@@ -77,3 +77,23 @@ Subsequent pushes only require:
 ```powershell
 git push
 ```
+
+---
+
+## 5. Conceptual Reference: How SSH Works
+
+### What is an SSH Key?
+An SSH (Secure Shell) key pair is a secure, cryptographic way to authenticate your computer with GitHub. It consists of two keys:
+1. **Public Key (`id_ed25519.pub`)**: This is like a **padlock**. You upload it to GitHub settings.
+2. **Private Key (`id_ed25519`)**: This is the **physical key** that unlocks the padlock. It stays securely on your local computer. **Never share this key.**
+
+When you run `git push`, Git uses your private key to prove to GitHub that you own the matching public key (padlock).
+
+### What is Host Key Verification?
+When connecting to a server (like GitHub) via SSH for the first time, your SSH client needs to make sure the server is authentic (not a malicious imposter). 
+
+The command we ran:
+```powershell
+ssh -T -o StrictHostKeyChecking=accept-new git@github.com
+```
+tells SSH to automatically trust and accept GitHub's official host key fingerprint, adding it to your `~/.ssh/known_hosts` file, and testing the login. Once trusted, you can push and pull code without warnings.
