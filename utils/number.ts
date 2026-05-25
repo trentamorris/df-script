@@ -1,10 +1,36 @@
 const NUMERIC_CLEAN_REGEX = /[,\s_]/g;
 
-export function isValidFloat(v: any): v is number {
+// ============================================================================
+// /** Generic Number Helpers */
+// ============================================================================
+
+export function isValidNumber(v: unknown): v is number {
     return typeof v === "number" && !Number.isNaN(v) && Number.isFinite(v);
 }
 
+export function clamp(opts: { val: number; min: number; max: number }): number;
+export function clamp(opts: { val: bigint; min: bigint; max: bigint }): bigint;
+export function clamp(opts: { val: any; min: any; max: any }): any {
+    const { val, min, max } = opts;
+    if (val < min) return min;
+    if (val > max) return max;
+    return val;
+}
+
+// ============================================================================
+// /** Float Functions */
+// ============================================================================
+
 export type FloatPrecision = "Float32" | "Float64";
+
+export function isValidFloat(v: unknown, precision?: FloatPrecision): boolean {
+    if (!isValidNumber(v)) return false;
+    if (precision === "Float32") {
+        const f32Max = 3.4028234663852886e+38;
+        return v >= -f32Max && v <= f32Max;
+    }
+    return true;
+}
 
 export function toValidFloat(
     v: unknown,
@@ -15,13 +41,13 @@ export function toValidFloat(
     if (v == null) return null;
 
     let n: number;
-    if (isValidFloat(v)) {
+    if (isValidNumber(v)) {
         n = v;
     } else if (typeof v === "boolean") {
         n = v ? 1 : 0;
     } else if (typeof v === "bigint") {
         n = Number(v);
-        if (!isValidFloat(n)) return null;
+        if (!isValidNumber(n)) return null;
     } else if (v instanceof Date) {
         const t = v.getTime();
         if (Number.isNaN(t)) return null;
@@ -29,7 +55,7 @@ export function toValidFloat(
     } else {
         const raw = String(v).trim().replace(NUMERIC_CLEAN_REGEX, "");
         n = Number(raw);
-        if (!isValidFloat(n)) return null;
+        if (!isValidNumber(n)) return null;
     }
 
     if (coerceInt) {
@@ -45,21 +71,9 @@ export function toValidFloat(
     return precision === "Float32" ? Math.fround(n) : n;
 }
 
-export function clamp(opts: { val: number; min: number; max: number }): number;
-export function clamp(opts: { val: bigint; min: bigint; max: bigint }): bigint;
-export function clamp(opts: { val: any; min: any; max: any }): any {
-    const { val, min, max } = opts;
-    if (val < min) return min;
-    if (val > max) return max;
-    return val;
-}
-
-export function isValidInt(v: unknown): v is number | bigint {
-    if (typeof v === "number") {
-        return Number.isInteger(v) && !Number.isNaN(v) && Number.isFinite(v);
-    }
-    return typeof v === "bigint";
-}
+// ============================================================================
+// /** Integer & BigInt Functions */
+// ============================================================================
 
 export const INT_RANGES = {
     Int8: { min: -128, max: 127 },
@@ -72,6 +86,43 @@ export const INT_RANGES = {
 
 export type IntRangeType = keyof typeof INT_RANGES;
 
+export const BIGINT_RANGES = {
+    Int64: { min: -9223372036854775808n, max: 9223372036854775807n },
+    UInt64: { min: 0n, max: 18446744073709551615n }
+} as const;
+
+export type BigIntRangeType = keyof typeof BIGINT_RANGES;
+
+export function isValidInt(
+    v: unknown,
+    range?: { min: number | bigint; max: number | bigint } | IntRangeType | BigIntRangeType
+): boolean {
+    if (typeof v === "number") {
+        if (!Number.isInteger(v) || Number.isNaN(v) || !Number.isFinite(v)) return false;
+        if (!range) return true;
+        if (typeof range === "string") {
+            if (range in INT_RANGES) {
+                const limits = INT_RANGES[range as IntRangeType];
+                return v >= limits.min && v <= limits.max;
+            }
+            return false;
+        }
+        return v >= range.min && v <= range.max;
+    }
+    if (typeof v === "bigint") {
+        if (!range) return true;
+        if (typeof range === "string") {
+            if (range in BIGINT_RANGES) {
+                const limits = BIGINT_RANGES[range as BigIntRangeType];
+                return v >= limits.min && v <= limits.max;
+            }
+            return false;
+        }
+        return v >= range.min && v <= range.max;
+    }
+    return false;
+}
+
 export function toValidInt(
     v: unknown,
     range: { min: number; max: number } | IntRangeType = "Int32"
@@ -83,13 +134,6 @@ export function toValidInt(
     const limits = typeof range === "string" ? INT_RANGES[range] : range;
     return clamp({ val: truncated, min: limits.min, max: limits.max });
 }
-
-export const BIGINT_RANGES = {
-    Int64: { min: -9223372036854775808n, max: 9223372036854775807n },
-    UInt64: { min: 0n, max: 18446744073709551615n }
-} as const;
-
-export type BigIntRangeType = keyof typeof BIGINT_RANGES;
 
 export function toValidBigInt(
     v: unknown,
