@@ -10,21 +10,24 @@ export function toValidNumber(
 ): number | null {
     const { requireInt = false, coerceInt } = opts;
     if (v == null) return null;
-    if (typeof v === "boolean") return v ? 1 : 0;
-    if (typeof v === "bigint") {
-        const n = Number(v);
+
+    let n: number;
+    if (isValidNumber(v)) {
+        n = v;
+    } else if (typeof v === "boolean") {
+        n = v ? 1 : 0;
+    } else if (typeof v === "bigint") {
+        n = Number(v);
         if (!isValidNumber(n)) return null;
-        return n;
-    }
-    if (v instanceof Date) {
+    } else if (v instanceof Date) {
         const t = v.getTime();
-        return Number.isNaN(t) ? null : t;
+        if (Number.isNaN(t)) return null;
+        n = t;
+    } else {
+        const raw = String(v).trim().replace(NUMERIC_CLEAN_REGEX, "");
+        n = Number(raw);
+        if (!isValidNumber(n)) return null;
     }
-
-    const raw = typeof v === "number" ? v : String(v).trim().replace(NUMERIC_CLEAN_REGEX, "");
-
-    let n = Number(raw);
-    if (!isValidNumber(n)) return null;
 
     if (coerceInt) {
         switch (coerceInt) {
