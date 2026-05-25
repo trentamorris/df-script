@@ -8,9 +8,7 @@ export function isValidNumber(v: unknown): v is number {
     return typeof v === "number" && !Number.isNaN(v) && Number.isFinite(v);
 }
 
-export function clamp(opts: { val: number; min: number; max: number }): number;
-export function clamp(opts: { val: bigint; min: bigint; max: bigint }): bigint;
-export function clamp(opts: { val: any; min: any; max: any }): any {
+export function clamp<T extends number | bigint>(opts: { val: T; min: T; max: T }): T {
     const { val, min, max } = opts;
     if (val < min) return min;
     if (val > max) return max;
