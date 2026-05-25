@@ -20,9 +20,9 @@ export function clamp<T extends number | bigint>(opts: { val: T; min: T; max: T 
 // ============================================================================
 
 export type FloatPrecision = "Float32" | "Float64";
-
+export const FLOAT_32_BOUNDARY = 3.4028234663852886e+38
 export const FLOAT_RANGES = {
-    Float32: { min: -3.4028234663852886e+38, max: 3.4028234663852886e+38 },
+    Float32: { min: -FLOAT_32_BOUNDARY, max: FLOAT_32_BOUNDARY },
     Float64: { min: -Number.MAX_VALUE, max: Number.MAX_VALUE }
 } as const;
 
@@ -37,10 +37,8 @@ export function isValidFloat(v: unknown, precision?: FloatPrecision): boolean {
 
 export function toValidFloat(
     v: unknown,
-    precision: FloatPrecision = "Float64",
-    opts: { requireInt?: boolean; coerceInt?: "round" | "floor" | "ceil" | "truncate" } = {}
+    precision: FloatPrecision = "Float64"
 ): number | null {
-    const { requireInt = false, coerceInt } = opts;
     if (v == null) return null;
 
     let n: number;
@@ -61,16 +59,6 @@ export function toValidFloat(
         if (!isValidNumber(n)) return null;
     }
 
-    if (coerceInt) {
-        switch (coerceInt) {
-            case "round": n = Math.round(n); break;
-            case "floor": n = Math.floor(n); break;
-            case "ceil": n = Math.ceil(n); break;
-            case "truncate": n = Math.trunc(n); break;
-        }
-    }
-
-    if (requireInt && !Number.isInteger(n)) return null;
     return precision === "Float32" ? Math.fround(n) : n;
 }
 
@@ -128,14 +116,23 @@ export function isValidInt(
 
 export function toValidInt(
     v: unknown,
-    range: { min: number; max: number } | IntRangeType = "Int32"
+    range: { min: number; max: number } | IntRangeType = "Int32",
+    opts: { coerce?: "round" | "floor" | "ceil" | "truncate" } = {}
 ): number | null {
     const num = toValidFloat(v);
     if (num === null) return null;
-    const truncated = Math.trunc(num);
+
+    let n = num;
+    const coerce = opts.coerce || "truncate";
+    switch (coerce) {
+        case "round": n = Math.round(n); break;
+        case "floor": n = Math.floor(n); break;
+        case "ceil": n = Math.ceil(n); break;
+        case "truncate": n = Math.trunc(n); break;
+    }
 
     const limits = typeof range === "string" ? INT_RANGES[range] : range;
-    return clamp({ val: truncated, min: limits.min, max: limits.max });
+    return clamp({ val: n, min: limits.min, max: limits.max });
 }
 
 export function toValidBigInt(
