@@ -91,27 +91,27 @@ export function toValidBigInt(
     range: { min: bigint; max: bigint } | BigIntRangeType = "Int64"
 ): bigint | null {
     if (v == null) return null;
-    try {
-        let bigintVal: bigint;
-        if (typeof v === "bigint") {
-            bigintVal = v;
-        } else if (typeof v === "number") {
-            bigintVal = BigInt(Math.trunc(v));
-        } else if (typeof v === "boolean") {
-            bigintVal = v ? 1n : 0n;
-        } else if (v instanceof Date) {
-            const t = v.getTime();
-            if (Number.isNaN(t)) return null;
-            bigintVal = BigInt(t);
-        } else {
-            const str = String(v);
+
+    let bigintVal: bigint;
+    if (typeof v === "bigint") {
+        bigintVal = v;
+    } else if (typeof v === "string") {
+        try {
+            const str = v.trim().replace(/[,\s_]/g, "");
             const dotIdx = str.indexOf(".");
             const cleanStr = dotIdx !== -1 ? str.slice(0, dotIdx) : str;
             bigintVal = BigInt(cleanStr);
+        } catch {
+            const num = toValidNumber(v);
+            if (num === null) return null;
+            bigintVal = BigInt(Math.trunc(num));
         }
-        const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
-        return clamp({ val: bigintVal, min: limits.min, max: limits.max });
-    } catch {
-        return null;
+    } else {
+        const num = toValidNumber(v);
+        if (num === null) return null;
+        bigintVal = BigInt(Math.trunc(num));
     }
+
+    const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
+    return clamp({ val: bigintVal, min: limits.min, max: limits.max });
 }
