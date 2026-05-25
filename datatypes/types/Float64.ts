@@ -1,11 +1,11 @@
 import { FloatDataType, DataType } from "../DataType";
-import { toValidNumber } from "../../utils";
+import { toValidFloat } from "../../utils";
 
 export class Float64Type extends FloatDataType {
     readonly name = "Float64";
     
     coerce(val: any): number | null {
-        return toValidNumber(val);
+        return toValidFloat(val);
     }
     
     equals(other: DataType): boolean {

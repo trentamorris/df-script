@@ -1,24 +1,27 @@
 const NUMERIC_CLEAN_REGEX = /[,\s_]/g;
 
-export function isValidNumber(v: any): v is number {
+export function isValidFloat(v: any): v is number {
     return typeof v === "number" && !Number.isNaN(v) && Number.isFinite(v);
 }
 
-export function toValidNumber(
+export type FloatPrecision = "Float32" | "Float64";
+
+export function toValidFloat(
     v: unknown,
+    precision: FloatPrecision = "Float64",
     opts: { requireInt?: boolean; coerceInt?: "round" | "floor" | "ceil" | "truncate" } = {}
 ): number | null {
     const { requireInt = false, coerceInt } = opts;
     if (v == null) return null;
 
     let n: number;
-    if (isValidNumber(v)) {
+    if (isValidFloat(v)) {
         n = v;
     } else if (typeof v === "boolean") {
         n = v ? 1 : 0;
     } else if (typeof v === "bigint") {
         n = Number(v);
-        if (!isValidNumber(n)) return null;
+        if (!isValidFloat(n)) return null;
     } else if (v instanceof Date) {
         const t = v.getTime();
         if (Number.isNaN(t)) return null;
@@ -26,7 +29,7 @@ export function toValidNumber(
     } else {
         const raw = String(v).trim().replace(NUMERIC_CLEAN_REGEX, "");
         n = Number(raw);
-        if (!isValidNumber(n)) return null;
+        if (!isValidFloat(n)) return null;
     }
 
     if (coerceInt) {
@@ -39,7 +42,7 @@ export function toValidNumber(
     }
 
     if (requireInt && !Number.isInteger(n)) return null;
-    return n;
+    return precision === "Float32" ? Math.fround(n) : n;
 }
 
 export function clamp(opts: { val: number; min: number; max: number }): number;
@@ -73,7 +76,7 @@ export function toValidInt(
     v: unknown,
     range: { min: number; max: number } | IntRangeType = "Int32"
 ): number | null {
-    const num = toValidNumber(v);
+    const num = toValidFloat(v);
     if (num === null) return null;
     const truncated = Math.trunc(num);
 
@@ -104,12 +107,12 @@ export function toValidBigInt(
             const cleanStr = dotIdx !== -1 ? str.slice(0, dotIdx) : str;
             bigintVal = BigInt(cleanStr);
         } catch {
-            const num = toValidNumber(v);
+            const num = toValidFloat(v);
             if (num === null) return null;
             bigintVal = BigInt(Math.trunc(num));
         }
     } else {
-        const num = toValidNumber(v);
+        const num = toValidFloat(v);
         if (num === null) return null;
         bigintVal = BigInt(Math.trunc(num));
     }

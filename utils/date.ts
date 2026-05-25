@@ -1,4 +1,4 @@
-import { isValidNumber } from "./number";
+import { isValidFloat } from "./number";
 
 export function normalizeEpochToMs(n: number): number {
     const abs = Math.abs(n);
@@ -16,7 +16,7 @@ export function isValidDate(v: unknown): v is string | number | bigint | Date {
     if (v instanceof Date) return isValidDateObj(v);
 
     if (typeof v === "number") {
-        if (!isValidNumber(v)) return false;
+        if (!isValidFloat(v)) return false;
         const ms = normalizeEpochToMs(v);
         return isValidDateObj(new Date(ms));
     }
