@@ -1,7 +1,7 @@
 import { ColumnExpr, AllColumnsExpr, resolveColumnSelectors } from "../columnExpressions"
 import { GroupedData } from "./grouped"
 import type { IExpr } from "../types"
-import type { JoinType, LimitPosition, ConcatOptions } from "./types"
+import type { JoinType, LimitPosition, ConcatOptions, GroupMap } from "./types"
 import { DataType, DataTypeRegistry } from "../datatypes"
 import {
     resolveWindowExpr,
@@ -258,7 +258,7 @@ export class DataFrame<T> {
 
     groupby<K extends keyof T>(keys: K | K[]): GroupedData<T, K> {
         const keysArr = ensureArray(keys);
-        const groups = new Map<string, number[]>();
+        const groups: GroupMap = new Map();
         const len = this.height;
         const keysStr = keysArr.map(String);
 

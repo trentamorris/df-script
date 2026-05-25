@@ -6,3 +6,4 @@ export type ConcatHow = "vertical" | "horizontal" | "diagonal";
 export interface ConcatOptions {
     how?: ConcatHow;
 }
+export type GroupMap = Map<string, number[]>;

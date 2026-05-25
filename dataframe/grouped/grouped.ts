@@ -1,10 +1,10 @@
-import { DataFrame, getRowFromColumns, inferColumnType } from ".."
+import { DataFrame, getRowFromColumns, inferColumnType, GroupMap } from ".."
 import { resolveColumnSelectors } from "../../columnExpressions"
 import { DataType } from "../../datatypes"
 import type { IExpr } from "../../types"
 
 export class GroupedData<T, K extends keyof T> {
-    private groups: Map<string, number[]>
+    private groups: GroupMap
     private keys: K[]
     private allKeys: (keyof T)[]
     private parentColumns: Record<string, any[]>
@@ -13,7 +13,7 @@ export class GroupedData<T, K extends keyof T> {
 
 
     constructor(
-        groups: Map<string, number[]>,
+        groups: GroupMap,
         keys: K[],
         allKeys: (keyof T)[],
         parentColumns: Record<string, any[]>,
