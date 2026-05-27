@@ -41,13 +41,10 @@ class ListExprNamespace {
     get(index: number, null_on_oob: boolean = true) {
         return this._deriveList((arr) => {
             const val = (arr as any).at(index);
-            if (val === undefined) {
-                if (!null_on_oob) {
-                    throw new Error(`Index ${index} is out of bounds for list of length ${(arr as any).length}`);
-                }
-                return null;
+            if (val === undefined && !null_on_oob) {
+                throw new Error(`Index ${index} is out of bounds for list of length ${(arr as any).length}`);
             }
-            return val;
+            return val ?? null;
         });
     }
 
