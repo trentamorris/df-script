@@ -14,10 +14,10 @@ export function isArrayOfType(
 ): boolean {
     if (!isArray(arr)) return false;
     const list = Array.from(arr as any);
-    const mode = options.mode ?? "every";
+    const mode = options?.mode ?? "every";
 
     const check = (v: unknown) => {
-        if (v == null && options.includeNulls) {
+        if (v == null && options?.includeNulls) {
             return true;
         }
         if (typeof type === "function") {
