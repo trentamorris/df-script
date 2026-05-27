@@ -34,6 +34,16 @@ try {
     // Test invalid array input
     if (isArrayOfType(42, "number")) throw new Error("Expected scalar to fail isArrayOfType");
 
+    // Test mode: "some"
+    if (!isArrayOfType([1, "2", "3"], "number", { mode: "some" })) throw new Error("Expected [1, '2', '3'] to have some 'number'");
+    if (isArrayOfType(["1", "2", "3"], "number", { mode: "some" })) throw new Error("Expected ['1', '2', '3'] to not have some 'number'");
+    if (isArrayOfType([null, null], "number", { mode: "some" })) throw new Error("Expected [null, null] to not have some 'number'");
+    if (!isArrayOfType([null, 42], "number", { mode: "some" })) throw new Error("Expected [null, 42] to have some 'number'");
+
+    // Test mode: "some" with custom predicate
+    if (!isArrayOfType([1, 5, 6], isEven, { mode: "some" })) throw new Error("Expected [1, 5, 6] to have some even number");
+    if (isArrayOfType([1, 5, 7], isEven, { mode: "some" })) throw new Error("Expected [1, 5, 7] to not have some even number");
+
     console.log("🎉 ALL UTILS TYPES TESTS PASSED SUCCESSFULLY!");
 } catch (err) {
     console.error("❌ UTILS TYPES TESTS FAILED:", err);

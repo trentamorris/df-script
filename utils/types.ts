@@ -6,15 +6,17 @@ export function isArray(v: unknown): v is unknown[] | ArrayBufferView {
 
 export function isArrayOfType(
     arr: unknown,
-    type: "string" | "number" | "boolean" | "bigint" | "object" | "date" | ((v: unknown) => boolean)
+    type: "string" | "number" | "boolean" | "bigint" | "object" | "date" | ((v: unknown) => boolean),
+    options: { mode?: "every" | "some" } = {}
 ): boolean {
     if (!isArray(arr)) return false;
     const list = Array.from(arr as any);
-    if (typeof type === "function") {
-        return list.every(type);
-    }
-    return list.every((v) => {
-        if (v == null) return true;
+    const mode = options.mode ?? "every";
+
+    const check = (v: unknown) => {
+        if (v == null) {
+            return mode === "every";
+        }
         if (type === "date") {
             return isValidDateObj(v);
         }
@@ -22,7 +24,12 @@ export function isArrayOfType(
             return isObj(v);
         }
         return typeof v === type;
-    });
+    };
+
+    if (typeof type === "function") {
+        return mode === "every" ? list.every(type) : list.some(type);
+    }
+    return mode === "every" ? list.every(check) : list.some(check);
 }
 
 export function isNonEmptyArray<T = unknown>(arr: unknown): arr is T[] | ArrayBufferView {
