@@ -60,3 +60,24 @@ export function toValidBinary(v: unknown): Uint8Array | null {
     }
     return new Uint8Array(v as any);
 }
+
+export function isArrayOfType(
+    arr: unknown,
+    type: "string" | "number" | "boolean" | "bigint" | "object" | "date" | ((v: unknown) => boolean)
+): boolean {
+    if (!isArray(arr)) return false;
+    const list = Array.from(arr as any);
+    if (typeof type === "function") {
+        return list.every(type);
+    }
+    return list.every((v) => {
+        if (v == null) return true;
+        if (type === "date") {
+            return v instanceof Date && isValidDateObj(v);
+        }
+        if (type === "object") {
+            return isObj(v);
+        }
+        return typeof v === type;
+    });
+}
