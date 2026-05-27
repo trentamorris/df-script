@@ -14,14 +14,6 @@ export function isArrayOfType(
     const mode = options.mode ?? "every";
 
     const check = (v: unknown) => {
-        if (v == null) {
-            // Nulls are compatible under 'every' mode (nullable lists),
-            // but should not count as a match under 'some' mode.
-            if (mode === "every") {
-                return true;
-            }
-            return false;
-        }
         if (type === "date") {
             return isValidDateObj(v);
         }
