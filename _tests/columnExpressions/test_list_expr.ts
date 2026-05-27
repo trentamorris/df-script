@@ -34,11 +34,13 @@ try {
         $tbl.col("empty_list").list.len().alias("len_empty"),
         $tbl.col("not_a_list").list.len().alias("len_not_list"),
 
-        // max / min / sum / mean
+        // max / min / sum / mean / median / mode
         $tbl.col("numbers").list.max().alias("max_nums"),
         $tbl.col("numbers").list.min().alias("min_nums"),
         $tbl.col("numbers").list.sum().alias("sum_nums"),
         $tbl.col("numbers").list.mean().alias("mean_nums"),
+        $tbl.col("numbers").list.median().alias("median_nums"),
+        $tbl.col("tags").list.mode().alias("mode_tags"),
 
         // get / first / last
         $tbl.col("numbers").list.get(2).alias("get_idx_2"),
@@ -99,6 +101,8 @@ try {
     if (r0.min_nums !== 1) throw new Error(`Expected min_nums 1, got ${r0.min_nums}`);
     if (r0.sum_nums !== 36) throw new Error(`Expected sum_nums 36 (3+1+4+1+5+9+2+6+5), got ${r0.sum_nums}`);
     if (Math.abs(r0.mean_nums - 36 / 9) > 1e-6) throw new Error(`Expected mean_nums 4, got ${r0.mean_nums}`);
+    if (r0.median_nums !== 4) throw new Error(`Expected median_nums 4, got ${r0.median_nums}`);
+    if (r0.mode_tags.length !== 1 || r0.mode_tags[0] !== "apple") throw new Error(`Expected mode_tags ["apple"], got ${r0.mode_tags}`);
 
     if (r0.get_idx_2 !== 4) throw new Error(`Expected get_idx_2 4, got ${r0.get_idx_2}`);
     if (r0.get_idx_neg_2 !== 6) throw new Error(`Expected get_idx_neg_2 6, got ${r0.get_idx_neg_2}`);
@@ -167,6 +171,8 @@ try {
     if (r1.min_nums !== -5) throw new Error(`Expected min_nums -5, got ${r1.min_nums}`);
     if (r1.sum_nums !== 25) throw new Error(`Expected sum_nums 25, got ${r1.sum_nums}`);
     if (r1.mean_nums !== 6.25) throw new Error(`Expected mean_nums 6.25, got ${r1.mean_nums}`);
+    if (r1.median_nums !== 5) throw new Error(`Expected median_nums 5, got ${r1.median_nums}`);
+    if (r1.mode_tags.length !== 2 || r1.mode_tags[0] !== "js" || r1.mode_tags[1] !== "ts") throw new Error(`Expected mode_tags ["js", "ts"], got ${r1.mode_tags}`);
 
     if (r1.get_idx_2 !== 20) throw new Error(`Expected get_idx_2 20, got ${r1.get_idx_2}`);
     if (r1.get_idx_neg_2 !== 20) throw new Error(`Expected get_idx_neg_2 20, got ${r1.get_idx_neg_2}`);

@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../../types";
 import { kleene, derive } from "../ExprBase";
-import { isArray, getListStats } from "../../utils";
+import { isArray, getListStats, getListMedian, getListMode, sortList } from "../../utils";
 
 class ListExprNamespace {
     constructor(private expr: any) {}
@@ -36,6 +36,14 @@ class ListExprNamespace {
             const { sum, count } = getListStats(arr);
             return sum !== null && count > 0 ? sum / count : null;
         });
+    }
+
+    median() {
+        return this._deriveList(getListMedian);
+    }
+
+    mode() {
+        return this._deriveList(getListMode);
     }
 
     get(index: number, null_on_oob: boolean = true) {
@@ -100,18 +108,7 @@ class ListExprNamespace {
     }
 
     sort(descending: boolean = false) {
-        return this._deriveList((arr) => {
-            const list = Array.from(arr as any);
-            list.sort((a, b) => {
-                if (a == null && b == null) return 0;
-                if (a == null) return 1;
-                if (b == null) return -1;
-                if (a < b) return descending ? 1 : -1;
-                if (a > b) return descending ? -1 : 1;
-                return 0;
-            });
-            return list;
-        });
+        return this._deriveList((arr) => sortList(arr, descending));
     }
 
     reverse() {
