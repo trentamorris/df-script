@@ -40,16 +40,14 @@ class ListExprNamespace {
 
     get(index: number, null_on_oob: boolean = true) {
         return this._deriveList((arr) => {
-            const len = (arr as any).length;
-            const idx = index < 0 ? len + index : index;
-            if (idx < 0 || idx >= len) {
+            const val = (arr as any).at(index);
+            if (val === undefined) {
                 if (!null_on_oob) {
-                    throw new Error(`Index ${index} is out of bounds for list of length ${len}`);
+                    throw new Error(`Index ${index} is out of bounds for list of length ${(arr as any).length}`);
                 }
                 return null;
             }
-            const val = (arr as any)[idx];
-            return val !== undefined ? val : null;
+            return val;
         });
     }
 
