@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../../types";
 import { kleene, derive } from "../ExprBase";
-import { isArray, getListSumAndCount, getListMax, getListMin } from "../../utils";
+import { isArray, getListSumAndCount } from "../../utils";
 
 class ListExprNamespace {
     constructor(private expr: any) {}
@@ -20,11 +20,11 @@ class ListExprNamespace {
     }
 
     max() {
-        return this._deriveList((arr) => getListMax(arr));
+        return this._deriveList((arr) => getListSumAndCount(arr).max);
     }
 
     min() {
-        return this._deriveList((arr) => getListMin(arr));
+        return this._deriveList((arr) => getListSumAndCount(arr).min);
     }
 
     sum() {
