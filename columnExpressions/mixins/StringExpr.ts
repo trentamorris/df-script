@@ -16,20 +16,41 @@ export class StringExprNamespace {
     constructor(public expr: any) {}
 
     _deriveString(fn: (v: string) => any) {
-        return derive(this.expr, kleene((v) => fn(String(v))));
+        return derive(this.expr, (vArray) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            for (let i = 0; i < height; i++) {
+                const v = vArray[i];
+                result[i] = v == null ? null : fn(String(v));
+            }
+            return result;
+        });
     }
 
     concat(other: string | IExpr) {
-        return derive(this.expr, kleene((v, row) => {
-            const otherVal = this.expr._resolve(other, row);
-            if (otherVal == null) return null;
-            return String(v) + String(otherVal);
-        }));
+        return derive(this.expr, (vArray, columns) => {
+            const height = vArray.length;
+            const otherVal = this.expr._resolve(other, columns, height);
+            const result = new Array(height);
+            if (Array.isArray(otherVal)) {
+                for (let i = 0; i < height; i++) {
+                    const v = vArray[i];
+                    const o = otherVal[i];
+                    result[i] = (v == null || o == null) ? null : String(v) + String(o);
+                }
+            } else {
+                for (let i = 0; i < height; i++) {
+                    const v = vArray[i];
+                    result[i] = (v == null || otherVal == null) ? null : String(v) + String(otherVal);
+                }
+            }
+            return result;
+        });
     }
 
     contains(pattern: string | RegExp) {
         if (pattern == null) {
-            return derive(this.expr, () => null);
+            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
         }
         return this._deriveString((str) => {
             return pattern instanceof RegExp ? pattern.test(str) : str.includes(pattern);
@@ -74,14 +95,14 @@ export class StringExprNamespace {
 
     replace(pattern: string | RegExp, replacement: string) {
         if (pattern == null) {
-            return derive(this.expr, () => null);
+            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
         }
         return this._deriveString((str) => str.replace(pattern, replacement));
     }
 
     replace_all(pattern: string | RegExp, replacement: string) {
         if (pattern == null) {
-            return derive(this.expr, () => null);
+            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
         }
         return this._deriveString((str) => {
             if (pattern instanceof RegExp) {

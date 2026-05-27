@@ -69,42 +69,40 @@ export class GroupedData<T, K extends keyof T> {
         for (let i = 0; i < keysStr.length; i++) {
             newColumns[keysStr[i]] = new Array(numGroups);
         }
-        for (let i = 0; i < expandedExprs.length; i++) {
-            const e = expandedExprs[i];
-            const targetKey = e.outputName || e.colName || "*";
-            newColumns[targetKey] = new Array(numGroups);
-        }
 
         let groupIdx = 0;
         for (const indices of this.groups.values()) {
             if (indices.length === 0) continue;
             const firstIdx = indices[0];
-
-            const firstRow = getRowFromColumns(this.parentColumns, firstIdx, allKeysStr);
-
             for (let i = 0; i < keysStr.length; i++) {
                 const k = keysStr[i];
-                newColumns[k][groupIdx] = firstRow[k];
-            }
-
-            let groupRows: any[] | null = null;
-
-            for (let i = 0; i < expandedExprs.length; i++) {
-                const e = expandedExprs[i];
-                const targetKey = e.outputName || e.colName || "*";
-
-                if (e.aggFn) {
-                    if (groupRows === null) {
-                        groupRows = indices.map(idx => getRowFromColumns(this.parentColumns, idx, allKeysStr));
-                    }
-                    const groupValues = groupRows.map(r => e.evaluatePreGrouping(r));
-                    const aggregated = e.aggFn(groupValues);
-                    newColumns[targetKey][groupIdx] = e.evaluatePostGrouping(aggregated, firstRow);
-                } else {
-                    newColumns[targetKey][groupIdx] = e.evaluate(firstRow);
-                }
+                const val = this.parentColumns[k][firstIdx];
+                newColumns[k][groupIdx] = val === undefined ? null : val;
             }
             groupIdx++;
+        }
+
+        for (let i = 0; i < expandedExprs.length; i++) {
+            const e = expandedExprs[i];
+            const targetKey = e.outputName || e.colName || "*";
+
+            if (e.aggFn) {
+                const preGroupedCol = e.evaluatePreGrouping(this.parentColumns, this.parentHeight);
+                const aggregatedGroupValues = new Array(numGroups);
+                let gIdx = 0;
+                for (const indices of this.groups.values()) {
+                    if (indices.length === 0) continue;
+                    const groupValues = new Array(indices.length);
+                    for (let k = 0; k < indices.length; k++) {
+                        groupValues[k] = preGroupedCol[indices[k]];
+                    }
+                    aggregatedGroupValues[gIdx] = e.aggFn(groupValues);
+                    gIdx++;
+                }
+                newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
+            } else {
+                newColumns[targetKey] = e.evaluate(newColumns, numGroups);
+            }
         }
 
         const outSchema: Record<string, DataType> = {};

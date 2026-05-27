@@ -3,17 +3,23 @@ import type { IExpr } from "../types"
 import type { JoinType, LimitPosition, ConcatOptions } from "./types"
 import { DataType, DataTypeRegistry } from "../datatypes"
 
-export function partition_by(data: any[], partitionKeys: (string | IExpr)[]): Map<string, number[]> {
+export function partition_by_columns(
+    columns: Record<string, any[]>,
+    height: number,
+    partitionKeys: (string | IExpr)[]
+): Map<string, number[]> {
     const partitionMap = new Map<string, number[]>();
-    const len = data.length;
 
-    for (let i = 0; i < len; i++) {
-        const row = data[i];
-        const keyValues = [];
-        for (let j = 0; j < partitionKeys.length; j++) {
-            const pKey = partitionKeys[j];
-            const val = typeof pKey === "string" ? row[pKey] : pKey.evaluate(row);
-            keyValues.push(val);
+    const keyColumns = partitionKeys.map(pKey => {
+        return typeof pKey === "string" 
+            ? (columns[pKey] || new Array(height).fill(null)) 
+            : pKey.evaluate(columns, height);
+    });
+
+    for (let i = 0; i < height; i++) {
+        const keyValues = new Array(keyColumns.length);
+        for (let j = 0; j < keyColumns.length; j++) {
+            keyValues[j] = keyColumns[j][i];
         }
         const hash = JSON.stringify(keyValues);
         let group = partitionMap.get(hash);
@@ -26,29 +32,39 @@ export function partition_by(data: any[], partitionKeys: (string | IExpr)[]): Ma
     return partitionMap;
 }
 
-export function resolveWindowExpr(expr: IExpr, data: any[]): any[] {
-    const len = data.length;
-    const results = new Array(len);
-    if (len === 0) return results;
+export function resolveWindowExpr(expr: IExpr, columns: Record<string, any[]>, height: number): any[] {
+    const results = new Array(height);
+    if (height === 0) return results;
 
     const partitionKeys = expr.partitionBy || [];
-    const partitionGroups = partition_by(data, partitionKeys);
+    const partitionGroups = partition_by_columns(columns, height, partitionKeys);
+
+    const prePartitionArray = expr.evaluatePrePartition(columns, height);
 
     for (const indices of partitionGroups.values()) {
         const groupLen = indices.length;
-        const partitionRows = indices.map(idx => data[idx]);
-
+        const groupPreValues = new Array(groupLen);
         for (let k = 0; k < groupLen; k++) {
-            const targetIdx = indices[k];
-            if (expr.evaluateWindow) {
-                results[targetIdx] = expr.evaluateWindow(partitionRows, indices, k);
-            } else {
-                results[targetIdx] = expr.evaluate(data[targetIdx]);
+            groupPreValues[k] = prePartitionArray[indices[k]];
+        }
+
+        if (expr.evaluateWindow) {
+            for (let k = 0; k < groupLen; k++) {
+                results[indices[k]] = expr.evaluateWindow(groupPreValues, indices, k);
+            }
+        } else if (expr.aggFn) {
+            const aggregatedVal = expr.aggFn(groupPreValues);
+            for (let k = 0; k < groupLen; k++) {
+                results[indices[k]] = aggregatedVal;
+            }
+        } else {
+            for (let k = 0; k < groupLen; k++) {
+                results[indices[k]] = prePartitionArray[indices[k]];
             }
         }
     }
 
-    return results;
+    return expr.evaluatePostPartition(results, columns);
 }
 
 export function ensureArray<T>(val: T | T[] | null | undefined): T[] {

@@ -23,16 +23,28 @@ export class DateTimeExprNamespace {
     constructor(public expr: any) {}
 
     _deriveDate(fn: (d: Date) => any) {
-        return derive(this.expr, kleene((v) => {
-            const d = toValidDate(v);
-            return d ? fn(d) : null;
-        }));
+        return derive(this.expr, (vArray) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            for (let i = 0; i < height; i++) {
+                const v = vArray[i];
+                const d = toValidDate(v);
+                result[i] = d ? fn(d) : null;
+            }
+            return result;
+        });
     }
 
     _deriveDuration(fn: (v: number) => number) {
-        return derive(this.expr, kleene((v) => {
-            return typeof v === "number" ? fn(v) : null;
-        }));
+        return derive(this.expr, (vArray) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            for (let i = 0; i < height; i++) {
+                const v = vArray[i];
+                result[i] = typeof v === "number" ? fn(v) : null;
+            }
+            return result;
+        });
     }
 
     century() {

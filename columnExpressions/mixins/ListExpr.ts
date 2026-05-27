@@ -6,9 +6,15 @@ export class ListExprNamespace {
     constructor(public expr: any) {}
 
     _deriveList(fn: (arr: any[] | ArrayBufferView) => any) {
-        return derive(this.expr, kleene((v) => {
-            return isArray(v) ? fn(v as any) : null;
-        }));
+        return derive(this.expr, (vArray) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            for (let i = 0; i < height; i++) {
+                const v = vArray[i];
+                result[i] = isArray(v) ? fn(v as any) : null;
+            }
+            return result;
+        });
     }
 
     contains(item: any) {

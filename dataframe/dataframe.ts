@@ -212,28 +212,45 @@ export class DataFrame<T> {
     filter(...exprs: (IExpr | ((row: T) => any))[]): DataFrame<T> {
         if (this.height === 0) return new DataFrame({}, this.schema, 0);
 
-        const predicates = exprs.map(expr =>
-            typeof expr === "function" ? expr : (row: T) => expr.evaluate(row)
-        );
-        const predLen = predicates.length;
-
-        const matchingIndices: number[] = [];
+        const height = this.height;
         const keys = Object.keys(this.columns);
         const numKeys = keys.length;
 
-        for (let i = 0; i < this.height; i++) {
-            const row: any = {};
-            for (let j = 0; j < numKeys; j++) {
-                const k = keys[j];
-                const val = this.columns[k][i];
-                row[k] = val === undefined ? null : val;
-            }
+        const evaluatedExprs: any[][] = [];
+        const funcPredicates: ((row: T) => any)[] = [];
 
+        for (const expr of exprs) {
+            if (typeof expr === "function") {
+                funcPredicates.push(expr);
+            } else {
+                evaluatedExprs.push(expr.evaluate(this.columns, height));
+            }
+        }
+
+        const matchingIndices: number[] = [];
+
+        for (let i = 0; i < height; i++) {
             let keep = true;
-            for (let j = 0; j < predLen; j++) {
-                if (!predicates[j](row)) {
+
+            for (let j = 0; j < evaluatedExprs.length; j++) {
+                if (!evaluatedExprs[j][i]) {
                     keep = false;
                     break;
+                }
+            }
+
+            if (keep && funcPredicates.length > 0) {
+                const row: any = {};
+                for (let j = 0; j < numKeys; j++) {
+                    const k = keys[j];
+                    const val = this.columns[k][i];
+                    row[k] = val === undefined ? null : val;
+                }
+                for (let j = 0; j < funcPredicates.length; j++) {
+                    if (!funcPredicates[j](row)) {
+                        keep = false;
+                        break;
+                    }
                 }
             }
 
@@ -483,31 +500,13 @@ export class DataFrame<T> {
         const allKeys = Object.keys(this.columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys);
 
-        const dataRows = columnsToRows(this.columns, this.height);
-
-        const windowResultsMap = new Map<IExpr, any[]>();
-        for (const expr of expandedExprs) {
-            if (expr.isWindow) {
-                windowResultsMap.set(expr, resolveWindowExpr(expr, dataRows));
-            }
-        }
-
         const newColumns: Record<string, any[]> = {};
         for (const expr of expandedExprs) {
             const targetKey = expr.outputName || (expr as any).colName || "*";
-            newColumns[targetKey] = new Array(this.height);
-        }
-
-        for (let i = 0; i < this.height; i++) {
-            const row = dataRows[i];
-            for (const expr of expandedExprs) {
-                const targetKey = expr.outputName || (expr as any).colName || "*";
-                const wResults = windowResultsMap.get(expr);
-                if (wResults !== undefined) {
-                    newColumns[targetKey][i] = wResults[i];
-                } else {
-                    newColumns[targetKey][i] = expr.evaluate(row);
-                }
+            if (expr.isWindow) {
+                newColumns[targetKey] = resolveWindowExpr(expr, this.columns, this.height);
+            } else {
+                newColumns[targetKey] = expr.evaluate(this.columns, this.height);
             }
         }
 
@@ -554,16 +553,15 @@ export class DataFrame<T> {
             ? descending
             : new Array(sortKeys.length).fill(descending);
 
-        const dataRows = columnsToRows(this.columns, this.height);
-
         const plan = sortKeys.map((keyOrExpr, i) => {
             const isDesc = descArray[i] ? -1 : 1;
             const customComp = (custom && typeof keyOrExpr === "string") ? custom[keyOrExpr as keyof T] : null;
+            const values = (keyOrExpr as any)?.evaluate
+                ? (keyOrExpr as any).evaluate(this.columns, this.height)
+                : (this.columns[keyOrExpr as string] || new Array(this.height).fill(null));
 
             return {
-                getValue: (row: T) => (keyOrExpr as any)?.evaluate
-                    ? (keyOrExpr as any).evaluate(row)
-                    : (row as any)[keyOrExpr as string],
+                values,
                 isDesc,
                 customComp
             };
@@ -578,13 +576,10 @@ export class DataFrame<T> {
         }
 
         indices.sort((idxA, idxB) => {
-            const a = dataRows[idxA];
-            const b = dataRows[idxB];
-
             for (let i = 0; i < planLen; i++) {
-                const { getValue, isDesc, customComp } = plan[i];
-                const vA = getValue(a);
-                const vB = getValue(b);
+                const { values, isDesc, customComp } = plan[i];
+                const vA = values[idxA];
+                const vB = values[idxB];
 
                 if (customComp) {
                     const res = customComp(vA, vB);
@@ -629,12 +624,7 @@ export class DataFrame<T> {
 
         if (isExpr) {
             const expr = nameOrExpr as IExpr;
-            const dataRows = columnsToRows(this.columns, this.height);
-            const list = new Array(this.height);
-            for (let i = 0; i < this.height; i++) {
-                list[i] = expr.evaluate(dataRows[i]);
-            }
-            return list;
+            return expr.evaluate(this.columns, this.height);
         } else {
             const key = nameOrExpr as string;
             const col = this.columns[key];
@@ -781,7 +771,7 @@ export class DataFrame<T> {
                         exprs.push((val as IExpr).alias(key));
                     } else {
                         const staticExpr = new ColumnExpr(key);
-                        staticExpr.evaluate = () => val;
+                        staticExpr.evaluate = (cols: Record<string, any[]>, h: number) => new Array(h).fill(val);
                         exprs.push(staticExpr);
                     }
                 }
@@ -792,46 +782,25 @@ export class DataFrame<T> {
         const expandedExprs = resolveColumnSelectors(exprs, allKeys);
         const numEntries = expandedExprs.length;
 
-        const dataRows = columnsToRows(this.columns, this.height);
-
-        const plan = expandedExprs.map(expr => {
-            const isWindow = expr.isWindow;
-            const windowResults = isWindow ? resolveWindowExpr(expr, dataRows) : undefined;
-            return {
-                name: expr.outputName || (expr as any).colName || "*",
-                expr,
-                windowResults
-            };
-        });
-
         const newColumns: Record<string, any[]> = { ...this.columns };
-
-        for (let j = 0; j < numEntries; j++) {
-            const step = plan[j];
-            newColumns[step.name] = new Array(this.height);
-        }
-
-        for (let i = 0; i < this.height; i++) {
-            const row = dataRows[i];
-            for (let j = 0; j < numEntries; j++) {
-                const step = plan[j];
-                if (step.windowResults !== undefined) {
-                    newColumns[step.name][i] = step.windowResults[i];
-                } else {
-                    newColumns[step.name][i] = step.expr.evaluate(row);
-                }
-            }
-        }
-
         const outSchema = { ...this.schema };
+
         for (let j = 0; j < numEntries; j++) {
-            const step = plan[j];
-            const originalKey = (step.expr as any).colName || step.name;
-            const isPureColSelector = step.expr instanceof ColumnExpr && step.expr.ops.length === 0;
-            if (isPureColSelector && this.schema[originalKey]) {
-                outSchema[step.name] = this.schema[originalKey];
+            const expr = expandedExprs[j];
+            const name = expr.outputName || (expr as any).colName || "*";
+
+            if (expr.isWindow) {
+                newColumns[name] = resolveWindowExpr(expr, this.columns, this.height);
             } else {
-                outSchema[step.name] = inferColumnType(newColumns[step.name]);
+                newColumns[name] = expr.evaluate(this.columns, this.height);
+            }
+
+            const originalKey = (expr as any).colName || name;
+            const isPureColSelector = expr instanceof ColumnExpr && expr.ops.length === 0;
+            if (isPureColSelector && this.schema[originalKey]) {
+                outSchema[name] = this.schema[originalKey];
+            } else {
+                outSchema[name] = inferColumnType(newColumns[name]);
             }
         }
 
