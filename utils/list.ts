@@ -15,33 +15,24 @@ export function sortList(arr: unknown, descending: boolean = false): any[] {
     return list;
 }
 
-export function getListStats(
-    arr: unknown,
-    options: { sort?: boolean } = {}
-): {
+export function getListStats(arr: unknown): {
     sum: number | null;
     count: number;
     min: any;
     max: any;
-    median: number | null;
 } {
     if (!isArray(arr)) {
-        return { sum: null, count: 0, min: null, max: null, median: null };
+        return { sum: null, count: 0, min: null, max: null };
     }
-    let list = Array.from(arr as any);
+    const list = Array.from(arr as any);
     if (list.length === 0) {
-        return { sum: null, count: 0, min: null, max: null, median: null };
-    }
-
-    if (options.sort) {
-        list = sortList(list, false);
+        return { sum: null, count: 0, min: null, max: null };
     }
 
     let total = 0;
     let count = 0;
     let minVal: any = null;
     let maxVal: any = null;
-    const nums: number[] = [];
 
     for (const val of list) {
         if (val == null) continue;
@@ -57,31 +48,37 @@ export function getListStats(
         if (n !== null) {
             total += n;
             count++;
-            if (options.sort) {
-                nums.push(n);
-            }
         }
-    }
-
-    let medianVal: number | null = null;
-    if (options.sort && nums.length > 0) {
-        const mid = Math.floor(nums.length / 2);
-        medianVal = nums.length % 2 !== 0
-            ? nums[mid]
-            : (nums[mid - 1] + nums[mid]) / 2;
     }
 
     return {
         sum: count > 0 ? total : null,
         count,
         min: minVal,
-        max: maxVal,
-        median: medianVal
+        max: maxVal
     };
 }
 
 export function getListMedian(arr: unknown): number | null {
-    return getListStats(arr, { sort: true }).median;
+    if (!isArray(arr)) return null;
+
+    const stats = getListStats(arr);
+    if (stats.count === 0) return null;
+
+    const nums: number[] = [];
+    for (const val of Array.from(arr as any)) {
+        const n = toValidNumber(val);
+        if (n !== null) {
+            nums.push(n);
+        }
+    }
+
+    const sorted = sortList(nums);
+    const mid = Math.floor(stats.count / 2);
+    if (stats.count % 2 !== 0) {
+        return sorted[mid];
+    }
+    return (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 export function getListMode(arr: unknown): any[] | null {
