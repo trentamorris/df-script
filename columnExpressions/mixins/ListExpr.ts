@@ -38,22 +38,27 @@ class ListExprNamespace {
         });
     }
 
-    get(index: number) {
+    get(index: number, null_on_oob: boolean = true) {
         return this._deriveList((arr) => {
-            const list = Array.from(arr as any);
-            const idx = index < 0 ? list.length + index : index;
-            if (idx < 0 || idx >= list.length) return null;
-            const val = list[idx];
+            const len = (arr as any).length;
+            const idx = index < 0 ? len + index : index;
+            if (idx < 0 || idx >= len) {
+                if (!null_on_oob) {
+                    throw new Error(`Index ${index} is out of bounds for list of length ${len}`);
+                }
+                return null;
+            }
+            const val = (arr as any)[idx];
             return val !== undefined ? val : null;
         });
     }
 
-    first() {
-        return this.get(0);
+    first(null_on_oob: boolean = true) {
+        return this.get(0, null_on_oob);
     }
 
-    last() {
-        return this.get(-1);
+    last(null_on_oob: boolean = true) {
+        return this.get(-1, null_on_oob);
     }
 
     contains(item: any) {

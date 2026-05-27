@@ -169,6 +169,22 @@ try {
     if (r1.coerced_sum !== 10) throw new Error(`Expected r1.coerced_sum 10, got ${r1.coerced_sum}`);
     if (r1.coerced_mean !== 10) throw new Error(`Expected r1.coerced_mean 10, got ${r1.coerced_mean}`);
 
+    // Test null_on_oob = false throws
+    let threwOob = false;
+    try {
+        df.select([
+            $tbl.col("numbers").list.get(100, false)
+        ]).collect();
+    } catch (e: any) {
+        if (e.message && e.message.includes("out of bounds")) {
+            threwOob = true;
+        }
+    }
+    if (!threwOob) {
+        throw new Error("Expected index out of bounds to throw when null_on_oob is false");
+    }
+    console.log("✓ null_on_oob=false bounds check passed");
+
     console.log("\n🎉 ALL Expr.list COLUMN EXPRESSION TESTS PASSED SUCCESSFULLY!");
 } catch (err) {
     console.error("\n❌ Expr.list COLUMN EXPRESSION TESTS FAILED:", err);
