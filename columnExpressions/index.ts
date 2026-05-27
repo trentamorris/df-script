@@ -10,6 +10,7 @@ export * from "./mixins/StringExpr"
 export * from "./mixins/AggregationExpr"
 export * from "./mixins/WindowExpr"
 export * from "./mixins/TemporalExpr"
+export * from "./mixins/ListExpr"
 export * from "./ColumnExpr"
 export * from "./AllColumnsExpr"
 
