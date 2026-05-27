@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running constructor and collect tests...");
 
@@ -33,3 +33,4 @@ if (collected[0].name !== "Alice" || collected[1].id !== 2) {
 }
 
 console.log("✓ constructor and collect tests passed!");
+

@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running sort tests...");
 
@@ -63,3 +63,4 @@ if (
 }
 
 console.log("✓ sort tests passed!");
+

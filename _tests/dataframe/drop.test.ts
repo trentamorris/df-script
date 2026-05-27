@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running drop tests...");
 
@@ -21,3 +21,4 @@ if (collected[0].name !== "Alice" || collected[0].id !== 1) {
 }
 
 console.log("✓ drop tests passed!");
+

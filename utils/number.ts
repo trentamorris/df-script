@@ -1,4 +1,5 @@
 const NUMERIC_CLEAN_REGEX = /[,\s_]/g;
+const VALID_DECIMAL_REGEX = /^[+-]?\d+(?:\.\d+)?$/;
 
 // ============================================================================
 // /** Generic Number Helpers */
@@ -8,37 +9,7 @@ export function isValidNumber(v: unknown): v is number {
     return typeof v === "number" && !Number.isNaN(v) && Number.isFinite(v);
 }
 
-export function clamp<T extends number | bigint>(opts: { val: T; min: T; max: T }): T {
-    const { val, min, max } = opts;
-    if (val < min) return min;
-    if (val > max) return max;
-    return val;
-}
-
-// ============================================================================
-// /** Float Functions */
-// ============================================================================
-
-export type FloatPrecision = "Float32" | "Float64";
-export const FLOAT_32_BOUNDARY = 3.4028234663852886e+38
-export const FLOAT_RANGES = {
-    Float32: { min: -FLOAT_32_BOUNDARY, max: FLOAT_32_BOUNDARY },
-    Float64: { min: -Number.MAX_VALUE, max: Number.MAX_VALUE }
-} as const;
-
-export function isValidFloat(v: unknown, precision?: FloatPrecision): boolean {
-    if (!isValidNumber(v)) return false;
-    if (precision) {
-        const limits = FLOAT_RANGES[precision];
-        return v >= limits.min && v <= limits.max;
-    }
-    return true;
-}
-
-export function toValidFloat(
-    v: unknown,
-    precision: FloatPrecision = "Float64"
-): number | null {
+export function toValidNumber(v: unknown): number | null {
     if (v == null) return null;
 
     let n: number;
@@ -58,8 +29,44 @@ export function toValidFloat(
         n = Number(raw);
         if (!isValidNumber(n)) return null;
     }
+    return n;
+}
 
-    return precision === "Float32" ? Math.fround(n) : n;
+export function clamp<T extends number | bigint>(opts: { val: T; min: T; max: T }): T {
+    const { val, min, max } = opts;
+    if (val < min) return min;
+    if (val > max) return max;
+    return val;
+}
+
+// ============================================================================
+// /** Float Functions */
+// ============================================================================
+
+export type FloatPrecision = "Float32" | "Float64";
+
+export const FLOAT_32_BOUNDARY = 3.4028234663852886e+38;
+export const FLOAT_RANGES = {
+    Float32: { min: -FLOAT_32_BOUNDARY, max: FLOAT_32_BOUNDARY },
+    Float64: { min: -Number.MAX_VALUE, max: Number.MAX_VALUE }
+} as const;
+
+export function isValidFloat(v: unknown, precision?: FloatPrecision): boolean {
+    if (!isValidNumber(v)) return false;
+    if (precision) {
+        const limits = FLOAT_RANGES[precision];
+        return v >= limits.min && v <= limits.max;
+    }
+    return true;
+}
+
+export function toValidFloat(
+    v: unknown,
+    precision: FloatPrecision = "Float64"
+): number | null {
+    const num = toValidNumber(v);
+    if (num === null) return null;
+    return precision === "Float32" ? Math.fround(num) : num;
 }
 
 // ============================================================================
@@ -76,6 +83,7 @@ export const INT_RANGES = {
 } as const;
 
 export type IntRangeType = keyof typeof INT_RANGES;
+export type IntRange = { min: number; max: number } | IntRangeType;
 
 export const BIGINT_RANGES = {
     Int64: { min: -9223372036854775808n, max: 9223372036854775807n },
@@ -83,43 +91,40 @@ export const BIGINT_RANGES = {
 } as const;
 
 export type BigIntRangeType = keyof typeof BIGINT_RANGES;
+export type BigIntRange = { min: bigint; max: bigint } | BigIntRangeType;
+
+export type IntCoerceType = "round" | "floor" | "ceil" | "truncate";
+export interface IntOptions {
+    coerce?: IntCoerceType;
+}
 
 export function isValidInt(
     v: unknown,
-    range?: { min: number | bigint; max: number | bigint } | IntRangeType | BigIntRangeType
-): boolean {
-    if (typeof v === "number") {
-        if (!Number.isInteger(v) || Number.isNaN(v) || !Number.isFinite(v)) return false;
-        if (!range) return true;
-        if (typeof range === "string") {
-            if (range in INT_RANGES) {
-                const limits = INT_RANGES[range as IntRangeType];
-                return v >= limits.min && v <= limits.max;
-            }
-            return false;
-        }
-        return v >= range.min && v <= range.max;
-    }
-    if (typeof v === "bigint") {
-        if (!range) return true;
-        if (typeof range === "string") {
-            if (range in BIGINT_RANGES) {
-                const limits = BIGINT_RANGES[range as BigIntRangeType];
-                return v >= limits.min && v <= limits.max;
-            }
-            return false;
-        }
-        return v >= range.min && v <= range.max;
-    }
-    return false;
+    range?: IntRange
+): v is number {
+    if (!isValidNumber(v)) return false;
+    if (!Number.isInteger(v)) return false;
+    if (!range) return true;
+    const limits = typeof range === "string" ? INT_RANGES[range] : range;
+    return v >= limits.min && v <= limits.max;
+}
+
+export function isValidBigInt(
+    v: unknown,
+    range?: BigIntRange
+): v is bigint {
+    if (typeof v !== "bigint") return false;
+    if (!range) return true;
+    const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
+    return v >= limits.min && v <= limits.max;
 }
 
 export function toValidInt(
     v: unknown,
-    range: { min: number; max: number } | IntRangeType = "Int32",
-    opts: { coerce?: "round" | "floor" | "ceil" | "truncate" } = {}
+    range: IntRange = "Int32",
+    opts: IntOptions = {}
 ): number | null {
-    const num = toValidFloat(v);
+    const num = toValidNumber(v);
     if (num === null) return null;
 
     let n = num;
@@ -137,30 +142,99 @@ export function toValidInt(
 
 export function toValidBigInt(
     v: unknown,
-    range: { min: bigint; max: bigint } | BigIntRangeType = "Int64"
+    range: BigIntRange = "Int64"
 ): bigint | null {
     if (v == null) return null;
 
-    let bigintVal: bigint;
-    if (typeof v === "bigint") {
-        bigintVal = v;
-    } else if (typeof v === "string") {
-        try {
-            const str = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
-            const dotIdx = str.indexOf(".");
-            const cleanStr = dotIdx !== -1 ? str.slice(0, dotIdx) : str;
-            bigintVal = BigInt(cleanStr);
-        } catch {
-            const num = toValidFloat(v);
+    let bigintVal: bigint | null = null;
+
+    switch (typeof v) {
+        case "bigint":
+            bigintVal = v;
+            break;
+        case "string": {
+            const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
+            if (!VALID_DECIMAL_REGEX.test(clean)) {
+                const num = toValidNumber(v);
+                if (num === null) return null;
+                bigintVal = BigInt(Math.trunc(num));
+            } else {
+                bigintVal = BigInt(clean.split(".")[0]);
+            }
+            break;
+        }
+
+        default: {
+            const num = toValidNumber(v);
             if (num === null) return null;
             bigintVal = BigInt(Math.trunc(num));
+            break;
         }
-    } else {
-        const num = toValidFloat(v);
-        if (num === null) return null;
-        bigintVal = BigInt(Math.trunc(num));
     }
 
     const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
     return clamp({ val: bigintVal, min: limits.min, max: limits.max });
+}
+
+// ============================================================================
+// /** Decimal Functions */
+// ============================================================================
+
+export interface DecimalOptions {
+    precision?: number;
+    scale?: number;
+}
+
+export function isValidDecimal(
+    v: unknown,
+    opts: DecimalOptions = {}
+): boolean {
+    if (!isValidNumber(v)) return false;
+
+    const { precision, scale = 0 } = opts;
+
+    if (precision !== undefined) {
+        const integerDigits = precision - scale;
+        const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scale);
+        if (integerDigits > 0 && Math.abs(v) > maxVal) {
+            return false;
+        }
+    }
+
+    if (scale !== undefined) {
+        const str = v.toString();
+        const dotIdx = str.indexOf(".");
+        if (dotIdx !== -1 && str.slice(dotIdx + 1).length > scale) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+export function toValidDecimal(
+    v: unknown,
+    opts: DecimalOptions = {}
+): number | null {
+    const num = toValidNumber(v);
+    if (num === null) return null;
+
+    const { precision, scale } = opts;
+    let n = num;
+
+    if (scale !== undefined) {
+        const multiplier = Math.pow(10, scale);
+        n = Math.round(n * multiplier) / multiplier;
+    }
+
+    if (precision !== undefined) {
+        const scaleVal = scale || 0;
+        const integerDigits = precision - scaleVal;
+        if (integerDigits > 0) {
+            const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scaleVal);
+            n = clamp({ val: n, min: -maxVal, max: maxVal });
+        }
+    }
+
+    return n;
 }

@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 import { $tbl } from "../../api";
 
 console.log("Running select tests...");
@@ -39,3 +39,4 @@ if (schema3.name === undefined || schema3.age === undefined || schema3.city !== 
 }
 
 console.log("✓ select tests passed!");
+

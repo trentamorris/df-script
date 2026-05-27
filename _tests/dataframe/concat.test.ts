@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running concat tests...");
 
@@ -30,3 +30,4 @@ if (collectedDiag[0].age !== null || collectedDiag[1].name !== null || collected
 }
 
 console.log("✓ concat tests passed!");
+

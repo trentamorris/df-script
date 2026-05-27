@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 import { $tbl } from "../../api";
 
 console.log("Running with_columns tests...");
@@ -45,3 +45,4 @@ if (collectedExpr[0].agePlusFive !== 35 || collectedExpr[1].agePlusFive !== 30) 
 }
 
 console.log("✓ with_columns tests passed!");
+

@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running limit and slice tests...");
 
@@ -27,3 +27,4 @@ if (df.head(2).height !== 2) throw new Error("Head failed");
 if (df.tail(2).height !== 2) throw new Error("Tail failed");
 
 console.log("✓ limit and slice tests passed!");
+

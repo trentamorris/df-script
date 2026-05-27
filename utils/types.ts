@@ -1,11 +1,19 @@
-export function isScalar(v: unknown): v is string | number | boolean | bigint | Date {
-    return (
-        typeof v === "string" ||
-        typeof v === "number" ||
-        typeof v === "boolean" ||
-        typeof v === "bigint" ||
-        v instanceof Date
-    );
+import { isValidDateObj } from "./date";
+
+export function isArray(v: unknown): v is unknown[] | ArrayBufferView {
+    return Array.isArray(v) || (ArrayBuffer.isView(v) && !(v instanceof DataView));
+}
+
+export function isNonEmptyArray<T = unknown>(arr: unknown): arr is T[] | ArrayBufferView {
+    return isArray(arr) && (arr as any).length > 0;
+}
+
+export function isNonEmptyArrayObjs<T extends object>(arr: unknown): arr is T[] {
+    return isNonEmptyArray(arr) && Array.from(arr as any).every(isObj);
+}
+
+export function isNonEmptyObj(v: unknown): v is Record<string, unknown> {
+    return isObj(v) && Object.keys(v).length > 0;
 }
 
 export function isObj(v: unknown): v is Record<string, unknown> {
@@ -18,34 +26,37 @@ export function isPlainObj(v: unknown): v is Record<string, unknown> {
     return proto === null || proto === Object.prototype;
 }
 
-export function isNonEmptyObj(v: unknown): v is Record<string, unknown> {
-    return isObj(v) && Object.keys(v).length > 0;
+export function isScalar(v: unknown): v is string | number | boolean | bigint | Date | Uint8Array {
+    return (
+        typeof v === "string" ||
+        typeof v === "number" ||
+        typeof v === "boolean" ||
+        typeof v === "bigint" ||
+        (v instanceof Date && isValidDateObj(v)) ||
+        v instanceof Uint8Array
+    );
 }
 
-export function isNonEmptyArray<T = unknown>(arr: unknown): arr is T[] {
-    return Array.isArray(arr) && arr.length > 0;
-}
-
-export function isNonEmptyArrayObjs<T extends object>(arr: unknown): arr is T[] {
-    return isNonEmptyArray(arr) && arr.every(isObj);
+export function isValidBinary(v: unknown): v is Uint8Array | string | unknown[] | ArrayBufferView {
+    if (v == null) return false;
+    if (v instanceof Uint8Array) return true;
+    if (typeof v === "string") return true;
+    if (isArray(v)) {
+        try {
+            new Uint8Array(v as any);
+            return true;
+        } catch {
+            return false;
+        }
+    }
+    return false;
 }
 
 export function toValidBinary(v: unknown): Uint8Array | null {
-    if (v == null) return null;
+    if (!isValidBinary(v)) return null;
     if (v instanceof Uint8Array) return v;
     if (typeof v === "string") {
         return new TextEncoder().encode(v);
     }
-    if (Array.isArray(v) || (typeof v === "object" && "length" in v)) {
-        try {
-            return new Uint8Array(v as any);
-        } catch {
-            return null;
-        }
-    }
-    return null;
-}
-
-export function isValidBinary(v: unknown): boolean {
-    return toValidBinary(v) !== null;
+    return new Uint8Array(v as any);
 }

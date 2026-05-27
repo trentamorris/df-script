@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 import { $tbl } from "../../api";
 
 console.log("Running groupby tests...");
@@ -23,3 +23,4 @@ if (!hrRow || hrRow.avg_salary !== 1500) throw new Error("HR average salary mism
 if (!itRow || itRow.avg_salary !== 4000) throw new Error("IT average salary mismatch");
 
 console.log("✓ groupby tests passed!");
+

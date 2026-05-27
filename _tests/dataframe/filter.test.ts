@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 import { $tbl } from "../../api";
 
 console.log("Running filter tests...");
@@ -22,3 +22,4 @@ if (collected[0].name !== "Alice" || collected[1].name !== "Charlie") {
 }
 
 console.log("✓ filter tests passed!");
+

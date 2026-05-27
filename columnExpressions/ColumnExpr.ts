@@ -5,8 +5,9 @@ import { AggregationExpr } from "./mixins/AggregationExpr"
 import { WindowExpr } from "./mixins/WindowExpr"
 import { StringExpr } from "./mixins/StringExpr"
 import { LogicalExpr } from "./mixins/LogicalExpr"
+import { TemporalExpr } from "./mixins/TemporalExpr"
 
-export class ColumnExpr<T> extends LogicalExpr(StringExpr(WindowExpr(AggregationExpr(ComparisonExpr(ArithmeticExpr(ExprBase)))))) {
+export class ColumnExpr<T> extends TemporalExpr(LogicalExpr(StringExpr(WindowExpr(AggregationExpr(ComparisonExpr(ArithmeticExpr(ExprBase))))))) {
     public colName: string
 
     constructor(colName: keyof T | string) {

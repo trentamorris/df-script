@@ -1,4 +1,5 @@
-import { $tbl } from "../index";
+declare const process: any;
+import { $tbl } from "../../index";
 
 const data = [
     { name: "Alice", dept: "HR", salary: 1000 },
@@ -253,7 +254,7 @@ try {
 
     // 8. Test AllColumnsExpr wildcard select and exclude
     console.log("\nTesting AllColumnsExpr select and exclude:");
-    const dfAllExclude = df.select($tbl.all().exclude("salary").lower()).collect();
+    const dfAllExclude = df.select($tbl.all().exclude("salary").str.lower()).collect();
     console.table(dfAllExclude);
 
     if (dfAllExclude.length !== 5 || dfAllExclude[0].salary !== undefined || dfAllExclude[0].name !== "alice" || dfAllExclude[0].dept !== "hr") {
@@ -264,7 +265,7 @@ try {
     // 9. Test with_columns wildcard select and exclude
     console.log("\nTesting with_columns wildcard select and exclude:");
     const dfWithCols = df.with_columns(
-        $tbl.all().exclude("salary").upper()
+        $tbl.all().exclude("salary").str.upper()
     ).collect();
     console.table(dfWithCols);
 
@@ -304,7 +305,7 @@ try {
         // 10.3 3-valued Kleene AND logic
         $tbl.col("val_bool").and($tbl.col("val_bool").is_null()).alias("kleene_and"),
         // 10.4 replace_all string replacement
-        $tbl.col("val_num").replace(new Map([[10, "HR"], [null, "IT"], [20, "HR"]])).replace_all("R", "S").alias("replaced_dept")
+        $tbl.col("val_num").replace(new Map([[10, "HR"], [null, "IT"], [20, "HR"]])).str.replace_all("R", "S").alias("replaced_dept")
     ).collect();
 
     console.table(dfNullsRes);

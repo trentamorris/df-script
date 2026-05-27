@@ -1,11 +1,11 @@
 import { TemporalDataType, DataType } from "../DataType";
-import { toValidFloat } from "../../utils";
+import { toValidNumber } from "../../utils";
 
 export class DurationType extends TemporalDataType {
     readonly name = "Duration";
 
     coerce(val: any): number | null {
-        return toValidFloat(val);
+        return toValidNumber(val);
     }
 
     equals(other: DataType): boolean {

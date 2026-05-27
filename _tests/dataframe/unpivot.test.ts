@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running unpivot tests...");
 
@@ -33,3 +33,4 @@ if (!row2sci || row2sci.score !== 95) {
 }
 
 console.log("✓ unpivot tests passed!");
+

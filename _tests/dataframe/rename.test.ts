@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running rename tests...");
 
@@ -24,3 +24,4 @@ if (collected[0].first_name !== undefined) {
 }
 
 console.log("✓ rename tests passed!");
+

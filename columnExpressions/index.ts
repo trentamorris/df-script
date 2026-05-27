@@ -9,6 +9,7 @@ export * from "./mixins/ComparisonExpr"
 export * from "./mixins/StringExpr"
 export * from "./mixins/AggregationExpr"
 export * from "./mixins/WindowExpr"
+export * from "./mixins/TemporalExpr"
 export * from "./ColumnExpr"
 export * from "./AllColumnsExpr"
 

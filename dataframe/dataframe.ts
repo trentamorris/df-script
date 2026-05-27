@@ -3,6 +3,7 @@ import { GroupedData } from "./grouped/grouped"
 import type { IExpr } from "../types"
 import type { JoinType, LimitPosition, ConcatOptions, GroupMap } from "./types"
 import { DataType, DataTypeRegistry } from "../datatypes"
+import { isArray } from "../utils"
 import {
     resolveWindowExpr,
     ensureArray,
@@ -30,7 +31,7 @@ export class DataFrame<T> {
                 this.height = height;
             } else {
                 const firstCol = Object.values(data)[0];
-                this.height = Array.isArray(firstCol) ? firstCol.length : 0;
+                this.height = isArray(firstCol) ? (firstCol as any).length : 0;
             }
         } else {
             this.columns = {};

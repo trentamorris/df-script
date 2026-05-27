@@ -134,15 +134,26 @@ export function inferColumnType(col: any[]): DataType {
     let isBoolean = true;
     let isInteger = true;
     let isNumeric = true;
+    let isBigInt = true;
     let isDate = true;
+    let isList = true;
+    let hasDateObj = false;
     let hasNonNull = false;
+    const allListElements: any[] = [];
 
     for (let i = 0; i < col.length; i++) {
         const val = col[i];
         if (val == null) continue;
         hasNonNull = true;
 
+        if (!Array.isArray(val)) {
+            isList = false;
+        } else {
+            allListElements.push(...val);
+        }
+        if (val instanceof Date) hasDateObj = true;
         if (typeof val !== "boolean") isBoolean = false;
+        if (typeof val !== "bigint") isBigInt = false;
         if (typeof val !== "number") {
             isNumeric = false;
             isInteger = false;
@@ -155,8 +166,27 @@ export function inferColumnType(col: any[]): DataType {
     }
 
     if (!hasNonNull) return DataTypeRegistry.Utf8;
+    if (isList) {
+        const innerType = inferColumnType(allListElements);
+        return DataTypeRegistry.List(innerType);
+    }
     if (isBoolean) return DataTypeRegistry.Boolean;
-    if (isNumeric) return isInteger ? DataTypeRegistry.Int32 : DataTypeRegistry.Float64;
-    if (isDate) return DataTypeRegistry.Datetime;
+    if (isBigInt) return DataTypeRegistry.Int64;
+    if (isNumeric) {
+        if (isInteger) {
+            let fitsInInt32 = true;
+            for (let i = 0; i < col.length; i++) {
+                const val = col[i];
+                if (val == null) continue;
+                if (val < -2147483648 || val > 2147483647) {
+                    fitsInInt32 = false;
+                    break;
+                }
+            }
+            return fitsInInt32 ? DataTypeRegistry.Int32 : DataTypeRegistry.Float64;
+        }
+        return DataTypeRegistry.Float64;
+    }
+    if (isDate && hasDateObj) return DataTypeRegistry.Datetime;
     return DataTypeRegistry.Utf8;
 }

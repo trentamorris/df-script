@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running pivot tests...");
 
@@ -29,3 +29,4 @@ if (!y2021 || y2021.Jan !== 200 || y2021.Feb !== 250) {
 }
 
 console.log("✓ pivot tests passed!");
+

@@ -20,3 +20,4 @@ export interface IExpr {
     evaluateWindow?(partitionRows: any[], partitionIndices: number[], currentIndex: number): any;
 }
 export type ExprConstructor = new (...args: any[]) => IExpr;
+export type TimeUnit = "s" | "ms" | "us" | "ns";

@@ -1,4 +1,5 @@
 import { NestedDataType, DataType } from "../DataType";
+import { isObj } from "../../utils";
 
 export class StructType extends NestedDataType {
     readonly name = "Struct";
@@ -8,7 +9,7 @@ export class StructType extends NestedDataType {
     }
     
     coerce(val: any): Record<string, any> | null {
-        if (val == null || typeof val !== "object") return null;
+        if (!isObj(val)) return null;
         const res: Record<string, any> = {};
         for (const [k, type] of Object.entries(this.fields)) {
             res[k] = type.coerce(val[k]);

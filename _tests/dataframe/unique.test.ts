@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running unique tests...");
 
@@ -32,3 +32,4 @@ if (colAB.filter(r => r.a === 1 && r.b === 2).length !== 1) {
 }
 
 console.log("✓ unique tests passed!");
+

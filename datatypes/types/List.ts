@@ -1,4 +1,5 @@
 import { NestedDataType, DataType } from "../DataType";
+import { isArray } from "../../utils";
 
 export class ListType extends NestedDataType {
     readonly name = "List";
@@ -9,7 +10,7 @@ export class ListType extends NestedDataType {
     
     coerce(val: any): any[] | null {
         if (val == null) return null;
-        const arr = Array.isArray(val) ? val : [val];
+        const arr = isArray(val) ? Array.from(val as any) : [val];
         return arr.map(item => this.innerType.coerce(item));
     }
     

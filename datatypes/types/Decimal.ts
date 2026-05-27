@@ -1,5 +1,5 @@
 import { NumericDataType, DataType } from "../DataType";
-import { toValidFloat } from "../../utils";
+import { toValidDecimal } from "../../utils";
 
 export class DecimalType extends NumericDataType {
     readonly name: string;
@@ -12,13 +12,7 @@ export class DecimalType extends NumericDataType {
     }
 
     coerce(val: any): number | null {
-        const num = toValidFloat(val);
-        if (num === null) return null;
-        if (this.scale !== undefined) {
-            const multiplier = Math.pow(10, this.scale);
-            return Math.round(num * multiplier) / multiplier;
-        }
-        return num;
+        return toValidDecimal(val, { precision: this.precision, scale: this.scale });
     }
 
     equals(other: DataType): boolean {

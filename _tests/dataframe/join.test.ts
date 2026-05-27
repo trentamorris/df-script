@@ -1,4 +1,4 @@
-import { DataFrame } from "../dataframe";
+import { DataFrame } from "../../dataframe";
 
 console.log("Running join tests...");
 
@@ -14,6 +14,7 @@ const right = new DataFrame([
 
 // 1. Inner Join
 const dfInner = left.join(right, "id", "inner");
+
 if (dfInner.height !== 1) throw new Error("Inner join height mismatch");
 if (dfInner.collect()[0].val !== "L1" || dfInner.collect()[0].rval !== "R1") {
     throw new Error("Inner join values mismatch");
@@ -28,3 +29,4 @@ if (collectedLeft[1].val !== "L2" || collectedLeft[1].rval !== null) {
 }
 
 console.log("✓ join tests passed!");
+
