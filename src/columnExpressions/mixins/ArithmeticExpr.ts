@@ -1,4 +1,5 @@
-import type { IExpr, ExprConstructor } from "../../types"
+import type { IExpr } from "../../types"
+import type { ExprConstructor } from "../types"
 import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
 import { clamp } from "../../utils"
 

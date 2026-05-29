@@ -1,8 +1,8 @@
-export abstract class DataType {
+export abstract class DataType<T = any> {
     abstract readonly name: string;
-    abstract coerce(val: any): any;
+    abstract coerce(val: any): T;
     abstract equals(other: DataType): boolean;
-    abstract allocate(size: number): ArrayLike<any>;
+    abstract allocate(size: number): ArrayLike<T>;
 
     get isNumeric(): boolean { return false; }
     get isInteger(): boolean { return false; }
@@ -19,30 +19,30 @@ export abstract class DataType {
     get isBinary(): boolean { return false; }
 }
 
-export abstract class NumericDataType extends DataType {
+export abstract class NumericDataType<T = number | null> extends DataType<T> {
     override get isNumeric(): boolean { return true; }
 }
 
-export abstract class IntegerDataType extends NumericDataType {
+export abstract class IntegerDataType<T = number | null> extends NumericDataType<T> {
     override get isInteger(): boolean { return true; }
 }
 
-export abstract class SignedIntegerType extends IntegerDataType {
+export abstract class SignedIntegerType<T = number | null> extends IntegerDataType<T> {
     override get isSigned(): boolean { return true; }
 }
 
-export abstract class UnsignedIntegerType extends IntegerDataType {
+export abstract class UnsignedIntegerType<T = number | null> extends IntegerDataType<T> {
     override get isUnsigned(): boolean { return true; }
 }
 
-export abstract class FloatDataType extends NumericDataType {
+export abstract class FloatDataType<T = number | null> extends NumericDataType<T> {
     override get isFloat(): boolean { return true; }
 }
 
-export abstract class TemporalDataType extends DataType {
+export abstract class TemporalDataType<T = any> extends DataType<T> {
     override get isTemporal(): boolean { return true; }
 }
 
-export abstract class NestedDataType extends DataType {
+export abstract class NestedDataType<T = any> extends DataType<T> {
     override get isNested(): boolean { return true; }
 }

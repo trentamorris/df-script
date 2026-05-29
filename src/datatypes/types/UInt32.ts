@@ -11,7 +11,7 @@ export class UInt32Type extends UnsignedIntegerType {
     equals(other: DataType): boolean {
         return other.name === "UInt32";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Uint32Array { return new Uint32Array(size); }
 
 }
 

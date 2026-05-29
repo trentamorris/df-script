@@ -29,3 +29,8 @@ This document outlines core engineering principles and standards for writing cle
 - **Minimize Object Allocation**: Avoid creating short-lived objects, intermediate arrays, or array spreads within loops. Use in-place updates, pre-allocated result arrays, or proxies where possible to reduce garbage collection overhead.
 - **Minimal Abstractions**: Keep execution paths direct. Avoid building layers of indirect callbacks, wrappers, or custom helper abstractions where a direct iterative implementation does the job.
 
+## 8. Containing Scope Principle (Variables, Functions & Types)
+- **Narrowest Local Scope**: Declare all variables, helper functions, and types in the narrowest containing scope possible. If a variable or type is only used within a single function or file, declare it locally inside that function or file.
+- **Enclosing Containing Scope**: If a type, utility, or variable is shared across multiple files or modules, place it in the outermost file or directory that encompasses all its usages (e.g. in the module's own types file if used only within that module, or up to the root-level `types.ts` if shared across sibling modules like DataFrame and ColumnExpressions). This prevents global clutter and enforces a clean, modular hierarchy.
+- **Dedicated Types & Utils Files**: Place all type definitions in a dedicated `types.ts` file, and all helper/formatting utilities in a `utils.ts` file (or `utils/` directory) within the relevant containing scope. This keeps the core business logic files clean and strictly focused on a single responsibility.
+

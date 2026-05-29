@@ -11,7 +11,7 @@ export class Int8Type extends SignedIntegerType {
     equals(other: DataType): boolean {
         return other.name === "Int8";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Int8Array { return new Int8Array(size); }
 
 }
 

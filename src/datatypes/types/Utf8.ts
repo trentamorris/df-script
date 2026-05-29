@@ -14,7 +14,7 @@ export class Utf8Type extends DataType {
     equals(other: DataType): boolean {
         return other.name === "Utf8";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (string | null)[] { return new Array(size).fill(null); }
 
 }
 

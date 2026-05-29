@@ -351,7 +351,7 @@ try {
     const dfJoinRight = $tbl.data(joinRightData);
 
     // Inner Join: null ids should NOT match, only id: 1 should match
-    const dfInnerJoined = dfJoinLeft.join(dfJoinRight, "id", "inner").collect();
+    const dfInnerJoined = dfJoinLeft.join({ other: dfJoinRight, on: "id", how: "inner" }).collect();
     console.log("Inner Join Result:");
     console.table(dfInnerJoined);
     if (dfInnerJoined.length !== 1 || dfInnerJoined[0].id !== 1 || dfInnerJoined[0].val !== "L1" || dfInnerJoined[0].rval !== "R1") {
@@ -360,7 +360,7 @@ try {
     }
 
     // Left Join: null ids should NOT match, and left null id should be kept with right columns null
-    const dfLeftJoined = dfJoinLeft.join(dfJoinRight, "id", "left").collect();
+    const dfLeftJoined = dfJoinLeft.join({ other: dfJoinRight, on: "id", how: "left" }).collect();
     console.log("Left Join Result:");
     console.table(dfLeftJoined);
     if (dfLeftJoined.length !== 3) {
@@ -374,7 +374,7 @@ try {
     }
 
     // Outer Join: null ids should NOT match, both null key rows kept
-    const dfOuterJoined = dfJoinLeft.join(dfJoinRight, "id", "outer").collect();
+    const dfOuterJoined = dfJoinLeft.join({ other: dfJoinRight, on: "id", how: "outer" }).collect();
     console.log("Outer Join Result:");
     console.table(dfOuterJoined);
     if (dfOuterJoined.length !== 5) {
@@ -410,7 +410,7 @@ try {
     }
 
     // unpivot with single string:
-    const dfUnpivotUsability = dfUsability.unpivot("category", "val").collect();
+    const dfUnpivotUsability = dfUsability.unpivot({ idVars: "category", valueVars: "val" }).collect();
     console.log("Unpivot Usability Result:");
     console.table(dfUnpivotUsability);
     if (dfUnpivotUsability.length !== 3) {
@@ -419,7 +419,7 @@ try {
     }
 
     // pivot with single string:
-    const dfPivotUsability = dfUsability.pivot("category", "category", "val").collect();
+    const dfPivotUsability = dfUsability.pivot({ index: "category", columns: "category", values: "val" }).collect();
     console.log("Pivot Usability Result:");
     console.table(dfPivotUsability);
     if (dfPivotUsability.length !== 2) {

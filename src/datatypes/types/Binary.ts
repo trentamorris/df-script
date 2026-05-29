@@ -13,7 +13,7 @@ export class BinaryType extends DataType {
     equals(other: DataType): boolean {
         return other.name === "Binary";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (Uint8Array | null)[] { return new Array(size).fill(null); }
 
 }
 

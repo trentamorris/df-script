@@ -11,7 +11,7 @@ export class Int16Type extends SignedIntegerType {
     equals(other: DataType): boolean {
         return other.name === "Int16";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Int16Array { return new Int16Array(size); }
 
 }
 

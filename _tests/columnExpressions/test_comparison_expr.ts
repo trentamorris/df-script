@@ -89,6 +89,28 @@ try {
     if (r2.is_in_expr !== false) throw new Error("r2.is_in_expr failed");
     if (r2.not_in_expr !== true) throw new Error("r2.not_in_expr failed");
 
+    // TypedArray test
+    const typedDf = $tbl.data({
+        val: new Int32Array([15, 5, 20]),
+        lower: new Int32Array([10, 10, 10]),
+        upper: new Int32Array([20, 20, 20]),
+        tags: [new Int32Array([15, 10]), new Int32Array([5]), new Int32Array([20])]
+    } as any);
+
+    const typedProjected = typedDf.select([
+        $tbl.col("val").between($tbl.col("lower"), $tbl.col("upper")).alias("between"),
+        $tbl.col("val").is_in(new Int32Array([15, 20]) as any).alias("is_in_static"),
+        $tbl.col("val").and(true).alias("and_true")
+    ]).collect() as any[];
+
+    if (typedProjected[0].between !== true) throw new Error("TypedArray between failed on index 0");
+    if (typedProjected[1].between !== false) throw new Error("TypedArray between failed on index 1");
+    if (typedProjected[2].between !== true) throw new Error("TypedArray between failed on index 2");
+
+    if (typedProjected[0].is_in_static !== true) throw new Error("TypedArray is_in_static failed on index 0");
+    if (typedProjected[1].is_in_static !== false) throw new Error("TypedArray is_in_static failed on index 1");
+    if (typedProjected[2].is_in_static !== true) throw new Error("TypedArray is_in_static failed on index 2");
+
     console.log("=========================================");
     console.log("🎉 ALL COLUMN EXPRESSION COMPARISON TESTS PASSED!");
     console.log("=========================================");

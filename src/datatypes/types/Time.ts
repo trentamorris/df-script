@@ -23,7 +23,7 @@ export class TimeType extends TemporalDataType {
     equals(other: DataType): boolean {
         return other.name === "Time";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (string | null)[] { return new Array(size).fill(null); }
 
 }
 

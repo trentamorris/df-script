@@ -1,4 +1,5 @@
-import type { AggFn, ExprConstructor } from "../../types"
+import type { AggFn } from "../../types"
+import type { ExprConstructor } from "../types"
 import { derive } from "../ExprBase"
 
 export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {

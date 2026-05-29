@@ -1,24 +1,29 @@
 import { NestedDataType, DataType } from "../DataType";
-import { isArray } from "../../utils";
+import { isArrayOrTypedArray } from "../../utils";
 
-export class ListType extends NestedDataType {
+export class ListType<TInner = any> extends NestedDataType<TInner[] | null> {
     readonly name = "List";
     
-    constructor(public readonly innerType: DataType) {
+    constructor(public readonly innerType: DataType<TInner>) {
         super();
     }
     
-    coerce(val: any): any[] | null {
+    coerce(val: any): TInner[] | null {
         if (val == null) return null;
-        const arr = isArray(val) ? Array.from(val as any) : [val];
-        return arr.map(item => this.innerType.coerce(item));
+        const arr = isArrayOrTypedArray(val) ? Array.from(val as any) : [val];
+        const len = arr.length;
+        const res = new Array(len);
+        for (let i = 0; i < len; i++) {
+            res[i] = this.innerType.coerce(arr[i]);
+        }
+        return res;
     }
     
     equals(other: DataType): boolean {
         return other instanceof ListType && this.innerType.equals(other.innerType);
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (TInner[] | null)[] { return new Array(size).fill(null); }
 
 }
 
-export const List = (inner: DataType) => new ListType(inner);
+export const List = <TInner>(inner: DataType<TInner>) => new ListType<TInner>(inner);

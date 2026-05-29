@@ -11,7 +11,7 @@ export class DurationType extends TemporalDataType {
     equals(other: DataType): boolean {
         return other.name === "Duration";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (number | null)[] { return new Array(size).fill(null); }
 
 }
 

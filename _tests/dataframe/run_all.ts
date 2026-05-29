@@ -16,7 +16,8 @@ import "./sort.test";
 import "./unique.test";
 import "./unpivot.test";
 import "./with_columns.test";
+import "./robustness.test";
 
 console.log("=========================================");
-console.log("🎉 ALL 14 DATAFRAME TESTS PASSED SUCCESSFULLY!");
+console.log("🎉 ALL 15 DATAFRAME TESTS PASSED SUCCESSFULLY!");
 console.log("=========================================");

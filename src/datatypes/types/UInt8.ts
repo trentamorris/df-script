@@ -11,7 +11,7 @@ export class UInt8Type extends UnsignedIntegerType {
     equals(other: DataType): boolean {
         return other.name === "UInt8";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Uint8Array { return new Uint8Array(size); }
 
 }
 

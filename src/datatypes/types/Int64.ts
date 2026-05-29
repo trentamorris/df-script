@@ -1,7 +1,7 @@
 import { SignedIntegerType, DataType } from "../DataType";
 import { toValidBigInt } from "../../utils";
 
-export class Int64Type extends SignedIntegerType {
+export class Int64Type extends SignedIntegerType<bigint | null> {
     readonly name = "Int64";
 
     coerce(val: any): bigint | null {
@@ -11,7 +11,7 @@ export class Int64Type extends SignedIntegerType {
     equals(other: DataType): boolean {
         return other.name === "Int64";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): BigInt64Array { return new BigInt64Array(size); }
 
 }
 

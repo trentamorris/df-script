@@ -20,6 +20,6 @@ export class DecimalType extends NumericDataType {
             this.precision === other.precision &&
             this.scale === other.scale;
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (number | null)[] { return new Array(size).fill(null); }
 
 }

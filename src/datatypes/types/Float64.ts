@@ -3,15 +3,15 @@ import { toValidFloat } from "../../utils";
 
 export class Float64Type extends FloatDataType {
     readonly name = "Float64";
-    
+
     coerce(val: any): number | null {
         return toValidFloat(val);
     }
-    
+
     equals(other: DataType): boolean {
         return other.name === "Float64";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Float64Array { return new Float64Array(size); }
 
 }
 

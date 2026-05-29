@@ -11,7 +11,7 @@ export class UInt16Type extends UnsignedIntegerType {
     equals(other: DataType): boolean {
         return other.name === "UInt16";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Uint16Array { return new Uint16Array(size); }
 
 }
 

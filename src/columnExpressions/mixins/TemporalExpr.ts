@@ -1,4 +1,5 @@
-import type { ExprConstructor, TimeUnit } from "../../types";
+import type { TimeUnit } from "../../types";
+import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
 import {
     toValidDate,

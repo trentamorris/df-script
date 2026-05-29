@@ -1,16 +1,16 @@
 import { NestedDataType, DataType } from "../DataType";
 import { isObj } from "../../utils";
 
-export class StructType extends NestedDataType {
+export class StructType<TFields extends Record<string, any> = any> extends NestedDataType<TFields | null> {
     readonly name = "Struct";
     
-    constructor(public readonly fields: Record<string, DataType>) {
+    constructor(public readonly fields: { [K in keyof TFields]: DataType<TFields[K]> }) {
         super();
     }
     
-    coerce(val: any): Record<string, any> | null {
+    coerce(val: any): TFields | null {
         if (!isObj(val)) return null;
-        const res: Record<string, any> = {};
+        const res: any = {};
         for (const [k, type] of Object.entries(this.fields)) {
             res[k] = type.coerce(val[k]);
         }
@@ -28,7 +28,7 @@ export class StructType extends NestedDataType {
         return true;
     }
 
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (TFields | null)[] { return new Array(size).fill(null); }
 }
 
-export const Struct = (fields: Record<string, DataType>) => new StructType(fields);
+export const Struct = <TFields extends Record<string, any>>(fields: { [K in keyof TFields]: DataType<TFields[K]> }) => new StructType<TFields>(fields);

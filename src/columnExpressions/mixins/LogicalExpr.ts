@@ -1,5 +1,7 @@
-import type { IExpr, ExprConstructor } from "../../types"
+import type { IExpr } from "../../types"
+import type { ExprConstructor } from "../types"
 import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
+import { isArrayOrTypedArray } from "../../utils"
 
 export const LogicalExpr = <TBase extends ExprConstructor>(Base: TBase) => {
     return class extends Base {
@@ -7,7 +9,7 @@ export const LogicalExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             return derive(this, (vArray, columns) => {
                 const height = vArray.length;
                 const otherVal = this._resolve(other, columns, height);
-                const isOtherArray = Array.isArray(otherVal);
+                const isOtherArray = isArrayOrTypedArray(otherVal);
                 const result = new Array(height);
                 for (let i = 0; i < height; i++) {
                     const v = vArray[i];
@@ -26,7 +28,7 @@ export const LogicalExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             return derive(this, (vArray, columns) => {
                 const height = vArray.length;
                 const otherVal = this._resolve(other, columns, height);
-                const isOtherArray = Array.isArray(otherVal);
+                const isOtherArray = isArrayOrTypedArray(otherVal);
                 const result = new Array(height);
                 for (let i = 0; i < height; i++) {
                     const v = vArray[i];

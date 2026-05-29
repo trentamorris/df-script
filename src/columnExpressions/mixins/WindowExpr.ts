@@ -1,4 +1,5 @@
-import type { IExpr, ExprConstructor } from "../../types"
+import type { IExpr } from "../../types"
+import type { ExprConstructor } from "../types"
 import { derive } from "../ExprBase"
 
 export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
@@ -125,7 +126,10 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             newInst.groupingOpsIndex = this.ops.length;
             newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
                 const sortedUnique = Array.from(new Set(groupPreValues)).sort((a, b) => a - b);
-                const valueToRank = new Map(sortedUnique.map((v, idx) => [v, idx + 1]));
+                const valueToRank = new Map();
+                for (let idx = 0; idx < sortedUnique.length; idx++) {
+                    valueToRank.set(sortedUnique[idx], idx + 1);
+                }
                 const currentVal = groupPreValues[currentIndex];
                 return valueToRank.get(currentVal) ?? null;
             };

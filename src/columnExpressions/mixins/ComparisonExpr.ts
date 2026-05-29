@@ -1,5 +1,7 @@
-import type { IExpr, ExprConstructor } from "../../types"
+import type { IExpr } from "../../types"
+import type { ExprConstructor } from "../types"
 import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
+import { isArrayOrTypedArray } from "../../utils"
 
 export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
     return class extends Base {
@@ -11,8 +13,8 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
                 const uResolved = this._resolve(upper, columns, height);
                 const result = new Array(height);
 
-                const isLArray = Array.isArray(lResolved);
-                const isUArray = Array.isArray(uResolved);
+                const isLArray = isArrayOrTypedArray(lResolved);
+                const isUArray = isArrayOrTypedArray(uResolved);
 
                 for (let i = 0; i < height; i++) {
                     const v = vArray[i];
@@ -40,7 +42,7 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
                 const height = vArray.length;
                 const rResolved = this._resolve(val, columns, height);
                 const result = new Array(height);
-                if (Array.isArray(rResolved)) {
+                if (isArrayOrTypedArray(rResolved)) {
                     for (let i = 0; i < height; i++) {
                         const v = vArray[i];
                         const r = rResolved[i];
@@ -84,12 +86,12 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
                             result[i] = null;
                         } else {
                             const candidates = resolved[i];
-                            const set = Array.isArray(candidates) ? new Set(candidates) : new Set([candidates]);
+                            const set = isArrayOrTypedArray(candidates) ? new Set(candidates) : new Set([candidates]);
                             result[i] = set.has(v);
                         }
                     }
                 } else {
-                    const arr = Array.isArray(values) ? values : [];
+                    const arr = isArrayOrTypedArray(values) ? values : [];
                     const set = new Set(arr);
                     for (let i = 0; i < height; i++) {
                         const v = vArray[i];
@@ -151,7 +153,7 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
                 const height = vArray.length;
                 const rResolved = this._resolve(val, columns, height);
                 const result = new Array(height);
-                if (Array.isArray(rResolved)) {
+                if (isArrayOrTypedArray(rResolved)) {
                     for (let i = 0; i < height; i++) {
                         const v = vArray[i];
                         const r = rResolved[i];
@@ -183,12 +185,12 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
                             result[i] = null;
                         } else {
                             const candidates = resolved[i];
-                            const set = Array.isArray(candidates) ? new Set(candidates) : new Set([candidates]);
+                            const set = isArrayOrTypedArray(candidates) ? new Set(candidates) : new Set([candidates]);
                             result[i] = !set.has(v);
                         }
                     }
                 } else {
-                    const arr = Array.isArray(values) ? values : [];
+                    const arr = isArrayOrTypedArray(values) ? values : [];
                     const set = new Set(arr);
                     for (let i = 0; i < height; i++) {
                         const v = vArray[i];

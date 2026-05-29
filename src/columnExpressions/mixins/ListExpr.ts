@@ -1,13 +1,13 @@
-import type { ExprConstructor } from "../../types";
+import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArray, getListStats, getListMedian, getListMode, sortList } from "../../utils";
+import { isArrayOrTypedArray, getListStats, getListMedian, getListMode, sortList } from "../../utils";
 
 export class ListExprNamespace {
     constructor(public expr: any) { }
 
     _deriveList(fn: (arr: any[] | ArrayBufferView) => any) {
         return derive(this.expr, kleeneUnary((v) => {
-            return isArray(v) ? fn(v as any) : null;
+            return isArrayOrTypedArray(v) ? fn(v as any) : null;
         }));
     }
 
@@ -128,7 +128,14 @@ export class ListExprNamespace {
 
     join(separator: string) {
         return this._deriveList((arr) => {
-            return Array.from(arr as any).map(x => x == null ? "" : String(x)).join(separator);
+            const list = Array.from(arr as any);
+            const listLen = list.length;
+            const strList = new Array(listLen);
+            for (let i = 0; i < listLen; i++) {
+                const x = list[i];
+                strList[i] = x == null ? "" : String(x);
+            }
+            return strList.join(separator);
         });
     }
 

@@ -14,7 +14,7 @@ export class DateType extends TemporalDataType {
     equals(other: DataType): boolean {
         return other.name === "Date";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (Date | null)[] { return new Array(size).fill(null); }
 
 }
 

@@ -7,7 +7,7 @@ const df = new DataFrame([
     { id: 2, math: 80, science: 95 }
 ]);
 
-const dfUnpivoted = df.unpivot("id", ["math", "science"], "subject", "score");
+const dfUnpivoted = df.unpivot({ idVars: "id", valueVars: ["math", "science"], varName: "subject", valueName: "score" });
 
 if (dfUnpivoted.height !== 4) {
     throw new Error(`Expected height 4, got ${dfUnpivoted.height}`);

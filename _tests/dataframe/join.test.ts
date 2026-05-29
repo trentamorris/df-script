@@ -13,7 +13,7 @@ const right = new DataFrame([
 ]);
 
 // 1. Inner Join
-const dfInner = left.join(right, "id", "inner");
+const dfInner = left.join({ other: right, on: "id", how: "inner" });
 
 if (dfInner.height !== 1) throw new Error("Inner join height mismatch");
 if (dfInner.collect()[0].val !== "L1" || dfInner.collect()[0].rval !== "R1") {
@@ -21,7 +21,7 @@ if (dfInner.collect()[0].val !== "L1" || dfInner.collect()[0].rval !== "R1") {
 }
 
 // 2. Left Join
-const dfLeft = left.join(right, "id", "left");
+const dfLeft = left.join({ other: right, on: "id", how: "left" });
 if (dfLeft.height !== 2) throw new Error("Left join height mismatch");
 const collectedLeft = dfLeft.collect() as any[];
 if (collectedLeft[1].val !== "L2" || collectedLeft[1].rval !== null) {

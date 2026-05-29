@@ -11,25 +11,29 @@ export function isValidNumber(v: unknown): v is number {
 
 export function toValidNumber(v: unknown): number | null {
     if (v == null) return null;
+    if (typeof v === "symbol") return null;
 
-    let n: number;
     if (isValidNumber(v)) {
-        n = v;
-    } else if (typeof v === "boolean") {
-        n = v ? 1 : 0;
-    } else if (typeof v === "bigint") {
-        n = Number(v);
-        if (!isValidNumber(n)) return null;
-    } else if (v instanceof Date) {
-        const t = v.getTime();
-        if (Number.isNaN(t)) return null;
-        n = t;
-    } else {
-        const raw = String(v).trim().replace(NUMERIC_CLEAN_REGEX, "");
-        n = Number(raw);
-        if (!isValidNumber(n)) return null;
+        return v;
     }
-    return n;
+    if (typeof v === "boolean") {
+        return v ? 1 : 0;
+    }
+    if (typeof v === "bigint") {
+        const n = Number(v);
+        return isValidNumber(n) ? n : null;
+    }
+    if (v instanceof Date) {
+        const t = v.getTime();
+        return isValidNumber(t) ? t : null;
+    }
+    if (typeof v === "string") {
+        const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
+        if (clean === "") return null;
+        const n = Number(clean);
+        return isValidNumber(n) ? n : null;
+    }
+    return null;
 }
 
 export function clamp<T extends number | bigint>(opts: { val: T; min: T; max: T }): T {
@@ -145,31 +149,28 @@ export function toValidBigInt(
     range: BigIntRange = "Int64"
 ): bigint | null {
     if (v == null) return null;
+    if (typeof v === "symbol") return null;
 
     let bigintVal: bigint | null = null;
 
-    switch (typeof v) {
-        case "bigint":
-            bigintVal = v;
-            break;
-        case "string": {
-            const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
-            if (!VALID_DECIMAL_REGEX.test(clean)) {
-                const num = toValidNumber(v);
-                if (num === null) return null;
-                bigintVal = BigInt(Math.trunc(num));
-            } else {
-                bigintVal = BigInt(clean.split(".")[0]);
-            }
-            break;
-        }
-
-        default: {
+    if (typeof v === "bigint") {
+        bigintVal = v;
+    } else if (typeof v === "boolean") {
+        bigintVal = v ? 1n : 0n;
+    } else if (typeof v === "string") {
+        const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
+        if (clean === "") return null;
+        if (!VALID_DECIMAL_REGEX.test(clean)) {
             const num = toValidNumber(v);
             if (num === null) return null;
             bigintVal = BigInt(Math.trunc(num));
-            break;
+        } else {
+            bigintVal = BigInt(clean.split(".")[0]);
         }
+    } else {
+        const num = toValidNumber(v);
+        if (num === null) return null;
+        bigintVal = BigInt(Math.trunc(num));
     }
 
     const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;

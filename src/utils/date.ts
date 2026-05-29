@@ -207,6 +207,7 @@ export function strftime(d: Date, format: string, locale?: string): string {
 }
 
 export function strptime(str: string, format: string, strict = true): Date | null {
+    if (typeof str !== "string" || typeof format !== "string") return null;
     const placeholders: { name: string; index: number }[] = [];
     let groupIndex = 1;
 

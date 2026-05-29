@@ -1,28 +1,36 @@
-import { ColumnExpr, AllColumnsExpr, resolveColumnSelectors } from "../columnExpressions"
-import type { IExpr } from "../types"
-import type { JoinType, LimitPosition, ConcatOptions } from "./types"
+import type { IExpr, ColumnData } from "../types"
 import { DataType, DataTypeRegistry } from "../datatypes"
+import { KEY_SEPARATOR } from "./constants"
+import { isObj } from "../utils"
 
-export function partition_by_columns(
-    columns: Record<string, any[]>,
+function partition_by_columns(
+    columns: Record<string, ColumnData>,
     height: number,
     partitionKeys: (string | IExpr)[]
 ): Map<string, number[]> {
     const partitionMap = new Map<string, number[]>();
 
-    const keyColumns = partitionKeys.map(pKey => {
-        return typeof pKey === "string" 
-            ? (columns[pKey] || new Array(height).fill(null)) 
-            : pKey.evaluate(columns, height);
-    });
+    const pKeysLen = partitionKeys.length;
+    const keyColumns = new Array(pKeysLen);
+    for (let i = 0; i < pKeysLen; i++) {
+        const pKey = partitionKeys[i];
+        if (typeof pKey === "string") {
+            if (!(pKey in columns)) {
+                throw new Error(`Partition key "${pKey}" does not exist in the DataFrame.`);
+            }
+            keyColumns[i] = columns[pKey];
+        } else {
+            keyColumns[i] = pKey.evaluate(columns, height);
+        }
+    }
 
     for (let i = 0; i < height; i++) {
         const keyValues = new Array(keyColumns.length);
         for (let j = 0; j < keyColumns.length; j++) {
             const val = keyColumns[j][i];
-            keyValues[j] = val === undefined || val === null ? "" : String(val);
+            keyValues[j] = val == null ? "" : String(val);
         }
-        const hash = keyValues.join("\x00");
+        const hash = keyValues.join(KEY_SEPARATOR);
         let group = partitionMap.get(hash);
         if (group === undefined) {
             group = [];
@@ -33,7 +41,7 @@ export function partition_by_columns(
     return partitionMap;
 }
 
-export function resolveWindowExpr(expr: IExpr, columns: Record<string, any[]>, height: number): any[] {
+export function resolveWindowExpr(expr: IExpr, columns: Record<string, ColumnData>, height: number): ColumnData {
     const results = new Array(height);
     if (height === 0) return results;
 
@@ -53,37 +61,30 @@ export function resolveWindowExpr(expr: IExpr, columns: Record<string, any[]>, h
             for (let k = 0; k < groupLen; k++) {
                 results[indices[k]] = expr.evaluateWindow(groupPreValues, indices, k);
             }
-        } else if (expr.aggFn) {
+            continue;
+        }
+
+        if (expr.aggFn) {
             const aggregatedVal = expr.aggFn(groupPreValues);
             for (let k = 0; k < groupLen; k++) {
                 results[indices[k]] = aggregatedVal;
             }
-        } else {
-            for (let k = 0; k < groupLen; k++) {
-                results[indices[k]] = prePartitionArray[indices[k]];
-            }
+            continue;
+        }
+
+        for (let k = 0; k < groupLen; k++) {
+            results[indices[k]] = prePartitionArray[indices[k]];
         }
     }
 
     return expr.evaluatePostPartition(results, columns);
 }
 
-export function ensureArray<T>(val: T | T[] | null | undefined): T[] {
-    if (val == null) return [];
-    return Array.isArray(val) ? val : [val];
-}
-
-export function hashRowKeys(row: any, keys: any[]): string {
-    const len = keys.length;
-    const vals = new Array(len);
-    for (let i = 0; i < len; i++) {
-        const val = row[keys[i]];
-        vals[i] = val === undefined || val === null ? "" : String(val);
-    }
-    return vals.join("\x00");
-}
 
 export function getRowJoinKeys(row: any, keys: any[]): { hash: string; hasNull: boolean } {
+    if (!row) {
+        return { hash: "", hasNull: true };
+    }
     const len = keys.length;
     const vals = new Array(len);
     let hasNull = false;
@@ -97,23 +98,33 @@ export function getRowJoinKeys(row: any, keys: any[]): { hash: string; hasNull: 
         }
     }
     return {
-        hash: vals.join("\x00"),
+        hash: vals.join(KEY_SEPARATOR),
         hasNull
     };
 }
 
-export function rowsToColumns(rows: any[]): { columns: Record<string, any[]>; height: number } {
+export function rowsToColumns(rows: any[]): { columns: Record<string, ColumnData>; height: number } {
     if (!Array.isArray(rows) || rows.length === 0) {
         return { columns: {}, height: 0 };
     }
     const height = rows.length;
-    const keys = Object.keys(rows[0]);
+    const keysSet = new Set<string>();
+    for (let r = 0; r < height; r++) {
+        const row = rows[r];
+        if (isObj(row)) {
+            const rowKeys = Object.keys(row);
+            for (let i = 0; i < rowKeys.length; i++) {
+                keysSet.add(rowKeys[i]);
+            }
+        }
+    }
+    const keys = Array.from(keysSet);
     const columns: Record<string, any[]> = {};
     for (let i = 0; i < keys.length; i++) {
         columns[keys[i]] = new Array(height);
     }
     for (let r = 0; r < height; r++) {
-        const row = rows[r];
+        const row = rows[r] || {};
         for (let i = 0; i < keys.length; i++) {
             const k = keys[i];
             const val = row[k];
@@ -123,7 +134,7 @@ export function rowsToColumns(rows: any[]): { columns: Record<string, any[]>; he
     return { columns, height };
 }
 
-export function columnsToRows(columns: Record<string, any[]>, height: number): any[] {
+export function columnsToRows(columns: Record<string, ColumnData>, height: number): any[] {
     const keys = Object.keys(columns);
     const rows = new Array(height);
     for (let r = 0; r < height; r++) {
@@ -138,7 +149,7 @@ export function columnsToRows(columns: Record<string, any[]>, height: number): a
     return rows;
 }
 
-export function getRowFromColumns(columns: Record<string, any[]>, idx: number, keys: string[]): any {
+export function getRowFromColumns(columns: Record<string, ColumnData>, idx: number, keys: string[]): any {
     const row: any = {};
     for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
@@ -148,7 +159,7 @@ export function getRowFromColumns(columns: Record<string, any[]>, idx: number, k
     return row;
 }
 
-export function inferColumnType(col: any[]): DataType {
+export function inferColumnType(col: ColumnData): DataType {
     if (col.length === 0) return DataTypeRegistry.Utf8;
     let isBoolean = true;
     let isInteger = true;
@@ -168,7 +179,9 @@ export function inferColumnType(col: any[]): DataType {
         if (!Array.isArray(val)) {
             isList = false;
         } else {
-            allListElements.push(...val);
+            for (let j = 0; j < val.length; j++) {
+                allListElements.push(val[j]);
+            }
         }
         if (val instanceof Date) hasDateObj = true;
         if (typeof val !== "boolean") isBoolean = false;
@@ -191,20 +204,18 @@ export function inferColumnType(col: any[]): DataType {
     }
     if (isBoolean) return DataTypeRegistry.Boolean;
     if (isBigInt) return DataTypeRegistry.Int64;
-    if (isNumeric) {
-        if (isInteger) {
-            let fitsInInt32 = true;
-            for (let i = 0; i < col.length; i++) {
-                const val = col[i];
-                if (val == null) continue;
-                if (val < -2147483648 || val > 2147483647) {
-                    fitsInInt32 = false;
-                    break;
-                }
+    if (isNumeric && !isInteger) return DataTypeRegistry.Float64;
+    if (isNumeric && isInteger) {
+        let fitsInInt32 = true;
+        for (let i = 0; i < col.length; i++) {
+            const val = col[i];
+            if (val == null) continue;
+            if (val < -2147483648 || val > 2147483647) {
+                fitsInInt32 = false;
+                break;
             }
-            return fitsInInt32 ? DataTypeRegistry.Int32 : DataTypeRegistry.Float64;
         }
-        return DataTypeRegistry.Float64;
+        return fitsInInt32 ? DataTypeRegistry.Int32 : DataTypeRegistry.Float64;
     }
     if (isDate && hasDateObj) return DataTypeRegistry.Datetime;
     return DataTypeRegistry.Utf8;

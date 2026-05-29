@@ -11,7 +11,7 @@ export class Float32Type extends FloatDataType {
     equals(other: DataType): boolean {
         return other.name === "Float32";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): Float32Array { return new Float32Array(size); }
 
 }
 

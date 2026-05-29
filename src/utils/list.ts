@@ -1,17 +1,23 @@
-import { isArray, isObj } from "./types";
+import { isArrayOrTypedArray, isObj, isTypedArray } from "./guards";
 import { isValidDateObj } from "./date";
-import { toValidNumber } from "./number";
+import { toValidNumber, isValidNumber } from "./number";
 
 export type ArrayItemType = "string" | "number" | "boolean" | "bigint" | "object" | "date" | ((v: unknown) => boolean);
 export type ArrayCheckMode = "every" | "some";
+
+export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
+    if (val == null) return [];
+    if (Array.isArray(val)) return val;
+    if (isTypedArray(val)) return Array.from(val as any);
+    return [val];
+}
 
 export function isArrayOfType(
     arr: unknown,
     type: ArrayItemType,
     options: { mode?: ArrayCheckMode; includeNulls?: boolean } = {}
 ): boolean {
-    if (!isArray(arr)) return false;
-    const list = Array.from(arr as any);
+    if (!isArrayOrTypedArray(arr)) return false;
     const mode = options?.mode ?? "every";
 
     const check = (v: unknown) => {
@@ -19,14 +25,26 @@ export function isArrayOfType(
         if (typeof type === "function") return type(v);
         if (type === "date") return isValidDateObj(v);
         if (type === "object") return isObj(v);
+        if (type === "number") return isValidNumber(v);
         return typeof v === type;
     };
 
-    return mode === "every" ? list.every(check) : list.some(check);
+    const len = (arr as any).length;
+    if (mode === "every") {
+        for (let i = 0; i < len; i++) {
+            if (!check((arr as any)[i])) return false;
+        }
+        return true;
+    } else {
+        for (let i = 0; i < len; i++) {
+            if (check((arr as any)[i])) return true;
+        }
+        return false;
+    }
 }
 
 export function sortList(arr: unknown, descending: boolean = false): any[] {
-    if (!isArray(arr)) return [];
+    if (!isArrayOrTypedArray(arr)) return [];
     const list = Array.from(arr as any);
     list.sort((a, b) => {
         if (a == null && b == null) return 0;
@@ -45,11 +63,11 @@ export function getListStats(arr: unknown): {
     min: any;
     max: any;
 } {
-    if (!isArray(arr)) {
+    if (!isArrayOrTypedArray(arr)) {
         return { sum: null, count: 0, min: null, max: null };
     }
-    const list = Array.from(arr as any);
-    if (list.length === 0) {
+    const len = (arr as any).length;
+    if (len === 0) {
         return { sum: null, count: 0, min: null, max: null };
     }
 
@@ -58,7 +76,8 @@ export function getListStats(arr: unknown): {
     let minVal: any = null;
     let maxVal: any = null;
 
-    for (const val of list) {
+    for (let i = 0; i < len; i++) {
+        const val = (arr as any)[i];
         if (val == null) continue;
 
         if (minVal == null || val < minVal) minVal = val;
@@ -80,26 +99,35 @@ export function getListStats(arr: unknown): {
 }
 
 export function getListMedian(arr: unknown): number | null {
-    if (!isArray(arr) || !isArrayOfType(arr, "number", { includeNulls: true })) return null;
+    if (!isArrayOfType(arr, "number", { includeNulls: true })) return null;
 
-    const nums = (Array.from(arr as any) as (number | null)[]).filter((v) => v != null) as number[];
+    const len = (arr as any).length;
+    const nums: number[] = [];
+    for (let i = 0; i < len; i++) {
+        const val = (arr as any)[i];
+        if (val != null) {
+            nums.push(val);
+        }
+    }
+
     if (nums.length === 0) return null;
 
-    const sorted = sortList(nums);
-    const mid = Math.floor(sorted.length / 2);
-    return sorted.length % 2 !== 0
-        ? sorted[mid]
-        : (sorted[mid - 1] + sorted[mid]) / 2;
+    nums.sort((a, b) => a - b);
+    const mid = Math.floor(nums.length / 2);
+    return nums.length % 2 !== 0
+        ? nums[mid]
+        : (nums[mid - 1] + nums[mid]) / 2;
 }
 
 export function getListMode(arr: unknown): any[] | null {
-    if (!isArray(arr)) return null;
-    const list = Array.from(arr as any);
+    if (!isArrayOrTypedArray(arr)) return null;
+    const len = (arr as any).length;
 
     const counts = new Map<any, number>();
     let maxCount = 0;
 
-    for (const val of list) {
+    for (let i = 0; i < len; i++) {
+        const val = (arr as any)[i];
         if (val == null) continue;
         const c = (counts.get(val) ?? 0) + 1;
         counts.set(val, c);

@@ -1,9 +1,9 @@
-import type { IExpr, OpFn, AggFn } from "../types"
-import { isArray } from "../utils"
+import type { IExpr, OpFn, AggFn, ColumnData } from "../types"
+import { isArrayOrTypedArray } from "../utils"
 import type { DataType } from "../datatypes"
 
 export const kleeneUnary = (fn: (v: any) => any) => {
-    return (vArray: any[]) => {
+    return (vArray: ColumnData) => {
         const height = vArray.length;
         const result = new Array(height);
         for (let i = 0; i < height; i++) {
@@ -15,11 +15,11 @@ export const kleeneUnary = (fn: (v: any) => any) => {
 };
 
 export const kleeneBinary = (expr: IExpr, other: any, fn: (v: any, r: any) => any) => {
-    return (vArray: any[], columns: Record<string, any[]>) => {
+    return (vArray: ColumnData, columns: Record<string, ColumnData>) => {
         const height = vArray.length;
         const rResolved = expr._resolve(other, columns, height);
         const result = new Array(height);
-        if (isArray(rResolved)) {
+        if (isArrayOrTypedArray(rResolved)) {
             for (let i = 0; i < height; i++) {
                 const v = vArray[i];
                 const r = (rResolved as any)[i];
@@ -54,7 +54,7 @@ export class ExprBase implements IExpr {
     public partitionOpsIndex?: number;
     public partitionBy: (string | IExpr)[] | null = null;
 
-    public _resolve(val: any, columns: Record<string, any[]>, height: number) {
+    public _resolve(val: any, columns: Record<string, ColumnData>, height: number) {
         return val && typeof val === "object" && "evaluate" in val 
             ? val.evaluate(columns, height) 
             : val;
@@ -73,7 +73,7 @@ export class ExprBase implements IExpr {
             const height = vArray.length;
             const resolved = this._resolve(value, columns, height);
             const result = new Array(height);
-            if (Array.isArray(resolved)) {
+            if (isArrayOrTypedArray(resolved)) {
                 for (let i = 0; i < height; i++) {
                     const v = vArray[i];
                     result[i] = v == null ? resolved[i] : v;
@@ -108,7 +108,7 @@ export class ExprBase implements IExpr {
 
 
 
-    evaluate(columns: Record<string, any[]>, height: number): any[] {
+    evaluate(columns: Record<string, ColumnData>, height: number): ColumnData {
         const name = (this as any).colName;
         let value = name && name !== "*" 
             ? (columns[name] || new Array(height).fill(null)) 
@@ -119,10 +119,10 @@ export class ExprBase implements IExpr {
         for (let i = 0; i < len; i++) {
             value = ops[i](value, columns);
         }
-        return value;
+        return value as ColumnData;
     }
 
-    private _evaluatePre(opsIndex: number | undefined, columns: Record<string, any[]>, height: number): any[] {
+    private _evaluatePre(opsIndex: number | undefined, columns: Record<string, ColumnData>, height: number): ColumnData {
         const name = (this as any).colName;
         let value = name && name !== "*" 
             ? (columns[name] || new Array(height).fill(null)) 
@@ -132,32 +132,32 @@ export class ExprBase implements IExpr {
         for (let i = 0; i < idx; i++) {
             value = ops[i](value, columns);
         }
-        return value;
+        return value as ColumnData;
     }
 
-    private _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: Record<string, any[]>): any[] {
+    private _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: Record<string, ColumnData>): ColumnData {
         const ops = this.ops;
         const idx = opsIndex !== undefined ? opsIndex : ops.length;
-        let value = aggregatedArray;
+        let value: ColumnData = aggregatedArray;
         for (let i = idx; i < ops.length; i++) {
             value = ops[i](value, columns);
         }
-        return value;
+        return value as ColumnData;
     }
 
-    evaluatePrePartition(columns: Record<string, any[]>, height: number): any[] {
+    evaluatePrePartition(columns: Record<string, ColumnData>, height: number): ColumnData {
         return this._evaluatePre(this.partitionOpsIndex, columns, height);
     }
 
-    evaluatePostPartition(aggregatedArray: any[], columns: Record<string, any[]>): any[] {
+    evaluatePostPartition(aggregatedArray: any[], columns: Record<string, ColumnData>): ColumnData {
         return this._evaluatePost(this.partitionOpsIndex, aggregatedArray, columns);
     }
 
-    evaluatePreGrouping(columns: Record<string, any[]>, height: number): any[] {
+    evaluatePreGrouping(columns: Record<string, ColumnData>, height: number): ColumnData {
         return this._evaluatePre(this.groupingOpsIndex, columns, height);
     }
 
-    evaluatePostGrouping(aggregatedArray: any[], columns: Record<string, any[]>): any[] {
+    evaluatePostGrouping(aggregatedArray: any[], columns: Record<string, ColumnData>): ColumnData {
         return this._evaluatePost(this.groupingOpsIndex, aggregatedArray, columns);
     }
 }

@@ -13,7 +13,7 @@ export class BooleanType extends DataType {
     equals(other: DataType): boolean {
         return other.name === "Boolean";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): (boolean | null)[] { return new Array(size).fill(null); }
 
 }
 

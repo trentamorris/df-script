@@ -1,15 +1,15 @@
 import { DataFrame } from "../dataframe"
-import { getRowFromColumns, inferColumnType } from "../utils"
+import { inferColumnType } from "../utils"
 import type { GroupMap } from "../types"
 import { resolveColumnSelectors } from "../../columnExpressions"
 import { DataType } from "../../datatypes"
-import type { IExpr } from "../../types"
+import type { IExpr, ColumnData } from "../../types"
 
 export class GroupedData<T, K extends keyof T> {
     private groups: GroupMap
     private keys: K[]
     private allKeys: (keyof T)[]
-    private parentColumns: Record<string, any[]>
+    private parentColumns: Record<string, ColumnData>
     private parentHeight: number
     private parentSchema: Record<string, DataType>
 
@@ -18,7 +18,7 @@ export class GroupedData<T, K extends keyof T> {
         groups: GroupMap,
         keys: K[],
         allKeys: (keyof T)[],
-        parentColumns: Record<string, any[]>,
+        parentColumns: Record<string, ColumnData>,
         parentHeight: number,
         parentSchema: Record<string, DataType>
     ) {
@@ -30,10 +30,14 @@ export class GroupedData<T, K extends keyof T> {
         this.parentSchema = parentSchema
     }
 
-    collect(): DataFrame<any> {
-        const keysStr = this.keys.map(String);
+    collect<U extends Record<string, any> = any>(): DataFrame<U> {
+        const keysLen = this.keys.length;
+        const keysStr = new Array(keysLen);
+        for (let i = 0; i < keysLen; i++) {
+            keysStr[i] = String(this.keys[i]);
+        }
         const numGroups = this.groups.size;
-        const newColumns: Record<string, any[]> = {};
+        const newColumns: Record<string, any> = {};
         for (let i = 0; i < keysStr.length; i++) {
             newColumns[keysStr[i]] = new Array(numGroups);
         }
@@ -55,16 +59,25 @@ export class GroupedData<T, K extends keyof T> {
             outSchema[k] = this.parentSchema[k];
         }
 
-        return new DataFrame(newColumns, outSchema, groupIdx);
+        return new DataFrame<U>(newColumns as any, outSchema, groupIdx);
     }
 
-    agg(...exprs: (IExpr | any)[]): DataFrame<any> {
-        const allKeysStr = this.allKeys.map(String);
-        const keysStr = this.keys.map(String);
+    agg<U extends Record<string, any> = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
+        const allKeysLen = this.allKeys.length;
+        const allKeysStr = new Array(allKeysLen);
+        for (let i = 0; i < allKeysLen; i++) {
+            allKeysStr[i] = String(this.allKeys[i]);
+        }
+
+        const keysLen = this.keys.length;
+        const keysStr = new Array(keysLen);
+        for (let i = 0; i < keysLen; i++) {
+            keysStr[i] = String(this.keys[i]);
+        }
         const expandedExprs = resolveColumnSelectors(exprs.flat(), allKeysStr, keysStr);
 
         const numGroups = this.groups.size;
-        const newColumns: Record<string, any[]> = {};
+        const newColumns: Record<string, any> = {};
 
         for (let i = 0; i < keysStr.length; i++) {
             newColumns[keysStr[i]] = new Array(numGroups);
@@ -86,23 +99,24 @@ export class GroupedData<T, K extends keyof T> {
             const e = expandedExprs[i];
             const targetKey = e.outputName || e.colName || "*";
 
-            if (e.aggFn) {
-                const preGroupedCol = e.evaluatePreGrouping(this.parentColumns, this.parentHeight);
-                const aggregatedGroupValues = new Array(numGroups);
-                let gIdx = 0;
-                for (const indices of this.groups.values()) {
-                    if (indices.length === 0) continue;
-                    const groupValues = new Array(indices.length);
-                    for (let k = 0; k < indices.length; k++) {
-                        groupValues[k] = preGroupedCol[indices[k]];
-                    }
-                    aggregatedGroupValues[gIdx] = e.aggFn(groupValues);
-                    gIdx++;
-                }
-                newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
-            } else {
+            if (!e.aggFn) {
                 newColumns[targetKey] = e.evaluate(newColumns, numGroups);
+                continue;
             }
+
+            const preGroupedCol = e.evaluatePreGrouping(this.parentColumns, this.parentHeight);
+            const aggregatedGroupValues = new Array(numGroups);
+            let gIdx = 0;
+            for (const indices of this.groups.values()) {
+                if (indices.length === 0) continue;
+                const groupValues = new Array(indices.length);
+                for (let k = 0; k < indices.length; k++) {
+                    groupValues[k] = preGroupedCol[indices[k]];
+                }
+                aggregatedGroupValues[gIdx] = e.aggFn(groupValues);
+                gIdx++;
+            }
+            newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
         }
 
         const outSchema: Record<string, DataType> = {};
@@ -114,6 +128,6 @@ export class GroupedData<T, K extends keyof T> {
             outSchema[targetKey] = inferColumnType(newColumns[targetKey]);
         }
 
-        return new DataFrame(newColumns, outSchema, groupIdx);
+        return new DataFrame<U>(newColumns as any, outSchema, groupIdx);
     }
 }

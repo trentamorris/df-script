@@ -9,7 +9,7 @@ const df = new DataFrame([
     { year: 2021, month: "Feb", sales: 250 }
 ]);
 
-const dfPivoted = df.pivot("year", "month", "sales");
+const dfPivoted = df.pivot({ index: "year", columns: "month", values: "sales" });
 
 if (dfPivoted.height !== 2) {
     throw new Error(`Expected height 2, got ${dfPivoted.height}`);

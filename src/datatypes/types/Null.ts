@@ -12,7 +12,7 @@ export class NullType extends DataType {
     equals(other: DataType): boolean {
         return other.name === "Null";
     }
-    allocate(size: number): any[] { return new Array(size).fill(null); }
+    allocate(size: number): null[] { return new Array(size).fill(null); }
 
 }
 
