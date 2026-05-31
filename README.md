@@ -161,7 +161,7 @@ $tbl.col("name").str.lower()
 $tbl.col("code").str.starts_with("A")
 $tbl.col("description").str.replace(/foo/i, "bar")
 ```
-- **Methods**: `lower()`, `upper()`, `len()`, `len_bytes()`, `len_chars()`, `trim()`, `trim_start()`, `trim_end()`, `starts_with(prefix)`, `ends_with(suffix)`, `contains(pattern)`, `replace(pattern, repl)`, `replace_all(pattern, repl)`, `slice(offset, length?)`, `split(delimiter)`, `explode()`, `reverse()`, `lpad(w, f)`, `rpad(w, f)`, `zfill(w)`, `strip(chars?)`, `strip_prefix(pfx)`, `strip_suffix(sfx)`, `to_titlecase()`, `strptime(format, strict?)`, `to_integer()`, `to_decimal(p, s)`, `to_date()`, `to_datetime()`, `to_time()`.
+- **Methods**: `lower()`, `upper()`, `len()`, `len_bytes()`, `len_chars()`, `trim()`, `trim_start()`, `trim_end()`, `starts_with(prefix)`, `ends_with(suffix)`, `contains(pattern)`, `replace(pattern, repl)`, `replace_all(pattern, repl)`, `slice(offset, length?)`, `split(delimiter)`, `explode()`, `reverse()`, `lpad(w, f)`, `rpad(w, f)`, `zfill(w)`, `strip_chars(chars?)`, `strip_chars_start(chars?)`, `strip_chars_end(chars?)`, `strip_prefix(pfx)`, `strip_suffix(sfx)`, `to_titlecase()`, `strptime(format, strict?)`, `to_integer()`, `to_decimal(p, s)`, `to_date()`, `to_datetime()`, `to_time()`.
 
 ### 📅 Temporal Operations (`.dt`)
 Available on datetime or duration values via `.dt`:

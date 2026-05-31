@@ -1,6 +1,5 @@
 import type { IExpr } from "../types"
 import { ColumnExpr } from "./ColumnExpr"
-import { AllColumnsExpr } from "./AllColumnsExpr"
 
 export * from "./ExprBase"
 export * from "./mixins/ArithmeticExpr"
@@ -12,7 +11,11 @@ export * from "./mixins/WindowExpr"
 export * from "./mixins/TemporalExpr"
 export * from "./mixins/ListExpr"
 export * from "./ColumnExpr"
-export * from "./AllColumnsExpr"
+export * from "./functions/lit"
+export * from "./functions/all"
+export * from "./functions/exclude"
+export * from "./functions/coalesce"
+export * from "./functions/when"
 
 export function resolveColumnSelectors(
     exprs: any[],
@@ -25,7 +28,7 @@ export function resolveColumnSelectors(
     for (const expr of exprs) {
         if (typeof expr === "string") {
             expanded.push(new ColumnExpr(expr));
-        } else if (expr instanceof AllColumnsExpr) {
+        } else if (expr instanceof ColumnExpr && expr.colName === "*") {
             const excluded = new Set(expr.excludedCols);
             for (const key of allKeys) {
                 if (!excludeSet.has(key) && !excluded.has(key)) {
@@ -45,7 +48,6 @@ export function resolveColumnSelectors(
                 }
             }
         } else if (expr && typeof expr === 'object' && 'evaluate' in expr && !expr.colName) {
-            // Anonymous/base expressions (e.g. $tbl.mean() with no column specified) target all columns by default.
             for (const key of allKeys) {
                 if (!excludeSet.has(key)) {
                     const concrete = new ColumnExpr(key);

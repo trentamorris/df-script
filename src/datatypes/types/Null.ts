@@ -5,7 +5,7 @@ export class NullType extends DataType {
 
     override get isNull(): boolean { return true; }
 
-    coerce(val: any): null {
+    coerce(_val: any): null {
         return null;
     }
 

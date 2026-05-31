@@ -8,10 +8,10 @@ import {
     TIME_PREFIX_REGEX,
     ZONE_OFFSET_REGEX,
     isValidDateObj,
-    strptime
+    strptime,
+    stripChars,
+    StripCharsOptions
 } from "../../utils";
-
-const REGEX_ESCAPE_REGEX = /[-/\\^$*+?.()|[\]{}]/g;
 
 export class StringExprNamespace {
     constructor(public expr: any) { }
@@ -62,6 +62,26 @@ export class StringExprNamespace {
 
     explode() {
         return this._deriveString((str) => str.split(""));
+    }
+
+    encode_uri_component() {
+        return this._deriveString((str) => {
+            try {
+                return encodeURIComponent(str);
+            } catch {
+                return str;
+            }
+        });
+    }
+
+    decode_uri_component() {
+        return this._deriveString((str) => {
+            try {
+                return decodeURIComponent(str);
+            } catch {
+                return str;
+            }
+        });
     }
 
     extract(pattern: RegExp, group: number = 0) {
@@ -153,54 +173,39 @@ export class StringExprNamespace {
         return this._deriveString((str) => str.startsWith(prefix));
     }
 
-    strip(characters?: string) {
-        return this.strip_chars(characters);
+    strip_chars(characters?: string | RegExp, options?: StripCharsOptions) {
+        return this._deriveString((str) => stripChars(str, characters, { mode: "both", ...options }));
     }
 
-    strip_chars(characters?: string) {
-        return this._deriveString((str) => {
-            if (!characters) return str.trim();
-            const escaped = characters.replace(REGEX_ESCAPE_REGEX, '\\$&');
-            const regex = new RegExp(`^[${escaped}]+|[${escaped}]+$`, 'g');
-            return str.replace(regex, '');
-        });
+    strip_chars_end(characters?: string | RegExp, options?: StripCharsOptions) {
+        return this._deriveString((str) => stripChars(str, characters, { mode: "end", ...options }));
     }
 
-    strip_chars_end(characters?: string) {
-        return this._deriveString((str) => {
-            if (!characters) return str.trimEnd();
-            const escaped = characters.replace(REGEX_ESCAPE_REGEX, '\\$&');
-            const regex = new RegExp(`[${escaped}]+$`, 'g');
-            return str.replace(regex, '');
-        });
-    }
-
-    strip_chars_start(characters?: string) {
-        return this._deriveString((str) => {
-            if (!characters) return str.trimStart();
-            const escaped = characters.replace(REGEX_ESCAPE_REGEX, '\\$&');
-            const regex = new RegExp(`^[${escaped}]+`, 'g');
-            return str.replace(regex, '');
-        });
-    }
-
-    strip_end(characters?: string) {
-        return this.strip_chars_end(characters);
+    strip_chars_start(characters?: string | RegExp, options?: StripCharsOptions) {
+        return this._deriveString((str) => stripChars(str, characters, { mode: "start", ...options }));
     }
 
     strip_prefix(prefix: string) {
         return this._deriveString((str) => {
-            return str.startsWith(prefix) ? str.slice(prefix.length) : str;
+            return stripChars(str, prefix, {
+                mode: "start",
+                maxScanStart: 1,
+                maxMatchesStart: 1,
+                returnStringOnNull: true,
+                stringOptions: { literal: true }
+            }) as string;
         });
-    }
-
-    strip_start(characters?: string) {
-        return this.strip_chars_start(characters);
     }
 
     strip_suffix(suffix: string) {
         return this._deriveString((str) => {
-            return str.endsWith(suffix) ? str.slice(0, str.length - suffix.length) : str;
+            return stripChars(str, suffix, {
+                mode: "end",
+                maxScanEnd: 1,
+                maxMatchesEnd: 1,
+                returnStringOnNull: true,
+                stringOptions: { literal: true }
+            }) as string;
         });
     }
 

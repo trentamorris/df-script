@@ -1,10 +1,10 @@
-import type { IExpr, ColumnData } from "../types"
+import type { IExpr, ColumnData, ColumnDict } from "../types"
 import { DataType, DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR } from "./constants"
 import { isObj } from "../utils"
 
 function partition_by_columns(
-    columns: Record<string, ColumnData>,
+    columns: ColumnDict,
     height: number,
     partitionKeys: (string | IExpr)[]
 ): Map<string, number[]> {
@@ -41,7 +41,7 @@ function partition_by_columns(
     return partitionMap;
 }
 
-export function resolveWindowExpr(expr: IExpr, columns: Record<string, ColumnData>, height: number): ColumnData {
+export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: number): ColumnData {
     const results = new Array(height);
     if (height === 0) return results;
 
@@ -103,7 +103,7 @@ export function getRowJoinKeys(row: any, keys: any[]): { hash: string; hasNull: 
     };
 }
 
-export function rowsToColumns(rows: any[]): { columns: Record<string, ColumnData>; height: number } {
+export function rowsToColumns(rows: any[]): { columns: ColumnDict; height: number } {
     if (!Array.isArray(rows) || rows.length === 0) {
         return { columns: {}, height: 0 };
     }
@@ -134,7 +134,7 @@ export function rowsToColumns(rows: any[]): { columns: Record<string, ColumnData
     return { columns, height };
 }
 
-export function columnsToRows(columns: Record<string, ColumnData>, height: number): any[] {
+export function columnsToRows(columns: ColumnDict, height: number): any[] {
     const keys = Object.keys(columns);
     const rows = new Array(height);
     for (let r = 0; r < height; r++) {
@@ -149,7 +149,7 @@ export function columnsToRows(columns: Record<string, ColumnData>, height: numbe
     return rows;
 }
 
-export function getRowFromColumns(columns: Record<string, ColumnData>, idx: number, keys: string[]): any {
+export function getRowFromColumns(columns: ColumnDict, idx: number, keys: string[]): any {
     const row: any = {};
     for (let i = 0; i < keys.length; i++) {
         const k = keys[i];

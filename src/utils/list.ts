@@ -1,9 +1,23 @@
-import { isArrayOrTypedArray, isObj, isTypedArray } from "./guards";
+import { isArrayOrTypedArray, isClass, isObj, isPlainObj, isTypedArray } from "./guards";
 import { isValidDateObj } from "./date";
 import { toValidNumber, isValidNumber } from "./number";
 
-export type ArrayItemType = "string" | "number" | "boolean" | "bigint" | "object" | "date" | ((v: unknown) => boolean);
+export type ArrayItemType =
+    | "string"
+    | "number"
+    | "boolean"
+    | "bigint"
+    | "object"
+    | "plainObject"
+    | "date"
+    | (new (...args: any[]) => any)
+    | ((v: unknown) => boolean);
 export type ArrayCheckMode = "every" | "some";
+export type IsArrayOfTypeOptionsParams = {
+    mode?: ArrayCheckMode;
+    allowNulls?: boolean;
+    allowEmpty?: boolean;
+};
 
 export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
     if (val == null) return [];
@@ -15,21 +29,31 @@ export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
 export function isArrayOfType(
     arr: unknown,
     type: ArrayItemType,
-    options: { mode?: ArrayCheckMode; includeNulls?: boolean } = {}
+    {
+        mode = "every",
+        allowNulls = false,
+        allowEmpty = true
+    }: IsArrayOfTypeOptionsParams = {}
 ): boolean {
     if (!isArrayOrTypedArray(arr)) return false;
-    const mode = options?.mode ?? "every";
+    const len = (arr as any).length;
+    if (len === 0) {
+        if (!allowEmpty) return false;
+        return mode === "every";
+    }
 
     const check = (v: unknown) => {
-        if (v == null && options?.includeNulls) return true;
-        if (typeof type === "function") return type(v);
+        if (v == null) return allowNulls;
+        if (typeof type === "function") {
+            return isClass(type) ? v instanceof type : (type as (v: unknown) => boolean)(v);
+        }
         if (type === "date") return isValidDateObj(v);
         if (type === "object") return isObj(v);
+        if (type === "plainObject") return isPlainObj(v);
         if (type === "number") return isValidNumber(v);
         return typeof v === type;
     };
 
-    const len = (arr as any).length;
     if (mode === "every") {
         for (let i = 0; i < len; i++) {
             if (!check((arr as any)[i])) return false;
@@ -99,7 +123,7 @@ export function getListStats(arr: unknown): {
 }
 
 export function getListMedian(arr: unknown): number | null {
-    if (!isArrayOfType(arr, "number", { includeNulls: true })) return null;
+    if (!isArrayOfType(arr, "number", { allowNulls: true })) return null;
 
     const len = (arr as any).length;
     const nums: number[] = [];

@@ -1,7 +1,7 @@
 import type { IExpr } from "../../types"
 import type { ExprConstructor } from "../types"
 import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
-import { clamp } from "../../utils"
+import { clamp, mulberry32 } from "../../utils"
 
 export const ArithmeticExpr = <TBase extends ExprConstructor>(Base: TBase) => {
     return class extends Base {
@@ -159,6 +159,23 @@ export const ArithmeticExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             return derive(this, kleeneUnary(Math.trunc));
         }
 
-
+        rand(seed?: number) {
+            return derive(this, (vArray) => {
+                const len = vArray.length;
+                const out = new Float64Array(len);
+                if (seed !== undefined) {
+                    const rnd = mulberry32(seed);
+                    for (let i = 0; i < len; i++) {
+                        out[i] = rnd();
+                    }
+                } else {
+                    for (let i = 0; i < len; i++) {
+                        out[i] = Math.random();
+                    }
+                }
+                return out;
+            });
+        }
     }
 }
+

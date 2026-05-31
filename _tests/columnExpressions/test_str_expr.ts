@@ -53,10 +53,14 @@ try {
         $tbl.col("digits").str.explode().alias("exploded_arr"),
 
         // Stripping
-        $tbl.col("name").str.strip().alias("stripped_ws"),
+        $tbl.col("name").str.strip_chars().alias("stripped_ws"),
         $tbl.col("name").str.strip_chars(" -").alias("stripped_chars"),
-        $tbl.col("name").str.strip_start().alias("stripped_start_ws"),
-        $tbl.col("name").str.strip_end().alias("stripped_end_ws"),
+        $tbl.col("name").str.strip_chars_start(undefined).alias("stripped_start_ws"),
+        $tbl.col("name").str.strip_chars_end().alias("stripped_end_ws"),
+        $tbl.col("name").str.strip_chars("-", { trimFirst: true }).alias("stripped_chars_trim_first"),
+        $tbl.col("name").str.strip_chars("-", { maxScanStart: 3, maxScanEnd: 3 }).alias("stripped_chars_offset_3"),
+        $tbl.col("name").str.strip_chars(/[a-zA-Z]/, { maxScanStart: 10, maxScanEnd: 10 }).alias("stripped_chars_regex"),
+        $tbl.col("digits").str.strip_chars(/[0-9]/, { returnStringOnNull: true }).alias("stripped_digits_regex"),
 
         // Prefix/Suffix removal
         $tbl.col("prefix_suffix").str.strip_prefix("pre-").alias("stripped_prefix"),
@@ -100,6 +104,10 @@ try {
     if (r0.stripped_chars !== "Alice") throw new Error(`Expected r0.stripped_chars to be "Alice", got ${r0.stripped_chars}`);
     if (r0.stripped_start_ws !== "--Alice  ") throw new Error(`Expected r0.stripped_start_ws to be "--Alice  ", got ${r0.stripped_start_ws}`);
     if (r0.stripped_end_ws !== "  --Alice") throw new Error(`Expected r0.stripped_end_ws to be "  --Alice", got ${r0.stripped_end_ws}`);
+    if (r0.stripped_chars_trim_first !== "Alice") throw new Error(`Expected r0.stripped_chars_trim_first to be "Alice", got "${r0.stripped_chars_trim_first}"`);
+    if (r0.stripped_chars_offset_3 !== "  Alice  ") throw new Error(`Expected r0.stripped_chars_offset_3 to be "  Alice  ", got "${r0.stripped_chars_offset_3}"`);
+    if (r0.stripped_chars_regex !== "  --  ") throw new Error(`Expected r0.stripped_chars_regex to be "  --  ", got "${r0.stripped_chars_regex}"`);
+    if (r0.stripped_digits_regex !== "") throw new Error(`Expected r0.stripped_digits_regex to be "", got "${r0.stripped_digits_regex}"`);
 
     if (r0.stripped_prefix !== "middle-suf") throw new Error(`Expected r0.stripped_prefix to be "middle-suf", got ${r0.stripped_prefix}`);
     if (r0.stripped_suffix !== "pre-middle") throw new Error(`Expected r0.stripped_suffix to be "pre-middle", got ${r0.stripped_suffix}`);
@@ -115,6 +123,10 @@ try {
     const r1 = projected[1];
     if (r1.stripped_prefix !== "no-prefix-suf") throw new Error(`Expected r1.stripped_prefix to be "no-prefix-suf", got ${r1.stripped_prefix}`); // doesn't have prefix "pre-"
     if (r1.stripped_suffix !== "no-prefix") throw new Error(`Expected r1.stripped_suffix to be "no-prefix", got ${r1.stripped_suffix}`);
+    if (r1.stripped_chars_trim_first !== "Bob") throw new Error(`Expected r1.stripped_chars_trim_first to be "Bob", got "${r1.stripped_chars_trim_first}"`);
+    if (r1.stripped_chars_offset_3 !== "Bob  ") throw new Error(`Expected r1.stripped_chars_offset_3 to be "Bob  ", got "${r1.stripped_chars_offset_3}"`);
+    if (r1.stripped_chars_regex !== "--  ") throw new Error(`Expected r1.stripped_chars_regex to be "--  ", got "${r1.stripped_chars_regex}"`);
+    if (r1.stripped_digits_regex !== "") throw new Error(`Expected r1.stripped_digits_regex to be "", got "${r1.stripped_digits_regex}"`);
 
     console.log("-----------------------------------------");
     console.log("RUNNING CASTING & PARSING TESTS...");

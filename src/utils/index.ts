@@ -4,4 +4,4 @@ export * from "./json";
 export * from "./date";
 export * from "./boolean";
 export * from "./list";
-
+export * from "./string";

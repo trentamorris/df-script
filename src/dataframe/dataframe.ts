@@ -1,9 +1,10 @@
 import { ColumnExpr, resolveColumnSelectors } from "../columnExpressions"
 import { GroupedData } from "./grouped/grouped"
-import type { IExpr, ColumnData, DataFrameColumns } from "../types"
-import type { JoinType, LimitPosition, ConcatOptions, GroupMap } from "./types"
+import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions } from "../types"
+import type { JoinType, LimitPosition, GroupMap } from "./types"
 import { DataType, DataTypeRegistry } from "../datatypes"
-import { isArrayOrTypedArray, isTypedArray, toValidArray, isObj } from "../utils"
+import { isArrayOrTypedArray, isTypedArray, toValidArray, isObj, isArrayOfType } from "../utils"
+import { concat } from "../functions/concat"
 import { KEY_SEPARATOR } from "./constants"
 import {
     resolveWindowExpr,
@@ -15,10 +16,10 @@ import {
 
 export class DataFrame<T extends Record<string, any> = any> {
     public _columns: DataFrameColumns<T>
-    public _height: number
+    private _height: number
     private _schema: Record<string, DataType> = {}
 
-    constructor(data: T[] | Record<string, ColumnData>, schema?: Record<string, DataType>, height?: number) {
+    constructor(data: T[] | ColumnDict, schema?: Record<string, DataType>, height?: number) {
         if (Array.isArray(data)) {
             const { columns, height: h } = rowsToColumns(data);
             this._columns = columns as DataFrameColumns<T>;
@@ -61,7 +62,7 @@ export class DataFrame<T extends Record<string, any> = any> {
     private applySchema(schema: Record<string, DataType>) {
         this._schema = schema;
         const keys = Object.keys(schema);
-        const newColumns: Record<string, ColumnData> = {};
+        const newColumns: ColumnDict = {};
         for (const key of keys) {
             const type = schema[key];
             const oldCol = this._columns[key];
@@ -112,187 +113,18 @@ export class DataFrame<T extends Record<string, any> = any> {
     }
 
     concat<U extends Record<string, any> = any>(
-        items: DataFrame<any>[],
+        items: ConcatItem | ConcatItem[],
         options: ConcatOptions = {}
     ): DataFrame<U> {
-        const { how = 'vertical' } = options;
-
-        if (items.length === 0) return new DataFrame<U>({}, {}, 0);
-        if (items.length === 1 && how !== 'horizontal') return items[0] as unknown as DataFrame<U>;
-
-        switch (how) {
-            case 'vertical': {
-                const validItems: DataFrame<any>[] = [];
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].height > 0) {
-                        validItems.push(items[i]);
-                    }
-                }
-                if (validItems.length === 0) return new DataFrame<U>({}, {}, 0);
-
-                const firstDF = validItems[0];
-                const firstKeys = Object.keys(firstDF._columns);
-
-                for (let i = 0; i < items.length; i++) {
-                    const currentDF = items[i];
-                    if (currentDF.height === 0) continue;
-
-                    const currentKeys = Object.keys(currentDF._columns);
-
-                    if (firstKeys.length !== currentKeys.length) {
-                        throw new Error(`[Strict Vertical] Column count mismatch at index ${i}.`);
-                    }
-                    for (let j = 0; j < firstKeys.length; j++) {
-                        if (firstKeys[j] !== currentKeys[j]) {
-                            throw new Error(
-                                `[Strict Vertical] Schema mismatch at position ${j} in DF ${i}. ` +
-                                `Expected column "${firstKeys[j]}", but found "${currentKeys[j]}".`
-                            );
-                        }
-                    }
-                }
-
-                let newHeight = 0;
-                for (const item of items) {
-                    newHeight += item.height;
-                }
-
-                const outSchema = items.find(df => df.height > 0)?.schema || items[0]?.schema || {};
-                const newColumns: Record<string, any> = {};
-
-                for (const key of firstKeys) {
-                    const type = outSchema[key];
-                    let hasNulls = false;
-                    for (const item of items) {
-                        const colArr = item._columns[key];
-                        if (!colArr) {
-                            hasNulls = true;
-                            break;
-                        }
-                        if (!isTypedArray(colArr)) {
-                            for (let i = 0; i < colArr.length; i++) {
-                                if (colArr[i] == null) {
-                                    hasNulls = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (hasNulls) break;
-                    }
-
-                    let dest = type && type.allocate ? type.allocate(newHeight) : new Array(newHeight).fill(null);
-                    if (hasNulls && isTypedArray(dest)) {
-                        dest = new Array(newHeight).fill(null);
-                    }
-                    newColumns[key] = dest;
-                }
-
-                let offset = 0;
-                for (const item of items) {
-                    const h = item.height;
-                    if (h === 0) continue;
-                    for (const key of firstKeys) {
-                        const colArr = item._columns[key] || new Array(h).fill(null);
-                        const dest = newColumns[key];
-                        if (isTypedArray(dest) && isTypedArray(colArr) && (dest as Uint8Array).set) {
-                            (dest as Uint8Array).set(colArr as ArrayLike<number>, offset);
-                        } else {
-                            for (let i = 0; i < h; i++) {
-                                dest[offset + i] = colArr[i];
-                            }
-                        }
-                    }
-                    offset += h;
-                }
-                return new DataFrame<U>(newColumns, outSchema, newHeight);
-            }
-
-            case 'horizontal': {
-                const firstLen = items[0].height;
-                const allColNames = new Set<string>();
-
-                for (let idx = 0; idx < items.length; idx++) {
-                    const df = items[idx];
-                    if (df.height !== firstLen) {
-                        throw new Error(`[Horizontal] Row count mismatch at index ${idx}. Expected ${firstLen}, got ${df.height}.`);
-                    }
-
-                    for (const key of Object.keys(df._columns)) {
-                        if (allColNames.has(key)) {
-                            throw new Error(`[Horizontal] Duplicate column name "${key}" detected. Horizontal concat requires unique names.`);
-                        }
-                        allColNames.add(key);
-                    }
-                }
-
-                const newColumns: Record<string, any[]> = {};
-                for (const df of items) {
-                    Object.assign(newColumns, df._columns);
-                }
-                const outSchema: Record<string, DataType> = {};
-                for (let i = 0; i < items.length; i++) {
-                    Object.assign(outSchema, items[i].schema);
-                }
-                return new DataFrame<U>(newColumns, outSchema, firstLen);
-            }
-
-            case 'diagonal': {
-                const allColumnsSet = new Set<string>();
-                for (const df of items) {
-                    for (const key of Object.keys(df._columns)) {
-                        allColumnsSet.add(key);
-                    }
-                }
-
-                const allColumns = Array.from(allColumnsSet);
-                let newHeight = 0;
-                for (let i = 0; i < items.length; i++) {
-                    newHeight += items[i].height;
-                }
-
-                const newColumns: Record<string, any[]> = {};
-                for (let j = 0; j < allColumns.length; j++) {
-                    newColumns[allColumns[j]] = new Array(newHeight);
-                }
-
-                let offset = 0;
-                for (let i = 0; i < items.length; i++) {
-                    const df = items[i];
-                    const h = df.height;
-                    if (h === 0) continue;
-                    for (let j = 0; j < allColumns.length; j++) {
-                        const col = allColumns[j];
-                        const dest = newColumns[col];
-                        const src = df._columns[col];
-                        if (src !== undefined) {
-                            if (isTypedArray(src) && isTypedArray(dest) && (dest as any).set) {
-                                (dest as any).set(src, offset);
-                            } else {
-                                for (let k = 0; k < h; k++) {
-                                    dest[offset + k] = src[k];
-                                }
-                            }
-                        } else {
-                            for (let k = 0; k < h; k++) {
-                                dest[offset + k] = null;
-                            }
-                        }
-                    }
-                    offset += h;
-                }
-
-                const outSchema: Record<string, DataType> = {};
-                for (const df of items) {
-                    Object.assign(outSchema, df.schema);
-                }
-                return new DataFrame<U>(newColumns, outSchema, newHeight);
-            }
-        }
+        const arrayItems = isArrayOfType(items, DataFrame, { mode: "every", allowEmpty: false })
+            ? (items as DataFrame[])
+            : [items];
+        return concat([this, ...arrayItems], options);
     }
 
     drop<K extends keyof T>(...args: (K | K[])[]): DataFrame<Omit<T, K>> {
         const columnsToDrop = new Set(args.flat() as string[]);
-        const newColumns: Record<string, ColumnData> = {};
+        const newColumns: ColumnDict = {};
         const outSchema: Record<string, DataType> = {};
         for (const key of Object.keys(this._columns)) {
             if (!columnsToDrop.has(key)) {
@@ -335,35 +167,22 @@ export class DataFrame<T extends Record<string, any> = any> {
         const matchingIndices: number[] = [];
 
         let currentIndex = 0;
-        let rowProxy: T | null = null;
+        let rowObj: T | null = null;
         if (funcPredicates.length > 0) {
             const columns = this._columns;
-            rowProxy = new Proxy({} as Record<string, any>, {
-                get(target, prop) {
-                    if (typeof prop === "string" && prop in columns) {
-                        const val = columns[prop]?.[currentIndex];
+            rowObj = {} as unknown as T;
+            for (let k = 0; k < numKeys; k++) {
+                const key = keys[k];
+                const col = columns[key];
+                Object.defineProperty(rowObj, key, {
+                    get() {
+                        const val = col[currentIndex];
                         return val === undefined ? null : val;
-                    }
-                    return Reflect.get(target, prop);
-                },
-                has(target, prop) {
-                    return (typeof prop === "string" && prop in columns) || Reflect.has(target, prop);
-                },
-                ownKeys(target) {
-                    return Object.keys(columns);
-                },
-                getOwnPropertyDescriptor(target, prop) {
-                    if (typeof prop === "string" && prop in columns) {
-                        return {
-                            configurable: true,
-                            enumerable: true,
-                            value: columns[prop]?.[currentIndex],
-                            writable: false
-                        };
-                    }
-                    return Reflect.getOwnPropertyDescriptor(target, prop);
-                }
-            }) as unknown as T;
+                    },
+                    enumerable: true,
+                    configurable: true
+                });
+            }
         }
 
         for (let i = 0; i < height; i++) {
@@ -378,10 +197,10 @@ export class DataFrame<T extends Record<string, any> = any> {
 
             if (!keep) continue;
 
-            if (rowProxy) {
+            if (rowObj) {
                 currentIndex = i;
                 for (let j = 0; j < funcPredicates.length; j++) {
-                    if (!funcPredicates[j](rowProxy)) {
+                    if (!funcPredicates[j](rowObj)) {
                         keep = false;
                         break;
                     }
@@ -450,6 +269,13 @@ export class DataFrame<T extends Record<string, any> = any> {
 
     get height(): number {
         return this._height;
+    }
+
+    hstack<U extends Record<string, any> = any>(
+        other: ConcatItem | ConcatItem[],
+        options: HorizontalConcatOptions = {}
+    ): DataFrame<U> {
+        return this.concat<U>(other, { how: "horizontal", horizontal: options });
     }
 
     join<U extends Record<string, any> = any, R extends Record<string, any> = any>(config: {
@@ -588,7 +414,7 @@ export class DataFrame<T extends Record<string, any> = any> {
         }
 
         const newHeight = Math.max(actualEnd - actualStart, 0);
-        const newColumns: Record<string, ColumnData> = {};
+        const newColumns: ColumnDict = {};
         for (const key of Object.keys(this._columns)) {
             newColumns[key] = (this._columns[key] as any).slice(actualStart, actualEnd);
         }
@@ -666,7 +492,7 @@ export class DataFrame<T extends Record<string, any> = any> {
 
     rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> {
         const renameMapping = mapping || {};
-        const newColumns: Record<string, ColumnData> = {};
+        const newColumns: ColumnDict = {};
         const outSchema: Record<string, DataType> = {};
 
         const originalKeys = Object.keys(this._columns);
@@ -689,9 +515,9 @@ export class DataFrame<T extends Record<string, any> = any> {
     }
 
     select<U extends Record<string, any> = any>(
-        ...args: (string | IExpr | (string | IExpr)[])[]
+        ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
     ): DataFrame<U> {
-        const exprs = args.flat();
+        const exprs = this._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys);
 
@@ -704,7 +530,7 @@ export class DataFrame<T extends Record<string, any> = any> {
             seenNames.add(targetKey);
         }
 
-        const newColumns: Record<string, ColumnData> = {};
+        const newColumns: ColumnDict = {};
         for (const expr of expandedExprs) {
             const targetKey = expr.outputName || (expr as any).colName || "*";
             if (expr.isWindow) {
@@ -1007,15 +833,18 @@ export class DataFrame<T extends Record<string, any> = any> {
         return new DataFrame<U>(newColumns as any, outSchema, newHeight);
     }
 
+    vstack<U extends Record<string, any> = any>(
+        other: ConcatItem | ConcatItem[]
+    ): DataFrame<U> {
+        return this.concat<U>(other, { how: "vertical" });
+    }
+
     get width(): number {
         return Object.keys(this._columns).length;
     }
 
-    with_columns(
-        ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
-    ): DataFrame<any> {
+    private _normalizeArgs(args: any[]): IExpr[] {
         const flatArgs = args.flat();
-
         const exprs: IExpr[] = [];
         for (const arg of flatArgs) {
             if (typeof arg === "string") {
@@ -1028,18 +857,25 @@ export class DataFrame<T extends Record<string, any> = any> {
                         exprs.push((val as unknown as IExpr).alias(key));
                     } else {
                         const staticExpr = new ColumnExpr(key);
-                        staticExpr.evaluate = (cols: Record<string, ColumnData>, h: number) => new Array(h).fill(val) as any;
+                        staticExpr.evaluate = (_cols: ColumnDict, h: number) => new Array(h).fill(val) as any;
                         exprs.push(staticExpr);
                     }
                 }
             }
         }
+        return exprs;
+    }
+
+    with_columns(
+        ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
+    ): DataFrame<any> {
+        const exprs = this._normalizeArgs(args);
 
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys);
         const numEntries = expandedExprs.length;
 
-        const newColumns: Record<string, ColumnData> = { ...this._columns };
+        const newColumns: ColumnDict = { ...this._columns };
         const outSchema = { ...this._schema };
 
         for (let j = 0; j < numEntries; j++) {

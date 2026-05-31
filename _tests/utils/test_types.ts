@@ -37,6 +37,19 @@ try {
     if (!isArrayOfType([2, 4, 6], isEven)) throw new Error("Expected [2, 4, 6] to satisfy isEven");
     if (isArrayOfType([2, 5, 6], isEven)) throw new Error("Expected [2, 5, 6] to not satisfy isEven");
 
+    function isEvenFunc(v: any) { return typeof v === "number" && v % 2 === 0; }
+    if (!isArrayOfType([2, 4, 6], isEvenFunc)) throw new Error("Expected [2, 4, 6] to satisfy isEvenFunc");
+
+    // Test constructor / class support
+    class TestClass {}
+    class SubClass extends TestClass {}
+    class OtherClass {}
+    const obj1 = new TestClass();
+    const obj2 = new SubClass();
+    const obj3 = new OtherClass();
+    if (!isArrayOfType([obj1, obj2], TestClass)) throw new Error("Expected [obj1, obj2] to be of class TestClass");
+    if (isArrayOfType([obj1, obj3], TestClass)) throw new Error("Expected [obj1, obj3] to not be of class TestClass");
+
     // Test invalid array input
     if (isArrayOfType(42, "number")) throw new Error("Expected scalar to fail isArrayOfType");
 
@@ -50,10 +63,15 @@ try {
     if (!isArrayOfType([1, 5, 6], isEven, { mode: "some" })) throw new Error("Expected [1, 5, 6] to have some even number");
     if (isArrayOfType([1, 5, 7], isEven, { mode: "some" })) throw new Error("Expected [1, 5, 7] to not have some even number");
 
-    // Test options.includeNulls: true
-    if (!isArrayOfType([1, 2, null, 3], "number", { includeNulls: true })) throw new Error("Expected [1, 2, null, 3] to match 'number' with includeNulls");
-    if (!isArrayOfType(["a", null, "b"], "string", { includeNulls: true })) throw new Error("Expected ['a', null, 'b'] to match 'string' with includeNulls");
-    if (!isArrayOfType([true, null, false], "boolean", { includeNulls: true })) throw new Error("Expected [true, null, false] to match 'boolean' with includeNulls");
+    // Test options.allowNulls: true
+    if (!isArrayOfType([1, 2, null, 3], "number", { allowNulls: true })) throw new Error("Expected [1, 2, null, 3] to match 'number' with allowNulls");
+    if (!isArrayOfType(["a", null, "b"], "string", { allowNulls: true })) throw new Error("Expected ['a', null, 'b'] to match 'string' with allowNulls");
+    if (!isArrayOfType([true, null, false], "boolean", { allowNulls: true })) throw new Error("Expected [true, null, false] to match 'boolean' with allowNulls");
+
+    // Test options.allowEmpty
+    if (!isArrayOfType([], "number")) throw new Error("Expected empty array to match by default");
+    if (isArrayOfType([], "number", { allowEmpty: false })) throw new Error("Expected empty array to fail with allowEmpty: false");
+    if (isArrayOfType([], "number", { mode: "some", allowEmpty: true })) throw new Error("Expected empty array to still fail 'some' even with allowEmpty: true");
 
     console.log("🎉 ALL UTILS TYPES TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

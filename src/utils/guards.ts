@@ -36,6 +36,16 @@ export function isPlainObj(v: unknown): v is Record<string, unknown> {
     return proto === null || proto === Object.prototype;
 }
 
+export function isClass(v: unknown): v is new (...args: any[]) => any {
+    if (typeof v !== "function") return false;
+    return (
+        /^class\s/.test(Function.prototype.toString.call(v)) ||
+        (v.prototype !== undefined &&
+         v.prototype.constructor === v &&
+         Object.getOwnPropertyDescriptor(v, "prototype")?.writable === false)
+    );
+}
+
 export function isScalar(v: unknown): v is string | number | boolean | bigint | Date | Uint8Array {
     return (
         typeof v === "string" ||

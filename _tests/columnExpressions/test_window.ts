@@ -252,20 +252,20 @@ try {
         }
     }
 
-    // 8. Test AllColumnsExpr wildcard select and exclude
-    console.log("\nTesting AllColumnsExpr select and exclude:");
-    const dfAllExclude = df.select($tbl.all().exclude("salary").str.lower()).collect();
+    // 8. Test wildcard select and exclude
+    console.log("\nTesting wildcard select and exclude:");
+    const dfAllExclude = df.select($tbl.exclude("salary").str.lower()).collect();
     console.table(dfAllExclude);
 
     if (dfAllExclude.length !== 5 || dfAllExclude[0].salary !== undefined || dfAllExclude[0].name !== "alice" || dfAllExclude[0].dept !== "hr") {
-        console.error("AllColumnsExpr exclude lower failed!");
+        console.error("wildcard exclude lower failed!");
         passed = false;
     }
 
     // 9. Test with_columns wildcard select and exclude
     console.log("\nTesting with_columns wildcard select and exclude:");
     const dfWithCols = df.with_columns(
-        $tbl.all().exclude("salary").str.upper()
+        $tbl.exclude("salary").str.upper()
     ).collect();
     console.table(dfWithCols);
 
@@ -303,9 +303,7 @@ try {
         // 10.2 RHS null comparison
         $tbl.col("val_num").gt(null).alias("gt_null"),
         // 10.3 3-valued Kleene AND logic
-        $tbl.col("val_bool").and($tbl.col("val_bool").is_null()).alias("kleene_and"),
-        // 10.4 replace_all string replacement
-        $tbl.col("val_num").replace(new Map([[10, "HR"], [null, "IT"], [20, "HR"]])).str.replace_all("R", "S").alias("replaced_dept")
+        $tbl.col("val_bool").and($tbl.col("val_bool").is_null()).alias("kleene_and")
     ).collect();
 
     console.table(dfNullsRes);
@@ -327,11 +325,6 @@ try {
     // row 2: null AND true -> null
     if (dfNullsRes[0].kleene_and !== false || dfNullsRes[1].kleene_and !== false || dfNullsRes[2].kleene_and !== null) {
         console.error("Kleene logical AND failed!");
-        passed = false;
-    }
-    // replaced_dept should replace "HR" to "HS" and "IT" to "IT"
-    if (dfNullsRes[0].replaced_dept !== "HS" || dfNullsRes[1].replaced_dept !== "IT" || dfNullsRes[2].replaced_dept !== "HS") {
-        console.error("replace_all string replacement failed!");
         passed = false;
     }
 

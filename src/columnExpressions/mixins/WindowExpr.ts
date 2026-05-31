@@ -10,7 +10,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 const start = Math.max(0, currentIndex - windowSize + 1);
                 const end = currentIndex + 1;
                 const windowVals = groupPreValues.slice(start, end);
@@ -27,7 +27,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let count = 0;
                 const start = reverse ? currentIndex : 0;
                 const end = reverse ? groupPreValues.length - 1 : currentIndex;
@@ -44,7 +44,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let maxVal = null;
                 const start = reverse ? currentIndex : 0;
                 const end = reverse ? groupPreValues.length - 1 : currentIndex;
@@ -65,7 +65,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let minVal = null;
                 const start = reverse ? currentIndex : 0;
                 const end = reverse ? groupPreValues.length - 1 : currentIndex;
@@ -86,7 +86,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let prod = 1;
                 let hasValid = false;
                 const start = reverse ? currentIndex : 0;
@@ -107,7 +107,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let sum = 0;
                 const start = reverse ? currentIndex : 0;
                 const end = reverse ? groupPreValues.length - 1 : currentIndex;
@@ -124,7 +124,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 const sortedUnique = Array.from(new Set(groupPreValues)).sort((a, b) => a - b);
                 const valueToRank = new Map();
                 for (let idx = 0; idx < sortedUnique.length; idx++) {
@@ -140,7 +140,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let val = defaultVal;
                 if (currentIndex - offset >= 0) {
                     val = groupPreValues[currentIndex - offset];
@@ -154,7 +154,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 let val = defaultVal;
                 if (currentIndex + offset < groupPreValues.length) {
                     val = groupPreValues[currentIndex + offset];
@@ -175,7 +175,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 const sorted = [...groupPreValues].sort((a, b) => a - b);
                 const valueToRank = new Map();
                 for (let i = 0; i < sorted.length; i++) {
@@ -254,7 +254,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 const start = Math.max(0, currentIndex - windowSize + 1);
                 const end = currentIndex + 1;
                 const vals = groupPreValues.slice(start, end);
@@ -308,7 +308,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             const newInst = derive(this);
             newInst.partitionOpsIndex = this.ops.length;
             newInst.groupingOpsIndex = this.ops.length;
-            newInst.evaluateWindow = function(this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) {
+            newInst.evaluateWindow = function(this: IExpr, _groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
                 return currentIndex + 1;
             };
             newInst.outputName = "row_number";

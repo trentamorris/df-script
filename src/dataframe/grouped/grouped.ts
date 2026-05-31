@@ -3,13 +3,13 @@ import { inferColumnType } from "../utils"
 import type { GroupMap } from "../types"
 import { resolveColumnSelectors } from "../../columnExpressions"
 import { DataType } from "../../datatypes"
-import type { IExpr, ColumnData } from "../../types"
+import type { IExpr, ColumnDict } from "../../types"
 
 export class GroupedData<T, K extends keyof T> {
     private groups: GroupMap
     private keys: K[]
     private allKeys: (keyof T)[]
-    private parentColumns: Record<string, ColumnData>
+    private parentColumns: ColumnDict
     private parentHeight: number
     private parentSchema: Record<string, DataType>
 
@@ -18,7 +18,7 @@ export class GroupedData<T, K extends keyof T> {
         groups: GroupMap,
         keys: K[],
         allKeys: (keyof T)[],
-        parentColumns: Record<string, ColumnData>,
+        parentColumns: ColumnDict,
         parentHeight: number,
         parentSchema: Record<string, DataType>
     ) {

@@ -127,7 +127,7 @@ assert(dfFiltered.height === 1 && dfFiltered.collect()[0].a === 3, "Filtered pro
 // 9. Diagonal concat pre-allocation correctness
 const dfDiag1 = new DataFrame([{ a: 1 }]);
 const dfDiag2 = new DataFrame([{ b: 2 }]);
-const dfDiagConcat = dfDiag1.concat([dfDiag1, dfDiag2], { how: "diagonal" });
+const dfDiagConcat = $tbl.concat([dfDiag1, dfDiag2], { how: "diagonal" });
 assert(dfDiagConcat.height === 2, "Diagonal concat height should be 2");
 const collectedDiag = dfDiagConcat.collect() as any[];
 assert(collectedDiag[0].a === 1 && collectedDiag[0].b === null, "First diagonal row values correct");

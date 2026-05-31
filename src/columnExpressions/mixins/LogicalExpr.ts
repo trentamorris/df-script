@@ -1,4 +1,3 @@
-import type { IExpr } from "../../types"
 import type { ExprConstructor } from "../types"
 import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
 import { isArrayOrTypedArray } from "../../utils"

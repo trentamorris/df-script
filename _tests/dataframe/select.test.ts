@@ -31,8 +31,8 @@ if (collected2[0].years !== 30 || collected2[0].name !== "Alice") {
     throw new Error("Values mismatch on expression selection");
 }
 
-// 3. Select all except some columns (using AllColumnsExpr with exclude)
-const df3 = df.select($tbl.all().exclude("city"));
+// 3. Select all except some columns using top-level exclude function
+const df3 = df.select($tbl.exclude("city"));
 const schema3 = df3.getSchema();
 if (schema3.name === undefined || schema3.age === undefined || schema3.city !== undefined) {
     throw new Error("Columns mismatch on all-exclude selection schema");

@@ -34,6 +34,7 @@ try {
         $tbl.col("val5").acosh().alias("acosh"),
         $tbl.col("val1").add($tbl.col("val2")).alias("add_expr"),
         $tbl.col("val1").add(5).alias("add_scalar"),
+        $tbl.col("val1").add($tbl.lit(5)).alias("add_lit"),
         $tbl.col("val5").asin().alias("asin"),
         $tbl.col("val3").asinh().alias("asinh"),
         $tbl.col("val3").atan().alias("atan"),
@@ -73,7 +74,11 @@ try {
         $tbl.col("val3").tan().alias("tan"),
         $tbl.col("val3").tanh().alias("tanh"),
         $tbl.col("val3").trunc().alias("trunc"),
-        $tbl.col("val1").sub($tbl.col("val2")).alias("sub_expr")
+        $tbl.col("val1").sub($tbl.col("val2")).alias("sub_expr"),
+        $tbl.col("val1").rand().alias("rand_no_seed"),
+        $tbl.col("val1").rand(42).alias("rand_seed_42_a"),
+        $tbl.col("val1").rand(42).alias("rand_seed_42_b"),
+        $tbl.col("val1").rand(99).alias("rand_seed_99")
     ]).collect() as any[];
 
     console.dir(projected, { depth: null });
@@ -85,6 +90,7 @@ try {
     if (Math.abs(r0.acosh - Math.acosh(2.7182818)) > 1e-6) throw new Error(`acosh failed: got ${r0.acosh}`);
     if (r0.add_expr !== 13) throw new Error(`add_expr failed: expected 13, got ${r0.add_expr}`);
     if (r0.add_scalar !== 15) throw new Error(`add_scalar failed: expected 15, got ${r0.add_scalar}`);
+    if (r0.add_lit !== 15) throw new Error(`add_lit failed: expected 15, got ${r0.add_lit}`);
     if (r0.asin !== null) throw new Error(`asin out of bounds failed: expected null, got ${r0.asin}`);
     if (Math.abs(r0.asinh - Math.asinh(-5.5)) > 1e-6) throw new Error(`asinh failed: got ${r0.asinh}`);
     if (Math.abs(r0.atan - Math.atan(-5.5)) > 1e-6) throw new Error(`atan failed: expected ~-1.39, got ${r0.atan}`);
@@ -125,6 +131,10 @@ try {
     if (Math.abs(r0.tanh - Math.tanh(-5.5)) > 1e-6) throw new Error(`tanh failed: got ${r0.tanh}`);
     if (r0.trunc !== -5) throw new Error(`trunc failed: expected -5, got ${r0.trunc}`);
     if (r0.sub_expr !== 7) throw new Error(`sub_expr failed: expected 7, got ${r0.sub_expr}`);
+    if (r0.rand_no_seed < 0 || r0.rand_no_seed >= 1) throw new Error(`rand_no_seed out of range: ${r0.rand_no_seed}`);
+    if (r0.rand_seed_42_a !== r0.rand_seed_42_b) throw new Error(`seeded random mismatch: ${r0.rand_seed_42_a} vs ${r0.rand_seed_42_b}`);
+    if (r0.rand_seed_42_a === r0.rand_seed_99) throw new Error(`seeded random collision with different seeds`);
+
 
     // Assert row 1
     const r1 = projected[1];
@@ -133,6 +143,7 @@ try {
     if (r1.acosh !== 0) throw new Error(`acosh failed: expected 0, got ${r1.acosh}`);
     if (r1.add_expr !== -15) throw new Error(`add_expr failed: expected -15, got ${r1.add_expr}`);
     if (r1.add_scalar !== -15) throw new Error(`add_scalar failed: expected -15, got ${r1.add_scalar}`);
+    if (r1.add_lit !== -15) throw new Error(`add_lit failed: expected -15, got ${r1.add_lit}`);
     if (Math.abs(r1.asin - Math.PI / 2) > 1e-6) throw new Error(`asin failed: expected ~1.57, got ${r1.asin}`);
     if (Math.abs(r1.asinh - Math.asinh(4.88)) > 1e-6) throw new Error(`asinh failed: got ${r1.asinh}`);
     if (Math.abs(r1.atan - Math.atan(4.88)) > 1e-6) throw new Error(`atan failed: got ${r1.atan}`);
@@ -173,6 +184,10 @@ try {
     if (Math.abs(r1.tanh - Math.tanh(4.88)) > 1e-6) throw new Error(`tanh failed: got ${r1.tanh}`);
     if (r1.trunc !== 4) throw new Error(`trunc failed: expected 4, got ${r1.trunc}`);
     if (r1.sub_expr !== -25) throw new Error(`sub_expr failed: expected -25, got ${r1.sub_expr}`);
+    if (r1.rand_no_seed < 0 || r1.rand_no_seed >= 1) throw new Error(`rand_no_seed out of range: ${r1.rand_no_seed}`);
+    if (r1.rand_seed_42_a !== r1.rand_seed_42_b) throw new Error(`seeded random mismatch: ${r1.rand_seed_42_a} vs ${r1.rand_seed_42_b}`);
+    if (r1.rand_seed_42_a === r1.rand_seed_99) throw new Error(`seeded random collision with different seeds`);
+
 
     console.log("=========================================");
     console.log("🎉 ALL COLUMN EXPRESSION ARITHMETIC TESTS PASSED!");
