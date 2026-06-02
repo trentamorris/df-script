@@ -1,5 +1,5 @@
 {
-  "name": "framescript",
+  "name": "dfscript",
   "version": "1.4.0",
   "description": "A zero-dependency, high-performance, expression-based DataFrame library for TypeScript/JavaScript.",
   "main": "dist/index.js",

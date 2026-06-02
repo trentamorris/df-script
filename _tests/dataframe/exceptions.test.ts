@@ -1,5 +1,5 @@
 import { $tbl } from "../../src"
-import { FrameScriptError, ColumnNotFoundError, ComputeError } from "../../src/exceptions"
+import { DFScriptError, ColumnNotFoundError, ComputeError } from "../../src/exceptions"
 
 // Verify exceptions are thrown and inherit correctly
 try {
@@ -10,8 +10,8 @@ try {
     if (!(err instanceof ColumnNotFoundError)) {
         throw new Error(`Expected ColumnNotFoundError, got: ${err}`);
     }
-    if (!(err instanceof FrameScriptError)) {
-        throw new Error(`Expected err to be instance of FrameScriptError`);
+    if (!(err instanceof DFScriptError)) {
+        throw new Error(`Expected err to be instance of DFScriptError`);
     }
     if (!(err instanceof Error)) {
         throw new Error(`Expected err to be instance of Error`);

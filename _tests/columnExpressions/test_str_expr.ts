@@ -8,7 +8,7 @@ console.log("=========================================");
 const data = [
     {
         name: "  --Alice  ",
-        phrase: "FrameScript is awesome!",
+        phrase: "DFScript is awesome!",
         prefix_suffix: "pre-middle-suf",
         digits: "42"
     },
@@ -47,7 +47,7 @@ try {
         $tbl.col("digits").str.pad_end(5, "-").alias("padded_end"),
 
         // Slice & Split & Explode
-        $tbl.col("phrase").str.slice(0, 11).alias("sliced"),
+        $tbl.col("phrase").str.slice(0, 8).alias("sliced"),
         $tbl.col("phrase").str.slice(-8, 7).alias("sliced_neg"),
         $tbl.col("phrase").str.split(" ").alias("split_arr"),
         $tbl.col("digits").str.explode().alias("exploded_arr"),
@@ -70,7 +70,7 @@ try {
         $tbl.col("phrase").str.contains("awesome").alias("contains_str"),
         $tbl.col("phrase").str.contains(/is/i).alias("contains_regex"),
         $tbl.col("phrase").str.ends_with("!").alias("ends_with_excl"),
-        $tbl.col("phrase").str.starts_with("Frame").alias("starts_with_frame"),
+        $tbl.col("phrase").str.starts_with("DF").alias("starts_with_df"),
         $tbl.col("phrase").str.replace("is", "was").alias("replaced"),
         $tbl.col("phrase").str.replace_all("e", "3").alias("replaced_all")
     ]).to_dicts() as any[];
@@ -79,22 +79,22 @@ try {
     console.dir(projected, { depth: null });
 
     const r0 = projected[0];
-    if (r0.lower !== "framescript is awesome!") throw new Error(`Expected r0.lower to be "framescript is awesome!", got ${r0.lower}`);
-    if (r0.upper !== "FRAMESCRIPT IS AWESOME!") throw new Error(`Expected r0.upper to be "FRAMESCRIPT IS AWESOME!", got ${r0.upper}`);
-    if (r0.title !== "FrameScript Is Awesome!") throw new Error(`Expected r0.title to be "FrameScript Is Awesome!", got ${r0.title}`);
-    if (r0.reversed !== "!emosewa si tpircSemarF") throw new Error(`Expected r0.reversed to be "!emosewa si tpircSemarF", got ${r0.reversed}`);
+    if (r0.lower !== "dfscript is awesome!") throw new Error(`Expected r0.lower to be "dfscript is awesome!", got ${r0.lower}`);
+    if (r0.upper !== "DFSCRIPT IS AWESOME!") throw new Error(`Expected r0.upper to be "DFSCRIPT IS AWESOME!", got ${r0.upper}`);
+    if (r0.title !== "DFScript Is Awesome!") throw new Error(`Expected r0.title to be "DFScript Is Awesome!", got ${r0.title}`);
+    if (r0.reversed !== "!emosewa si tpircSFD") throw new Error(`Expected r0.reversed to be "!emosewa si tpircSFD", got ${r0.reversed}`);
 
-    if (r0.len_c !== 23) throw new Error(`Expected r0.len_c to be 23, got ${r0.len_c}`);
-    if (r0.len_b !== 23) throw new Error(`Expected r0.len_b to be 23, got ${r0.len_b}`);
+    if (r0.len_c !== 20) throw new Error(`Expected r0.len_c to be 20, got ${r0.len_c}`);
+    if (r0.len_b !== 20) throw new Error(`Expected r0.len_b to be 20, got ${r0.len_b}`);
 
     if (r0.zfilled !== "0042") throw new Error(`Expected r0.zfilled to be "0042", got ${r0.zfilled}`);
     if (r0.padded_start !== "***42") throw new Error(`Expected r0.padded_start to be "***42", got ${r0.padded_start}`);
     if (r0.padded_end !== "42---") throw new Error(`Expected r0.padded_end to be "42---", got ${r0.padded_end}`);
 
-    if (r0.sliced !== "FrameScript") throw new Error(`Expected r0.sliced to be "FrameScript", got ${r0.sliced}`);
+    if (r0.sliced !== "DFScript") throw new Error(`Expected r0.sliced to be "DFScript", got ${r0.sliced}`);
     if (r0.sliced_neg !== "awesome") throw new Error(`Expected r0.sliced_neg to be "awesome", got ${r0.sliced_neg}`); // "-8" is "awesome!", length 7 is "awesome"
-    if (JSON.stringify(r0.split_arr) !== JSON.stringify(["FrameScript", "is", "awesome!"])) {
-        throw new Error(`Expected r0.split_arr to be ["FrameScript", "is", "awesome!"], got ${JSON.stringify(r0.split_arr)}`);
+    if (JSON.stringify(r0.split_arr) !== JSON.stringify(["DFScript", "is", "awesome!"])) {
+        throw new Error(`Expected r0.split_arr to be ["DFScript", "is", "awesome!"], got ${JSON.stringify(r0.split_arr)}`);
     }
     if (JSON.stringify(r0.exploded_arr) !== JSON.stringify(["4", "2"])) {
         throw new Error(`Expected r0.exploded_arr to be ["4", "2"], got ${JSON.stringify(r0.exploded_arr)}`);
@@ -115,9 +115,9 @@ try {
     if (r0.contains_str !== true) throw new Error(`Expected r0.contains_str to be true, got ${r0.contains_str}`);
     if (r0.contains_regex !== true) throw new Error(`Expected r0.contains_regex to be true, got ${r0.contains_regex}`);
     if (r0.ends_with_excl !== true) throw new Error(`Expected r0.ends_with_excl to be true, got ${r0.ends_with_excl}`);
-    if (r0.starts_with_frame !== true) throw new Error(`Expected r0.starts_with_frame to be true, got ${r0.starts_with_frame}`);
-    if (r0.replaced !== "FrameScript was awesome!") throw new Error(`Expected r0.replaced to be "FrameScript was awesome!", got ${r0.replaced}`);
-    if (r0.replaced_all !== "Fram3Script is aw3som3!") throw new Error(`Expected r0.replaced_all to be "Fram3Script is aw3som3!", got ${r0.replaced_all}`);
+    if (r0.starts_with_df !== true) throw new Error(`Expected r0.starts_with_df to be true, got ${r0.starts_with_df}`);
+    if (r0.replaced !== "DFScript was awesome!") throw new Error(`Expected r0.replaced to be "DFScript was awesome!", got ${r0.replaced}`);
+    if (r0.replaced_all !== "DFScript is aw3som3!") throw new Error(`Expected r0.replaced_all to be "DFScript is aw3som3!", got ${r0.replaced_all}`);
 
     // Assert Row 1
     const r1 = projected[1];

@@ -1,8 +1,8 @@
-# 🚀 FrameScript
+# 🚀 DFScript
 
-FrameScript is a lightweight, high-performance, and **zero-dependency** data analysis library for TypeScript and JavaScript. Heavily inspired by modern dataframe libraries like **Polars** and **Pandas**, FrameScript brings a robust, expression-based columnar data processing engine directly to the JavaScript ecosystem.
+DFScript is a lightweight, high-performance, and **zero-dependency** data analysis library for TypeScript and JavaScript. Heavily inspired by modern dataframe libraries like **Polars** and **Pandas**, DFScript brings a robust, expression-based columnar data processing engine directly to the JavaScript ecosystem.
 
-With optimized columnar storage under the hood, FrameScript enables you to build clean, maintainable, and type-safe data pipelines using a declarative expression API.
+With optimized columnar storage under the hood, DFScript enables you to build clean, maintainable, and type-safe data pipelines using a declarative expression API.
 
 ---
 
@@ -23,17 +23,17 @@ With optimized columnar storage under the hood, FrameScript enables you to build
 
 ## 📦 Installation
 
-Install FrameScript using your favorite package manager:
+Install DFScript using your favorite package manager:
 
 ```bash
-npm install framescript
+npm install dfscript
 ```
 
 Or with Yarn/PNPM:
 
 ```bash
-yarn add framescript
-pnpm add framescript
+yarn add dfscript
+pnpm add dfscript
 ```
 
 ---
@@ -43,7 +43,7 @@ pnpm add framescript
 Here is a quick example showing how to load data, run expressions, perform aggregations, and compute rolling statistics.
 
 ```typescript
-import { $tbl } from "framescript";
+import { $tbl } from "dfscript";
 
 // 1. Create a DataFrame with structured data and automatic schema inference
 const df = $tbl.data([
@@ -79,7 +79,7 @@ console.log(processedDf.to_dicts());
 
 ### The `$tbl` Entry Point
 
-FrameScript uses the `$tbl` namespace to bootstrap DataFrames, refer to columns, and access general types.
+DFScript uses the `$tbl` namespace to bootstrap DataFrames, refer to columns, and access general types.
 
 - `$tbl.data(dataRowsOrCols, schema?)`: Instantiates a new `DataFrame`.
 - `$tbl.col(name)`: Creates a column reference expression.
@@ -185,7 +185,7 @@ $tbl.col("matrix").list.get(2)
 
 ## 🪟 Window & Rolling Expressions
 
-FrameScript provides full support for analytic partition window operations using `.over()` and rolling filters.
+DFScript provides full support for analytic partition window operations using `.over()` and rolling filters.
 
 ```typescript
 // Calculate partition cumulative sums and row numbers
@@ -230,7 +230,7 @@ Apply moving calculations over a fixed window size:
 You can optionally declare schemas to enforce precise data types and automatic type coercion during construction.
 
 ```typescript
-import { $tbl } from "framescript";
+import { $tbl } from "dfscript";
 
 const schema = {
   id: $tbl.DataType.Int32,
@@ -253,10 +253,10 @@ const df = $tbl.data(rawData, schema);
 
 ## 🧑‍💻 Contributing & Development
 
-We welcome contributions! Please make sure to review our [Developer Guidelines](file:///c:/Users/Ford/Trent/FrameScript/DEVELOPER_GUIDELINES.md) when writing code.
+We welcome contributions! Please make sure to review our [Developer Guidelines](file:///c:/Users/Ford/Trent/framescript/DEVELOPER_GUIDELINES.md) when writing code.
 
 ### Running Project Tests
-FrameScript has a comprehensive suite of unit tests. Run them using:
+DFScript has a comprehensive suite of unit tests. Run them using:
 
 ```bash
 npx tsx _tests/run_all_project_tests.ts
@@ -266,4 +266,4 @@ npx tsx _tests/run_all_project_tests.ts
 
 ## 📄 License
 
-FrameScript is open-source software licensed under the [MIT License](file:///c:/Users/Ford/Trent/FrameScript/LICENSE).
+DFScript is open-source software licensed under the [MIT License](file:///c:/Users/Ford/Trent/framescript/LICENSE).

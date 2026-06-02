@@ -1,5 +1,5 @@
 console.log("=========================================");
-console.log("RUNNING ALL FRAMESCRIPT PROJECT TESTS...");
+console.log("RUNNING ALL DFSCRIPT PROJECT TESTS...");
 console.log("=========================================");
 
 import "./columnExpressions/test_dt_expr";

@@ -1,4 +1,4 @@
-export class FrameScriptError extends Error {
+export class DFScriptError extends Error {
     constructor(message: string) {
         super(message);
         this.name = this.constructor.name;
@@ -8,7 +8,7 @@ export class FrameScriptError extends Error {
     }
 }
 
-export class DataFrameError extends FrameScriptError {}
+export class DataFrameError extends DFScriptError {}
 
 export class ColumnNotFoundError extends DataFrameError {
     constructor(columnName: string, message?: string) {
@@ -16,9 +16,9 @@ export class ColumnNotFoundError extends DataFrameError {
     }
 }
 
-export class SchemaError extends FrameScriptError {}
+export class SchemaError extends DFScriptError {}
 
-export class ComputeError extends FrameScriptError {}
+export class ComputeError extends DFScriptError {}
 
 export * from "./utils";
 
