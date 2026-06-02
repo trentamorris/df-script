@@ -4,7 +4,7 @@ import { DFScriptError, ColumnNotFoundError, ComputeError } from "../../src/exce
 // Verify exceptions are thrown and inherit correctly
 try {
     const df = $tbl.data([{ a: 1 }]);
-    df.to_list("non_existent");
+    df.to_list("non_existent" as any);
     throw new Error("Expected ColumnNotFoundError but no error was thrown");
 } catch (err: any) {
     if (!(err instanceof ColumnNotFoundError)) {
