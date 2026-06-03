@@ -1,6 +1,6 @@
 export abstract class DataType<T = any> {
     abstract readonly name: string;
-    abstract coerce(val: any): T;
+    abstract coerce(val: unknown): T;
     abstract equals(other: DataType): boolean;
     abstract allocate(size: number): ArrayLike<T>;
 

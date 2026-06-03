@@ -21,9 +21,19 @@ export type IsArrayOfTypeOptionsParams = {
 
 export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
     if (val == null) return [];
-    if (Array.isArray(val)) return val;
+    if (Array.isArray(val)) return [...val];
     if (isTypedArray(val)) return Array.from(val as any);
     return [val];
+}
+
+export function toValidStringArray(val: unknown): string[] {
+    const arr = toValidArray(val);
+    const len = arr.length;
+    const res = new Array(len);
+    for (let i = 0; i < len; i++) {
+        res[i] = String(arr[i]);
+    }
+    return res;
 }
 
 export function isArrayOfType(

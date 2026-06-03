@@ -1,4 +1,5 @@
 import { isValidNumber } from "./number";
+import { isBlankString } from "./string";
 import type { TimeUnit } from "../types";
 
 /**
@@ -131,9 +132,8 @@ export function isValidDate(v: unknown): v is string | number | bigint | Date {
         return isValidDateObj(new Date(normalizeEpochToMs(Number(v))));
     }
     if (typeof v === "string") {
-        const s = v.trim();
-        if (s === "") return false;
-        return isValidDateObj(new Date(s));
+        if (isBlankString(v)) return false;
+        return isValidDateObj(new Date(v));
     }
     return false;
 }
@@ -347,9 +347,8 @@ export function toValidDate(input: unknown): Date | null {
         return isValidDateObj(d) ? d : null;
     }
     if (typeof input === "string") {
-        const s = input.trim();
-        if (s === "") return null;
-        const d = new Date(s);
+        if (isBlankString(input)) return null;
+        const d = new Date(input);
         return isValidDateObj(d) ? d : null;
     }
     return null;

@@ -1,11 +1,11 @@
 import { DataFrame } from "./dataframe"
 import { ColumnExpr, lit, all, exclude, coalesce, when } from "./columnExpressions"
-import { DataType, DataTypeRegistry } from "./datatypes"
+import { DataTypeRegistry } from "./datatypes"
 import { concat } from "./functions"
-import type { RowRecord } from "./types"
+import type { RowRecord, DataFrameSchema } from "./types"
 
 export const $tbl = {
-    data: <T extends RowRecord>(data: T[], schema?: Record<string, DataType>) => new DataFrame(data, schema),
+    data: <T extends RowRecord>(data: T[], schema?: DataFrameSchema) => new DataFrame(data, schema),
     col: <T = any>(name: keyof T | string) => new ColumnExpr<T>(name),
     all,
     exclude,

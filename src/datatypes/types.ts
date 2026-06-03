@@ -29,7 +29,7 @@ import type { RowRecord } from "../types";
 
 export class Int8Type extends SignedIntegerType {
     readonly name = "Int8";
-    coerce(val: any): number | null { return toValidInt(val, "Int8"); }
+    coerce(val: unknown): number | null { return toValidInt(val, "Int8"); }
     equals(other: DataType): boolean { return other.name === "Int8"; }
     allocate(size: number): Int8Array { return new Int8Array(size); }
 }
@@ -37,7 +37,7 @@ export const Int8 = new Int8Type();
 
 export class Int16Type extends SignedIntegerType {
     readonly name = "Int16";
-    coerce(val: any): number | null { return toValidInt(val, "Int16"); }
+    coerce(val: unknown): number | null { return toValidInt(val, "Int16"); }
     equals(other: DataType): boolean { return other.name === "Int16"; }
     allocate(size: number): Int16Array { return new Int16Array(size); }
 }
@@ -45,7 +45,7 @@ export const Int16 = new Int16Type();
 
 export class Int32Type extends SignedIntegerType {
     readonly name = "Int32";
-    coerce(val: any): number | null { return toValidInt(val, "Int32"); }
+    coerce(val: unknown): number | null { return toValidInt(val, "Int32"); }
     equals(other: DataType): boolean { return other.name === "Int32"; }
     allocate(size: number): Int32Array { return new Int32Array(size); }
 }
@@ -53,7 +53,7 @@ export const Int32 = new Int32Type();
 
 export class Int64Type extends SignedIntegerType<bigint | null> {
     readonly name = "Int64";
-    coerce(val: any): bigint | null { return toValidBigInt(val); }
+    coerce(val: unknown): bigint | null { return toValidBigInt(val); }
     equals(other: DataType): boolean { return other.name === "Int64"; }
     allocate(size: number): BigInt64Array { return new BigInt64Array(size); }
 }
@@ -61,7 +61,7 @@ export const Int64 = new Int64Type();
 
 export class UInt8Type extends UnsignedIntegerType {
     readonly name = "UInt8";
-    coerce(val: any): number | null { return toValidInt(val, "UInt8"); }
+    coerce(val: unknown): number | null { return toValidInt(val, "UInt8"); }
     equals(other: DataType): boolean { return other.name === "UInt8"; }
     allocate(size: number): Uint8Array { return new Uint8Array(size); }
 }
@@ -69,7 +69,7 @@ export const UInt8 = new UInt8Type();
 
 export class UInt16Type extends UnsignedIntegerType {
     readonly name = "UInt16";
-    coerce(val: any): number | null { return toValidInt(val, "UInt16"); }
+    coerce(val: unknown): number | null { return toValidInt(val, "UInt16"); }
     equals(other: DataType): boolean { return other.name === "UInt16"; }
     allocate(size: number): Uint16Array { return new Uint16Array(size); }
 }
@@ -77,7 +77,7 @@ export const UInt16 = new UInt16Type();
 
 export class UInt32Type extends UnsignedIntegerType {
     readonly name = "UInt32";
-    coerce(val: any): number | null { return toValidInt(val, "UInt32"); }
+    coerce(val: unknown): number | null { return toValidInt(val, "UInt32"); }
     equals(other: DataType): boolean { return other.name === "UInt32"; }
     allocate(size: number): Uint32Array { return new Uint32Array(size); }
 }
@@ -85,7 +85,7 @@ export const UInt32 = new UInt32Type();
 
 export class UInt64Type extends UnsignedIntegerType<bigint | null> {
     readonly name = "UInt64";
-    coerce(val: any): bigint | null { return toValidBigInt(val, "UInt64"); }
+    coerce(val: unknown): bigint | null { return toValidBigInt(val, "UInt64"); }
     equals(other: DataType): boolean { return other.name === "UInt64"; }
     allocate(size: number): BigUint64Array { return new BigUint64Array(size); }
 }
@@ -93,7 +93,7 @@ export const UInt64 = new UInt64Type();
 
 export class Float32Type extends FloatDataType {
     readonly name = "Float32";
-    coerce(val: any): number | null { return toValidFloat(val, "Float32"); }
+    coerce(val: unknown): number | null { return toValidFloat(val, "Float32"); }
     equals(other: DataType): boolean { return other.name === "Float32"; }
     allocate(size: number): Float32Array { return new Float32Array(size); }
 }
@@ -101,7 +101,7 @@ export const Float32 = new Float32Type();
 
 export class Float64Type extends FloatDataType {
     readonly name = "Float64";
-    coerce(val: any): number | null { return toValidFloat(val, "Float64"); }
+    coerce(val: unknown): number | null { return toValidFloat(val, "Float64"); }
     equals(other: DataType): boolean { return other.name === "Float64"; }
     allocate(size: number): Float64Array { return new Float64Array(size); }
 }
@@ -115,7 +115,7 @@ export class DecimalType extends NumericDataType {
             ? `Decimal(${precision}, ${scale})`
             : "Decimal";
     }
-    coerce(val: any): number | null {
+    coerce(val: unknown): number | null {
         return toValidDecimal(val, { precision: this.precision, scale: this.scale });
     }
     equals(other: DataType): boolean {
@@ -133,7 +133,7 @@ export class DecimalType extends NumericDataType {
 export class BooleanType extends DataType {
     readonly name = "Boolean";
     override get isBoolean(): boolean { return true; }
-    coerce(val: any): boolean | null {
+    coerce(val: unknown): boolean | null {
         if (val == null) return null;
         return !!val;
     }
@@ -146,7 +146,7 @@ export class Utf8Type extends DataType {
     readonly name = "Utf8";
     override get isString(): boolean { return true; }
     override get isUtf8(): boolean { return true; }
-    coerce(val: any): string | null {
+    coerce(val: unknown): string | null {
         if (val == null) return null;
         return String(val);
     }
@@ -158,7 +158,7 @@ export const Utf8 = new Utf8Type();
 export class BinaryType extends DataType {
     readonly name = "Binary";
     override get isBinary(): boolean { return true; }
-    coerce(val: any): Uint8Array | null { return toValidBinary(val); }
+    coerce(val: unknown): Uint8Array | null { return toValidBinary(val); }
     equals(other: DataType): boolean { return other.name === "Binary"; }
     allocate(size: number): (Uint8Array | null)[] { return new Array(size).fill(null); }
 }
@@ -167,7 +167,7 @@ export const Binary = new BinaryType();
 export class NullType extends DataType {
     readonly name = "Null";
     override get isNull(): boolean { return true; }
-    coerce(_val: any): null { return null; }
+    coerce(_val: unknown): null { return null; }
     equals(other: DataType): boolean { return other.name === "Null"; }
     allocate(size: number): null[] { return new Array(size).fill(null); }
 }
@@ -176,7 +176,7 @@ export const Null = new NullType();
 export class ObjectType extends DataType {
     readonly name = "Object";
     override get isObject(): boolean { return true; }
-    coerce(val: any): any { return val === undefined ? null : val; }
+    coerce(val: unknown): any { return val === undefined ? null : val; }
     equals(other: DataType): boolean { return other.name === "Object"; }
     allocate(size: number): any[] { return new Array(size).fill(null); }
 }
@@ -188,7 +188,7 @@ export const Object = new ObjectType();
 
 export class DateType extends TemporalDataType {
     readonly name = "Date";
-    coerce(val: any): Date | null {
+    coerce(val: unknown): Date | null {
         const d = toValidDate(val);
         if (!d) return null;
         d.setUTCHours(0, 0, 0, 0);
@@ -201,7 +201,7 @@ export const Date = new DateType();
 
 export class DatetimeType extends TemporalDataType {
     readonly name = "Datetime";
-    coerce(val: any): Date | null { return toValidDate(val); }
+    coerce(val: unknown): Date | null { return toValidDate(val); }
     equals(other: DataType): boolean { return other.name === "Datetime"; }
     allocate(size: number): (Date | null)[] { return new Array(size).fill(null); }
 }
@@ -209,7 +209,7 @@ export const Datetime = new DatetimeType();
 
 export class TimeType extends TemporalDataType {
     readonly name = "Time";
-    coerce(val: any): string | null {
+    coerce(val: unknown): string | null {
         if (val == null) return null;
         if (typeof val === "string") {
             const trimmed = val.trim();
@@ -230,7 +230,7 @@ export const Time = new TimeType();
 
 export class DurationType extends TemporalDataType {
     readonly name = "Duration";
-    coerce(val: any): number | null { return toValidNumber(val); }
+    coerce(val: unknown): number | null { return toValidNumber(val); }
     equals(other: DataType): boolean { return other.name === "Duration"; }
     allocate(size: number): (number | null)[] { return new Array(size).fill(null); }
 }
@@ -243,7 +243,7 @@ export const Duration = new DurationType();
 export class ListType<TInner = any> extends NestedDataType<TInner[] | null> {
     readonly name = "List";
     constructor(public readonly innerType: DataType<TInner>) { super(); }
-    coerce(val: any): TInner[] | null {
+    coerce(val: unknown): TInner[] | null {
         if (val == null) return null;
         const arr = isArrayOrTypedArray(val) ? Array.from(val as any) : [val];
         const len = arr.length;
@@ -263,7 +263,7 @@ export const List = <TInner>(inner: DataType<TInner>) => new ListType<TInner>(in
 export class StructType<TFields extends RowRecord = any> extends NestedDataType<TFields | null> {
     readonly name = "Struct";
     constructor(public readonly fields: { [K in keyof TFields]: DataType<TFields[K]> }) { super(); }
-    coerce(val: any): TFields | null {
+    coerce(val: unknown): TFields | null {
         if (!isObj(val)) return null;
         const res: any = {};
         for (const [k, type] of globalThis.Object.entries(this.fields)) {

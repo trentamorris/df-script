@@ -203,3 +203,13 @@ export function stripChars(
     }
     return (returnStringOnNull || result !== "") ? result : null;
 }
+
+export function isBlankString(v: unknown): v is string {
+    if (typeof v === "string") {
+        return v.trim().length === 0;
+    }
+    if (v instanceof String) {
+        return v.valueOf().trim().length === 0;
+    }
+    return false;
+}

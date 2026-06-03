@@ -20,40 +20,43 @@ export class StringExprNamespace {
         return derive(this.expr, kleeneUnary((v) => fn(String(v))));
     }
 
+    _patternGuard(pattern: any, fn: () => any) {
+        if (pattern == null) {
+            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
+        }
+        return fn();
+    }
+
     concat(other: string | IExpr) {
         return derive(this.expr, kleeneBinary(this.expr, other, (v, o) => String(v) + String(o)));
     }
 
     contains(pattern: string | RegExp) {
-        if (pattern == null) {
-            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
-        }
-        return this._deriveString((str) => {
-            return pattern instanceof RegExp ? pattern.test(str) : str.includes(pattern);
-        });
+        return this._patternGuard(pattern, () =>
+            this._deriveString((str) => pattern instanceof RegExp ? pattern.test(str) : str.includes(pattern))
+        );
     }
 
     count_matches(pattern: string | RegExp) {
-        if (pattern == null) {
-            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
-        }
-        return this._deriveString((str) => {
-            if (pattern instanceof RegExp) {
-                const regex = pattern.global
-                    ? pattern
-                    : new RegExp(pattern.source, pattern.flags + "g");
-                const matches = str.match(regex);
-                return matches ? matches.length : 0;
-            } else {
-                let count = 0;
-                let pos = str.indexOf(pattern);
-                while (pos !== -1) {
-                    count++;
-                    pos = str.indexOf(pattern, pos + pattern.length);
+        return this._patternGuard(pattern, () =>
+            this._deriveString((str) => {
+                if (pattern instanceof RegExp) {
+                    const regex = pattern.global
+                        ? pattern
+                        : new RegExp(pattern.source, pattern.flags + "g");
+                    const matches = str.match(regex);
+                    return matches ? matches.length : 0;
+                } else {
+                    let count = 0;
+                    let pos = str.indexOf(pattern);
+                    while (pos !== -1) {
+                        count++;
+                        pos = str.indexOf(pattern, pos + pattern.length);
+                    }
+                    return count;
                 }
-                return count;
-            }
-        });
+            })
+        );
     }
 
     decode_uri_component() {
@@ -85,14 +88,13 @@ export class StringExprNamespace {
     }
 
     extract(pattern: RegExp, group: number = 0) {
-        if (pattern == null) {
-            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
-        }
-        return this._deriveString((str) => {
-            const match = str.match(pattern);
-            if (!match) return null;
-            return match[group] !== undefined ? match[group] : null;
-        });
+        return this._patternGuard(pattern, () =>
+            this._deriveString((str) => {
+                const match = str.match(pattern);
+                if (!match) return null;
+                return match[group] !== undefined ? match[group] : null;
+            })
+        );
     }
 
     len() {
@@ -124,25 +126,23 @@ export class StringExprNamespace {
     }
 
     replace(pattern: string | RegExp, replacement: string) {
-        if (pattern == null) {
-            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
-        }
-        return this._deriveString((str) => str.replace(pattern, replacement));
+        return this._patternGuard(pattern, () =>
+            this._deriveString((str) => str.replace(pattern, replacement))
+        );
     }
 
     replace_all(pattern: string | RegExp, replacement: string) {
-        if (pattern == null) {
-            return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
-        }
-        return this._deriveString((str) => {
-            if (pattern instanceof RegExp) {
-                const regex = pattern.global
-                    ? pattern
-                    : new RegExp(pattern.source, pattern.flags + "g");
-                return str.replace(regex, replacement);
-            }
-            return str.replaceAll(pattern, replacement);
-        });
+        return this._patternGuard(pattern, () =>
+            this._deriveString((str) => {
+                if (pattern instanceof RegExp) {
+                    const regex = pattern.global
+                        ? pattern
+                        : new RegExp(pattern.source, pattern.flags + "g");
+                    return str.replace(regex, replacement);
+                }
+                return str.replaceAll(pattern, replacement);
+            })
+        );
     }
 
     reverse() {

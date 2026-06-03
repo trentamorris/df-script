@@ -14,6 +14,19 @@ const df = new DataFrame([
 const dfLim = df.limit(2);
 if (dfLim.height !== 2) throw new Error("Limit height mismatch");
 
+// 1.1 Limit with partial options (verifying default offset = 0 in argument)
+const dfLimPartial = df.limit(3, { from: "end" });
+if (dfLimPartial.height !== 3) throw new Error("Limit with partial options height mismatch");
+const collectedLimPartial = dfLimPartial.to_dicts();
+if (collectedLimPartial[0].val !== 3 || collectedLimPartial[2].val !== 5) {
+    throw new Error("Limit with partial options values mismatch");
+}
+
+// 1.2 Limit with NaN handling
+const dfLimNaN = df.limit(NaN, { offset: NaN });
+if (dfLimNaN.height !== 0) throw new Error("Limit with NaN height mismatch");
+
+
 // 2. Slice
 const dfSlice = df.slice(1, 4);
 if (dfSlice.height !== 3) throw new Error("Slice height mismatch");

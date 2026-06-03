@@ -1,6 +1,6 @@
 import { ColumnExpr } from "../ColumnExpr";
 import type { IExpr, Scalar } from "../../types";
-import { isArrayOrTypedArray } from "../../utils";
+import { isArrayOrTypedArray, isColExpr } from "../../utils";
 
 
 export function coalesce(...exprs: (IExpr | Scalar | (IExpr | Scalar)[])[]): ColumnExpr<any> {
@@ -12,7 +12,7 @@ export function coalesce(...exprs: (IExpr | Scalar | (IExpr | Scalar)[])[]): Col
     expr.ops.push((_, columns) => {
         const height = _.length;
         const evaluateArg = (arg: any): any => {
-            if (arg && typeof arg === "object" && "evaluate" in arg) {
+            if (isColExpr(arg)) {
                 return (arg as IExpr).evaluate(columns, height);
             }
             if (typeof arg === "string") {
@@ -21,9 +21,12 @@ export function coalesce(...exprs: (IExpr | Scalar | (IExpr | Scalar)[])[]): Col
             return arg;
         };
 
-        const evaluatedArrays = rawArgs.map(evaluateArg);
+        const exprCount = rawArgs.length;
+        const evaluatedArrays = new Array(exprCount);
+        for (let j = 0; j < exprCount; j++) {
+            evaluatedArrays[j] = evaluateArg(rawArgs[j]);
+        }
         const result = new Array(height);
-        const exprCount = evaluatedArrays.length;
 
         for (let i = 0; i < height; i++) {
             let foundVal = null;

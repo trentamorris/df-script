@@ -1,5 +1,5 @@
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict } from "../types"
-import { isArrayOrTypedArray } from "../utils"
+import { isArrayOrTypedArray, isColExpr } from "../utils"
 import type { DataType } from "../datatypes"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
@@ -56,7 +56,7 @@ export class ExprBase implements IExpr {
     public partitionBy: (string | IExpr)[] | null = null;
 
     public _resolve(val: any, columns: ColumnDict, height: number) {
-        if (val && typeof val === "object" && "evaluate" in val) {
+        if (isColExpr(val)) {
             if (val.isLiteral && val.ops.length === 1) {
                 return val.literalValue;
             }

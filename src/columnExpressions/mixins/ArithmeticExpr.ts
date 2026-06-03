@@ -48,7 +48,7 @@ export const ArithmeticExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         clip(lower: number | null = null, upper: number | null = null) {
             return derive(this, kleeneUnary((v) => {
                 if (lower !== null && upper !== null) {
-                    return clamp({ val: v, min: lower, max: upper });
+                    return clamp(v, lower, upper);
                 } else if (lower !== null) {
                     return Math.max(v, lower);
                 } else if (upper !== null) {

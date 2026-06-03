@@ -19,8 +19,8 @@ export interface SortOptions<T> {
 
 export interface PivotOptions<T> {
     index: (keyof T) | (keyof T)[];
-    columns: keyof T;
-    values: keyof T;
+    columns: (keyof T) | (keyof T)[];
+    values: (keyof T) | (keyof T)[];
     agg?: AggFn<any> | string;
 }
 

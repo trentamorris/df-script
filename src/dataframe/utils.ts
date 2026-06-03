@@ -1,7 +1,7 @@
 import type { IExpr, ColumnData, ColumnDict } from "../types"
 import { DataType, DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR } from "./constants"
-import { isObj } from "../utils"
+import { isObj, isTypedArray } from "../utils"
 import { assertColumnExists } from "../exceptions"
 
 function partition_by_columns(
@@ -24,8 +24,8 @@ function partition_by_columns(
     }
 
     for (let i = 0; i < height; i++) {
-        const keyValues = new Array(keyColumns.length);
-        for (let j = 0; j < keyColumns.length; j++) {
+        const keyValues = new Array(pKeysLen);
+        for (let j = 0; j < pKeysLen; j++) {
             const val = keyColumns[j][i];
             keyValues[j] = val == null ? "" : String(val);
         }
@@ -205,7 +205,9 @@ export function gatherColumnsByIndices(columns: ColumnDict, indices: number[]): 
     for (let j = 0; j < numKeys; j++) {
         const k = keys[j];
         const oldCol = columns[k];
-        const newCol = new Array(newHeight);
+        const newCol = isTypedArray(oldCol)
+            ? new (oldCol.constructor as any)(newHeight)
+            : new Array(newHeight);
         for (let idx = 0; idx < newHeight; idx++) {
             newCol[idx] = oldCol[indices[idx]];
         }
@@ -213,4 +215,25 @@ export function gatherColumnsByIndices(columns: ColumnDict, indices: number[]): 
     }
     return res;
 }
+
+/**
+ * Computes a hash string for a row at the given index, using one or more column keys.
+ * Includes a single-key fast path to avoid array allocation and join overhead.
+ */
+export function computeRowHash(columns: ColumnDict, keys: string[], rowIndex: number): string {
+    const len = keys.length;
+    if (len === 1) {
+        const val = columns[keys[0]][rowIndex];
+        return val == null ? "" : String(val);
+    }
+    const vals = new Array(len);
+    for (let i = 0; i < len; i++) {
+        const val = columns[keys[i]][rowIndex];
+        vals[i] = val == null ? "" : String(val);
+    }
+    return vals.join(KEY_SEPARATOR);
+}
+
+
+
 

@@ -2,8 +2,7 @@ import { DataFrame } from "../dataframe"
 import { inferColumnType } from "../utils"
 import type { GroupMap } from "../types"
 import { resolveColumnSelectors, ALL_COLUMNS_MARKER } from "../../columnExpressions"
-import { DataType } from "../../datatypes"
-import type { IExpr, ColumnDict, RowRecord } from "../../types"
+import type { IExpr, ColumnDict, RowRecord, DataFrameSchema } from "../../types"
 
 export class GroupedData<T, K extends keyof T> {
     private groups: GroupMap
@@ -11,7 +10,7 @@ export class GroupedData<T, K extends keyof T> {
     private allKeys: (keyof T)[]
     private parentColumns: ColumnDict
     private parentHeight: number
-    private parentSchema: Record<string, DataType>
+    private parentSchema: DataFrameSchema
 
 
     constructor(
@@ -20,7 +19,7 @@ export class GroupedData<T, K extends keyof T> {
         allKeys: (keyof T)[],
         parentColumns: ColumnDict,
         parentHeight: number,
-        parentSchema: Record<string, DataType>
+        parentSchema: DataFrameSchema
     ) {
         this.groups = groups
         this.keys = keys
@@ -54,7 +53,7 @@ export class GroupedData<T, K extends keyof T> {
             groupIdx++;
         }
 
-        const outSchema: Record<string, DataType> = {};
+        const outSchema: DataFrameSchema = {};
         for (const k of keysStr) {
             outSchema[k] = this.parentSchema[k];
         }
@@ -119,7 +118,7 @@ export class GroupedData<T, K extends keyof T> {
             newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
         }
 
-        const outSchema: Record<string, DataType> = {};
+        const outSchema: DataFrameSchema = {};
         for (const k of keysStr) {
             outSchema[k] = this.parentSchema[k];
         }

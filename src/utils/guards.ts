@@ -1,5 +1,6 @@
 import { isValidDateObj } from "./date";
 import { isValidInt } from "./number";
+import { isBlankString } from "./string";
 
 export function isTypedArray(v: unknown): v is ArrayBufferView {
     return ArrayBuffer.isView(v) && !(v instanceof DataView);
@@ -41,8 +42,8 @@ export function isClass(v: unknown): v is new (...args: any[]) => any {
     return (
         /^class\s/.test(Function.prototype.toString.call(v)) ||
         (v.prototype !== undefined &&
-         v.prototype.constructor === v &&
-         Object.getOwnPropertyDescriptor(v, "prototype")?.writable === false)
+            v.prototype.constructor === v &&
+            Object.getOwnPropertyDescriptor(v, "prototype")?.writable === false)
     );
 }
 
@@ -103,9 +104,9 @@ export function tryParseBoolean(v: unknown): boolean | undefined {
 
 export function isJsonString(input: unknown, allowPrimitives = false): input is string {
     if (typeof input !== "string") return false;
-    const s = input.trim();
-    if (s === "") return false;
+    if (isBlankString(input)) return false;
 
+    const s = (input as string).trim();
     if (!allowPrimitives) {
         const isWrapped = (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"));
         if (!isWrapped) return false;
@@ -125,6 +126,15 @@ export function safeJsonParse(input: unknown): unknown {
         return JSON.parse(input);
     } catch {
         return input;
+    }
+}
+
+export function isColExpr(v: unknown): v is { evaluate: (...args: any[]) => any;[key: string]: any } {
+    if (!isObj(v)) return false;
+    try {
+        return "evaluate" in v && typeof (v as any).evaluate === "function";
+    } catch {
+        return false;
     }
 }
 

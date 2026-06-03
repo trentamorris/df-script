@@ -1,9 +1,11 @@
 import type { DataFrame } from "./dataframe/dataframe";
+import type { DataType } from "./datatypes/DataType";
 
 export type RowRecord = Record<string, any>;
 
 export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
 export type ColumnDict = Record<string, ColumnData>;
+export type DataFrameSchema = Record<string, DataType>;
 
 export type DataFrameColumns<T extends RowRecord> = {
     [K in keyof T]: ColumnData<T[K]>;
@@ -27,7 +29,7 @@ export interface IExpr {
     windowOp?: { type: string;[key: string]: any } | null;
     isWindow?: boolean;
     alias(name: string): this;
-    cast(dataType: any): this;
+    cast(dataType: DataType): this;
     _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
     evaluate(columns: ColumnDict, height: number): ColumnData;
     evaluatePreGrouping(columns: ColumnDict, height: number): ColumnData;

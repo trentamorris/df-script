@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, isArrayOfType } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian } from "../../utils";
 import { ComputeError } from "../../exceptions";
 
 export class ListExprNamespace {
@@ -167,24 +167,7 @@ export class ListExprNamespace {
     }
 
     median() {
-        return this._deriveList((arr) => {
-            if (!isArrayOfType(arr, "number", { allowNulls: true })) return null;
-            const len = (arr as any).length;
-            const nums: number[] = [];
-            for (let i = 0; i < len; i++) {
-                const val = (arr as any)[i];
-                if (val != null) {
-                    nums.push(val);
-                }
-            }
-            const numsLen = nums.length;
-            if (numsLen === 0) return null;
-            nums.sort((a, b) => a - b);
-            const mid = Math.floor(numsLen / 2);
-            return numsLen % 2 !== 0
-                ? nums[mid]
-                : (nums[mid - 1] + nums[mid]) / 2;
-        });
+        return this._deriveList((arr) => computeMedian(Array.from(arr as any)));
     }
 
     min() {

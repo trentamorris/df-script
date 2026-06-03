@@ -73,6 +73,44 @@ try {
     if (isArrayOfType([], "number", { allowEmpty: false })) throw new Error("Expected empty array to fail with allowEmpty: false");
     if (isArrayOfType([], "number", { mode: "some", allowEmpty: true })) throw new Error("Expected empty array to still fail 'some' even with allowEmpty: true");
 
+    // Test toValidArray & toValidStringArray
+    const { toValidArray, toValidStringArray } = require("../../src/utils/list");
+    
+    // toValidArray tests
+    const arrNull = toValidArray(null);
+    if (!Array.isArray(arrNull) || arrNull.length !== 0) throw new Error("Expected null to return empty array");
+    
+    const arrUndef = toValidArray(undefined);
+    if (!Array.isArray(arrUndef) || arrUndef.length !== 0) throw new Error("Expected undefined to return empty array");
+    
+    const inputArr = [1, 2, 3];
+    const arrCopied = toValidArray(inputArr);
+    if (arrCopied === inputArr) throw new Error("Expected array input to return a new shallow copy reference");
+    if (arrCopied.length !== 3 || arrCopied[0] !== 1 || arrCopied[1] !== 2 || arrCopied[2] !== 3) {
+        throw new Error("Expected shallow copy to contain same elements");
+    }
+    
+    const typedArr = new Int32Array([10, 20]);
+    const arrFromTyped = toValidArray(typedArr);
+    if (!Array.isArray(arrFromTyped) || arrFromTyped[0] !== 10 || arrFromTyped[1] !== 20) {
+        throw new Error("Expected typed array to be converted to standard array");
+    }
+    
+    const scalarVal = 42;
+    const arrScalar = toValidArray(scalarVal);
+    if (!Array.isArray(arrScalar) || arrScalar.length !== 1 || arrScalar[0] !== 42) {
+        throw new Error("Expected scalar to be wrapped in a single-element array");
+    }
+
+    // toValidStringArray tests
+    const strArr1 = toValidStringArray(null);
+    if (!Array.isArray(strArr1) || strArr1.length !== 0) throw new Error("Expected toValidStringArray(null) to return []");
+
+    const strArr2 = toValidStringArray([1, "hello", null, undefined]);
+    if (strArr2.length !== 4 || strArr2[0] !== "1" || strArr2[1] !== "hello" || strArr2[2] !== "null" || strArr2[3] !== "undefined") {
+        throw new Error("Expected elements to be converted to strings");
+    }
+
     console.log("🎉 ALL UTILS TYPES TESTS PASSED SUCCESSFULLY!");
 } catch (err) {
     console.error("❌ UTILS TYPES TESTS FAILED:", err);

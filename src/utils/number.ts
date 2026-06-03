@@ -36,11 +36,19 @@ export function toValidNumber(v: unknown): number | null {
     return null;
 }
 
-export function clamp<T extends number | bigint>(opts: { val: T; min: T; max: T }): T {
-    const { val, min, max } = opts;
-    if (val < min) return min;
-    if (val > max) return max;
-    return val;
+export function clamp<T extends number | bigint>(
+    val: T,
+    min: T,
+    max: T,
+    options: { safe?: boolean } = { safe: true }
+): T {
+    let v = val;
+    if (options.safe && typeof v === "number" && Number.isNaN(v)) {
+        v = min;
+    }
+    if (v < min) return min;
+    if (v > max) return max;
+    return v;
 }
 
 // ============================================================================
@@ -141,7 +149,7 @@ export function toValidInt(
     }
 
     const limits = typeof range === "string" ? INT_RANGES[range] : range;
-    return clamp({ val: n, min: limits.min, max: limits.max });
+    return clamp(n, limits.min, limits.max);
 }
 
 export function toValidBigInt(
@@ -174,7 +182,7 @@ export function toValidBigInt(
     }
 
     const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
-    return clamp({ val: bigintVal, min: limits.min, max: limits.max });
+    return clamp(bigintVal, limits.min, limits.max);
 }
 
 // ============================================================================
@@ -233,7 +241,7 @@ export function toValidDecimal(
         const integerDigits = precision - scaleVal;
         if (integerDigits > 0) {
             const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scaleVal);
-            n = clamp({ val: n, min: -maxVal, max: maxVal });
+            n = clamp(n, -maxVal, maxVal);
         }
     }
 
@@ -252,5 +260,43 @@ export function mulberry32(seed: number): () => number {
         t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
+}
+
+/**
+ * Computes the median of a numeric array, filtering out null/undefined values.
+ * Returns null if no valid numbers remain.
+ */
+export function computeMedian(values: ArrayLike<any>): number | null {
+    const len = values.length;
+    const nums: number[] = [];
+    for (let i = 0; i < len; i++) {
+        const val = values[i];
+        if (val != null) nums.push(val);
+    }
+    const n = nums.length;
+    if (n === 0) return null;
+    nums.sort((a, b) => a - b);
+    const mid = Math.floor(n / 2);
+    return n % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+}
+
+/**
+ * Computes the quantile of a numeric array using linear interpolation, filtering out null/undefined values.
+ * q must be in [0, 1]. Returns null if no valid numbers remain.
+ */
+export function computeQuantile(values: ArrayLike<any>, q: number): number | null {
+    const len = values.length;
+    const nums: number[] = [];
+    for (let i = 0; i < len; i++) {
+        if (values[i] != null) nums.push(values[i]);
+    }
+    const n = nums.length;
+    if (n === 0) return null;
+    nums.sort((a, b) => a - b);
+    const idx = q * (n - 1);
+    const low = Math.floor(idx);
+    const high = Math.ceil(idx);
+    if (low === high) return nums[low];
+    return nums[low] + (idx - low) * (nums[high] - nums[low]);
 }
 

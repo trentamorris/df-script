@@ -2,7 +2,7 @@ import type { AggFn } from "../../types"
 import type { ExprConstructor } from "../types"
 import { derive } from "../ExprBase"
 import { ComputeError } from "../../exceptions"
-import { getListStats, isArrayOfType, isArrayOrTypedArray } from "../../utils"
+import { getListStats, isArrayOrTypedArray, computeMedian, computeQuantile } from "../../utils"
 
 export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
     return class extends Base {
@@ -78,24 +78,7 @@ export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         median() {
-            return this._deriveAgg(v => {
-                if (!isArrayOfType(v, "number", { allowNulls: true })) return null;
-                const len = (v as any).length;
-                const nums: number[] = [];
-                for (let i = 0; i < len; i++) {
-                    const val = (v as any)[i];
-                    if (val != null) {
-                        nums.push(val);
-                    }
-                }
-                const numsLen = nums.length;
-                if (numsLen === 0) return null;
-                nums.sort((a, b) => a - b);
-                const mid = Math.floor(numsLen / 2);
-                return numsLen % 2 !== 0
-                    ? nums[mid]
-                    : (nums[mid - 1] + nums[mid]) / 2;
-            });
+            return this._deriveAgg(v => computeMedian(v));
         }
 
         min() {
@@ -148,20 +131,7 @@ export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
 
         quantile(q: number) {
             if (q < 0 || q > 1) throw new ComputeError("Quantile q must be between 0 and 1");
-            return this._deriveAgg(v => {
-                const f: any[] = [];
-                for (let i = 0; i < v.length; i++) {
-                    if (v[i] != null) f.push(v[i]);
-                }
-                const fLen = f.length;
-                if (!fLen) return null;
-                f.sort((a, b) => a - b);
-                const idx = (fLen - 1) * q;
-                const low = Math.floor(idx);
-                const high = Math.ceil(idx);
-                if (low === high) return f[low];
-                return f[low] + (idx - low) * (f[high] - f[low]);
-            });
+            return this._deriveAgg(v => computeQuantile(v, q));
         }
 
         std() {

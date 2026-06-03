@@ -1,6 +1,6 @@
 import { ColumnExpr } from "../ColumnExpr";
 import type { IExpr, Scalar } from "../../types";
-import { isArrayOrTypedArray } from "../../utils";
+import { isArrayOrTypedArray, isColExpr } from "../../utils";
 
 type WhenArg = IExpr | Scalar;
 
@@ -45,7 +45,7 @@ export class WhenThen extends ColumnExpr<any> {
             const height = _.length;
 
             const evaluateArg = (arg: any): any => {
-                if (arg && typeof arg === "object" && "evaluate" in arg) {
+                if (isColExpr(arg)) {
                     return (arg as IExpr).evaluate(columns, height);
                 }
                 if (typeof arg === "string" && (arg in columns)) {
@@ -54,12 +54,16 @@ export class WhenThen extends ColumnExpr<any> {
                 return arg;
             };
 
-            const evaluatedPreds = this.predicates.map(evaluateArg);
-            const evaluatedVals = this.values.map(evaluateArg);
+            const numConditions = this.predicates.length;
+            const evaluatedPreds = new Array(numConditions);
+            const evaluatedVals = new Array(numConditions);
+            for (let j = 0; j < numConditions; j++) {
+                evaluatedPreds[j] = evaluateArg(this.predicates[j]);
+                evaluatedVals[j] = evaluateArg(this.values[j]);
+            }
             const evaluatedOtherwise = evaluateArg(this.otherwiseValue);
 
             const result = new Array(height);
-            const numConditions = evaluatedPreds.length;
 
             for (let i = 0; i < height; i++) {
                 let matched = false;

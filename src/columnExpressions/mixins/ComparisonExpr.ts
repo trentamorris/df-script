@@ -18,6 +18,102 @@ function getCacheKey(val: any): any {
     return val;
 }
 
+function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any, invert: boolean): any[] {
+    const height = vArray.length;
+    const result = new Array(height);
+    if (values && typeof values === 'object' && 'evaluate' in values) {
+        const resolved = values.evaluate(columns, height);
+        for (let i = 0; i < height; i++) {
+            const v = vArray[i];
+            if (v == null) {
+                result[i] = null;
+            } else {
+                const candidates = resolved[i];
+                const set = new Set();
+                if (isArrayOrTypedArray(candidates)) {
+                    const cLen = candidates.length;
+                    for (let j = 0; j < cLen; j++) {
+                        set.add(getCacheKey(candidates[j]));
+                    }
+                } else {
+                    set.add(getCacheKey(candidates));
+                }
+                const hasVal = set.has(getCacheKey(v));
+                result[i] = invert ? !hasVal : hasVal;
+            }
+        }
+    } else {
+        const arr = isArrayOrTypedArray(values) ? values : [];
+        const set = new Set();
+        const arrLen = arr.length;
+        for (let j = 0; j < arrLen; j++) {
+            set.add(getCacheKey(arr[j]));
+        }
+        for (let i = 0; i < height; i++) {
+            const v = vArray[i];
+            if (v == null) {
+                result[i] = null;
+            } else {
+                const hasVal = set.has(getCacheKey(v));
+                result[i] = invert ? !hasVal : hasVal;
+            }
+        }
+    }
+    return result;
+}
+
+function evaluateDuplication(vArray: ArrayLike<any>, checkDuplicate: boolean): boolean[] {
+    const height = vArray.length;
+    const counts = new Map<any, number>();
+    const keys = new Array(height);
+    for (let i = 0; i < height; i++) {
+        const k = getCacheKey(vArray[i]);
+        keys[i] = k;
+        counts.set(k, (counts.get(k) || 0) + 1);
+    }
+    const result = new Array(height);
+    if (checkDuplicate) {
+        for (let i = 0; i < height; i++) {
+            result[i] = (counts.get(keys[i]) || 0) > 1;
+        }
+    } else {
+        for (let i = 0; i < height; i++) {
+            result[i] = counts.get(keys[i]) === 1;
+        }
+    }
+    return result;
+}
+
+function compareMissing(vArray: ArrayLike<any>, rResolved: any, invert: boolean): boolean[] {
+    const height = vArray.length;
+    const result = new Array(height);
+    if (isArrayOrTypedArray(rResolved)) {
+        for (let i = 0; i < height; i++) {
+            const v = vArray[i];
+            const r = rResolved[i];
+            if (v == null && r == null) {
+                result[i] = !invert;
+            } else if (v == null || r == null) {
+                result[i] = invert;
+            } else {
+                result[i] = invert ? v !== r : v === r;
+            }
+        }
+    } else {
+        for (let i = 0; i < height; i++) {
+            const v = vArray[i];
+            if (v == null && rResolved == null) {
+                result[i] = !invert;
+            } else if (v == null || rResolved == null) {
+                result[i] = invert;
+            } else {
+                result[i] = invert ? v !== rResolved : v === rResolved;
+            }
+        }
+    }
+    return result;
+}
+
 export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
     return class extends Base {
 
@@ -54,26 +150,8 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
 
         eq_missing(val: any) {
             return derive(this, (vArray, columns) => {
-                const height = vArray.length;
-                const rResolved = this._resolve(val, columns, height);
-                const result = new Array(height);
-                if (isArrayOrTypedArray(rResolved)) {
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        const r = rResolved[i];
-                        if (v == null && r == null) result[i] = true;
-                        else if (v == null || r == null) result[i] = false;
-                        else result[i] = v === r;
-                    }
-                } else {
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        if (v == null && rResolved == null) result[i] = true;
-                        else if (v == null || rResolved == null) result[i] = false;
-                        else result[i] = v === rResolved;
-                    }
-                }
-                return result;
+                const rResolved = this._resolve(val, columns, vArray.length);
+                return compareMissing(vArray, rResolved, false);
             });
         }
 
@@ -132,21 +210,7 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         is_duplicated() {
-            return derive(this, (vArray) => {
-                const height = vArray.length;
-                const counts = new Map<any, number>();
-                const keys = new Array(height);
-                for (let i = 0; i < height; i++) {
-                    const k = getCacheKey(vArray[i]);
-                    keys[i] = k;
-                    counts.set(k, (counts.get(k) || 0) + 1);
-                }
-                const result = new Array(height);
-                for (let i = 0; i < height; i++) {
-                    result[i] = (counts.get(keys[i]) || 0) > 1;
-                }
-                return result;
-            });
+            return derive(this, (vArray) => evaluateDuplication(vArray, true));
         }
 
         is_empty(options: { ignoreNulls?: boolean } = {}) {
@@ -195,43 +259,7 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         is_in(values: any[] | any) {
-            return derive(this, (vArray, columns) => {
-                const height = vArray.length;
-                const result = new Array(height);
-                if (values && typeof values === 'object' && 'evaluate' in values) {
-                    const resolved = values.evaluate(columns, height);
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        if (v == null) {
-                            result[i] = null;
-                        } else {
-                            const candidates = resolved[i];
-                            const set = new Set();
-                            if (isArrayOrTypedArray(candidates)) {
-                                const cLen = candidates.length;
-                                for (let j = 0; j < cLen; j++) {
-                                    set.add(getCacheKey(candidates[j]));
-                                }
-                            } else {
-                                set.add(getCacheKey(candidates));
-                            }
-                            result[i] = set.has(getCacheKey(v));
-                        }
-                    }
-                } else {
-                    const arr = isArrayOrTypedArray(values) ? values : [];
-                    const set = new Set();
-                    const arrLen = arr.length;
-                    for (let j = 0; j < arrLen; j++) {
-                        set.add(getCacheKey(arr[j]));
-                    }
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        result[i] = v == null ? null : set.has(getCacheKey(v));
-                    }
-                }
-                return result;
-            });
+            return derive(this, (vArray, columns) => computeIsIn(vArray, columns, values, false));
         }
 
         is_infinite() {
@@ -298,21 +326,7 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         is_unique() {
-            return derive(this, (vArray) => {
-                const height = vArray.length;
-                const counts = new Map<any, number>();
-                const keys = new Array(height);
-                for (let i = 0; i < height; i++) {
-                    const k = getCacheKey(vArray[i]);
-                    keys[i] = k;
-                    counts.set(k, (counts.get(k) || 0) + 1);
-                }
-                const result = new Array(height);
-                for (let i = 0; i < height; i++) {
-                    result[i] = counts.get(keys[i]) === 1;
-                }
-                return result;
-            });
+            return derive(this, (vArray) => evaluateDuplication(vArray, false));
         }
 
         le(val: any) {
@@ -329,67 +343,13 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
 
         ne_missing(val: any) {
             return derive(this, (vArray, columns) => {
-                const height = vArray.length;
-                const rResolved = this._resolve(val, columns, height);
-                const result = new Array(height);
-                if (isArrayOrTypedArray(rResolved)) {
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        const r = rResolved[i];
-                        if (v == null && r == null) result[i] = false;
-                        else if (v == null || r == null) result[i] = true;
-                        else result[i] = v !== r;
-                    }
-                } else {
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        if (v == null && rResolved == null) result[i] = false;
-                        else if (v == null || rResolved == null) result[i] = true;
-                        else result[i] = v !== rResolved;
-                    }
-                }
-                return result;
+                const rResolved = this._resolve(val, columns, vArray.length);
+                return compareMissing(vArray, rResolved, true);
             });
         }
 
         not_in(values: any[] | any) {
-            return derive(this, (vArray, columns) => {
-                const height = vArray.length;
-                const result = new Array(height);
-                if (values && typeof values === 'object' && 'evaluate' in values) {
-                    const resolved = values.evaluate(columns, height);
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        if (v == null) {
-                            result[i] = null;
-                        } else {
-                            const candidates = resolved[i];
-                            const set = new Set();
-                            if (isArrayOrTypedArray(candidates)) {
-                                const cLen = candidates.length;
-                                for (let j = 0; j < cLen; j++) {
-                                    set.add(getCacheKey(candidates[j]));
-                                }
-                            } else {
-                                set.add(getCacheKey(candidates));
-                            }
-                            result[i] = !set.has(getCacheKey(v));
-                        }
-                    }
-                } else {
-                    const arr = isArrayOrTypedArray(values) ? values : [];
-                    const set = new Set();
-                    const arrLen = arr.length;
-                    for (let j = 0; j < arrLen; j++) {
-                        set.add(getCacheKey(arr[j]));
-                    }
-                    for (let i = 0; i < height; i++) {
-                        const v = vArray[i];
-                        result[i] = v == null ? null : !set.has(getCacheKey(v));
-                    }
-                }
-                return result;
-            });
+            return derive(this, (vArray, columns) => computeIsIn(vArray, columns, values, true));
         }
 
     }
