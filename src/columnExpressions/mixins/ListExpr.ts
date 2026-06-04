@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -14,23 +14,11 @@ export class ListExprNamespace {
     }
 
     all() {
-        return this._deriveList((arr) => {
-            const list = Array.from(arr as any);
-            for (let i = 0; i < list.length; i++) {
-                if (!list[i]) return false;
-            }
-            return true;
-        });
+        return this._deriveList((arr) => isArrayOfType(arr, (x) => !!x, { mode: "every" }));
     }
 
     any() {
-        return this._deriveList((arr) => {
-            const list = Array.from(arr as any);
-            for (let i = 0; i < list.length; i++) {
-                if (list[i]) return true;
-            }
-            return false;
-        });
+        return this._deriveList((arr) => isArrayOfType(arr, (x) => !!x, { mode: "some" }));
     }
 
     contains(item: any) {

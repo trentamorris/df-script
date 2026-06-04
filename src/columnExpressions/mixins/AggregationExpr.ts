@@ -2,7 +2,7 @@ import type { AggFn, UniqueListStatsOptions } from "../../types"
 import type { ExprConstructor } from "../types"
 import { derive } from "../ExprBase"
 import { ComputeError } from "../../exceptions"
-import { getListStats, computeMedian, computeQuantile, getUniqueListStats, computeMode } from "../../utils"
+import { getListStats, computeMedian, computeQuantile, getUniqueListStats, computeMode, isArrayOfType } from "../../utils"
 
 
 
@@ -19,39 +19,19 @@ export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         all() {
-            return this._deriveAgg(v => {
-                for (let i = 0; i < v.length; i++) {
-                    if (!v[i]) return false;
-                }
-                return true;
-            });
+            return this._deriveAgg(v => isArrayOfType(v, (x) => !!x, { mode: "every" }));
         }
 
         all_null() {
-            return this._deriveAgg(v => {
-                for (let i = 0; i < v.length; i++) {
-                    if (v[i] != null) return false;
-                }
-                return true;
-            });
+            return this._deriveAgg(v => isArrayOfType(v, "nullish", { mode: "every" }));
         }
 
         any() {
-            return this._deriveAgg(v => {
-                for (let i = 0; i < v.length; i++) {
-                    if (v[i]) return true;
-                }
-                return false;
-            });
+            return this._deriveAgg(v => isArrayOfType(v, (x) => !!x, { mode: "some" }));
         }
 
         any_null() {
-            return this._deriveAgg(v => {
-                for (let i = 0; i < v.length; i++) {
-                    if (v[i] == null) return true;
-                }
-                return false;
-            });
+            return this._deriveAgg(v => isArrayOfType(v, "nullish", { mode: "some" }));
         }
 
         avg() {
