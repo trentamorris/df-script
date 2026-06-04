@@ -21,6 +21,18 @@ With optimized columnar storage under the hood, DFScript enables you to build cl
 
 ---
 
+## ⚙️ Compatibility & Design Principles
+
+DFScript is designed with a **low-abstraction, zero-dependency** philosophy to guarantee maximum compatibility, predictability, and runtime performance:
+
+- 📦 **Zero External Dependencies** — Lightweight footprint with zero runtime overhead or supply chain vulnerabilities.
+- 🌐 **Universal Compatibility** — Works out-of-the-box in any JavaScript/TypeScript environment, including Node.js, Deno, Bun, web browsers, and cloud/edge workers.
+- 🧱 **Built-in Standards** — Prioritizes native, built-in APIs (like standard `Date`, `Intl` formatting, and `TextEncoder`) and standard arrays rather than custom wrappers or heavy runtime abstractions.
+- ⚡ **Optimized Execution Paths** — Under the hood, performance-critical code avoids higher-level array iterators and short-lived intermediate allocations in favor of simple, fast `for` and `while` loops with cached lengths, keeping garbage collection overhead to an absolute minimum.
+- 🔄 **Easy Transpilation** — Relies strictly on low-level native operations, making it fully compatible with older environments (like ES6 or even ES5) without requiring complex polyfills or modern engine-specific features.
+
+---
+
 ## 📦 Installation
 
 Install DFScript using your favorite package manager:
