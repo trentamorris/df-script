@@ -19,7 +19,7 @@ export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         all() {
-            return this._deriveAgg(v => isArrayOfType(v, "truthy", { mode: "every" }));
+            return this._deriveAgg(v => isArrayOfType(v, (x) => !!x, { mode: "every" }));
         }
 
         all_null() {
@@ -27,7 +27,7 @@ export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         any() {
-            return this._deriveAgg(v => isArrayOfType(v, "truthy", { mode: "some" }));
+            return this._deriveAgg(v => isArrayOfType(v, (x) => !!x, { mode: "some" }));
         }
 
         any_null() {

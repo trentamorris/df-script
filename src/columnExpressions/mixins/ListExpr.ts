@@ -14,11 +14,11 @@ export class ListExprNamespace {
     }
 
     all() {
-        return this._deriveList((arr) => isArrayOfType(arr, "truthy", { mode: "every" }));
+        return this._deriveList((arr) => isArrayOfType(arr, (x) => !!x, { mode: "every" }));
     }
 
     any() {
-        return this._deriveList((arr) => isArrayOfType(arr, "truthy", { mode: "some" }));
+        return this._deriveList((arr) => isArrayOfType(arr, (x) => !!x, { mode: "some" }));
     }
 
     contains(item: any) {

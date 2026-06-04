@@ -16,8 +16,6 @@ export type ArrayItemType =
     | "null"
     | "undefined"
     | "nullish"
-    | "truthy"
-    | "falsy"
     | (new (...args: any[]) => any)
     | ((v: unknown) => boolean);
 export type ArrayCheckMode = "every" | "some";
@@ -60,92 +58,33 @@ export function isArrayOfType(
         return mode === "every";
     }
 
-    if (typeof type === "string") {
-        if (mode === "every") {
-            for (let i = 0; i < len; i++) {
-                const v = (arr as any)[i];
-                if (v == null) {
-                    if (type === "nullish") continue;
-                    if (type === "falsy") continue;
-                    if (allowNulls) continue;
-                    return false;
-                }
-                if (type === "any") continue;
-                if (type === "nullish") return false;
-                if (type === "truthy") {
-                    if (!v) return false;
-                } else if (type === "falsy") {
-                    if (v) return false;
-                } else if (type === "date") {
-                    if (!isValidDateObj(v)) return false;
-                } else if (type === "object") {
-                    if (!isObj(v)) return false;
-                } else if (type === "plainObject") {
-                    if (!isPlainObj(v)) return false;
-                } else if (type === "number") {
-                    if (!isValidNumber(v)) return false;
-                } else {
-                    if (typeof v !== type) return false;
-                }
-            }
-            return true;
-        } else {
-            // mode === "some"
-            for (let i = 0; i < len; i++) {
-                const v = (arr as any)[i];
-                if (v == null) {
-                    if (type === "nullish") return true;
-                    if (type === "falsy") return true;
-                    if (allowNulls) return true;
-                    continue;
-                }
-                if (type === "any") return true;
-                if (type === "nullish") continue;
-                if (type === "truthy") {
-                    if (v) return true;
-                } else if (type === "falsy") {
-                    if (!v) return true;
-                } else if (type === "date") {
-                    if (isValidDateObj(v)) return true;
-                } else if (type === "object") {
-                    if (isObj(v)) return true;
-                } else if (type === "plainObject") {
-                    if (isPlainObj(v)) return true;
-                } else if (type === "number") {
-                    if (isValidNumber(v)) return true;
-                } else {
-                    if (typeof v === type) return true;
-                }
-            }
-            return false;
+    const check = (v: unknown) => {
+        if (type === "null") return v === null;
+        if (type === "undefined") return v === undefined;
+        if (type === "nullish") return v == null;
+        if (v == null) return allowNulls;
+        if (type === "any") return true;
+        if (typeof type === "function") {
+            return isClass(type) ? v instanceof type : (type as (v: unknown) => boolean)(v);
         }
-    } else if (typeof type === "function") {
-        const isCls = isClass(type);
-        if (mode === "every") {
-            for (let i = 0; i < len; i++) {
-                const v = (arr as any)[i];
-                if (v == null) {
-                    if (allowNulls) continue;
-                    return false;
-                }
-                const ok = isCls ? (v instanceof type) : (type as (v: unknown) => boolean)(v);
-                if (!ok) return false;
-            }
-            return true;
-        } else {
-            for (let i = 0; i < len; i++) {
-                const v = (arr as any)[i];
-                if (v == null) {
-                    if (allowNulls) return true;
-                    continue;
-                }
-                const ok = isCls ? (v instanceof type) : (type as (v: unknown) => boolean)(v);
-                if (ok) return true;
-            }
-            return false;
+        if (type === "date") return isValidDateObj(v);
+        if (type === "object") return isObj(v);
+        if (type === "plainObject") return isPlainObj(v);
+        if (type === "number") return isValidNumber(v);
+        return typeof v === type;
+    };
+
+    if (mode === "every") {
+        for (let i = 0; i < len; i++) {
+            if (!check((arr as any)[i])) return false;
         }
+        return true;
+    } else {
+        for (let i = 0; i < len; i++) {
+            if (check((arr as any)[i])) return true;
+        }
+        return false;
     }
-    return false;
 }
 
 export function sortList(arr: unknown, descending: boolean = false): any[] {
