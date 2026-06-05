@@ -81,9 +81,9 @@ try {
         $tbl.col("numbers").list.gather([0, 2, -2]).alias("gather_nums"),
         $tbl.col("tags").list.gather(1).alias("gather_single"),
         $tbl.col("numbers").list.gather([0, 100]).alias("gather_oob_null"),
-        $tbl.col("numbers").list.gather_every(2).alias("every_2"),
-        $tbl.col("numbers").list.gather_every(3, 1).alias("every_3_offset_1"),
-        $tbl.col("numbers").list.gather_every(2, -1).alias("every_2_neg_offset"),
+        $tbl.col("numbers").list.gather({ every: 2 }).alias("every_2"),
+        $tbl.col("numbers").list.gather({ every: 3, offset: 1 }).alias("every_3_offset_1"),
+        $tbl.col("numbers").list.gather({ every: 2, offset: -1 }).alias("every_2_neg_offset"),
 
         // Robustness features: TypedArray & String Coercion
         $tbl.col("typed_array").list.lengths().alias("typed_len"),
