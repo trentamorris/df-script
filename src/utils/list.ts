@@ -201,7 +201,7 @@ export function getUniqueListStats(
     };
 }
 
-export function gatherEvery<T>(arr: ArrayLike<T>, n: number, offset: number = 0): T[] {
+export function stepSlice<T>(arr: ArrayLike<T>, n: number, offset: number = 0): T[] {
     if (n === 0) {
         throw new Error("Step size n cannot be zero");
     }
@@ -221,36 +221,6 @@ export function gatherEvery<T>(arr: ArrayLike<T>, n: number, offset: number = 0)
     return res;
 }
 
-export function gatherList<T>(
-    arr: ArrayLike<T>,
-    indices: number | number[],
-    options: { nullOnOob?: boolean } = {}
-): (T | null)[] {
-    const nullOnOob = options.nullOnOob ?? true;
-    const len = arr.length;
-    const idxs = Array.isArray(indices) ? indices : [indices];
-    const numIndices = idxs.length;
-    const res = new Array(numIndices);
-
-    const hasAt = typeof (arr as any).at === "function";
-
-    for (let i = 0; i < numIndices; i++) {
-        const index = idxs[i];
-        let val: T | undefined;
-        if (hasAt) {
-            val = (arr as any).at(index);
-        } else {
-            const resolvedIndex = index < 0 ? len + index : index;
-            val = (resolvedIndex >= 0 && resolvedIndex < len) ? arr[resolvedIndex] : undefined;
-        }
-
-        if (val === undefined && !nullOnOob) {
-            throw new Error(`Index ${index} is out of bounds for list of length ${len}`);
-        }
-        res[i] = val ?? null;
-    }
-    return res;
-}
 
 
 
