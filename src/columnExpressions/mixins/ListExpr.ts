@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj, gatherEvery } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj, gatherEvery, gatherList } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -80,7 +80,6 @@ export class ListExprNamespace {
     gather(indices: number | number[] | { every: number; offset?: number }, null_on_oob: boolean = true) {
         return this._deriveList((arr) => {
             const list = arr as any;
-            const len = list.length;
 
             if (isObj(indices) && "every" in indices) {
                 const { every, offset = 0 } = indices as { every: number; offset?: number };
@@ -91,18 +90,11 @@ export class ListExprNamespace {
                 }
             }
 
-            const idxs = Array.isArray(indices) ? indices : [indices as any];
-            const numIndices = idxs.length;
-            const res = new Array(numIndices);
-            for (let i = 0; i < numIndices; i++) {
-                const index = idxs[i];
-                const val = list.at(index);
-                if (val === undefined && !null_on_oob) {
-                    throw new ComputeError(`Index ${index} is out of bounds for list of length ${len}`);
-                }
-                res[i] = val ?? null;
+            try {
+                return gatherList(list, indices as number | number[], { nullOnOob: null_on_oob });
+            } catch (e: any) {
+                throw new ComputeError(e.message || "Invalid gather parameters");
             }
-            return res;
         });
     }
 
