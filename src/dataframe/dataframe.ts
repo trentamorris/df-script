@@ -561,6 +561,58 @@ export class DataFrame<T extends RowRecord = any> {
         return [this.height, this.width];
     }
 
+    gather(indices: number | number[], options: { null_on_oob?: boolean } = {}): DataFrame<T> {
+        const nullOnOob = options?.null_on_oob ?? false;
+        const idxs = Array.isArray(indices) ? indices : [indices];
+        const numIndices = idxs.length;
+        const total = this._height;
+
+        const mappedIndices = new Array(numIndices);
+        for (let i = 0; i < numIndices; i++) {
+            const index = idxs[i];
+            let actualIdx = index < 0 ? total + index : index;
+            if (actualIdx < 0 || actualIdx >= total) {
+                if (!nullOnOob) {
+                    throw new DataFrameError(`Index ${index} is out of bounds for DataFrame of height ${total}`);
+                }
+                actualIdx = -1;
+            }
+            mappedIndices[i] = actualIdx;
+        }
+
+        const keys = Object.keys(this._columns);
+        const numKeys = keys.length;
+        const newColumns: ColumnDict = {};
+
+        for (let j = 0; j < numKeys; j++) {
+            const k = keys[j];
+            const oldCol = this._columns[k];
+            let hasOob = false;
+            for (let i = 0; i < numIndices; i++) {
+                if (mappedIndices[i] === -1) {
+                    hasOob = true;
+                    break;
+                }
+            }
+
+            const newCol = (isTypedArray(oldCol) && !hasOob)
+                ? new (oldCol.constructor as any)(numIndices)
+                : new Array(numIndices);
+
+            for (let idx = 0; idx < numIndices; idx++) {
+                const srcIdx = mappedIndices[idx];
+                if (srcIdx === -1) {
+                    newCol[idx] = null;
+                } else {
+                    newCol[idx] = oldCol[srcIdx];
+                }
+            }
+            newColumns[k] = newCol;
+        }
+
+        return new DataFrame<T>(newColumns, this._schema, numIndices);
+    }
+
     slice(start: number, end?: number): DataFrame<T> {
         const total = this._height;
 

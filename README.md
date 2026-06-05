@@ -119,6 +119,7 @@ DFScript uses the `$tbl` namespace to bootstrap DataFrames, refer to columns, an
 - **`limit(n, options?)`**: Returns the first `n` rows. Options include `offset` and direction `from: "start" | "end"`.
 - **`head(n)`** / **`tail(n)`**: Shortcuts for `limit` from the start or end of the DataFrame.
 - **`slice(start, end?)`**: Extract a subset of rows using standard index slicing.
+- **`gather(indices, options?)`**: Gathers rows at specified indices. Supports single index, arrays of indices, and negative indexing. Options include `{ null_on_oob?: boolean }` (default: `false` which throws an error on out-of-bounds indices; if `true`, out-of-bounds indices result in `null` values).
 
 ### 3. Sorting
 - **`sort({ by, descending?, nullsLast?, custom? })`**: Sorts rows. Supports single or multiple columns/expressions, custom descending configurations per column, custom null sorting rules, and custom comparator functions.
