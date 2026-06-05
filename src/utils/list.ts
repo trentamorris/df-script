@@ -201,7 +201,7 @@ export function getUniqueListStats(
     };
 }
 
-export function stepSlice<T>(arr: ArrayLike<T>, n: number, offset: number = 0): T[] {
+export function stepSliceList<T>(arr: ArrayLike<T>, n: number, offset: number = 0): T[] {
     if (n === 0) {
         throw new Error("Step size n cannot be zero");
     }

@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj, stepSlice } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj, stepSliceList } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -85,7 +85,7 @@ export class ListExprNamespace {
             if (isObj(indices) && "every" in indices) {
                 const { every, offset = 0 } = indices as { every: number; offset?: number };
                 try {
-                    return stepSlice(list, every, offset);
+                    return stepSliceList(list, every, offset);
                 } catch (e: any) {
                     throw new ComputeError(e.message || "Invalid gather step parameters");
                 }
