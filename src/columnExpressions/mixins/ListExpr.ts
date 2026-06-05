@@ -90,7 +90,7 @@ export class ListExprNamespace {
                     offsetEnd
                 } = indices as { every: number; offset?: number; offsetStart?: number; offsetEnd?: number };
                 try {
-                    return stepSliceList(list, every, { offsetStart, offsetEnd, strict: !null_on_oob });
+                    return stepSliceList(list, every, { offsetStart, offsetEnd });
                 } catch (e: any) {
                     throw new ComputeError(e.message || "Invalid gather step parameters");
                 }

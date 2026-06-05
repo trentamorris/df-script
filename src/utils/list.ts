@@ -206,12 +206,10 @@ export function stepSliceList<T>(
     step: number,
     {
         offsetStart = step > 0 ? 0 : (arr?.length ?? 0) - 1,
-        offsetEnd = step > 0 ? (arr?.length ?? 0) : undefined,
-        strict = false
+        offsetEnd = step > 0 ? (arr?.length ?? 0) : undefined
     }: {
         offsetStart?: number;
         offsetEnd?: number;
-        strict?: boolean;
     } = {}
 ): T[] {
     if (arr == null) {
@@ -221,44 +219,24 @@ export function stepSliceList<T>(
         throw new Error("Step size step cannot be zero");
     }
     const len = arr.length;
-    let start = offsetStart < 0 ? len + offsetStart : offsetStart;
-    let end = offsetEnd !== undefined
+    const start = offsetStart < 0 ? len + offsetStart : offsetStart;
+    const end = offsetEnd !== undefined
         ? (offsetEnd < 0 ? len + offsetEnd : offsetEnd)
         : -1;
 
-    if (strict && len > 0) {
-        if (start < 0 || start >= len) {
-            throw new Error(`offsetStart ${offsetStart} (resolved: ${start}) is out of bounds for array of length ${len}`);
-        }
-        if (step > 0) {
-            if (end < 0 || end > len) {
-                throw new Error(`offsetEnd ${offsetEnd} (resolved: ${end}) is out of bounds for array of length ${len}`);
-            }
-        } else {
-            if (end < -1 || end >= len) {
-                throw new Error(`offsetEnd ${offsetEnd} (resolved: ${end}) is out of bounds for array of length ${len}`);
-            }
-        }
-    }
-
-    if (!strict) {
-        start = Math.max(0, Math.min(len, start));
-        end = Math.max(-1, Math.min(len, end));
-    }
-
     const res: T[] = [];
     if (step > 0) {
-        for (let i = start; i < end && i < len && i >= 0; i += step) {
-            res.push(arr[i]);
+        for (let i = start; i < end && i < len; i += step) {
+            if (i >= 0) {
+                res.push(arr[i]);
+            }
         }
     } else {
-        for (let i = start; i > end && i >= 0 && i < len; i += step) {
-            res.push(arr[i]);
+        for (let i = start; i > end && i >= 0; i += step) {
+            if (i < len) {
+                res.push(arr[i]);
+            }
         }
     }
     return res;
 }
-
-
-
-
