@@ -575,8 +575,15 @@ export class DataFrame<T extends RowRecord = any> {
                 throw new DataFrameError("Step size every must be positive");
             }
             idxs = [];
-            for (let i = offset; i < total; i += every) {
-                idxs.push(i);
+            if (offset < 0) {
+                const actualOffset = total + offset;
+                for (let i = actualOffset; i >= 0; i -= every) {
+                    idxs.push(i);
+                }
+            } else {
+                for (let i = offset; i < total; i += every) {
+                    idxs.push(i);
+                }
             }
         } else {
             idxs = Array.isArray(indices) ? indices : [indices as any];

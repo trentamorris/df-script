@@ -89,8 +89,15 @@ export class ListExprNamespace {
                     throw new ComputeError("Step size every must be positive");
                 }
                 idxs = [];
-                for (let i = offset; i < len; i += every) {
-                    idxs.push(i);
+                if (offset < 0) {
+                    const actualOffset = len + offset;
+                    for (let i = actualOffset; i >= 0; i -= every) {
+                        idxs.push(i);
+                    }
+                } else {
+                    for (let i = offset; i < len; i += every) {
+                        idxs.push(i);
+                    }
                 }
             } else {
                 idxs = Array.isArray(indices) ? indices : [indices as any];

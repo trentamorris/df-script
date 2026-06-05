@@ -116,5 +116,13 @@ if (collectedGatherEvery[0].val !== 1 || collectedGatherEvery[1].val !== 3 || co
     throw new Error("gather_every values mismatch");
 }
 
+// 4.10 Gather with negative offset (stepping right-to-left)
+const dfGatherNegOffset = df.gather({ every: 2, offset: -1 });
+if (dfGatherNegOffset.height !== 3) throw new Error("Gather negative offset height mismatch");
+const collectedGatherNegOffset = dfGatherNegOffset.to_dicts();
+if (collectedGatherNegOffset[0].val !== 5 || collectedGatherNegOffset[1].val !== 3 || collectedGatherNegOffset[2].val !== 1) {
+    throw new Error("Gather negative offset values mismatch");
+}
+
 console.log("✓ limit and slice tests passed!");
 
