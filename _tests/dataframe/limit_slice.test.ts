@@ -92,5 +92,29 @@ if (collectedTyped[0].val !== 20 || collectedTyped[1].val !== null) {
     throw new Error("Gather on typed array with null_on_oob failed");
 }
 
+// 4.7 Gather with duplicates (e.g. [0, 2, 2])
+const dfGatherDup = df.gather([0, 2, 2]);
+if (dfGatherDup.height !== 3) throw new Error("Gather duplicate height mismatch");
+const collectedGatherDup = dfGatherDup.to_dicts();
+if (collectedGatherDup[0].val !== 1 || collectedGatherDup[1].val !== 3 || collectedGatherDup[2].val !== 3) {
+    throw new Error("Gather duplicate values mismatch");
+}
+
+// 4.8 Gather with config object step
+const dfGatherConfig = df.gather({ every: 2, offset: 1 });
+if (dfGatherConfig.height !== 2) throw new Error("Gather config step height mismatch");
+const collectedGatherConfig = dfGatherConfig.to_dicts();
+if (collectedGatherConfig[0].val !== 2 || collectedGatherConfig[1].val !== 4) {
+    throw new Error("Gather config step values mismatch");
+}
+
+// 4.9 gather_every wrapper
+const dfGatherEvery = df.gather_every(2, 0);
+if (dfGatherEvery.height !== 3) throw new Error("gather_every height mismatch");
+const collectedGatherEvery = dfGatherEvery.to_dicts();
+if (collectedGatherEvery[0].val !== 1 || collectedGatherEvery[1].val !== 3 || collectedGatherEvery[2].val !== 5) {
+    throw new Error("gather_every values mismatch");
+}
+
 console.log("✓ limit and slice tests passed!");
 

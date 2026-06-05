@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -77,14 +77,30 @@ export class ListExprNamespace {
         return this.get(0, null_on_oob);
     }
 
-    gather(indices: number | number[], null_on_oob: boolean = true) {
-        const idxs = Array.isArray(indices) ? indices : [indices];
+    gather(indices: number | number[] | { every: number; offset?: number }, null_on_oob: boolean = true) {
         return this._deriveList((arr) => {
-            const len = (arr as any).length;
-            const res = new Array(idxs.length);
-            for (let i = 0; i < idxs.length; i++) {
+            const list = arr as any;
+            const len = list.length;
+            let idxs: number[];
+
+            if (isObj(indices) && "every" in indices) {
+                const { every, offset = 0 } = indices as { every: number; offset?: number };
+                if (every <= 0) {
+                    throw new ComputeError("Step size every must be positive");
+                }
+                idxs = [];
+                for (let i = offset; i < len; i += every) {
+                    idxs.push(i);
+                }
+            } else {
+                idxs = Array.isArray(indices) ? indices : [indices as any];
+            }
+
+            const numIndices = idxs.length;
+            const res = new Array(numIndices);
+            for (let i = 0; i < numIndices; i++) {
                 const index = idxs[i];
-                const val = (arr as any).at(index);
+                const val = list.at(index);
                 if (val === undefined && !null_on_oob) {
                     throw new ComputeError(`Index ${index} is out of bounds for list of length ${len}`);
                 }
@@ -95,17 +111,7 @@ export class ListExprNamespace {
     }
 
     gather_every(n: number, offset: number = 0) {
-        if (n <= 0) {
-            throw new ComputeError("Step size n must be positive");
-        }
-        return this._deriveList((arr) => {
-            const len = (arr as any).length;
-            const res = [];
-            for (let i = offset; i < len; i += n) {
-                res.push((arr as any)[i]);
-            }
-            return res;
-        });
+        return this.gather({ every: n, offset });
     }
 
     get(index: number, null_on_oob: boolean = true) {

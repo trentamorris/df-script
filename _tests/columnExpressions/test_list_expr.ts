@@ -83,6 +83,7 @@ try {
         $tbl.col("numbers").list.gather([0, 100]).alias("gather_oob_null"),
         $tbl.col("numbers").list.gather_every(2).alias("every_2"),
         $tbl.col("numbers").list.gather_every(3, 1).alias("every_3_offset_1"),
+        $tbl.col("numbers").list.gather({ every: 2 }).alias("gather_every_config_list"),
 
         // Robustness features: TypedArray & String Coercion
         $tbl.col("typed_array").list.lengths().alias("typed_len"),
@@ -162,6 +163,7 @@ try {
     if (r0.gather_oob_null[0] !== 3 || r0.gather_oob_null[1] !== null) throw new Error("r0.gather_oob_null failed");
     if (r0.every_2.length !== 5 || r0.every_2[0] !== 3 || r0.every_2[1] !== 4 || r0.every_2[2] !== 5 || r0.every_2[3] !== 2 || r0.every_2[4] !== 6) throw new Error("r0.every_2 failed");
     if (r0.every_3_offset_1.length !== 3 || r0.every_3_offset_1[0] !== 1 || r0.every_3_offset_1[1] !== 5 || r0.every_3_offset_1[2] !== null) throw new Error("r0.every_3_offset_1 failed");
+    if (r0.gather_every_config_list.length !== 5 || r0.gather_every_config_list[0] !== 3 || r0.gather_every_config_list[1] !== 4 || r0.gather_every_config_list[2] !== 5 || r0.gather_every_config_list[3] !== 2 || r0.gather_every_config_list[4] !== 6) throw new Error("r0.gather_every_config_list failed");
 
     // Robustness assertions Row 0
     if (r0.typed_len !== 3) throw new Error(`Expected r0.typed_len 3, got ${r0.typed_len}`);
