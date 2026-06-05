@@ -87,6 +87,10 @@ try {
         $tbl.col("numbers").list.gather({ every: -2, offset: -1 }).alias("every_neg_2_neg_offset"),
         $tbl.col("numbers").list.gather({ every: 2, offset: -4 }).alias("every_pos_2_neg_offset"),
         $tbl.col("numbers").list.gather({ every: -2, offset: 4 }).alias("every_neg_2_offset_4"),
+        $tbl.col("numbers").list.gather({ every: 2, offsetStart: 1, offsetEnd: 7 }).alias("every_pos_step_start_end"),
+        $tbl.col("numbers").list.gather({ every: -2, offsetStart: 7, offsetEnd: 1 }).alias("every_neg_step_start_end"),
+        $tbl.col("numbers").list.gather({ every: 2, offsetStart: -9, offsetEnd: -3 }).alias("every_pos_step_neg_start_end"),
+        $tbl.col("numbers").list.gather({ every: -2, offsetStart: -3, offsetEnd: -9 }).alias("every_neg_step_neg_start_end"),
 
         // Robustness features: TypedArray & String Coercion
         $tbl.col("typed_array").list.lengths().alias("typed_len"),
@@ -170,6 +174,10 @@ try {
     if (r0.every_neg_2_neg_offset.length !== 5 || r0.every_neg_2_neg_offset[0] !== 5 || r0.every_neg_2_neg_offset[1] !== null || r0.every_neg_2_neg_offset[2] !== 9 || r0.every_neg_2_neg_offset[3] !== 1 || r0.every_neg_2_neg_offset[4] !== 1) throw new Error("r0.every_neg_2_neg_offset failed");
     if (r0.every_pos_2_neg_offset.length !== 2 || r0.every_pos_2_neg_offset[0] !== 2 || r0.every_pos_2_neg_offset[1] !== 6) throw new Error("r0.every_pos_2_neg_offset failed");
     if (r0.every_neg_2_offset_4.length !== 3 || r0.every_neg_2_offset_4[0] !== 5 || r0.every_neg_2_offset_4[1] !== 4 || r0.every_neg_2_offset_4[2] !== 3) throw new Error("r0.every_neg_2_offset_4 failed");
+    if (r0.every_pos_step_start_end.length !== 3 || r0.every_pos_step_start_end[0] !== 1 || r0.every_pos_step_start_end[1] !== 1 || r0.every_pos_step_start_end[2] !== 9) throw new Error("r0.every_pos_step_start_end failed");
+    if (r0.every_neg_step_start_end.length !== 3 || r0.every_neg_step_start_end[0] !== null || r0.every_neg_step_start_end[1] !== 9 || r0.every_neg_step_start_end[2] !== 1) throw new Error("r0.every_neg_step_start_end failed");
+    if (r0.every_pos_step_neg_start_end.length !== 3 || r0.every_pos_step_neg_start_end[0] !== 1 || r0.every_pos_step_neg_start_end[1] !== 1 || r0.every_pos_step_neg_start_end[2] !== 9) throw new Error("r0.every_pos_step_neg_start_end failed");
+    if (r0.every_neg_step_neg_start_end.length !== 3 || r0.every_neg_step_neg_start_end[0] !== null || r0.every_neg_step_neg_start_end[1] !== 9 || r0.every_neg_step_neg_start_end[2] !== 1) throw new Error("r0.every_neg_step_neg_start_end failed");
 
 
     // Robustness assertions Row 0

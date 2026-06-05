@@ -83,9 +83,14 @@ export class ListExprNamespace {
             const len = list.length;
 
             if (isObj(indices) && "every" in indices) {
-                const { every, offset = 0 } = indices as { every: number; offset?: number };
+                const {
+                    every,
+                    offset,
+                    offsetStart = offset ?? 0,
+                    offsetEnd
+                } = indices as { every: number; offset?: number; offsetStart?: number; offsetEnd?: number };
                 try {
-                    return stepSliceList(list, every, offset);
+                    return stepSliceList(list, every, offsetStart, offsetEnd);
                 } catch (e: any) {
                     throw new ComputeError(e.message || "Invalid gather step parameters");
                 }

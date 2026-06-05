@@ -201,20 +201,31 @@ export function getUniqueListStats(
     };
 }
 
-export function stepSliceList<T>(arr: ArrayLike<T>, n: number, offset: number = 0): T[] {
-    if (n === 0) {
-        throw new Error("Step size n cannot be zero");
+export function stepSliceList<T>(
+    arr: ArrayLike<T>,
+    step: number,
+    offsetStart: number = 0,
+    offsetEnd?: number
+): T[] {
+    if (arr == null) {
+        return [];
+    }
+    if (step === 0) {
+        throw new Error("Step size step cannot be zero");
     }
     const len = arr.length;
-    const start = offset < 0 ? len + offset : offset;
+    const start = offsetStart < 0 ? len + offsetStart : offsetStart;
+    const end = offsetEnd !== undefined
+        ? (offsetEnd < 0 ? len + offsetEnd : offsetEnd)
+        : (step > 0 ? len : -1);
 
     const res: T[] = [];
-    if (n > 0) {
-        for (let i = start; i < len && i >= 0; i += n) {
+    if (step > 0) {
+        for (let i = start; i < end && i < len && i >= 0; i += step) {
             res.push(arr[i]);
         }
     } else {
-        for (let i = start; i >= 0 && i < len; i += n) {
+        for (let i = start; i > end && i >= 0 && i < len; i += step) {
             res.push(arr[i]);
         }
     }
