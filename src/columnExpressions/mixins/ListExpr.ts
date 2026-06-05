@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj, gatherEvery } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -81,28 +81,17 @@ export class ListExprNamespace {
         return this._deriveList((arr) => {
             const list = arr as any;
             const len = list.length;
-            let idxs: number[];
 
             if (isObj(indices) && "every" in indices) {
                 const { every, offset = 0 } = indices as { every: number; offset?: number };
-                if (every <= 0) {
-                    throw new ComputeError("Step size every must be positive");
+                try {
+                    return gatherEvery(list, every, offset);
+                } catch (e: any) {
+                    throw new ComputeError(e.message || "Invalid gather step parameters");
                 }
-                idxs = [];
-                if (offset < 0) {
-                    const actualOffset = len + offset;
-                    for (let i = actualOffset; i >= 0; i -= every) {
-                        idxs.push(i);
-                    }
-                } else {
-                    for (let i = offset; i < len; i += every) {
-                        idxs.push(i);
-                    }
-                }
-            } else {
-                idxs = Array.isArray(indices) ? indices : [indices as any];
             }
 
+            const idxs = Array.isArray(indices) ? indices : [indices as any];
             const numIndices = idxs.length;
             const res = new Array(numIndices);
             for (let i = 0; i < numIndices; i++) {

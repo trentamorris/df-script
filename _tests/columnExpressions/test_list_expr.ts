@@ -84,6 +84,7 @@ try {
         $tbl.col("numbers").list.gather({ every: 2 }).alias("every_2"),
         $tbl.col("numbers").list.gather({ every: 3, offset: 1 }).alias("every_3_offset_1"),
         $tbl.col("numbers").list.gather({ every: 2, offset: -1 }).alias("every_2_neg_offset"),
+        $tbl.col("numbers").list.gather({ every: -2, offset: 4 }).alias("every_neg_2_offset_4"),
 
         // Robustness features: TypedArray & String Coercion
         $tbl.col("typed_array").list.lengths().alias("typed_len"),
@@ -164,6 +165,8 @@ try {
     if (r0.every_2.length !== 5 || r0.every_2[0] !== 3 || r0.every_2[1] !== 4 || r0.every_2[2] !== 5 || r0.every_2[3] !== 2 || r0.every_2[4] !== 6) throw new Error("r0.every_2 failed");
     if (r0.every_3_offset_1.length !== 3 || r0.every_3_offset_1[0] !== 1 || r0.every_3_offset_1[1] !== 5 || r0.every_3_offset_1[2] !== null) throw new Error("r0.every_3_offset_1 failed");
     if (r0.every_2_neg_offset.length !== 5 || r0.every_2_neg_offset[0] !== 5 || r0.every_2_neg_offset[1] !== null || r0.every_2_neg_offset[2] !== 9 || r0.every_2_neg_offset[3] !== 1 || r0.every_2_neg_offset[4] !== 1) throw new Error("r0.every_2_neg_offset failed");
+    if (r0.every_neg_2_offset_4.length !== 3 || r0.every_neg_2_offset_4[0] !== 5 || r0.every_neg_2_offset_4[1] !== 4 || r0.every_neg_2_offset_4[2] !== 3) throw new Error("r0.every_neg_2_offset_4 failed");
+
 
     // Robustness assertions Row 0
     if (r0.typed_len !== 3) throw new Error(`Expected r0.typed_len 3, got ${r0.typed_len}`);
