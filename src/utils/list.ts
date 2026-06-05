@@ -204,8 +204,15 @@ export function getUniqueListStats(
 export function stepSliceList<T>(
     arr: ArrayLike<T>,
     step: number,
-    offsetStart: number = 0,
-    offsetEnd?: number
+    {
+        offsetStart = step > 0 ? 0 : (arr?.length ?? 0) - 1,
+        offsetEnd = step > 0 ? (arr?.length ?? 0) : undefined,
+        strict = false
+    }: {
+        offsetStart?: number;
+        offsetEnd?: number;
+        strict?: boolean;
+    } = {}
 ): T[] {
     if (arr == null) {
         return [];
@@ -214,10 +221,30 @@ export function stepSliceList<T>(
         throw new Error("Step size step cannot be zero");
     }
     const len = arr.length;
-    const start = offsetStart < 0 ? len + offsetStart : offsetStart;
-    const end = offsetEnd !== undefined
+    let start = offsetStart < 0 ? len + offsetStart : offsetStart;
+    let end = offsetEnd !== undefined
         ? (offsetEnd < 0 ? len + offsetEnd : offsetEnd)
-        : (step > 0 ? len : -1);
+        : -1;
+
+    if (strict && len > 0) {
+        if (start < 0 || start >= len) {
+            throw new Error(`offsetStart ${offsetStart} (resolved: ${start}) is out of bounds for array of length ${len}`);
+        }
+        if (step > 0) {
+            if (end < 0 || end > len) {
+                throw new Error(`offsetEnd ${offsetEnd} (resolved: ${end}) is out of bounds for array of length ${len}`);
+            }
+        } else {
+            if (end < -1 || end >= len) {
+                throw new Error(`offsetEnd ${offsetEnd} (resolved: ${end}) is out of bounds for array of length ${len}`);
+            }
+        }
+    }
+
+    if (!strict) {
+        start = Math.max(0, Math.min(len, start));
+        end = Math.max(-1, Math.min(len, end));
+    }
 
     const res: T[] = [];
     if (step > 0) {
