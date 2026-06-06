@@ -81,16 +81,17 @@ try {
         $tbl.col("numbers").list.gather([0, 2, -2]).alias("gather_nums"),
         $tbl.col("tags").list.gather(1).alias("gather_single"),
         $tbl.col("numbers").list.gather([0, 100]).alias("gather_oob_null"),
-        $tbl.col("numbers").list.gather({ every: 2 }).alias("every_2"),
-        $tbl.col("numbers").list.gather({ every: 3, offset: 1 }).alias("every_3_offset_1"),
-        $tbl.col("numbers").list.gather({ every: 2, offset: -1 }).alias("every_2_neg_offset"),
-        $tbl.col("numbers").list.gather({ every: -2, offset: -1 }).alias("every_neg_2_neg_offset"),
-        $tbl.col("numbers").list.gather({ every: 2, offset: -4 }).alias("every_pos_2_neg_offset"),
-        $tbl.col("numbers").list.gather({ every: -2, offset: 4 }).alias("every_neg_2_offset_4"),
-        $tbl.col("numbers").list.gather({ every: 2, offsetStart: 1, offsetEnd: 7 }).alias("every_pos_step_start_end"),
-        $tbl.col("numbers").list.gather({ every: -2, offsetStart: 7, offsetEnd: 1 }).alias("every_neg_step_start_end"),
-        $tbl.col("numbers").list.gather({ every: 2, offsetStart: -9, offsetEnd: -3 }).alias("every_pos_step_neg_start_end"),
-        $tbl.col("numbers").list.gather({ every: -2, offsetStart: -3, offsetEnd: -9 }).alias("every_neg_step_neg_start_end"),
+        $tbl.col("numbers").list.gather_every({ step: 2 }).alias("every_2"),
+        $tbl.col("numbers").list.gather_every({ step: 3, offsetStart: 1 }).alias("every_3_offset_1"),
+        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: -1 }).alias("every_2_neg_offset"),
+        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: -1 }).alias("every_neg_2_neg_offset"),
+        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: -4 }).alias("every_pos_2_neg_offset"),
+        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: 4 }).alias("every_neg_2_offset_4"),
+        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: 1, offsetEnd: 7 }).alias("every_pos_step_start_end"),
+        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: 7, offsetEnd: 1 }).alias("every_neg_step_start_end"),
+        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: -9, offsetEnd: -3 }).alias("every_pos_step_neg_start_end"),
+        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: -3, offsetEnd: -9 }).alias("every_neg_step_neg_start_end"),
+        $tbl.col("numbers").list.gather_every({ step: 2, maxItemsGathered: 3 }).alias("every_2_limit_3"),
 
         // Robustness features: TypedArray & String Coercion
         $tbl.col("typed_array").list.lengths().alias("typed_len"),
@@ -178,6 +179,7 @@ try {
     if (r0.every_neg_step_start_end.length !== 3 || r0.every_neg_step_start_end[0] !== null || r0.every_neg_step_start_end[1] !== 9 || r0.every_neg_step_start_end[2] !== 1) throw new Error("r0.every_neg_step_start_end failed");
     if (r0.every_pos_step_neg_start_end.length !== 3 || r0.every_pos_step_neg_start_end[0] !== 1 || r0.every_pos_step_neg_start_end[1] !== 1 || r0.every_pos_step_neg_start_end[2] !== 9) throw new Error("r0.every_pos_step_neg_start_end failed");
     if (r0.every_neg_step_neg_start_end.length !== 3 || r0.every_neg_step_neg_start_end[0] !== null || r0.every_neg_step_neg_start_end[1] !== 9 || r0.every_neg_step_neg_start_end[2] !== 1) throw new Error("r0.every_neg_step_neg_start_end failed");
+    if (r0.every_2_limit_3.length !== 3 || r0.every_2_limit_3[0] !== 3 || r0.every_2_limit_3[1] !== 4 || r0.every_2_limit_3[2] !== 5) throw new Error("r0.every_2_limit_3 failed");
 
 
     // Robustness assertions Row 0

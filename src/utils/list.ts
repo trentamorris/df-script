@@ -201,18 +201,48 @@ export function getUniqueListStats(
     };
 }
 
+/**
+ * Options configuration for the `stepSliceList` utility.
+ */
+export interface StepSliceListOptions {
+    /**
+     * The step size to slice the list by. Cannot be zero.
+     * Positive values slice forward (left-to-right), negative values slice backward (right-to-left).
+     * @default 1
+     */
+    step?: number;
+
+    /**
+     * The index to start slicing from (inclusive).
+     * Supports negative values to start relative to the end of the array.
+     * @default 0
+     */
+    offsetStart?: number;
+
+    /**
+     * The index to end slicing at (exclusive).
+     * Supports negative values to end relative to the end of the array.
+     * Defaults to the end of the array (if step > 0) or -1 (if step < 0).
+     */
+    offsetEnd?: number;
+
+    /**
+     * Caps the maximum number of items gathered in the sliced result list.
+     * If specified, the slicing process stops once this limit is reached.
+     */
+    maxItemsGathered?: number;
+}
+
 export function stepSliceList<T>(
     arr: ArrayLike<T>,
-    step: number,
     {
+        step = 1,
         offsetStart = 0,
-        offsetEnd
-    }: {
-        offsetStart?: number;
-        offsetEnd?: number;
-    } = {}
+        offsetEnd,
+        maxItemsGathered
+    }: StepSliceListOptions = {}
 ): T[] {
-    if (arr == null) {
+    if (arr == null || (maxItemsGathered !== undefined && maxItemsGathered <= 0)) {
         return [];
     }
     if (step === 0) {
@@ -229,12 +259,18 @@ export function stepSliceList<T>(
         for (let i = start; i < end && i < len; i += step) {
             if (i >= 0) {
                 res.push(arr[i]);
+                if (maxItemsGathered !== undefined && res.length >= maxItemsGathered) {
+                    break;
+                }
             }
         }
     } else {
         for (let i = start; i > end && i >= 0; i += step) {
             if (i < len) {
                 res.push(arr[i]);
+                if (maxItemsGathered !== undefined && res.length >= maxItemsGathered) {
+                    break;
+                }
             }
         }
     }

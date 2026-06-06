@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, isObj, stepSliceList } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -77,24 +77,13 @@ export class ListExprNamespace {
         return this.get(0, null_on_oob);
     }
 
-    gather(indices: number | number[] | { every: number; offset?: number }, null_on_oob: boolean = true) {
+    gather(
+        indices: number | number[],
+        null_on_oob: boolean = true
+    ) {
         return this._deriveList((arr) => {
             const list = arr as any;
             const len = list.length;
-
-            if (isObj(indices) && "every" in indices) {
-                const {
-                    every,
-                    offset,
-                    offsetStart = offset,
-                    offsetEnd
-                } = indices as { every: number; offset?: number; offsetStart?: number; offsetEnd?: number };
-                try {
-                    return stepSliceList(list, every, { offsetStart, offsetEnd });
-                } catch (e: any) {
-                    throw new ComputeError(e.message || "Invalid gather step parameters");
-                }
-            }
 
             const idxs = Array.isArray(indices) ? indices : [indices as any];
             const numIndices = idxs.length;
@@ -108,6 +97,16 @@ export class ListExprNamespace {
                 res[i] = val ?? null;
             }
             return res;
+        });
+    }
+
+    gather_every(options: StepSliceListOptions = {}) {
+        return this._deriveList((arr) => {
+            try {
+                return stepSliceList(arr as any, options);
+            } catch (e: any) {
+                throw new ComputeError(e.message || "Invalid gather step parameters");
+            }
         });
     }
 
