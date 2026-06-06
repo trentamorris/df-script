@@ -1,6 +1,6 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSlice, StepSliceOptions } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions } from "../../types";
 
@@ -100,10 +100,10 @@ export class ListExprNamespace {
         });
     }
 
-    gather_every(options: StepSliceOptions = {}) {
+    gather_every(options: StepSliceListOptions = {}) {
         return this._deriveList((arr) => {
             try {
-                return stepSlice(arr as any, options);
+                return stepSliceList(arr as any, options);
             } catch (e: any) {
                 throw new ComputeError(e.message || "Invalid gather step parameters");
             }

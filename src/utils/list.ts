@@ -202,9 +202,9 @@ export function getUniqueListStats(
 }
 
 /**
- * Options configuration for the `stepSlice` utility.
+ * Options configuration for the `stepSliceList` utility.
  */
-export interface StepSliceOptions {
+export interface StepSliceListOptions {
     /**
      * The step size to slice the list by. Cannot be zero.
      * Positive values slice forward (left-to-right), negative values slice backward (right-to-left).
@@ -233,14 +233,14 @@ export interface StepSliceOptions {
     maxItemsGathered?: number;
 }
 
-export function stepSlice<T>(
+export function stepSliceList<T>(
     arr: ArrayLike<T>,
     {
         step = 1,
         offsetStart = 0,
         offsetEnd,
         maxItemsGathered
-    }: StepSliceOptions = {}
+    }: StepSliceListOptions = {}
 ): T[] {
     if (arr == null || (maxItemsGathered !== undefined && maxItemsGathered <= 0)) {
         return [];
