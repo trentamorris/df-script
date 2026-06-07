@@ -14,6 +14,11 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement element-wise operations on lists/arrays using a sub-expression scope.
   * Replicate Polars `.list.eval()` behavior by exposing `.elements` inside the eval blocks to represent the inner elements of each list.
 
+### 🧱 Struct Column Operations (`.struct`)
+- [ ] **`struct` & `.struct.field()`**:
+  * Implement struct data type and `$df.struct(...)` constructor to group multiple columns into a single nested object/struct column.
+  * Implement `.struct.field(name)` to extract inner fields from a struct column.
+
 ---
 
 ## 🛠️ Refactoring & Infrastructure
