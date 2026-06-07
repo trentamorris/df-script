@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION STR NAMESPACE TESTS...");
@@ -21,58 +21,58 @@ const data = [
 ];
 
 const schema = {
-    name: $tbl.DataType.Utf8,
-    phrase: $tbl.DataType.Utf8,
-    prefix_suffix: $tbl.DataType.Utf8,
-    digits: $tbl.DataType.Utf8
+    name: $df.DataType.Utf8,
+    phrase: $df.DataType.Utf8,
+    prefix_suffix: $df.DataType.Utf8,
+    digits: $df.DataType.Utf8
 };
 
 try {
-    const df = $tbl.data(data, schema);
+    const df = $df.data(data, schema);
 
     const projected = df.select([
         // Basic conversions
-        $tbl.col("phrase").str.to_lowercase().alias("lower"),
-        $tbl.col("phrase").str.to_uppercase().alias("upper"),
-        $tbl.col("phrase").str.to_titlecase().alias("title"),
-        $tbl.col("phrase").str.reverse().alias("reversed"),
+        $df.col("phrase").str.to_lowercase().alias("lower"),
+        $df.col("phrase").str.to_uppercase().alias("upper"),
+        $df.col("phrase").str.to_titlecase().alias("title"),
+        $df.col("phrase").str.reverse().alias("reversed"),
 
         // Lengths
-        $tbl.col("phrase").str.len_chars().alias("len_c"),
-        $tbl.col("phrase").str.len_bytes().alias("len_b"),
+        $df.col("phrase").str.len_chars().alias("len_c"),
+        $df.col("phrase").str.len_bytes().alias("len_b"),
 
         // Padding & Zfill
-        $tbl.col("digits").str.zfill(4).alias("zfilled"),
-        $tbl.col("digits").str.pad_start(5, "*").alias("padded_start"),
-        $tbl.col("digits").str.pad_end(5, "-").alias("padded_end"),
+        $df.col("digits").str.zfill(4).alias("zfilled"),
+        $df.col("digits").str.pad_start(5, "*").alias("padded_start"),
+        $df.col("digits").str.pad_end(5, "-").alias("padded_end"),
 
         // Slice & Split & Explode
-        $tbl.col("phrase").str.slice(0, 8).alias("sliced"),
-        $tbl.col("phrase").str.slice(-8, 7).alias("sliced_neg"),
-        $tbl.col("phrase").str.split(" ").alias("split_arr"),
-        $tbl.col("digits").str.explode().alias("exploded_arr"),
+        $df.col("phrase").str.slice(0, 8).alias("sliced"),
+        $df.col("phrase").str.slice(-8, 7).alias("sliced_neg"),
+        $df.col("phrase").str.split(" ").alias("split_arr"),
+        $df.col("digits").str.explode().alias("exploded_arr"),
 
         // Stripping
-        $tbl.col("name").str.strip_chars().alias("stripped_ws"),
-        $tbl.col("name").str.strip_chars(" -").alias("stripped_chars"),
-        $tbl.col("name").str.strip_chars_start(undefined).alias("stripped_start_ws"),
-        $tbl.col("name").str.strip_chars_end().alias("stripped_end_ws"),
-        $tbl.col("name").str.strip_chars("-", { trimFirst: true }).alias("stripped_chars_trim_first"),
-        $tbl.col("name").str.strip_chars("-", { maxScanStart: 3, maxScanEnd: 3 }).alias("stripped_chars_offset_3"),
-        $tbl.col("name").str.strip_chars(/[a-zA-Z]/, { maxScanStart: 10, maxScanEnd: 10 }).alias("stripped_chars_regex"),
-        $tbl.col("digits").str.strip_chars(/[0-9]/, { returnStringOnNull: true }).alias("stripped_digits_regex"),
+        $df.col("name").str.strip_chars().alias("stripped_ws"),
+        $df.col("name").str.strip_chars(" -").alias("stripped_chars"),
+        $df.col("name").str.strip_chars_start(undefined).alias("stripped_start_ws"),
+        $df.col("name").str.strip_chars_end().alias("stripped_end_ws"),
+        $df.col("name").str.strip_chars("-", { trimFirst: true }).alias("stripped_chars_trim_first"),
+        $df.col("name").str.strip_chars("-", { maxScanStart: 3, maxScanEnd: 3 }).alias("stripped_chars_offset_3"),
+        $df.col("name").str.strip_chars(/[a-zA-Z]/, { maxScanStart: 10, maxScanEnd: 10 }).alias("stripped_chars_regex"),
+        $df.col("digits").str.strip_chars(/[0-9]/, { returnStringOnNull: true }).alias("stripped_digits_regex"),
 
         // Prefix/Suffix removal
-        $tbl.col("prefix_suffix").str.strip_prefix("pre-").alias("stripped_prefix"),
-        $tbl.col("prefix_suffix").str.strip_suffix("-suf").alias("stripped_suffix"),
+        $df.col("prefix_suffix").str.strip_prefix("pre-").alias("stripped_prefix"),
+        $df.col("prefix_suffix").str.strip_suffix("-suf").alias("stripped_suffix"),
 
         // Regex / Matches
-        $tbl.col("phrase").str.contains("awesome").alias("contains_str"),
-        $tbl.col("phrase").str.contains(/is/i).alias("contains_regex"),
-        $tbl.col("phrase").str.ends_with("!").alias("ends_with_excl"),
-        $tbl.col("phrase").str.starts_with("DF").alias("starts_with_df"),
-        $tbl.col("phrase").str.replace("is", "was").alias("replaced"),
-        $tbl.col("phrase").str.replace_all("e", "3").alias("replaced_all")
+        $df.col("phrase").str.contains("awesome").alias("contains_str"),
+        $df.col("phrase").str.contains(/is/i).alias("contains_regex"),
+        $df.col("phrase").str.ends_with("!").alias("ends_with_excl"),
+        $df.col("phrase").str.starts_with("DF").alias("starts_with_df"),
+        $df.col("phrase").str.replace("is", "was").alias("replaced"),
+        $df.col("phrase").str.replace_all("e", "3").alias("replaced_all")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.str results:");
@@ -147,28 +147,28 @@ try {
     ];
 
     const castSchema = {
-        date_str: $tbl.DataType.Utf8,
-        iso_date: $tbl.DataType.Utf8,
-        iso_datetime: $tbl.DataType.Utf8,
-        decimal_str: $tbl.DataType.Utf8,
-        int_str: $tbl.DataType.Utf8,
-        time_str: $tbl.DataType.Utf8,
-        upper_str: $tbl.DataType.Utf8,
-        lower_str: $tbl.DataType.Utf8,
-        title_str: $tbl.DataType.Utf8
+        date_str: $df.DataType.Utf8,
+        iso_date: $df.DataType.Utf8,
+        iso_datetime: $df.DataType.Utf8,
+        decimal_str: $df.DataType.Utf8,
+        int_str: $df.DataType.Utf8,
+        time_str: $df.DataType.Utf8,
+        upper_str: $df.DataType.Utf8,
+        lower_str: $df.DataType.Utf8,
+        title_str: $df.DataType.Utf8
     };
 
-    const castDf = $tbl.data(castData, castSchema);
+    const castDf = $df.data(castData, castSchema);
     const castProjected = castDf.select([
-        $tbl.col("date_str").str.strptime("%Y-%m-%d %H:%M:%S").alias("parsed_datetime"),
-        $tbl.col("iso_date").str.to_date().alias("parsed_date"),
-        $tbl.col("iso_datetime").str.to_datetime().alias("parsed_iso_datetime"),
-        $tbl.col("decimal_str").str.to_decimal(10, 2).alias("parsed_decimal"),
-        $tbl.col("int_str").str.to_integer().alias("parsed_int"),
-        $tbl.col("time_str").str.to_time().alias("parsed_time"),
-        $tbl.col("upper_str").str.to_lowercase().alias("to_lower"),
-        $tbl.col("lower_str").str.to_uppercase().alias("to_upper"),
-        $tbl.col("title_str").str.to_titlecase().alias("to_title")
+        $df.col("date_str").str.strptime("%Y-%m-%d %H:%M:%S").alias("parsed_datetime"),
+        $df.col("iso_date").str.to_date().alias("parsed_date"),
+        $df.col("iso_datetime").str.to_datetime().alias("parsed_iso_datetime"),
+        $df.col("decimal_str").str.to_decimal(10, 2).alias("parsed_decimal"),
+        $df.col("int_str").str.to_integer().alias("parsed_int"),
+        $df.col("time_str").str.to_time().alias("parsed_time"),
+        $df.col("upper_str").str.to_lowercase().alias("to_lower"),
+        $df.col("lower_str").str.to_uppercase().alias("to_upper"),
+        $df.col("title_str").str.to_titlecase().alias("to_title")
     ]).to_dicts() as any[];
 
     console.log("Casting and parsing results:");

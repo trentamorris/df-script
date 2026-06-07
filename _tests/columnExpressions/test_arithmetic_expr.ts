@@ -1,4 +1,4 @@
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION ARITHMETIC TESTS...");
@@ -26,65 +26,65 @@ const data = [
 ];
 
 try {
-    const df = $tbl.data(data);
+    const df = $df.data(data);
 
     const projected = df.select([
-        $tbl.col("val3").abs().alias("abs"),
-        $tbl.col("val5").acos().alias("acos"),
-        $tbl.col("val5").acosh().alias("acosh"),
-        $tbl.col("val1").add($tbl.col("val2")).alias("add_expr"),
-        $tbl.col("val1").add(5).alias("add_scalar"),
-        $tbl.col("val1").add($tbl.lit(5)).alias("add_lit"),
-        $tbl.col("val5").asin().alias("asin"),
-        $tbl.col("val3").asinh().alias("asinh"),
-        $tbl.col("val3").atan().alias("atan"),
-        $tbl.col("val7").atanh().alias("atanh"),
-        $tbl.col("val6").cbrt().alias("cbrt"),
-        $tbl.col("val3").ceil().alias("ceil"),
-        $tbl.col("val3").clip(-5, 5).alias("clip_both"),
-        $tbl.col("val3").clip(-2, null).alias("clip_lower"),
-        $tbl.col("val3").clip(null, 2).alias("clip_upper"),
-        $tbl.col("val3").cos().alias("cos"),
-        $tbl.col("val3").cosh().alias("cosh"),
-        $tbl.col("val5").degrees().alias("degrees"),
-        $tbl.col("val1").div($tbl.col("val2")).alias("div_expr"),
-        $tbl.col("val1").div($tbl.col("val4")).alias("div_zero"), // div by zero should return null
-        $tbl.col("val5").exp().alias("exp"),
-        $tbl.col("val4").expm1().alias("expm1"),
-        $tbl.col("val3").floor().alias("floor"),
-        $tbl.col("val1").floordiv($tbl.col("val2")).alias("floordiv_expr"),
-        $tbl.col("val1").floordiv($tbl.col("val4")).alias("floordiv_zero"), // floordiv by zero should return null
-        $tbl.col("val2").hypot($tbl.col("val4")).alias("hypot_expr"),
-        $tbl.col("val1").log().alias("log_natural"),
-        $tbl.col("val1").log(10).alias("log_10"),
-        $tbl.col("val1").log(2).alias("log_2"),
-        $tbl.col("val4").log1p().alias("log1p"),
-        $tbl.col("val1").mod($tbl.col("val2")).alias("mod_expr"),
-        $tbl.col("val1").mod($tbl.col("val4")).alias("mod_zero"), // mod by zero should return null
-        $tbl.col("val1").mul($tbl.col("val2")).alias("mul_expr"),
-        $tbl.col("val3").negate().alias("negate"),
-        $tbl.col("val2").pow($tbl.col("val4")).alias("pow_expr"),
-        $tbl.col("val5").radians().alias("radians"),
-        $tbl.col("val3").round(1).alias("round_1"),
-        $tbl.col("val3").round().alias("round_0"),
-        $tbl.col("val3").sin().alias("sin"),
-        $tbl.col("val3").sinh().alias("sinh"),
-        $tbl.col("val3").sign().alias("sign"),
-        $tbl.col("val6").sqrt().alias("sqrt"),
-        $tbl.col("val3").tan().alias("tan"),
-        $tbl.col("val3").tanh().alias("tanh"),
-        $tbl.col("val3").trunc().alias("trunc"),
-        $tbl.col("val1").sub($tbl.col("val2")).alias("sub_expr"),
-        $tbl.col("val1").rand().alias("rand_no_seed"),
-        $tbl.col("val1").rand(42).alias("rand_seed_42_a"),
-        $tbl.col("val1").rand(42).alias("rand_seed_42_b"),
-        $tbl.col("val1").rand(99).alias("rand_seed_99"),
-        $tbl.col("val1").rand(undefined, { min: 10, max: 20 }).alias("rand_range_unseeded"),
-        $tbl.col("val1").rand(42, { min: 10, max: 20 }).alias("rand_range_seeded_a"),
-        $tbl.col("val1").rand(42, { min: 10, max: 20 }).alias("rand_range_seeded_b"),
-        $tbl.col("val1").rand(undefined, { min: 100, max: 200, integer: true }).alias("rand_int_unseeded"),
-        $tbl.col("val1").rand(42, { min: 100, max: 200, integer: true }).alias("rand_int_seeded_a"),
-        $tbl.col("val1").rand(42, { min: 100, max: 200, integer: true }).alias("rand_int_seeded_b")
+        $df.col("val3").abs().alias("abs"),
+        $df.col("val5").acos().alias("acos"),
+        $df.col("val5").acosh().alias("acosh"),
+        $df.col("val1").add($df.col("val2")).alias("add_expr"),
+        $df.col("val1").add(5).alias("add_scalar"),
+        $df.col("val1").add($df.lit(5)).alias("add_lit"),
+        $df.col("val5").asin().alias("asin"),
+        $df.col("val3").asinh().alias("asinh"),
+        $df.col("val3").atan().alias("atan"),
+        $df.col("val7").atanh().alias("atanh"),
+        $df.col("val6").cbrt().alias("cbrt"),
+        $df.col("val3").ceil().alias("ceil"),
+        $df.col("val3").clip(-5, 5).alias("clip_both"),
+        $df.col("val3").clip(-2, null).alias("clip_lower"),
+        $df.col("val3").clip(null, 2).alias("clip_upper"),
+        $df.col("val3").cos().alias("cos"),
+        $df.col("val3").cosh().alias("cosh"),
+        $df.col("val5").degrees().alias("degrees"),
+        $df.col("val1").div($df.col("val2")).alias("div_expr"),
+        $df.col("val1").div($df.col("val4")).alias("div_zero"), // div by zero should return null
+        $df.col("val5").exp().alias("exp"),
+        $df.col("val4").expm1().alias("expm1"),
+        $df.col("val3").floor().alias("floor"),
+        $df.col("val1").floordiv($df.col("val2")).alias("floordiv_expr"),
+        $df.col("val1").floordiv($df.col("val4")).alias("floordiv_zero"), // floordiv by zero should return null
+        $df.col("val2").hypot($df.col("val4")).alias("hypot_expr"),
+        $df.col("val1").log().alias("log_natural"),
+        $df.col("val1").log(10).alias("log_10"),
+        $df.col("val1").log(2).alias("log_2"),
+        $df.col("val4").log1p().alias("log1p"),
+        $df.col("val1").mod($df.col("val2")).alias("mod_expr"),
+        $df.col("val1").mod($df.col("val4")).alias("mod_zero"), // mod by zero should return null
+        $df.col("val1").mul($df.col("val2")).alias("mul_expr"),
+        $df.col("val3").negate().alias("negate"),
+        $df.col("val2").pow($df.col("val4")).alias("pow_expr"),
+        $df.col("val5").radians().alias("radians"),
+        $df.col("val3").round(1).alias("round_1"),
+        $df.col("val3").round().alias("round_0"),
+        $df.col("val3").sin().alias("sin"),
+        $df.col("val3").sinh().alias("sinh"),
+        $df.col("val3").sign().alias("sign"),
+        $df.col("val6").sqrt().alias("sqrt"),
+        $df.col("val3").tan().alias("tan"),
+        $df.col("val3").tanh().alias("tanh"),
+        $df.col("val3").trunc().alias("trunc"),
+        $df.col("val1").sub($df.col("val2")).alias("sub_expr"),
+        $df.col("val1").rand().alias("rand_no_seed"),
+        $df.col("val1").rand(42).alias("rand_seed_42_a"),
+        $df.col("val1").rand(42).alias("rand_seed_42_b"),
+        $df.col("val1").rand(99).alias("rand_seed_99"),
+        $df.col("val1").rand(undefined, { min: 10, max: 20 }).alias("rand_range_unseeded"),
+        $df.col("val1").rand(42, { min: 10, max: 20 }).alias("rand_range_seeded_a"),
+        $df.col("val1").rand(42, { min: 10, max: 20 }).alias("rand_range_seeded_b"),
+        $df.col("val1").rand(undefined, { min: 100, max: 200, integer: true }).alias("rand_int_unseeded"),
+        $df.col("val1").rand(42, { min: 100, max: 200, integer: true }).alias("rand_int_seeded_a"),
+        $df.col("val1").rand(42, { min: 100, max: 200, integer: true }).alias("rand_int_seeded_b")
     ]).to_dicts() as any[];
 
     console.dir(projected, { depth: null });

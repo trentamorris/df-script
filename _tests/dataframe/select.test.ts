@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("Running select tests...");
 
@@ -21,7 +21,7 @@ if (collected1[0].name !== "Alice" || collected1[0].city !== "NY" || (collected1
 }
 
 // 2. Select using column expressions and aliasing
-const df2 = df.select($tbl.col("age").alias("years"), "name");
+const df2 = df.select($df.col("age").alias("years"), "name");
 const schema2 = df2.getSchema();
 if (schema2.years === undefined || schema2.name === undefined || schema2.age !== undefined) {
     throw new Error("Columns mismatch on expression selection schema");
@@ -32,7 +32,7 @@ if (collected2[0].years !== 30 || collected2[0].name !== "Alice") {
 }
 
 // 3. Select all except some columns using top-level exclude function
-const df3 = df.select($tbl.exclude("city"));
+const df3 = df.select($df.exclude("city"));
 const schema3 = df3.getSchema();
 if (schema3.name === undefined || schema3.age === undefined || schema3.city !== undefined) {
     throw new Error("Columns mismatch on all-exclude selection schema");

@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION BOOLEAN TESTS...");
@@ -14,47 +14,47 @@ const testData = [
 ];
 
 try {
-    const df = $tbl.data(testData);
+    const df = $df.data(testData);
 
     // 1. Element-wise checks
     const results = df.select([
-        $tbl.col("id").alias("orig_id"),
+        $df.col("id").alias("orig_id"),
 
         // between
-        $tbl.col("id").between(2, 4).alias("id_between_2_4"),
-        $tbl.col("id").between(2, 4, "none").alias("id_between_2_4_none"),
+        $df.col("id").between(2, 4).alias("id_between_2_4"),
+        $df.col("id").between(2, 4, "none").alias("id_between_2_4_none"),
 
         // is_close
-        $tbl.col("val").is_close(10.500001, { rel_tol: 1e-5 }).alias("val_close"),
-        $tbl.col("val").is_close(11.0).alias("val_not_close"),
-        $tbl.col("val").is_close(NaN, { nans_equal: true }).alias("val_nan_close_eq"),
-        $tbl.col("val").is_close(NaN, { nans_equal: false }).alias("val_nan_close_neq"),
-        $tbl.col("val").is_close(Infinity).alias("val_inf_close"),
+        $df.col("val").is_close(10.500001, { rel_tol: 1e-5 }).alias("val_close"),
+        $df.col("val").is_close(11.0).alias("val_not_close"),
+        $df.col("val").is_close(NaN, { nans_equal: true }).alias("val_nan_close_eq"),
+        $df.col("val").is_close(NaN, { nans_equal: false }).alias("val_nan_close_neq"),
+        $df.col("val").is_close(Infinity).alias("val_inf_close"),
 
         // is_duplicated
-        $tbl.col("duplicates").is_duplicated().alias("dup_mask"),
+        $df.col("duplicates").is_duplicated().alias("dup_mask"),
 
         // is_unique
-        $tbl.col("duplicates").is_unique().alias("uniq_mask"),
+        $df.col("duplicates").is_unique().alias("uniq_mask"),
 
         // is_empty
-        $tbl.col("name").is_empty().alias("name_empty"),
-        $tbl.col("flags").is_empty().alias("flags_empty"),
+        $df.col("name").is_empty().alias("name_empty"),
+        $df.col("flags").is_empty().alias("flags_empty"),
 
         // not
-        $tbl.col("id").eq(1).not().alias("not_id_eq_1"),
+        $df.col("id").eq(1).not().alias("not_id_eq_1"),
 
         // Null and NaN checks
-        $tbl.col("val").is_null().alias("val_null"),
-        $tbl.col("val").is_not_null().alias("val_not_null"),
-        $tbl.col("val").is_nan().alias("val_nan"),
-        $tbl.col("val").is_not_nan().alias("val_not_nan"),
-        $tbl.col("val").is_finite().alias("val_finite"),
-        $tbl.col("val").is_infinite().alias("val_infinite"),
+        $df.col("val").is_null().alias("val_null"),
+        $df.col("val").is_not_null().alias("val_not_null"),
+        $df.col("val").is_nan().alias("val_nan"),
+        $df.col("val").is_not_nan().alias("val_not_nan"),
+        $df.col("val").is_finite().alias("val_finite"),
+        $df.col("val").is_infinite().alias("val_infinite"),
 
         // is_in / not_in
-        $tbl.col("duplicates").is_in(["A", "C"]).alias("dup_in_AC"),
-        $tbl.col("duplicates").not_in(["A", "C"]).alias("dup_not_in_AC")
+        $df.col("duplicates").is_in(["A", "C"]).alias("dup_in_AC"),
+        $df.col("duplicates").not_in(["A", "C"]).alias("dup_not_in_AC")
     ]).to_dicts() as any[];
 
     console.log("Element-wise boolean checks results:");
@@ -149,20 +149,20 @@ try {
     // 2. Boolean aggregations
     const aggResults = df.select([
         // all
-        $tbl.col("id").gt(0).all().alias("all_gt_0"),
-        $tbl.col("id").gt(3).all().alias("all_gt_3"),
+        $df.col("id").gt(0).all().alias("all_gt_0"),
+        $df.col("id").gt(3).all().alias("all_gt_3"),
 
         // any
-        $tbl.col("id").gt(3).any().alias("any_gt_3"),
-        $tbl.col("id").gt(10).any().alias("any_gt_10"),
+        $df.col("id").gt(3).any().alias("any_gt_3"),
+        $df.col("id").gt(10).any().alias("any_gt_10"),
 
         // has_nulls
-        $tbl.col("name").has_nulls().alias("name_has_nulls"),
-        $tbl.col("id").has_nulls().alias("id_has_nulls"),
+        $df.col("name").has_nulls().alias("name_has_nulls"),
+        $df.col("id").has_nulls().alias("id_has_nulls"),
 
         // n_unique checks
-        $tbl.col("duplicates").n_unique().eq(3).alias("dup_distinct_3"),
-        $tbl.col("duplicates").n_unique().eq(4).alias("dup_distinct_4")
+        $df.col("duplicates").n_unique().eq(3).alias("dup_distinct_3"),
+        $df.col("duplicates").n_unique().eq(4).alias("dup_distinct_4")
     ]).to_dicts() as any[];
 
     console.log("Boolean aggregations results:");
@@ -207,22 +207,22 @@ try {
         }
     ];
 
-    const edgeDf = $tbl.data(edgeData);
+    const edgeDf = $df.data(edgeData);
 
     const edgeResults = edgeDf.select([
-        $tbl.col("dateVal").is_unique().alias("date_unique"),
-        $tbl.col("dateVal").is_duplicated().alias("date_duplicated"),
-        $tbl.col("binaryVal").is_unique().alias("binary_unique"),
-        $tbl.col("binaryVal").is_duplicated().alias("binary_duplicated"),
-        $tbl.col("numVal").is_unique().alias("num_unique"),
-        $tbl.col("numVal").is_duplicated().alias("num_duplicated"),
-        $tbl.col("nullVal").is_unique().alias("null_unique"),
-        $tbl.col("nullVal").is_duplicated().alias("null_duplicated"),
-        $tbl.col("dateVal").is_in([new Date("2026-06-01T12:00:00.000Z"), new Date("2026-06-03T12:00:00.000Z")]),
-        $tbl.col("binaryVal").is_in([new Uint8Array([1, 2, 3])]),
-        $tbl.col("numVal").is_in([NaN]),
-        $tbl.col("listVal").is_empty().alias("list_empty_default"),
-        $tbl.col("listVal").is_empty({ ignoreNulls: true }).alias("list_empty_ignore_nulls")
+        $df.col("dateVal").is_unique().alias("date_unique"),
+        $df.col("dateVal").is_duplicated().alias("date_duplicated"),
+        $df.col("binaryVal").is_unique().alias("binary_unique"),
+        $df.col("binaryVal").is_duplicated().alias("binary_duplicated"),
+        $df.col("numVal").is_unique().alias("num_unique"),
+        $df.col("numVal").is_duplicated().alias("num_duplicated"),
+        $df.col("nullVal").is_unique().alias("null_unique"),
+        $df.col("nullVal").is_duplicated().alias("null_duplicated"),
+        $df.col("dateVal").is_in([new Date("2026-06-01T12:00:00.000Z"), new Date("2026-06-03T12:00:00.000Z")]),
+        $df.col("binaryVal").is_in([new Uint8Array([1, 2, 3])]),
+        $df.col("numVal").is_in([NaN]),
+        $df.col("listVal").is_empty().alias("list_empty_default"),
+        $df.col("listVal").is_empty({ ignoreNulls: true }).alias("list_empty_ignore_nulls")
     ]).to_dicts() as any[];
 
     console.log("Edge cases / complex types unique/in/empty checks results:");
@@ -283,14 +283,14 @@ try {
     if (edgeResults[2].list_empty_ignore_nulls !== true) throw new Error("list_empty_ignore_nulls index 2 failed");
     // n_unique checks (default is standard reference checks)
     const distinctResults = edgeDf.select([
-        $tbl.col("dateVal").n_unique().alias("date_distinct_default"),
-        $tbl.col("binaryVal").n_unique().alias("binary_distinct_default"),
-        $tbl.col("numVal").n_unique().alias("num_distinct_default"),
-        $tbl.col("nullVal").n_unique().alias("null_distinct_default"),
+        $df.col("dateVal").n_unique().alias("date_distinct_default"),
+        $df.col("binaryVal").n_unique().alias("binary_distinct_default"),
+        $df.col("numVal").n_unique().alias("num_distinct_default"),
+        $df.col("nullVal").n_unique().alias("null_distinct_default"),
 
         // n_unique in strict mode (robust value checks)
-        $tbl.col("dateVal").n_unique({ strict: true }).eq(2).alias("date_distinct_strict"),
-        $tbl.col("binaryVal").n_unique({ strict: true }).eq(2).alias("binary_distinct_strict")
+        $df.col("dateVal").n_unique({ strict: true }).eq(2).alias("date_distinct_strict"),
+        $df.col("binaryVal").n_unique({ strict: true }).eq(2).alias("binary_distinct_strict")
     ]).to_dicts() as any[];
 
     // In default mode, unique Date instances and TypedArray instances are counted separately (identity checks)

@@ -8,15 +8,27 @@ import { sortList } from "./list";
 // /** Generic Number Helpers */
 // ============================================================================
 
-export function isValidNumber(v: unknown): v is number {
-    return typeof v === "number" && !Number.isNaN(v) && Number.isFinite(v);
+export interface NumericValidationOptions {
+    allowNonFiniteNumbers?: boolean;
 }
 
-export function toValidNumber(v: unknown): number | null {
+export function isValidNumber(
+    v: unknown,
+    options?: NumericValidationOptions
+): v is number {
+    if (typeof v !== "number") return false;
+    if (options && options.allowNonFiniteNumbers) return true;
+    return !Number.isNaN(v) && Number.isFinite(v);
+}
+
+export function toValidNumber(
+    v: unknown,
+    options?: NumericValidationOptions
+): number | null {
     if (v == null) return null;
     if (typeof v === "symbol") return null;
 
-    if (isValidNumber(v)) {
+    if (isValidNumber(v, options)) {
         return v;
     }
     if (typeof v === "boolean") {
@@ -24,17 +36,23 @@ export function toValidNumber(v: unknown): number | null {
     }
     if (typeof v === "bigint") {
         const n = Number(v);
-        return isValidNumber(n) ? n : null;
+        return isValidNumber(n, options) ? n : null;
     }
     if (v instanceof Date) {
         const t = v.getTime();
-        return isValidNumber(t) ? t : null;
+        return isValidNumber(t, options) ? t : null;
     }
     if (typeof v === "string") {
         const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
         if (clean === "") return null;
         const n = Number(clean);
-        return isValidNumber(n) ? n : null;
+        if (isValidNumber(n, options)) {
+            if (Number.isNaN(n) && clean.toLowerCase() !== "nan") {
+                return null;
+            }
+            return n;
+        }
+        return null;
     }
     return null;
 }
@@ -75,11 +93,16 @@ export function isValidFloat(v: unknown, precision?: FloatPrecision): boolean {
     return true;
 }
 
+export interface FloatOptions extends NumericValidationOptions {
+    precision?: FloatPrecision;
+}
+
 export function toValidFloat(
     v: unknown,
-    precision: FloatPrecision = "Float64"
+    options: FloatOptions = {}
 ): number | null {
-    const num = toValidNumber(v);
+    const { precision = "Float64", allowNonFiniteNumbers = true } = options;
+    const num = toValidNumber(v, { allowNonFiniteNumbers });
     if (num === null) return null;
     return precision === "Float32" ? Math.fround(num) : num;
 }

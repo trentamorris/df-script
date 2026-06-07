@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION WHEN-THEN-OTHERWISE TESTS...");
@@ -13,17 +13,17 @@ const data = [
 ];
 
 try {
-    const df = $tbl.data(data);
+    const df = $df.data(data);
 
     // 1. Basic When/Then/Otherwise using with_columns and ColumnExpressions
     const res1 = df.with_columns(
-        $tbl.when($tbl.col("val").gt(10))
-            .then($tbl.col("category"))
-            .otherwise($tbl.col("fallback_val"))
+        $df.when($df.col("val").gt(10))
+            .then($df.col("category"))
+            .otherwise($df.col("fallback_val"))
             .alias("basic_expr"),
-        $tbl.when($tbl.col("val").lt(6))
-            .then($tbl.col("category"))
-            .otherwise($tbl.col("fallback_val"))
+        $df.when($df.col("val").lt(6))
+            .then($df.col("category"))
+            .otherwise($df.col("fallback_val"))
             .alias("basic_expr_other")
     ).to_dicts() as any[];
 
@@ -47,9 +47,9 @@ try {
 
     // 2. Chained When/Then/Otherwise using with_columns and Record/Literal Expressions
     const res2 = df.with_columns({
-        chained_expr: $tbl.when($tbl.col("val").gt(10)).then($tbl.lit("GT10"))
-            .when($tbl.col("val").gt(6)).then($tbl.lit("GT6"))
-            .otherwise($tbl.lit("LT_EQ6"))
+        chained_expr: $df.when($df.col("val").gt(10)).then($df.lit("GT10"))
+            .when($df.col("val").gt(6)).then($df.lit("GT6"))
+            .otherwise($df.lit("LT_EQ6"))
     }).to_dicts() as any[];
 
     console.log("Chained When/Then/Otherwise Results:");
@@ -67,8 +67,8 @@ try {
 
     // 3. Fallback when otherwise() is omitted (should default to null)
     const res3 = df.with_columns(
-        $tbl.when($tbl.col("val").gt(10))
-            .then($tbl.col("category"))
+        $df.when($df.col("val").gt(10))
+            .then($df.col("category"))
             .alias("omitted_otherwise")
     ).to_dicts() as any[];
 
@@ -82,10 +82,10 @@ try {
 
     // 4. Aliasing and Casting (Cloning support)
     const res4 = df.with_columns(
-        $tbl.when($tbl.col("val").gt(10)).then($tbl.col("category")).otherwise($tbl.col("fallback_val"))
+        $df.when($df.col("val").gt(10)).then($df.col("category")).otherwise($df.col("fallback_val"))
             .alias("new_alias"),
-        $tbl.when($tbl.col("val").gt(10)).then($tbl.lit(1)).otherwise($tbl.lit(0))
-            .cast($tbl.DataType.Boolean)
+        $df.when($df.col("val").gt(10)).then($df.lit(1)).otherwise($df.lit(0))
+            .cast($df.DataType.Boolean)
             .alias("cast_bool")
     ).to_dicts() as any[];
 
@@ -98,9 +98,9 @@ try {
 
     // 5. Object/Record syntax inside select()
     const res5 = df.select({
-        basic_expr: $tbl.when($tbl.col("val").gt(10))
-            .then($tbl.col("category"))
-            .otherwise($tbl.col("fallback_val"))
+        basic_expr: $df.when($df.col("val").gt(10))
+            .then($df.col("category"))
+            .otherwise($df.col("fallback_val"))
     }).to_dicts() as any[];
 
     console.log("Object/Record syntax inside select() Results:");

@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src";
+import { $df } from "../../src";
 
 console.log("Running concat tests...");
 
@@ -7,7 +7,7 @@ const df1 = new DataFrame([{ id: 1, name: "Alice" }]);
 const df2 = new DataFrame([{ id: 2, name: "Bob" }]);
 
 // 1. Vertical Concat (Top-Level)
-const dfVert = $tbl.concat([df1, df2], { how: "vertical" });
+const dfVert = $df.concat([df1, df2], { how: "vertical" });
 if (dfVert.height !== 2) throw new Error("Vertical concat height mismatch");
 const collectedVert = dfVert.to_dicts();
 if (collectedVert[1].name !== "Bob") throw new Error("Vertical concat value mismatch");
@@ -23,7 +23,7 @@ if (collectedHoriz[0].age !== 25 || collectedHoriz[0].name !== "Alice") {
 
 // 3. Diagonal Concat (Top-Level)
 const df4 = new DataFrame([{ age: 30, city: "Paris" }]);
-const dfDiag = $tbl.concat([df1, df4], { how: "diagonal" });
+const dfDiag = $df.concat([df1, df4], { how: "diagonal" });
 if (dfDiag.height !== 2) throw new Error("Diagonal concat height mismatch");
 const collectedDiag = dfDiag.to_dicts() as any[];
 if (collectedDiag[0].age !== null || collectedDiag[1].name !== null || collectedDiag[1].city !== "Paris") {
@@ -36,7 +36,7 @@ const dfHorizTall = new DataFrame([{ other: 10 }, { other: 20 }]);
 
 let didThrow = false;
 try {
-    $tbl.concat([dfHorizShort, dfHorizTall], { how: "horizontal", horizontal: { strict: true } });
+    $df.concat([dfHorizShort, dfHorizTall], { how: "horizontal", horizontal: { strict: true } });
 } catch (e: any) {
     if (e.message.includes("Row count mismatch")) {
         didThrow = true;
@@ -44,7 +44,7 @@ try {
 }
 if (!didThrow) throw new Error("Expected horizontal strict check to throw on height mismatch");
 
-const dfHorizPadded = $tbl.concat([dfHorizShort, dfHorizTall], { how: "horizontal", horizontal: { strict: false } });
+const dfHorizPadded = $df.concat([dfHorizShort, dfHorizTall], { how: "horizontal", horizontal: { strict: false } });
 if (dfHorizPadded.height !== 2) throw new Error("Padded horizontal concat should have height of tallest DataFrame");
 const collectedHorizPadded = dfHorizPadded.to_dicts() as any[];
 if (collectedHorizPadded[0].val !== "X" || collectedHoriz[0].age !== 25) {
@@ -99,7 +99,7 @@ if (collectedH3[0].val !== "X" || collectedH3[0].other !== 10) {
 }
 
 // 6. Generalized concat input tests
-const dfGen1 = $tbl.concat(df1);
+const dfGen1 = $df.concat(df1);
 if (dfGen1.height !== 1 || dfGen1.to_dicts()[0].name !== "Alice") {
     throw new Error("Generalized concat with single DataFrame failed");
 }
@@ -114,7 +114,7 @@ if (dfGen3.height !== 2 || dfGen3.to_dicts()[1].name !== "Bob") {
     throw new Error("Generalized instance concat with raw row objects failed");
 }
 
-const dfGen4 = $tbl.concat([df1, { id: [2], name: ["Bob"] }], { how: "diagonal" });
+const dfGen4 = $df.concat([df1, { id: [2], name: ["Bob"] }], { how: "diagonal" });
 if (dfGen4.height !== 2 || dfGen4.to_dicts()[1].name !== "Bob") {
     throw new Error("Generalized top-level concat with mixed items failed");
 }
@@ -122,7 +122,7 @@ if (dfGen4.height !== 2 || dfGen4.to_dicts()[1].name !== "Bob") {
 // 7. Defensive verification
 let threw = false;
 try {
-    $tbl.concat(null as any);
+    $df.concat(null as any);
 } catch (e: any) {
     if (e.message.includes("cannot be null or undefined")) threw = true;
 }
@@ -130,7 +130,7 @@ if (!threw) throw new Error("Expected concat(null) to throw");
 
 threw = false;
 try {
-    $tbl.concat([df1, null as any]);
+    $df.concat([df1, null as any]);
 } catch (e: any) {
     if (e.message.includes("cannot be null or undefined")) threw = true;
 }
@@ -138,7 +138,7 @@ if (!threw) throw new Error("Expected concat([df, null]) to throw");
 
 threw = false;
 try {
-    $tbl.concat([[df1, {} as any]]);
+    $df.concat([[df1, {} as any]]);
 } catch (e: any) {
     if (e.message.includes("must contain only DataFrame instances")) threw = true;
 }
@@ -146,7 +146,7 @@ if (!threw) throw new Error("Expected nested array with non-DataFrame to throw")
 
 threw = false;
 try {
-    $tbl.concat([[1, 2, 3] as any]);
+    $df.concat([[1, 2, 3] as any]);
 } catch (e: any) {
     if (e.message.includes("rows must be plain objects")) threw = true;
 }
@@ -154,7 +154,7 @@ if (!threw) throw new Error("Expected row array with non-objects to throw");
 
 threw = false;
 try {
-    $tbl.concat("invalid" as any);
+    $df.concat("invalid" as any);
 } catch (e: any) {
     if (e.message.includes("expected DataFrame")) threw = true;
 }

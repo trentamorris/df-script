@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("Running reverse tests...");
 
@@ -42,7 +42,7 @@ if (reversedEmpty !== emptyDf) {
 
 // 3. Reverse using column expressions (reverse only column "name" inside with_columns)
 const dfExprReversed = df.with_columns(
-    $tbl.col("name").reverse().alias("reversed_name")
+    $df.col("name").reverse().alias("reversed_name")
 );
 const exprCollected = dfExprReversed.to_dicts();
 if (exprCollected[0].id !== 1 || exprCollected[0].reversed_name !== "Charlie") {

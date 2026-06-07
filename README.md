@@ -55,10 +55,10 @@ pnpm add df-script
 Here is a quick example showing how to load data, run expressions, perform aggregations, and compute rolling statistics.
 
 ```typescript
-import { $tbl } from "df-script";
+import { $df } from "df-script";
 
 // 1. Create a DataFrame with structured data and automatic schema inference
-const df = $tbl.data([
+const df = $df.data([
   { id: 1, name: "Alice", join_date: "2026-01-15", sales: 1200.50, tags: ["sales", "east"] },
   { id: 2, name: "Bob", join_date: "2026-02-20", sales: 850.00, tags: ["support", "west"] },
   { id: 3, name: "Charlie", join_date: "2026-03-05", sales: 2300.00, tags: ["sales", "north"] },
@@ -67,11 +67,11 @@ const df = $tbl.data([
 
 // 2. Select columns, transform strings, format dates, and fill missing values
 const processedDf = df.select(
-  $tbl.col("id"),
-  $tbl.col("name").str.upper().alias("NAME_UPPER"),
-  $tbl.col("join_date").str.to_datetime().dt.year().alias("join_year"),
-  $tbl.col("sales").add(500).alias("sales_adjusted"),
-  $tbl.col("tags").list.lengths().alias("tag_count")
+  $df.col("id"),
+  $df.col("name").str.upper().alias("NAME_UPPER"),
+  $df.col("join_date").str.to_datetime().dt.year().alias("join_year"),
+  $df.col("sales").add(500).alias("sales_adjusted"),
+  $df.col("tags").list.lengths().alias("tag_count")
 );
 
 console.log(processedDf.to_dicts());
@@ -89,14 +89,14 @@ console.log(processedDf.to_dicts());
 
 ## 📖 Core Concepts
 
-### The `$tbl` Entry Point
+### The `$df` Entry Point
 
-DFScript uses the `$tbl` namespace to bootstrap DataFrames, refer to columns, and access general types.
+DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, and access general types.
 
-- `$tbl.data(dataRowsOrCols, schema?)`: Instantiates a new `DataFrame`.
-- `$tbl.col(name)`: Creates a column reference expression.
-- `$tbl.all()`: Selects all columns in the DataFrame.
-- `$tbl.DataType`: Direct access to the `DataTypeRegistry` for schema specification.
+- `$df.data(dataRowsOrCols, schema?)`: Instantiates a new `DataFrame`.
+- `$df.col(name)`: Creates a column reference expression.
+- `$df.all()`: Selects all columns in the DataFrame.
+- `$df.DataType`: Direct access to the `DataTypeRegistry` for schema specification.
 
 ### DataFrames vs. Columns
 
@@ -108,7 +108,7 @@ DFScript uses the `$tbl` namespace to bootstrap DataFrames, refer to columns, an
 ## 🛠️ DataFrame API Reference
 
 ### 1. Transformations & Projection
-- **`select(...exprs)`**: Projects columns. Supports strings, raw column names, `$tbl.col(...)` expressions, and `$tbl.all()`.
+- **`select(...exprs)`**: Projects columns. Supports strings, raw column names, `$df.col(...)` expressions, and `$df.all()`.
 - **`with_columns(...exprs)`**: Adds or overrides columns. Accepts expressions, strings, or options objects mapping keys to values/expressions.
 - **`drop(...names)`**: Drops one or more columns from the DataFrame.
 - **`rename(mapping)`**: Renames columns using a `{ oldName: newName }` object.
@@ -126,7 +126,7 @@ DFScript uses the `$tbl` namespace to bootstrap DataFrames, refer to columns, an
 
 ### 4. Grouping & Aggregations
 - **`groupby(keys)`**: Groups the data by one or more columns, returning a `GroupedData` object.
-- **`GroupedData.agg(...exprs)`**: Run aggregations on grouped data (e.g. `$tbl.col("sales").sum()`).
+- **`GroupedData.agg(...exprs)`**: Run aggregations on grouped data (e.g. `$df.col("sales").sum()`).
 
 ### 5. Reshaping & Joining
 - **`join(other, on, how, suffixes?)`**: Merges two DataFrames on join keys. Supported join types: `"inner" | "left" | "right" | "outer"`.
@@ -170,18 +170,18 @@ To maintain a clean and uncluttered API namespace, specific data transforms are 
 ### 🔤 String Operations (`.str`)
 Available on any expression via `.str`:
 ```typescript
-$tbl.col("name").str.lower()
-$tbl.col("code").str.starts_with("A")
-$tbl.col("description").str.replace(/foo/i, "bar")
+$df.col("name").str.lower()
+$df.col("code").str.starts_with("A")
+$df.col("description").str.replace(/foo/i, "bar")
 ```
 - **Methods**: `lower()`, `upper()`, `len()`, `len_bytes()`, `len_chars()`, `trim()`, `trim_start()`, `trim_end()`, `starts_with(prefix)`, `ends_with(suffix)`, `contains(pattern)`, `replace(pattern, repl)`, `replace_all(pattern, repl)`, `slice(offset, length?)`, `split(delimiter)`, `explode()`, `reverse()`, `lpad(w, f)`, `rpad(w, f)`, `zfill(w)`, `strip_chars(chars?)`, `strip_chars_start(chars?)`, `strip_chars_end(chars?)`, `strip_prefix(pfx)`, `strip_suffix(sfx)`, `to_titlecase()`, `strptime(format, strict?)`, `to_integer()`, `to_decimal(p, s)`, `to_date()`, `to_datetime()`, `to_time()`.
 
 ### 📅 Temporal Operations (`.dt`)
 Available on datetime or duration values via `.dt`:
 ```typescript
-$tbl.col("timestamp").dt.year()
-$tbl.col("timestamp").dt.strftime("%Y-%m-%d %H:%M:%S")
-$tbl.col("duration").dt.total_seconds()
+$df.col("timestamp").dt.year()
+$df.col("timestamp").dt.strftime("%Y-%m-%d %H:%M:%S")
+$df.col("duration").dt.total_seconds()
 ```
 - **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinal_day()`, `is_leap_year()`, `month_start()`, `month_end()`, `date()`, `time()`, `datetime()`, `epoch(unit)`, `timestamp(unit)`, `strftime(format, locale?)`.
 - **Duration Methods**: `total_days()`, `total_hours()`, `total_minutes()`, `total_seconds()`, `total_milliseconds()`, `total_microseconds()`, `total_nanoseconds()`.
@@ -189,8 +189,8 @@ $tbl.col("duration").dt.total_seconds()
 ### 📊 List Operations (`.list`)
 Available on arrays or lists via `.list`:
 ```typescript
-$tbl.col("tags").list.contains("vip")
-$tbl.col("matrix").list.get(2)
+$df.col("tags").list.contains("vip")
+$df.col("matrix").list.get(2)
 ```
 - **Methods**: `lengths()`, `len()`, `get(idx, null_on_oob?)`, `first(null_on_oob?)`, `last(null_on_oob?)`, `gather(indices, null_on_oob?)`, `gather_every(n, offset?)`, `slice(offset, length?)`, `contains(item)`, `count_matches(item)`, `join(separator)`, `sort(descending?)`, `reverse()`, `unique()`, `sum()`, `mean()`, `median()`, `mode()`, `min()`, `max()`.
 
@@ -203,11 +203,11 @@ DFScript provides full support for analytic partition window operations using `.
 ```typescript
 // Calculate partition cumulative sums and row numbers
 df.select(
-  $tbl.col("department"),
-  $tbl.col("sales"),
-  $tbl.col("sales").sum().over("department").alias("dept_total_sales"),
-  $tbl.col("sales").cum_sum().over("department").alias("dept_running_sales"),
-  $tbl.all().row_number().over("department").alias("dept_rank")
+  $df.col("department"),
+  $df.col("sales"),
+  $df.col("sales").sum().over("department").alias("dept_total_sales"),
+  $df.col("sales").cum_sum().over("department").alias("dept_running_sales"),
+  $df.all().row_number().over("department").alias("dept_rank")
 );
 ```
 
@@ -243,16 +243,16 @@ Apply moving calculations over a fixed window size:
 You can optionally declare schemas to enforce precise data types and automatic type coercion during construction.
 
 ```typescript
-import { $tbl } from "df-script";
+import { $df } from "df-script";
 
 const schema = {
-  id: $tbl.DataType.Int32,
-  price: $tbl.DataType.Decimal(10, 2),
-  active: $tbl.DataType.Boolean,
-  created_at: $tbl.DataType.Datetime
+  id: $df.DataType.Int32,
+  price: $df.DataType.Decimal(10, 2),
+  active: $df.DataType.Boolean,
+  created_at: $df.DataType.Datetime
 };
 
-const df = $tbl.data(rawData, schema);
+const df = $df.data(rawData, schema);
 ```
 
 ### Supported Data Types

@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("Running filter tests...");
 
@@ -14,7 +14,7 @@ const dfFiltered1 = df.filter(row => row.age >= 25);
 if (dfFiltered1.height !== 2) throw new Error("Filter by predicate height mismatch");
 
 // Filter using expression
-const dfFiltered2 = df.filter($tbl.col("age").ge(25));
+const dfFiltered2 = df.filter($df.col("age").ge(25));
 if (dfFiltered2.height !== 2) throw new Error("Filter by expression height mismatch");
 const collected = dfFiltered2.to_dicts();
 if (collected[0].name !== "Alice" || collected[1].name !== "Charlie") {

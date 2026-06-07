@@ -55,8 +55,5 @@ export interface ConcatOptions {
 }
 export type ConcatItem = DataFrame<any> | ColumnDict | RowRecord[];
 
-export interface UniqueListStatsOptions {
-    strict?: boolean;
-    keySelector?: (val: any) => any;
-}
+export type { UniqueListStatsOptions, JoinListOptions } from "./utils/list";
 

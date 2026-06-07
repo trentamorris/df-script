@@ -1,4 +1,4 @@
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION COMPARISON TESTS...");
@@ -32,25 +32,25 @@ const data = [
 ];
 
 try {
-    const df = $tbl.data(data);
+    const df = $df.data(data);
 
     const projected = df.select([
         // between tests
-        $tbl.col("val").between($tbl.col("lower"), $tbl.col("upper")).alias("between_default"), // closed = both
-        $tbl.col("val").between($tbl.col("lower"), $tbl.col("upper"), "left").alias("between_left"),
-        $tbl.col("val").between($tbl.col("lower"), $tbl.col("upper"), "right").alias("between_right"),
-        $tbl.col("val").between($tbl.col("lower"), $tbl.col("upper"), "none").alias("between_none"),
+        $df.col("val").between($df.col("lower"), $df.col("upper")).alias("between_default"), // closed = both
+        $df.col("val").between($df.col("lower"), $df.col("upper"), "left").alias("between_left"),
+        $df.col("val").between($df.col("lower"), $df.col("upper"), "right").alias("between_right"),
+        $df.col("val").between($df.col("lower"), $df.col("upper"), "none").alias("between_none"),
         
         // eq_missing and ne_missing tests
-        $tbl.col("null_col").eq_missing(null).alias("eq_missing_null"),
-        $tbl.col("null_col").eq_missing(100).alias("eq_missing_val"),
-        $tbl.col("null_col").ne_missing(null).alias("ne_missing_null"),
-        $tbl.col("null_col").ne_missing(100).alias("ne_missing_val"),
+        $df.col("null_col").eq_missing(null).alias("eq_missing_null"),
+        $df.col("null_col").eq_missing(100).alias("eq_missing_val"),
+        $df.col("null_col").ne_missing(null).alias("ne_missing_null"),
+        $df.col("null_col").ne_missing(100).alias("ne_missing_val"),
 
         // is_in / not_in dynamic IExpr tests
-        $tbl.col("target").is_in($tbl.col("tags")).alias("is_in_expr"),
-        $tbl.col("target").not_in($tbl.col("tags")).alias("not_in_expr"),
-        $tbl.col("target").is_in(["a", "b"]).alias("is_in_array")
+        $df.col("target").is_in($df.col("tags")).alias("is_in_expr"),
+        $df.col("target").not_in($df.col("tags")).alias("not_in_expr"),
+        $df.col("target").is_in(["a", "b"]).alias("is_in_array")
     ]).to_dicts() as any[];
 
     console.dir(projected, { depth: null });
@@ -90,7 +90,7 @@ try {
     if (r2.not_in_expr !== true) throw new Error("r2.not_in_expr failed");
 
     // TypedArray test
-    const typedDf = $tbl.data({
+    const typedDf = $df.data({
         val: new Int32Array([15, 5, 20]),
         lower: new Int32Array([10, 10, 10]),
         upper: new Int32Array([20, 20, 20]),
@@ -98,9 +98,9 @@ try {
     } as any);
 
     const typedProjected = typedDf.select([
-        $tbl.col("val").between($tbl.col("lower"), $tbl.col("upper")).alias("between"),
-        $tbl.col("val").is_in(new Int32Array([15, 20]) as any).alias("is_in_static"),
-        $tbl.col("val").and(true).alias("and_true")
+        $df.col("val").between($df.col("lower"), $df.col("upper")).alias("between"),
+        $df.col("val").is_in(new Int32Array([15, 20]) as any).alias("is_in_static"),
+        $df.col("val").and(true).alias("and_true")
     ]).to_dicts() as any[];
 
     if (typedProjected[0].between !== true) throw new Error("TypedArray between failed on index 0");

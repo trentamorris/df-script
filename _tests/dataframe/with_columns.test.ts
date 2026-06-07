@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("Running with_columns tests...");
 
@@ -11,7 +11,7 @@ const df = new DataFrame([
 // 1. Add static values and expressions using a record
 const dfWithRecord = df.with_columns({
     status: "active",
-    doubleAge: $tbl.col("age").mul(2)
+    doubleAge: $df.col("age").mul(2)
 });
 
 if (dfWithRecord.height !== 2) throw new Error("Expected height 2");
@@ -33,7 +33,7 @@ if (
 
 // 2. Add column using alias expression directly
 const dfWithExpr = df.with_columns(
-    $tbl.col("age").add(5).alias("agePlusFive")
+    $df.col("age").add(5).alias("agePlusFive")
 );
 const schemaExpr = dfWithExpr.getSchema();
 if (schemaExpr.agePlusFive === undefined) {

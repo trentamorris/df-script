@@ -3,7 +3,7 @@ import { DataTypeRegistry } from "../datatypes"
 import { isTypedArray, isPlainObj, isArrayOfType, isArrayOrTypedArray } from "../utils"
 import type { ColumnDict, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType } from "../types"
 import { DataFrameError, SchemaError } from "../exceptions"
-export function normalizeToDataFrames(item: any, context: string, index: number): DataFrame<any>[] {
+function normalizeToDataFrames(item: any, context: string, index: number): DataFrame<any>[] {
     if (item == null) {
         throw new DataFrameError(`Invalid input to ${context} at index ${index}: item cannot be null or undefined.`);
     }
@@ -52,7 +52,7 @@ export function concat<U extends RowRecord = any>(
     const { how = 'vertical' } = options;
     const strict = options.horizontal?.strict ?? true;
 
-    if (items.length === 0) return new DataFrame<U>({}, {}, 0);
+    if (items.length === 0) return DataFrame._createDirect<U>({}, {}, 0);
     if (items.length === 1 && how !== 'horizontal') return items[0] as DataFrame<U>;
 
     switch (how) {
@@ -63,7 +63,7 @@ export function concat<U extends RowRecord = any>(
                     validItems.push(items[i]);
                 }
             }
-            if (validItems.length === 0) return new DataFrame<U>({}, {}, 0);
+            if (validItems.length === 0) return DataFrame._createDirect<U>({}, {}, 0);
 
             const firstDF = validItems[0];
             const firstKeys = Object.keys(firstDF._columns);
@@ -145,7 +145,7 @@ export function concat<U extends RowRecord = any>(
                 }
                 offset += h;
             }
-            return new DataFrame<U>(newColumns as ColumnDict, outSchema, newHeight);
+            return DataFrame._createDirect<U>(newColumns as ColumnDict, outSchema, newHeight);
         }
 
         case 'horizontal': {
@@ -179,7 +179,11 @@ export function concat<U extends RowRecord = any>(
                 const h = df.height;
                 Object.assign(outSchema, df.schema);
 
-                for (const [key, col] of Object.entries(df._columns)) {
+                const keys = Object.keys(df._columns);
+                const numKeys = keys.length;
+                for (let idxKey = 0; idxKey < numKeys; idxKey++) {
+                    const key = keys[idxKey];
+                    const col = df._columns[key];
                     if (h === maxHeight) {
                         newColumns[key] = isTypedArray(col) ? Array.from(col) : col;
                     } else {
@@ -195,7 +199,7 @@ export function concat<U extends RowRecord = any>(
                 }
             }
 
-            return new DataFrame<U>(newColumns as ColumnDict, outSchema, maxHeight);
+            return DataFrame._createDirect<U>(newColumns as ColumnDict, outSchema, maxHeight);
         }
 
         case 'diagonal': {
@@ -263,7 +267,7 @@ export function concat<U extends RowRecord = any>(
                 offset += h;
             }
 
-            return new DataFrame<U>(newColumns as ColumnDict, outSchema, newHeight);
+            return DataFrame._createDirect<U>(newColumns as ColumnDict, outSchema, newHeight);
         }
     }
 }

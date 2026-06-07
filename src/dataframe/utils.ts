@@ -1,7 +1,7 @@
 import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types"
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR } from "./constants"
-import { isObj, isTypedArray, toCanonicalString } from "../utils"
+import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray } from "../utils"
 import { assertColumnExists } from "../exceptions"
 
 function partition_by_columns(
@@ -143,6 +143,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     let isBigInt = true;
     let isDate = true;
     let isList = true;
+    let isBinary = true;
     let hasDateObj = false;
     let hasNonNull = false;
     const allListElements: any[] = [];
@@ -152,11 +153,17 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         if (val == null) continue;
         hasNonNull = true;
 
-        if (!Array.isArray(val)) {
+        if (!(val instanceof Uint8Array)) {
+            isBinary = false;
+        }
+
+        if (!isArrayOrTypedArray(val) || val instanceof Uint8Array) {
             isList = false;
         } else {
-            for (let j = 0; j < val.length; j++) {
-                allListElements.push(val[j]);
+            const valArr = val as any;
+            const subLen = valArr.length;
+            for (let j = 0; j < subLen; j++) {
+                allListElements.push(valArr[j]);
             }
         }
         if (val instanceof Date) hasDateObj = true;
@@ -174,6 +181,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     }
 
     if (!hasNonNull) return DataTypeRegistry.Utf8;
+    if (isBinary) return DataTypeRegistry.Binary;
     if (isList) {
         const innerType = inferColumnType(allListElements);
         return DataTypeRegistry.List(innerType);
@@ -232,6 +240,26 @@ export function computeRowHash(columns: ColumnDict, keys: string[], rowIndex: nu
         vals[i] = val == null ? "" : toCanonicalString(val);
     }
     return vals.join(KEY_SEPARATOR);
+}
+
+export function coerceColumn(col: ColumnData, type: RegisteredDataType, height: number): ColumnData {
+    let newCol: any = type.allocate ? type.allocate(height) : new Array(height).fill(null);
+    let hasNulls = false;
+    const coercedVals = new Array(height);
+    for (let i = 0; i < height; i++) {
+        const coerced = type.coerce(col[i]);
+        coercedVals[i] = coerced;
+        if (coerced == null) {
+            hasNulls = true;
+        }
+    }
+    if (hasNulls && isTypedArray(newCol)) {
+        newCol = new Array(height);
+    }
+    for (let i = 0; i < height; i++) {
+        newCol[i] = coercedVals[i];
+    }
+    return newCol;
 }
 
 

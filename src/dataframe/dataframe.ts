@@ -3,7 +3,7 @@ import { GroupedData } from "./grouped/grouped"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType } from "../types"
 import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
-import { isArrayOrTypedArray, isTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, isColExpr, clamp } from "../utils"
+import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, isColExpr, clamp } from "../utils"
 import { assertColumnExists, DataFrameError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
@@ -12,13 +12,26 @@ import {
     columnsToRows,
     inferColumnType,
     gatherColumnsByIndices,
-    computeRowHash
+    computeRowHash,
+    coerceColumn
 } from "./utils"
 
 export class DataFrame<T extends RowRecord = any> {
     public _columns: DataFrameColumns<T>
     private _height: number
     private _schema: DataFrameSchema = {}
+
+    static _createDirect<U extends RowRecord = any>(
+        columns: ColumnDict,
+        schema: DataFrameSchema,
+        height: number
+    ): DataFrame<U> {
+        const df = Object.create(DataFrame.prototype);
+        df._columns = columns;
+        df._schema = schema;
+        df._height = height;
+        return df;
+    }
 
     constructor(data: T[] | ColumnDict, schema?: DataFrameSchema, height?: number) {
         if (Array.isArray(data)) {
@@ -31,7 +44,11 @@ export class DataFrame<T extends RowRecord = any> {
 
         if (isObj(data)) {
             let firstLength = -1;
-            for (const [key, col] of Object.entries(data)) {
+            const keys = Object.keys(data);
+            const numKeys = keys.length;
+            for (let i = 0; i < numKeys; i++) {
+                const key = keys[i];
+                const col = data[key];
                 const colLen = isArrayOrTypedArray(col) ? col.length : 0;
                 if (firstLength === -1) {
                     firstLength = colLen;
@@ -54,10 +71,12 @@ export class DataFrame<T extends RowRecord = any> {
     private inferSchema() {
         const schema: DataFrameSchema = {};
         const keys = Object.keys(this._columns);
-        for (const key of keys) {
+        const numKeys = keys.length;
+        for (let i = 0; i < numKeys; i++) {
+            const key = keys[i];
             schema[key] = inferColumnType(this._columns[key]);
         }
-        this._schema = schema;
+        this.applySchema(schema);
     }
 
     private applySchema(schema: DataFrameSchema) {
@@ -67,36 +86,9 @@ export class DataFrame<T extends RowRecord = any> {
         for (const key of keys) {
             const type = schema[key];
             const oldCol = this._columns[key];
-
-            let newCol: any = type.allocate ? type.allocate(this._height) : new Array(this._height).fill(null);
-
-            if (!oldCol) {
-                if (this._height > 0 && isTypedArray(newCol)) {
-                    newCol = new Array(this._height).fill(null);
-                }
-                newColumns[key] = newCol;
-                continue;
-            }
-
-            let hasNulls = false;
-            const coercedVals = new Array(this._height);
-            for (let i = 0; i < this._height; i++) {
-                const coerced = type.coerce(oldCol[i]);
-                coercedVals[i] = coerced;
-                if (coerced == null) {
-                    hasNulls = true;
-                }
-            }
-
-            if (hasNulls && isTypedArray(newCol)) {
-                newCol = new Array(this._height);
-            }
-
-            for (let i = 0; i < this._height; i++) {
-                newCol[i] = coercedVals[i];
-            }
-
-            newColumns[key] = newCol;
+            newColumns[key] = oldCol
+                ? coerceColumn(oldCol, type, this._height)
+                : coerceColumn(new Array(this._height).fill(null), type, this._height);
         }
         this._columns = newColumns as DataFrameColumns<T>;
     }
@@ -138,7 +130,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
         }
 
-        return new DataFrame<Omit<T, K>>(newColumns, outSchema, this._height);
+        return DataFrame._createDirect<Omit<T, K>>(newColumns, outSchema, this._height);
     }
 
     get dtypes(): RegisteredDataType[] {
@@ -152,7 +144,7 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     filter(...exprs: (IExpr | ((row: T) => any))[]): DataFrame<T> {
-        if (this._height === 0) return new DataFrame({}, this._schema, 0);
+        if (this._height === 0) return DataFrame._createDirect({}, this._schema, 0);
 
         const height = this._height;
         const keys = Object.keys(this._columns);
@@ -220,7 +212,7 @@ export class DataFrame<T extends RowRecord = any> {
         const newColumns = gatherColumnsByIndices(this._columns, matchingIndices) as DataFrameColumns<T>;
         const newHeight = matchingIndices.length;
 
-        return new DataFrame<T>(newColumns, this._schema, newHeight);
+        return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
     }
 
     groupby<K extends keyof T>(keys: K | K[]): GroupedData<T, K> {
@@ -395,7 +387,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
         }
 
-        return new DataFrame<R>(newColumns, outSchema, outHeight);
+        return DataFrame._createDirect<R>(newColumns, outSchema, outHeight);
     }
 
     limit(n: number, { offset = 0, from = "start" }: LimitOptions = {}): DataFrame<T> {
@@ -421,11 +413,11 @@ export class DataFrame<T extends RowRecord = any> {
             newColumns[key] = (this._columns[key] as any).slice(actualStart, actualEnd);
         }
 
-        return new DataFrame<T>(newColumns, this._schema, newHeight);
+        return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
     }
 
     pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U> {
-        if (this._height === 0) return new DataFrame<any>({}, {}, 0);
+        if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0);
 
         const { index, columns, values } = config;
         const indexStr = toValidStringArray(index);
@@ -484,7 +476,7 @@ export class DataFrame<T extends RowRecord = any> {
             newColumns[pivotColName][groupIdx] = valCol[i];
         }
 
-        return new DataFrame<U>(newColumns, outSchema, outHeight);
+        return DataFrame._createDirect<U>(newColumns, outSchema, outHeight);
     }
 
     rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> {
@@ -504,7 +496,7 @@ export class DataFrame<T extends RowRecord = any> {
             throw new DataFrameError("Rename collision: Multiple columns mapped to the same output name.");
         }
 
-        return new DataFrame(newColumns, outSchema, this._height);
+        return DataFrame._createDirect(newColumns, outSchema, this._height);
     }
 
     reverse(): DataFrame<T> {
@@ -519,7 +511,7 @@ export class DataFrame<T extends RowRecord = any> {
             newColumns[key] = (this._columns[key] as any).slice().reverse();
         }
 
-        return new DataFrame<T>(newColumns, this._schema, this._height);
+        return DataFrame._createDirect<T>(newColumns, this._schema, this._height);
     }
 
     get schema(): DataFrameSchema {
@@ -549,12 +541,16 @@ export class DataFrame<T extends RowRecord = any> {
 
             const originalKey = expr.colName || targetKey;
             const isPureColSelector = expr instanceof ColumnExpr && expr.ops.length === 0 && !expr.isWindow && !expr.aggFn;
-            outSchema[targetKey] = (isPureColSelector && this._schema[originalKey])
-                ? this._schema[originalKey]
-                : inferColumnType(newColumns[targetKey]);
+            if (isPureColSelector && this._schema[originalKey]) {
+                outSchema[targetKey] = this._schema[originalKey];
+            } else {
+                const inferredType = inferColumnType(newColumns[targetKey]);
+                outSchema[targetKey] = inferredType;
+                newColumns[targetKey] = coerceColumn(newColumns[targetKey], inferredType, this._height);
+            }
         }
 
-        return new DataFrame<U>(newColumns, outSchema, this._height);
+        return DataFrame._createDirect<U>(newColumns, outSchema, this._height);
     }
 
     get shape(): [number, number] {
@@ -643,7 +639,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const newColumns = gatherColumnsByIndices(this._columns, indices) as DataFrameColumns<T>;
 
-        return new DataFrame<T>(newColumns, this._schema, this._height);
+        return DataFrame._createDirect<T>(newColumns, this._schema, this._height);
     }
 
     tail(n: number = 10): DataFrame<T> {
@@ -671,7 +667,7 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     unique<K extends keyof T>(columns?: K | K[]): DataFrame<T> {
-        if (this._height === 0) return new DataFrame<T>({}, this._schema, 0);
+        if (this._height === 0) return DataFrame._createDirect<T>({}, this._schema, 0);
 
         const colsArr = toValidArray(columns);
         const colsStr = colsArr.length === 0
@@ -698,7 +694,7 @@ export class DataFrame<T extends RowRecord = any> {
         const newColumns = gatherColumnsByIndices(this._columns, matchingIndices) as DataFrameColumns<T>;
         const newHeight = matchingIndices.length;
 
-        return new DataFrame<T>(newColumns, this._schema, newHeight);
+        return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
     }
 
     unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> {
@@ -747,7 +743,7 @@ export class DataFrame<T extends RowRecord = any> {
         outSchema[varName] = DataTypeRegistry.Utf8;
         outSchema[valueName] = inferColumnType(newColumns[valueName]);
 
-        return new DataFrame<U>(newColumns as any, outSchema, newHeight);
+        return DataFrame._createDirect<U>(newColumns as any, outSchema, newHeight);
     }
 
     vstack<U extends RowRecord = any>(
@@ -769,7 +765,11 @@ export class DataFrame<T extends RowRecord = any> {
             } else if (isColExpr(arg)) {
                 exprs.push(arg as unknown as IExpr);
             } else if (isObj(arg)) {
-                for (const [key, val] of Object.entries(arg)) {
+                const keys = Object.keys(arg);
+                const numKeys = keys.length;
+                for (let i = 0; i < numKeys; i++) {
+                    const key = keys[i];
+                    const val = arg[key];
                     if (isColExpr(val)) {
                         exprs.push((val as unknown as IExpr).alias(key));
                     } else {
@@ -810,10 +810,12 @@ export class DataFrame<T extends RowRecord = any> {
             if (isPureColSelector && this._schema[originalKey]) {
                 outSchema[name] = this._schema[originalKey];
             } else {
-                outSchema[name] = inferColumnType(newColumns[name]);
+                const inferredType = inferColumnType(newColumns[name]);
+                outSchema[name] = inferredType;
+                newColumns[name] = coerceColumn(newColumns[name], inferredType, this._height);
             }
         }
 
-        return new DataFrame(newColumns, outSchema, this._height);
+        return DataFrame._createDirect(newColumns, outSchema, this._height);
     }
 }

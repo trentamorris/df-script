@@ -93,7 +93,7 @@ export const UInt64 = new UInt64Type();
 
 export class Float32Type extends FloatDataType {
     readonly name = "Float32";
-    coerce(val: unknown): number | null { return toValidFloat(val, "Float32"); }
+    coerce(val: unknown): number | null { return toValidFloat(val, { precision: "Float32" }); }
     equals(other: DataType): boolean { return other.name === "Float32"; }
     allocate(size: number): Float32Array { return new Float32Array(size); }
 }
@@ -101,7 +101,7 @@ export const Float32 = new Float32Type();
 
 export class Float64Type extends FloatDataType {
     readonly name = "Float64";
-    coerce(val: unknown): number | null { return toValidFloat(val, "Float64"); }
+    coerce(val: unknown): number | null { return toValidFloat(val, { precision: "Float64" }); }
     equals(other: DataType): boolean { return other.name === "Float64"; }
     allocate(size: number): Float64Array { return new Float64Array(size); }
 }
@@ -266,8 +266,12 @@ export class StructType<TFields extends RowRecord = any> extends NestedDataType<
     coerce(val: unknown): TFields | null {
         if (!isObj(val)) return null;
         const res: any = {};
-        for (const [k, type] of globalThis.Object.entries(this.fields)) {
-            res[k] = type.coerce(val[k]);
+        const keys = globalThis.Object.keys(this.fields);
+        const len = keys.length;
+        for (let i = 0; i < len; i++) {
+            const k = keys[i];
+            const type = this.fields[k];
+            res[k] = type.coerce((val as any)[k]);
         }
         return res;
     }

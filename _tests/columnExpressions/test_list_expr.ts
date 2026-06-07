@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION LIST NAMESPACE TESTS...");
@@ -27,77 +27,77 @@ const data = [
 ];
 
 try {
-    const df = $tbl.data(data);
+    const df = $df.data(data);
     const projected = df.select([
         // lengths / len
-        $tbl.col("numbers").list.lengths().alias("len_nums"),
-        $tbl.col("empty_list").list.len().alias("len_empty"),
-        $tbl.col("not_a_list").list.len().alias("len_not_list"),
+        $df.col("numbers").list.lengths().alias("len_nums"),
+        $df.col("empty_list").list.len().alias("len_empty"),
+        $df.col("not_a_list").list.len().alias("len_not_list"),
 
         // max / min / sum / mean / median / mode
-        $tbl.col("numbers").list.max().alias("max_nums"),
-        $tbl.col("numbers").list.min().alias("min_nums"),
-        $tbl.col("numbers").list.sum().alias("sum_nums"),
-        $tbl.col("numbers").list.mean().alias("mean_nums"),
-        $tbl.col("numbers").list.median().alias("median_nums"),
-        $tbl.col("tags").list.mode().alias("mode_tags"),
+        $df.col("numbers").list.max().alias("max_nums"),
+        $df.col("numbers").list.min().alias("min_nums"),
+        $df.col("numbers").list.sum().alias("sum_nums"),
+        $df.col("numbers").list.mean().alias("mean_nums"),
+        $df.col("numbers").list.median().alias("median_nums"),
+        $df.col("tags").list.mode().alias("mode_tags"),
 
         // get / first / last
-        $tbl.col("numbers").list.get(2).alias("get_idx_2"),
-        $tbl.col("numbers").list.get(-2).alias("get_idx_neg_2"),
-        $tbl.col("numbers").list.get(100).alias("get_out_of_bounds"),
-        $tbl.col("tags").list.first().alias("first_tag"),
-        $tbl.col("tags").list.last().alias("last_tag"),
+        $df.col("numbers").list.get(2).alias("get_idx_2"),
+        $df.col("numbers").list.get(-2).alias("get_idx_neg_2"),
+        $df.col("numbers").list.get(100).alias("get_out_of_bounds"),
+        $df.col("tags").list.first().alias("first_tag"),
+        $df.col("tags").list.last().alias("last_tag"),
 
         // contains
-        $tbl.col("tags").list.contains("banana").alias("has_banana"),
-        $tbl.col("tags").list.contains("orange").alias("has_orange"),
+        $df.col("tags").list.contains("banana").alias("has_banana"),
+        $df.col("tags").list.contains("orange").alias("has_orange"),
 
         // join
-        $tbl.col("tags").list.join(", ").alias("joined_tags"),
-        $tbl.col("numbers").list.join("-").alias("joined_nums_default"),
-        $tbl.col("numbers").list.join("-", { ignoreNulls: true }).alias("joined_nums_ignore"),
+        $df.col("tags").list.join(", ").alias("joined_tags"),
+        $df.col("numbers").list.join("-").alias("joined_nums_default"),
+        $df.col("numbers").list.join("-", { ignoreNulls: true }).alias("joined_nums_ignore"),
 
         // sort
-        $tbl.col("numbers").list.sort().alias("sorted_nums"),
-        $tbl.col("numbers").list.sort(true).alias("sorted_nums_desc"),
+        $df.col("numbers").list.sort().alias("sorted_nums"),
+        $df.col("numbers").list.sort(true).alias("sorted_nums_desc"),
 
         // reverse
-        $tbl.col("tags").list.reverse().alias("reversed_tags"),
+        $df.col("tags").list.reverse().alias("reversed_tags"),
 
         // unique
-        $tbl.col("tags").list.unique().alias("unique_tags"),
-        $tbl.col("tags").list.n_unique().alias("n_unique_tags"),
+        $df.col("tags").list.unique().alias("unique_tags"),
+        $df.col("tags").list.n_unique().alias("n_unique_tags"),
 
         // slice
-        $tbl.col("numbers").list.slice(2, 3).alias("slice_nums"),
-        $tbl.col("numbers").list.slice(-4, 2).alias("slice_nums_neg"),
+        $df.col("numbers").list.slice(2, 3).alias("slice_nums"),
+        $df.col("numbers").list.slice(-4, 2).alias("slice_nums_neg"),
 
         // count_matches
-        $tbl.col("tags").list.count_matches("apple").alias("apple_count"),
-        $tbl.col("tags").list.count_matches("pear").alias("pear_count"),
+        $df.col("tags").list.count_matches("apple").alias("apple_count"),
+        $df.col("tags").list.count_matches("pear").alias("pear_count"),
 
         // gather / gather_every
-        $tbl.col("numbers").list.gather([0, 2, -2]).alias("gather_nums"),
-        $tbl.col("tags").list.gather(1).alias("gather_single"),
-        $tbl.col("numbers").list.gather([0, 100]).alias("gather_oob_null"),
-        $tbl.col("numbers").list.gather_every({ step: 2 }).alias("every_2"),
-        $tbl.col("numbers").list.gather_every({ step: 3, offsetStart: 1 }).alias("every_3_offset_1"),
-        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: -1 }).alias("every_2_neg_offset"),
-        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: -1 }).alias("every_neg_2_neg_offset"),
-        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: -4 }).alias("every_pos_2_neg_offset"),
-        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: 4 }).alias("every_neg_2_offset_4"),
-        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: 1, offsetEnd: 7 }).alias("every_pos_step_start_end"),
-        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: 7, offsetEnd: 1 }).alias("every_neg_step_start_end"),
-        $tbl.col("numbers").list.gather_every({ step: 2, offsetStart: -9, offsetEnd: -3 }).alias("every_pos_step_neg_start_end"),
-        $tbl.col("numbers").list.gather_every({ step: -2, offsetStart: -3, offsetEnd: -9 }).alias("every_neg_step_neg_start_end"),
-        $tbl.col("numbers").list.gather_every({ step: 2, maxItemsGathered: 3 }).alias("every_2_limit_3"),
+        $df.col("numbers").list.gather([0, 2, -2]).alias("gather_nums"),
+        $df.col("tags").list.gather(1).alias("gather_single"),
+        $df.col("numbers").list.gather([0, 100]).alias("gather_oob_null"),
+        $df.col("numbers").list.gather_every({ step: 2 }).alias("every_2"),
+        $df.col("numbers").list.gather_every({ step: 3, offsetStart: 1 }).alias("every_3_offset_1"),
+        $df.col("numbers").list.gather_every({ step: 2, offsetStart: -1 }).alias("every_2_neg_offset"),
+        $df.col("numbers").list.gather_every({ step: -2, offsetStart: -1 }).alias("every_neg_2_neg_offset"),
+        $df.col("numbers").list.gather_every({ step: 2, offsetStart: -4 }).alias("every_pos_2_neg_offset"),
+        $df.col("numbers").list.gather_every({ step: -2, offsetStart: 4 }).alias("every_neg_2_offset_4"),
+        $df.col("numbers").list.gather_every({ step: 2, offsetStart: 1, offsetEnd: 7 }).alias("every_pos_step_start_end"),
+        $df.col("numbers").list.gather_every({ step: -2, offsetStart: 7, offsetEnd: 1 }).alias("every_neg_step_start_end"),
+        $df.col("numbers").list.gather_every({ step: 2, offsetStart: -9, offsetEnd: -3 }).alias("every_pos_step_neg_start_end"),
+        $df.col("numbers").list.gather_every({ step: -2, offsetStart: -3, offsetEnd: -9 }).alias("every_neg_step_neg_start_end"),
+        $df.col("numbers").list.gather_every({ step: 2, maxItemsGathered: 3 }).alias("every_2_limit_3"),
 
         // Robustness features: TypedArray & String Coercion
-        $tbl.col("typed_array").list.lengths().alias("typed_len"),
-        $tbl.col("typed_array").list.sum().alias("typed_sum"),
-        $tbl.col("string_nums").list.sum().alias("coerced_sum"),
-        $tbl.col("string_nums").list.mean().alias("coerced_mean")
+        $df.col("typed_array").list.lengths().alias("typed_len"),
+        $df.col("typed_array").list.sum().alias("typed_sum"),
+        $df.col("string_nums").list.sum().alias("coerced_sum"),
+        $df.col("string_nums").list.mean().alias("coerced_mean")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.list results:");
@@ -226,7 +226,7 @@ try {
     let threwOob = false;
     try {
         df.select([
-            $tbl.col("numbers").list.get(100, false)
+            $df.col("numbers").list.get(100, false)
         ]).to_dicts();
     } catch (e: any) {
         if (e.message && e.message.includes("out of bounds")) {
@@ -242,7 +242,7 @@ try {
     let threwGatherOob = false;
     try {
         df.select([
-            $tbl.col("numbers").list.gather([0, 100], false)
+            $df.col("numbers").list.gather([0, 100], false)
         ]).to_dicts();
     } catch (e: any) {
         if (e.message && e.message.includes("out of bounds")) {

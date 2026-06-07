@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 const data = [
     { name: "Alice", dept: "HR", salary: 1000 },
@@ -13,14 +13,14 @@ console.log("Input data:");
 console.table(data);
 
 try {
-    const df = $tbl.data(data);
+    const df = $df.data(data);
 
     // 1. Test single partition column window function
     const dfWithWindow = df.select(
         "name",
         "dept",
         "salary",
-        $tbl.col("salary").mean().over("dept").alias("avg_salary_by_dept")
+        $df.col("salary").mean().over("dept").alias("avg_salary_by_dept")
     );
 
     const result = dfWithWindow.to_dicts();
@@ -43,10 +43,10 @@ try {
         { name: "Bob", dept: "HR", role: "Developer", salary: 2000 },
         { name: "Charlie", dept: "HR", role: "Developer", salary: 3000 },
     ];
-    const dfMulti = $tbl.data(dataMulti);
+    const dfMulti = $df.data(dataMulti);
     const resMulti = dfMulti.select(
         "name",
-        $tbl.col("salary").sum().over(["dept", "role"]).alias("sum_salary_by_dept_role")
+        $df.col("salary").sum().over(["dept", "role"]).alias("sum_salary_by_dept_role")
     ).to_dicts();
 
     console.log("\nResult of sum().over(['dept', 'role']):");
@@ -63,8 +63,8 @@ try {
     // 3. Test post-aggregation operations on window function (e.g. .mean().over(...).add(100) or .gt(2000))
     const dfPostAgg = df.select(
         "name",
-        $tbl.col("salary").mean().over("dept").add(100).alias("avg_salary_plus_100"),
-        $tbl.col("salary").mean().over("dept").gt(2000).alias("avg_salary_gt_2000")
+        $df.col("salary").mean().over("dept").add(100).alias("avg_salary_plus_100"),
+        $df.col("salary").mean().over("dept").gt(2000).alias("avg_salary_gt_2000")
     ).to_dicts();
 
     console.log("\nResult of mean().over('dept') with post-aggregations (.add(100), .gt(2000)):");
@@ -88,9 +88,9 @@ try {
     const dfPositional = df.select(
         "name",
         "dept",
-        $tbl.col("salary").lag(1).over("dept").alias("salary_lag_1"),
-        $tbl.col("salary").lead(1).over("dept").alias("salary_lead_1"),
-        $tbl.col("salary").row_number().over("dept").alias("row_num")
+        $df.col("salary").lag(1).over("dept").alias("salary_lag_1"),
+        $df.col("salary").lead(1).over("dept").alias("salary_lead_1"),
+        $df.col("salary").row_number().over("dept").alias("row_num")
     ).to_dicts();
 
     console.log("\nResult of positional window functions (lag(1), lead(1), row_number()):");
@@ -121,14 +121,14 @@ try {
     const dfExtended = df.select(
         "name",
         "dept",
-        $tbl.col("salary").dense_rank().over("dept").alias("dense_rank"),
-        $tbl.col("salary").cum_sum().over("dept").alias("cum_sum"),
-        $tbl.col("salary").cum_sum(true).over("dept").alias("cum_sum_reverse"),
-        $tbl.col("salary").cum_count().over("dept").alias("cum_count"),
-        $tbl.col("salary").cum_count(true).over("dept").alias("cum_count_reverse"),
-        $tbl.col("salary").rolling_mean(2).over("dept").alias("rolling_mean_2"),
-        $tbl.col("salary").rolling_quantile(0.5, 2).over("dept").alias("rolling_median_2"),
-        $tbl.col("salary").rolling_rank(2).over("dept").alias("rolling_rank_2")
+        $df.col("salary").dense_rank().over("dept").alias("dense_rank"),
+        $df.col("salary").cum_sum().over("dept").alias("cum_sum"),
+        $df.col("salary").cum_sum(true).over("dept").alias("cum_sum_reverse"),
+        $df.col("salary").cum_count().over("dept").alias("cum_count"),
+        $df.col("salary").cum_count(true).over("dept").alias("cum_count_reverse"),
+        $df.col("salary").rolling_mean(2).over("dept").alias("rolling_mean_2"),
+        $df.col("salary").rolling_quantile(0.5, 2).over("dept").alias("rolling_median_2"),
+        $df.col("salary").rolling_rank(2).over("dept").alias("rolling_rank_2")
     ).to_dicts();
 
     console.log("\nResult of extended window functions (dense_rank(), cum_sum(), cum_sum_reverse, cum_count(), cum_count_reverse, rolling_mean(2), rolling_quantile(0.5, 2), rolling_rank(2)):");
@@ -183,8 +183,8 @@ try {
     // 5.5. Test first() and last() window functions
     const dfFirstLast = df.select(
         "name",
-        $tbl.col("salary").first().over("dept").alias("first_salary"),
-        $tbl.col("salary").last().over("dept").alias("last_salary")
+        $df.col("salary").first().over("dept").alias("first_salary"),
+        $df.col("salary").last().over("dept").alias("last_salary")
     ).to_dicts();
 
     console.log("\nResult of first().over('dept') and last().over('dept'):");
@@ -206,7 +206,7 @@ try {
     // 6. Test post-operations on rolling functions (e.g. rolling_mean(2).gt(3500))
     const dfRollingPost = df.select(
         "name",
-        $tbl.col("salary").rolling_mean(2).over("dept").gt(3500).alias("rolling_mean_gt_3500")
+        $df.col("salary").rolling_mean(2).over("dept").gt(3500).alias("rolling_mean_gt_3500")
     ).to_dicts();
 
     console.log("\nResult of rolling_mean(2).over('dept').gt(3500):");
@@ -222,8 +222,8 @@ try {
 
     // 7. Test GroupBy aggregation using pre/post grouping operations
     const dfGrouped = df.groupby(["dept"]).agg(
-        $tbl.col("salary").mean().alias("avg_salary"),
-        $tbl.col("salary").mean().gt(2000).alias("avg_salary_gt_2000")
+        $df.col("salary").mean().alias("avg_salary"),
+        $df.col("salary").mean().gt(2000).alias("avg_salary_gt_2000")
     ).to_dicts();
 
     console.log("\nResult of GroupBy aggregation:");
@@ -254,7 +254,7 @@ try {
 
     // 8. Test wildcard select and exclude
     console.log("\nTesting wildcard select and exclude:");
-    const dfAllExclude = df.select($tbl.exclude("salary").str.lower()).to_dicts();
+    const dfAllExclude = df.select($df.exclude("salary").str.lower()).to_dicts();
     console.table(dfAllExclude);
 
     if (dfAllExclude.length !== 5 || dfAllExclude[0].salary !== undefined || dfAllExclude[0].name !== "alice" || dfAllExclude[0].dept !== "hr") {
@@ -265,7 +265,7 @@ try {
     // 9. Test with_columns wildcard select and exclude
     console.log("\nTesting with_columns wildcard select and exclude:");
     const dfWithCols = df.with_columns(
-        $tbl.exclude("salary").str.upper()
+        $df.exclude("salary").str.upper()
     ).to_dicts();
     console.table(dfWithCols);
 
@@ -277,7 +277,7 @@ try {
     // 9.5 Test with_columns old record signature
     console.log("\nTesting with_columns old record signature:");
     const dfWithColsRecord = df.with_columns({
-        "salary_plus_500": $tbl.col("salary").add(500)
+        "salary_plus_500": $df.col("salary").add(500)
     }).to_dicts();
     console.table(dfWithColsRecord);
 
@@ -295,15 +295,15 @@ try {
         { val_num: null, val_bool: false },
         { val_num: 20, val_bool: null },
     ];
-    const dfNulls = $tbl.data(dataNulls);
+    const dfNulls = $df.data(dataNulls);
 
     const dfNullsRes = dfNulls.select(
         // 10.1 RHS null arithmetic
-        $tbl.col("val_num").add(null).alias("add_null"),
+        $df.col("val_num").add(null).alias("add_null"),
         // 10.2 RHS null comparison
-        $tbl.col("val_num").gt(null).alias("gt_null"),
+        $df.col("val_num").gt(null).alias("gt_null"),
         // 10.3 3-valued Kleene AND logic
-        $tbl.col("val_bool").and($tbl.col("val_bool").is_null()).alias("kleene_and")
+        $df.col("val_bool").and($df.col("val_bool").is_null()).alias("kleene_and")
     ).to_dicts();
 
     console.table(dfNullsRes);
@@ -340,8 +340,8 @@ try {
         { id: null, rval: "R2" },
         { id: 3, rval: "R3" },
     ];
-    const dfJoinLeft = $tbl.data(joinLeftData);
-    const dfJoinRight = $tbl.data(joinRightData);
+    const dfJoinLeft = $df.data(joinLeftData);
+    const dfJoinRight = $df.data(joinRightData);
 
     // Inner Join: null ids should NOT match, only id: 1 should match
     const dfInnerJoined = dfJoinLeft.join({ other: dfJoinRight, on: "id", how: "inner" }).to_dicts();
@@ -382,10 +382,10 @@ try {
         { category: "A", val: 10 },
         { category: "B", val: 20 },
     ];
-    const dfUsability = $tbl.data(testUsabilityData);
+    const dfUsability = $df.data(testUsabilityData);
 
     // groupby with single string:
-    const dfGroupedUsability = dfUsability.groupby("category").agg($tbl.col("val").sum().alias("sum_val")).to_dicts();
+    const dfGroupedUsability = dfUsability.groupby("category").agg($df.col("val").sum().alias("sum_val")).to_dicts();
     console.log("Groupby Usability Result:");
     console.table(dfGroupedUsability);
     if (dfGroupedUsability.length !== 2) {
@@ -423,7 +423,7 @@ try {
     // 13. Test constructor array enforcement
     console.log("\nTesting constructor array enforcement:");
     try {
-        const dfInvalid = $tbl.data(null as any);
+        const dfInvalid = $df.data(null as any);
         const collectedInvalid = dfInvalid.to_dicts();
         if (!Array.isArray(collectedInvalid) || collectedInvalid.length !== 0) {
             console.error("Constructor array enforcement failed: collected is not empty array.");

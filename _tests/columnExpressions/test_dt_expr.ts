@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 import { MS_PER_SECOND, MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY } from "../../src/utils";
 
 console.log("=========================================");
@@ -22,64 +22,64 @@ const data = [
 ];
 
 const schema = {
-    date_str: $tbl.DataType.Date,
-    datetime_str: $tbl.DataType.Datetime,
-    time_str: $tbl.DataType.Time,
-    duration_ms: $tbl.DataType.Duration
+    date_str: $df.DataType.Date,
+    datetime_str: $df.DataType.Datetime,
+    time_str: $df.DataType.Time,
+    duration_ms: $df.DataType.Duration
 };
 
 try {
-    const df = $tbl.data(data, schema);
+    const df = $df.data(data, schema);
 
     const projected = df.select([
         // Date component checks
-        $tbl.col("date_str").dt.year().alias("year"),
-        $tbl.col("date_str").dt.month().alias("month"),
-        $tbl.col("date_str").dt.day().alias("day"),
-        $tbl.col("date_str").dt.weekday().alias("weekday"),
-        $tbl.col("date_str").dt.is_leap_year().alias("is_leap"),
-        $tbl.col("date_str").dt.ordinal_day().alias("ordinal"),
-        $tbl.col("date_str").dt.quarter().alias("quarter"),
+        $df.col("date_str").dt.year().alias("year"),
+        $df.col("date_str").dt.month().alias("month"),
+        $df.col("date_str").dt.day().alias("day"),
+        $df.col("date_str").dt.weekday().alias("weekday"),
+        $df.col("date_str").dt.is_leap_year().alias("is_leap"),
+        $df.col("date_str").dt.ordinal_day().alias("ordinal"),
+        $df.col("date_str").dt.quarter().alias("quarter"),
 
         // Time component checks on datetime
-        $tbl.col("datetime_str").dt.hour().alias("hour"),
-        $tbl.col("datetime_str").dt.minute().alias("minute"),
-        $tbl.col("datetime_str").dt.second().alias("second"),
-        $tbl.col("datetime_str").dt.millisecond().alias("ms"),
-        $tbl.col("datetime_str").dt.microsecond().alias("us"),
-        $tbl.col("datetime_str").dt.nanosecond().alias("ns"),
+        $df.col("datetime_str").dt.hour().alias("hour"),
+        $df.col("datetime_str").dt.minute().alias("minute"),
+        $df.col("datetime_str").dt.second().alias("second"),
+        $df.col("datetime_str").dt.millisecond().alias("ms"),
+        $df.col("datetime_str").dt.microsecond().alias("us"),
+        $df.col("datetime_str").dt.nanosecond().alias("ns"),
 
         // Date truncation and string formatting checks
-        $tbl.col("datetime_str").dt.date().alias("truncated_date"),
-        $tbl.col("datetime_str").dt.time().alias("time_str_extracted"),
-        $tbl.col("datetime_str").dt.datetime().alias("datetime_extracted"),
+        $df.col("datetime_str").dt.date().alias("truncated_date"),
+        $df.col("datetime_str").dt.time().alias("time_str_extracted"),
+        $df.col("datetime_str").dt.datetime().alias("datetime_extracted"),
 
         // Epoch check
-        $tbl.col("datetime_str").dt.epoch("s").alias("epoch_s"),
-        $tbl.col("datetime_str").dt.epoch("ms").alias("epoch_ms"),
-        $tbl.col("datetime_str").dt.timestamp().alias("timestamp_alias"),
-        $tbl.col("datetime_str").dt.timestamp("us").alias("timestamp_us"),
+        $df.col("datetime_str").dt.epoch("s").alias("epoch_s"),
+        $df.col("datetime_str").dt.epoch("ms").alias("epoch_ms"),
+        $df.col("datetime_str").dt.timestamp().alias("timestamp_alias"),
+        $df.col("datetime_str").dt.timestamp("us").alias("timestamp_us"),
 
         // Duration checks
-        $tbl.col("duration_ms").dt.total_milliseconds().alias("dur_ms"),
-        $tbl.col("duration_ms").dt.total_microseconds().alias("dur_us"),
-        $tbl.col("duration_ms").dt.total_nanoseconds().alias("dur_ns"),
-        $tbl.col("duration_ms").dt.total_seconds().alias("dur_s"),
-        $tbl.col("duration_ms").dt.total_minutes().alias("dur_m"),
-        $tbl.col("duration_ms").dt.total_hours().alias("dur_h"),
-        $tbl.col("duration_ms").dt.total_days().alias("dur_d"),
+        $df.col("duration_ms").dt.total_milliseconds().alias("dur_ms"),
+        $df.col("duration_ms").dt.total_microseconds().alias("dur_us"),
+        $df.col("duration_ms").dt.total_nanoseconds().alias("dur_ns"),
+        $df.col("duration_ms").dt.total_seconds().alias("dur_s"),
+        $df.col("duration_ms").dt.total_minutes().alias("dur_m"),
+        $df.col("duration_ms").dt.total_hours().alias("dur_h"),
+        $df.col("duration_ms").dt.total_days().alias("dur_d"),
 
         // New Polars operations
-        $tbl.col("date_str").dt.week().alias("week"),
-        $tbl.col("date_str").dt.century().alias("century"),
-        $tbl.col("date_str").dt.millennium().alias("millennium"),
-        $tbl.col("date_str").dt.month_start().alias("m_start"),
-        $tbl.col("date_str").dt.month_end().alias("m_end"),
-        $tbl.col("datetime_str").dt.strftime("%Y/%m/%d %H:%M:%S.%ms").alias("formatted_str"),
-        $tbl.col("datetime_str").dt.strftime("%F %T %% %A %B %j %I:%M %p", "en-US").alias("formatted_shorthands"),
-        $tbl.col("datetime_str").dt.strftime("%A %B", "fr-FR").alias("formatted_fr"),
-        $tbl.col("datetime_str").dt.strftime("%A %B", "de-DE").alias("formatted_de"),
-        $tbl.col("datetime_str").dt.to_string("%Y-%m-%d").alias("to_str_formatted")
+        $df.col("date_str").dt.week().alias("week"),
+        $df.col("date_str").dt.century().alias("century"),
+        $df.col("date_str").dt.millennium().alias("millennium"),
+        $df.col("date_str").dt.month_start().alias("m_start"),
+        $df.col("date_str").dt.month_end().alias("m_end"),
+        $df.col("datetime_str").dt.strftime("%Y/%m/%d %H:%M:%S.%ms").alias("formatted_str"),
+        $df.col("datetime_str").dt.strftime("%F %T %% %A %B %j %I:%M %p", "en-US").alias("formatted_shorthands"),
+        $df.col("datetime_str").dt.strftime("%A %B", "fr-FR").alias("formatted_fr"),
+        $df.col("datetime_str").dt.strftime("%A %B", "de-DE").alias("formatted_de"),
+        $df.col("datetime_str").dt.to_string("%Y-%m-%d").alias("to_str_formatted")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.dt results:");

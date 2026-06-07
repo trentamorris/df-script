@@ -1,18 +1,18 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("=========================================");
 console.log("STARTING POLARS DATATYPES TESTS...");
 console.log("=========================================");
 
 // 1. Test Metadata Classification Getters
-const tInt8 = $tbl.DataType.Int8;
-const tUInt32 = $tbl.DataType.UInt32;
-const tInt64 = $tbl.DataType.Int64;
-const tFloat32 = $tbl.DataType.Float32;
-const tDecimal = $tbl.DataType.Decimal(10, 2);
-const tDate = $tbl.DataType.Date;
-const tList = $tbl.DataType.List($tbl.DataType.Int32);
+const tInt8 = $df.DataType.Int8;
+const tUInt32 = $df.DataType.UInt32;
+const tInt64 = $df.DataType.Int64;
+const tFloat32 = $df.DataType.Float32;
+const tDecimal = $df.DataType.Decimal(10, 2);
+const tDate = $df.DataType.Date;
+const tList = $df.DataType.List($df.DataType.Int32);
 
 if (!tInt8.isNumeric || !tInt8.isInteger || !tInt8.isSigned || tInt8.isUnsigned) {
     throw new Error("Int8 metadata classification failed");
@@ -37,19 +37,19 @@ if (!tList.isNested) {
 }
 
 // Check new getters
-if (!$tbl.DataType.Null.isNull) {
+if (!$df.DataType.Null.isNull) {
     throw new Error("Null isNull check failed");
 }
-if (!$tbl.DataType.Object.isObject) {
+if (!$df.DataType.Object.isObject) {
     throw new Error("Object isObject check failed");
 }
-if (!$tbl.DataType.Boolean.isBoolean) {
+if (!$df.DataType.Boolean.isBoolean) {
     throw new Error("Boolean isBoolean check failed");
 }
-if (!$tbl.DataType.Utf8.isString || !$tbl.DataType.Utf8.isUtf8) {
+if (!$df.DataType.Utf8.isString || !$df.DataType.Utf8.isUtf8) {
     throw new Error("Utf8 isString/isUtf8 check failed");
 }
-if (!$tbl.DataType.Binary.isBinary) {
+if (!$df.DataType.Binary.isBinary) {
     throw new Error("Binary isBinary check failed");
 }
 
@@ -72,18 +72,18 @@ const data = [
 ];
 
 const schema = {
-    val_i8: $tbl.DataType.Int8,
-    val_u8: $tbl.DataType.UInt8,
-    val_i64: $tbl.DataType.Int64,
-    val_u64: $tbl.DataType.UInt64,
-    val_f32: $tbl.DataType.Float32,
-    val_dec: $tbl.DataType.Decimal(10, 2),
-    val_date: $tbl.DataType.Date,
-    val_time: $tbl.DataType.Time,
-    val_duration: $tbl.DataType.Duration,
-    val_binary: $tbl.DataType.Binary,
-    val_obj: $tbl.DataType.Object,
-    val_null: $tbl.DataType.Null
+    val_i8: $df.DataType.Int8,
+    val_u8: $df.DataType.UInt8,
+    val_i64: $df.DataType.Int64,
+    val_u64: $df.DataType.UInt64,
+    val_f32: $df.DataType.Float32,
+    val_dec: $df.DataType.Decimal(10, 2),
+    val_date: $df.DataType.Date,
+    val_time: $df.DataType.Time,
+    val_duration: $df.DataType.Duration,
+    val_binary: $df.DataType.Binary,
+    val_obj: $df.DataType.Object,
+    val_null: $df.DataType.Null
 };
 
 const df = new DataFrame(data, schema);

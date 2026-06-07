@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 const data = [
     { name: "Alice", age: 30, is_active: 1, joined: "2026-05-20" },
@@ -12,7 +12,7 @@ console.table(data);
 
 try {
     // 1. Test automatic schema inference
-    const df = $tbl.data(data);
+    const df = $df.data(data);
     const schema = df.getSchema();
     
     console.log("\nInferred Schema:");
@@ -28,14 +28,14 @@ try {
 
     // 2. Test explicit schema coercion
     const explicitSchema = {
-        name: $tbl.DataType.Utf8,
-        age: $tbl.DataType.Int32, // coerce float string to int
-        is_active: $tbl.DataType.Boolean, // coerce 1/0/null to boolean/null
-        joined: $tbl.DataType.Datetime,
-        missing_col: $tbl.DataType.Utf8 // will be null-padded
+        name: $df.DataType.Utf8,
+        age: $df.DataType.Int32, // coerce float string to int
+        is_active: $df.DataType.Boolean, // coerce 1/0/null to boolean/null
+        joined: $df.DataType.Datetime,
+        missing_col: $df.DataType.Utf8 // will be null-padded
     };
 
-    const dfCoerced = $tbl.data(data, explicitSchema);
+    const dfCoerced = $df.data(data, explicitSchema);
     const coercedData = dfCoerced.to_dicts() as any[];
     
     console.log("\nCoerced Data (with Null Padding):");
@@ -62,14 +62,14 @@ try {
     ];
 
     const complexSchema = {
-        tags: $tbl.DataType.List($tbl.DataType.Utf8),
-        info: $tbl.DataType.Struct({
-            val: $tbl.DataType.Int32,
-            label: $tbl.DataType.Utf8
+        tags: $df.DataType.List($df.DataType.Utf8),
+        info: $df.DataType.Struct({
+            val: $df.DataType.Int32,
+            label: $df.DataType.Utf8
         })
     };
 
-    const dfComplex = $tbl.data(complexData, complexSchema);
+    const dfComplex = $df.data(complexData, complexSchema);
     const complexResult = dfComplex.to_dicts() as any[];
 
     console.log("\nComplex List & Struct Coerced Result:");
@@ -81,6 +81,32 @@ try {
     if (complexResult[0].info.val !== 10) throw new Error("Struct field Int32 preserve failed");
     if (complexResult[1].info.val !== 20) throw new Error("Struct field String-to-Int32 coercion failed");
     if (complexResult[1].info.label !== "B") throw new Error("Struct field label string preserve failed");
+
+    // 4. Test inferred schema TypedArray coercion
+    const inferredDf = $df.data({
+        age: [30, 25, 40],
+        price: [10.5, 20.3, 30.1]
+    });
+    const inferredSchema = inferredDf.getSchema();
+    if (inferredSchema.age.name !== "Int32") throw new Error(`Expected age schema to be Int32, got ${inferredSchema.age.name}`);
+    if (inferredSchema.price.name !== "Float64") throw new Error(`Expected price schema to be Float64, got ${inferredSchema.price.name}`);
+    
+    // Check that underlying arrays were actually coerced to TypedArrays!
+    const cols = (inferredDf as any)._columns;
+    if (!(cols.age instanceof Int32Array)) throw new Error("Expected age column array to be instantiated as Int32Array");
+    if (!(cols.price instanceof Float64Array)) throw new Error("Expected price column array to be instantiated as Float64Array");
+
+    // 5. Test nested TypedArrays list type inference
+    const listTypedArrayData = {
+        nested_lists: [
+            new Int32Array([1, 2]),
+            new Int32Array([3, 4])
+        ]
+    };
+    const listTypedArrayDf = $df.data(listTypedArrayData);
+    const listTypedArraySchema = listTypedArrayDf.getSchema();
+    if (listTypedArraySchema.nested_lists.name !== "List") throw new Error(`Expected nested_lists schema to be List, got ${listTypedArraySchema.nested_lists.name}`);
+    if ((listTypedArraySchema.nested_lists as any).innerType.name !== "Int32") throw new Error(`Expected nested list inner type to be Int32, got ${(listTypedArraySchema.nested_lists as any).innerType.name}`);
 
     console.log("\n🎉 ALL SCHEMA AND DATATYPE TESTS PASSED!");
 } catch (e) {

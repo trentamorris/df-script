@@ -1,8 +1,8 @@
 import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions } from "../../utils";
+import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions, joinList } from "../../utils";
 import { ComputeError } from "../../exceptions";
-import type { UniqueListStatsOptions } from "../../types";
+import type { UniqueListStatsOptions, JoinListOptions } from "../../types";
 
 export class ListExprNamespace {
     constructor(public expr: any) { }
@@ -22,38 +22,23 @@ export class ListExprNamespace {
     }
 
     contains(item: any) {
-        return this._deriveList((arr) => {
-            return (arr as any).includes(item);
-        });
+        return this._deriveList((arr: any) => arr.includes(item));
     }
 
     contains_all(items: any[]) {
-        return this._deriveList((arr) => {
-            const list = arr as any;
-            for (let i = 0; i < items.length; i++) {
-                if (!list.includes(items[i])) return false;
-            }
-            return true;
-        });
+        return this._deriveList((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
     }
 
     contains_any(items: any[]) {
-        return this._deriveList((arr) => {
-            const list = arr as any;
-            for (let i = 0; i < items.length; i++) {
-                if (list.includes(items[i])) return true;
-            }
-            return false;
-        });
+        return this._deriveList((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
     }
 
     count_matches(item: any) {
-        return this._deriveList((arr) => {
-            const list = arr as any;
+        return this._deriveList((arr: any) => {
             let count = 0;
-            const len = list.length;
+            const len = arr.length;
             for (let i = 0; i < len; i++) {
-                if (list[i] === item) {
+                if (arr[i] === item) {
                     count++;
                 }
             }
@@ -62,12 +47,11 @@ export class ListExprNamespace {
     }
 
     drop_nulls() {
-        return this._deriveList((arr) => {
-            const list = arr as any;
-            const len = list.length;
+        return this._deriveList((arr: any) => {
+            const len = arr.length;
             const result: any[] = [];
             for (let i = 0; i < len; i++) {
-                if (list[i] != null) result.push(list[i]);
+                if (arr[i] != null) result.push(arr[i]);
             }
             return result;
         });
@@ -81,16 +65,14 @@ export class ListExprNamespace {
         indices: number | number[],
         null_on_oob: boolean = true
     ) {
-        return this._deriveList((arr) => {
-            const list = arr as any;
-            const len = list.length;
-
-            const idxs = Array.isArray(indices) ? indices : [indices as any];
+        return this._deriveList((arr: any) => {
+            const len = arr.length;
+            const idxs = Array.isArray(indices) ? indices : [indices];
             const numIndices = idxs.length;
             const res = new Array(numIndices);
             for (let i = 0; i < numIndices; i++) {
                 const index = idxs[i];
-                const val = list.at(index);
+                const val = arr.at(index);
                 if (val === undefined && !null_on_oob) {
                     throw new ComputeError(`Index ${index} is out of bounds for list of length ${len}`);
                 }
@@ -101,41 +83,21 @@ export class ListExprNamespace {
     }
 
     gather_every(options: StepSliceListOptions = {}) {
-        return this._deriveList((arr) => {
-            try {
-                return stepSliceList(arr as any, options);
-            } catch (e: any) {
-                throw new ComputeError(e.message || "Invalid gather step parameters");
-            }
-        });
+        return this._deriveList((arr: any) => stepSliceList(arr, options));
     }
 
     get(index: number, null_on_oob: boolean = true) {
-        return this._deriveList((arr) => {
-            const val = (arr as any).at(index);
+        return this._deriveList((arr: any) => {
+            const val = arr.at(index);
             if (val === undefined && !null_on_oob) {
-                throw new ComputeError(`Index ${index} is out of bounds for list of length ${(arr as any).length}`);
+                throw new ComputeError(`Index ${index} is out of bounds for list of length ${arr.length}`);
             }
             return val ?? null;
         });
     }
 
-    join(separator: string = ",", options: { ignoreNulls?: boolean } = {}) {
-        const ignoreNulls = options?.ignoreNulls ?? false;
-        return this._deriveList((arr) => {
-            const list = arr as any;
-            const len = list.length;
-            const strList: string[] = [];
-            for (let i = 0; i < len; i++) {
-                const x = list[i];
-                if (x != null) {
-                    strList.push(String(x));
-                } else if (!ignoreNulls) {
-                    strList.push("");
-                }
-            }
-            return strList.join(separator);
-        });
+    join(separator: string = ",", options: JoinListOptions = {}) {
+        return this._deriveList((arr: any) => joinList(arr, separator, options));
     }
 
     last(null_on_oob: boolean = true) {
@@ -147,7 +109,7 @@ export class ListExprNamespace {
     }
 
     lengths() {
-        return this._deriveList((arr) => (arr as any).length);
+        return this._deriveList((arr: any) => arr.length);
     }
 
     max() {
@@ -155,14 +117,11 @@ export class ListExprNamespace {
     }
 
     mean() {
-        return this._deriveList((arr) => {
-            const { sum, count } = getListStats(arr);
-            return sum !== null && count > 0 ? sum / count : null;
-        });
+        return this._deriveList((arr) => getListStats(arr).mean);
     }
 
     median() {
-        return this._deriveList((arr) => computeMedian(arr as any));
+        return this._deriveList((arr: any) => computeMedian(arr));
     }
 
     min() {
@@ -170,30 +129,23 @@ export class ListExprNamespace {
     }
 
     mode() {
-        return this._deriveList((arr) => {
-            return computeMode(arr as any);
-        });
+        return this._deriveList((arr: any) => computeMode(arr));
     }
 
     n_unique(options: UniqueListStatsOptions = {}) {
-        return this._deriveList((arr) => {
-            return getUniqueListStats(arr as any, options).count;
-        });
+        return this._deriveList((arr: any) => getUniqueListStats(arr, options).count);
     }
 
     reverse() {
-        return this._deriveList((arr) => {
-            return (arr as any).slice().reverse();
-        });
+        return this._deriveList((arr: any) => arr.slice().reverse());
     }
 
     slice(offset: number, length?: number) {
-        return this._deriveList((arr) => {
-            const list = arr as any;
-            const len = list.length;
+        return this._deriveList((arr: any) => {
+            const len = arr.length;
             const start = offset < 0 ? Math.max(0, len + offset) : offset;
             const end = length !== undefined ? start + length : len;
-            return list.slice(start, end);
+            return arr.slice(start, end);
         });
     }
 
@@ -206,9 +158,7 @@ export class ListExprNamespace {
     }
 
     unique(options: UniqueListStatsOptions = {}) {
-        return this._deriveList((arr) => {
-            return getUniqueListStats(arr as any, options).values;
-        });
+        return this._deriveList((arr: any) => getUniqueListStats(arr, options).values);
     }
 }
 

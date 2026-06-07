@@ -2,7 +2,6 @@ import { isArrayOrTypedArray, isClass, isObj, isPlainObj, isTypedArray } from ".
 import { isValidDateObj } from "./date";
 import { toValidNumber, isValidNumber } from "./number";
 import { toCanonicalString } from "./string";
-import type { UniqueListStatsOptions } from "../types";
 
 export type ArrayItemType =
     | "string"
@@ -58,30 +57,59 @@ export function isArrayOfType(
         return mode === "every";
     }
 
-    const check = (v: unknown) => {
-        if (type === "null") return v === null;
-        if (type === "undefined") return v === undefined;
-        if (type === "nullish") return v == null;
-        if (v == null) return allowNulls;
-        if (type === "any") return true;
-        if (typeof type === "function") {
-            return isClass(type) ? v instanceof type : (type as (v: unknown) => boolean)(v);
+    const list = arr as any;
+    let check: (v: unknown) => boolean;
+
+    if (typeof type === "function") {
+        const isC = isClass(type);
+        check = isC
+            ? (v) => v instanceof type
+            : (type as (v: unknown) => boolean);
+    } else {
+        switch (type) {
+            case "null":
+                check = (v) => v === null;
+                break;
+            case "undefined":
+                check = (v) => v === undefined;
+                break;
+            case "nullish":
+                check = (v) => v == null;
+                break;
+            case "any":
+                check = () => true;
+                break;
+            case "date":
+                check = isValidDateObj;
+                break;
+            case "object":
+                check = isObj;
+                break;
+            case "plainObject":
+                check = isPlainObj;
+                break;
+            case "number":
+                check = isValidNumber;
+                break;
+            default:
+                check = (v) => typeof v === type;
+                break;
         }
-        if (type === "date") return isValidDateObj(v);
-        if (type === "object") return isObj(v);
-        if (type === "plainObject") return isPlainObj(v);
-        if (type === "number") return isValidNumber(v);
-        return typeof v === type;
-    };
+    }
+
+    if (allowNulls) {
+        const baseCheck = check;
+        check = (v) => v == null || baseCheck(v);
+    }
 
     if (mode === "every") {
         for (let i = 0; i < len; i++) {
-            if (!check((arr as any)[i])) return false;
+            if (!check(list[i])) return false;
         }
         return true;
     } else {
         for (let i = 0; i < len; i++) {
-            if (check((arr as any)[i])) return true;
+            if (check(list[i])) return true;
         }
         return false;
     }
@@ -170,34 +198,72 @@ export function getListStats(arr: unknown): {
     };
 }
 
+/**
+ * Options configuration for the `getUniqueListStats` utility.
+ */
+export interface UniqueListStatsOptions {
+    /**
+     * If true, uses strict serialization comparison (via keySelector or toCanonicalString)
+     * to group complex nested types (like Arrays, Sets, Maps, and Dates) by value instead of reference.
+     * @default false
+     */
+    strict?: boolean;
+
+    /**
+     * Custom function to extract a unique comparison key from each element.
+     * If strict is true and no selector is provided, falls back to `toCanonicalString`.
+     */
+    keySelector?: (val: any) => any;
+}
+
 export function getUniqueListStats(
     arr: ArrayLike<any>,
-    options: UniqueListStatsOptions = {}
-): { values: any[]; count: number } {
+    {
+        strict = false,
+        keySelector
+    }: UniqueListStatsOptions = {}
+): { values: any[]; count: number; frequencies: Map<any, number> } {
     const list = Array.from(arr);
-    if (options.strict) {
-        const selector = options.keySelector ?? toCanonicalString;
-        const seen = new Set();
-        const result: any[] = [];
+    const frequencies = new Map<any, number>();
+
+    if (strict) {
+        const selector = keySelector ?? toCanonicalString;
+        const seen = new Map<string, { val: any; count: number }>();
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const val = list[i];
             const key = selector(val);
-            if (!seen.has(key)) {
-                seen.add(key);
-                result.push(val);
+            const entry = seen.get(key);
+            if (entry === undefined) {
+                seen.set(key, { val, count: 1 });
+            } else {
+                entry.count++;
             }
         }
+
+        const values: any[] = [];
+        for (const entry of seen.values()) {
+            values.push(entry.val);
+            frequencies.set(entry.val, entry.count);
+        }
+
         return {
-            values: result,
-            count: result.length
+            values,
+            count: values.length,
+            frequencies
         };
     }
 
-    const set = new Set(list);
+    const len = list.length;
+    for (let i = 0; i < len; i++) {
+        const val = list[i];
+        frequencies.set(val, (frequencies.get(val) ?? 0) + 1);
+    }
+
     return {
-        values: Array.from(set),
-        count: set.size
+        values: Array.from(frequencies.keys()),
+        count: frequencies.size,
+        frequencies
     };
 }
 
@@ -231,6 +297,13 @@ export interface StepSliceListOptions {
      * If specified, the slicing process stops once this limit is reached.
      */
     maxItemsGathered?: number;
+
+    /**
+     * If true, returns null when the starting offset is out of bounds.
+     * If false, throws an error when the starting offset is out of bounds.
+     * @default true
+     */
+    null_on_oob?: boolean;
 }
 
 export function stepSliceList<T>(
@@ -239,16 +312,32 @@ export function stepSliceList<T>(
         step = 1,
         offsetStart = 0,
         offsetEnd,
-        maxItemsGathered
+        maxItemsGathered,
+        null_on_oob = true
     }: StepSliceListOptions = {}
-): T[] {
-    if (arr == null || (maxItemsGathered !== undefined && maxItemsGathered <= 0)) {
+): T[] | null {
+    if (arr == null) {
+        return null;
+    }
+    if (maxItemsGathered !== undefined && maxItemsGathered <= 0) {
         return [];
     }
     if (step === 0) {
         throw new Error("Step size step cannot be zero");
     }
+
     const len = arr.length;
+    const isOob = len === 0
+        ? (offsetStart !== 0)
+        : (offsetStart >= len || offsetStart < -len);
+
+    if (isOob) {
+        if (!null_on_oob) {
+            throw new Error(`Start offset ${offsetStart} is out of bounds for list of length ${len}`);
+        }
+        return null;
+    }
+
     const start = offsetStart < 0 ? len + offsetStart : offsetStart;
     const end = offsetEnd !== undefined
         ? (offsetEnd < 0 ? len + offsetEnd : offsetEnd)
@@ -275,4 +364,91 @@ export function stepSliceList<T>(
         }
     }
     return res;
+}
+
+/**
+ * Options configuration for the `joinList` utility.
+ */
+export interface JoinListOptions {
+    /**
+     * If true, nullish elements (null and undefined) are completely ignored during joining.
+     * If false (default), nullish elements are serialized as empty strings or custom `nullValue`.
+     * @default false
+     */
+    ignoreNulls?: boolean;
+
+    /**
+     * Custom string representation for nullish values.
+     * Only applied if `ignoreNulls` is false.
+     * @default ""
+     */
+    nullValue?: string;
+
+    /**
+     * Optional prefix string prepended to the final joined result.
+     * @default ""
+     */
+    prefix?: string;
+
+    /**
+     * Optional suffix string appended to the final joined result.
+     * @default ""
+     */
+    suffix?: string;
+
+    /**
+     * Maximum number of list elements to join.
+     * If specified, elements beyond this limit are omitted and `truncationMarker` is appended.
+     */
+    limit?: number;
+
+    /**
+     * Custom placeholder string appended to the joined string when limit truncation occurs.
+     * Only applied if `limit` is specified and the list length exceeds it.
+     * @default "..."
+     */
+    truncationMarker?: string;
+
+    /**
+     * Callback function used to format each individual non-null element to a custom string representation.
+     */
+    valueFormatter?: (val: any, index: number) => string;
+}
+
+/**
+ * Joins the elements of an array-like structure into a string using a separator.
+ * Excludes nullish checks and formats nested arrays cleanly.
+ */
+export function joinList(
+    arr: ArrayLike<any>,
+    separator: string = ",",
+    {
+        ignoreNulls = false,
+        nullValue = "",
+        prefix = "",
+        suffix = "",
+        limit,
+        truncationMarker = "...",
+        valueFormatter
+    }: JoinListOptions = {}
+): string {
+    const len = arr.length;
+    const strList: string[] = [];
+    const maxLimit = limit !== undefined ? Math.max(0, limit) : len;
+    
+    let truncated = false;
+    for (let i = 0; i < len; i++) {
+        if (strList.length >= maxLimit) {
+            truncated = true;
+            break;
+        }
+        const x = arr[i];
+        if (x != null) {
+            strList.push(valueFormatter ? valueFormatter(x, i) : String(x));
+        } else if (!ignoreNulls) {
+            strList.push(nullValue);
+        }
+    }
+
+    return prefix + strList.join(separator) + (truncated ? truncationMarker : "") + suffix;
 }

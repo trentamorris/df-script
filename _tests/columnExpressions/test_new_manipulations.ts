@@ -1,5 +1,5 @@
 declare const process: any;
-import { $tbl } from "../../src/index";
+import { $df } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION NEW MANIPULATIONS TESTS...");
@@ -31,43 +31,43 @@ const data = [
 ];
 
 try {
-    const df = $tbl.data(data);
+    const df = $df.data(data);
 
     const projected = df.select([
         // 1. fill_null (scalar and expression)
-        $tbl.col("val").fill_null(99).alias("val_filled_scalar"),
-        $tbl.col("val").fill_null($tbl.col("other_val")).alias("val_filled_expr"),
-        $tbl.col("null_val").fill_null("fallback").alias("null_filled"),
+        $df.col("val").fill_null(99).alias("val_filled_scalar"),
+        $df.col("val").fill_null($df.col("other_val")).alias("val_filled_expr"),
+        $df.col("null_val").fill_null("fallback").alias("null_filled"),
 
         // 2. cast
-        $tbl.col("id").cast($tbl.DataType.Utf8).alias("id_cast_str"),
-        $tbl.col("str_val").cast($tbl.DataType.Boolean).alias("str_cast_bool"),
+        $df.col("id").cast($df.DataType.Utf8).alias("id_cast_str"),
+        $df.col("str_val").cast($df.DataType.Boolean).alias("str_cast_bool"),
 
         // 3. logical boolean literals
-        $tbl.col("bool_val").and(true).alias("bool_and_true"),
-        $tbl.col("bool_val").and(false).alias("bool_and_false"),
-        $tbl.col("bool_val").or(true).alias("bool_or_true"),
-        $tbl.col("bool_val").or(false).alias("bool_or_false"),
+        $df.col("bool_val").and(true).alias("bool_and_true"),
+        $df.col("bool_val").and(false).alias("bool_and_false"),
+        $df.col("bool_val").or(true).alias("bool_or_true"),
+        $df.col("bool_val").or(false).alias("bool_or_false"),
 
         // 4. list any/all/contains/drop_nulls
-        $tbl.col("list_val").list.any().alias("list_any"),
-        $tbl.col("list_val").list.all().alias("list_all"),
-        $tbl.col("list_val").list.contains_any([true, "nonexistent"]).alias("list_contains_any"),
-        $tbl.col("list_val").list.contains_all([true, false]).alias("list_contains_all"),
-        $tbl.col("list_val").list.drop_nulls().alias("list_dropped_nulls"),
+        $df.col("list_val").list.any().alias("list_any"),
+        $df.col("list_val").list.all().alias("list_all"),
+        $df.col("list_val").list.contains_any([true, "nonexistent"]).alias("list_contains_any"),
+        $df.col("list_val").list.contains_all([true, false]).alias("list_contains_all"),
+        $df.col("list_val").list.drop_nulls().alias("list_dropped_nulls"),
 
         // 5. string count_matches / extract
-        $tbl.col("str_val").str.count_matches("apple").alias("str_matches_str"),
-        $tbl.col("str_val").str.count_matches(/apple/g).alias("str_matches_regex"),
-        $tbl.col("str_val").str.extract(/(\w+)/).alias("str_extract_default"),
-        $tbl.col("str_val").str.extract(/(\w+)\s+(\w+)/, 2).alias("str_extract_group"),
-        $tbl.col("regex_str").str.encode_uri_component().alias("str_uri_encoded"),
-        $tbl.col("regex_str").str.encode_uri_component().str.decode_uri_component().alias("str_uri_decoded"),
-        $tbl.lit("constant_string").alias("lit_str"),
-        $tbl.lit(42).alias("lit_num"),
-        $tbl.lit([1, 2]).alias("lit_arr"),
-        $tbl.coalesce($tbl.col("val"), $tbl.col("other_val")).alias("coalesce_val_other"),
-        $tbl.coalesce($tbl.col("val"), 999).alias("coalesce_val_static")
+        $df.col("str_val").str.count_matches("apple").alias("str_matches_str"),
+        $df.col("str_val").str.count_matches(/apple/g).alias("str_matches_regex"),
+        $df.col("str_val").str.extract(/(\w+)/).alias("str_extract_default"),
+        $df.col("str_val").str.extract(/(\w+)\s+(\w+)/, 2).alias("str_extract_group"),
+        $df.col("regex_str").str.encode_uri_component().alias("str_uri_encoded"),
+        $df.col("regex_str").str.encode_uri_component().str.decode_uri_component().alias("str_uri_decoded"),
+        $df.lit("constant_string").alias("lit_str"),
+        $df.lit(42).alias("lit_num"),
+        $df.lit([1, 2]).alias("lit_arr"),
+        $df.coalesce($df.col("val"), $df.col("other_val")).alias("coalesce_val_other"),
+        $df.coalesce($df.col("val"), 999).alias("coalesce_val_static")
     ]).to_dicts() as any[];
 
     console.log("New manipulations test results:");
@@ -134,12 +134,12 @@ try {
 
     // 6. Test Quantile aggregation
     const aggResult = df.select([
-        $tbl.col("numeric_list").list.first().quantile(0.5).alias("q_50"),
-        $tbl.col("numeric_list").list.first().quantile(0.9).alias("q_90"),
-        $tbl.col("numeric_list").list.first().n_unique().alias("n_uniq"),
-        $tbl.col("id").mode().alias("mode_id"),
-        $tbl.col("id").mode().list.first().alias("first_mode_id"),
-        $tbl.col("id").mode().list.last().alias("last_mode_id")
+        $df.col("numeric_list").list.first().quantile(0.5).alias("q_50"),
+        $df.col("numeric_list").list.first().quantile(0.9).alias("q_90"),
+        $df.col("numeric_list").list.first().n_unique().alias("n_uniq"),
+        $df.col("id").mode().alias("mode_id"),
+        $df.col("id").mode().list.first().alias("first_mode_id"),
+        $df.col("id").mode().list.last().alias("last_mode_id")
     ]).to_dicts() as any[];
 
     console.log("Aggregation test results:");

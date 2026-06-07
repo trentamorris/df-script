@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("Running DataFrame robustness and edge-case tests...");
 
@@ -47,8 +47,8 @@ assertThrows(() => {
 
 // 3. Schema alignment (dropping extra columns)
 const explicitSchema = {
-    name: $tbl.DataType.Utf8,
-    age: $tbl.DataType.Int32,
+    name: $df.DataType.Utf8,
+    age: $df.DataType.Int32,
 };
 const dfAligned = new DataFrame(sparseData, explicitSchema);
 const alignedSchema = dfAligned.getSchema();
@@ -70,7 +70,7 @@ assertThrows(() => dfDummy.to_list("c" as any), "Column \"c\" does not exist");
 
 // 5. Duplicate selection error in select
 assertThrows(() => dfDummy.select("a", "a"), "Duplicate column selection");
-assertThrows(() => dfDummy.select($tbl.col("a").alias("b"), $tbl.col("b").alias("b")), "Duplicate column selection");
+assertThrows(() => dfDummy.select($df.col("a").alias("b"), $df.col("b").alias("b")), "Duplicate column selection");
 
 // 6. Rename collision detection
 assertThrows(() => dfDummy.rename({ a: "b" }), "Rename collision");
@@ -98,7 +98,7 @@ assert(Object.keys(dfEmptyRenamed.getSchema()).length === 2 && "c" in dfEmptyRen
 // 7.4 with_columns on height-0
 const dfEmptyWithCols = dfEmpty.with_columns({
     c: 5,
-    d: $tbl.col("a").add(10),
+    d: $df.col("a").add(10),
 });
 assert(dfEmptyWithCols.height === 0, "With_columns on height-0 should have height 0");
 assert(Object.keys(dfEmptyWithCols.getSchema()).length === 4, "With_columns on height-0 should append new columns to schema");
@@ -127,7 +127,7 @@ assert(dfFiltered.height === 1 && dfFiltered.to_dicts()[0].a === 3, "Filtered pr
 // 9. Diagonal concat pre-allocation correctness
 const dfDiag1 = new DataFrame([{ a: 1 }]);
 const dfDiag2 = new DataFrame([{ b: 2 }]);
-const dfDiagConcat = $tbl.concat([dfDiag1, dfDiag2], { how: "diagonal" });
+const dfDiagConcat = $df.concat([dfDiag1, dfDiag2], { how: "diagonal" });
 assert(dfDiagConcat.height === 2, "Diagonal concat height should be 2");
 const collectedDiag = dfDiagConcat.to_dicts() as any[];
 assert(collectedDiag[0].a === 1 && collectedDiag[0].b === null, "First diagonal row values correct");

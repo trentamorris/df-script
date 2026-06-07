@@ -1,5 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
-import { $tbl } from "../../src/api";
+import { $df } from "../../src/api";
 
 console.log("Running groupby tests...");
 
@@ -10,7 +10,7 @@ const df = new DataFrame([
 ]);
 
 const dfAgg = df.groupby("dept").agg(
-    $tbl.col("salary").mean().alias("avg_salary")
+    $df.col("salary").mean().alias("avg_salary")
 );
 
 if (dfAgg.height !== 2) throw new Error("Groupby aggregation height mismatch");

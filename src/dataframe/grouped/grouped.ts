@@ -58,7 +58,7 @@ export class GroupedData<T, K extends keyof T> {
             outSchema[k] = this.parentSchema[k];
         }
 
-        return new DataFrame<U>(newColumns as any, outSchema, groupIdx);
+        return DataFrame._createDirect<U>(newColumns as any, outSchema, groupIdx);
     }
 
     agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
@@ -127,6 +127,6 @@ export class GroupedData<T, K extends keyof T> {
             outSchema[targetKey] = inferColumnType(newColumns[targetKey]);
         }
 
-        return new DataFrame<U>(newColumns as any, outSchema, groupIdx);
+        return DataFrame._createDirect<U>(newColumns as any, outSchema, groupIdx);
     }
 }
