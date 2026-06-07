@@ -1,6 +1,7 @@
 declare const process: any;
 import { isArrayOfType, toValidArray, toValidStringArray, getUniqueListStats, joinList } from "../../src/utils/list";
 import { toValidNumber, toValidFloat } from "../../src/utils/number";
+import { $df } from "../../src/index";
 
 
 console.log("=========================================");
@@ -205,6 +206,27 @@ try {
     // toValidFloat options checks
     if (toValidFloat("12.3", { precision: "Float32" }) !== Math.fround(12.3)) throw new Error("toValidFloat precision option failed");
     if (toValidFloat("Infinity", { allowNonFiniteNumbers: false }) !== null) throw new Error("toValidFloat allowNonFiniteNumbers: false failed");
+
+    // 10. Test dynamic schema type inference
+    const testSchema = {
+        id: $df.DataType.Int32,
+        name: $df.DataType.Utf8,
+        active: $df.DataType.Boolean,
+        tags: $df.DataType.List($df.DataType.Utf8),
+        info: $df.DataType.Struct({
+            val: $df.DataType.Int32
+        })
+    };
+    const inferredSchemaDf = $df.data([], testSchema);
+    type ExpectedRow = {
+        id: number | null;
+        name: string | null;
+        active: boolean | null;
+        tags: (string | null)[] | null;
+        info: { val: number | null } | null;
+    };
+    const rows = inferredSchemaDf.to_dicts();
+    const _checkRows: ExpectedRow[] = rows;
 
     console.log("🎉 ALL UTILS TYPES TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

@@ -2,10 +2,16 @@ import { DataFrame } from "./dataframe"
 import { ColumnExpr, lit, all, exclude, coalesce, when } from "./columnExpressions"
 import { DataTypeRegistry } from "./datatypes"
 import { concat } from "./functions"
-import type { RowRecord, DataFrameSchema, ColumnDict } from "./types"
+import type { RowRecord, DataFrameSchema, ColumnDict, InferSchema } from "./types"
+
+function data<S extends DataFrameSchema>(data: any[] | ColumnDict, schema: S): DataFrame<InferSchema<S>>;
+function data<T extends RowRecord = any>(data: T[] | ColumnDict, schema?: DataFrameSchema): DataFrame<T>;
+function data(data: any[] | ColumnDict, schema?: DataFrameSchema): DataFrame<any> {
+    return new DataFrame(data, schema);
+}
 
 export const $df = {
-    data: <T extends RowRecord = any>(data: T[] | ColumnDict, schema?: DataFrameSchema) => new DataFrame<T>(data, schema),
+    data,
     col: <T = any>(name: keyof T | string) => new ColumnExpr<T>(name),
     all,
     exclude,

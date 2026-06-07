@@ -130,7 +130,7 @@ export class DecimalType extends NumericDataType {
 // Standard Types
 // ============================================================================
 
-export class BooleanType extends DataType {
+export class BooleanType extends DataType<boolean | null> {
     readonly name = "Boolean";
     override get isBoolean(): boolean { return true; }
     coerce(val: unknown): boolean | null {
@@ -142,7 +142,7 @@ export class BooleanType extends DataType {
 }
 export const Boolean = new BooleanType();
 
-export class Utf8Type extends DataType {
+export class Utf8Type extends DataType<string | null> {
     readonly name = "Utf8";
     override get isString(): boolean { return true; }
     override get isUtf8(): boolean { return true; }
@@ -155,7 +155,7 @@ export class Utf8Type extends DataType {
 }
 export const Utf8 = new Utf8Type();
 
-export class BinaryType extends DataType {
+export class BinaryType extends DataType<Uint8Array | null> {
     readonly name = "Binary";
     override get isBinary(): boolean { return true; }
     coerce(val: unknown): Uint8Array | null { return toValidBinary(val); }
@@ -164,7 +164,7 @@ export class BinaryType extends DataType {
 }
 export const Binary = new BinaryType();
 
-export class NullType extends DataType {
+export class NullType extends DataType<null> {
     readonly name = "Null";
     override get isNull(): boolean { return true; }
     coerce(_val: unknown): null { return null; }
@@ -186,7 +186,7 @@ export const Object = new ObjectType();
 // Temporal Types
 // ============================================================================
 
-export class DateType extends TemporalDataType {
+export class DateType extends TemporalDataType<Date | null> {
     readonly name = "Date";
     coerce(val: unknown): Date | null {
         const d = toValidDate(val);
@@ -199,7 +199,7 @@ export class DateType extends TemporalDataType {
 }
 export const Date = new DateType();
 
-export class DatetimeType extends TemporalDataType {
+export class DatetimeType extends TemporalDataType<Date | null> {
     readonly name = "Datetime";
     coerce(val: unknown): Date | null { return toValidDate(val); }
     equals(other: DataType): boolean { return other.name === "Datetime"; }
@@ -207,7 +207,7 @@ export class DatetimeType extends TemporalDataType {
 }
 export const Datetime = new DatetimeType();
 
-export class TimeType extends TemporalDataType {
+export class TimeType extends TemporalDataType<string | null> {
     readonly name = "Time";
     coerce(val: unknown): string | null {
         if (val == null) return null;
@@ -228,7 +228,7 @@ export class TimeType extends TemporalDataType {
 }
 export const Time = new TimeType();
 
-export class DurationType extends TemporalDataType {
+export class DurationType extends TemporalDataType<number | null> {
     readonly name = "Duration";
     coerce(val: unknown): number | null { return toValidNumber(val); }
     equals(other: DataType): boolean { return other.name === "Duration"; }

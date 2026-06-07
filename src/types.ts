@@ -57,3 +57,11 @@ export type ConcatItem = DataFrame<any> | ColumnDict | RowRecord[];
 
 export type { UniqueListStatsOptions, JoinListOptions } from "./utils/list";
 
+import type { DataType } from "./datatypes/DataType";
+
+export type InferDataType<T> = T extends DataType<infer U> ? U : any;
+
+export type InferSchema<S extends DataFrameSchema> = {
+    [K in keyof S]: InferDataType<S[K]>;
+};
+
