@@ -391,7 +391,95 @@ try {
         throw new Error("Expected horizontal concat/hstack to throw ShapeError on row count mismatch");
     }
 
+    // =========================================
+    // STARTING REPEAT TESTS
+    // =========================================
+    const testRepeatDf = $df.data([
+        { id: 1 },
+        { id: 2 },
+        { id: 3 }
+    ]);
 
+    // 1. Omitted n: behave like lit (broadcast to DataFrame height)
+    const repeatBroadcast = testRepeatDf.select([
+        $df.repeat("z").alias("broadcasted")
+    ]).to_dicts();
+    if (repeatBroadcast.length !== 3) throw new Error("repeat broadcast length mismatch");
+    for (let i = 0; i < 3; i++) {
+        if (repeatBroadcast[i].broadcasted !== "z") {
+            throw new Error(`repeat broadcast value mismatch at index ${i}`);
+        }
+    }
+
+    // 2. Exact match: n matches DataFrame height (n = 3)
+    const repeatExact = testRepeatDf.select([
+        $df.repeat("x", { n: 3 }).alias("exact")
+    ]).to_dicts();
+    if (repeatExact.length !== 3) throw new Error("repeat exact length mismatch");
+    for (let i = 0; i < 3; i++) {
+        if (repeatExact[i].exact !== "x") {
+            throw new Error(`repeat exact value mismatch at index ${i}`);
+        }
+    }
+
+    // 3. Strict mode mismatch: n = 5 (larger than df height 3)
+    let strictThrewLarger = false;
+    try {
+        testRepeatDf.select($df.repeat("y", { n: 5 }));
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Column height mismatch")) {
+            strictThrewLarger = true;
+        }
+    }
+    if (!strictThrewLarger) {
+        throw new Error("Expected repeat strict mode to throw ShapeError for larger n");
+    }
+
+    // 4. Strict mode mismatch: n = 2 (smaller than df height 3)
+    let strictThrewSmaller = false;
+    try {
+        testRepeatDf.select($df.repeat("y", { n: 2 }));
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Column height mismatch")) {
+            strictThrewSmaller = true;
+        }
+    }
+    if (!strictThrewSmaller) {
+        throw new Error("Expected repeat strict mode to throw ShapeError for smaller n");
+    }
+
+    // 5. Non-strict mode: n = 5 (larger, should truncate to 3)
+    const repeatTruncated = testRepeatDf.select([
+        $df.repeat("a", { n: 5, strict: false }).alias("truncated")
+    ]).to_dicts();
+    if (repeatTruncated.length !== 3) throw new Error("repeat non-strict larger length mismatch");
+    for (let i = 0; i < 3; i++) {
+        if (repeatTruncated[i].truncated !== "a") {
+            throw new Error(`repeat non-strict larger value mismatch at index ${i}`);
+        }
+    }
+
+    // 6. Non-strict mode: n = 2 (smaller, should pad with nulls to 3)
+    const repeatPadded = testRepeatDf.select([
+        $df.repeat("b", { n: 2, strict: false }).alias("padded")
+    ]).to_dicts();
+    if (repeatPadded.length !== 3) throw new Error("repeat non-strict smaller length mismatch");
+    if (repeatPadded[0].padded !== "b" || repeatPadded[1].padded !== "b") {
+        throw new Error("repeat non-strict smaller values mismatch");
+    }
+    if (repeatPadded[2].padded !== null) {
+        throw new Error("repeat non-strict smaller padding failed");
+    }
+
+    // 7. Type coercion: custom dtype specified
+    const repeatCoerced = testRepeatDf.select([
+        $df.repeat("123", { n: 3, dtype: $df.DataType.Int32 }).alias("coerced")
+    ]).to_dicts();
+    for (let i = 0; i < 3; i++) {
+        if (repeatCoerced[i].coerced !== 123) {
+            throw new Error(`repeat coercion failed at index ${i}`);
+        }
+    }
 
     console.log("\n🎉 ALL Expr NEW MANIPULATIONS TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

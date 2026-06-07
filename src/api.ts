@@ -1,5 +1,5 @@
 import { DataFrame } from "./dataframe"
-import { ColumnExpr, lit, all, exclude, coalesce, when, implode } from "./columnExpressions"
+import { ColumnExpr, lit, all, exclude, coalesce, when, implode, repeat } from "./columnExpressions"
 import { DataTypeRegistry } from "./datatypes"
 import { concat } from "./functions"
 import type { RowRecord, DataFrameSchema, ColumnDict, InferSchema } from "./types"
@@ -20,5 +20,6 @@ export const $df = {
     lit,
     when,
     implode,
+    repeat,
     DataType: DataTypeRegistry
 };
