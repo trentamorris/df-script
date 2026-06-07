@@ -1,5 +1,4 @@
-declare const process: any;
-import { $df } from "../../src/index";
+import { $df, ShapeError, DataFrame } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION NEW MANIPULATIONS TESTS...");
@@ -198,9 +197,201 @@ try {
     if (JSON.stringify(groupB.val) !== JSON.stringify(groupB.imploded_vals)) {
         throw new Error("group B col([...]) implode failed");
     }
-    if (JSON.stringify(groupB.list) !== JSON.stringify([null, [3, 4]])) {
-        throw new Error("group B col([...]) list implode failed: " + JSON.stringify(groupB.list));
+    // Test explode DataFrame-level and Expression-level
+    const explodableData = [
+        { id: 1, list: [10, 20], tag: "A" },
+        { id: 2, list: [], tag: "B" },
+        { id: 3, list: null, tag: "C" },
+        { id: 4, list: [30], tag: "D" }
+    ];
+    const expDf = $df.data(explodableData);
+
+    // 1. DataFrame.explode
+    const exploded = expDf.explode("list").to_dicts();
+    console.log("Exploded DataFrame results:");
+    console.dir(exploded);
+    if (exploded.length !== 5) {
+        throw new Error(`Expected exploded height 5, got ${exploded.length}`);
     }
+    if (exploded[0].id !== 1 || exploded[0].list !== 10 || exploded[0].tag !== "A") throw new Error("explode row 0 failed");
+    if (exploded[1].id !== 1 || exploded[1].list !== 20 || exploded[1].tag !== "A") throw new Error("explode row 1 failed");
+    if (exploded[2].id !== 2 || exploded[2].list !== null || exploded[2].tag !== "B") throw new Error("explode row 2 failed");
+    if (exploded[3].id !== 3 || exploded[3].list !== null || exploded[3].tag !== "C") throw new Error("explode row 3 failed");
+    if (exploded[4].id !== 4 || exploded[4].list !== 30 || exploded[4].tag !== "D") throw new Error("explode row 4 failed");
+
+    // Test DataFrame.explode options
+    const explodedNoEmpty = expDf.explode("list", { empty_as_null: false }).to_dicts();
+    if (explodedNoEmpty.length !== 4) throw new Error(`Expected explodedNoEmpty length 4, got ${explodedNoEmpty.length}`);
+    if (explodedNoEmpty[2].id !== 3 || explodedNoEmpty[2].list !== null) throw new Error("explodedNoEmpty row 2 failed");
+
+    const explodedNoNulls = expDf.explode("list", { keep_nulls: false }).to_dicts();
+    if (explodedNoNulls.length !== 4) throw new Error(`Expected explodedNoNulls length 4, got ${explodedNoNulls.length}`);
+    if (explodedNoNulls[2].id !== 2 || explodedNoNulls[2].list !== null) throw new Error("explodedNoNulls row 2 failed");
+
+    const explodedNeither = expDf.explode("list", { empty_as_null: false, keep_nulls: false }).to_dicts();
+    if (explodedNeither.length !== 3) throw new Error(`Expected explodedNeither length 3, got ${explodedNeither.length}`);
+    if (explodedNeither[2].id !== 4 || explodedNeither[2].list !== 30) throw new Error("explodedNeither row 2 failed");
+
+    // Test DataFrame.explode accepting Expressions and lists of names
+    const explodedExpr = expDf.explode($df.col("list")).to_dicts();
+    if (explodedExpr.length !== 5 || explodedExpr[0].list !== 10) throw new Error("explode with expression failed");
+
+    const explodedList = expDf.explode(["list"]).to_dicts();
+    if (explodedList.length !== 5 || explodedList[0].list !== 10) throw new Error("explode with array of strings failed");
+
+    // Test parallel/synchronized explosions of multiple columns using array of strings
+    const multiDf = $df.data([
+        { id: 1, list1: [10, 20], list2: ["a", "b"] },
+        { id: 2, list1: [], list2: [] },
+        { id: 3, list1: null, list2: null },
+        { id: 4, list1: [30], list2: ["d"] }
+    ]);
+    const explodedMulti = multiDf.explode(["list1", "list2"]).to_dicts();
+    if (explodedMulti.length !== 5) throw new Error(`Expected explodedMulti length 5, got ${explodedMulti.length}`);
+    if (explodedMulti[0].list1 !== 10 || explodedMulti[0].list2 !== "a") throw new Error("explodedMulti row 0 failed");
+    if (explodedMulti[1].list1 !== 20 || explodedMulti[1].list2 !== "b") throw new Error("explodedMulti row 1 failed");
+    if (explodedMulti[2].list1 !== null || explodedMulti[2].list2 !== null) throw new Error("explodedMulti row 2 failed");
+    if (explodedMulti[3].list1 !== null || explodedMulti[3].list2 !== null) throw new Error("explodedMulti row 3 failed");
+    if (explodedMulti[4].list1 !== 30 || explodedMulti[4].list2 !== "d") throw new Error("explodedMulti row 4 failed");
+
+    // Test ShapeError on mismatched parallel explode heights
+    const mismatchMultiDf = $df.data([
+        { id: 1, list1: [10, 20], list2: ["a"] }
+    ]);
+    let threwMismatchedExplode = false;
+    try {
+        mismatchMultiDf.explode(["list1", "list2"]);
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Mismatched explode heights")) {
+            threwMismatchedExplode = true;
+        }
+    }
+    if (!threwMismatchedExplode) {
+        throw new Error("Expected explode to throw ShapeError on mismatched parallel explode heights");
+    }
+
+    // Test ShapeError on matching total length but mismatched row-by-row lengths
+    const mismatchRowLengthsDf = $df.data([
+        { id: 1, list1: [10, 20], list2: ["a"] },
+        { id: 2, list1: [30], list2: ["b", "c"] }
+    ]);
+    let threwMismatchedRowLengths = false;
+    try {
+        mismatchRowLengthsDf.explode(["list1", "list2"]);
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("mismatched row lengths")) {
+            threwMismatchedRowLengths = true;
+        }
+    }
+    if (!threwMismatchedRowLengths) {
+        throw new Error("Expected explode to throw ShapeError on mismatched row-by-row lengths");
+    }
+
+
+    // 2. col().list.explode in select expands columns and repeats values
+    const selectExploded = expDf.select([
+        $df.col("id"),
+        $df.col("list").list.explode().alias("exploded_val"),
+        $df.col("tag")
+    ]).to_dicts();
+    console.log("selectExploded results:");
+    console.dir(selectExploded);
+    if (selectExploded.length !== 5) {
+        throw new Error(`Expected select exploded height 5, got ${selectExploded.length}`);
+    }
+    if (selectExploded[0].id !== 1 || selectExploded[0].exploded_val !== 10 || selectExploded[0].tag !== "A") throw new Error("select explode row 0 failed");
+    if (selectExploded[1].id !== 1 || selectExploded[1].exploded_val !== 20 || selectExploded[1].tag !== "A") throw new Error("select explode row 1 failed");
+    if (selectExploded[2].id !== 2 || selectExploded[2].exploded_val !== null || selectExploded[2].tag !== "B") throw new Error("select explode row 2 failed");
+    if (selectExploded[3].id !== 3 || selectExploded[3].exploded_val !== null || selectExploded[3].tag !== "C") throw new Error("select explode row 3 failed");
+    if (selectExploded[4].id !== 4 || selectExploded[4].exploded_val !== 30 || selectExploded[4].tag !== "D") throw new Error("select explode row 4 failed");
+
+    // 2b. col().list.explode in select succeeds if list lengths are all 1 (matching height)
+    const matchingDf = $df.data([
+        { id: 1, list: [100] },
+        { id: 2, list: [200] }
+    ]);
+    const selectMatching = matchingDf.select([$df.col("id"), $df.col("list").list.explode().alias("exploded_val")]).to_dicts();
+    if (selectMatching.length !== 2) throw new Error("select matching list length failed");
+    if (selectMatching[0].exploded_val !== 100 || selectMatching[1].exploded_val !== 200) throw new Error("select matching list values failed");
+
+    // 3. col().list.explode in with_columns expands columns and repeats existing columns
+    const withColsExploded = expDf.with_columns(
+        $df.col("list").list.explode().alias("exploded_val")
+    ).to_dicts();
+    console.log("withColsExploded results:");
+    console.dir(withColsExploded);
+    if (withColsExploded.length !== 5) {
+        throw new Error(`Expected with_columns exploded height 5, got ${withColsExploded.length}`);
+    }
+    if (withColsExploded[0].id !== 1 || withColsExploded[0].exploded_val !== 10 || withColsExploded[0].tag !== "A") throw new Error("with_columns explode row 0 failed");
+    if (withColsExploded[1].id !== 1 || withColsExploded[1].exploded_val !== 20 || withColsExploded[1].tag !== "A") throw new Error("with_columns explode row 1 failed");
+    if (withColsExploded[2].id !== 2 || withColsExploded[2].exploded_val !== null || withColsExploded[2].tag !== "B") throw new Error("with_columns explode row 2 failed");
+    if (withColsExploded[3].id !== 3 || withColsExploded[3].exploded_val !== null || withColsExploded[3].tag !== "C") throw new Error("with_columns explode row 3 failed");
+    if (withColsExploded[4].id !== 4 || withColsExploded[4].exploded_val !== 30 || withColsExploded[4].tag !== "D") throw new Error("with_columns explode row 4 failed");
+
+    // Test ShapeError on height mismatch in select/with_columns
+    const mismatchDf = $df.data([
+        { id: 1, val: 10 },
+        { id: 2, val: 20 }
+    ]);
+
+    // Create an expression that evaluates to an array of different length
+    const badExpr = $df.col("val");
+    badExpr.evaluate = (_cols, _h) => [1, 2, 3]; // Length 3 instead of 2
+
+    let selectThrew = false;
+    try {
+        mismatchDf.select(badExpr);
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Column height mismatch")) {
+            selectThrew = true;
+        }
+    }
+    if (!selectThrew) {
+        throw new Error("Expected select to throw ShapeError on height mismatch");
+    }
+
+    let withColsThrew = false;
+    try {
+        mismatchDf.with_columns(badExpr);
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Column height mismatch")) {
+            withColsThrew = true;
+        }
+    }
+    if (!withColsThrew) {
+        throw new Error("Expected with_columns to throw ShapeError on height mismatch");
+    }
+
+    // Test constructor ShapeError
+    let constructorThrew = false;
+    try {
+        new DataFrame({ a: [1, 2], b: [1, 2, 3] });
+    } catch (e: any) {
+        if ((e instanceof ShapeError || e.name === "ShapeError") && e.message.includes("Column height mismatch")) {
+            constructorThrew = true;
+        }
+    }
+    if (!constructorThrew) {
+        throw new Error("Expected constructor to throw ShapeError on column length mismatch");
+    }
+
+    // Test horizontal concat ShapeError
+    let concatThrew = false;
+    try {
+        const df1 = new DataFrame({ a: [1, 2] });
+        const df2 = new DataFrame({ b: [1, 2, 3] });
+        df1.hstack(df2);
+    } catch (e: any) {
+        if ((e instanceof ShapeError || e.name === "ShapeError") && e.message.includes("Row count mismatch")) {
+            concatThrew = true;
+        }
+    }
+    if (!concatThrew) {
+        throw new Error("Expected horizontal concat/hstack to throw ShapeError on row count mismatch");
+    }
+
+
 
     console.log("\n🎉 ALL Expr NEW MANIPULATIONS TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

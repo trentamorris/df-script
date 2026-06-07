@@ -285,6 +285,3 @@ export function coerceColumn(col: ColumnData, type: RegisteredDataType, height: 
     return newCol;
 }
 
-
-
-

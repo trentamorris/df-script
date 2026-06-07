@@ -2,7 +2,7 @@ import type { ExprConstructor } from "../types";
 import { kleeneUnary, derive } from "../ExprBase";
 import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions, joinList } from "../../utils";
 import { ComputeError } from "../../exceptions";
-import type { UniqueListStatsOptions, JoinListOptions } from "../../types";
+import type { UniqueListStatsOptions, JoinListOptions, ExplodeOptions } from "../../types";
 
 export class ListExprNamespace {
     constructor(public expr: any) { }
@@ -57,6 +57,63 @@ export class ListExprNamespace {
         });
     }
 
+    explode({ empty_as_null = true, keep_nulls = true }: ExplodeOptions = {}) {
+        return derive(this.expr, (vArray) => {
+            const height = vArray.length;
+            let newHeight = 0;
+            for (let i = 0; i < height; i++) {
+                const val = vArray[i];
+                if (isArrayOrTypedArray(val)) {
+                    newHeight += val.length || (empty_as_null ? 1 : 0);
+                    continue;
+                }
+
+                if (val != null) {
+                    newHeight += 1;
+                    continue;
+                }
+
+                if (keep_nulls) {
+                    newHeight += 1;
+                }
+            }
+
+            const res = new Array(newHeight);
+            const rowMap = new Int32Array(newHeight);
+            let idx = 0;
+            for (let i = 0; i < height; i++) {
+                const val = vArray[i];
+                if (isArrayOrTypedArray(val)) {
+                    const len = val.length;
+                    if (len > 0) {
+                        for (let j = 0; j < len; j++) {
+                            rowMap[idx] = i;
+                            res[idx++] = val[j];
+                        }
+                        continue;
+                    }
+                    if (empty_as_null) {
+                        rowMap[idx] = i;
+                        res[idx++] = null;
+                    }
+                    continue;
+                }
+
+                if (val != null) {
+                    rowMap[idx] = i;
+                    res[idx++] = val;
+                    continue;
+                }
+
+                if (keep_nulls) {
+                    rowMap[idx] = i;
+                    res[idx++] = null;
+                }
+            }
+            (res as any).rowMap = rowMap;
+            return res;
+        });
+    }
 
     first(null_on_oob: boolean = true) {
         return this.get(0, null_on_oob);

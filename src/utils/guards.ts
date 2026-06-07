@@ -129,12 +129,3 @@ export function safeJsonParse(input: unknown): unknown {
     }
 }
 
-export function isColExpr(v: unknown): v is { evaluate: (...args: any[]) => any;[key: string]: any } {
-    if (!isObj(v)) return false;
-    try {
-        return "evaluate" in v && typeof (v as any).evaluate === "function";
-    } catch {
-        return false;
-    }
-}
-

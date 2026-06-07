@@ -1,6 +1,6 @@
 import { ColumnExpr } from "../ColumnExpr";
 import type { IExpr, Scalar } from "../../types";
-import { isArrayOrTypedArray, isColExpr } from "../../utils";
+import { isArrayOrTypedArray } from "../../utils";
 
 type WhenArg = IExpr | Scalar;
 
@@ -45,8 +45,8 @@ export class WhenThen extends ColumnExpr<any> {
             const height = _.length;
 
             const evaluateArg = (arg: any): any => {
-                if (isColExpr(arg)) {
-                    return (arg as IExpr).evaluate(columns, height);
+                if (ColumnExpr.isColExpr(arg)) {
+                    return arg.evaluate(columns, height);
                 }
                 if (typeof arg === "string" && (arg in columns)) {
                     return columns[arg];

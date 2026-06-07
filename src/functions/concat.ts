@@ -2,7 +2,7 @@ import { DataFrame } from "../dataframe/dataframe"
 import { DataTypeRegistry } from "../datatypes"
 import { isTypedArray, isPlainObj, isArrayOfType, isArrayOrTypedArray } from "../utils"
 import type { ColumnDict, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType } from "../types"
-import { DataFrameError, SchemaError } from "../exceptions"
+import { DataFrameError, SchemaError, ShapeError } from "../exceptions"
 function normalizeToDataFrames(item: any, context: string, index: number): DataFrame<any>[] {
     if (item == null) {
         throw new DataFrameError(`Invalid input to ${context} at index ${index}: item cannot be null or undefined.`);
@@ -171,7 +171,7 @@ export function concat<U extends RowRecord = any>(
             for (let idx = 0; idx < items.length; idx++) {
                 const df = items[idx];
                 if (strict && df.height !== maxHeight) {
-                    throw new DataFrameError(`[Horizontal] Row count mismatch at index ${idx}. Expected ${maxHeight}, got ${df.height}. Set strict=false to allow padding.`);
+                    throw new ShapeError(`[Horizontal] Row count mismatch at index ${idx}. Expected ${maxHeight}, got ${df.height}. Set strict=false to allow padding.`);
                 }
 
                 for (const key of Object.keys(df._columns)) {

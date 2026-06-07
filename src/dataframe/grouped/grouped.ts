@@ -100,22 +100,21 @@ export class GroupedData<T, K extends keyof T> {
 
             if (!e.aggFn) {
                 newColumns[targetKey] = e.evaluate(newColumns, numGroups);
-                continue;
-            }
-
-            const preGroupedCol = e.evaluatePreGrouping(this.parentColumns, this.parentHeight);
-            const aggregatedGroupValues = new Array(numGroups);
-            let gIdx = 0;
-            for (const indices of this.groups.values()) {
-                if (indices.length === 0) continue;
-                const groupValues = new Array(indices.length);
-                for (let k = 0; k < indices.length; k++) {
-                    groupValues[k] = preGroupedCol[indices[k]];
+            } else {
+                const preGroupedCol = e.evaluatePreGrouping(this.parentColumns, this.parentHeight);
+                const aggregatedGroupValues = new Array(numGroups);
+                let gIdx = 0;
+                for (const indices of this.groups.values()) {
+                    if (indices.length === 0) continue;
+                    const groupValues = new Array(indices.length);
+                    for (let k = 0; k < indices.length; k++) {
+                        groupValues[k] = preGroupedCol[indices[k]];
+                    }
+                    aggregatedGroupValues[gIdx] = e.aggFn(groupValues);
+                    gIdx++;
                 }
-                aggregatedGroupValues[gIdx] = e.aggFn(groupValues);
-                gIdx++;
+                newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
             }
-            newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
         }
 
         const outSchema: DataFrameSchema = {};

@@ -1,10 +1,10 @@
 import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER } from "../columnExpressions"
 import { GroupedData } from "./grouped/grouped"
-import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType } from "../types"
+import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr } from "../types"
 import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
-import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, isColExpr, clamp } from "../utils"
-import { assertColumnExists, DataFrameError } from "../exceptions"
+import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray } from "../utils"
+import { assertColumnExists, assertHeight, DataFrameError, ShapeError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
     resolveWindowExpr,
@@ -26,6 +26,8 @@ export class DataFrame<T extends RowRecord = any> {
         schema: DataFrameSchema,
         height: number
     ): DataFrame<U> {
+        assertHeight(columns, height);
+
         const df = Object.create(DataFrame.prototype);
         df._columns = columns;
         df._schema = schema;
@@ -43,22 +45,8 @@ export class DataFrame<T extends RowRecord = any> {
         }
 
         if (isObj(data)) {
-            let firstLength = -1;
-            const keys = Object.keys(data);
-            const numKeys = keys.length;
-            for (let i = 0; i < numKeys; i++) {
-                const key = keys[i];
-                const col = data[key];
-                const colLen = isArrayOrTypedArray(col) ? col.length : 0;
-                if (firstLength === -1) {
-                    firstLength = colLen;
-                } else if (colLen !== firstLength) {
-                    throw new DataFrameError(`Column height mismatch: Column "${key}" has length ${colLen}, but previous columns have length ${firstLength}`);
-                }
-            }
             this._columns = data as DataFrameColumns<T>;
-            this._height = height !== undefined ? height : (firstLength === -1 ? 0 : firstLength);
-
+            this._height = assertHeight(data, height);
             schema ? this.applySchema(schema) : this.inferSchema();
             return;
         }
@@ -153,7 +141,9 @@ export class DataFrame<T extends RowRecord = any> {
         const evaluatedExprs: ColumnData[] = [];
         const funcPredicates: ((row: T) => any)[] = [];
 
-        for (const expr of exprs) {
+        const numExprs = exprs.length;
+        for (let i = 0; i < numExprs; i++) {
+            const expr = exprs[i];
             if (typeof expr === "function") {
                 funcPredicates.push(expr);
             } else {
@@ -525,32 +515,100 @@ export class DataFrame<T extends RowRecord = any> {
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys);
 
+        const numExprs = expandedExprs.length;
+        if (numExprs === 0) {
+            return DataFrame._createDirect<U>({}, {}, this._height);
+        }
+
         const newColumns: ColumnDict = {};
         const outSchema: DataFrameSchema = {};
 
-        for (const expr of expandedExprs) {
+        const evaluatedCols = new Array(numExprs);
+        const targetKeys = new Array(numExprs);
+        const selectedKeys = new Set<string>();
+        let activeRowMap: Int32Array | null = null;
+
+        for (let i = 0; i < numExprs; i++) {
+            const expr = expandedExprs[i];
             const targetKey = expr.outputName || expr.colName || ALL_COLUMNS_MARKER;
 
-            if (targetKey in newColumns) {
+            if (selectedKeys.has(targetKey)) {
                 throw new DataFrameError(`Duplicate column selection: "${targetKey}" is selected multiple times.`);
             }
+            selectedKeys.add(targetKey);
 
-            newColumns[targetKey] = expr.isWindow
+            const col = expr.isWindow
                 ? resolveWindowExpr(expr, this._columns, this._height)
                 : expr.evaluate(this._columns, this._height);
 
-            const originalKey = expr.colName || targetKey;
-            const isPureColSelector = expr instanceof ColumnExpr && expr.ops.length === 0 && !expr.isWindow && !expr.aggFn;
-            if (isPureColSelector && this._schema[originalKey]) {
-                outSchema[targetKey] = this._schema[originalKey];
-            } else {
-                const inferredType = inferColumnType(newColumns[targetKey]);
-                outSchema[targetKey] = inferredType;
-                newColumns[targetKey] = coerceColumn(newColumns[targetKey], inferredType, this._height);
+            evaluatedCols[i] = col;
+            targetKeys[i] = targetKey;
+
+            const rowMap = col && (col as any).rowMap;
+            if (rowMap) {
+                if (activeRowMap) {
+                    const len = rowMap.length;
+                    if (len !== activeRowMap.length) {
+                        throw new ShapeError(
+                            `Mismatched explode heights: Column "${targetKey}" has length ${len}, but another exploded column has length ${activeRowMap.length}`
+                        );
+                    }
+                    for (let j = 0; j < len; j++) {
+                        if (rowMap[j] !== activeRowMap[j]) {
+                            throw new ShapeError(
+                                `Mismatched explode heights: Column "${targetKey}" has mismatched row lengths compared to another exploded column.`
+                            );
+                        }
+                    }
+                } else {
+                    activeRowMap = rowMap;
+                }
             }
         }
 
-        return DataFrame._createDirect<U>(newColumns, outSchema, this._height);
+        const targetHeight = activeRowMap ? activeRowMap.length : this._height;
+
+        for (let i = 0; i < numExprs; i++) {
+            const expr = expandedExprs[i];
+            const targetKey = targetKeys[i];
+            let col = evaluatedCols[i];
+            const colObj = col as any;
+            const hasRowMap = colObj && colObj.rowMap;
+
+            const len = isArrayOrTypedArray(col) ? col.length : 0;
+            const expectedLen = (activeRowMap && !hasRowMap) ? this._height : targetHeight;
+            if (len !== expectedLen) {
+                throw new ShapeError(
+                    `Column height mismatch: Column "${targetKey}" has length ${len}, but expected ${expectedLen}`
+                );
+            }
+
+            if (activeRowMap && !hasRowMap) {
+                const mapLen = activeRowMap.length;
+                if (isTypedArray(col)) {
+                    const newCol = new colObj.constructor(mapLen);
+                    for (let j = 0; j < mapLen; j++) {
+                        newCol[j] = colObj[activeRowMap[j]];
+                    }
+                    col = newCol;
+                } else {
+                    const newCol = new Array(mapLen);
+                    for (let j = 0; j < mapLen; j++) {
+                        newCol[j] = colObj[activeRowMap[j]];
+                    }
+                    col = newCol;
+                }
+            }
+
+            const originalKey = expr.colName || targetKey;
+            const isPureCol = expr instanceof ColumnExpr && expr.ops.length === 0 && !expr.isWindow && !expr.aggFn;
+            const type = (isPureCol && this._schema[originalKey]) || inferColumnType(col);
+
+            outSchema[targetKey] = type;
+            newColumns[targetKey] = coerceColumn(col, type, targetHeight);
+        }
+
+        return DataFrame._createDirect<U>(newColumns, outSchema, targetHeight);
     }
 
     get shape(): [number, number] {
@@ -577,9 +635,9 @@ export class DataFrame<T extends RowRecord = any> {
         const sortKeys = toValidArray(by);
 
         for (let i = 0; i < sortKeys.length; i++) {
-            const keyOrExpr = sortKeys[i];
-            if (typeof keyOrExpr === "string") {
-                assertColumnExists(keyOrExpr, this._columns, "Sort key");
+            const expr = ColumnExpr.toColExpr(sortKeys[i] as any);
+            if (expr.colName) {
+                assertColumnExists(expr.colName, this._columns, "Sort key");
             }
         }
 
@@ -593,9 +651,7 @@ export class DataFrame<T extends RowRecord = any> {
             const keyOrExpr = sortKeys[i];
             const isDesc = descArray[i] ? -1 : 1;
             const customComp = (custom && typeof keyOrExpr === "string") ? custom[keyOrExpr as keyof T] : null;
-            const values = isColExpr(keyOrExpr)
-                ? keyOrExpr.evaluate(this._columns, this._height)
-                : (this._columns[keyOrExpr as string] || new Array(this._height).fill(null));
+            const values = ColumnExpr.toColExpr(keyOrExpr as any).evaluate(this._columns, this._height);
 
             plan[i] = {
                 values,
@@ -648,21 +704,15 @@ export class DataFrame<T extends RowRecord = any> {
 
     to_list<K extends keyof T>(nameOrExpr: K | IExpr): any[] {
         if (this._height === 0) return [];
-
-        const isExpression = isColExpr(nameOrExpr);
-
-        let colData: ColumnData;
-        if (isExpression) {
-            const expr = nameOrExpr as IExpr;
-            colData = expr.evaluate(this._columns, this._height);
-        } else {
-            const key = nameOrExpr as string;
-            if (key == null) {
-                return new Array(this._height).fill(null);
-            }
-            assertColumnExists(key, this._columns, "Column");
-            colData = this._columns[key];
+        if (nameOrExpr == null) {
+            return new Array(this._height).fill(null);
         }
+
+        const expr = ColumnExpr.toColExpr(nameOrExpr as any);
+        if (expr.colName) {
+            assertColumnExists(expr.colName, this._columns, "Column");
+        }
+        const colData = expr.evaluate(this._columns, this._height);
         return Array.isArray(colData) ? colData : Array.from(colData);
     }
 
@@ -762,16 +812,16 @@ export class DataFrame<T extends RowRecord = any> {
         for (const arg of flatArgs) {
             if (typeof arg === "string") {
                 exprs.push(new ColumnExpr(arg));
-            } else if (isColExpr(arg)) {
-                exprs.push(arg as unknown as IExpr);
+            } else if (ColumnExpr.isColExpr(arg)) {
+                exprs.push(arg);
             } else if (isObj(arg)) {
                 const keys = Object.keys(arg);
                 const numKeys = keys.length;
                 for (let i = 0; i < numKeys; i++) {
                     const key = keys[i];
                     const val = arg[key];
-                    if (isColExpr(val)) {
-                        exprs.push((val as unknown as IExpr).alias(key));
+                    if (ColumnExpr.isColExpr(val)) {
+                        exprs.push(val.alias(key));
                     } else {
                         const staticExpr = new ColumnExpr(key);
                         staticExpr.evaluate = (_cols: ColumnDict, h: number) => new Array(h).fill(val) as any;
@@ -786,36 +836,66 @@ export class DataFrame<T extends RowRecord = any> {
     with_columns(
         ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
     ): DataFrame<any> {
-        const exprs = this._normalizeArgs(args);
+        if (args.length === 0) return this;
 
+        const exprs = this._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys);
         const numEntries = expandedExprs.length;
+        if (numEntries === 0) return this;
 
-        const newColumns: ColumnDict = { ...this._columns };
-        const outSchema = { ...this._schema };
-
+        const overrides = new Map<string, IExpr>();
         for (let j = 0; j < numEntries; j++) {
             const expr = expandedExprs[j];
             const name = expr.outputName || expr.colName || ALL_COLUMNS_MARKER;
-
-            if (expr.isWindow) {
-                newColumns[name] = resolveWindowExpr(expr, this._columns, this._height);
-            } else {
-                newColumns[name] = expr.evaluate(this._columns, this._height);
-            }
-
-            const originalKey = expr.colName || name;
-            const isPureColSelector = expr instanceof ColumnExpr && expr.ops.length === 0 && !expr.isWindow && !expr.aggFn;
-            if (isPureColSelector && this._schema[originalKey]) {
-                outSchema[name] = this._schema[originalKey];
-            } else {
-                const inferredType = inferColumnType(newColumns[name]);
-                outSchema[name] = inferredType;
-                newColumns[name] = coerceColumn(newColumns[name], inferredType, this._height);
-            }
+            overrides.set(name, expr);
         }
 
-        return DataFrame._createDirect(newColumns, outSchema, this._height);
+        const selectList: IExpr[] = [];
+        const numKeys = allKeys.length;
+        for (let i = 0; i < numKeys; i++) {
+            const key = allKeys[i];
+            selectList.push(overrides.get(key) || new ColumnExpr(key));
+            overrides.delete(key);
+        }
+
+        for (const expr of overrides.values()) {
+            selectList.push(expr);
+        }
+
+        return this.select(...selectList);
+    }
+
+    explode(
+        columns: IntoExpr | IntoExpr[],
+        options?: ExplodeOptions
+    ): DataFrame<any> {
+        const expr = ColumnExpr.toColExpr(columns);
+        const colNames = expr.colNames || [expr.colName || expr.outputName];
+        const colsToExplode = new Set<string>();
+        const numCols = colNames.length;
+        for (let i = 0; i < numCols; i++) {
+            const name = colNames[i];
+            if (!name) {
+                throw new DataFrameError("Expression passed to explode must have a column name.");
+            }
+            assertColumnExists(name, this._columns, "Explode column");
+            colsToExplode.add(name);
+        }
+
+        const keys = Object.keys(this._columns);
+        const selectList: IExpr[] = [];
+        const numKeys = keys.length;
+        for (let i = 0; i < numKeys; i++) {
+            const key = keys[i];
+            selectList.push(
+                colsToExplode.has(key)
+                    ? new ColumnExpr(key).list.explode(options)
+                    : new ColumnExpr(key)
+            );
+        }
+
+        return this.select(...selectList);
     }
 }
+

@@ -435,7 +435,7 @@ export function joinList(
     const len = arr.length;
     const strList: string[] = [];
     const maxLimit = limit !== undefined ? Math.max(0, limit) : len;
-    
+
     let truncated = false;
     for (let i = 0; i < len; i++) {
         if (strList.length >= maxLimit) {

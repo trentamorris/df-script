@@ -59,6 +59,12 @@ export type ConcatItem = DataFrame<any> | ColumnDict | RowRecord[];
 
 export type { UniqueListStatsOptions, JoinListOptions } from "./utils/list";
 
+export interface ExplodeOptions {
+    empty_as_null?: boolean;
+    keep_nulls?: boolean;
+}
+
+
 import type { DataType } from "./datatypes/DataType";
 
 export type InferDataType<T> = T extends DataType<infer U> ? U : any;

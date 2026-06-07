@@ -1,7 +1,6 @@
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict, RegisteredDataType } from "../types"
-import { isArrayOrTypedArray, isColExpr } from "../utils"
+import { isArrayOrTypedArray } from "../utils"
 import { ALL_COLUMNS_MARKER } from "./constants"
-
 export const kleeneUnary = (fn: (v: any) => any) => {
     return (vArray: ColumnData) => {
         const height = vArray.length;
@@ -50,13 +49,15 @@ export const derive = <T extends IExpr>(
 export class ExprBase implements IExpr {
     public ops: OpFn[] = [];
     public outputName: string = "";
+    public isLiteral?: boolean;
+    public literalValue?: any;
     public aggFn?: AggFn<any> | null = null;
     public groupingOpsIndex?: number;
     public partitionOpsIndex?: number;
     public partitionBy: (string | IExpr)[] | null = null;
 
     public _resolve(val: any, columns: ColumnDict, height: number) {
-        if (isColExpr(val)) {
+        if (val instanceof ExprBase) {
             if (val.isLiteral && val.ops.length === 1) {
                 return val.literalValue;
             }

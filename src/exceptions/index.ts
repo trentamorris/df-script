@@ -20,6 +20,8 @@ export class SchemaError extends DFScriptError {}
 
 export class ComputeError extends DFScriptError {}
 
+export class ShapeError extends DFScriptError {}
+
 export * from "./utils";
 
 
