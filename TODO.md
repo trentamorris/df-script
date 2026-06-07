@@ -19,6 +19,13 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement struct data type and `$df.struct(...)` constructor to group multiple columns into a single nested object/struct column.
   * Implement `.struct.field(name)` to extract inner fields from a struct column.
 
+### 📂 File Input/Output (I/O)
+- [ ] **`read_csv` / `write_csv`**:
+  * Implement streaming delimiter-separated parser with automatic schema and type inference.
+  * Provide stringifying writers supporting multiple CSV dialects.
+- [ ] **`read_json` / `write_json`**:
+  * Parse standard JSON arrays and newline-delimited JSON (NDJSON) records.
+
 ---
 
 ## 🛠️ Refactoring & Infrastructure
