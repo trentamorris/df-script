@@ -73,3 +73,7 @@ export type InferSchema<S extends DataFrameSchema> = {
     [K in keyof S]: InferDataType<S[K]>;
 };
 
+export type FlattenUnion<T> = {
+    [K in (T extends any ? keyof T : never)]?: T extends any ? (K extends keyof T ? T[K] : never) : never;
+};
+

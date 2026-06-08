@@ -11,7 +11,9 @@ import "./columnExpressions/test_comparison_expr";
 import "./columnExpressions/test_boolean_expr";
 import "./columnExpressions/test_new_manipulations";
 import "./columnExpressions/test_when_then";
+import "./columnExpressions/test_seq_range";
 import "./dataframe/run_all";
+
 import "./datatypes/test_polars_types";
 import "./utils/test_date_robustness";
 import "./utils/test_types";

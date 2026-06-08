@@ -65,7 +65,9 @@ try {
         $df.lit("constant_string").alias("lit_str"),
         $df.lit(42).alias("lit_num"),
         $df.lit([1, 2]).alias("lit_arr"),
+        $df.lit(123.45, { dtype: $df.DataType.Int32, name: "lit_coerced_int" }),
         $df.coalesce($df.col("val"), $df.col("other_val")).alias("coalesce_val_other"),
+
         $df.coalesce($df.col("val"), 999).alias("coalesce_val_static")
     ]).to_dicts() as any[];
 
@@ -126,9 +128,12 @@ try {
     if (r0.lit_str !== "constant_string") throw new Error("r0.lit_str failed");
     if (r0.lit_num !== 42) throw new Error("r0.lit_num failed");
     if (JSON.stringify(r0.lit_arr) !== JSON.stringify([1, 2])) throw new Error("r0.lit_arr failed");
+    if (r0.lit_coerced_int !== 123) throw new Error("r0.lit_coerced_int failed");
     if (r1.lit_str !== "constant_string") throw new Error("r1.lit_str failed");
     if (r1.lit_num !== 42) throw new Error("r1.lit_num failed");
     if (JSON.stringify(r1.lit_arr) !== JSON.stringify([1, 2])) throw new Error("r1.lit_arr failed");
+    if (r1.lit_coerced_int !== 123) throw new Error("r1.lit_coerced_int failed");
+
 
 
     // 6. Test Quantile aggregation
@@ -392,159 +397,221 @@ try {
     }
 
     // =========================================
-    // STARTING REPEAT TESTS
+    // STARTING SEQ_RANGE CONSTANT TESTS
     // =========================================
-    const testRepeatDf = $df.data([
+    const testSeqRangeDf = $df.data([
         { id: 1 },
         { id: 2 },
         { id: 3 }
     ]);
 
     // 1. Omitted n: behave like lit (broadcast to DataFrame height)
-    const repeatBroadcast = testRepeatDf.select([
-        $df.repeat("z").alias("broadcasted")
+    const seqRangeBroadcast = testSeqRangeDf.select([
+        $df.seq_range("z", { mode: "constant" }).alias("broadcasted")
     ]).to_dicts();
-    if (repeatBroadcast.length !== 3) throw new Error("repeat broadcast length mismatch");
+    if (seqRangeBroadcast.length !== 3) throw new Error("seq_range broadcast length mismatch");
     for (let i = 0; i < 3; i++) {
-        if (repeatBroadcast[i].broadcasted !== "z") {
-            throw new Error(`repeat broadcast value mismatch at index ${i}`);
+        if (seqRangeBroadcast[i].broadcasted !== "z") {
+            throw new Error(`seq_range broadcast value mismatch at index ${i}`);
         }
     }
 
-    // 2. Exact match: n matches DataFrame height (n = 3)
-    const repeatExact = testRepeatDf.select([
-        $df.repeat("x", { n: 3 }).alias("exact")
+    // 1b. Selecting ONLY literal collapses to 1 row (Polars-style)
+    const seqRangeLiteralOnly = testSeqRangeDf.select([
+        $df.lit("z").alias("broadcasted")
     ]).to_dicts();
-    if (repeatExact.length !== 3) throw new Error("repeat exact length mismatch");
+    if (seqRangeLiteralOnly.length !== 1) throw new Error("single literal select should collapse to 1 row");
+    if (seqRangeLiteralOnly[0].broadcasted !== "z") throw new Error("value mismatch in collapsed select");
+
+
+    // 2. Exact match: n matches DataFrame height (n = 3)
+    const seqRangeExact = testSeqRangeDf.select([
+        $df.seq_range("x", { n: 3, mode: "constant" }).alias("exact")
+    ]).to_dicts();
+    if (seqRangeExact.length !== 3) throw new Error("seq_range exact length mismatch");
     for (let i = 0; i < 3; i++) {
-        if (repeatExact[i].exact !== "x") {
-            throw new Error(`repeat exact value mismatch at index ${i}`);
+        if (seqRangeExact[i].exact !== "x") {
+            throw new Error(`seq_range exact value mismatch at index ${i}`);
         }
     }
 
     // 3. Strict mode mismatch: n = 5 (larger than df height 3)
     let strictThrewLarger = false;
     try {
-        testRepeatDf.select($df.repeat("y", { n: 5 }));
+        testSeqRangeDf.select([$df.seq_range("y", { n: 5, mode: "constant" })]);
     } catch (e: any) {
         if (e instanceof ShapeError && e.message.includes("Column height mismatch")) {
             strictThrewLarger = true;
         }
     }
     if (!strictThrewLarger) {
-        throw new Error("Expected repeat strict mode to throw ShapeError for larger n");
+        throw new Error("Expected seq_range to throw ShapeError when n > DataFrame height under strict: true");
     }
 
     // 4. Strict mode mismatch: n = 2 (smaller than df height 3)
     let strictThrewSmaller = false;
     try {
-        testRepeatDf.select($df.repeat("y", { n: 2 }));
+        testSeqRangeDf.select([$df.seq_range("y", { n: 2, mode: "constant" })]);
     } catch (e: any) {
         if (e instanceof ShapeError && e.message.includes("Column height mismatch")) {
             strictThrewSmaller = true;
         }
     }
     if (!strictThrewSmaller) {
-        throw new Error("Expected repeat strict mode to throw ShapeError for smaller n");
+        throw new Error("Expected seq_range to throw ShapeError when n < DataFrame height under strict: true");
     }
 
-    // 5. Non-strict mode: n = 5 with truncate: true (larger, should truncate to 3)
-    const repeatTruncated = testRepeatDf.select([
-        $df.repeat("a", { n: 5, truncate: true }).alias("truncated")
-    ]).to_dicts();
-    if (repeatTruncated.length !== 3) throw new Error("repeat non-strict larger length mismatch");
-    for (let i = 0; i < 3; i++) {
-        if (repeatTruncated[i].truncated !== "a") {
-            throw new Error(`repeat non-strict larger value mismatch at index ${i}`);
-        }
-    }
-
-    // 6. Non-strict mode: n = 2 with pad: true (smaller, should pad with nulls to 3)
-    const repeatPadded = testRepeatDf.select([
-        $df.repeat("b", { n: 2, pad: true }).alias("padded")
-    ]).to_dicts();
-    if (repeatPadded.length !== 3) throw new Error("repeat non-strict smaller length mismatch");
-    if (repeatPadded[0].padded !== "b" || repeatPadded[1].padded !== "b") {
-        throw new Error("repeat non-strict smaller values mismatch");
-    }
-    if (repeatPadded[2].padded !== null) {
-        throw new Error("repeat non-strict smaller padding failed");
-    }
-
-    // 7. Error: strict: false without either pad or truncate
-    let errorNoStrategy = false;
-    try {
-        $df.repeat("x", { n: 3, strict: false });
-    } catch (e: any) {
-        if (e.message.includes("either pad or truncate must be set to true")) {
-            errorNoStrategy = true;
-        }
-    }
-    if (!errorNoStrategy) {
-        throw new Error("Expected repeat to throw error if strict is false without strategy");
-    }
-
-    // 8. Error: pad and truncate both set to true
-    let errorMutualExclusive = false;
-    try {
-        $df.repeat("x", { n: 3, pad: true, truncate: true });
-    } catch (e: any) {
-        if (e.message.includes("mutually exclusive")) {
-            errorMutualExclusive = true;
-        }
-    }
-    if (!errorMutualExclusive) {
-        throw new Error("Expected repeat to throw error if both pad and truncate are true");
-    }
-
-    // 9. Error: strict: true and pad/truncate set to true
-    let errorStrictConflict = false;
-    try {
-        $df.repeat("x", { n: 3, strict: true, pad: true });
-    } catch (e: any) {
-        if (e.message.includes("Cannot set strict to true when pad or truncate is enabled")) {
-            errorStrictConflict = true;
-        }
-    }
-    if (!errorStrictConflict) {
-        throw new Error("Expected repeat to throw error on strict conflict with pad/truncate");
-    }
-
-    // 10. ShapeError: pad is true but requires truncation (n = 5 > height 3)
-    let shapeErrorPadLarger = false;
-    try {
-        testRepeatDf.select($df.repeat("y", { n: 5, pad: true }));
-    } catch (e: any) {
-        if (e instanceof ShapeError && e.message.includes("Cannot pad repeat output")) {
-            shapeErrorPadLarger = true;
-        }
-    }
-    if (!shapeErrorPadLarger) {
-        throw new Error("Expected repeat to throw ShapeError when pad: true requires truncation");
-    }
-
-    // 11. ShapeError: truncate is true but requires padding (n = 2 < height 3)
-    let shapeErrorTruncateSmaller = false;
-    try {
-        testRepeatDf.select($df.repeat("y", { n: 2, truncate: true }));
-    } catch (e: any) {
-        if (e instanceof ShapeError && e.message.includes("Cannot truncate repeat output")) {
-            shapeErrorTruncateSmaller = true;
-        }
-    }
-    if (!shapeErrorTruncateSmaller) {
-        throw new Error("Expected repeat to throw ShapeError when truncate: true requires padding");
-    }
-
-    // 12. Type coercion: custom dtype specified
-    const repeatCoerced = testRepeatDf.select([
-        $df.repeat("123", { n: 3, dtype: $df.DataType.Int32 }).alias("coerced")
+    // 5. Strict mode with dtype: coerces repeated value
+    const seqRangeDtype = testSeqRangeDf.select([
+        $df.seq_range(123.45, { n: 3, dtype: $df.DataType.Int32, mode: "constant" }).alias("val")
     ]).to_dicts();
     for (let i = 0; i < 3; i++) {
-        if (repeatCoerced[i].coerced !== 123) {
-            throw new Error(`repeat coercion failed at index ${i}`);
+        if (seqRangeDtype[i].val !== 123) {
+            throw new Error(`seq_range dtype coercion failed at index ${i}, expected 123 got ${seqRangeDtype[i].val}`);
         }
     }
+
+    // 6. Strict mode with name: sets output column name
+    const seqRangeName = testSeqRangeDf.select([
+        $df.seq_range("a", { name: "custom_name", mode: "constant" })
+    ]).to_dicts();
+    if (seqRangeName[0].custom_name !== "a") {
+        throw new Error("seq_range option name failed to rename column");
+    }
+
+    // 7. Non-strict mode: omitted n behaves like lit
+    const seqRangeNonStrictBroadcast = testSeqRangeDf.select([
+        $df.seq_range("z", { strict: false, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    for (let i = 0; i < 3; i++) {
+        if (seqRangeNonStrictBroadcast[i].val !== "z") {
+            throw new Error("seq_range non-strict broadcast failed");
+        }
+    }
+
+    // 8. Non-strict mode: n matches DataFrame height
+    const seqRangeNonStrictExact = testSeqRangeDf.select([
+        $df.seq_range("x", { n: 3, strict: false, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    for (let i = 0; i < 3; i++) {
+        if (seqRangeNonStrictExact[i].val !== "x") {
+            throw new Error("seq_range non-strict exact failed");
+        }
+    }
+
+    // 9. Non-strict mode: n = 5 (larger) with default options auto-truncates to 3
+    const seqRangeNonStrictTruncateDefault = testSeqRangeDf.select([
+        $df.seq_range("a", { n: 5, strict: false, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeNonStrictTruncateDefault.length !== 3) throw new Error("seq_range non-strict truncate default length failed");
+    for (let i = 0; i < 3; i++) {
+        if (seqRangeNonStrictTruncateDefault[i].val !== "a") {
+            throw new Error("seq_range non-strict truncate default values failed");
+        }
+    }
+
+    // 10. Non-strict mode: n = 2 (smaller) with default options auto-pads to 3
+    const seqRangeNonStrictPadDefault = testSeqRangeDf.select([
+        $df.seq_range("b", { n: 2, strict: false, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeNonStrictPadDefault[0].val !== "b" || seqRangeNonStrictPadDefault[1].val !== "b" || seqRangeNonStrictPadDefault[2].val !== null) {
+        throw new Error("seq_range non-strict pad default failed");
+    }
+
+    // 11. Non-strict mode: n = 5 (larger) with truncate: true, pad: false truncates to 3
+    const seqRangeNonStrictTruncateExplicit = testSeqRangeDf.select([
+        $df.seq_range("c", { n: 5, strict: false, truncate: true, pad: false, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    for (let i = 0; i < 3; i++) {
+        if (seqRangeNonStrictTruncateExplicit[i].val !== "c") {
+            throw new Error("seq_range non-strict truncate explicit failed");
+        }
+    }
+
+    // 12. Non-strict mode: n = 2 (smaller) with truncate: true, pad: false throws ShapeError
+    let nonStrictTruncateSmallerThrew = false;
+    try {
+        testSeqRangeDf.select([$df.seq_range("d", { n: 2, strict: false, truncate: true, pad: false, mode: "constant" })]);
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Cannot truncate seq_range output")) {
+            nonStrictTruncateSmallerThrew = true;
+        }
+    }
+    if (!nonStrictTruncateSmallerThrew) {
+        throw new Error("Expected non-strict seq_range to throw when padding is required but not allowed");
+    }
+
+    // 13. Non-strict mode: n = 2 (smaller) with pad: true, truncate: false pads to 3
+    const seqRangeNonStrictPadExplicit = testSeqRangeDf.select([
+        $df.seq_range("e", { n: 2, strict: false, pad: true, truncate: false, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeNonStrictPadExplicit[0].val !== "e" || seqRangeNonStrictPadExplicit[1].val !== "e" || seqRangeNonStrictPadExplicit[2].val !== null) {
+        throw new Error("seq_range non-strict pad explicit failed");
+    }
+
+    // 14. Non-strict mode: n = 5 (larger) with pad: true, truncate: false throws ShapeError
+    let nonStrictPadLargerThrew = false;
+    try {
+        testSeqRangeDf.select([$df.seq_range("f", { n: 5, strict: false, pad: true, truncate: false, mode: "constant" })]);
+    } catch (e: any) {
+        if (e instanceof ShapeError && e.message.includes("Cannot pad seq_range output")) {
+            nonStrictPadLargerThrew = true;
+        }
+    }
+    if (!nonStrictPadLargerThrew) {
+        throw new Error("Expected non-strict seq_range to throw when truncation is required but not allowed");
+    }
+
+    // 15. Non-strict mode: custom padValue padding
+    const seqRangeCustomPadValue = testSeqRangeDf.select([
+        $df.seq_range("g", { n: 2, strict: false, padValue: "missing", mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeCustomPadValue[0].val !== "g" || seqRangeCustomPadValue[1].val !== "g" || seqRangeCustomPadValue[2].val !== "missing") {
+        throw new Error("seq_range custom padValue failed");
+    }
+
+    // 16. Non-strict mode: custom padValue with dtype coercion
+    const seqRangeCustomPadCoerced = testSeqRangeDf.select([
+        $df.seq_range(10, { n: 2, strict: false, padValue: 99.9, dtype: $df.DataType.Int32, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeCustomPadCoerced[0].val !== 10 || seqRangeCustomPadCoerced[1].val !== 10 || seqRangeCustomPadCoerced[2].val !== 99) {
+        throw new Error("seq_range custom padValue coercion failed");
+    }
+
+    // 17. startIndex and endIndex under strict: false
+    const seqRangeStartEndFit = testSeqRangeDf.select([
+        $df.seq_range("z", { strict: false, startIndex: 1, endIndex: 3, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeStartEndFit[0].val !== null || seqRangeStartEndFit[1].val !== "z" || seqRangeStartEndFit[2].val !== "z") {
+        throw new Error("seq_range startIndex and endIndex fit failed");
+    }
+
+    // Negative indices: startIndex: -2, endIndex: -1 -> slice [1, 2) on height 3
+    const seqRangeStartEndNeg = testSeqRangeDf.select([
+        $df.seq_range("z", { strict: false, startIndex: -2, endIndex: -1, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeStartEndNeg[0].val !== null || seqRangeStartEndNeg[1].val !== "z" || seqRangeStartEndNeg[2].val !== null) {
+        throw new Error("seq_range negative startIndex and endIndex failed");
+    }
+
+    // 18. startIndex and endIndex with padding and truncation
+    // startIndex: 1, endIndex: 2 (width 1), n: 2, truncate: true -> fills index 1, index 0 and 2 are null
+    const seqRangeStartEndTruncated = testSeqRangeDf.select([
+        $df.seq_range("a", { n: 2, strict: false, startIndex: 1, endIndex: 2, truncate: true, mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeStartEndTruncated[0].val !== null || seqRangeStartEndTruncated[1].val !== "a" || seqRangeStartEndTruncated[2].val !== null) {
+        throw new Error("seq_range startIndex and endIndex with truncate failed");
+    }
+
+    // startIndex: 1, endIndex: 3 (width 2), n: 1, pad: true, padValue: "x" -> fills index 1 with "b", pads index 0, 2 with "x"
+    const seqRangeStartEndPadded = testSeqRangeDf.select([
+        $df.seq_range("b", { n: 1, strict: false, startIndex: 1, endIndex: 3, pad: true, padValue: "x", mode: "constant" }).alias("val")
+    ]).to_dicts();
+    if (seqRangeStartEndPadded[0].val !== "x" || seqRangeStartEndPadded[1].val !== "b" || seqRangeStartEndPadded[2].val !== "x") {
+        throw new Error("seq_range startIndex and endIndex with pad failed");
+    }
+
+
 
     console.log("\n🎉 ALL Expr NEW MANIPULATIONS TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

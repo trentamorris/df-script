@@ -11,7 +11,7 @@ const df = new DataFrame([
 // 1. Simple selection of columns by name
 const df1 = df.select("name", "city");
 if (df1.height !== 2) throw new Error("Expected height 2");
-const schema1 = df1.getSchema();
+const schema1 = df1.get_schema();
 if (schema1.name === undefined || schema1.city === undefined || schema1.age !== undefined) {
     throw new Error("Columns mismatch on simple selection schema");
 }
@@ -22,7 +22,7 @@ if (collected1[0].name !== "Alice" || collected1[0].city !== "NY" || (collected1
 
 // 2. Select using column expressions and aliasing
 const df2 = df.select($df.col("age").alias("years"), "name");
-const schema2 = df2.getSchema();
+const schema2 = df2.get_schema();
 if (schema2.years === undefined || schema2.name === undefined || schema2.age !== undefined) {
     throw new Error("Columns mismatch on expression selection schema");
 }
@@ -33,7 +33,7 @@ if (collected2[0].years !== 30 || collected2[0].name !== "Alice") {
 
 // 3. Select all except some columns using top-level exclude function
 const df3 = df.select($df.exclude("city"));
-const schema3 = df3.getSchema();
+const schema3 = df3.get_schema();
 if (schema3.name === undefined || schema3.age === undefined || schema3.city !== undefined) {
     throw new Error("Columns mismatch on all-exclude selection schema");
 }

@@ -38,7 +38,7 @@ function normalizeToDataFrames(item: any, context: string, index: number): DataF
 
 export function concat<U extends RowRecord = any>(
     rawItems: ConcatItem | ConcatItem[],
-    options: ConcatOptions = {}
+    { how = 'vertical', horizontal }: ConcatOptions = {}
 ): DataFrame<U> {
     if (rawItems == null) {
         throw new DataFrameError("Invalid input to concat: rawItems cannot be null or undefined.");
@@ -49,8 +49,7 @@ export function concat<U extends RowRecord = any>(
         items.push(...normalizeToDataFrames(itemsArray[i], "concat", i));
     }
 
-    const { how = 'vertical' } = options;
-    const strict = options.horizontal?.strict ?? true;
+    const strict = horizontal?.strict ?? true;
 
     if (items.length === 0) return DataFrame._createDirect<U>({}, {}, 0);
     if (items.length === 1 && how !== 'horizontal') return items[0] as DataFrame<U>;

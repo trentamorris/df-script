@@ -37,3 +37,10 @@ export interface UnpivotOptions<T> {
     varName?: string;
     valueName?: string;
 }
+
+export interface TransposeOptions {
+    include_header?: boolean;
+    header_name?: string;
+    column_names?: string | Iterable<string>;
+}
+

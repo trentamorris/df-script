@@ -29,7 +29,7 @@ const sparseData = [
 ];
 const dfSparse = new DataFrame(sparseData);
 assert(dfSparse.height === 2, "Sparse data height should be 2");
-const schemaSparse = dfSparse.getSchema();
+const schemaSparse = dfSparse.get_schema();
 assert("name" in schemaSparse, "Sparse schema should contain name");
 assert("age" in schemaSparse, "Sparse schema should contain age");
 assert("city" in schemaSparse, "Sparse schema should contain city");
@@ -51,7 +51,7 @@ const explicitSchema = {
     age: $df.DataType.Int32,
 };
 const dfAligned = new DataFrame(sparseData, explicitSchema);
-const alignedSchema = dfAligned.getSchema();
+const alignedSchema = dfAligned.get_schema();
 assert("name" in alignedSchema && "age" in alignedSchema, "Aligned schema should contain name and age");
 assert(!("city" in alignedSchema), "Aligned schema should drop city");
 const alignedColumns = Object.keys(dfAligned._columns);
@@ -78,22 +78,22 @@ assertThrows(() => dfDummy.rename({ a: "b" }), "Rename collision");
 // 7. Height-0 DataFrame schema preservation
 const dfEmpty = new DataFrame([{ a: 1, b: 2 }]).limit(0);
 assert(dfEmpty.height === 0, "Limit(0) should yield height 0");
-assert(Object.keys(dfEmpty.getSchema()).length === 2, "Height-0 should preserve original schema");
+assert(Object.keys(dfEmpty.get_schema()).length === 2, "Height-0 should preserve original schema");
 
 // 7.1 select on height-0
 const dfEmptySelected = dfEmpty.select("a");
 assert(dfEmptySelected.height === 0, "Select on height-0 should have height 0");
-assert(Object.keys(dfEmptySelected.getSchema()).length === 1 && "a" in dfEmptySelected.getSchema(), "Select on height-0 should preserve schema selection");
+assert(Object.keys(dfEmptySelected.get_schema()).length === 1 && "a" in dfEmptySelected.get_schema(), "Select on height-0 should preserve schema selection");
 
 // 7.2 drop on height-0
 const dfEmptyDropped = dfEmpty.drop("a");
 assert(dfEmptyDropped.height === 0, "Drop on height-0 should have height 0");
-assert(Object.keys(dfEmptyDropped.getSchema()).length === 1 && "b" in dfEmptyDropped.getSchema(), "Drop on height-0 should preserve schema");
+assert(Object.keys(dfEmptyDropped.get_schema()).length === 1 && "b" in dfEmptyDropped.get_schema(), "Drop on height-0 should preserve schema");
 
 // 7.3 rename on height-0
 const dfEmptyRenamed = dfEmpty.rename({ a: "c" });
 assert(dfEmptyRenamed.height === 0, "Rename on height-0 should have height 0");
-assert(Object.keys(dfEmptyRenamed.getSchema()).length === 2 && "c" in dfEmptyRenamed.getSchema(), "Rename on height-0 should preserve schema");
+assert(Object.keys(dfEmptyRenamed.get_schema()).length === 2 && "c" in dfEmptyRenamed.get_schema(), "Rename on height-0 should preserve schema");
 
 // 7.4 with_columns on height-0
 const dfEmptyWithCols = dfEmpty.with_columns({
@@ -101,12 +101,12 @@ const dfEmptyWithCols = dfEmpty.with_columns({
     d: $df.col("a").add(10),
 });
 assert(dfEmptyWithCols.height === 0, "With_columns on height-0 should have height 0");
-assert(Object.keys(dfEmptyWithCols.getSchema()).length === 4, "With_columns on height-0 should append new columns to schema");
+assert(Object.keys(dfEmptyWithCols.get_schema()).length === 4, "With_columns on height-0 should append new columns to schema");
 
 // 7.5 unpivot on height-0
 const dfEmptyUnpivoted = dfEmpty.unpivot({ idVars: "a", valueVars: "b", varName: "var", valueName: "val" });
 assert(dfEmptyUnpivoted.height === 0, "Unpivot on height-0 should have height 0");
-const unpivotedSchema = dfEmptyUnpivoted.getSchema();
+const unpivotedSchema = dfEmptyUnpivoted.get_schema();
 assert("a" in unpivotedSchema && "var" in unpivotedSchema && "val" in unpivotedSchema, "Unpivot on height-0 should preserve unpivoted schema");
 
 // 8. Filter custom proxy compatibility (Object.keys / Object.getOwnPropertyDescriptor / in)

@@ -20,7 +20,10 @@ export * from "./functions/exclude"
 export * from "./functions/coalesce"
 export * from "./functions/when"
 export * from "./functions/implode"
-export * from "./functions/repeat"
+export * from "./functions/seq_range"
+
+
+
 
 export function resolveColumnSelectors(
     exprs: any[],

@@ -8,7 +8,7 @@ const df = new DataFrame([
 
 const dfDropped = df.drop("active");
 
-if (dfDropped.getSchema().active !== undefined) {
+if (dfDropped.get_schema().active !== undefined) {
     throw new Error("Dropped column active still exists in schema");
 }
 

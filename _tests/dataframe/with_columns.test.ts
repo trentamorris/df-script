@@ -16,7 +16,7 @@ const dfWithRecord = df.with_columns({
 
 if (dfWithRecord.height !== 2) throw new Error("Expected height 2");
 
-const schemaRecord = dfWithRecord.getSchema();
+const schemaRecord = dfWithRecord.get_schema();
 if (schemaRecord.status === undefined || schemaRecord.doubleAge === undefined) {
     throw new Error("New columns missing in schema from record input");
 }
@@ -35,7 +35,7 @@ if (
 const dfWithExpr = df.with_columns(
     $df.col("age").add(5).alias("agePlusFive")
 );
-const schemaExpr = dfWithExpr.getSchema();
+const schemaExpr = dfWithExpr.get_schema();
 if (schemaExpr.agePlusFive === undefined) {
     throw new Error("New column missing in schema from expression input");
 }

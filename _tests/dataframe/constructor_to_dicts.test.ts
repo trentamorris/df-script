@@ -15,7 +15,7 @@ if (df.height !== 2) {
 }
 
 // Verify schema inference
-const schema = df.getSchema();
+const schema = df.get_schema();
 if (schema.id.name !== "Int32") {
     throw new Error(`Expected id to be Int32, got ${schema.id.name}`);
 }

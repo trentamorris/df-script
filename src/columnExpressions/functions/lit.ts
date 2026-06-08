@@ -1,20 +1,20 @@
 import { ColumnExpr } from "../ColumnExpr";
-import { LITERAL_MARKER } from "../constants";
+import { seq_range } from "./seq_range";
+import type { SeqRangeOptions } from "./seq_range";
+
+export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
 
 /**
  * Creates a literal column expression that repeats the given value for all rows.
  */
-export function lit(value: any): ColumnExpr<any> {
-    const expr = new ColumnExpr(LITERAL_MARKER);
+export function lit(value: any, options?: LitOptions): ColumnExpr<any> {
+    const expr = seq_range(value, {
+        strict: true,
+        mode: "constant",
+        dtype: options?.dtype,
+        name: options?.name,
+    } as any);
     expr.isLiteral = true;
-    expr.literalValue = value;
-    expr.ops.push((vArray) => {
-        const height = vArray.length;
-        const result = new Array(height);
-        for (let i = 0; i < height; i++) {
-            result[i] = value;
-        }
-        return result;
-    });
     return expr;
 }
+
