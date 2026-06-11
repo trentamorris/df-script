@@ -1,10 +1,10 @@
 import type { IExpr } from "../../types"
-import type { ExprConstructor, RandomOptions } from "../types"
-import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
+import type { RandomOptions } from "../types"
+import { ExprBase, derive } from "../ExprBase"
+import { kleeneUnary, kleeneBinary } from "../utils"
 import { clamp, mulberry32 } from "../../utils"
 
-export const ArithmeticExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
+export class ArithmeticExpr extends ExprBase {
         abs() {
             return derive(this, kleeneUnary((v) => Math.abs(v)));
         }
@@ -46,16 +46,7 @@ export const ArithmeticExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         clip(lower: number | null = null, upper: number | null = null) {
-            return derive(this, kleeneUnary((v) => {
-                if (lower !== null && upper !== null) {
-                    return clamp(v, lower, upper);
-                } else if (lower !== null) {
-                    return Math.max(v, lower);
-                } else if (upper !== null) {
-                    return Math.min(v, upper);
-                }
-                return v;
-            }));
+            return derive(this, kleeneUnary((v) => clamp(v, lower, upper)));
         }
 
         cos() {
@@ -173,6 +164,5 @@ export const ArithmeticExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         trunc() {
             return derive(this, kleeneUnary(Math.trunc));
         }
-    }
 }
 

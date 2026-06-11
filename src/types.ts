@@ -36,10 +36,8 @@ export interface IExpr {
     cast(dataType: RegisteredDataType): this;
     _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
     evaluate(columns: ColumnDict, height: number): ColumnData;
-    evaluatePreGrouping(columns: ColumnDict, height: number): ColumnData;
-    evaluatePostGrouping(aggregatedArray: any[], columns: ColumnDict): ColumnData;
-    evaluatePrePartition(columns: ColumnDict, height: number): ColumnData;
-    evaluatePostPartition(aggregatedArray: any[], columns: ColumnDict): ColumnData;
+    evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
+    evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
     evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
     debug(label?: string): this;
 }

@@ -1,10 +1,37 @@
 import type { IExpr } from "../../types"
-import type { ExprConstructor } from "../types"
-import { derive } from "../ExprBase"
+import { ExprBase, derive } from "../ExprBase"
 import { getListStats, computeMedian, computeQuantile } from "../../utils"
 
-export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
+function computeRank(
+    arr: any[],
+    value: any,
+    options: { ignoreNulls?: boolean; dense?: boolean } = {}
+): number | null {
+    if (value == null) return null;
+    let targetArr = arr;
+    if (options.ignoreNulls) {
+        targetArr = [];
+        const len = arr.length;
+        for (let i = 0; i < len; i++) {
+            if (arr[i] != null) targetArr.push(arr[i]);
+        }
+    }
+    if (options.dense) {
+        targetArr = Array.from(new Set(targetArr));
+    }
+    const sorted = [...targetArr].sort((a, b) => a - b);
+    const valueToRank = new Map();
+    const len = sorted.length;
+    for (let i = 0; i < len; i++) {
+        const v = sorted[i];
+        if (!valueToRank.has(v)) {
+            valueToRank.set(v, i + 1);
+        }
+    }
+    return valueToRank.get(value) ?? null;
+}
+
+export class WindowExpr extends ExprBase {
         public partitionBy: (string | IExpr)[] | null = (this as any).partitionBy || null;
 
         _window(evaluateWindow: (this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any) {
@@ -24,96 +51,55 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             });
         }
 
-        get isWindow(): boolean {
-            return this.partitionBy !== null || (this as any).evaluateWindow !== undefined || (this as any).aggFn !== null;
-        }
-
-        cum_count(reverse: boolean = false) {
+        _cum(
+            reverse: boolean,
+            initialVal: any,
+            stepFn: (acc: any, val: any) => any,
+            postFn?: (acc: any, hasValid: boolean) => any
+        ) {
             return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                let count = 0;
-                const start = reverse ? currentIndex : 0;
-                const end = reverse ? groupPreValues.length - 1 : currentIndex;
-                for (let i = start; i <= end; i++) {
-                    const val = groupPreValues[i];
-                    if (val != null) count++;
-                }
-                return count;
-            });
-        }
-
-        cum_max(reverse: boolean = false) {
-            return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                let maxVal = null;
-                const start = reverse ? currentIndex : 0;
-                const end = reverse ? groupPreValues.length - 1 : currentIndex;
-                for (let i = start; i <= end; i++) {
-                    const val = groupPreValues[i];
-                    if (val != null) {
-                        if (maxVal === null || val > maxVal) {
-                            maxVal = val;
-                        }
-                    }
-                }
-                return maxVal;
-            });
-        }
-
-        cum_min(reverse: boolean = false) {
-            return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                let minVal = null;
-                const start = reverse ? currentIndex : 0;
-                const end = reverse ? groupPreValues.length - 1 : currentIndex;
-                for (let i = start; i <= end; i++) {
-                    const val = groupPreValues[i];
-                    if (val != null) {
-                        if (minVal === null || val < minVal) {
-                            minVal = val;
-                        }
-                    }
-                }
-                return minVal;
-            });
-        }
-
-        cum_prod(reverse: boolean = false) {
-            return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                let prod = 1;
+                let acc = initialVal;
                 let hasValid = false;
                 const start = reverse ? currentIndex : 0;
                 const end = reverse ? groupPreValues.length - 1 : currentIndex;
                 for (let i = start; i <= end; i++) {
                     const val = groupPreValues[i];
                     if (val != null) {
-                        prod *= val;
+                        acc = stepFn(acc, val);
                         hasValid = true;
                     }
                 }
-                return hasValid ? prod : null;
+                return postFn ? postFn(acc, hasValid) : acc;
             });
         }
 
+        get isWindow(): boolean {
+            return this.partitionBy !== null || (this as any).evaluateWindow !== undefined || (this as any).aggFn !== null;
+        }
+
+        cum_count(reverse: boolean = false) {
+            return this._cum(reverse, 0, (acc) => acc + 1);
+        }
+
+        cum_max(reverse: boolean = false) {
+            return this._cum(reverse, null, (acc, val) => (acc === null || val > acc ? val : acc));
+        }
+
+        cum_min(reverse: boolean = false) {
+            return this._cum(reverse, null, (acc, val) => (acc === null || val < acc ? val : acc));
+        }
+
+        cum_prod(reverse: boolean = false) {
+            return this._cum(reverse, 1, (acc, val) => acc * val, (acc, hasValid) => (hasValid ? acc : null));
+        }
+
         cum_sum(reverse: boolean = false) {
-            return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                let sum = 0;
-                const start = reverse ? currentIndex : 0;
-                const end = reverse ? groupPreValues.length - 1 : currentIndex;
-                for (let i = start; i <= end; i++) {
-                    const val = groupPreValues[i];
-                    if (val != null) sum += val;
-                }
-                return sum;
-            });
+            return this._cum(reverse, 0, (acc, val) => acc + val);
         }
 
         dense_rank() {
             return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                const sortedUnique = Array.from(new Set(groupPreValues)).sort((a, b) => a - b);
-                const valueToRank = new Map();
-                for (let idx = 0; idx < sortedUnique.length; idx++) {
-                    valueToRank.set(sortedUnique[idx], idx + 1);
-                }
-                const currentVal = groupPreValues[currentIndex];
-                return valueToRank.get(currentVal) ?? null;
+                return computeRank(groupPreValues, groupPreValues[currentIndex], { dense: true });
             });
         }
 
@@ -146,16 +132,7 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
 
         rank() {
             return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                const sorted = [...groupPreValues].sort((a, b) => a - b);
-                const valueToRank = new Map();
-                for (let i = 0; i < sorted.length; i++) {
-                    const v = sorted[i];
-                    if (!valueToRank.has(v)) {
-                        valueToRank.set(v, i + 1);
-                    }
-                }
-                const currentVal = groupPreValues[currentIndex];
-                return valueToRank.get(currentVal) ?? null;
+                return computeRank(groupPreValues, groupPreValues[currentIndex]);
             });
         }
 
@@ -180,26 +157,8 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         }
 
         rolling_rank(windowSize: number) {
-            return this._window(function(this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
-                const start = Math.max(0, currentIndex - windowSize + 1);
-                const end = currentIndex + 1;
-                const vals = groupPreValues.slice(start, end);
-                const currentVal = groupPreValues[currentIndex];
-                if (currentVal == null) return null;
-                const nonNullVals: any[] = [];
-                for (let j = 0; j < vals.length; j++) {
-                    if (vals[j] != null) nonNullVals.push(vals[j]);
-                }
-                if (nonNullVals.length === 0) return null;
-                const sorted = [...nonNullVals].sort((a, b) => a - b);
-                const valueToRank = new Map();
-                for (let i = 0; i < sorted.length; i++) {
-                    const v = sorted[i];
-                    if (!valueToRank.has(v)) {
-                        valueToRank.set(v, i + 1);
-                    }
-                }
-                return valueToRank.get(currentVal) ?? null;
+            return this._rolling(windowSize, (vals) => {
+                return computeRank(vals, vals[vals.length - 1], { ignoreNulls: true });
             });
         }
 
@@ -218,5 +177,4 @@ export const WindowExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             newInst.outputName = "row_number";
             return newInst;
         }
-    }
 }

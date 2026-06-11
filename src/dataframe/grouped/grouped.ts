@@ -73,7 +73,7 @@ export class GroupedData<T, K extends keyof T> {
         for (let i = 0; i < keysLen; i++) {
             keysStr[i] = String(this.keys[i]);
         }
-        const expandedExprs = resolveColumnSelectors(exprs.flat(), allKeysStr, keysStr);
+        const expandedExprs = resolveColumnSelectors(exprs.flat(), allKeysStr, keysStr, this.parentSchema);
 
         const numGroups = this.groups.size;
         const newColumns: Record<string, any> = {};
@@ -101,7 +101,7 @@ export class GroupedData<T, K extends keyof T> {
             if (!e.aggFn) {
                 newColumns[targetKey] = e.evaluate(newColumns, numGroups);
             } else {
-                const preGroupedCol = e.evaluatePreGrouping(this.parentColumns, this.parentHeight);
+                const preGroupedCol = e.evaluatePre(e.groupingOpsIndex, this.parentColumns, this.parentHeight);
                 const aggregatedGroupValues = new Array(numGroups);
                 let gIdx = 0;
                 for (const indices of this.groups.values()) {
@@ -113,7 +113,7 @@ export class GroupedData<T, K extends keyof T> {
                     aggregatedGroupValues[gIdx] = e.aggFn(groupValues);
                     gIdx++;
                 }
-                newColumns[targetKey] = e.evaluatePostGrouping(aggregatedGroupValues, newColumns);
+                newColumns[targetKey] = e.evaluatePost(e.groupingOpsIndex, aggregatedGroupValues, newColumns);
             }
         }
 

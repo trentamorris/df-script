@@ -62,7 +62,7 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
     const partitionKeys = expr.partitionBy || [];
     const partitionGroups = partition_by_columns(columns, height, partitionKeys);
 
-    const prePartitionArray = expr.evaluatePrePartition(columns, height);
+    const prePartitionArray = expr.evaluatePre(expr.partitionOpsIndex, columns, height);
 
     for (const indices of partitionGroups.values()) {
         const groupLen = indices.length;
@@ -91,7 +91,7 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
         }
     }
 
-    return expr.evaluatePostPartition(results, columns);
+    return expr.evaluatePost(expr.partitionOpsIndex, results, columns);
 }
 
 export function rowsToColumns(rows: any[]): { columns: ColumnDict; height: number } {

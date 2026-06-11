@@ -183,7 +183,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
         }
 
-        const expandedExprs = resolveColumnSelectors(exprSelectors, keys);
+        const expandedExprs = resolveColumnSelectors(exprSelectors, keys, undefined, this._schema);
         const numExpanded = expandedExprs.length;
         for (let i = 0; i < numExpanded; i++) {
             evaluatedExprs.push(expandedExprs[i].evaluate(this._columns, height));
@@ -649,7 +649,7 @@ export class DataFrame<T extends RowRecord = any> {
     ): DataFrame<U> {
         const exprs = this._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
-        const expandedExprs = resolveColumnSelectors(exprs, allKeys);
+        const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema);
 
         const numExprs = expandedExprs.length;
         if (numExprs === 0) {
@@ -1086,7 +1086,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const exprs = this._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
-        const expandedExprs = resolveColumnSelectors(exprs, allKeys);
+        const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema);
         const numEntries = expandedExprs.length;
         if (numEntries === 0) return this;
 

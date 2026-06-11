@@ -1,6 +1,6 @@
 import type { TimeUnit } from "../../types";
-import type { ExprConstructor } from "../types";
-import { kleeneUnary, derive } from "../ExprBase";
+import { ExprBase, derive } from "../ExprBase";
+import { kleeneUnary } from "../utils";
 import {
     toValidDate,
     toEpoch,
@@ -165,10 +165,8 @@ export class DateTimeExprNamespace {
     }
 }
 
-export const TemporalExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
-        get dt() {
-            return new DateTimeExprNamespace(this);
-        }
-    };
-};
+export class TemporalExpr extends ExprBase {
+    get dt() {
+        return new DateTimeExprNamespace(this);
+    }
+}

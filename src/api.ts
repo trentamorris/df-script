@@ -1,7 +1,7 @@
 import { DataFrame } from "./dataframe"
 import { ColumnExpr, lit, all, exclude, coalesce, when, implode, seq_range } from "./columnExpressions"
 
-import { DataTypeRegistry } from "./datatypes"
+import { DataTypeRegistry, DataType } from "./datatypes"
 import { concat } from "./functions"
 import type { RowRecord, DataFrameSchema, ColumnDict, InferSchema } from "./types"
 
@@ -13,7 +13,9 @@ function data(data: any[] | ColumnDict, schema?: DataFrameSchema): DataFrame<any
 
 export const $df = {
     data,
-    col: <T = any>(name: keyof T | string | (keyof T | string)[]) => new ColumnExpr<T>(name),
+    col: <T = any>(
+        name: keyof T | string | (keyof T | string)[] | DataType | Function | (DataType | Function)[]
+    ) => new ColumnExpr<T>(name),
     all,
     exclude,
     coalesce,

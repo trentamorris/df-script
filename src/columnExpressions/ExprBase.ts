@@ -1,39 +1,6 @@
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict, RegisteredDataType } from "../types"
-import { isArrayOrTypedArray } from "../utils"
 import { ALL_COLUMNS_MARKER } from "./constants"
 import { ColumnNotFoundError } from "../exceptions"
-export const kleeneUnary = (fn: (v: any) => any) => {
-    return (vArray: ColumnData) => {
-        const height = vArray.length;
-        const result = new Array(height);
-        for (let i = 0; i < height; i++) {
-            const v = vArray[i];
-            result[i] = v == null ? null : fn(v);
-        }
-        return result;
-    };
-};
-
-export const kleeneBinary = (expr: IExpr, other: any, fn: (v: any, r: any) => any) => {
-    return (vArray: ColumnData, columns: ColumnDict) => {
-        const height = vArray.length;
-        const rResolved = expr._resolve(other, columns, height);
-        const result = new Array(height);
-        if (isArrayOrTypedArray(rResolved)) {
-            for (let i = 0; i < height; i++) {
-                const v = vArray[i];
-                const r = (rResolved as any)[i];
-                result[i] = (v == null || r == null) ? null : fn(v, r);
-            }
-        } else {
-            for (let i = 0; i < height; i++) {
-                const v = vArray[i];
-                result[i] = (v == null || rResolved == null) ? null : fn(v, rResolved);
-            }
-        }
-        return result;
-    };
-};
 
 export const derive = <T extends IExpr>(
     instance: T,
@@ -56,6 +23,7 @@ export class ExprBase implements IExpr {
     public groupingOpsIndex?: number;
     public partitionOpsIndex?: number;
     public partitionBy: (string | IExpr)[] | null = null;
+    public evaluateWindow?: (groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any;
 
     public _resolve(val: any, columns: ColumnDict, height: number) {
         if (val instanceof ExprBase) {
@@ -68,10 +36,7 @@ export class ExprBase implements IExpr {
     }
 
     alias(name: string): this {
-        const Constructor = this.constructor as any;
-        const colNameVal = (this as any).colNames || (this as any).colName || "";
-        const newInst = new Constructor(colNameVal);
-        Object.assign(newInst, this);
+        const newInst = derive(this);
         newInst.outputName = name;
         return newInst;
     }
@@ -114,7 +79,7 @@ export class ExprBase implements IExpr {
         return value as ColumnData;
     }
 
-    private _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData {
+    evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData {
         let value = this._getInitialValue(columns, height);
         const ops = this.ops;
         const idx = opsIndex !== undefined ? opsIndex : ops.length;
@@ -124,7 +89,7 @@ export class ExprBase implements IExpr {
         return value as ColumnData;
     }
 
-    private _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
+    evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
         const ops = this.ops;
         const idx = opsIndex !== undefined ? opsIndex : ops.length;
         let value: ColumnData = aggregatedArray;
@@ -132,21 +97,5 @@ export class ExprBase implements IExpr {
             value = ops[i](value, columns);
         }
         return value as ColumnData;
-    }
-
-    evaluatePrePartition(columns: ColumnDict, height: number): ColumnData {
-        return this._evaluatePre(this.partitionOpsIndex, columns, height);
-    }
-
-    evaluatePostPartition(aggregatedArray: any[], columns: ColumnDict): ColumnData {
-        return this._evaluatePost(this.partitionOpsIndex, aggregatedArray, columns);
-    }
-
-    evaluatePreGrouping(columns: ColumnDict, height: number): ColumnData {
-        return this._evaluatePre(this.groupingOpsIndex, columns, height);
-    }
-
-    evaluatePostGrouping(aggregatedArray: any[], columns: ColumnDict): ColumnData {
-        return this._evaluatePost(this.groupingOpsIndex, aggregatedArray, columns);
     }
 }

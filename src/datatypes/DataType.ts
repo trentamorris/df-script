@@ -4,6 +4,33 @@ export abstract class DataType<T = any> {
     abstract equals(other: DataType): boolean;
     abstract allocate(size: number): ArrayLike<T>;
 
+    matches(selector: any): boolean {
+        if (selector == null) return false;
+        if (selector instanceof DataType) {
+            if (this.equals(selector)) return true;
+            if (this.name.startsWith("Decimal") && selector.name.startsWith("Decimal")) {
+                if ((selector as any).precision === undefined && (selector as any).scale === undefined) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (typeof selector === "function") {
+            if (selector.prototype instanceof DataType) {
+                return this instanceof selector;
+            }
+            try {
+                const dummy = selector();
+                if (dummy instanceof DataType) {
+                    return this.constructor === dummy.constructor;
+                }
+            } catch {
+                // Ignore errors
+            }
+        }
+        return false;
+    }
+
     get isNumeric(): boolean { return false; }
     get isInteger(): boolean { return false; }
     get isFloat(): boolean { return false; }

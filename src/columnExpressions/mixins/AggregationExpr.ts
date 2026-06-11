@@ -1,14 +1,11 @@
 import type { AggFn, UniqueListStatsOptions } from "../../types"
-import type { ExprConstructor } from "../types"
-import { derive } from "../ExprBase"
+import { ExprBase, derive } from "../ExprBase"
 import { ComputeError } from "../../exceptions"
 import { getListStats, computeMedian, computeQuantile, getUniqueListStats, computeMode, isArrayOfType } from "../../utils"
 
 
 
-export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
-        public aggFn: AggFn<any> | null = (this as any).aggFn || null;
+export class AggregationExpr extends ExprBase {
 
         _deriveAgg(fn: AggFn<any>) {
             const newInst = derive(this);
@@ -94,5 +91,4 @@ export const AggregationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             return this._deriveAgg(v => getListStats(v).sum);
         }
 
-    }
 }

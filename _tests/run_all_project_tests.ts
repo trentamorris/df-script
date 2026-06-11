@@ -12,6 +12,7 @@ import "./columnExpressions/test_boolean_expr";
 import "./columnExpressions/test_new_manipulations";
 import "./columnExpressions/test_when_then";
 import "./columnExpressions/test_seq_range";
+import "./columnExpressions/test_type_selector";
 import "./dataframe/run_all";
 
 import "./datatypes/test_polars_types";

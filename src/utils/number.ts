@@ -59,16 +59,18 @@ export function toValidNumber(
 
 export function clamp<T extends number | bigint>(
     val: T,
-    min: T,
-    max: T,
+    min: T | null = null,
+    max: T | null = null,
     options: { safe?: boolean } = { safe: true }
 ): T {
     let v = val;
-    if (options.safe && typeof v === "number" && Number.isNaN(v)) {
-        v = min;
+    if (options.safe && typeof v === "number" && !isValidNumber(v)) {
+        if (Number.isNaN(v)) {
+            v = min !== null ? min : (max !== null ? max : val);
+        }
     }
-    if (v < min) return min;
-    if (v > max) return max;
+    if (min !== null && v < min) return min;
+    if (max !== null && v > max) return max;
     return v;
 }
 
@@ -231,15 +233,14 @@ export function isValidDecimal(
     if (precision !== undefined) {
         const integerDigits = precision - scale;
         const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scale);
-        if (integerDigits > 0 && Math.abs(v) > maxVal) {
+        if (maxVal > 0 && Math.abs(v) > maxVal) {
             return false;
         }
     }
 
     if (scale !== undefined) {
-        const str = v.toString();
-        const dotIdx = str.indexOf(".");
-        if (dotIdx !== -1 && str.slice(dotIdx + 1).length > scale) {
+        const multiplier = Math.pow(10, scale);
+        if (Math.abs(v * multiplier - Math.round(v * multiplier)) > 1e-12) {
             return false;
         }
     }
@@ -265,8 +266,8 @@ export function toValidDecimal(
     if (precision !== undefined) {
         const scaleVal = scale || 0;
         const integerDigits = precision - scaleVal;
-        if (integerDigits > 0) {
-            const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scaleVal);
+        const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scaleVal);
+        if (maxVal > 0) {
             n = clamp(n, -maxVal, maxVal);
         }
     }

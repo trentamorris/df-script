@@ -1,10 +1,8 @@
-import type { ExprConstructor } from "../types"
-import { derive } from "../ExprBase"
+import { ExprBase, derive } from "../ExprBase"
 import { isArrayOrTypedArray, getListStats, fillSequence } from "../../utils"
 import type { FillNullOptions } from "../../types"
 
-export const ManipulationExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
+export class ManipulationExpr extends ExprBase {
         fill_null({
             value = undefined,
             strategy = undefined,
@@ -71,5 +69,4 @@ export const ManipulationExpr = <TBase extends ExprConstructor>(Base: TBase) => 
                 return (vArray as any).slice().reverse();
             }) as this;
         }
-    }
 }

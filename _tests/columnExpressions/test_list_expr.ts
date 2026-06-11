@@ -97,7 +97,10 @@ try {
         $df.col("typed_array").list.lengths().alias("typed_len"),
         $df.col("typed_array").list.sum().alias("typed_sum"),
         $df.col("string_nums").list.sum().alias("coerced_sum"),
-        $df.col("string_nums").list.mean().alias("coerced_mean")
+        $df.col("string_nums").list.mean().alias("coerced_mean"),
+        $df.col("numbers").list.gather(new Int32Array([0, 2, -2])).alias("gather_typed_indices"),
+        $df.col("typed_array").list.contains_all(new Int32Array([10, 30])).alias("typed_contains_all"),
+        $df.col("typed_array").list.contains_any(new Int32Array([10, 40])).alias("typed_contains_any")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.list results:");
@@ -187,6 +190,11 @@ try {
     if (r0.typed_sum !== 60) throw new Error(`Expected r0.typed_sum 60, got ${r0.typed_sum}`);
     if (r0.coerced_sum !== 8) throw new Error(`Expected r0.coerced_sum 8, got ${r0.coerced_sum}`);
     if (Math.abs(r0.coerced_mean - 8 / 3) > 1e-6) throw new Error(`Expected r0.coerced_mean 2.6666, got ${r0.coerced_mean}`);
+    if (r0.gather_typed_indices[0] !== 3 || r0.gather_typed_indices[1] !== 4 || r0.gather_typed_indices[2] !== 6) {
+        throw new Error(`Expected gather_typed_indices [3, 4, 6], got ${JSON.stringify(r0.gather_typed_indices)}`);
+    }
+    if (r0.typed_contains_all !== true) throw new Error(`Expected r0.typed_contains_all true, got ${r0.typed_contains_all}`);
+    if (r0.typed_contains_any !== true) throw new Error(`Expected r0.typed_contains_any true, got ${r0.typed_contains_any}`);
 
     // Assert Row 1
     const r1 = projected[1];
@@ -221,6 +229,11 @@ try {
     if (r1.coerced_sum !== 10) throw new Error(`Expected r1.coerced_sum 10, got ${r1.coerced_sum}`);
     if (r1.coerced_mean !== 10) throw new Error(`Expected r1.coerced_mean 10, got ${r1.coerced_mean}`);
     if (r1.n_unique_tags !== 2) throw new Error(`Expected n_unique_tags 2, got ${r1.n_unique_tags}`);
+    if (r1.gather_typed_indices[0] !== 10 || r1.gather_typed_indices[1] !== 20 || r1.gather_typed_indices[2] !== 20) {
+        throw new Error(`Expected gather_typed_indices [10, 20, 20], got ${JSON.stringify(r1.gather_typed_indices)}`);
+    }
+    if (r1.typed_contains_all !== false) throw new Error(`Expected r1.typed_contains_all false, got ${r1.typed_contains_all}`);
+    if (r1.typed_contains_any !== false) throw new Error(`Expected r1.typed_contains_any false, got ${r1.typed_contains_any}`);
 
     // Test null_on_oob = false throws
     let threwOob = false;

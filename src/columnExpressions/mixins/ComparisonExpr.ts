@@ -1,6 +1,6 @@
-import type { ExprConstructor } from "../types"
-import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
-import { isArrayOrTypedArray, isArrayOfType, isValidNumber, toCanonicalString } from "../../utils"
+import { ExprBase, derive } from "../ExprBase"
+import { kleeneUnary, kleeneBinary } from "../utils"
+import { isArrayOrTypedArray, isArrayOfType, isValidNumber, toCanonicalString, getUniqueListStats } from "../../utils"
 
 function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any, invert: boolean): any[] {
     const height = vArray.length;
@@ -47,23 +47,12 @@ function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any, invert: 
 }
 
 function evaluateDuplication(vArray: ArrayLike<any>, checkDuplicate: boolean): boolean[] {
+    const { frequencies } = getUniqueListStats(vArray, { strict: true });
     const height = vArray.length;
-    const counts = new Map<any, number>();
-    const keys = new Array(height);
-    for (let i = 0; i < height; i++) {
-        const k = toCanonicalString(vArray[i]);
-        keys[i] = k;
-        counts.set(k, (counts.get(k) || 0) + 1);
-    }
     const result = new Array(height);
-    if (checkDuplicate) {
-        for (let i = 0; i < height; i++) {
-            result[i] = (counts.get(keys[i]) || 0) > 1;
-        }
-    } else {
-        for (let i = 0; i < height; i++) {
-            result[i] = counts.get(keys[i]) === 1;
-        }
+    for (let i = 0; i < height; i++) {
+        const count = frequencies.get(vArray[i]) || 0;
+        result[i] = checkDuplicate ? count > 1 : count === 1;
     }
     return result;
 }
@@ -98,8 +87,7 @@ function compareMissing(vArray: ArrayLike<any>, rResolved: any, invert: boolean)
     return result;
 }
 
-export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
+export class ComparisonExpr extends ExprBase {
 
         between(lower: any, upper: any, closed: "both" | "left" | "right" | "none" = "both") {
             return derive(this, (vArray, columns) => {
@@ -284,5 +272,4 @@ export const ComparisonExpr = <TBase extends ExprConstructor>(Base: TBase) => {
             return derive(this, (vArray, columns) => computeIsIn(vArray, columns, values, true));
         }
 
-    }
 }

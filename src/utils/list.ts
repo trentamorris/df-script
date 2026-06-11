@@ -244,7 +244,12 @@ export function getUniqueListStats(
         const values: any[] = [];
         for (const entry of seen.values()) {
             values.push(entry.val);
-            frequencies.set(entry.val, entry.count);
+        }
+        for (let i = 0; i < len; i++) {
+            const val = list[i];
+            const key = selector(val);
+            const entry = seen.get(key)!;
+            frequencies.set(val, entry.count);
         }
 
         return {
@@ -519,17 +524,17 @@ export interface IndependentStepContext {
 
 export type FillSeqOptions = FillSeqBaseOptions & (
     | {
-          mode: "constant";
-          step?: never;
-      }
+        mode: "constant";
+        step?: never;
+    }
     | {
-          mode?: "cumulative";
-          step?: number | ((context: CumulativeStepContext) => any);
-      }
+        mode?: "cumulative";
+        step?: number | ((context: CumulativeStepContext) => any);
+    }
     | {
-          mode: "independent";
-          step?: number | ((context: IndependentStepContext) => any);
-      }
+        mode: "independent";
+        step?: number | ((context: IndependentStepContext) => any);
+    }
 );
 
 export function fillSequence(

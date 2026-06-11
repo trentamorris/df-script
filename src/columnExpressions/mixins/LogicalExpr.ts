@@ -1,9 +1,8 @@
-import type { ExprConstructor } from "../types"
-import { derive, kleeneUnary, kleeneBinary } from "../ExprBase"
+import { ExprBase, derive } from "../ExprBase"
+import { kleeneUnary, kleeneBinary } from "../utils"
 import { isArrayOrTypedArray } from "../../utils"
 
-export const LogicalExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
+export class LogicalExpr extends ExprBase {
         and(other: any) { 
             return derive(this, (vArray, columns) => {
                 const height = vArray.length;
@@ -42,5 +41,4 @@ export const LogicalExpr = <TBase extends ExprConstructor>(Base: TBase) => {
         xor(other: any) {
             return derive(this, kleeneBinary(this, other, (v, w) => !!v !== !!w));
         }
-    }
 }

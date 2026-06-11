@@ -1,5 +1,5 @@
-import type { ExprConstructor } from "../types";
-import { kleeneUnary, derive } from "../ExprBase";
+import { ExprBase, derive } from "../ExprBase";
+import { kleeneUnary } from "../utils";
 import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions, joinList } from "../../utils";
 import { ComputeError } from "../../exceptions";
 import type { UniqueListStatsOptions, JoinListOptions, ExplodeOptions } from "../../types";
@@ -25,13 +25,14 @@ export class ListExprNamespace {
         return this._deriveList((arr: any) => arr.includes(item));
     }
 
-    contains_all(items: any[]) {
+    contains_all(items: ArrayLike<any>) {
         return this._deriveList((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
     }
 
-    contains_any(items: any[]) {
+    contains_any(items: ArrayLike<any>) {
         return this._deriveList((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
     }
+
 
     count_matches(item: any) {
         return this._deriveList((arr: any) => {
@@ -120,12 +121,12 @@ export class ListExprNamespace {
     }
 
     gather(
-        indices: number | number[],
+        indices: number | ArrayLike<number>,
         null_on_oob: boolean = true
     ) {
         return this._deriveList((arr: any) => {
             const len = arr.length;
-            const idxs = Array.isArray(indices) ? indices : [indices];
+            const idxs = isArrayOrTypedArray(indices) ? indices : [indices];
             const numIndices = idxs.length;
             const res = new Array(numIndices);
             for (let i = 0; i < numIndices; i++) {
@@ -221,10 +222,8 @@ export class ListExprNamespace {
 
 }
 
-export const ListExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
-        get list() {
-            return new ListExprNamespace(this);
-        }
-    };
-};
+export class ListExpr extends ExprBase {
+    get list() {
+        return new ListExprNamespace(this);
+    }
+}

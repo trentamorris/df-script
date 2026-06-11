@@ -1,6 +1,6 @@
 import type { IExpr } from "../../types";
-import type { ExprConstructor } from "../types";
-import { kleeneUnary, kleeneBinary, derive } from "../ExprBase";
+import { ExprBase, derive } from "../ExprBase";
+import { kleeneUnary, kleeneBinary } from "../utils";
 import {
     toValidDate,
     toValidDecimal,
@@ -284,10 +284,8 @@ export class StringExprNamespace {
     }
 }
 
-export const StringExpr = <TBase extends ExprConstructor>(Base: TBase) => {
-    return class extends Base {
-        get str() {
-            return new StringExprNamespace(this);
-        }
-    };
-};
+export class StringExpr extends ExprBase {
+    get str() {
+        return new StringExprNamespace(this);
+    }
+}
