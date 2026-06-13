@@ -73,7 +73,7 @@ export class GroupedData<T, K extends keyof T> {
         for (let i = 0; i < keysLen; i++) {
             keysStr[i] = String(this.keys[i]);
         }
-        const expandedExprs = resolveColumnSelectors(exprs.flat(), allKeysStr, keysStr, this.parentSchema);
+        const expandedExprs = resolveColumnSelectors(exprs.flat(), allKeysStr, keysStr, this.parentSchema, this.parentColumns);
 
         const numGroups = this.groups.size;
         const newColumns: Record<string, any> = {};

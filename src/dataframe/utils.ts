@@ -159,6 +159,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     let isDate = true;
     let isList = true;
     let isBinary = true;
+    let isObject = true;
     let hasDateObj = false;
     let hasNonNull = false;
     const allListElements: any[] = [];
@@ -193,6 +194,9 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         if (!(val instanceof Date) && (typeof val !== "string" || isNaN(Date.parse(val)))) {
             isDate = false;
         }
+        if (!isObj(val) || val instanceof Date || val instanceof Uint8Array || Array.isArray(val)) {
+            isObject = false;
+        }
     }
 
     if (!hasNonNull) return DataTypeRegistry.Utf8;
@@ -217,6 +221,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         return fitsInInt32 ? DataTypeRegistry.Int32 : DataTypeRegistry.Float64;
     }
     if (isDate && hasDateObj) return DataTypeRegistry.Datetime;
+    if (isObject) return DataTypeRegistry.Object;
     return DataTypeRegistry.Utf8;
 }
 

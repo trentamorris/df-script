@@ -1,6 +1,5 @@
 import { isValidDateObj } from "./date";
 import { isValidInt } from "./number";
-import { isBlankString } from "./string";
 
 export function isTypedArray(v: unknown): v is ArrayBufferView {
     return ArrayBuffer.isView(v) && !(v instanceof DataView);
@@ -102,30 +101,4 @@ export function tryParseBoolean(v: unknown): boolean | undefined {
     return boolMap[v.trim().toLowerCase()];
 }
 
-export function isJsonString(input: unknown, allowPrimitives = false): input is string {
-    if (typeof input !== "string") return false;
-    if (isBlankString(input)) return false;
-
-    const s = (input as string).trim();
-    if (!allowPrimitives) {
-        const isWrapped = (s.startsWith("{") && s.endsWith("}")) || (s.startsWith("[") && s.endsWith("]"));
-        if (!isWrapped) return false;
-    }
-
-    try {
-        JSON.parse(s);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-export function safeJsonParse(input: unknown): unknown {
-    if (typeof input !== "string") return input;
-    try {
-        return JSON.parse(input);
-    } catch {
-        return input;
-    }
-}
 

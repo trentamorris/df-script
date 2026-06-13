@@ -1,13 +1,13 @@
-import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seq_range, all } from "../columnExpressions"
+import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seq_range, all, evaluateExpression } from "../columnExpressions"
 import { GroupedData } from "./grouped/grouped"
+import { NEWLINE } from "./constants"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions } from "../types"
-import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions } from "./types"
+import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, ReadJSONOptions, WriteJSONOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
-import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray } from "../utils"
+import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, safeJsonParse } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
-    resolveWindowExpr,
     rowsToColumns,
     columnsToRows,
     inferColumnType,
@@ -183,7 +183,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
         }
 
-        const expandedExprs = resolveColumnSelectors(exprSelectors, keys, undefined, this._schema);
+        const expandedExprs = resolveColumnSelectors(exprSelectors, keys, undefined, this._schema, this._columns);
         const numExpanded = expandedExprs.length;
         for (let i = 0; i < numExpanded; i++) {
             evaluatedExprs.push(expandedExprs[i].evaluate(this._columns, height));
@@ -605,6 +605,24 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<U>(newColumns, outSchema, outHeight);
     }
 
+
+    static read_json(
+        content: string,
+        {
+            format = "json",
+            trimBeforeParse = true,
+            schema,
+            ...parseOpts
+        }: ReadJSONOptions = {}
+    ): DataFrame<any> {
+        const parsed = safeJsonParse(content, { format, trimBeforeParse, ...parseOpts });
+        if (parsed === content) {
+            throw new DataFrameError(`Invalid JSON input: must be a valid, non-empty JSON ${format} string.`);
+        }
+        const parsedData = Array.isArray(parsed) ? parsed : (isObj(parsed) ? [parsed] : []);
+        return new DataFrame(parsedData, schema);
+    }
+
     rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> {
         const renameMapping = mapping || {};
         const newColumns: ColumnDict = {};
@@ -649,7 +667,7 @@ export class DataFrame<T extends RowRecord = any> {
     ): DataFrame<U> {
         const exprs = this._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
-        const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema);
+        const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns);
 
         const numExprs = expandedExprs.length;
         if (numExprs === 0) {
@@ -673,9 +691,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
             selectedKeys.add(targetKey);
 
-            const col = expr.isWindow
-                ? resolveWindowExpr(expr, this._columns, this._height)
-                : expr.evaluate(this._columns, this._height);
+            const col = evaluateExpression(expr, this._columns, this._height);
 
             evaluatedCols[i] = col;
             targetKeys[i] = targetKey;
@@ -1086,7 +1102,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const exprs = this._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
-        const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema);
+        const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns);
         const numEntries = expandedExprs.length;
         if (numEntries === 0) return this;
 
@@ -1122,5 +1138,40 @@ export class DataFrame<T extends RowRecord = any> {
         const df = this.insert_column(0, name, expr);
         df._schema[name] = DataTypeRegistry.UInt32;
         return df;
+    }
+
+    write_json(
+        file?: string | { write: (str: string) => void },
+        { format = "json", replacer }: WriteJSONOptions = {}
+    ): string | void {
+        if (format !== "json" && format !== "ndjson") {
+            throw new TypeError(`Unsupported JSON format: "${format}". Expected "json" or "ndjson".`);
+        }
+
+        let jsonStr: string;
+        if (format === "ndjson") {
+            const dicts = this.to_dicts();
+            const len = dicts.length;
+            const lines = new Array(len);
+            for (let i = 0; i < len; i++) {
+                lines[i] = JSON.stringify(dicts[i], replacer as any);
+            }
+            jsonStr = lines.join(NEWLINE);
+        } else {
+            jsonStr = JSON.stringify(this.to_dicts(), replacer as any);
+        }
+
+        if (file) {
+            if (typeof file === "string") {
+                const fs = require("fs");
+                fs.writeFileSync(file, jsonStr, "utf8");
+            } else if (typeof file === "object" && typeof (file as any).write === "function") {
+                (file as any).write(jsonStr);
+            } else {
+                throw new TypeError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
+            }
+            return;
+        }
+        return jsonStr;
     }
 }

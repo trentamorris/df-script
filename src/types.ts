@@ -4,6 +4,11 @@ import type { RegisteredDataType } from "./datatypes";
 export type { RegisteredDataType };
 
 export type RowRecord = Record<string, any>;
+export type JSONFormat =
+    /** Standard JSON format. */
+    | "json"
+    /** Newline Delimited JSON format. */
+    | "ndjson";
 
 export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
 export type ColumnDict = Record<string, ColumnData>;

@@ -1,5 +1,5 @@
 import { DataFrame } from "./dataframe"
-import { ColumnExpr, lit, all, exclude, coalesce, when, implode, seq_range } from "./columnExpressions"
+import { ColumnExpr, lit, all, exclude, coalesce, when, implode, seq_range, element } from "./columnExpressions"
 
 import { DataTypeRegistry, DataType } from "./datatypes"
 import { concat } from "./functions"
@@ -24,6 +24,7 @@ export const $df = {
     when,
     implode,
     seq_range,
+    element,
     DataType: DataTypeRegistry
 };
 

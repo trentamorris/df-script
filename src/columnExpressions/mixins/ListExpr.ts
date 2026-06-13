@@ -1,8 +1,9 @@
 import { ExprBase, derive } from "../ExprBase";
-import { kleeneUnary } from "../utils";
+import { kleeneUnary, evaluateExpression } from "../utils";
 import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions, joinList } from "../../utils";
 import { ComputeError } from "../../exceptions";
-import type { UniqueListStatsOptions, JoinListOptions, ExplodeOptions } from "../../types";
+import type { UniqueListStatsOptions, JoinListOptions, ExplodeOptions, IExpr } from "../../types";
+import { ELEMENT_MARKER } from "../constants";
 
 export class ListExprNamespace {
     constructor(public expr: any) { }
@@ -218,6 +219,32 @@ export class ListExprNamespace {
 
     unique(options: UniqueListStatsOptions = {}) {
         return this._deriveList((arr: any) => getUniqueListStats(arr, options).values);
+    }
+
+    eval(expr: IExpr) {
+        return derive(this.expr, (vArray, columns) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            for (let i = 0; i < height; i++) {
+                const val = vArray[i];
+                if (!isArrayOrTypedArray(val)) {
+                    result[i] = null;
+                    continue;
+                }
+                const subHeight = val.length;
+                const subColumns = { ...columns, [ELEMENT_MARKER]: val };
+                const isGlobalAgg = expr.aggFn != null && (expr.partitionBy == null || expr.partitionBy.length === 0);
+                if (isGlobalAgg) {
+                    const preOpsIdx = expr.groupingOpsIndex !== undefined ? expr.groupingOpsIndex : expr.ops.length;
+                    const preVal = expr.evaluatePre(preOpsIdx, subColumns, subHeight);
+                    const aggVal = expr.aggFn!(Array.from(preVal));
+                    result[i] = expr.evaluatePost(preOpsIdx, [aggVal], subColumns);
+                } else {
+                    result[i] = evaluateExpression(expr, subColumns, subHeight);
+                }
+            }
+            return result;
+        });
     }
 
 }

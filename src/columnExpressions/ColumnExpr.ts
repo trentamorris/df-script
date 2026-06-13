@@ -7,10 +7,11 @@ import { StringExpr } from "./mixins/StringExpr"
 import { LogicalExpr } from "./mixins/LogicalExpr"
 import { TemporalExpr } from "./mixins/TemporalExpr"
 import { ListExpr } from "./mixins/ListExpr"
+import { StructExpr } from "./mixins/StructExpr"
 import { ManipulationExpr } from "./mixins/ManipulationExpr"
 import { isObj } from "../utils"
 import { DataType } from "../datatypes"
-import type { IntoExpr, IExpr, DataFrameSchema } from "../types"
+import type { IntoExpr, IExpr, DataFrameSchema, ColumnDict } from "../types"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
 export class ColumnExpr<T> extends ExprBase {
@@ -69,6 +70,7 @@ export interface ColumnExpr<T> extends
     LogicalExpr,
     TemporalExpr,
     ListExpr,
+    StructExpr,
     ManipulationExpr {}
 
 function applyMixins(derivedCtor: any, constructors: any[]) {
@@ -94,6 +96,7 @@ applyMixins(ColumnExpr, [
     LogicalExpr,
     TemporalExpr,
     ListExpr,
+    StructExpr,
     ManipulationExpr
 ]);
 
@@ -179,7 +182,8 @@ export function resolveColumnSelectors(
     exprs: any[],
     allKeys: string[],
     keysToExcludeFromAll?: string[],
-    schema?: DataFrameSchema
+    schema?: DataFrameSchema,
+    columns?: ColumnDict
 ): IExpr[] {
     const expanded: IExpr[] = [];
     const excludeSet = keysToExcludeFromAll ? new Set(keysToExcludeFromAll) : new Set<string>();
@@ -190,6 +194,38 @@ export function resolveColumnSelectors(
         if (typeof expr === "string") {
             expanded.push(new ColumnExpr(expr));
             continue;
+        }
+
+        // Handle struct unnesting expansion
+        if (expr && typeof expr === "object" && (expr as any).isUnnest) {
+            let fields: string[] = [];
+            const colName = expr.colName;
+            if (schema && colName && schema[colName] && schema[colName].name === "Struct") {
+                fields = Object.keys((schema[colName] as any).fields);
+            }
+            if (fields.length === 0 && columns) {
+                const columnsKeys = Object.keys(columns);
+                const firstKey = columnsKeys[0];
+                const height = firstKey ? columns[firstKey].length : 0;
+                const evaluated = (expr as any).baseExpr.evaluate(columns, height);
+                const evalLen = evaluated.length;
+                for (let idx = 0; idx < evalLen; idx++) {
+                    const item = evaluated[idx];
+                    if (item != null && typeof item === "object") {
+                        fields = Object.keys(item);
+                        break;
+                    }
+                }
+            }
+            const fieldsLen = fields.length;
+            if (fieldsLen > 0) {
+                for (let fIdx = 0; fIdx < fieldsLen; fIdx++) {
+                    const fieldName = fields[fIdx];
+                    const fieldExpr = (expr as any).baseExpr.struct.field(fieldName);
+                    expanded.push(fieldExpr);
+                }
+                continue;
+            }
         }
 
         const targets = getTargetKeys(expr, allKeys, excludeSet, schema);

@@ -5,14 +5,14 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 ## 🚀 Upcoming Features
 
 ### 🗂️ DataFrame & Column Transformations
-- [ ] **`explode` / `implode`**:
-  * **`explode`**: Unnest list-like columns into multiple rows, replicating the input rows for each list element (Polars `.explode()` style).
-  * **`implode`**: Group columns or values back into a single list element per group (Polars `.implode()` style).
+- [x] **`explode` / `implode`**:
+  * [x] **`explode`**: Unnest list-like columns into multiple rows, replicating the input rows for each list element (Polars `.explode()` style).
+  * [x] **`implode`**: Group columns or values back into a single list element per group (Polars `.implode()` style).
 
 ### 📊 List Column Operations (`.list`)
-- [ ] **`list.eval()` & `.elements`**:
+- [x] **`list.eval()` & `.element`**:
   * Implement element-wise operations on lists/arrays using a sub-expression scope.
-  * Replicate Polars `.list.eval()` behavior by exposing `.elements` inside the eval blocks to represent the inner elements of each list.
+  * Replicate Polars `.list.eval()` behavior by exposing `.element` inside the eval blocks to represent the inner elements of each list.
 
 ### 🧱 Struct Column Operations (`.struct`)
 - [ ] **`struct` & `.struct.field()`**:

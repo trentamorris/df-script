@@ -4,6 +4,8 @@ console.log("=========================================");
 
 import "./columnExpressions/test_dt_expr";
 import "./columnExpressions/test_list_expr";
+import "./columnExpressions/test_list_eval";
+import "./columnExpressions/test_struct_expr";
 import "./columnExpressions/test_str_expr";
 import "./columnExpressions/test_window";
 import "./columnExpressions/test_arithmetic_expr";
@@ -19,6 +21,7 @@ import "./datatypes/test_polars_types";
 import "./utils/test_date_robustness";
 import "./utils/test_types";
 import "./utils/test_string";
+import "./utils/test_io";
 
 console.log("=========================================");
 console.log("🎉 ALL TESTS IN THE PROJECT PASSED SUCCESSFULLY!");

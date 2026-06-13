@@ -26,6 +26,10 @@
   ],
   "author": "Trent Morris",
   "license": "MIT",
+  "funding": {
+    "type": "custom",
+    "url": "https://github.com/trentamorris/df-script/blob/main/DONATIONS.md"
+  },
   "devDependencies": {
     "typescript": "^5.4.5",
     "tsx": "^4.15.5",

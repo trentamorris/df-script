@@ -1,5 +1,6 @@
 import type { IExpr, ColumnData, ColumnDict } from "../types";
 import { isArrayOrTypedArray } from "../utils";
+import { resolveWindowExpr } from "../dataframe/utils";
 
 export const kleeneUnary = (fn: (v: any) => any) => {
     return (vArray: ColumnData) => {
@@ -33,3 +34,9 @@ export const kleeneBinary = (expr: IExpr, other: any, fn: (v: any, r: any) => an
         return result;
     };
 };
+
+export function evaluateExpression(expr: IExpr, columns: ColumnDict, height: number): ColumnData {
+    return expr.isWindow
+        ? resolveWindowExpr(expr, columns, height)
+        : expr.evaluate(columns, height);
+}

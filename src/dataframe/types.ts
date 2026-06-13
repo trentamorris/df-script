@@ -1,5 +1,6 @@
-import type { IExpr, AggFn, RowRecord } from "../types";
+import type { IExpr, AggFn, RowRecord, DataFrameSchema, JSONFormat } from "../types";
 import type { DataFrame } from "./dataframe";
+import type { JSONParseOptions } from "../utils";
 
 export type JoinType = "inner" | "left" | "outer" | "right";
 export type LimitPosition = "start" | "end";
@@ -42,5 +43,35 @@ export interface TransposeOptions {
     include_header?: boolean;
     header_name?: string;
     column_names?: string | Iterable<string>;
+}
+
+
+export interface ReadJSONOptions extends JSONParseOptions {
+    /**
+     * Optional explicit schema mapping column names to their registered data types.
+     */
+    schema?: DataFrameSchema;
+}
+
+/**
+ * The `replacer` argument type extracted directly from the overloads of the built-in `JSON.stringify`.
+ * Hover or Go-to-Definition on `JSON.stringify` below to inspect the standard library signatures.
+ */
+export type JSONStringifyReplacer = typeof JSON.stringify extends {
+    (value: any, replacer?: infer R1, space?: any): string;
+    (value: any, replacer?: infer R2, space?: any): string;
+} ? R1 | R2 : never;
+
+export interface WriteJSONOptions {
+    /**
+     * The format of the JSON output.
+     * @default "json"
+     */
+    format?: JSONFormat;
+
+    /**
+     * A replacer function or array passed directly to JSON.stringify for custom value serialization.
+     */
+    replacer?: JSONStringifyReplacer;
 }
 
