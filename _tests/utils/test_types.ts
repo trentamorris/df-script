@@ -204,7 +204,7 @@ try {
     if (toValidFloat("invalid") !== null) throw new Error("toValidFloat('invalid') should return null");
 
     // toValidFloat options checks
-    if (toValidFloat("12.3", { precision: "Float32" }) !== Math.fround(12.3)) throw new Error("toValidFloat precision option failed");
+    if (toValidFloat("12.3", { floatPrecision: "Float32" }) !== Math.fround(12.3)) throw new Error("toValidFloat precision option failed");
     if (toValidFloat("Infinity", { allowNonFiniteNumbers: false }) !== null) throw new Error("toValidFloat allowNonFiniteNumbers: false failed");
 
     // 10. Test dynamic schema type inference

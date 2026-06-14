@@ -1,6 +1,8 @@
 import type { IExpr, AggFn, RowRecord, DataFrameSchema, JSONFormat } from "../types";
 import type { DataFrame } from "./dataframe";
-import type { JSONParseOptions } from "../utils";
+import type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions } from "../utils";
+
+export type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions };
 
 export type JoinType = "inner" | "left" | "outer" | "right";
 export type LimitPosition = "start" | "end";
@@ -70,8 +72,46 @@ export interface WriteJSONOptions {
     format?: JSONFormat;
 
     /**
-     * A replacer function or array passed directly to JSON.stringify for custom value serialization.
+     * Options for the safe JSON replacer.
      */
-    replacer?: JSONStringifyReplacer;
+    replacerOptions?: SafeJsonReplacerOptions;
 }
 
+export type { WriteCSVOptions } from "../utils";
+
+export interface ReadCSVOptions {
+    /**
+     * Whether the CSV has a header row.
+     * @default true
+     */
+    hasHeader?: boolean;
+
+    /**
+     * Character that separates fields.
+     * @default ","
+     */
+    separator?: string;
+
+    /**
+     * The character used for quoting fields.
+     * @default '"'
+     */
+    quoteChar?: string;
+
+    /**
+     * String representations of null values.
+     * @default ["", "NA", "null", "NaN"]
+     */
+    nullValues?: string[];
+
+    /**
+     * Optional explicit schema mapping column names to their registered data types.
+     */
+    schema?: DataFrameSchema;
+
+    /**
+     * Try to infer types from values if no schema is provided.
+     * @default true
+     */
+    inferSchema?: boolean;
+}

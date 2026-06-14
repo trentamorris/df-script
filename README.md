@@ -94,6 +94,7 @@ console.log(processedDf.to_dicts());
 DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, and access general types.
 
 - `$df.data(dataRowsOrCols, schema?)`: Instantiates a new `DataFrame`.
+- `$df.read_json(content, options?)`: Reads JSON/NDJSON content into a new `DataFrame`.
 - `$df.col(name)`: Creates a column reference expression.
 - `$df.all()`: Selects all columns in the DataFrame.
 - `$df.DataType`: Direct access to the `DataTypeRegistry` for schema specification.
@@ -133,6 +134,39 @@ DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, and
 - **`pivot(index, columns, values)`**: Pivots the table, converting unique values in `columns` into column headers.
 - **`unpivot(idVars, valueVars, varName?, valueName?)`**: Melts/unpivots the table, converting wide columns into long format name-value pairs.
 - **`concat(items, options?)`**: Concatenates multiple DataFrames. Supported concat strategies: `"vertical" | "horizontal" | "diagonal"`.
+
+---
+
+## 📂 File / Data I/O
+
+DFScript provides helpers to serialize and parse data formats like JSON and CSV.
+
+### Reading Data
+- **`$df.read_json(content, options?)`**: Reads a JSON array or Newline Delimited JSON (NDJSON) string and loads it into a new DataFrame.
+  ```typescript
+  import { $df } from "df-script";
+
+  // Read standard JSON array
+  const df = $df.read_json('[{"id": 1, "name": "Alice"}]');
+
+  // Read Newline Delimited JSON (NDJSON)
+  const dfNdjson = $df.read_json('{"id": 1}\n{"id": 2}', { format: "ndjson" });
+  ```
+
+### Writing Data
+- **`df.write_json(file?, options?)`**: Serializes a DataFrame into a JSON or NDJSON string. If a file path or writable stream/object (with a `.write` method) is provided, writes/streams the content as a side-effect. Always returns the serialized string.
+  ```typescript
+  // Write to a file and get the string
+  const jsonStr = df.write_json("output.json");
+  ```
+- **`df.write_csv(file?, options?)`**: Serializes a DataFrame into a CSV string. Supports options for headers, custom separators, quote styles, float precision, and BOM. If a file path or writable stream/object (with a `.write` method) is provided, writes/streams the content as a side-effect. Always returns the serialized string.
+  ```typescript
+  // Serialize to a CSV string
+  const csvStr = df.write_csv();
+
+  // Write to a file with custom separator
+  df.write_csv("output.csv", { separator: ";" });
+  ```
 
 ---
 

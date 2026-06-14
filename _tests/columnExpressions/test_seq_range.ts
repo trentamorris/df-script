@@ -31,7 +31,7 @@ try {
 
     // 3. Cumulative Mode: Callback step (prev * 3) -> Geometric sequence
     const r3 = df.select([
-        $df.seq_range(3, { step: ({ prev }) => prev * 3 }).alias("seq")
+        $df.seq_range(3, { step: ({ prev }: { prev: number }) => prev * 3 }).alias("seq")
     ]).to_dicts() as any[];
     if (r3[0].seq !== 3 || r3[1].seq !== 9 || r3[2].seq !== 27 || r3[3].seq !== 81) {
         throw new Error("r3 callback step failed: " + JSON.stringify(r3));
@@ -47,7 +47,7 @@ try {
 
     // 5. Independent Mode: Callback step (i * 3) -> step(i)
     const r5 = df.select([
-        $df.seq_range(0, { step: ({ index }) => index * 3, mode: "independent" }).alias("seq")
+        $df.seq_range(0, { step: ({ index }: { index: number }) => index * 3, mode: "independent" }).alias("seq")
     ]).to_dicts() as any[];
     if (r5[0].seq !== 0 || r5[1].seq !== 3 || r5[2].seq !== 6 || r5[3].seq !== 9) {
         throw new Error("r5 independent callback step failed: " + JSON.stringify(r5));

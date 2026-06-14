@@ -54,7 +54,7 @@ export function seq_range(
 
         const getIdx = (val: number | undefined, def: number) => {
             if (val === undefined) return def;
-            return clamp(val < 0 ? targetHeight + val : val, 0, targetHeight);
+            return clamp(val < 0 ? targetHeight + val : val, { min: 0, max: targetHeight });
         };
         const safeStart = getIdx(opts.startIndex, 0);
         const safeEnd = getIdx(opts.endIndex, targetHeight);

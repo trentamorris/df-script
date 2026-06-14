@@ -16,12 +16,15 @@ import "./columnExpressions/test_when_then";
 import "./columnExpressions/test_seq_range";
 import "./columnExpressions/test_type_selector";
 import "./dataframe/run_all";
+import "./dataframe/read_csv.test";
 
 import "./datatypes/test_polars_types";
 import "./utils/test_date_robustness";
 import "./utils/test_types";
 import "./utils/test_string";
 import "./utils/test_io";
+import "./utils/test_csv";
+import "./utils/test_csv_parse";
 
 console.log("=========================================");
 console.log("🎉 ALL TESTS IN THE PROJECT PASSED SUCCESSFULLY!");

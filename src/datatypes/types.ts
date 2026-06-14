@@ -29,7 +29,7 @@ import type { RowRecord } from "../types";
 
 export class Int8Type extends SignedIntegerType {
     readonly name = "Int8";
-    coerce(val: unknown): number | null { return toValidInt(val, "Int8"); }
+    coerce(val: unknown): number | null { return toValidInt(val, { range: "Int8" }); }
     equals(other: DataType): boolean { return other.name === "Int8"; }
     allocate(size: number): Int8Array { return new Int8Array(size); }
 }
@@ -37,7 +37,7 @@ export const Int8 = new Int8Type();
 
 export class Int16Type extends SignedIntegerType {
     readonly name = "Int16";
-    coerce(val: unknown): number | null { return toValidInt(val, "Int16"); }
+    coerce(val: unknown): number | null { return toValidInt(val, { range: "Int16" }); }
     equals(other: DataType): boolean { return other.name === "Int16"; }
     allocate(size: number): Int16Array { return new Int16Array(size); }
 }
@@ -45,7 +45,7 @@ export const Int16 = new Int16Type();
 
 export class Int32Type extends SignedIntegerType {
     readonly name = "Int32";
-    coerce(val: unknown): number | null { return toValidInt(val, "Int32"); }
+    coerce(val: unknown): number | null { return toValidInt(val, { range: "Int32" }); }
     equals(other: DataType): boolean { return other.name === "Int32"; }
     allocate(size: number): Int32Array { return new Int32Array(size); }
 }
@@ -53,7 +53,7 @@ export const Int32 = new Int32Type();
 
 export class Int64Type extends SignedIntegerType<bigint | null> {
     readonly name = "Int64";
-    coerce(val: unknown): bigint | null { return toValidBigInt(val); }
+    coerce(val: unknown): bigint | null { return toValidBigInt(val, { truncate: true }); }
     equals(other: DataType): boolean { return other.name === "Int64"; }
     allocate(size: number): BigInt64Array { return new BigInt64Array(size); }
 }
@@ -61,7 +61,7 @@ export const Int64 = new Int64Type();
 
 export class UInt8Type extends UnsignedIntegerType {
     readonly name = "UInt8";
-    coerce(val: unknown): number | null { return toValidInt(val, "UInt8"); }
+    coerce(val: unknown): number | null { return toValidInt(val, { range: "UInt8" }); }
     equals(other: DataType): boolean { return other.name === "UInt8"; }
     allocate(size: number): Uint8Array { return new Uint8Array(size); }
 }
@@ -69,7 +69,7 @@ export const UInt8 = new UInt8Type();
 
 export class UInt16Type extends UnsignedIntegerType {
     readonly name = "UInt16";
-    coerce(val: unknown): number | null { return toValidInt(val, "UInt16"); }
+    coerce(val: unknown): number | null { return toValidInt(val, { range: "UInt16" }); }
     equals(other: DataType): boolean { return other.name === "UInt16"; }
     allocate(size: number): Uint16Array { return new Uint16Array(size); }
 }
@@ -77,7 +77,7 @@ export const UInt16 = new UInt16Type();
 
 export class UInt32Type extends UnsignedIntegerType {
     readonly name = "UInt32";
-    coerce(val: unknown): number | null { return toValidInt(val, "UInt32"); }
+    coerce(val: unknown): number | null { return toValidInt(val, { range: "UInt32" }); }
     equals(other: DataType): boolean { return other.name === "UInt32"; }
     allocate(size: number): Uint32Array { return new Uint32Array(size); }
 }
@@ -85,7 +85,7 @@ export const UInt32 = new UInt32Type();
 
 export class UInt64Type extends UnsignedIntegerType<bigint | null> {
     readonly name = "UInt64";
-    coerce(val: unknown): bigint | null { return toValidBigInt(val, "UInt64"); }
+    coerce(val: unknown): bigint | null { return toValidBigInt(val, { range: "UInt64" }); }
     equals(other: DataType): boolean { return other.name === "UInt64"; }
     allocate(size: number): BigUint64Array { return new BigUint64Array(size); }
 }
@@ -93,7 +93,7 @@ export const UInt64 = new UInt64Type();
 
 export class Float32Type extends FloatDataType {
     readonly name = "Float32";
-    coerce(val: unknown): number | null { return toValidFloat(val, { precision: "Float32" }); }
+    coerce(val: unknown): number | null { return toValidFloat(val, { floatPrecision: "Float32" }); }
     equals(other: DataType): boolean { return other.name === "Float32"; }
     allocate(size: number): Float32Array { return new Float32Array(size); }
 }
@@ -101,7 +101,7 @@ export const Float32 = new Float32Type();
 
 export class Float64Type extends FloatDataType {
     readonly name = "Float64";
-    coerce(val: unknown): number | null { return toValidFloat(val, { precision: "Float64" }); }
+    coerce(val: unknown): number | null { return toValidFloat(val, { floatPrecision: "Float64" }); }
     equals(other: DataType): boolean { return other.name === "Float64"; }
     allocate(size: number): Float64Array { return new Float64Array(size); }
 }

@@ -290,3 +290,18 @@ export function coerceColumn(col: ColumnData, type: RegisteredDataType, height: 
     return newCol;
 }
 
+export function writeStringToFileOrStream(
+    file: string | { write: (str: string) => void } | undefined,
+    content: string
+): void {
+    if (!file) return;
+    if (typeof file === "string") {
+        const fs = require("fs");
+        fs.writeFileSync(file, content, "utf8");
+    } else if (typeof file === "object" && typeof (file as any).write === "function") {
+        (file as any).write(content);
+    } else {
+        throw new TypeError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
+    }
+}
+

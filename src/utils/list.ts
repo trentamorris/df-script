@@ -157,6 +157,7 @@ export function getListStats(arr: unknown): {
     let count = 0;
     let nullCount = 0;
     let total = 0;
+    let sumCompensation = 0;
     let mean = 0;
     let M2 = 0;
 
@@ -172,7 +173,15 @@ export function getListStats(arr: unknown): {
 
         const n = toValidNumber(val);
         if (n !== null) {
-            total += n;
+            // Neumaier sum
+            const t = total + n;
+            if (Math.abs(total) >= Math.abs(n)) {
+                sumCompensation += (total - t) + n;
+            } else {
+                sumCompensation += (n - t) + total;
+            }
+            total = t;
+
             count++;
             const delta = n - mean;
             mean += delta / count;
@@ -184,11 +193,11 @@ export function getListStats(arr: unknown): {
     const variance = count > 1 ? M2 / (count - 1) : 0;
 
     return {
-        sum: count > 0 ? total : null,
+        sum: count > 0 ? total + sumCompensation : null,
         count,
         min: minVal,
         max: maxVal,
-        mean: count > 0 ? total / count : null,
+        mean: count > 0 ? (total + sumCompensation) / count : null,
         variance,
         std: Math.sqrt(variance),
         nullCount,

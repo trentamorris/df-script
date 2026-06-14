@@ -46,7 +46,7 @@ export class ArithmeticExpr extends ExprBase {
         }
 
         clip(lower: number | null = null, upper: number | null = null) {
-            return derive(this, kleeneUnary((v) => clamp(v, lower, upper)));
+            return derive(this, kleeneUnary((v) => clamp(v, { min: lower, max: upper })));
         }
 
         cos() {

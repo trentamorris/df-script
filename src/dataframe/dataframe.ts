@@ -1,10 +1,11 @@
 import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seq_range, all, evaluateExpression } from "../columnExpressions"
 import { GroupedData } from "./grouped/grouped"
 import { NEWLINE } from "./constants"
+import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions } from "../types"
-import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, ReadJSONOptions, WriteJSONOptions } from "./types"
+import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
-import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, safeJsonParse } from "../utils"
+import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
@@ -13,7 +14,8 @@ import {
     inferColumnType,
     gatherColumnsByIndices,
     computeRowHash,
-    coerceColumn
+    coerceColumn,
+    writeStringToFileOrStream
 } from "./utils"
 
 export class DataFrame<T extends RowRecord = any> {
@@ -518,8 +520,8 @@ export class DataFrame<T extends RowRecord = any> {
 
     limit(n: number, { offset = 0, from = "start" }: LimitOptions = {}): DataFrame<T> {
         const len = this._height;
-        const safeN = clamp(Math.floor(n), 0, len);
-        const safeOffset = clamp(Math.floor(offset), 0, len);
+        const safeN = clamp(Math.floor(n), { min: 0, max: len });
+        const safeOffset = clamp(Math.floor(offset), { min: 0, max: len });
 
         let actualStart = safeOffset;
         let actualEnd = Math.min(safeOffset + safeN, len);
@@ -606,22 +608,6 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
 
-    static read_json(
-        content: string,
-        {
-            format = "json",
-            trimBeforeParse = true,
-            schema,
-            ...parseOpts
-        }: ReadJSONOptions = {}
-    ): DataFrame<any> {
-        const parsed = safeJsonParse(content, { format, trimBeforeParse, ...parseOpts });
-        if (parsed === content) {
-            throw new DataFrameError(`Invalid JSON input: must be a valid, non-empty JSON ${format} string.`);
-        }
-        const parsedData = Array.isArray(parsed) ? parsed : (isObj(parsed) ? [parsed] : []);
-        return new DataFrame(parsedData, schema);
-    }
 
     rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> {
         const renameMapping = mapping || {};
@@ -1142,11 +1128,15 @@ export class DataFrame<T extends RowRecord = any> {
 
     write_json(
         file?: string | { write: (str: string) => void },
-        { format = "json", replacer }: WriteJSONOptions = {}
-    ): string | void {
+        { format = "json", replacerOptions }: WriteJSONOptions = {}
+    ): string {
         if (format !== "json" && format !== "ndjson") {
             throw new TypeError(`Unsupported JSON format: "${format}". Expected "json" or "ndjson".`);
         }
+
+        const safeReplacer = replacerOptions?.replacer === null
+            ? undefined
+            : createSafeJsonReplacer(replacerOptions);
 
         let jsonStr: string;
         if (format === "ndjson") {
@@ -1154,24 +1144,48 @@ export class DataFrame<T extends RowRecord = any> {
             const len = dicts.length;
             const lines = new Array(len);
             for (let i = 0; i < len; i++) {
-                lines[i] = JSON.stringify(dicts[i], replacer as any);
+                lines[i] = JSON.stringify(dicts[i], safeReplacer as any);
             }
             jsonStr = lines.join(NEWLINE);
         } else {
-            jsonStr = JSON.stringify(this.to_dicts(), replacer as any);
+            jsonStr = JSON.stringify(this.to_dicts(), safeReplacer as any);
         }
 
+        writeStringToFileOrStream(file, jsonStr);
+        return jsonStr;
+    }
+
+    write_csv(
+        file?: string | { write: (str: string) => void },
+        options: WriteCSVOptions = {}
+    ): string {
         if (file) {
             if (typeof file === "string") {
                 const fs = require("fs");
-                fs.writeFileSync(file, jsonStr, "utf8");
+                const fd = fs.openSync(file, "w");
+                try {
+                    stringifyCSV(this._columns, this._height, {
+                        ...options,
+                        onRow: (str) => {
+                            fs.writeSync(fd, str, null, "utf8");
+                        }
+                    });
+                } finally {
+                    fs.closeSync(fd);
+                }
             } else if (typeof file === "object" && typeof (file as any).write === "function") {
-                (file as any).write(jsonStr);
+                stringifyCSV(this._columns, this._height, {
+                    ...options,
+                    onRow: (str) => {
+                        (file as any).write(str);
+                    }
+                });
             } else {
                 throw new TypeError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
             }
-            return;
+            return "";
         }
-        return jsonStr;
+
+        return stringifyCSV(this._columns, this._height, options);
     }
 }

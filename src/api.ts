@@ -2,7 +2,7 @@ import { DataFrame } from "./dataframe"
 import { ColumnExpr, lit, all, exclude, coalesce, when, implode, seq_range, element } from "./columnExpressions"
 
 import { DataTypeRegistry, DataType } from "./datatypes"
-import { concat } from "./functions"
+import { concat, read_json, read_csv } from "./functions"
 import type { RowRecord, DataFrameSchema, ColumnDict, InferSchema } from "./types"
 
 function data<S extends DataFrameSchema>(data: any[] | ColumnDict, schema: S): DataFrame<InferSchema<S>>;
@@ -20,6 +20,8 @@ export const $df = {
     exclude,
     coalesce,
     concat,
+    read_json,
+    read_csv,
     lit,
     when,
     implode,
