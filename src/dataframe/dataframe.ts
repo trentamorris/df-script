@@ -436,7 +436,15 @@ export class DataFrame<T extends RowRecord = any> {
             const hash = getColumnHashAt(leftCols, i);
             const matches = hash === null ? undefined : rightHash.get(hash);
 
-            if (matches === undefined) {
+            if (how === "semi") {
+                if (matches !== undefined) {
+                    leftIndices.push(i);
+                }
+            } else if (how === "anti") {
+                if (matches === undefined) {
+                    leftIndices.push(i);
+                }
+            } else if (matches === undefined) {
                 if (how === "left" || how === "outer") {
                     leftIndices.push(i);
                     rightIndices.push(null);
@@ -451,6 +459,25 @@ export class DataFrame<T extends RowRecord = any> {
                     rightIndices.push(rIdx);
                 }
             }
+        }
+
+        if (how === "semi" || how === "anti") {
+            const outHeight = leftIndices.length;
+            const newColumns: ColumnDict = {};
+            const outSchema: DataFrameSchema = {};
+            for (let i = 0; i < leftLen; i++) {
+                const k = leftKeys[i];
+                const leftCol = this._columns[k];
+                const outCol = new Array(outHeight);
+                for (let r = 0; r < outHeight; r++) {
+                    outCol[r] = leftCol[leftIndices[r]];
+                }
+                newColumns[k] = outCol;
+                if (this._schema[k]) {
+                    outSchema[k] = this._schema[k];
+                }
+            }
+            return DataFrame._createDirect<R>(newColumns, outSchema, outHeight);
         }
 
         if (trackRight) {
@@ -1161,6 +1188,9 @@ export class DataFrame<T extends RowRecord = any> {
     ): string {
         if (file) {
             if (typeof file === "string") {
+                if (typeof require !== "function") {
+                    throw new Error("File writing is not supported in this environment (missing require('fs')).");
+                }
                 const fs = require("fs");
                 const fd = fs.openSync(file, "w");
                 try {

@@ -296,6 +296,9 @@ export function writeStringToFileOrStream(
 ): void {
     if (!file) return;
     if (typeof file === "string") {
+        if (typeof require !== "function") {
+            throw new Error("File writing is not supported in this environment (missing require('fs')).");
+        }
         const fs = require("fs");
         fs.writeFileSync(file, content, "utf8");
     } else if (typeof file === "object" && typeof (file as any).write === "function") {
