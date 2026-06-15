@@ -1,5 +1,7 @@
 # 🚀 DFScript
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-Donate-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/trentamorris)
+
 DFScript is a lightweight, high-performance, and **zero-dependency** data analysis library for TypeScript and JavaScript. Heavily inspired by modern dataframe libraries like **Polars** and **Pandas**, DFScript brings a robust, expression-based columnar data processing engine directly to the JavaScript ecosystem.
 
 With optimized columnar storage under the hood, DFScript enables you to build clean, maintainable, and type-safe data pipelines using a declarative expression API.
