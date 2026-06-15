@@ -30,11 +30,6 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 
 ## 🎯 V1.6.0 Release Scope
 
-### 🤝 Advanced Joins
-- [ ] **Semi-Join & Anti-Join Support**:
-  * Add `"semi"` and `"anti"` join options to the `join` method inside `DataFrame.ts`.
-  * Ensure they only select columns from the left DataFrame and do not join right-side columns, utilizing the existing hash matching logic.
-
 ### 📦 Build & Tree-Shaking (ESM Support)
 - [ ] **Dual CommonJS & ES Module (ESM) Build**:
   * Configure the build script to output both CommonJS (`dist/index.js`) and ESM (`dist/index.mjs`) bundles.
