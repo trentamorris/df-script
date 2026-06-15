@@ -20,11 +20,11 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement `.struct.field(name)` to extract inner fields from a struct column.
 
 ### 📂 File Input/Output (I/O)
-- [ ] **`read_csv` / `write_csv`**:
-  * Implement streaming delimiter-separated parser with automatic schema and type inference.
-  * Provide stringifying writers supporting multiple CSV dialects.
-- [ ] **`read_json` / `write_json`**:
-  * Parse standard JSON arrays and newline-delimited JSON (NDJSON) records.
+- [x] **`read_csv` / `write_csv`**:
+  * [x] Implement streaming delimiter-separated parser with automatic schema and type inference.
+  * [x] Provide stringifying writers supporting multiple CSV dialects.
+- [x] **`read_json` / `write_json`**:
+  * [x] Parse standard JSON arrays and newline-delimited JSON (NDJSON) records.
 
 ---
 
