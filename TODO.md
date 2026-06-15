@@ -28,5 +28,21 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 
 ---
 
-## 🛠️ Refactoring & Infrastructure
-- [ ] Transition more inline runtime exceptions to inherit from the centralized custom exception classes defined in `src/exceptions`.
+## 🎯 V1.6.0 Release Scope
+
+### 🤝 Advanced Joins
+- [ ] **Semi-Join & Anti-Join Support**:
+  * Add `"semi"` and `"anti"` join options to the `join` method inside `DataFrame.ts`.
+  * Ensure they only select columns from the left DataFrame and do not join right-side columns, utilizing the existing hash matching logic.
+
+### 📦 Build & Tree-Shaking (ESM Support)
+- [ ] **Dual CommonJS & ES Module (ESM) Build**:
+  * Configure the build script to output both CommonJS (`dist/index.js`) and ESM (`dist/index.mjs`) bundles.
+  * Update `package.json` with `"exports"` map supporting both `"require"` and `"import"` to enable tree-shaking for modern bundlers (Vite/Webpack).
+
+### 🛠️ Refactoring & Infrastructure
+- [ ] **Standardize Exception Assertions**:
+  * Centralize check-and-throw assertion helper functions and ensure all inline exceptions throw specialized classes from `src/exceptions/`.
+- [ ] **Performance Benchmarks**:
+  * Create a performance benchmark suite comparing `df-script` to standard JS array manipulations and alternative JS libraries for common operations (groupby, join, pivot).
+
