@@ -10,7 +10,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsc && esbuild src/index.ts --bundle --minify --outfile=dist/index.js --platform=node",
+    "build": "tsc --emitDeclarationOnly && esbuild src/index.ts --bundle --minify --outfile=dist/index.js --platform=node",
     "test": "tsx _tests/run_all_project_tests.ts",
     "prepublishOnly": "npm run build"
   },
