@@ -6,7 +6,7 @@ import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, Co
 import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
-import { assertColumnExists, assertHeight, DataFrameError, ShapeError } from "../exceptions"
+import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
     rowsToColumns,
@@ -314,29 +314,29 @@ export class DataFrame<T extends RowRecord = any> {
 
         if (row === undefined && column === undefined) {
             if (height !== 1 || width !== 1) {
-                throw new Error("DataFrame.item() can only be called without arguments if the shape is (1, 1).");
+                throw new DataFrameError("DataFrame.item() can only be called without arguments if the shape is (1, 1).");
             }
             return this._columns[keys[0]][0];
         }
 
         if (row === undefined || column === undefined) {
-            throw new Error("DataFrame.item() requires both row and column to be specified if not empty.");
+            throw new DataFrameError("DataFrame.item() requires both row and column to be specified if not empty.");
         }
 
         if (row < 0 || row >= height) {
-            throw new Error(`Row index ${row} is out of bounds for DataFrame height ${height}.`);
+            throw new ShapeError(`Row index ${row} is out of bounds for DataFrame height ${height}.`);
         }
 
         let colName: string;
         if (typeof column === "number") {
             if (column < 0 || column >= width) {
-                throw new Error(`Column index ${column} is out of bounds for DataFrame width ${width}.`);
+                throw new ShapeError(`Column index ${column} is out of bounds for DataFrame width ${width}.`);
             }
             colName = keys[column];
         } else {
             colName = column;
             if (this._columns[colName] === undefined) {
-                throw new Error(`Column "${colName}" does not exist.`);
+                throw new ColumnNotFoundError(colName);
             }
         }
 
