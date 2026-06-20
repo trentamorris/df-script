@@ -1,42 +1,41 @@
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, evaluateExpression } from "../utils";
-import { isArrayOrTypedArray, getListStats, sortList, computeMedian, getUniqueListStats, computeMode, isArrayOfType, stepSliceList, StepSliceListOptions, joinList } from "../../utils";
+import { isArrayOrTypedArray, getArrayStats, sortArray, SortArrayOptions, computeMedian, getUniqueArrayStats, computeMode, isArrayOfType, stepSliceArray, StepSliceArrayOptions, joinArray } from "../../utils";
 import { ComputeError } from "../../exceptions";
-import type { UniqueListStatsOptions, JoinListOptions, ExplodeOptions, IExpr } from "../../types";
+import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr } from "../../types";
 import { ELEMENT_MARKER } from "../constants";
 
-export class ListExprNamespace {
+export class ArrayExprNamespace {
     constructor(public expr: any) { }
 
-    _deriveList(fn: (arr: any[] | ArrayBufferView) => any) {
+    _deriveArray(fn: (arr: any[] | ArrayBufferView) => any) {
         return derive(this.expr, kleeneUnary((v) => {
             return isArrayOrTypedArray(v) ? fn(v as any) : null;
         }));
     }
 
     all() {
-        return this._deriveList((arr) => isArrayOfType(arr, (x) => !!x, { mode: "every" }));
+        return this._deriveArray((arr) => isArrayOfType(arr, (x) => !!x, { mode: "every" }));
     }
 
     any() {
-        return this._deriveList((arr) => isArrayOfType(arr, (x) => !!x, { mode: "some" }));
+        return this._deriveArray((arr) => isArrayOfType(arr, (x) => !!x, { mode: "some" }));
     }
 
     contains(item: any) {
-        return this._deriveList((arr: any) => arr.includes(item));
+        return this._deriveArray((arr: any) => arr.includes(item));
     }
 
     contains_all(items: ArrayLike<any>) {
-        return this._deriveList((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
+        return this._deriveArray((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
     }
 
     contains_any(items: ArrayLike<any>) {
-        return this._deriveList((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
+        return this._deriveArray((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
     }
 
-
     count_matches(item: any) {
-        return this._deriveList((arr: any) => {
+        return this._deriveArray((arr: any) => {
             let count = 0;
             const len = arr.length;
             for (let i = 0; i < len; i++) {
@@ -49,7 +48,7 @@ export class ListExprNamespace {
     }
 
     drop_nulls() {
-        return this._deriveList((arr: any) => {
+        return this._deriveArray((arr: any) => {
             const len = arr.length;
             const result: any[] = [];
             for (let i = 0; i < len; i++) {
@@ -125,7 +124,7 @@ export class ListExprNamespace {
         indices: number | ArrayLike<number>,
         null_on_oob: boolean = true
     ) {
-        return this._deriveList((arr: any) => {
+        return this._deriveArray((arr: any) => {
             const len = arr.length;
             const idxs = isArrayOrTypedArray(indices) ? indices : [indices];
             const numIndices = idxs.length;
@@ -134,7 +133,7 @@ export class ListExprNamespace {
                 const index = idxs[i];
                 const val = arr.at(index);
                 if (val === undefined && !null_on_oob) {
-                    throw new ComputeError(`Index ${index} is out of bounds for list of length ${len}`);
+                    throw new ComputeError(`Index ${index} is out of bounds for array of length ${len}`);
                 }
                 res[i] = val ?? null;
             }
@@ -142,22 +141,22 @@ export class ListExprNamespace {
         });
     }
 
-    gather_every(options: StepSliceListOptions = {}) {
-        return this._deriveList((arr: any) => stepSliceList(arr, options));
+    gather_every(options: StepSliceArrayOptions = {}) {
+        return this._deriveArray((arr: any) => stepSliceArray(arr, options));
     }
 
     get(index: number, null_on_oob: boolean = true) {
-        return this._deriveList((arr: any) => {
+        return this._deriveArray((arr: any) => {
             const val = arr.at(index);
             if (val === undefined && !null_on_oob) {
-                throw new ComputeError(`Index ${index} is out of bounds for list of length ${arr.length}`);
+                throw new ComputeError(`Index ${index} is out of bounds for array of length ${arr.length}`);
             }
             return val ?? null;
         });
     }
 
-    join(separator: string = ",", options: JoinListOptions = {}) {
-        return this._deriveList((arr: any) => joinList(arr, separator, options));
+    join(separator: string = ",", options: JoinArrayOptions = {}) {
+        return this._deriveArray((arr: any) => joinArray(arr, separator, options));
     }
 
     last(null_on_oob: boolean = true) {
@@ -169,39 +168,39 @@ export class ListExprNamespace {
     }
 
     lengths() {
-        return this._deriveList((arr: any) => arr.length);
+        return this._deriveArray((arr: any) => arr.length);
     }
 
     max() {
-        return this._deriveList((arr) => getListStats(arr).max);
+        return this._deriveArray((arr) => getArrayStats(arr).max);
     }
 
     mean() {
-        return this._deriveList((arr) => getListStats(arr).mean);
+        return this._deriveArray((arr) => getArrayStats(arr).mean);
     }
 
     median() {
-        return this._deriveList((arr: any) => computeMedian(arr));
+        return this._deriveArray((arr: any) => computeMedian(arr));
     }
 
     min() {
-        return this._deriveList((arr) => getListStats(arr).min);
+        return this._deriveArray((arr) => getArrayStats(arr).min);
     }
 
     mode() {
-        return this._deriveList((arr: any) => computeMode(arr));
+        return this._deriveArray((arr: any) => computeMode(arr));
     }
 
-    n_unique(options: UniqueListStatsOptions = {}) {
-        return this._deriveList((arr: any) => getUniqueListStats(arr, options).count);
+    n_unique(options: UniqueArrayStatsOptions = {}) {
+        return this._deriveArray((arr: any) => getUniqueArrayStats(arr, options).count);
     }
 
     reverse() {
-        return this._deriveList((arr: any) => arr.slice().reverse());
+        return this._deriveArray((arr: any) => arr.slice().reverse());
     }
 
     slice(offset: number, length?: number) {
-        return this._deriveList((arr: any) => {
+        return this._deriveArray((arr: any) => {
             const len = arr.length;
             const start = offset < 0 ? Math.max(0, len + offset) : offset;
             const end = length !== undefined ? start + length : len;
@@ -209,16 +208,16 @@ export class ListExprNamespace {
         });
     }
 
-    sort(descending: boolean = false) {
-        return this._deriveList((arr) => sortList(arr, descending));
+    sort(options?: SortArrayOptions) {
+        return this._deriveArray((arr) => sortArray(arr, options));
     }
 
     sum() {
-        return this._deriveList((arr) => getListStats(arr).sum);
+        return this._deriveArray((arr) => getArrayStats(arr).sum);
     }
 
-    unique(options: UniqueListStatsOptions = {}) {
-        return this._deriveList((arr: any) => getUniqueListStats(arr, options).values);
+    unique(options: UniqueArrayStatsOptions = {}) {
+        return this._deriveArray((arr: any) => getUniqueArrayStats(arr, options).values);
     }
 
     eval(expr: IExpr) {
@@ -246,11 +245,10 @@ export class ListExprNamespace {
             return result;
         });
     }
-
 }
 
-export class ListExpr extends ExprBase {
-    get list() {
-        return new ListExprNamespace(this);
+export class ArrayExpr extends ExprBase {
+    get arr() {
+        return new ArrayExprNamespace(this);
     }
 }

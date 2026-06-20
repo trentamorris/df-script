@@ -1,6 +1,6 @@
 import { ExprBase, derive } from "../ExprBase"
 import { kleeneUnary, kleeneBinary } from "../utils"
-import { isArrayOrTypedArray, isArrayOfType, isValidNumber, toCanonicalString, getUniqueListStats } from "../../utils"
+import { isArrayOrTypedArray, isArrayOfType, isValidNumber, toCanonicalString, getUniqueArrayStats } from "../../utils"
 
 function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any, invert: boolean): any[] {
     const height = vArray.length;
@@ -47,7 +47,7 @@ function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any, invert: 
 }
 
 function evaluateDuplication(vArray: ArrayLike<any>, checkDuplicate: boolean): boolean[] {
-    const { frequencies } = getUniqueListStats(vArray, { strict: true });
+    const { frequencies } = getUniqueArrayStats(vArray, { strict: true });
     const height = vArray.length;
     const result = new Array(height);
     for (let i = 0; i < height; i++) {

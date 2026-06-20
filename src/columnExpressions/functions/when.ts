@@ -1,8 +1,8 @@
 import { ColumnExpr } from "../ColumnExpr";
-import type { IExpr, Scalar } from "../../types";
+import type { IExpr, ValidScalarTypes } from "../../types";
 import { isArrayOrTypedArray } from "../../utils";
 
-type WhenArg = IExpr | Scalar;
+type WhenArg = IExpr | ValidScalarTypes;
 
 export class WhenThenChain {
     private predicates: WhenArg[];

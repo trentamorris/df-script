@@ -1,6 +1,16 @@
 import { isTypedArray, isPlainObj } from "./guards";
 import { isValidDateObj } from "./date";
 
+export function isBlankString(v: unknown): v is string {
+    if (typeof v === "string") {
+        return v.trim().length === 0;
+    }
+    if (v instanceof String) {
+        return v.valueOf().trim().length === 0;
+    }
+    return false;
+}
+
 export type StripMode = "both" | "start" | "end";
 
 export type StripCharsOptions = {
@@ -51,13 +61,16 @@ export type StripCharsOptions = {
     };
 };
 
-/**
- * Strips characters from the start, end, or both ends of a string.
- */
 export function stripChars(
     str: string | null | undefined,
     characters: string | RegExp | null = null,
-    {
+    options: StripCharsOptions = {}
+): string | null {
+    if (str == null) {
+        return options.returnStringOnNull ? "" : null;
+    }
+
+    const {
         mode = "both",
         returnStringOnNull = false,
         maxScanStart = 1,
@@ -65,12 +78,10 @@ export function stripChars(
         maxMatchesStart = 1,
         maxMatchesEnd = 1,
         trimFirst = false,
-        stringOptions: { literal = false, caseInsensitive = false } = {}
-    }: StripCharsOptions = {}
-): string | null {
-    if (str == null) {
-        return returnStringOnNull ? "" : null;
-    }
+        stringOptions
+    } = options;
+
+    const { literal = false, caseInsensitive = false } = stringOptions ?? {};
 
     const trimString = (s: string, m: StripMode = "both"): string => {
         if (m === "start") return s.trimStart();
@@ -89,22 +100,47 @@ export function stripChars(
     }
 
     const matches = characters instanceof RegExp
-        ? (char: string) => characters.test(char)
+        ? (char: string) => {
+            try {
+                characters.lastIndex = 0;
+            } catch { }
+            return characters.test(char);
+        }
         : (() => {
             const targetSet = new Set(caseInsensitive ? (characters as string).toLowerCase() : characters);
             return (char: string) => targetSet.has(caseInsensitive ? char.toLowerCase() : char);
         })();
 
     const len = workStr.length;
+
+    const isDefaultScan = maxScanStart === 1 && maxMatchesStart === 1 && maxScanEnd === 1 && maxMatchesEnd === 1;
+    if (isDefaultScan && !literal) {
+        let startIndex = 0;
+        let endIndex = len;
+
+        if (mode === "both" || mode === "start") {
+            while (startIndex < len && matches(workStr[startIndex])) {
+                startIndex++;
+            }
+        }
+
+        if (mode === "both" || mode === "end") {
+            while (endIndex > startIndex && matches(workStr[endIndex - 1])) {
+                endIndex--;
+            }
+        }
+
+        const result = startIndex === 0 && endIndex === len ? workStr : workStr.substring(startIndex, endIndex);
+        return (returnStringOnNull || result !== "") ? result : null;
+    }
+
     const stripped = new Uint8Array(len);
 
-    type ScanArgs = {
-        isStart: boolean;
-        limit: number | null;
-        maxMatches: number | null;
-    };
-
-    const scanNonLiteral = ({ isStart, limit, maxMatches }: ScanArgs) => {
+    const scanNonLiteral = (
+        isStart: boolean,
+        limit: number | null,
+        maxMatches: number | null
+    ): void => {
         if (len === 0 || maxMatches === 0) {
             return;
         }
@@ -133,25 +169,28 @@ export function stripChars(
             } else {
                 inBlock = false;
                 totalSkipped++;
+                if (limit !== null && limit >= 0 && totalSkipped >= limit) {
+                    break;
+                }
             }
         }
     };
 
-    const scanLiteral = ({ isStart, limit, maxMatches }: ScanArgs) => {
-        if (len === 0 || maxMatches === 0) {
+    const scanLiteral = (
+        patStr: string,
+        patLen: number,
+        isStart: boolean,
+        limit: number | null,
+        maxMatches: number | null
+    ): void => {
+        if (len === 0 || maxMatches === 0 || patLen === 0) {
             return;
         }
-        const patLen = (characters as string).length;
-        if (patLen === 0) {
-            return;
-        }
-
-        const searchStr = caseInsensitive ? workStr.toLowerCase() : workStr;
-        const patStr = caseInsensitive ? (characters as string).toLowerCase() : (characters as string);
 
         let currentIdx = isStart ? 0 : len - 1;
         let matchesFound = 0;
         let totalSkipped = 0;
+        const searchStr = caseInsensitive ? workStr.toLowerCase() : workStr;
 
         while (currentIdx >= 0 && currentIdx < len) {
             if (maxMatches !== null && maxMatches >= 0 && matchesFound >= maxMatches) {
@@ -188,14 +227,22 @@ export function stripChars(
         }
     };
 
-    const isLiteral = literal && typeof characters === "string";
-    const scan = isLiteral ? scanLiteral : scanNonLiteral;
-
     if (mode === "both" || mode === "start") {
-        scan({ isStart: true, limit: maxScanStart, maxMatches: maxMatchesStart });
+        if (literal && typeof characters === "string") {
+            const patStr = caseInsensitive ? characters.toLowerCase() : characters;
+            scanLiteral(patStr, characters.length, true, maxScanStart, maxMatchesStart);
+        } else {
+            scanNonLiteral(true, maxScanStart, maxMatchesStart);
+        }
     }
+
     if (mode === "both" || mode === "end") {
-        scan({ isStart: false, limit: maxScanEnd, maxMatches: maxMatchesEnd });
+        if (literal && typeof characters === "string") {
+            const patStr = caseInsensitive ? characters.toLowerCase() : characters;
+            scanLiteral(patStr, characters.length, false, maxScanEnd, maxMatchesEnd);
+        } else {
+            scanNonLiteral(false, maxScanEnd, maxMatchesEnd);
+        }
     }
 
     let result = "";
@@ -205,16 +252,6 @@ export function stripChars(
         }
     }
     return (returnStringOnNull || result !== "") ? result : null;
-}
-
-export function isBlankString(v: unknown): v is string {
-    if (typeof v === "string") {
-        return v.trim().length === 0;
-    }
-    if (v instanceof String) {
-        return v.valueOf().trim().length === 0;
-    }
-    return false;
 }
 
 export function toCanonicalString(
@@ -275,7 +312,10 @@ export function toCanonicalString(
     }
 
     if (typeof val === "object" && typeof val.toJSON === "function") {
-        return `j:${toCanonicalString(val.toJSON(), { depth: depth + 1, maxDepth })}`;
+        const jsonVal = val.toJSON();
+        if (jsonVal !== val) {
+            return `j:${toCanonicalString(jsonVal, { depth: depth + 1, maxDepth })}`;
+        }
     }
 
     if (isPlainObj(val)) {
@@ -308,3 +348,4 @@ export function toCanonicalString(
 
     return `${typeof val}:${val}`;
 }
+

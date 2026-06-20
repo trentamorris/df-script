@@ -151,7 +151,7 @@ export class DataFrame<T extends RowRecord = any> {
             const key = keys[i];
             selectList.push(
                 colsToExplode.has(key)
-                    ? new ColumnExpr(key).list.explode(options)
+                    ? new ColumnExpr(key).arr.explode(options)
                     : new ColumnExpr(key)
             );
         }
@@ -869,7 +869,7 @@ export class DataFrame<T extends RowRecord = any> {
         return columnsToRows(this._columns, this._height);
     }
 
-    to_list<K extends keyof T>(nameOrExpr: K | IExpr): any[] {
+    to_array<K extends keyof T>(nameOrExpr: K | IExpr): any[] {
         if (this._height === 0) return [];
         if (nameOrExpr == null) {
             return new Array(this._height).fill(null);
@@ -1176,7 +1176,7 @@ export class DataFrame<T extends RowRecord = any> {
                 } finally {
                     fs.closeSync(fd);
                 }
-            } else if (typeof file === "object" && typeof (file as any).write === "function") {
+            } else if (isObj(file) && typeof (file as any).write === "function") {
                 stringifyCSV(this._columns, this._height, {
                     ...options,
                     onRow: (str) => {

@@ -75,6 +75,8 @@ try {
         $df.col("val3").tanh().alias("tanh"),
         $df.col("val3").trunc().alias("trunc"),
         $df.col("val1").sub($df.col("val2")).alias("sub_expr"),
+        $df.col("val2").atan2($df.col("val1")).alias("atan2_val"),
+        $df.col("val3").copysign($df.col("val1")).alias("copysign_val"),
         $df.col("val1").rand().alias("rand_no_seed"),
         $df.col("val1").rand(42).alias("rand_seed_42_a"),
         $df.col("val1").rand(42).alias("rand_seed_42_b"),
@@ -137,6 +139,8 @@ try {
     if (Math.abs(r0.tanh - Math.tanh(-5.5)) > 1e-6) throw new Error(`tanh failed: got ${r0.tanh}`);
     if (r0.trunc !== -5) throw new Error(`trunc failed: expected -5, got ${r0.trunc}`);
     if (r0.sub_expr !== 7) throw new Error(`sub_expr failed: expected 7, got ${r0.sub_expr}`);
+    if (Math.abs(r0.atan2_val - Math.atan2(3, 10)) > 1e-6) throw new Error(`atan2 failed`);
+    if (r0.copysign_val !== 5.5) throw new Error(`copysign failed: expected 5.5, got ${r0.copysign_val}`);
     if (r0.rand_no_seed < 0 || r0.rand_no_seed >= 1) throw new Error(`rand_no_seed out of range: ${r0.rand_no_seed}`);
     if (r0.rand_seed_42_a !== r0.rand_seed_42_b) throw new Error(`seeded random mismatch: ${r0.rand_seed_42_a} vs ${r0.rand_seed_42_b}`);
     if (r0.rand_seed_42_a === r0.rand_seed_99) throw new Error(`seeded random collision with different seeds`);
@@ -196,6 +200,8 @@ try {
     if (Math.abs(r1.tanh - Math.tanh(4.88)) > 1e-6) throw new Error(`tanh failed: got ${r1.tanh}`);
     if (r1.trunc !== 4) throw new Error(`trunc failed: expected 4, got ${r1.trunc}`);
     if (r1.sub_expr !== -25) throw new Error(`sub_expr failed: expected -25, got ${r1.sub_expr}`);
+    if (Math.abs(r1.atan2_val - Math.atan2(5, -20)) > 1e-6) throw new Error(`atan2 row 1 failed`);
+    if (r1.copysign_val !== -4.88) throw new Error(`copysign row 1 failed: expected -4.88, got ${r1.copysign_val}`);
     if (r1.rand_no_seed < 0 || r1.rand_no_seed >= 1) throw new Error(`rand_no_seed out of range: ${r1.rand_no_seed}`);
     if (r1.rand_seed_42_a !== r1.rand_seed_42_b) throw new Error(`seeded random mismatch: ${r1.rand_seed_42_a} vs ${r1.rand_seed_42_b}`);
     if (r1.rand_seed_42_a === r1.rand_seed_99) throw new Error(`seeded random collision with different seeds`);

@@ -125,23 +125,21 @@ export class StringExprNamespace {
         return this.lpad(width, fill);
     }
 
-    replace(pattern: string | RegExp, replacement: string) {
+    replace(
+        pattern: string | RegExp,
+        replacement: string | ((match: string, ...args: any[]) => string)
+    ) {
         return this._patternGuard(pattern, () =>
-            this._deriveString((str) => str.replace(pattern, replacement))
+            this._deriveString((str) => str.replace(pattern, replacement as any))
         );
     }
 
-    replace_all(pattern: string | RegExp, replacement: string) {
+    replace_all(
+        pattern: string | RegExp,
+        replacement: string | ((match: string, ...args: any[]) => string)
+    ) {
         return this._patternGuard(pattern, () =>
-            this._deriveString((str) => {
-                if (pattern instanceof RegExp) {
-                    const regex = pattern.global
-                        ? pattern
-                        : new RegExp(pattern.source, pattern.flags + "g");
-                    return str.replace(regex, replacement);
-                }
-                return str.replaceAll(pattern, replacement);
-            })
+            this._deriveString((str) => str.replaceAll(pattern, replacement as any))
         );
     }
 

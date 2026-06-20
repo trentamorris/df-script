@@ -66,7 +66,7 @@ assertThrows(() => dfDummy.pivot({ index: "a" as any, columns: "c" as any, value
 assertThrows(() => dfDummy.unique("c" as any), "Unique column key \"c\" does not exist");
 assertThrows(() => dfDummy.unpivot({ idVars: "a" as any, valueVars: "c" as any }), "Unpivot value variable key \"c\" does not exist");
 assertThrows(() => dfDummy.sort({ by: "c" as any }), "Sort key \"c\" does not exist");
-assertThrows(() => dfDummy.to_list("c" as any), "Column \"c\" does not exist");
+assertThrows(() => dfDummy.to_array("c" as any), "Column \"c\" does not exist");
 
 // 5. Duplicate selection error in select
 assertThrows(() => dfDummy.select("a", "a"), "Duplicate column selection");

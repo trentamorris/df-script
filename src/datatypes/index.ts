@@ -11,16 +11,16 @@ import {
     Float32,
     Float64,
     DecimalType,
-    Boolean,
+    BooleanDataType as Boolean,
     Utf8,
     Binary,
-    Date,
+    DateDataType as Date,
     Datetime,
     Time,
     Duration,
-    Object,
+    ObjectDataType as Object,
     Null,
-    List,
+    ArrayDataType as Array,
     Struct
 } from "./types";
 
@@ -47,9 +47,10 @@ export const DataTypeRegistry = {
     Duration,
     Object,
     Null,
-    List,
+    Array,
     Struct
 };
 
+export { Boolean, Date, Object, Array };
 export * from "./types";
 export * from "./DataType";

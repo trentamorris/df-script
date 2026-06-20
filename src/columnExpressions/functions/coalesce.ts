@@ -1,13 +1,13 @@
 import { ColumnExpr } from "../ColumnExpr";
-import type { IExpr, Scalar } from "../../types";
+import type { IExpr, ValidScalarTypes } from "../../types";
 import { isArrayOrTypedArray } from "../../utils";
 import { COALESCE_MARKER } from "../constants";
 
 
-export function coalesce(...exprs: (IExpr | Scalar | (IExpr | Scalar)[])[]): ColumnExpr<any> {
+export function coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))
-        ? (exprs[0] as (IExpr | Scalar)[])
-        : (exprs as (IExpr | Scalar)[]);
+        ? (exprs[0] as (IExpr | ValidScalarTypes)[])
+        : (exprs as (IExpr | ValidScalarTypes)[]);
 
     const expr = new ColumnExpr(COALESCE_MARKER);
     expr.ops.push((_, columns) => {

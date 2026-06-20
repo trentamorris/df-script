@@ -72,7 +72,11 @@ try {
         $df.col("phrase").str.ends_with("!").alias("ends_with_excl"),
         $df.col("phrase").str.starts_with("DF").alias("starts_with_df"),
         $df.col("phrase").str.replace("is", "was").alias("replaced"),
-        $df.col("phrase").str.replace_all("e", "3").alias("replaced_all")
+        $df.col("phrase").str.replace_all("e", "3").alias("replaced_all"),
+        $df.col("phrase").str.replace(/IS/i, "was").alias("replaced_ci"),
+        $df.col("phrase").str.replace_all(/E/gi, "3").alias("replaced_all_ci"),
+        $df.col("phrase").str.replace("awesome", (m) => m.toUpperCase()).alias("replaced_fn"),
+        $df.col("phrase").str.replace_all("e", (m) => "3").alias("replaced_all_fn")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.str results:");
@@ -118,6 +122,10 @@ try {
     if (r0.starts_with_df !== true) throw new Error(`Expected r0.starts_with_df to be true, got ${r0.starts_with_df}`);
     if (r0.replaced !== "DFScript was awesome!") throw new Error(`Expected r0.replaced to be "DFScript was awesome!", got ${r0.replaced}`);
     if (r0.replaced_all !== "DFScript is aw3som3!") throw new Error(`Expected r0.replaced_all to be "DFScript is aw3som3!", got ${r0.replaced_all}`);
+    if (r0.replaced_ci !== "DFScript was awesome!") throw new Error(`Expected r0.replaced_ci to be "DFScript was awesome!", got ${r0.replaced_ci}`);
+    if (r0.replaced_all_ci !== "DFScript is aw3som3!") throw new Error(`Expected r0.replaced_all_ci to be "DFScript is aw3som3!", got ${r0.replaced_all_ci}`);
+    if (r0.replaced_fn !== "DFScript is AWESOME!") throw new Error(`Expected r0.replaced_fn to be "DFScript is AWESOME!", got ${r0.replaced_fn}`);
+    if (r0.replaced_all_fn !== "DFScript is aw3som3!") throw new Error(`Expected r0.replaced_all_fn to be "DFScript is aw3som3!", got ${r0.replaced_all_fn}`);
 
     // Assert Row 1
     const r1 = projected[1];

@@ -49,7 +49,7 @@ try {
     if (coercedData[2].is_active !== null) throw new Error(`Expected is_active null, got ${coercedData[2].is_active}`);
     if (coercedData[0].missing_col !== null) throw new Error(`Expected missing_col null, got ${coercedData[0].missing_col}`);
 
-    // 3. Test List and Struct types coercion
+    // 3. Test Array and Struct types coercion
     const complexData = [
         {
             tags: ["ts", "js"],
@@ -62,7 +62,7 @@ try {
     ];
 
     const complexSchema = {
-        tags: $df.DataType.List($df.DataType.Utf8),
+        tags: $df.DataType.Array($df.DataType.Utf8),
         info: $df.DataType.Struct({
             val: $df.DataType.Int32,
             label: $df.DataType.Utf8
@@ -72,12 +72,12 @@ try {
     const dfComplex = $df.data(complexData, complexSchema);
     const complexResult = dfComplex.to_dicts() as any[];
 
-    console.log("\nComplex List & Struct Coerced Result:");
+    console.log("\nComplex Array & Struct Coerced Result:");
     console.dir(complexResult, { depth: null });
 
     // Assert complex types
-    if (complexResult[0].tags[0] !== "ts" || complexResult[0].tags[1] !== "js") throw new Error("List string coercion failed");
-    if (complexResult[1].tags[0] !== "100") throw new Error("List element numeric-to-string coercion failed");
+    if (complexResult[0].tags[0] !== "ts" || complexResult[0].tags[1] !== "js") throw new Error("Array string coercion failed");
+    if (complexResult[1].tags[0] !== "100") throw new Error("Array element numeric-to-string coercion failed");
     if (complexResult[0].info.val !== 10) throw new Error("Struct field Int32 preserve failed");
     if (complexResult[1].info.val !== 20) throw new Error("Struct field String-to-Int32 coercion failed");
     if (complexResult[1].info.label !== "B") throw new Error("Struct field label string preserve failed");
@@ -96,7 +96,7 @@ try {
     if (!(cols.age instanceof Int32Array)) throw new Error("Expected age column array to be instantiated as Int32Array");
     if (!(cols.price instanceof Float64Array)) throw new Error("Expected price column array to be instantiated as Float64Array");
 
-    // 5. Test nested TypedArrays list type inference
+    // 5. Test nested TypedArrays array type inference
     const listTypedArrayData = {
         nested_lists: [
             new Int32Array([1, 2]),
@@ -105,8 +105,8 @@ try {
     };
     const listTypedArrayDf = $df.data(listTypedArrayData);
     const listTypedArraySchema = listTypedArrayDf.get_schema();
-    if (listTypedArraySchema.nested_lists.name !== "List") throw new Error(`Expected nested_lists schema to be List, got ${listTypedArraySchema.nested_lists.name}`);
-    if ((listTypedArraySchema.nested_lists as any).innerType.name !== "Int32") throw new Error(`Expected nested list inner type to be Int32, got ${(listTypedArraySchema.nested_lists as any).innerType.name}`);
+    if (listTypedArraySchema.nested_lists.name !== "Array") throw new Error(`Expected nested_lists schema to be Array, got ${listTypedArraySchema.nested_lists.name}`);
+    if ((listTypedArraySchema.nested_lists as any).innerType.name !== "Int32") throw new Error(`Expected nested array inner type to be Int32, got ${(listTypedArraySchema.nested_lists as any).innerType.name}`);
 
     console.log("\n🎉 ALL SCHEMA AND DATATYPE TESTS PASSED!");
 } catch (e) {

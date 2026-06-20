@@ -139,7 +139,10 @@ export function isValidDate(v: unknown): v is string | number | bigint | Date {
 }
 
 export function isValidDateObj(d: unknown): d is Date {
-    return d instanceof Date && !Number.isNaN(d.getTime());
+    if (d === null || typeof d !== "object") return false;
+    if (Object.prototype.toString.call(d) !== "[object Date]") return false;
+
+    return !Number.isNaN(Number(d));
 }
 
 export function normalizeEpochToMs(n: number): number {

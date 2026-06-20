@@ -1,104 +1,138 @@
+import type { ValidScalarTypes } from "../types";
 import { isValidDateObj } from "./date";
-import { isValidInt } from "./number";
 
-export function isTypedArray(v: unknown): v is ArrayBufferView {
-    return ArrayBuffer.isView(v) && !(v instanceof DataView);
+/** Array Guards **/
+export type AnyTypedArray = ArrayBufferView & ArrayLike<number | bigint> & Iterable<number | bigint>;
+const typedArrayTagGetter = (() => {
+    try {
+        const sample = new Uint8Array(0);
+        const proto = Object.getPrototypeOf(sample);
+        const superProto = Object.getPrototypeOf(proto);
+        const getter = Object.getOwnPropertyDescriptor(superProto, Symbol.toStringTag)?.get;
+        if (getter && getter.call(sample) === "Uint8Array") return getter;
+        return undefined;
+    } catch {
+        return undefined;
+    }
+})();
+export function isTypedArray(v: unknown): v is AnyTypedArray {
+    if (!ArrayBuffer.isView(v)) return false;
+    if (typedArrayTagGetter) return typedArrayTagGetter.call(v) !== undefined;
+    const tag = Object.prototype.toString.call(v);
+    return tag !== "[object DataView]" && tag.endsWith("Array]");
 }
-
-export function isArrayOrTypedArray(v: unknown): v is ArrayLike<any> & Iterable<any> {
+export function isArrayOrTypedArray(v: unknown): v is any[] | AnyTypedArray {
     return Array.isArray(v) || isTypedArray(v);
 }
 
-export function isNonEmptyArray<T = unknown>(arr: unknown): arr is ArrayLike<T> {
-    return isArrayOrTypedArray(arr) && arr.length > 0;
-}
-
-export function isNonEmptyArrayObjs<T extends object>(arr: unknown): arr is T[] {
-    if (!isNonEmptyArray(arr)) return false;
-    const len = (arr as any).length;
-    for (let i = 0; i < len; i++) {
-        if (!isObj((arr as any)[i])) return false;
+/** Object Guards **/
+const dateValueOf = Object.getOwnPropertyDescriptor(Date.prototype, "valueOf")?.value;
+const regExpSource = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(/./), "source")?.get;
+export function isObj(v: unknown): v is Record<PropertyKey, unknown> {
+    if (v === null || typeof v !== "object" || Array.isArray(v)) {
+        return false;
+    }
+    const tag = Object.prototype.toString.call(v);
+    if (tag === "[object Date]") {
+        if (!dateValueOf) return false;
+        try {
+            dateValueOf.call(v);
+            return false;
+        } catch {
+            return true;
+        }
+    }
+    if (tag === "[object RegExp]") {
+        if (!regExpSource) return false;
+        try {
+            regExpSource.call(v);
+            return false;
+        } catch {
+            return true;
+        }
     }
     return true;
 }
-
-export function isNonEmptyObj(v: unknown): v is Record<string, unknown> {
-    return isObj(v) && Object.keys(v).length > 0;
-}
-
-export function isObj(v: unknown): v is Record<string, unknown> {
-    return v !== null && typeof v === "object" && !Array.isArray(v);
-}
-
-export function isPlainObj(v: unknown): v is Record<string, unknown> {
+export function isPlainObj(v: unknown): v is Record<PropertyKey, unknown> {
     if (!isObj(v)) return false;
+
     const proto = Object.getPrototypeOf(v);
-    return proto === null || proto === Object.prototype;
+    if (proto === null) return true;
+
+    const ctor = Object.prototype.hasOwnProperty.call(proto, "constructor") && proto.constructor;
+    if (typeof ctor !== "function") return false;
+    if (ctor.prototype !== proto) return false;
+    if (!(ctor instanceof ctor)) return false;
+
+    return Object.getPrototypeOf(proto) === null;
 }
 
+/** Class Guards **/
 export function isClass(v: unknown): v is new (...args: any[]) => any {
     if (typeof v !== "function") return false;
-    return (
-        /^class\s/.test(Function.prototype.toString.call(v)) ||
-        (v.prototype !== undefined &&
-            v.prototype.constructor === v &&
-            Object.getOwnPropertyDescriptor(v, "prototype")?.writable === false)
-    );
-}
 
-export function isScalar(v: unknown): v is string | number | boolean | bigint | Date | Uint8Array {
-    return (
-        typeof v === "string" ||
-        typeof v === "number" ||
-        typeof v === "boolean" ||
-        typeof v === "bigint" ||
-        isValidDateObj(v) ||
-        v instanceof Uint8Array
-    );
-}
+    let fnStr = "";
+    try { fnStr = Function.prototype.toString.call(v) } catch { return false }
 
-export function isValidBinary(v: unknown): v is Uint8Array | string | ArrayLike<any> {
-    if (v == null) return false;
-    if (v instanceof Uint8Array) return true;
-    if (typeof v === "string") return true;
-    if (Array.isArray(v)) {
-        const len = v.length;
-        for (let i = 0; i < len; i++) {
-            if (!isValidInt(v[i], { min: -128, max: 255 })) {
-                return false;
-            }
-        }
-        return true;
-    }
-    if (isTypedArray(v)) {
-        return true;
-    }
+    if (/^class[\s{]/.test(fnStr)) return true;
+    if (v === Symbol || v === BigInt) return false;
+
+    const desc = Object.getOwnPropertyDescriptor(v, "prototype");
+    if (desc && !desc.writable) return fnStr.includes("[native code]");
+
     return false;
 }
 
+/** Scalar & Conversion Guards **/
+export function isScalar<V>(v: V): v is Extract<V, Exclude<ValidScalarTypes, null | undefined>> {
+    if (v === null || v === undefined) return false;
+
+    switch (typeof v) {
+        case "string":
+        case "boolean":
+        case "bigint":
+            return true;
+        case "number":
+            return !Number.isNaN(v);
+        case "object": {
+            const tag = Object.prototype.toString.call(v);
+            switch (tag) {
+                case "[object String]":
+                case "[object Boolean]":
+                    return true;
+                case "[object Number]":
+                    return !Number.isNaN(Number(v));
+                case "[object Date]":
+                    return isValidDateObj(v);
+                case "[object Uint8Array]":
+                    return ArrayBuffer.isView(v);
+                default:
+                    return false;
+            }
+        }
+        default:
+            return false;
+    }
+}
+
+export function isValidBinary(v: unknown): v is string | any[] | AnyTypedArray {
+    if (v === null || v === undefined) return false;
+    if (typeof v === "string") return true;
+    if (isTypedArray(v)) return true;
+    return Array.isArray(v);
+}
 export function toValidBinary(v: unknown): Uint8Array | null {
     if (!isValidBinary(v)) return null;
-    if (v instanceof Uint8Array) return v;
+    if (Object.prototype.toString.call(v) === "[object Uint8Array]") {
+        return v as Uint8Array;
+    }
     if (typeof v === "string") {
         return new TextEncoder().encode(v);
     }
-    if (ArrayBuffer.isView(v)) {
-        return new Uint8Array(v.buffer, v.byteOffset, v.byteLength);
+    if (isTypedArray(v)) {
+        return new Uint8Array(v.buffer.slice(v.byteOffset, v.byteOffset + v.byteLength));
     }
     return new Uint8Array(v as any);
-}
-
-const boolMap: Record<string, boolean> = {
-    true: true, "1": true, yes: true, y: true, on: true,
-    false: false, "0": false, no: false, n: false, off: false
-};
-
-export function tryParseBoolean(v: unknown): boolean | undefined {
-    if (typeof v === "boolean") return v;
-    if (v === 1) return true;
-    if (v === 0) return false;
-    if (typeof v !== "string") return undefined;
-    return boolMap[v.trim().toLowerCase()];
 }
 
 

@@ -157,12 +157,12 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     let isNumeric = true;
     let isBigInt = true;
     let isDate = true;
-    let isList = true;
+    let isArrayVal = true;
     let isBinary = true;
     let isObject = true;
     let hasDateObj = false;
     let hasNonNull = false;
-    const allListElements: any[] = [];
+    const allArrayElements: any[] = [];
 
     for (let i = 0; i < col.length; i++) {
         const val = col[i];
@@ -174,12 +174,12 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         }
 
         if (!isArrayOrTypedArray(val) || val instanceof Uint8Array) {
-            isList = false;
+            isArrayVal = false;
         } else {
             const valArr = val as any;
             const subLen = valArr.length;
             for (let j = 0; j < subLen; j++) {
-                allListElements.push(valArr[j]);
+                allArrayElements.push(valArr[j]);
             }
         }
         if (val instanceof Date) hasDateObj = true;
@@ -194,16 +194,16 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         if (!(val instanceof Date) && (typeof val !== "string" || isNaN(Date.parse(val)))) {
             isDate = false;
         }
-        if (!isObj(val) || val instanceof Date || val instanceof Uint8Array || Array.isArray(val)) {
+        if (!isObj(val) || val instanceof Uint8Array) {
             isObject = false;
         }
     }
 
     if (!hasNonNull) return DataTypeRegistry.Utf8;
     if (isBinary) return DataTypeRegistry.Binary;
-    if (isList) {
-        const innerType = inferColumnType(allListElements);
-        return DataTypeRegistry.List(innerType);
+    if (isArrayVal) {
+        const innerType = inferColumnType(allArrayElements);
+        return DataTypeRegistry.Array(innerType);
     }
     if (isBoolean) return DataTypeRegistry.Boolean;
     if (isBigInt) return DataTypeRegistry.Int64;
@@ -301,7 +301,7 @@ export function writeStringToFileOrStream(
         }
         const fs = require("fs");
         fs.writeFileSync(file, content, "utf8");
-    } else if (typeof file === "object" && typeof (file as any).write === "function") {
+    } else if (isObj(file) && typeof (file as any).write === "function") {
         (file as any).write(content);
     } else {
         throw new TypeError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");

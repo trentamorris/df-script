@@ -18,7 +18,7 @@ export type DataFrameColumns<T extends RowRecord> = {
     [K in keyof T]: ColumnData<T[K]>;
 };
 
-export type Scalar = string | number | boolean | bigint | Date | null | undefined;
+export type ValidScalarTypes = string | number | boolean | bigint | Date | Uint8Array | null | undefined;
 
 export type AggFn<V, R = any> = (values: V[]) => R;
 export type OpFn = (vals: ColumnData, columns: ColumnDict) => ColumnData;
@@ -60,7 +60,7 @@ export interface ConcatOptions {
 }
 export type ConcatItem = DataFrame<any> | ColumnDict | RowRecord[];
 
-export type { UniqueListStatsOptions, JoinListOptions } from "./utils/list";
+export type { UniqueArrayStatsOptions, JoinArrayOptions } from "./utils/array";
 
 export interface ExplodeOptions {
     empty_as_null?: boolean;

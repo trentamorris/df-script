@@ -452,11 +452,11 @@ try {
             passed = false;
         }
 
-        // 14.3 to_list with null nameOrExpr
+        // 14.3 to_array with null nameOrExpr
         try {
-            dfUsability.to_list(null as any);
+            dfUsability.to_array(null as any);
         } catch (e) {
-            console.error("to_list guard failed to prevent crash:", e);
+            console.error("to_array guard failed to prevent crash:", e);
             passed = false;
         }
     } catch (e) {

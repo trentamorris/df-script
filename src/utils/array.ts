@@ -115,23 +115,72 @@ export function isArrayOfType(
     }
 }
 
-export function sortList(arr: unknown, descending: boolean = false): any[] {
+export interface SortArrayOptions {
+    descending?: boolean;
+    nullsLast?: boolean;
+}
+
+export function sortArray(
+    arr: unknown,
+    { descending = false, nullsLast = true }: SortArrayOptions = {}
+): any[] {
     if (!isArrayOrTypedArray(arr)) return [];
-    const list = Array.from(arr as any);
-    list.sort((a, b) => {
-        if (a == null && b == null) return 0;
-        if (a == null) return 1;
-        if (b == null) return -1;
-        if (a < b) return descending ? 1 : -1;
-        if (a > b) return descending ? -1 : 1;
-        return 0;
-    });
-    return list;
+
+    const list = arr as any;
+    const len = list.length;
+    if (len === 0) return [];
+
+    if (isTypedArray(arr)) {
+        const copy = list.slice().sort();
+        if (descending) copy.reverse();
+        return Array.from(copy);
+    }
+    const valid: any[] = [];
+    const nulls: any[] = [];
+
+    let isAllNumbers = true;
+    let isAllStrings = true;
+    let checkTypes = true;
+
+    for (let i = 0; i < len; i++) {
+        const item = list[i];
+        if (item == null) {
+            nulls.push(item);
+        } else {
+            valid.push(item);
+            if (checkTypes) {
+                const t = typeof item;
+                if (t !== "number") isAllNumbers = false;
+                if (t !== "string") isAllStrings = false;
+                if (!isAllNumbers && !isAllStrings) {
+                    checkTypes = false;
+                }
+            }
+        }
+    }
+
+    const validLen = valid.length;
+
+    if (validLen > 1) {
+        if (isAllNumbers) {
+            valid.sort(descending ? (a, b) => b - a : (a, b) => a - b);
+        } else if (isAllStrings) {
+            valid.sort(descending ? (a, b) => b.localeCompare(a) : (a, b) => a.localeCompare(b));
+        } else {
+            valid.sort(descending ? (a, b) => (a < b ? 1 : a > b ? -1 : 0) : (a, b) => (a < b ? -1 : a > b ? 1 : 0));
+        }
+    }
+
+    if (nulls.length === 0) {
+        return valid;
+    }
+
+    return nullsLast ? valid.concat(nulls) : nulls.concat(valid);
 }
 
 const DEFAULT_STATS = { sum: null, count: 0, min: null, max: null, mean: null, variance: 0, std: 0, nullCount: 0, len: 0, hasNulls: false, isNumeric: false };
 
-export function getListStats(arr: unknown): {
+export function getArrayStats(arr: unknown): {
     sum: number | null;
     count: number;
     min: any;
@@ -208,9 +257,9 @@ export function getListStats(arr: unknown): {
 }
 
 /**
- * Options configuration for the `getUniqueListStats` utility.
+ * Options configuration for the `getUniqueArrayStats` utility.
  */
-export interface UniqueListStatsOptions {
+export interface UniqueArrayStatsOptions {
     /**
      * If true, uses strict serialization comparison (via keySelector or toCanonicalString)
      * to group complex nested types (like Arrays, Sets, Maps, and Dates) by value instead of reference.
@@ -225,12 +274,12 @@ export interface UniqueListStatsOptions {
     keySelector?: (val: any) => any;
 }
 
-export function getUniqueListStats(
+export function getUniqueArrayStats(
     arr: ArrayLike<any>,
     {
         strict = false,
         keySelector
-    }: UniqueListStatsOptions = {}
+    }: UniqueArrayStatsOptions = {}
 ): { values: any[]; count: number; frequencies: Map<any, number> } {
     const list = Array.from(arr);
     const frequencies = new Map<any, number>();
@@ -282,11 +331,11 @@ export function getUniqueListStats(
 }
 
 /**
- * Options configuration for the `stepSliceList` utility.
+ * Options configuration for the `stepSliceArray` utility.
  */
-export interface StepSliceListOptions {
+export interface StepSliceArrayOptions {
     /**
-     * The step size to slice the list by. Cannot be zero.
+     * The step size to slice the array by. Cannot be zero.
      * Positive values slice forward (left-to-right), negative values slice backward (right-to-left).
      * @default 1
      */
@@ -307,7 +356,7 @@ export interface StepSliceListOptions {
     offsetEnd?: number;
 
     /**
-     * Caps the maximum number of items gathered in the sliced result list.
+     * Caps the maximum number of items gathered in the sliced result array.
      * If specified, the slicing process stops once this limit is reached.
      */
     maxItemsGathered?: number;
@@ -320,7 +369,7 @@ export interface StepSliceListOptions {
     null_on_oob?: boolean;
 }
 
-export function stepSliceList<T>(
+export function stepSliceArray<T>(
     arr: ArrayLike<T>,
     {
         step = 1,
@@ -328,7 +377,7 @@ export function stepSliceList<T>(
         offsetEnd,
         maxItemsGathered,
         null_on_oob = true
-    }: StepSliceListOptions = {}
+    }: StepSliceArrayOptions = {}
 ): T[] | null {
     if (arr == null) {
         return null;
@@ -347,7 +396,7 @@ export function stepSliceList<T>(
 
     if (isOob) {
         if (!null_on_oob) {
-            throw new Error(`Start offset ${offsetStart} is out of bounds for list of length ${len}`);
+            throw new Error(`Start offset ${offsetStart} is out of bounds for array of length ${len}`);
         }
         return null;
     }
@@ -381,9 +430,9 @@ export function stepSliceList<T>(
 }
 
 /**
- * Options configuration for the `joinList` utility.
+ * Options configuration for the `joinArray` utility.
  */
-export interface JoinListOptions {
+export interface JoinArrayOptions {
     /**
      * If true, nullish elements (null and undefined) are completely ignored during joining.
      * If false (default), nullish elements are serialized as empty strings or custom `nullValue`.
@@ -411,14 +460,14 @@ export interface JoinListOptions {
     suffix?: string;
 
     /**
-     * Maximum number of list elements to join.
+     * Maximum number of array elements to join.
      * If specified, elements beyond this limit are omitted and `truncationMarker` is appended.
      */
     limit?: number;
 
     /**
      * Custom placeholder string appended to the joined string when limit truncation occurs.
-     * Only applied if `limit` is specified and the list length exceeds it.
+     * Only applied if `limit` is specified and the array length exceeds it.
      * @default "..."
      */
     truncationMarker?: string;
@@ -433,7 +482,7 @@ export interface JoinListOptions {
  * Joins the elements of an array-like structure into a string using a separator.
  * Excludes nullish checks and formats nested arrays cleanly.
  */
-export function joinList(
+export function joinArray(
     arr: ArrayLike<any>,
     separator: string = ",",
     {
@@ -444,7 +493,7 @@ export function joinList(
         limit,
         truncationMarker = "...",
         valueFormatter
-    }: JoinListOptions = {}
+    }: JoinArrayOptions = {}
 ): string {
     const len = arr.length;
     const strList: string[] = [];
@@ -624,4 +673,79 @@ export function fillSequence(
             relativeIdx++;
         }
     }
+}
+
+function getSortedValidNumbers(values: ArrayLike<any>): Float64Array | null {
+    const len = values.length;
+    let validCount = 0;
+    const nums = new Float64Array(len);
+    for (let i = 0; i < len; i++) {
+        const val = values[i];
+        // Only include actual numbers that aren't NaN (but preserve Infinity for bounds)
+        if (typeof val === "number" && !Number.isNaN(val)) {
+            nums[validCount++] = val;
+        }
+    }
+    if (validCount === 0) return null;
+    const validNums = nums.subarray(0, validCount);
+    validNums.sort();
+    return validNums;
+}
+
+/**
+ * Computes the median of a numeric array, filtering out non-numeric and NaN values.
+ * Returns null if no valid numbers remain.
+ */
+export function computeMedian(values: ArrayLike<any>): number | null {
+    const validNums = getSortedValidNumbers(values);
+    if (!validNums) return null;
+    const len = validNums.length;
+    const mid = Math.floor(len / 2);
+    return len % 2 !== 0 ? validNums[mid] : (validNums[mid - 1] + validNums[mid]) / 2;
+}
+
+/**
+ * Computes the quantile of a numeric array using linear interpolation, filtering out non-numeric and NaN values.
+ * q must be in [0, 1]. Returns null if no valid numbers remain or q is out of bounds.
+ */
+export function computeQuantile(values: ArrayLike<any>, q: number): number | null {
+    if (q < 0 || q > 1) return null;
+    const validNums = getSortedValidNumbers(values);
+    if (!validNums) return null;
+    const len = validNums.length;
+    const idx = q * (len - 1);
+    const low = Math.floor(idx);
+    const high = Math.ceil(idx);
+    if (low === high) return validNums[low];
+    return validNums[low] + (idx - low) * (validNums[high] - validNums[low]);
+}
+
+/**
+ * Computes the mode(s) of an array, filtering out null/undefined values.
+ * Returns an array of the most frequent values, sorted, or null if empty/no mode.
+ */
+export function computeMode(values: ArrayLike<any>): any[] | null {
+    if (!isArrayOrTypedArray(values) || values.length === 0) return null;
+
+    const counts = new Map<any, number>();
+    const len = values.length;
+    let max = 0;
+    let modes: any[] = [];
+
+    for (let i = 0; i < len; i++) {
+        const val = values[i];
+        if (val == null) continue;
+        const c = (counts.get(val) ?? 0) + 1;
+        counts.set(val, c);
+
+        if (c > max) {
+            max = c;
+            modes = [val];
+        } else if (c === max) {
+            modes.push(val);
+        }
+    }
+
+    if (modes.length === 0) return null;
+    return sortArray(modes);
 }

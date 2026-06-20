@@ -140,7 +140,7 @@ export class BooleanType extends DataType<boolean | null> {
     equals(other: DataType): boolean { return other.name === "Boolean"; }
     allocate(size: number): (boolean | null)[] { return new Array(size).fill(null); }
 }
-export const Boolean = new BooleanType();
+export const BooleanDataType = new BooleanType();
 
 export class Utf8Type extends DataType<string | null> {
     readonly name = "Utf8";
@@ -180,7 +180,7 @@ export class ObjectType extends DataType {
     equals(other: DataType): boolean { return other.name === "Object"; }
     allocate(size: number): any[] { return new Array(size).fill(null); }
 }
-export const Object = new ObjectType();
+export const ObjectDataType = new ObjectType();
 
 // ============================================================================
 // Temporal Types
@@ -197,7 +197,7 @@ export class DateType extends TemporalDataType<Date | null> {
     equals(other: DataType): boolean { return other.name === "Date"; }
     allocate(size: number): (Date | null)[] { return new Array(size).fill(null); }
 }
-export const Date = new DateType();
+export const DateDataType = new DateType();
 
 export class DatetimeType extends TemporalDataType<Date | null> {
     readonly name = "Datetime";
@@ -214,7 +214,7 @@ export class TimeType extends TemporalDataType<string | null> {
         if (typeof val === "string") {
             const trimmed = val.trim();
             if (TIME_PREFIX_REGEX.test(trimmed)) {
-                const d = new globalThis.Date(`1970-01-01T${trimmed}${ZONE_OFFSET_REGEX.test(trimmed) ? "" : "Z"}`);
+                const d = new Date(`1970-01-01T${trimmed}${ZONE_OFFSET_REGEX.test(trimmed) ? "" : "Z"}`);
                 if (isValidDateObj(d)) {
                     return d.toISOString().split("T")[1].slice(0, 12);
                 }
@@ -240,8 +240,8 @@ export const Duration = new DurationType();
 // Nested Types
 // ============================================================================
 
-export class ListType<TInner = any> extends NestedDataType<TInner[] | null> {
-    readonly name = "List";
+export class ArrayType<TInner = any> extends NestedDataType<TInner[] | null> {
+    readonly name = "Array";
     constructor(public readonly innerType: RegisteredDataType & DataType<TInner>) { super(); }
     coerce(val: unknown): TInner[] | null {
         if (val == null) return null;
@@ -254,11 +254,11 @@ export class ListType<TInner = any> extends NestedDataType<TInner[] | null> {
         return res;
     }
     equals(other: DataType): boolean {
-        return other instanceof ListType && this.innerType.equals(other.innerType);
+        return other instanceof ArrayType && this.innerType.equals(other.innerType);
     }
     allocate(size: number): (TInner[] | null)[] { return new Array(size).fill(null); }
 }
-export const List = <TInner>(inner: RegisteredDataType & DataType<TInner>) => new ListType<TInner>(inner);
+export const ArrayDataType = <TInner>(inner: RegisteredDataType & DataType<TInner>) => new ArrayType<TInner>(inner);
 
 export class StructType<TFields extends RowRecord = any> extends NestedDataType<TFields | null> {
     readonly name = "Struct";
@@ -266,7 +266,7 @@ export class StructType<TFields extends RowRecord = any> extends NestedDataType<
     coerce(val: unknown): TFields | null {
         if (!isObj(val)) return null;
         const res: any = {};
-        const keys = globalThis.Object.keys(this.fields);
+        const keys = Object.keys(this.fields);
         const len = keys.length;
         for (let i = 0; i < len; i++) {
             const k = keys[i];
@@ -277,11 +277,12 @@ export class StructType<TFields extends RowRecord = any> extends NestedDataType<
     }
     equals(other: DataType): boolean {
         if (!(other instanceof StructType)) return false;
-        const keysThis = globalThis.Object.keys(this.fields);
-        const keysOther = globalThis.Object.keys(other.fields);
+        const keysThis = Object.keys(this.fields);
+        const keysOther = Object.keys(other.fields);
         if (keysThis.length !== keysOther.length) return false;
-        for (const k of keysThis) {
-            if (!other.fields[k] || !this.fields[k].equals(other.fields[k])) return false;
+        for (let i = 0; i < keysThis.length; i++) {
+            const k = keysThis[i];
+            if (!this.fields[k].equals(other.fields[k])) return false;
         }
         return true;
     }
@@ -295,4 +296,4 @@ export type RegisteredDataType =
     | Float32Type | Float64Type | DecimalType
     | BooleanType | Utf8Type | BinaryType | NullType | ObjectType
     | DateType | DatetimeType | TimeType | DurationType
-    | ListType<any> | StructType<any>;
+    | ArrayType<any> | StructType<any>;

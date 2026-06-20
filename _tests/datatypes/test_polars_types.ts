@@ -12,7 +12,7 @@ const tInt64 = $df.DataType.Int64;
 const tFloat32 = $df.DataType.Float32;
 const tDecimal = $df.DataType.Decimal(10, 2);
 const tDate = $df.DataType.Date;
-const tList = $df.DataType.List($df.DataType.Int32);
+const tArray = $df.DataType.Array($df.DataType.Int32);
 
 if (!tInt8.isNumeric || !tInt8.isInteger || !tInt8.isSigned || tInt8.isUnsigned) {
     throw new Error("Int8 metadata classification failed");
@@ -32,8 +32,8 @@ if (!tDecimal.isNumeric || tDecimal.isInteger || tDecimal.isFloat) {
 if (!tDate.isTemporal) {
     throw new Error("Date isTemporal metadata classification failed");
 }
-if (!tList.isNested) {
-    throw new Error("List isNested metadata classification failed");
+if (!tArray.isNested) {
+    throw new Error("Array isNested metadata classification failed");
 }
 
 // Check new getters

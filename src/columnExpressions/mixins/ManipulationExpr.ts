@@ -1,5 +1,5 @@
 import { ExprBase, derive } from "../ExprBase"
-import { isArrayOrTypedArray, getListStats, fillSequence } from "../../utils"
+import { isArrayOrTypedArray, getArrayStats, fillSequence } from "../../utils"
 import type { FillNullOptions } from "../../types"
 
 export class ManipulationExpr extends ExprBase {
@@ -20,7 +20,7 @@ export class ManipulationExpr extends ExprBase {
                         } else if (strategy === "one") {
                             fillVal = 1;
                         } else {
-                            const stats = getListStats(vArray);
+                            const stats = getArrayStats(vArray);
                             fillVal = stats[strategy];
                         }
                         fillSequence(result, fillVal, {

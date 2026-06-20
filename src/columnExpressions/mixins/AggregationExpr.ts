@@ -1,7 +1,7 @@
-import type { AggFn, UniqueListStatsOptions } from "../../types"
+import type { AggFn, UniqueArrayStatsOptions } from "../../types"
 import { ExprBase, derive } from "../ExprBase"
 import { ComputeError } from "../../exceptions"
-import { getListStats, computeMedian, computeQuantile, getUniqueListStats, computeMode, isArrayOfType } from "../../utils"
+import { getArrayStats, computeMedian, computeQuantile, getUniqueArrayStats, computeMode, isArrayOfType } from "../../utils"
 
 
 
@@ -32,12 +32,12 @@ export class AggregationExpr extends ExprBase {
         }
 
         avg() {
-            return this._deriveAgg(v => getListStats(v).mean);
+            return this._deriveAgg(v => getArrayStats(v).mean);
         }
 
         count(options: { includeNulls?: boolean } = {}) {
             if (options.includeNulls) return this._deriveAgg(v => v.length);
-            return this._deriveAgg(v => getListStats(v).count);
+            return this._deriveAgg(v => getArrayStats(v).count);
         }
 
         first() {
@@ -53,7 +53,7 @@ export class AggregationExpr extends ExprBase {
         }
 
         max() {
-            return this._deriveAgg(v => getListStats(v).max);
+            return this._deriveAgg(v => getArrayStats(v).max);
         }
 
         mean() {
@@ -65,16 +65,16 @@ export class AggregationExpr extends ExprBase {
         }
 
         min() {
-            return this._deriveAgg(v => getListStats(v).min);
+            return this._deriveAgg(v => getArrayStats(v).min);
         }
 
         mode() {
             return this._deriveAgg(v => computeMode(v));
         }
 
-        n_unique(options: UniqueListStatsOptions = {}) {
+        n_unique(options: UniqueArrayStatsOptions = {}) {
             return this._deriveAgg(v => {
-                return getUniqueListStats(v, options).count;
+                return getUniqueArrayStats(v, options).count;
             });
         }
 
@@ -84,11 +84,11 @@ export class AggregationExpr extends ExprBase {
         }
 
         std() {
-            return this._deriveAgg(v => getListStats(v).std);
+            return this._deriveAgg(v => getArrayStats(v).std);
         }
 
         sum() {
-            return this._deriveAgg(v => getListStats(v).sum);
+            return this._deriveAgg(v => getArrayStats(v).sum);
         }
 
 }

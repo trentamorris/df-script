@@ -1,12 +1,11 @@
-import type { IExpr } from "../../types"
-import type { RandomOptions } from "../types"
+import type { RandomOptions, NumericArg } from "../types"
 import { ExprBase, derive } from "../ExprBase"
 import { kleeneUnary, kleeneBinary } from "../utils"
-import { clamp, mulberry32 } from "../../utils"
+import { clamp, mulberry32, roundToScale } from "../../utils"
 
 export class ArithmeticExpr extends ExprBase {
         abs() {
-            return derive(this, kleeneUnary((v) => Math.abs(v)));
+            return derive(this, kleeneUnary(Math.abs));
         }
 
         acos() {
@@ -17,7 +16,7 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary((v) => v < 1 ? null : Math.acosh(v)));
         }
 
-        add(val: number | IExpr | null) {
+        add(val: NumericArg) {
             return derive(this, kleeneBinary(this, val, (v, r) => v + r));
         }
 
@@ -31,6 +30,10 @@ export class ArithmeticExpr extends ExprBase {
 
         atan() {
             return derive(this, kleeneUnary(Math.atan));
+        }
+
+        atan2(val: NumericArg) {
+            return derive(this, kleeneBinary(this, val, Math.atan2));
         }
 
         atanh() {
@@ -49,6 +52,10 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary((v) => clamp(v, { min: lower, max: upper })));
         }
 
+        copysign(val: NumericArg) {
+            return derive(this, kleeneBinary(this, val, (v, r) => Math.abs(v) * (r >= 0 ? 1 : -1)));
+        }
+
         cos() {
             return derive(this, kleeneUnary(Math.cos));
         }
@@ -61,7 +68,7 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary((v) => v * (180 / Math.PI)));
         }
 
-        div(val: number | IExpr | null) {
+        div(val: NumericArg) {
             return derive(this, kleeneBinary(this, val, (v, r) => r === 0 ? null : v / r));
         }
 
@@ -77,12 +84,12 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary(Math.floor));
         }
 
-        floordiv(val: number | IExpr | null) {
+        floordiv(val: NumericArg) {
             return derive(this, kleeneBinary(this, val, (v, r) => r === 0 ? null : Math.floor(v / r)));
         }
 
-        hypot(val: number | IExpr | null) {
-            return derive(this, kleeneBinary(this, val, (v, r) => Math.hypot(v, r)));
+        hypot(val: NumericArg) {
+            return derive(this, kleeneBinary(this, val, Math.hypot));
         }
 
         log(base: number = Math.E) {
@@ -93,11 +100,11 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary((v) => v <= -1 ? null : Math.log1p(v)));
         }
 
-        mod(val: number | IExpr | null) {
+        mod(val: NumericArg) {
             return derive(this, kleeneBinary(this, val, (v, r) => r === 0 ? null : v % r));
         }
 
-        mul(val: number | IExpr | null) {
+        mul(val: NumericArg) {
             return derive(this, kleeneBinary(this, val, (v, r) => v * r));
         }
 
@@ -105,8 +112,8 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary((v) => -v));
         }
 
-        pow(val: number | IExpr | null) {
-            return derive(this, kleeneBinary(this, val, (v, r) => Math.pow(v, r)));
+        pow(val: NumericArg) {
+            return derive(this, kleeneBinary(this, val, Math.pow));
         }
 
         radians() {
@@ -129,8 +136,7 @@ export class ArithmeticExpr extends ExprBase {
         }
 
         round(decimals: number = 0) {
-            const factor = Math.pow(10, decimals);
-            return derive(this, kleeneUnary((v) => Math.round(v * factor) / factor));
+            return derive(this, kleeneUnary((v) => roundToScale(v, decimals)));
         }
 
         sign() {
@@ -149,7 +155,7 @@ export class ArithmeticExpr extends ExprBase {
             return derive(this, kleeneUnary((v) => v < 0 ? null : Math.sqrt(v)));
         }
 
-        sub(val: number | IExpr | null) {
+        sub(val: NumericArg) {
             return derive(this, kleeneBinary(this, val, (v, r) => v - r));
         }
 

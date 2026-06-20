@@ -1,5 +1,3 @@
-import { isArrayOrTypedArray } from "./guards";
-import { sortList } from "./list";
 
 const NUMERIC_CLEAN_REGEX = /[,\s_]/g;
 const VALID_DECIMAL_REGEX = /^[+-]?\d+(?:\.\d+)?$/;
@@ -10,6 +8,7 @@ const VALID_DECIMAL_REGEX = /^[+-]?\d+(?:\.\d+)?$/;
 
 export interface NumericValidationOptions {
     allowNonFiniteNumbers?: boolean;
+    strictNumericString?: boolean;
 }
 
 export function isValidNumber(
@@ -43,7 +42,9 @@ export function toValidNumber(
         return isValidNumber(t, options) ? t : null;
     }
     if (typeof v === "string") {
-        const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
+        const clean = options?.strictNumericString
+            ? v.trim()
+            : v.trim().replace(NUMERIC_CLEAN_REGEX, "");
         if (clean === "") return null;
 
         const n = Number(clean);
@@ -67,6 +68,8 @@ export interface NumericFormatOptions extends Intl.NumberFormatOptions {
     accountingNegatives?: boolean;
     /** Fallback string if the value cannot be parsed into a formatable number. */
     fallback?: string;
+    /** If true, returns the fallback string for Infinity and -Infinity values. */
+    formatNonFinite?: boolean;
 }
 
 /**
@@ -77,6 +80,7 @@ export function formatNumber({
     locale = "en-US",
     accountingNegatives = false,
     fallback = "NaN",
+    formatNonFinite = false,
     ...intlOpts
 }: NumericFormatOptions = {}): (value: unknown) => string {
     if (intlOpts.useGrouping === undefined) {
@@ -103,6 +107,9 @@ export function formatNumber({
         }
 
         if (!Number.isFinite(num)) {
+            if (formatNonFinite) {
+                return fallback;
+            }
             if (accountingNegatives && num === -Infinity) {
                 return "(Infinity)";
             }
@@ -326,7 +333,7 @@ function getDecimalMaxVal(precision: number, scale: number): number | null {
     return maxVal > 0 ? maxVal : null;
 }
 
-function roundToScale(v: number, scale: number): number {
+export function roundToScale(v: number, scale: number): number {
     const str = v.toString();
     if (str.includes("e")) {
         const factor = Math.pow(10, scale);
@@ -398,7 +405,6 @@ export function clamp<T extends number | bigint>(
 
     if (safe && typeof v === "number") {
         if (Number.isNaN(v)) {
-            // NaN can't be compared — coerce to the nearest boundary, preferring min
             v = min !== null ? min : (max !== null ? max : val);
         } else if (v === Infinity) {
             v = max !== null ? max : val;
@@ -424,80 +430,5 @@ export function mulberry32(seed: number): () => number {
         t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
-}
-
-function getSortedValidNumbers(values: ArrayLike<any>): Float64Array | null {
-    const len = values.length;
-    let validCount = 0;
-    const nums = new Float64Array(len);
-    for (let i = 0; i < len; i++) {
-        const val = values[i];
-        // Only include actual numbers that aren't NaN (but preserve Infinity for bounds)
-        if (typeof val === "number" && !Number.isNaN(val)) {
-            nums[validCount++] = val;
-        }
-    }
-    if (validCount === 0) return null;
-    const validNums = nums.subarray(0, validCount);
-    validNums.sort();
-    return validNums;
-}
-
-/**
- * Computes the median of a numeric array, filtering out non-numeric and NaN values.
- * Returns null if no valid numbers remain.
- */
-export function computeMedian(values: ArrayLike<any>): number | null {
-    const validNums = getSortedValidNumbers(values);
-    if (!validNums) return null;
-    const len = validNums.length;
-    const mid = Math.floor(len / 2);
-    return len % 2 !== 0 ? validNums[mid] : (validNums[mid - 1] + validNums[mid]) / 2;
-}
-
-/**
- * Computes the quantile of a numeric array using linear interpolation, filtering out non-numeric and NaN values.
- * q must be in [0, 1]. Returns null if no valid numbers remain or q is out of bounds.
- */
-export function computeQuantile(values: ArrayLike<any>, q: number): number | null {
-    if (q < 0 || q > 1) return null;
-    const validNums = getSortedValidNumbers(values);
-    if (!validNums) return null;
-    const len = validNums.length;
-    const idx = q * (len - 1);
-    const low = Math.floor(idx);
-    const high = Math.ceil(idx);
-    if (low === high) return validNums[low];
-    return validNums[low] + (idx - low) * (validNums[high] - validNums[low]);
-}
-
-/**
- * Computes the mode(s) of an array, filtering out null/undefined values.
- * Returns an array of the most frequent values, sorted, or null if empty/no mode.
- */
-export function computeMode(values: ArrayLike<any>): any[] | null {
-    if (!isArrayOrTypedArray(values) || values.length === 0) return null;
-
-    const counts = new Map<any, number>();
-    const len = values.length;
-    let max = 0;
-    let modes: any[] = [];
-
-    for (let i = 0; i < len; i++) {
-        const val = values[i];
-        if (val == null) continue;
-        const c = (counts.get(val) ?? 0) + 1;
-        counts.set(val, c);
-
-        if (c > max) {
-            max = c;
-            modes = [val];
-        } else if (c === max) {
-            modes.push(val);
-        }
-    }
-
-    if (modes.length === 0) return null;
-    return sortList(modes);
 }
 

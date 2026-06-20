@@ -49,11 +49,11 @@ try {
         $df.col("bool_val").or(false).alias("bool_or_false"),
 
         // 4. list any/all/contains/drop_nulls
-        $df.col("list_val").list.any().alias("list_any"),
-        $df.col("list_val").list.all().alias("list_all"),
-        $df.col("list_val").list.contains_any([true, "nonexistent"]).alias("list_contains_any"),
-        $df.col("list_val").list.contains_all([true, false]).alias("list_contains_all"),
-        $df.col("list_val").list.drop_nulls().alias("list_dropped_nulls"),
+        $df.col("list_val").arr.any().alias("list_any"),
+        $df.col("list_val").arr.all().alias("list_all"),
+        $df.col("list_val").arr.contains_any([true, "nonexistent"]).alias("list_contains_any"),
+        $df.col("list_val").arr.contains_all([true, false]).alias("list_contains_all"),
+        $df.col("list_val").arr.drop_nulls().alias("list_dropped_nulls"),
 
         // 5. string count_matches / extract
         $df.col("str_val").str.count_matches("apple").alias("str_matches_str"),
@@ -138,12 +138,12 @@ try {
 
     // 6. Test Quantile aggregation
     const aggResult = df.select([
-        $df.col("numeric_list").list.first().quantile(0.5).alias("q_50"),
-        $df.col("numeric_list").list.first().quantile(0.9).alias("q_90"),
-        $df.col("numeric_list").list.first().n_unique().alias("n_uniq"),
+        $df.col("numeric_list").arr.first().quantile(0.5).alias("q_50"),
+        $df.col("numeric_list").arr.first().quantile(0.9).alias("q_90"),
+        $df.col("numeric_list").arr.first().n_unique().alias("n_uniq"),
         $df.col("id").mode().alias("mode_id"),
-        $df.col("id").mode().list.first().alias("first_mode_id"),
-        $df.col("id").mode().list.last().alias("last_mode_id")
+        $df.col("id").mode().arr.first().alias("first_mode_id"),
+        $df.col("id").mode().arr.last().alias("last_mode_id")
     ]).to_dicts() as any[];
 
     console.log("Aggregation test results:");
@@ -293,10 +293,10 @@ try {
     }
 
 
-    // 2. col().list.explode in select expands columns and repeats values
+    // 2. col().arr.explode in select expands columns and repeats values
     const selectExploded = expDf.select([
         $df.col("id"),
-        $df.col("list").list.explode().alias("exploded_val"),
+        $df.col("list").arr.explode().alias("exploded_val"),
         $df.col("tag")
     ]).to_dicts();
     console.log("selectExploded results:");
@@ -310,18 +310,18 @@ try {
     if (selectExploded[3].id !== 3 || selectExploded[3].exploded_val !== null || selectExploded[3].tag !== "C") throw new Error("select explode row 3 failed");
     if (selectExploded[4].id !== 4 || selectExploded[4].exploded_val !== 30 || selectExploded[4].tag !== "D") throw new Error("select explode row 4 failed");
 
-    // 2b. col().list.explode in select succeeds if list lengths are all 1 (matching height)
+    // 2b. col().arr.explode in select succeeds if list lengths are all 1 (matching height)
     const matchingDf = $df.data([
         { id: 1, list: [100] },
         { id: 2, list: [200] }
     ]);
-    const selectMatching = matchingDf.select([$df.col("id"), $df.col("list").list.explode().alias("exploded_val")]).to_dicts();
+    const selectMatching = matchingDf.select([$df.col("id"), $df.col("list").arr.explode().alias("exploded_val")]).to_dicts();
     if (selectMatching.length !== 2) throw new Error("select matching list length failed");
     if (selectMatching[0].exploded_val !== 100 || selectMatching[1].exploded_val !== 200) throw new Error("select matching list values failed");
 
-    // 3. col().list.explode in with_columns expands columns and repeats existing columns
+    // 3. col().arr.explode in with_columns expands columns and repeats existing columns
     const withColsExploded = expDf.with_columns(
-        $df.col("list").list.explode().alias("exploded_val")
+        $df.col("list").arr.explode().alias("exploded_val")
     ).to_dicts();
     console.log("withColsExploded results:");
     console.dir(withColsExploded);

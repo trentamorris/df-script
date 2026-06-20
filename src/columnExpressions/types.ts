@@ -8,3 +8,6 @@ export interface RandomOptions {
     integer?: boolean;
 }
 
+export type NumericArg = number | IExpr | null;
+
+

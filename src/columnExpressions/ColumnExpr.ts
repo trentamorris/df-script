@@ -6,7 +6,7 @@ import { WindowExpr } from "./mixins/WindowExpr"
 import { StringExpr } from "./mixins/StringExpr"
 import { LogicalExpr } from "./mixins/LogicalExpr"
 import { TemporalExpr } from "./mixins/TemporalExpr"
-import { ListExpr } from "./mixins/ListExpr"
+import { ArrayExpr } from "./mixins/ArrayExpr"
 import { StructExpr } from "./mixins/StructExpr"
 import { ManipulationExpr } from "./mixins/ManipulationExpr"
 import { isObj } from "../utils"
@@ -69,7 +69,7 @@ export interface ColumnExpr<T> extends
     StringExpr,
     LogicalExpr,
     TemporalExpr,
-    ListExpr,
+    ArrayExpr,
     StructExpr,
     ManipulationExpr {}
 
@@ -95,7 +95,7 @@ applyMixins(ColumnExpr, [
     StringExpr,
     LogicalExpr,
     TemporalExpr,
-    ListExpr,
+    ArrayExpr,
     StructExpr,
     ManipulationExpr
 ]);
@@ -111,7 +111,7 @@ function getTargetKeys(
     schema?: DataFrameSchema
 ): string[] | null {
     if (!(expr instanceof ColumnExpr)) {
-        if (expr && typeof expr === "object" && "evaluate" in expr && !expr.colName) {
+        if (isObj(expr) && "evaluate" in expr && !expr.colName) {
             const targets: string[] = [];
             for (let i = 0; i < allKeys.length; i++) {
                 if (!excludeSet.has(allKeys[i])) {
@@ -197,10 +197,10 @@ export function resolveColumnSelectors(
         }
 
         // Handle struct unnesting expansion
-        if (expr && typeof expr === "object" && (expr as any).isUnnest) {
+        if (isObj(expr) && (expr as any).isUnnest) {
             let fields: string[] = [];
             const colName = expr.colName;
-            if (schema && colName && schema[colName] && schema[colName].name === "Struct") {
+            if (typeof colName === "string" && schema && schema[colName] && schema[colName].name === "Struct") {
                 fields = Object.keys((schema[colName] as any).fields);
             }
             if (fields.length === 0 && columns) {
