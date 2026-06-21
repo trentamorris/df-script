@@ -1,6 +1,6 @@
-import { isValidNumber } from "./number";
 import { isBlankString } from "./string";
 import type { TimeUnit } from "../types";
+import { isValidDateObj } from "./object";
 
 /**
  * Matches string values beginning with standard hour-and-minute formatting.
@@ -22,29 +22,12 @@ export const TIME_PREFIX_REGEX = /^\d{2}:\d{2}/;
  */
 export const ZONE_OFFSET_REGEX = /(?:Z|[+-]\d{2}(?::?\d{2})?)$/i;
 
-/**
- * Matches only UTC offset indicators at the end of a string.
- * Examples:
- * - "12:34:56Z" (matches "Z")
- * - "12:34:56+00:00" (matches "+00:00")
- * - "12:34:56-0000" (matches "-0000")
- * - "12:34:56+02:00" (does not match)
- */
-export const UTC_INDICATOR_REGEX = /(?:Z|[+-]00:00|[+-]0000|[+-]00)$/i;
-
 export const MS_PER_SECOND = 1000;
 export const MS_PER_MINUTE = 60_000;
 export const MS_PER_HOUR = 3_600_000;
 export const MS_PER_DAY = 86_400_000;
 export const US_PER_MS = 1000;
 export const NS_PER_MS = 1_000_000;
-
-export interface UtcOffsetResult {
-    timeZoneTime: Date;
-    utcTime: Date;
-    offset: number;
-    formatted: string;
-}
 
 
 export function toEpoch(d: Date, unit: TimeUnit = "ms"): number {
@@ -89,61 +72,11 @@ export function getQuarter(d: Date): number {
     return Math.floor(d.getUTCMonth() / 3) + 1;
 }
 
-export function getUtcOffset(timeZone: string): UtcOffsetResult {
-    const now = new Date();
-    const utcMs = now.getTime() + now.getTimezoneOffset() * 60_000;
-    const tzTime = new Date(now.toLocaleString('en-US', { timeZone }));
-    const tzMs = tzTime.getTime();
-    const offsetMin = Math.round((tzMs - utcMs) / 60_000);
-    const sign = offsetMin >= 0 ? "+" : "\u2212";
-    const h = Math.floor(Math.abs(offsetMin) / 60);
-    const m = Math.abs(offsetMin) % 60;
-
-    const formatted = `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-    return {
-        timeZoneTime: tzTime,
-        utcTime: now,
-        offset: offsetMin,
-        formatted
-    };
-}
-
 export function isLeapYear(yOrDate: number | Date): boolean {
-    const y = yOrDate instanceof Date ? yOrDate.getUTCFullYear() : yOrDate;
+    const y = isValidDateObj(yOrDate) ? yOrDate.getUTCFullYear() : (yOrDate as number);
     return (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
 }
 
-export function isUtcString(timestamp: string | null | undefined): boolean {
-    if (!timestamp) return false;
-    const trimmed = timestamp.trim();
-    if (!trimmed) return false;
-    return UTC_INDICATOR_REGEX.test(trimmed);
-}
-
-export function isValidDate(v: unknown): v is string | number | bigint | Date {
-    if (v == null) return false;
-    if (v instanceof Date) return isValidDateObj(v);
-
-    if (typeof v === "number") {
-        if (!isValidNumber(v)) return false;
-        return isValidDateObj(new Date(normalizeEpochToMs(v)));
-    }
-    if (typeof v === "bigint") {
-        return isValidDateObj(new Date(normalizeEpochToMs(Number(v))));
-    }
-    if (typeof v === "string") {
-        if (isBlankString(v)) return false;
-        return isValidDateObj(new Date(v));
-    }
-    return false;
-}
-
-export function isValidDateObj(d: unknown): d is Date {
-    if (d === null || typeof d !== "object") return false;
-    if (Object.prototype.toString.call(d) !== "[object Date]") return false;
-
-    return !Number.isNaN(Number(d));
-}
 
 export function normalizeEpochToMs(n: number): number {
     const abs = Math.abs(n);
@@ -152,66 +85,155 @@ export function normalizeEpochToMs(n: number): number {
     return n;
 }
 
-export const STRFTIME_DIRECTIVES = [
-    "%ms", "%f", "%Y", "%y", "%m", "%d", "%e", "%H", "%I", "%p", "%M", "%S", "%A", "%a", "%B", "%b", "%h", "%j", "%u", "%w", "%Z", "%z"
-] as const;
+interface DateDirective {
+    key: string;
+    format: (d: Date, locale?: string) => string;
+    parseRegex?: string;
+    parseField?: "year" | "month" | "day" | "hour" | "minute" | "second" | "ms";
+    parseNormalize?: (valStr: string) => number;
+}
 
-export function strftime(d: Date, format: string, locale?: string): string {
-    let result = format;
-
-    // 1. Literal %% escaping
-    result = result.replace(/%%/g, "\0");
-
-    // 2. High-level shorthand formats
-    result = result.replace(/%F/g, "%Y-%m-%d");
-    result = result.replace(/%T/g, "%H:%M:%S");
-    result = result.replace(/%R/g, "%H:%M");
-    result = result.replace(/%D/g, "%m/%d/%y");
-
-    // 3. Directives replacements with lazy getters
-    const replacements: Record<string, string> = {
-        get "%Y"() { return String(d.getUTCFullYear()); },
-        get "%y"() { return String(d.getUTCFullYear() % 100).padStart(2, "0"); },
-        get "%m"() { return String(d.getUTCMonth() + 1).padStart(2, "0"); },
-        get "%d"() { return String(d.getUTCDate()).padStart(2, "0"); },
-        get "%e"() { return String(d.getUTCDate()).padStart(2, " "); },
-        get "%H"() { return String(d.getUTCHours()).padStart(2, "0"); },
-        get "%I"() { return String(d.getUTCHours() % 12 || 12).padStart(2, "0"); },
-        get "%p"() { return d.getUTCHours() >= 12 ? "PM" : "AM"; },
-        get "%M"() { return String(d.getUTCMinutes()).padStart(2, "0"); },
-        get "%S"() { return String(d.getUTCSeconds()).padStart(2, "0"); },
-        get "%A"() { return d.toLocaleDateString(locale, { weekday: "long", timeZone: "UTC" }); },
-        get "%a"() { return d.toLocaleDateString(locale, { weekday: "short", timeZone: "UTC" }); },
-        get "%B"() { return d.toLocaleDateString(locale, { month: "long", timeZone: "UTC" }); },
-        get "%b"() { return d.toLocaleDateString(locale, { month: "short", timeZone: "UTC" }); },
-        get "%h"() { return d.toLocaleDateString(locale, { month: "short", timeZone: "UTC" }); },
-        get "%j"() {
+const DIRECTIVES: Record<string, DateDirective> = {
+    "Y": {
+        key: "Y",
+        format: (d) => String(d.getUTCFullYear()),
+        parseRegex: "\\d{4}",
+        parseField: "year"
+    },
+    "y": {
+        key: "y",
+        format: (d) => String(d.getUTCFullYear() % 100).padStart(2, "0"),
+        parseRegex: "\\d{2}",
+        parseField: "year",
+        parseNormalize: (s) => {
+            const val = parseInt(s, 10);
+            return val + (val >= 69 ? 1900 : 2000);
+        }
+    },
+    "m": {
+        key: "m",
+        format: (d) => String(d.getUTCMonth() + 1).padStart(2, "0"),
+        parseRegex: "\\d{1,2}",
+        parseField: "month"
+    },
+    "d": {
+        key: "d",
+        format: (d) => String(d.getUTCDate()).padStart(2, "0"),
+        parseRegex: "\\d{1,2}",
+        parseField: "day"
+    },
+    "e": {
+        key: "e",
+        format: (d) => String(d.getUTCDate()).padStart(2, " "),
+        parseRegex: "\\d{1,2}",
+        parseField: "day"
+    },
+    "H": {
+        key: "H",
+        format: (d) => String(d.getUTCHours()).padStart(2, "0"),
+        parseRegex: "\\d{1,2}",
+        parseField: "hour"
+    },
+    "I": {
+        key: "I",
+        format: (d) => String(d.getUTCHours() % 12 || 12).padStart(2, "0"),
+        parseRegex: "\\d{1,2}",
+        parseField: "hour"
+    },
+    "p": {
+        key: "p",
+        format: (d) => d.getUTCHours() >= 12 ? "PM" : "AM"
+    },
+    "M": {
+        key: "M",
+        format: (d) => String(d.getUTCMinutes()).padStart(2, "0"),
+        parseRegex: "\\d{1,2}",
+        parseField: "minute"
+    },
+    "S": {
+        key: "S",
+        format: (d) => String(d.getUTCSeconds()).padStart(2, "0"),
+        parseRegex: "\\d{1,2}",
+        parseField: "second"
+    },
+    "A": {
+        key: "A",
+        format: (d, locale) => d.toLocaleDateString(locale, { weekday: "long", timeZone: "UTC" })
+    },
+    "a": {
+        key: "a",
+        format: (d, locale) => d.toLocaleDateString(locale, { weekday: "short", timeZone: "UTC" })
+    },
+    "B": {
+        key: "B",
+        format: (d, locale) => d.toLocaleDateString(locale, { month: "long", timeZone: "UTC" })
+    },
+    "b": {
+        key: "b",
+        format: (d, locale) => d.toLocaleDateString(locale, { month: "short", timeZone: "UTC" })
+    },
+    "h": {
+        key: "h",
+        format: (d, locale) => d.toLocaleDateString(locale, { month: "short", timeZone: "UTC" })
+    },
+    "j": {
+        key: "j",
+        format: (d) => {
             const start = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
             const diff = d.getTime() - start.getTime();
             const dayOfYear = Math.floor(diff / MS_PER_DAY) + 1;
             return String(dayOfYear).padStart(3, "0");
-        },
-        get "%u"() { return String(d.getUTCDay() || 7); },
-        get "%w"() { return String(d.getUTCDay()); },
-        get "%Z"() { return "UTC"; },
-        get "%z"() { return "+0000"; },
-        get "%ms"() { return String(d.getUTCMilliseconds()).padStart(3, "0"); },
-        get "%f"() { return String(d.getUTCMilliseconds() * 1000).padStart(6, "0"); }
-    };
-
-    for (const directive of STRFTIME_DIRECTIVES) {
-        if (result.includes(directive)) {
-            result = result.replaceAll(directive, replacements[directive]);
         }
+    },
+    "u": {
+        key: "u",
+        format: (d) => String(d.getUTCDay() || 7)
+    },
+    "w": {
+        key: "w",
+        format: (d) => String(d.getUTCDay())
+    },
+    "Z": {
+        key: "Z",
+        format: () => "UTC"
+    },
+    "z": {
+        key: "z",
+        format: () => "+0000"
+    },
+    "ms": {
+        key: "ms",
+        format: (d) => String(d.getUTCMilliseconds()).padStart(3, "0"),
+        parseRegex: "\\d{1,3}",
+        parseField: "ms",
+        parseNormalize: (s) => parseInt(s.padEnd(3, "0").slice(0, 3), 10)
+    },
+    "f": {
+        key: "f",
+        format: (d) => String(d.getUTCMilliseconds() * 1000).padStart(6, "0"),
+        parseRegex: "\\d{1,6}",
+        parseField: "ms",
+        parseNormalize: (s) => parseInt(s.padEnd(6, "0").slice(0, 3), 10)
     }
+};
 
-    // 4. Restore literal percent symbols
-    return result.replace(/\0/g, "%");
+export function strftime(d: Date, format: string, locale?: string): string {
+    const expanded = format
+        .replace(/%F/g, "%Y-%m-%d")
+        .replace(/%T/g, "%H:%M:%S")
+        .replace(/%R/g, "%H:%M")
+        .replace(/%D/g, "%m/%d/%y");
+
+    return expanded.replace(/%(ms|f|[YymdeHIpMSaAbBhjuwZz%])/g, (match, key) => {
+        if (key === "%") return "%";
+        const dir = DIRECTIVES[key];
+        return dir ? dir.format(d, locale) : match;
+    });
 }
 
 export function strptime(str: string, format: string, strict = true): Date | null {
     if (typeof str !== "string" || typeof format !== "string") return null;
-    const placeholders: { name: string; index: number }[] = [];
+    const placeholders: { directive: DateDirective; index: number }[] = [];
     let groupIndex = 1;
 
     let regexStr = "";
@@ -224,50 +246,26 @@ export function strptime(str: string, format: string, strict = true): Date | nul
                 if (nextChar === "%") {
                     regexStr += "%";
                     i += 2;
-                } else if (format.slice(i, i + 3) === "%ms") {
-                    placeholders.push({ name: "ms", index: groupIndex++ });
-                    regexStr += "(\\d{1,3})";
-                    i += 3;
                 } else {
-                    switch (nextChar) {
-                        case "Y":
-                            placeholders.push({ name: "year", index: groupIndex++ });
-                            regexStr += "(\\d{4})";
-                            break;
-                        case "y":
-                            placeholders.push({ name: "year_short", index: groupIndex++ });
-                            regexStr += "(\\d{2})";
-                            break;
-                        case "m":
-                            placeholders.push({ name: "month", index: groupIndex++ });
-                            regexStr += "(\\d{1,2})";
-                            break;
-                        case "d":
-                        case "e":
-                            placeholders.push({ name: "day", index: groupIndex++ });
-                            regexStr += "(\\d{1,2})";
-                            break;
-                        case "H":
-                        case "I":
-                            placeholders.push({ name: "hour", index: groupIndex++ });
-                            regexStr += "(\\d{1,2})";
-                            break;
-                        case "M":
-                            placeholders.push({ name: "minute", index: groupIndex++ });
-                            regexStr += "(\\d{1,2})";
-                            break;
-                        case "S":
-                            placeholders.push({ name: "second", index: groupIndex++ });
-                            regexStr += "(\\d{1,2})";
-                            break;
-                        case "f":
-                            placeholders.push({ name: "fractional", index: groupIndex++ });
-                            regexStr += "(\\d{1,6})";
-                            break;
-                        default:
-                            regexStr += char + nextChar;
+                    let matchedKey: string | null = null;
+                    let consumedLength = 0;
+                    if (i + 2 < format.length && format.slice(i + 1, i + 3) === "ms") {
+                        matchedKey = "ms";
+                        consumedLength = 3;
+                    } else if (DIRECTIVES[nextChar]?.parseRegex) {
+                        matchedKey = nextChar;
+                        consumedLength = 2;
                     }
-                    i += 2;
+
+                    if (matchedKey) {
+                        const dir = DIRECTIVES[matchedKey];
+                        placeholders.push({ directive: dir, index: groupIndex++ });
+                        regexStr += `(${dir.parseRegex})`;
+                        i += consumedLength;
+                    } else {
+                        regexStr += char + nextChar;
+                        i += 2;
+                    }
                 }
             } else {
                 regexStr += char;
@@ -291,68 +289,64 @@ export function strptime(str: string, format: string, strict = true): Date | nul
         return isValidDateObj(parsed) ? parsed : null;
     }
 
-    let year = 1970;
-    let month = 1;
-    let day = 1;
-    let hour = 0;
-    let minute = 0;
-    let second = 0;
-    let ms = 0;
+    const parts = {
+        year: 1970,
+        month: 1,
+        day: 1,
+        hour: 0,
+        minute: 0,
+        second: 0,
+        ms: 0
+    };
 
     for (const p of placeholders) {
         const valStr = match[p.index];
-        const val = parseInt(valStr, 10);
-        switch (p.name) {
-            case "year":
-                year = val;
-                break;
-            case "year_short":
-                year = val + (val >= 69 ? 1900 : 2000);
-                break;
-            case "month":
-                month = val;
-                break;
-            case "day":
-                day = val;
-                break;
-            case "hour":
-                hour = val;
-                break;
-            case "minute":
-                minute = val;
-                break;
-            case "second":
-                second = val;
-                break;
-            case "ms":
-                ms = parseInt(valStr.padEnd(3, "0").slice(0, 3), 10);
-                break;
-            case "fractional":
-                ms = parseInt(valStr.padEnd(6, "0").slice(0, 3), 10);
-                break;
+        const dir = p.directive;
+        const parsedVal = dir.parseNormalize ? dir.parseNormalize(valStr) : parseInt(valStr, 10);
+        if (dir.parseField) {
+            parts[dir.parseField] = parsedVal;
         }
     }
 
-    const d = new Date(Date.UTC(year, month - 1, day, hour, minute, second, ms));
+    const d = new Date(Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second, parts.ms));
     return isValidDateObj(d) ? d : null;
 }
 
-export function toValidDate(input: unknown): Date | null {
-    if (input instanceof Date) {
-        return isValidDateObj(input) ? input : null;
-    }
-    if (typeof input === "number") {
-        const d = new Date(normalizeEpochToMs(input));
-        return isValidDateObj(d) ? d : null;
-    }
-    if (typeof input === "bigint") {
-        const d = new Date(normalizeEpochToMs(Number(input)));
-        return isValidDateObj(d) ? d : null;
-    }
-    if (typeof input === "string") {
+export function toValidDate(input: unknown, options?: { dateOnly?: boolean }): Date | null {
+    let d: Date | null = null;
+    if (isValidDateObj(input)) {
+        d = input;
+    } else if (typeof input === "number") {
+        d = new Date(normalizeEpochToMs(input));
+        d = isValidDateObj(d) ? d : null;
+    } else if (typeof input === "bigint") {
+        d = new Date(normalizeEpochToMs(Number(input)));
+        d = isValidDateObj(d) ? d : null;
+    } else if (typeof input === "string") {
         if (isBlankString(input)) return null;
-        const d = new Date(input);
-        return isValidDateObj(d) ? d : null;
+        d = new Date(input);
+        d = isValidDateObj(d) ? d : null;
     }
-    return null;
+
+    if (d && options?.dateOnly) {
+        const copy = new Date(d);
+        copy.setUTCHours(0, 0, 0, 0);
+        return copy;
+    }
+    return d;
+}
+
+export function toValidTime(val: unknown): string | null {
+    if (val == null) return null;
+    if (typeof val === "string") {
+        const trimmed = val.trim();
+        if (TIME_PREFIX_REGEX.test(trimmed)) {
+            const d = new Date(`1970-01-01T${trimmed}${ZONE_OFFSET_REGEX.test(trimmed) ? "" : "Z"}`);
+            if (isValidDateObj(d)) {
+                return d.toISOString().split("T")[1].slice(0, 12);
+            }
+        }
+    }
+    const d = toValidDate(val);
+    return d ? d.toISOString().split("T")[1].slice(0, 12) : null;
 }

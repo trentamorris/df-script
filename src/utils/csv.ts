@@ -5,6 +5,7 @@ import { formatNumber, toValidNumber, toValidBigInt, type NumericFormatOptions }
 import { NEWLINE, CARRIAGE_RETURN, UTF8_BOM } from "../dataframe/constants";
 import { DataType, Utf8, Boolean as BoolType, Int64, Float64, Datetime } from "../datatypes";
 import type { ReadCSVOptions } from "../dataframe/types";
+import { unboxPrimitiveObj } from "./object";
 
 export interface FormatCSVValueOptions {
     /**
@@ -111,7 +112,8 @@ function formatCsvValueInternal(options: FormatCSVValueOptions = {}) {
             return { str: formatNum(val), isNumeric: true };
         }
 
-        const processed = replacer.call(null, "", val);
+        const raw = replacer.call(null, "", val);
+        const processed = unboxPrimitiveObj(raw);
 
         if (processed === null || processed === undefined || typeof processed === "symbol" || typeof processed === "function") {
             return { str: nullValue, isNumeric: false };
@@ -122,10 +124,6 @@ function formatCsvValueInternal(options: FormatCSVValueOptions = {}) {
             return { str: formatNum(processed), isNumeric: true };
         }
         if (typeof processed === "boolean") return { str: processed ? "true" : "false", isNumeric: false };
-
-        if (processed instanceof Number) return { str: formatNum(processed.valueOf()), isNumeric: true };
-        if (processed instanceof String) return { str: processed.valueOf(), isNumeric: false };
-        if (processed instanceof Boolean) return { str: processed.valueOf() ? "true" : "false", isNumeric: false };
 
         if (typeof processed === "object") {
             // Instantiate a fresh replacer specifically for nested stringification

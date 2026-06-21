@@ -1,12 +1,10 @@
-import { isTypedArray, isPlainObj } from "./guards";
-import { isValidDateObj } from "./date";
+import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, unboxPrimitiveObj } from "./object";
+import { isTypedArray } from "./array";
 
 export function isBlankString(v: unknown): v is string {
-    if (typeof v === "string") {
-        return v.trim().length === 0;
-    }
-    if (v instanceof String) {
-        return v.valueOf().trim().length === 0;
+    const unwrapped = unboxPrimitiveObj(v);
+    if (typeof unwrapped === "string") {
+        return unwrapped.trim().length === 0;
     }
     return false;
 }
@@ -99,7 +97,7 @@ export function stripChars(
         return (returnStringOnNull || result !== "") ? result : null;
     }
 
-    const matches = characters instanceof RegExp
+    const matches = isRegExp(characters)
         ? (char: string) => {
             try {
                 characters.lastIndex = 0;
@@ -268,8 +266,8 @@ export function toCanonicalString(
         return "v:undefined";
     }
 
-    if (val instanceof Date) {
-        return isValidDateObj(val) ? `d:${val.getTime()}` : "d:invalid";
+    if (isValidDateObj(val)) {
+        return `d:${val.getTime()}`;
     }
 
     if (isTypedArray(val)) {
@@ -286,7 +284,7 @@ export function toCanonicalString(
         return `a:[${parts.join(",")}]`;
     }
 
-    if (val instanceof Set) {
+    if (isSet(val)) {
         const arr = Array.from(val);
         const len = arr.length;
         const parts = new Array(len);
@@ -298,7 +296,7 @@ export function toCanonicalString(
         return `set:[${parts.join(",")}]`;
     }
 
-    if (val instanceof Map) {
+    if (isMap(val)) {
         const keys = Array.from(val.keys());
         const len = keys.length;
         const parts = new Array(len);
@@ -330,7 +328,7 @@ export function toCanonicalString(
         return `o:{${parts.join(",")}}`;
     }
 
-    if (val instanceof RegExp) {
+    if (isRegExp(val)) {
         return `r:${val.toString()}`;
     }
 

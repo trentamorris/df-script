@@ -18,7 +18,21 @@ export type DataFrameColumns<T extends RowRecord> = {
     [K in keyof T]: ColumnData<T[K]>;
 };
 
-export type ValidScalarTypes = string | number | boolean | bigint | Date | Uint8Array | null | undefined;
+export type AnyTypedArray =
+    | Int8Array
+    | Uint8Array
+    | Uint8ClampedArray
+    | Int16Array
+    | Uint16Array
+    | Int32Array
+    | Uint32Array
+    | Float32Array
+    | Float64Array
+    | BigInt64Array
+    | BigUint64Array;
+
+export type ValidPrimitiveTypes = string | number | boolean | bigint | symbol | null | undefined;
+export type ValidScalarTypes = Exclude<ValidPrimitiveTypes, symbol> | Date | AnyTypedArray;
 
 export type AggFn<V, R = any> = (values: V[]) => R;
 export type OpFn = (vals: ColumnData, columns: ColumnDict) => ColumnData;

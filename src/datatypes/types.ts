@@ -17,9 +17,7 @@ import {
     toValidNumber,
     isArrayOrTypedArray,
     isObj,
-    TIME_PREFIX_REGEX,
-    ZONE_OFFSET_REGEX,
-    isValidDateObj
+    toValidTime
 } from "../utils";
 import type { RowRecord } from "../types";
 
@@ -188,12 +186,7 @@ export const ObjectDataType = new ObjectType();
 
 export class DateType extends TemporalDataType<Date | null> {
     readonly name = "Date";
-    coerce(val: unknown): Date | null {
-        const d = toValidDate(val);
-        if (!d) return null;
-        d.setUTCHours(0, 0, 0, 0);
-        return d;
-    }
+    coerce(val: unknown): Date | null { return toValidDate(val, { dateOnly: true }); }
     equals(other: DataType): boolean { return other.name === "Date"; }
     allocate(size: number): (Date | null)[] { return new Array(size).fill(null); }
 }
@@ -209,20 +202,7 @@ export const Datetime = new DatetimeType();
 
 export class TimeType extends TemporalDataType<string | null> {
     readonly name = "Time";
-    coerce(val: unknown): string | null {
-        if (val == null) return null;
-        if (typeof val === "string") {
-            const trimmed = val.trim();
-            if (TIME_PREFIX_REGEX.test(trimmed)) {
-                const d = new Date(`1970-01-01T${trimmed}${ZONE_OFFSET_REGEX.test(trimmed) ? "" : "Z"}`);
-                if (isValidDateObj(d)) {
-                    return d.toISOString().split("T")[1].slice(0, 12);
-                }
-            }
-        }
-        const d = toValidDate(val);
-        return d ? d.toISOString().split("T")[1].slice(0, 12) : null;
-    }
+    coerce(val: unknown): string | null { return toValidTime(val); }
     equals(other: DataType): boolean { return other.name === "Time"; }
     allocate(size: number): (string | null)[] { return new Array(size).fill(null); }
 }

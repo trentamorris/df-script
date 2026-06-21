@@ -5,12 +5,11 @@ import {
     toValidDate,
     toValidDecimal,
     toValidInt,
-    TIME_PREFIX_REGEX,
-    ZONE_OFFSET_REGEX,
-    isValidDateObj,
+    toValidTime,
     strptime,
     stripChars,
-    StripCharsOptions
+    StripCharsOptions,
+    isRegExp
 } from "../../utils";
 
 export class StringExprNamespace {
@@ -33,14 +32,14 @@ export class StringExprNamespace {
 
     contains(pattern: string | RegExp) {
         return this._patternGuard(pattern, () =>
-            this._deriveString((str) => pattern instanceof RegExp ? pattern.test(str) : str.includes(pattern))
+            this._deriveString((str) => isRegExp(pattern) ? pattern.test(str) : str.includes(pattern))
         );
     }
 
     count_matches(pattern: string | RegExp) {
         return this._patternGuard(pattern, () =>
             this._deriveString((str) => {
-                if (pattern instanceof RegExp) {
+                if (isRegExp(pattern)) {
                     const regex = pattern.global
                         ? pattern
                         : new RegExp(pattern.source, pattern.flags + "g");
@@ -212,13 +211,7 @@ export class StringExprNamespace {
     }
 
     to_date() {
-        return this._deriveString((str) => {
-            const d = toValidDate(str);
-            if (!d) return null;
-            const copy = new Date(d);
-            copy.setUTCHours(0, 0, 0, 0);
-            return copy;
-        });
+        return this._deriveString((str) => toValidDate(str, { dateOnly: true }));
     }
 
     to_datetime() {
@@ -238,19 +231,7 @@ export class StringExprNamespace {
     }
 
     to_time() {
-        return this._deriveString((str) => {
-            const d = toValidDate(str);
-            if (d) return d.toISOString().split("T")[1].slice(0, 12);
-
-            const trimmed = str.trim();
-            if (TIME_PREFIX_REGEX.test(trimmed)) {
-                const td = new Date(`1970-01-01T${trimmed}${ZONE_OFFSET_REGEX.test(trimmed) ? "" : "Z"}`);
-                if (isValidDateObj(td)) {
-                    return td.toISOString().split("T")[1].slice(0, 12);
-                }
-            }
-            return null;
-        });
+        return this._deriveString(toValidTime);
     }
 
     to_titlecase() {

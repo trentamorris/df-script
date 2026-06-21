@@ -1,6 +1,6 @@
 import type { JSONFormat } from "../types";
-import { isTypedArray } from "./guards";
-import { isValidDateObj } from "./date";
+import { isTypedArray } from "./array";
+import { isSet, isMap, isRegExp, isError, isURLSearchParams, isValidDateObj } from "./object";
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g;
 const NO_FALLBACK = Symbol("no_fallback");
@@ -337,15 +337,15 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
             if (options.voidTypedArrayReplacement) return val;
             return options.onTypedArray ? options.onTypedArray(raw) : Array.from(raw as any);
         }
-        if (raw instanceof Set) {
+        if (isSet(raw)) {
             if (options.voidSetReplacement) return val;
             return options.onSet ? options.onSet(raw) : Array.from(raw);
         }
-        if (raw instanceof Map) {
+        if (isMap(raw)) {
             if (options.voidMapReplacement) return val;
             return options.onMap ? options.onMap(raw) : Array.from(raw.entries());
         }
-        if (raw instanceof RegExp) {
+        if (isRegExp(raw)) {
             if (options.voidRegExpReplacement) return val;
             return options.onRegExp ? options.onRegExp(raw) : raw.toString();
         }
@@ -354,10 +354,10 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
             if (options.onDate) return options.onDate(raw);
             return options.formatDate ? options.formatDate(raw) : raw.toISOString();
         }
-        if (raw instanceof Error) {
+        if (isError(raw)) {
             return options.onError ? options.onError(raw) : { name: raw.name, message: raw.message, stack: raw.stack };
         }
-        if (raw instanceof URLSearchParams) {
+        if (isURLSearchParams(raw)) {
             return options.onURLSearchParams ? options.onURLSearchParams(raw) : raw.toString();
         }
 

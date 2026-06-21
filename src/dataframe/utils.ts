@@ -1,7 +1,7 @@
 import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types"
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR } from "./constants"
-import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray } from "../utils"
+import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj } from "../utils"
 import { assertColumnExists } from "../exceptions"
 
 function partition_by_columns(
@@ -182,7 +182,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
                 allArrayElements.push(valArr[j]);
             }
         }
-        if (val instanceof Date) hasDateObj = true;
+        if (isValidDateObj(val)) hasDateObj = true;
         if (typeof val !== "boolean") isBoolean = false;
         if (typeof val !== "bigint") isBigInt = false;
         if (typeof val !== "number") {
@@ -191,7 +191,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         } else {
             if (!Number.isInteger(val)) isInteger = false;
         }
-        if (!(val instanceof Date) && (typeof val !== "string" || isNaN(Date.parse(val)))) {
+        if (!isValidDateObj(val) && (typeof val !== "string" || isNaN(Date.parse(val)))) {
             isDate = false;
         }
         if (!isObj(val) || val instanceof Uint8Array) {

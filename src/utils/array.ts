@@ -1,7 +1,32 @@
-import { isArrayOrTypedArray, isClass, isObj, isPlainObj, isTypedArray } from "./guards";
-import { isValidDateObj } from "./date";
+import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
 import { toValidNumber, isValidNumber } from "./number";
 import { toCanonicalString } from "./string";
+import type { AnyTypedArray } from "../types";
+
+/** Array Guards **/
+const typedArrayTagGetter = (() => {
+    try {
+        const sample = new Uint8Array(0);
+        const proto = Object.getPrototypeOf(sample);
+        const superProto = Object.getPrototypeOf(proto);
+        const getter = Object.getOwnPropertyDescriptor(superProto, Symbol.toStringTag)?.get;
+        if (getter && getter.call(sample) === "Uint8Array") return getter;
+        return undefined;
+    } catch {
+        return undefined;
+    }
+})();
+
+export function isTypedArray(v: unknown): v is AnyTypedArray {
+    if (!ArrayBuffer.isView(v)) return false;
+    if (typedArrayTagGetter) return typedArrayTagGetter.call(v) !== undefined;
+    const tag = Object.prototype.toString.call(v);
+    return tag !== "[object DataView]" && tag.endsWith("Array]");
+}
+
+export function isArrayOrTypedArray(v: unknown): v is any[] | AnyTypedArray {
+    return Array.isArray(v) || isTypedArray(v);
+}
 
 export type ArrayItemType =
     | "string"
