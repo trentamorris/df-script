@@ -194,7 +194,7 @@ export function concat<U extends RowRecord = any>(
                     const key = keys[idxKey];
                     const col = df._columns[key];
                     if (h === maxHeight) {
-                        newColumns[key] = isTypedArray(col) ? Array.from(col) : col;
+                        newColumns[key] = isTypedArray(col) ? Array.from(col as any) : col;
                     } else {
                         const padded = new Array(maxHeight);
                         for (let i = 0; i < h; i++) {

@@ -289,6 +289,11 @@ try {
     if (toValidNumber("1,234,567") !== 1234567) throw new Error("Agnostic: lone repeating commas failed");
     if (toValidNumber("1.234.567") !== 1234567) throw new Error("Agnostic: lone repeating dots failed");
 
+    // Agnostic: single dot decimals
+    if (toValidNumber("1.234") !== 1.234) throw new Error("Agnostic: single dot '1.234' failed");
+    if (toValidNumber("0.123") !== 0.123) throw new Error("Agnostic: single dot '0.123' failed");
+    if (toValidNumber("1234.567") !== 1234.567) throw new Error("Agnostic: single dot '1234.567' failed");
+
     // standard decimal variations and signs (Prefixes)
     if (toValidNumber(".123") !== 0.123) throw new Error("Decimal: '.123' failed");
     if (toValidNumber("-.123") !== -0.123) throw new Error("Decimal: '-.123' failed");
@@ -328,13 +333,44 @@ try {
     if (toValidNumber("1.2.3.4") !== null) throw new Error("Rejection: version string 4-part failed");
     if (toValidNumber("1.2.3,45") !== null) throw new Error("Rejection: malformed mixed layout failed");
     if (toValidNumber("1.234.56") !== null) throw new Error("Rejection: invalid group length failed");
+    if (toValidNumber("9999.123.456") !== null) throw new Error("Rejection: 9999.123.456 should be null");
+    if (toValidNumber("1234,567.89") !== null) throw new Error("Rejection: 1234,567.89 should be null");
+    if (toValidNumber("12345.678") !== 12345.678) throw new Error("Acceptance: 12345.678 should be 12345.678");
+    if (toValidNumber("12345,678") !== null) throw new Error("Rejection: 12345,678 should be null");
+    if (toValidNumber("1,234.567") !== 1234.567) throw new Error("Acceptance: 1,234.567 should be 1234.567");
+    if (toValidNumber(".123.456") !== null) throw new Error("Rejection: leading dot version should be null");
+    if (toValidNumber(",123") !== null) throw new Error("Rejection: ,123 should be null");
+    if (toValidNumber("-,123") !== null) throw new Error("Rejection: -,123 should be null");
+    if (toValidNumber("+,123") !== null) throw new Error("Rejection: +,123 should be null");
+    if (toValidNumber(".123") !== 0.123) throw new Error("Acceptance: .123 should be 0.123");
+    if (toValidNumber("-.123") !== -0.123) throw new Error("Acceptance: -.123 should be -0.123");
+    if (toValidNumber("+.123") !== 0.123) throw new Error("Acceptance: +.123 should be 0.123");
 
     // Non-finite parsing
     if (!Number.isNaN(toValidNumber("NaN", { allowNonFiniteNumbers: true }) as number)) throw new Error("Non-finite: 'NaN' failed");
     if (!Number.isNaN(toValidNumber("-nan", { allowNonFiniteNumbers: true }) as number)) throw new Error("Non-finite: '-nan' failed");
+    if (!Number.isNaN(toValidNumber("+nan", { allowNonFiniteNumbers: true }) as number)) throw new Error("Non-finite: '+nan' failed");
     if (toValidNumber("Infinity", { allowNonFiniteNumbers: true }) !== Infinity) throw new Error("Non-finite: 'Infinity' failed");
     if (toValidNumber("-infinity", { allowNonFiniteNumbers: true }) !== -Infinity) throw new Error("Non-finite: '-infinity' failed");
     if (toValidNumber("NaN") !== null) throw new Error("Non-finite: strict should reject 'NaN'");
+
+    // roundToScale negative scale tests
+    const { roundToScale } = require("../../src/utils/number");
+    if (roundToScale(1234, -1) !== 1230) throw new Error("roundToScale negative scale -1 failed");
+    if (roundToScale(1234, -2) !== 1200) throw new Error("roundToScale negative scale -2 failed");
+    if (roundToScale(1.005, 2) !== 1.01) throw new Error("roundToScale positive scale failed");
+
+
+
+    // Trailing sign tests
+    if (toValidNumber("123.45-") !== -123.45) throw new Error("Trailing minus sign parsing failed");
+    if (toValidNumber("1,234.50-") !== -1234.5) throw new Error("Trailing minus with grouped commas failed");
+    if (toValidNumber("123.45+") !== 123.45) throw new Error("Trailing plus sign parsing failed");
+
+
+
+    // toValidFloat scientific default tests
+    if (toValidFloat("1.23e+4") !== 12300) throw new Error("toValidFloat scientific notation default failed");
 
     // toValidBigInt tests
     if (toValidBigInt(9223372036854775807n) !== 9223372036854775807n) throw new Error("BigInt: native bigint failed");
@@ -346,6 +382,10 @@ try {
     if (toValidBigInt("(1,234.00)") !== -1234n) throw new Error("BigInt: accounting layout parsing failed");
     if (toValidBigInt("1_000_000") !== 1000000n) throw new Error("BigInt: underscores failed");
     if (toValidBigInt("1.23e+4") !== 12300n) throw new Error("BigInt: scientific notation conversion failed");
+
+    // BigInt single dot tests
+    if (toValidBigInt("1.234", { truncate: false }) !== null) throw new Error("BigInt: single dot '1.234' strict check failed");
+    if (toValidBigInt("1.234", { truncate: true }) !== 1n) throw new Error("BigInt: single dot '1.234' truncate failed");
 
     // toValidBigInt loophole/edge case tests
     if (toValidBigInt("1.2.3") !== null) throw new Error("BigInt loophole: version string should return null");
@@ -487,8 +527,22 @@ try {
     if (!oIsSet(foreignSet)) throw new Error("isSet should return true for cross-realm Set");
     if (!oIsMap(foreignMap)) throw new Error("isMap should return true for cross-realm Map");
     if (!oIsRegExp(foreignRegExp)) throw new Error("isRegExp should return true for cross-realm RegExp");
+    // Custom valueOf unboxing tests
+    const { unboxPrimitiveObj: testUnbox } = require("../../src/utils/object");
+    class CustomVal {
+        private val: number | string;
+        constructor(val: number | string) { this.val = val; }
+        valueOf() { return this.val; }
+    }
+    if (testUnbox(new CustomVal(123)) !== 123) throw new Error("unboxPrimitiveObj custom number valueOf failed");
+    if (testUnbox(new CustomVal("hello")) !== "hello") throw new Error("unboxPrimitiveObj custom string valueOf failed");
 
-
+    // Check that we don't unbox objects returning objects from valueOf
+    class BadCustom {
+        valueOf() { return { x: 1 }; }
+    }
+    const badObj = new BadCustom();
+    if (testUnbox(badObj) !== badObj) throw new Error("unboxPrimitiveObj bad custom valueOf should return object itself");
 
     console.log("🎉 ALL UTILS TYPES TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

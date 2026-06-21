@@ -12,7 +12,6 @@ const EXPONENT_INDICATOR_REGEX = /[eE]/;
 
 export interface NumericValidationOptions {
     allowNonFiniteNumbers?: boolean;
-    strictNumericString?: boolean;
 }
 
 export function isValidNumber(
@@ -25,6 +24,7 @@ export function isValidNumber(
 }
 
 export interface ParseNumberOptions extends NumericValidationOptions {
+    strictNumericString?: boolean;
     floatScientific?: boolean;
 }
 
@@ -35,6 +35,10 @@ function validateGroupLengths(parts: string[]): boolean {
     return true;
 }
 
+const LEADING_SIGN_REGEX = /^[+-]/;
+const ALL_DOTS_REGEX = /\./g;
+const ALL_COMMAS_REGEX = /,/g;
+
 function cleanNumericString(str: string, strict: boolean): string | null {
     if (NON_BASE10_INJECTION_REGEX.test(str)) return null;
 
@@ -43,6 +47,11 @@ function cleanNumericString(str: string, strict: boolean): string | null {
 
     if (clean.startsWith("(") && clean.endsWith(")")) {
         clean = "-" + clean.slice(1, -1).trim();
+    }
+
+    const lastChar = clean[clean.length - 1];
+    if ((lastChar === "-" || lastChar === "+") && clean.length > 1) {
+        clean = lastChar + clean.slice(0, -1).trim();
     }
 
     if (!strict) {
@@ -55,28 +64,38 @@ function cleanNumericString(str: string, strict: boolean): string | null {
     if (hasDot && hasComma) {
         const lastDot = clean.lastIndexOf(".");
         const lastComma = clean.lastIndexOf(",");
-        if (lastComma > lastDot) {
-            const parts = clean.slice(0, lastComma).split(".");
-            if (parts.length > 1 && !validateGroupLengths(parts)) return null;
-            clean = clean.replace(/\./g, "").replace(/,/g, ".");
-        } else {
-            const parts = clean.slice(0, lastDot).split(",");
-            if (parts.length > 1 && !validateGroupLengths(parts)) return null;
-            clean = clean.replace(/,/g, "");
+        const isCommaDecimal = lastComma > lastDot;
+
+        const splitChar = isCommaDecimal ? "." : ",";
+        const limitIdx = isCommaDecimal ? lastComma : lastDot;
+
+        const parts = clean.slice(0, limitIdx).split(splitChar);
+        if (parts.length > 1 && !validateGroupLengths(parts)) return null;
+        if (parts[0].replace(LEADING_SIGN_REGEX, "").length > 3) return null;
+
+        return isCommaDecimal
+            ? clean.replace(ALL_DOTS_REGEX, "").replace(ALL_COMMAS_REGEX, ".")
+            : clean.replace(ALL_COMMAS_REGEX, "");
+    }
+
+    if (hasComma || hasDot) {
+        const char = hasComma ? "," : ".";
+        const parts = clean.split(char);
+
+        if (parts.length > 2 || (char === "," && parts.length === 2 && parts[1].length === 3)) {
+            const leadLength = parts[0].replace(LEADING_SIGN_REGEX, "").length;
+
+            if (leadLength === 0) {
+                if (char === "," || parts.length > 2) return null;
+            } else if (leadLength > 3) {
+                return null;
+            } else {
+                if (!validateGroupLengths(parts)) return null;
+                return clean.replace(hasComma ? ALL_COMMAS_REGEX : ALL_DOTS_REGEX, "");
+            }
         }
-    } else if (hasComma && !hasDot) {
-        if (clean.indexOf(",") !== clean.lastIndexOf(",")) {
-            const parts = clean.split(",");
-            if (!validateGroupLengths(parts)) return null;
-            clean = clean.replace(/,/g, "");
-        } else {
-            clean = clean.replace(/,/g, ".");
-        }
-    } else if (hasDot && !hasComma) {
-        if (clean.indexOf(".") !== clean.lastIndexOf(".")) {
-            const parts = clean.split(".");
-            if (!validateGroupLengths(parts)) return null;
-            clean = clean.replace(/\./g, "");
+        if (hasComma) {
+            return clean.replace(ALL_COMMAS_REGEX, ".");
         }
     }
 
@@ -117,7 +136,7 @@ export function toValidNumber(
 
             if (allowNonFiniteNumbers) {
                 const lower = clean.toLowerCase();
-                if (lower === "nan" || lower === "-nan") return NaN;
+                if (lower === "nan" || lower === "-nan" || lower === "+nan") return NaN;
                 if (lower === "infinity" || lower === "+infinity") return Infinity;
                 if (lower === "-infinity") return -Infinity;
             }
@@ -157,44 +176,38 @@ export function formatNumber({
     formatNonFinite = false,
     ...intlOpts
 }: NumericFormatOptions = {}): (value: unknown) => string {
-    if (intlOpts.useGrouping === undefined) {
-        intlOpts.useGrouping = false;
-    }
+    if (intlOpts.useGrouping === undefined) intlOpts.useGrouping = false;
     if (intlOpts.maximumFractionDigits === undefined && intlOpts.maximumSignificantDigits === undefined) {
         intlOpts.maximumFractionDigits = 20;
+    }
+
+    if (accountingNegatives) {
+        intlOpts.currencySign = "accounting";
+        if (intlOpts.style === undefined) intlOpts.style = "decimal";
     }
 
     const formatter = new Intl.NumberFormat(locale, intlOpts);
 
     return (value: unknown): string => {
         if (typeof value === "bigint") {
-            if (accountingNegatives && value < 0n) {
-                return `(${formatter.format(-value)})`;
-            }
-            return formatter.format(value);
+            return accountingNegatives && value < 0n
+                ? `(${formatter.format(-value)})`
+                : formatter.format(value);
         }
 
         const num = toValidNumber(value, { allowNonFiniteNumbers: true });
-
-        if (num === null || Number.isNaN(num)) {
-            return fallback;
-        }
+        if (num === null || Number.isNaN(num)) return fallback;
 
         if (!Number.isFinite(num)) {
-            if (formatNonFinite) {
-                return fallback;
-            }
-            if (accountingNegatives && num === -Infinity) {
-                return `(${formatter.format(Infinity)})`;
-            }
-            return String(num);
+            if (formatNonFinite) return fallback;
+            return accountingNegatives && num === -Infinity
+                ? `(${formatter.format(Infinity)})`
+                : String(num);
         }
 
-        if (accountingNegatives && num < 0) {
-            return `(${formatter.format(Math.abs(num))})`;
-        }
-
-        return formatter.format(num);
+        return accountingNegatives && num < 0
+            ? `(${formatter.format(Math.abs(num))})`
+            : formatter.format(num);
     };
 }
 
@@ -224,7 +237,7 @@ export function toValidFloat(
     {
         floatPrecision = "Float64",
         allowNonFiniteNumbers = true,
-        floatScientific = false,
+        floatScientific = true,
         strictNumericString = false
     }: FloatOptions = {}
 ): number | null {
@@ -272,19 +285,18 @@ export function toValidInt(
         coerce = "truncate"
     }: IntOptions = {}
 ): number | null {
-    const num = toValidNumber(v);
+    let num = toValidNumber(v);
     if (num === null) return null;
 
-    let n = num;
     switch (coerce) {
-        case "round": n = Math.round(n); break;
-        case "floor": n = Math.floor(n); break;
-        case "ceil": n = Math.ceil(n); break;
-        case "truncate": n = Math.trunc(n); break;
+        case "round": num = Math.round(num); break;
+        case "floor": num = Math.floor(num); break;
+        case "ceil": num = Math.ceil(num); break;
+        case "truncate": num = Math.trunc(num); break;
     }
 
     const limits = typeof range === "string" ? INT_RANGES[range] : range;
-    return clamp(n, { min: limits.min, max: limits.max });
+    return clamp(num, { min: limits.min, max: limits.max });
 }
 
 // ============================================================================
@@ -309,58 +321,38 @@ export function toValidBigInt(
     { range = "Int64", truncate = false }: BigIntOptions = {}
 ): bigint | null {
     if (v == null || typeof v === "symbol") return null;
-
     v = unboxPrimitiveObj(v);
 
     let bigintVal: bigint | null = null;
 
-    switch (typeof v) {
-        case "bigint":
-            bigintVal = v;
-            break;
-        case "boolean":
-            bigintVal = v ? 1n : 0n;
-            break;
-        case "number":
-            if (!Number.isFinite(v)) return null;
-            if (!truncate && !Number.isInteger(v)) return null;
-            bigintVal = BigInt(Math.trunc(v));
-            break;
-        case "string": {
-            let clean = cleanNumericString(v, false);
-            if (clean === null) return null;
+    if (typeof v === "bigint") {
+        bigintVal = v;
+    } else if (typeof v === "string") {
+        let clean = cleanNumericString(v, false);
+        if (clean === null || !STRICT_SCIENTIFIC_REGEX.test(clean)) return null;
 
-            if (!STRICT_SCIENTIFIC_REGEX.test(clean)) return null;
-
-            if (EXPONENT_INDICATOR_REGEX.test(clean)) {
-                const num = Number(clean);
-                if (!Number.isFinite(num)) return null;
-                if (!truncate && !Number.isInteger(num)) return null;
-                bigintVal = BigInt(Math.trunc(num));
-            } else {
-                const dotIdx = clean.indexOf(".");
-                if (dotIdx !== -1) {
-                    if (!truncate) {
-                        const fraction = clean.slice(dotIdx + 1);
-                        if (/[^0]/.test(fraction)) return null;
-                    }
-                    clean = clean.slice(0, dotIdx);
-                }
-                try {
-                    bigintVal = BigInt(clean);
-                } catch {
-                    return null;
-                }
-            }
-            break;
-        }
-        default: {
-            const num = toValidNumber(v);
-            if (num === null) return null;
+        if (EXPONENT_INDICATOR_REGEX.test(clean)) {
+            const num = Number(clean);
+            if (!Number.isFinite(num)) return null;
             if (!truncate && !Number.isInteger(num)) return null;
             bigintVal = BigInt(Math.trunc(num));
-            break;
+        } else {
+            const dotIdx = clean.indexOf(".");
+            if (dotIdx !== -1) {
+                if (!truncate && /[^0]/.test(clean.slice(dotIdx + 1))) return null;
+                clean = clean.slice(0, dotIdx);
+            }
+            try {
+                bigintVal = BigInt(clean);
+            } catch {
+                return null;
+            }
         }
+    } else {
+        const num = toValidNumber(v);
+        if (num === null) return null;
+        if (!truncate && !Number.isInteger(num)) return null;
+        bigintVal = BigInt(Math.trunc(num));
     }
 
     const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
@@ -394,7 +386,7 @@ export function roundToScale(v: number, scale: number): number {
         const factor = Math.pow(10, scale);
         return Math.round(v * factor) / factor;
     }
-    return Number(Math.round(Number(str + "e" + scale)) + "e-" + scale);
+    return Number(Math.round(Number(str + "e" + scale)) + "e" + (-scale));
 }
 
 export function toValidDecimal(
@@ -430,32 +422,19 @@ export function clamp<T extends number | bigint>(
     options?: { min?: T | null; max?: T | null; safe?: boolean }
 ): T {
     if (!options) return val;
-    const min = options.min;
-    const max = options.max;
-    const safe = options.safe !== false;
+    const { min = null, max = null, safe = true } = options;
 
-    const hasMin = min !== null && min !== undefined;
-    const hasMax = max !== null && max !== undefined;
-
-    if (hasMin && hasMax && (min as any) > (max as any)) {
-        return min as T;
-    }
+    if (min !== null && max !== null && (min as any) > (max as any)) return min as T;
 
     let v = val;
     if (safe && typeof v === "number") {
-        if (Number.isNaN(v)) {
-            return hasMin ? (min as T) : (hasMax ? (max as T) : val);
-        }
-        if (v === Infinity) {
-            return hasMax ? (max as T) : val;
-        }
-        if (v === -Infinity) {
-            return hasMin ? (min as T) : val;
-        }
+        if (Number.isNaN(v)) return min !== null ? (min as T) : (max !== null ? (max as T) : val);
+        if (v === Infinity) return max !== null ? (max as T) : val;
+        if (v === -Infinity) return min !== null ? (min as T) : val;
     }
 
-    if (hasMin && v < (min as T)) return min as T;
-    if (hasMax && v > (max as T)) return max as T;
+    if (min !== null && v < (min as T)) return min as T;
+    if (max !== null && v > (max as T)) return max as T;
     return v;
 }
 

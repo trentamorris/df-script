@@ -136,48 +136,53 @@ export function isSymbolObj(v: unknown): v is Object {
 
 export function unboxPrimitiveObj(v: unknown): unknown {
     if (!isObj(v)) return v;
+
     const tag = Object.prototype.toString.call(v);
+
     switch (tag) {
         case TAG_NUMBER:
             if (isNumberObj(v)) {
-                try { return numberValueOf.call(v); } catch { }
+                try { return numberValueOf.call(v); } catch {}
             }
             break;
         case TAG_STRING:
             if (isStringObj(v)) {
-                try { return stringValueOf.call(v); } catch { }
+                try { return stringValueOf.call(v); } catch {}
             }
             break;
         case TAG_BOOLEAN:
             if (isBooleanObj(v)) {
-                try { return booleanValueOf.call(v); } catch { }
+                try { return booleanValueOf.call(v); } catch {}
             }
             break;
         case TAG_BIGINT:
             if (isBigIntObj(v) && bigIntValueOf) {
-                try { return bigIntValueOf.call(v); } catch { }
+                try { return bigIntValueOf.call(v); } catch {}
             }
             break;
         case TAG_SYMBOL:
             if (isSymbolObj(v) && symbolValueOf) {
-                try { return symbolValueOf.call(v); } catch { }
-            }
-            break;
-        default:
-            if (Symbol.toStringTag in v) {
-                if (isNumberObj(v)) {
-                    try { return numberValueOf.call(v); } catch { }
-                } else if (isStringObj(v)) {
-                    try { return stringValueOf.call(v); } catch { }
-                } else if (isBooleanObj(v)) {
-                    try { return booleanValueOf.call(v); } catch { }
-                } else if (isBigIntObj(v) && bigIntValueOf) {
-                    try { return bigIntValueOf.call(v); } catch { }
-                } else if (isSymbolObj(v) && symbolValueOf) {
-                    try { return symbolValueOf.call(v); } catch { }
-                }
+                try { return symbolValueOf.call(v); } catch {}
             }
             break;
     }
+
+    if (Symbol.toStringTag in v) {
+        if (isNumberObj(v)) { try { return numberValueOf.call(v); } catch {} }
+        else if (isStringObj(v)) { try { return stringValueOf.call(v); } catch {} }
+        else if (isBooleanObj(v)) { try { return booleanValueOf.call(v); } catch {} }
+        else if (isBigIntObj(v) && bigIntValueOf) { try { return bigIntValueOf.call(v); } catch {} }
+        else if (isSymbolObj(v) && symbolValueOf) { try { return symbolValueOf.call(v); } catch {} }
+    }
+
+    if (typeof v.valueOf === "function" && v.valueOf !== Object.prototype.valueOf) {
+        try {
+            const primitive = v.valueOf();
+            if (typeof primitive !== "object" || primitive === null) {
+                return primitive;
+            }
+        } catch {}
+    }
+
     return v;
 }

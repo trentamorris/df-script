@@ -145,7 +145,7 @@ try {
             date_str: "2026-05-25 14:30:15",
             iso_date: "2026-05-25",
             iso_datetime: "2026-05-25T14:30:15.123Z",
-            decimal_str: "123.456",
+            decimal_str: "123.4567",
             int_str: "123",
             time_str: "14:30:15.123",
             upper_str: "HELLO WORLD",
