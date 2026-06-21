@@ -1,7 +1,6 @@
 declare const process: any;
 import { isArrayOfType, toValidArray, toValidStringArray, getUniqueArrayStats, joinArray, sortArray, computeMedian, computeQuantile, computeMode } from "../../src/utils/array";
-import { toValidNumber, toValidFloat, formatNumber, isValidFloat } from "../../src/utils/number";
-import { isScalar } from "../../src/utils/guards";
+import { toValidNumber, toValidFloat, formatNumber, isValidFloat, toValidBigInt, clamp } from "../../src/utils/number";
 import { $df } from "../../src/index";
 
 
@@ -44,9 +43,9 @@ try {
     if (!isArrayOfType([2, 4, 6], isEvenFunc)) throw new Error("Expected [2, 4, 6] to satisfy isEvenFunc");
 
     // Test constructor / class support
-    class TestClass {}
-    class SubClass extends TestClass {}
-    class OtherClass {}
+    class TestClass { }
+    class SubClass extends TestClass { }
+    class OtherClass { }
     const obj1 = new TestClass();
     const obj2 = new SubClass();
     const obj3 = new OtherClass();
@@ -78,27 +77,27 @@ try {
 
     // Test toValidArray & toValidStringArray
 
-    
+
     // toValidArray tests
     const arrNull = toValidArray(null);
     if (!Array.isArray(arrNull) || arrNull.length !== 0) throw new Error("Expected null to return empty array");
-    
+
     const arrUndef = toValidArray(undefined);
     if (!Array.isArray(arrUndef) || arrUndef.length !== 0) throw new Error("Expected undefined to return empty array");
-    
+
     const inputArr = [1, 2, 3];
     const arrCopied = toValidArray(inputArr);
     if (arrCopied === inputArr) throw new Error("Expected array input to return a new shallow copy reference");
     if (arrCopied.length !== 3 || arrCopied[0] !== 1 || arrCopied[1] !== 2 || arrCopied[2] !== 3) {
         throw new Error("Expected shallow copy to contain same elements");
     }
-    
+
     const typedArr = new Int32Array([10, 20]);
     const arrFromTyped = toValidArray(typedArr as any);
     if (!Array.isArray(arrFromTyped) || arrFromTyped[0] !== 10 || arrFromTyped[1] !== 20) {
         throw new Error("Expected typed array to be converted to standard array");
     }
-    
+
     const scalarVal = 42;
     const arrScalar = toValidArray(scalarVal);
     if (!Array.isArray(arrScalar) || arrScalar.length !== 1 || arrScalar[0] !== 42) {
@@ -151,7 +150,7 @@ try {
 
     // 1. Basic join with default separator
     if (joinArray([1, 2, 3]) !== "1,2,3") throw new Error("Expected '1,2,3'");
-    
+
     // 2. Custom separator
     if (joinArray(["a", "b", "c"], " - ") !== "a - b - c") throw new Error("Expected 'a - b - c'");
 
@@ -281,6 +280,88 @@ try {
         throw new Error("Expected toValidNumber to clean '1_2_3' to 123 by default");
     }
 
+    // toValidNumber Layout-Agnostic/European tests
+    if (toValidNumber("1.234,56") !== 1234.56) throw new Error("Agnostic: '1.234,56' failed");
+    if (toValidNumber("1 234,56") !== 1234.56) throw new Error("Agnostic: '1 234,56' failed");
+    if (toValidNumber("1234,56") !== 1234.56) throw new Error("Agnostic: '1234,56' failed");
+    if (toValidNumber("1,234.56") !== 1234.56) throw new Error("Agnostic: '1,234.56' failed");
+    if (toValidNumber("1 234.56") !== 1234.56) throw new Error("Agnostic: '1 234.56' failed");
+    if (toValidNumber("1,234,567") !== 1234567) throw new Error("Agnostic: lone repeating commas failed");
+    if (toValidNumber("1.234.567") !== 1234567) throw new Error("Agnostic: lone repeating dots failed");
+
+    // standard decimal variations and signs (Prefixes)
+    if (toValidNumber(".123") !== 0.123) throw new Error("Decimal: '.123' failed");
+    if (toValidNumber("-.123") !== -0.123) throw new Error("Decimal: '-.123' failed");
+    if (toValidNumber("+.123") !== 0.123) throw new Error("Decimal: '+.123' failed");
+
+    // Scientific notation tests
+    if (toValidNumber("1.23e+4") !== 12300) throw new Error("Scientific: '1.23e+4' failed");
+    if (toValidNumber("1.23E4") !== 12300) throw new Error("Scientific: '1.23E4' failed");
+    if (toValidNumber("1e5") !== 100000) throw new Error("Scientific: '1e5' failed");
+    if (toValidNumber("1.5e-3") !== 0.0015) throw new Error("Scientific: '1.5e-3' failed");
+    if (toValidNumber("+1.5e-3") !== 0.0015) throw new Error("Scientific: '+1.5e-3' failed");
+    if (toValidNumber("-1.5e-3") !== -0.0015) throw new Error("Scientific: '-1.5e-3' failed");
+    if (toValidNumber("1,23e+4") !== 12300) throw new Error("Scientific: European decimal comma failed");
+    if (toValidNumber("1.234,56e+3") !== 1234560) throw new Error("Scientific: Mixed European failed");
+    if (toValidNumber("1,234.56e+3") !== 1234560) throw new Error("Scientific: Mixed English failed");
+    if (toValidNumber("1e+4.5") !== null) throw new Error("Scientific: decimal exponent should be rejected");
+
+    // Accounting format negative checks
+    if (toValidNumber("(123.45)") !== -123.45) throw new Error("Accounting: '(123.45)' failed");
+    if (toValidNumber("(1,234.56)") !== -1234.56) throw new Error("Accounting: '(1,234.56)' failed");
+    if (toValidNumber("( 100 )") !== -100) throw new Error("Accounting: space handling failed");
+
+    // Underscores and Spaces (strict vs non-strict)
+    if (toValidNumber("1_000_000") !== 1000000) throw new Error("Underscore: default failed");
+    if (toValidNumber("1_000_000", { strictNumericString: true }) !== null) throw new Error("Underscore: strict failed");
+    if (toValidNumber("1 000 000") !== 1000000) throw new Error("Spaces: default failed");
+    if (toValidNumber("1 000 000", { strictNumericString: true }) !== null) throw new Error("Spaces: strict failed");
+
+    // Hex / Octal / Binary injection rejection
+    if (toValidNumber("0x1a") !== null) throw new Error("Hex injection failed");
+    if (toValidNumber("0b101") !== null) throw new Error("Binary injection failed");
+    if (toValidNumber("0o75") !== null) throw new Error("Octal injection failed");
+
+    // False positive checking (IPs, versions, malformed structures)
+    if (toValidNumber("192.168.1.1") !== null) throw new Error("Rejection: IP address failed");
+    if (toValidNumber("1.2.3") !== null) throw new Error("Rejection: version string failed");
+    if (toValidNumber("1.2.3.4") !== null) throw new Error("Rejection: version string 4-part failed");
+    if (toValidNumber("1.2.3,45") !== null) throw new Error("Rejection: malformed mixed layout failed");
+    if (toValidNumber("1.234.56") !== null) throw new Error("Rejection: invalid group length failed");
+
+    // Non-finite parsing
+    if (!Number.isNaN(toValidNumber("NaN", { allowNonFiniteNumbers: true }) as number)) throw new Error("Non-finite: 'NaN' failed");
+    if (!Number.isNaN(toValidNumber("-nan", { allowNonFiniteNumbers: true }) as number)) throw new Error("Non-finite: '-nan' failed");
+    if (toValidNumber("Infinity", { allowNonFiniteNumbers: true }) !== Infinity) throw new Error("Non-finite: 'Infinity' failed");
+    if (toValidNumber("-infinity", { allowNonFiniteNumbers: true }) !== -Infinity) throw new Error("Non-finite: '-infinity' failed");
+    if (toValidNumber("NaN") !== null) throw new Error("Non-finite: strict should reject 'NaN'");
+
+    // toValidBigInt tests
+    if (toValidBigInt(9223372036854775807n) !== 9223372036854775807n) throw new Error("BigInt: native bigint failed");
+    if (toValidBigInt(true) !== 1n) throw new Error("BigInt: boolean true failed");
+    if (toValidBigInt("9223372036854775807") !== 9223372036854775807n) throw new Error("BigInt: string parsing precision failed");
+    if (toValidBigInt("1.234,56", { truncate: true }) !== 1234n) throw new Error("BigInt: European mixed truncate failed");
+    if (toValidBigInt("1.234,56", { truncate: false }) !== null) throw new Error("BigInt: European mixed strict float check failed");
+    if (toValidBigInt("1.234,00", { truncate: false }) !== 1234n) throw new Error("BigInt: European mixed trailing zero float check failed");
+    if (toValidBigInt("(1,234.00)") !== -1234n) throw new Error("BigInt: accounting layout parsing failed");
+    if (toValidBigInt("1_000_000") !== 1000000n) throw new Error("BigInt: underscores failed");
+    if (toValidBigInt("1.23e+4") !== 12300n) throw new Error("BigInt: scientific notation conversion failed");
+
+    // toValidBigInt loophole/edge case tests
+    if (toValidBigInt("1.2.3") !== null) throw new Error("BigInt loophole: version string should return null");
+    if (toValidBigInt("1.2.3", { truncate: true }) !== null) throw new Error("BigInt loophole: version string with truncate should return null");
+    if (toValidBigInt("1.invalid_stuff", { truncate: true }) !== null) throw new Error("BigInt loophole: invalid suffix with truncate should return null");
+    if (toValidBigInt("1234.56.78", { truncate: true }) !== null) throw new Error("BigInt loophole: multiple dots with truncate should return null");
+
+    // Clamp tests
+    if (clamp(5, { min: 1, max: 10 }) !== 5) throw new Error("Clamp: basic clamp in-bounds failed");
+    if (clamp(0, { min: 1, max: 10 }) !== 1) throw new Error("Clamp: basic clamp lower bound failed");
+    if (clamp(15, { min: 1, max: 10 }) !== 10) throw new Error("Clamp: basic clamp upper bound failed");
+    if (clamp(5, { min: 10, max: 1 }) !== 10) throw new Error("Clamp: invalid bounds (min > max) should return min");
+    if (clamp(NaN, { min: 1, max: 10 }) !== 1) throw new Error("Clamp: NaN with min should return min");
+    if (clamp(Infinity, { min: 1, max: 10 }) !== 10) throw new Error("Clamp: Infinity with max should return max");
+    if (clamp(-Infinity, { min: 1, max: 10 }) !== 1) throw new Error("Clamp: -Infinity with min should return min");
+    if (clamp(5) !== 5) throw new Error("Clamp: no options failed");
     // formatNonFinite tests
     const f1 = formatNumber({ fallback: "INVALID_VAL", formatNonFinite: true });
     if (f1(Infinity) !== "INVALID_VAL") {
@@ -299,39 +380,115 @@ try {
         throw new Error("Expected representable Float32 to be accepted by isValidFloat");
     }
 
-    // Test isScalar
-    if (!isScalar("hello")) throw new Error("Expected string to be scalar");
-    if (!isScalar(42)) throw new Error("Expected number to be scalar");
-    if (!isScalar(true)) throw new Error("Expected boolean to be scalar");
-    if (!isScalar(10n)) throw new Error("Expected bigint to be scalar");
-    if (!isScalar(new Date())) throw new Error("Expected valid Date object to be scalar");
-    if (!isScalar(new Uint8Array([1, 2]))) throw new Error("Expected Uint8Array to be scalar");
 
-    // Test NaN and non-finite numbers
-    if (isScalar(NaN)) throw new Error("Expected NaN to not be scalar");
-    if (!isScalar(Infinity)) throw new Error("Expected Infinity to be scalar");
-
-    // Test cross-realm robust Uint8Array & Date
+    // Cross-realm robust validation checks
     const vm = require("vm");
-    const crossRealmUint8 = vm.runInNewContext("new Uint8Array([1, 2])");
-    if (!isScalar(crossRealmUint8)) throw new Error("Expected cross-realm Uint8Array to be scalar");
-    const crossRealmDate = vm.runInNewContext("new Date()");
-    if (!isScalar(crossRealmDate)) throw new Error("Expected cross-realm Date to be scalar");
-    const crossRealmInvalidDate = vm.runInNewContext("new Date('invalid')");
-    if (isScalar(crossRealmInvalidDate)) throw new Error("Expected cross-realm invalid Date to not be scalar");
+    const otherRealm = vm.createContext();
+    const foreignDate = vm.runInContext("new Date(1777000)", otherRealm);
+    const foreignSet = vm.runInContext("new Set([1, 2])", otherRealm);
+    const foreignMap = vm.runInContext("new Map([['x', 1]])", otherRealm);
+    const foreignRegExp = vm.runInContext("/abc/g", otherRealm);
+    const foreignString = vm.runInContext("new String('hello')", otherRealm);
 
-    // Test boxed primitive wrappers
-    if (!isScalar(new String("boxed string"))) throw new Error("Expected boxed String to be scalar");
-    if (!isScalar(new Number(42))) throw new Error("Expected boxed Number to be scalar");
-    if (!isScalar(new Boolean(true))) throw new Error("Expected boxed Boolean to be scalar");
-    if (isScalar(new Number(NaN))) throw new Error("Expected boxed NaN to not be scalar");
+    const { isValidDateObj } = require("../../src/utils/object");
+    const { toCanonicalString } = require("../../src/utils/string");
+    if (!isValidDateObj(foreignDate)) {
+        throw new Error("Expected cross-realm Date to be valid Date object");
+    }
+    if (toValidNumber(foreignDate) !== 1777000) {
+        throw new Error("Expected toValidNumber to coerce cross-realm Date to epoch");
+    }
+    if (toCanonicalString(foreignDate) !== "d:1777000") {
+        throw new Error("Expected toCanonicalString to format cross-realm Date");
+    }
+    if (toCanonicalString(foreignSet) !== "set:[number:1,number:2]") {
+        throw new Error("Expected toCanonicalString to format cross-realm Set");
+    }
+    if (toCanonicalString(foreignMap) !== "map:{s:x:number:1}") {
+        throw new Error("Expected toCanonicalString to format cross-realm Map");
+    }
+    if (toCanonicalString(foreignRegExp) !== "r:/abc/g") {
+        throw new Error("Expected toCanonicalString to format cross-realm RegExp");
+    }
 
-    if (isScalar(null)) throw new Error("Expected null to not be scalar");
-    if (isScalar(undefined)) throw new Error("Expected undefined to not be scalar");
-    if (isScalar(new Date("invalid"))) throw new Error("Expected invalid Date object to not be scalar");
-    if (isScalar([1, 2, 3])) throw new Error("Expected array to not be scalar");
-    if (isScalar({ a: 1 })) throw new Error("Expected object to not be scalar");
-    if (isScalar(new Int16Array([1, 2]))) throw new Error("Expected Int16Array to not be scalar");
+    const { createSafeJsonReplacer } = require("../../src/utils/json");
+    const replacer = createSafeJsonReplacer();
+    const serializedDate = replacer.call(null, "date", foreignDate);
+    if (serializedDate !== "1970-01-01T00:29:37.000Z") {
+        throw new Error("Expected cross-realm Date serialization to format to ISO string: " + serializedDate);
+    }
+    const serializedSet = replacer.call(null, "set", foreignSet);
+    if (!Array.isArray(serializedSet) || serializedSet[0] !== 1 || serializedSet[1] !== 2) {
+        throw new Error("Expected cross-realm Set serialization to format to Array");
+    }
+    const serializedMap = replacer.call(null, "map", foreignMap);
+    if (!Array.isArray(serializedMap) || serializedMap[0][0] !== "x" || serializedMap[0][1] !== 1) {
+        throw new Error("Expected cross-realm Map serialization to format to entries Array");
+    }
+
+    const circ = vm.runInContext("const o = {}; o.self = o; o", otherRealm);
+    const serializedCirc = JSON.stringify(circ, createSafeJsonReplacer({ handleCircular: true }));
+    if (serializedCirc !== '{"self":"[Circular]"}') {
+        throw new Error("Expected circular serialization to succeed cross-realm: " + serializedCirc);
+    }
+
+    // Extra validation for object/guard robust type checking (fixing spoofing and Map/Set issues)
+    const {
+        isObj: oIsObj,
+        isRegExp: oIsRegExp,
+        isSet: oIsSet,
+        isMap: oIsMap,
+        isValidDateObj: oIsValidDateObj
+    } = require("../../src/utils/object");
+
+    // 1. isObj returns true for all non-null non-array objects (original design)
+    const spoofedDate = {
+        [Symbol.toStringTag]: "Date",
+        valueOf() { throw new Error("lol"); }
+    };
+    const spoofedRegExp = {
+        [Symbol.toStringTag]: "RegExp",
+        get source() { throw new Error("lol"); }
+    };
+    const spoofedSet = {
+        [Symbol.toStringTag]: "Set",
+        get size() { throw new Error("lol"); }
+    };
+    const spoofedMap = {
+        [Symbol.toStringTag]: "Map",
+        get size() { throw new Error("lol"); }
+    };
+
+    if (!oIsObj({})) throw new Error("isObj should return true for {}");
+    if (!oIsObj(new Date())) throw new Error("isObj should return true for Date");
+    if (!oIsObj(new Set())) throw new Error("isObj should return true for Set");
+    if (!oIsObj(new Map())) throw new Error("isObj should return true for Map");
+    if (!oIsObj(/abc/)) throw new Error("isObj should return true for RegExp");
+    if (!oIsObj(spoofedDate)) throw new Error("isObj should return true for spoofed Date");
+
+    // 2. Specific type guards reject spoofed versions and wrong types
+    if (oIsValidDateObj(spoofedDate)) throw new Error("isValidDateObj should return false for spoofed Date");
+    if (!oIsValidDateObj(new Date())) throw new Error("isValidDateObj should return true for Date");
+
+    if (oIsRegExp(spoofedRegExp)) throw new Error("isRegExp should return false for spoofed RegExp");
+    if (!oIsRegExp(/abc/)) throw new Error("isRegExp should return true for RegExp");
+    if (oIsRegExp({})) throw new Error("isRegExp should return false for plain object");
+
+    if (oIsSet(spoofedSet)) throw new Error("isSet should return false for spoofed Set");
+    if (!oIsSet(new Set())) throw new Error("isSet should return true for Set");
+    if (oIsSet(new Map())) throw new Error("isSet should return false for Map");
+
+    if (oIsMap(spoofedMap)) throw new Error("isMap should return false for spoofed Map");
+    if (!oIsMap(new Map())) throw new Error("isMap should return true for Map");
+    if (oIsMap(new Set())) throw new Error("isMap should return false for Set");
+
+    // 3. Cross-realm compatibility for Date, Set, Map, and RegExp
+    if (!oIsValidDateObj(foreignDate)) throw new Error("isValidDateObj should return true for cross-realm Date");
+    if (!oIsSet(foreignSet)) throw new Error("isSet should return true for cross-realm Set");
+    if (!oIsMap(foreignMap)) throw new Error("isMap should return true for cross-realm Map");
+    if (!oIsRegExp(foreignRegExp)) throw new Error("isRegExp should return true for cross-realm RegExp");
+
+
 
     console.log("🎉 ALL UTILS TYPES TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

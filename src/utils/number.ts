@@ -1,6 +1,10 @@
+import { isValidDateObj, unboxPrimitiveObj } from "./object";
 
-const NUMERIC_CLEAN_REGEX = /[,\s_]/g;
-const VALID_DECIMAL_REGEX = /^[+-]?\d+(?:\.\d+)?$/;
+
+const STRICT_SCIENTIFIC_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
+const NON_BASE10_INJECTION_REGEX = /0[xobXOB]/;
+const WHITESPACE_UNDERSCORE_REGEX = /[\s_]/g;
+const EXPONENT_INDICATOR_REGEX = /[eE]/;
 
 // ============================================================================
 // /** Generic Number Helpers */
@@ -17,49 +21,119 @@ export function isValidNumber(
 ): v is number {
     if (typeof v !== "number") return false;
     if (options && options.allowNonFiniteNumbers) return true;
-    return !Number.isNaN(v) && Number.isFinite(v);
+    return Number.isFinite(v);
+}
+
+export interface ParseNumberOptions extends NumericValidationOptions {
+    floatScientific?: boolean;
+}
+
+function validateGroupLengths(parts: string[]): boolean {
+    for (let i = 1; i < parts.length; i++) {
+        if (parts[i].length !== 3) return false;
+    }
+    return true;
+}
+
+function cleanNumericString(str: string, strict: boolean): string | null {
+    if (NON_BASE10_INJECTION_REGEX.test(str)) return null;
+
+    let clean = str.trim();
+    if (clean === "") return null;
+
+    if (clean.startsWith("(") && clean.endsWith(")")) {
+        clean = "-" + clean.slice(1, -1).trim();
+    }
+
+    if (!strict) {
+        clean = clean.replace(WHITESPACE_UNDERSCORE_REGEX, "");
+    }
+
+    const hasDot = clean.includes(".");
+    const hasComma = clean.includes(",");
+
+    if (hasDot && hasComma) {
+        const lastDot = clean.lastIndexOf(".");
+        const lastComma = clean.lastIndexOf(",");
+        if (lastComma > lastDot) {
+            const parts = clean.slice(0, lastComma).split(".");
+            if (parts.length > 1 && !validateGroupLengths(parts)) return null;
+            clean = clean.replace(/\./g, "").replace(/,/g, ".");
+        } else {
+            const parts = clean.slice(0, lastDot).split(",");
+            if (parts.length > 1 && !validateGroupLengths(parts)) return null;
+            clean = clean.replace(/,/g, "");
+        }
+    } else if (hasComma && !hasDot) {
+        if (clean.indexOf(",") !== clean.lastIndexOf(",")) {
+            const parts = clean.split(",");
+            if (!validateGroupLengths(parts)) return null;
+            clean = clean.replace(/,/g, "");
+        } else {
+            clean = clean.replace(/,/g, ".");
+        }
+    } else if (hasDot && !hasComma) {
+        if (clean.indexOf(".") !== clean.lastIndexOf(".")) {
+            const parts = clean.split(".");
+            if (!validateGroupLengths(parts)) return null;
+            clean = clean.replace(/\./g, "");
+        }
+    }
+
+    return clean;
 }
 
 export function toValidNumber(
     v: unknown,
-    options?: NumericValidationOptions
+    {
+        allowNonFiniteNumbers = false,
+        strictNumericString = false,
+        floatScientific = true
+    }: ParseNumberOptions = {}
 ): number | null {
-    if (v == null) return null;
-    if (typeof v === "symbol") return null;
+    if (v == null || typeof v === "symbol") return null;
 
-    if (isValidNumber(v, options)) {
-        return v;
-    }
-    if (typeof v === "boolean") {
-        return v ? 1 : 0;
-    }
-    if (typeof v === "bigint") {
-        const n = Number(v);
-        return isValidNumber(n, options) ? n : null;
-    }
-    if (v instanceof Date) {
-        const t = v.getTime();
-        return isValidNumber(t, options) ? t : null;
-    }
-    if (typeof v === "string") {
-        const clean = options?.strictNumericString
-            ? v.trim()
-            : v.trim().replace(NUMERIC_CLEAN_REGEX, "");
-        if (clean === "") return null;
+    v = unboxPrimitiveObj(v);
 
-        const n = Number(clean);
-
-        if (Number.isNaN(n)) {
-            if (options?.allowNonFiniteNumbers && clean.toLowerCase() === "nan") {
-                return NaN;
+    switch (typeof v) {
+        case "number":
+            return isValidNumber(v, { allowNonFiniteNumbers }) ? v : null;
+        case "boolean":
+            return v ? 1 : 0;
+        case "bigint": {
+            const n = Number(v);
+            return isValidNumber(n, { allowNonFiniteNumbers }) ? n : null;
+        }
+        case "object": {
+            if (isValidDateObj(v)) {
+                const t = v.getTime();
+                return isValidNumber(t, { allowNonFiniteNumbers }) ? t : null;
             }
             return null;
         }
+        case "string": {
+            const clean = cleanNumericString(v, strictNumericString);
+            if (clean === null) return null;
 
-        return isValidNumber(n, options) ? n : null;
+            if (allowNonFiniteNumbers) {
+                const lower = clean.toLowerCase();
+                if (lower === "nan" || lower === "-nan") return NaN;
+                if (lower === "infinity" || lower === "+infinity") return Infinity;
+                if (lower === "-infinity") return -Infinity;
+            }
+
+            const hasExponent = EXPONENT_INDICATOR_REGEX.test(clean);
+            if (hasExponent && !floatScientific) return null;
+            if (!STRICT_SCIENTIFIC_REGEX.test(clean)) return null;
+
+            const parsed = Number(clean);
+            return isValidNumber(parsed, { allowNonFiniteNumbers }) ? parsed : null;
+        }
+        default:
+            return null;
     }
-    return null;
 }
+
 
 export interface NumericFormatOptions extends Intl.NumberFormatOptions {
     /** BCP 47 language tag (e.g., 'en-US' for dot, 'de-DE' for comma). Defaults to 'en-US'. */
@@ -111,7 +185,7 @@ export function formatNumber({
                 return fallback;
             }
             if (accountingNegatives && num === -Infinity) {
-                return "(Infinity)";
+                return `(${formatter.format(Infinity)})`;
             }
             return String(num);
         }
@@ -130,42 +204,18 @@ export function formatNumber({
 
 export type FloatPrecision = "Float32" | "Float64";
 
-export interface FloatOptions extends NumericValidationOptions {
+export interface FloatOptions extends ParseNumberOptions {
     floatPrecision?: FloatPrecision;
-    /**
-     * When true, explicitly accepts scientific notation strings (e.g. "1.23e+4").
-     * The result is still validated against the precision range.
-     */
-    floatScientific?: boolean;
 }
 
 export function isValidFloat(
     v: unknown,
-    {
-        floatPrecision,
-        allowNonFiniteNumbers = false,
-        floatScientific = false
-    }: FloatOptions = {}
-): boolean {
-    let num: number;
-    if (typeof v === "number") {
-        num = v;
-    } else if (floatScientific && typeof v === "string") {
-        const parsed = parseFloat(v);
-        if (Number.isNaN(parsed)) return false;
-        num = parsed;
-    } else {
-        return false;
-    }
-
+    { floatPrecision, allowNonFiniteNumbers = false }: FloatOptions = {}
+): v is number {
+    if (!isValidNumber(v, { allowNonFiniteNumbers })) return false;
     if (floatPrecision === "Float32") {
-        num = Math.fround(num);
+        return isValidNumber(Math.fround(v), { allowNonFiniteNumbers });
     }
-
-    if (!allowNonFiniteNumbers && (Number.isNaN(num) || !Number.isFinite(num))) {
-        return false;
-    }
-
     return true;
 }
 
@@ -174,17 +224,11 @@ export function toValidFloat(
     {
         floatPrecision = "Float64",
         allowNonFiniteNumbers = true,
-        floatScientific = false
+        floatScientific = false,
+        strictNumericString = false
     }: FloatOptions = {}
 ): number | null {
-    let num = toValidNumber(v, { allowNonFiniteNumbers });
-
-    if (num === null && floatScientific && typeof v === "string") {
-        const parsed = parseFloat(v);
-        if (isValidNumber(parsed, { allowNonFiniteNumbers })) {
-            num = parsed;
-        }
-    }
+    let num = toValidNumber(v, { allowNonFiniteNumbers, floatScientific, strictNumericString });
 
     if (num === null) return null;
 
@@ -192,7 +236,7 @@ export function toValidFloat(
         num = Math.fround(num);
     }
 
-    if (!allowNonFiniteNumbers && !Number.isFinite(num)) {
+    if (!isValidNumber(num, { allowNonFiniteNumbers })) {
         return null;
     }
 
@@ -219,17 +263,6 @@ export type IntCoerceType = "round" | "floor" | "ceil" | "truncate";
 export interface IntOptions {
     range?: IntRange;
     coerce?: IntCoerceType;
-}
-
-export function isValidInt(
-    v: unknown,
-    range?: IntRange
-): v is number {
-    if (!isValidNumber(v)) return false;
-    if (!Number.isInteger(v)) return false;
-    if (!range) return true;
-    const limits = typeof range === "string" ? INT_RANGES[range] : range;
-    return v >= limits.min && v <= limits.max;
 }
 
 export function toValidInt(
@@ -271,47 +304,63 @@ export interface BigIntOptions {
     truncate?: boolean;
 }
 
-export function isValidBigInt(
-    v: unknown,
-    range?: BigIntRange
-): v is bigint {
-    if (typeof v !== "bigint") return false;
-    if (!range) return true;
-    const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
-    return v >= limits.min && v <= limits.max;
-}
-
 export function toValidBigInt(
     v: unknown,
     { range = "Int64", truncate = false }: BigIntOptions = {}
 ): bigint | null {
-    if (v == null) return null;
-    if (typeof v === "symbol") return null;
+    if (v == null || typeof v === "symbol") return null;
+
+    v = unboxPrimitiveObj(v);
 
     let bigintVal: bigint | null = null;
 
-    if (typeof v === "bigint") {
-        bigintVal = v;
-    } else if (typeof v === "boolean") {
-        bigintVal = v ? 1n : 0n;
-    } else if (typeof v === "string") {
-        const clean = v.trim().replace(NUMERIC_CLEAN_REGEX, "");
-        if (clean === "") return null;
-        if (!VALID_DECIMAL_REGEX.test(clean)) {
-            const num = toValidNumber(clean);
+    switch (typeof v) {
+        case "bigint":
+            bigintVal = v;
+            break;
+        case "boolean":
+            bigintVal = v ? 1n : 0n;
+            break;
+        case "number":
+            if (!Number.isFinite(v)) return null;
+            if (!truncate && !Number.isInteger(v)) return null;
+            bigintVal = BigInt(Math.trunc(v));
+            break;
+        case "string": {
+            let clean = cleanNumericString(v, false);
+            if (clean === null) return null;
+
+            if (!STRICT_SCIENTIFIC_REGEX.test(clean)) return null;
+
+            if (EXPONENT_INDICATOR_REGEX.test(clean)) {
+                const num = Number(clean);
+                if (!Number.isFinite(num)) return null;
+                if (!truncate && !Number.isInteger(num)) return null;
+                bigintVal = BigInt(Math.trunc(num));
+            } else {
+                const dotIdx = clean.indexOf(".");
+                if (dotIdx !== -1) {
+                    if (!truncate) {
+                        const fraction = clean.slice(dotIdx + 1);
+                        if (/[^0]/.test(fraction)) return null;
+                    }
+                    clean = clean.slice(0, dotIdx);
+                }
+                try {
+                    bigintVal = BigInt(clean);
+                } catch {
+                    return null;
+                }
+            }
+            break;
+        }
+        default: {
+            const num = toValidNumber(v);
             if (num === null) return null;
             if (!truncate && !Number.isInteger(num)) return null;
             bigintVal = BigInt(Math.trunc(num));
-        } else {
-            if (!truncate && clean.includes(".")) return null;
-            const dotIdx = clean.indexOf(".");
-            bigintVal = BigInt(dotIdx !== -1 ? clean.slice(0, dotIdx) : clean);
+            break;
         }
-    } else {
-        const num = toValidNumber(v);
-        if (num === null) return null;
-        if (!truncate && !Number.isInteger(num)) return null;
-        bigintVal = BigInt(Math.trunc(num));
     }
 
     const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
@@ -329,7 +378,13 @@ export interface DecimalOptions {
 
 function getDecimalMaxVal(precision: number, scale: number): number | null {
     const integerDigits = precision - scale;
-    const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -scale);
+    if (integerDigits < 0 || scale < 0) return null;
+    if (integerDigits > 15) {
+        return Number.MAX_SAFE_INTEGER;
+    }
+
+    const safeScale = Math.min(scale, 16);
+    const maxVal = Math.pow(10, integerDigits) - Math.pow(10, -safeScale);
     return maxVal > 0 ? maxVal : null;
 }
 
@@ -340,29 +395,6 @@ export function roundToScale(v: number, scale: number): number {
         return Math.round(v * factor) / factor;
     }
     return Number(Math.round(Number(str + "e" + scale)) + "e-" + scale);
-}
-
-export function isValidDecimal(
-    v: unknown,
-    { precision, scale = 0 }: DecimalOptions = {}
-): boolean {
-    if (!isValidNumber(v)) return false;
-
-    if (precision !== undefined) {
-        const maxVal = getDecimalMaxVal(precision, scale);
-        if (maxVal !== null && Math.abs(v) > maxVal) {
-            return false;
-        }
-    }
-
-    if (scale !== undefined) {
-        const rounded = roundToScale(v, scale);
-        if (Math.abs(v - rounded) > 1e-12) {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 export function toValidDecimal(
@@ -395,26 +427,35 @@ export function toValidDecimal(
 
 export function clamp<T extends number | bigint>(
     val: T,
-    { min = null, max = null, safe = true }: { min?: T | null; max?: T | null; safe?: boolean } = {}
+    options?: { min?: T | null; max?: T | null; safe?: boolean }
 ): T {
-    if (min !== null && max !== null && min > max) {
-        return min;
+    if (!options) return val;
+    const min = options.min;
+    const max = options.max;
+    const safe = options.safe !== false;
+
+    const hasMin = min !== null && min !== undefined;
+    const hasMax = max !== null && max !== undefined;
+
+    if (hasMin && hasMax && (min as any) > (max as any)) {
+        return min as T;
     }
 
     let v = val;
-
     if (safe && typeof v === "number") {
         if (Number.isNaN(v)) {
-            v = min !== null ? min : (max !== null ? max : val);
-        } else if (v === Infinity) {
-            v = max !== null ? max : val;
-        } else if (v === -Infinity) {
-            v = min !== null ? min : val;
+            return hasMin ? (min as T) : (hasMax ? (max as T) : val);
+        }
+        if (v === Infinity) {
+            return hasMax ? (max as T) : val;
+        }
+        if (v === -Infinity) {
+            return hasMin ? (min as T) : val;
         }
     }
 
-    if (min !== null && v < min) return min;
-    if (max !== null && v > max) return max;
+    if (hasMin && v < (min as T)) return min as T;
+    if (hasMax && v > (max as T)) return max as T;
     return v;
 }
 
