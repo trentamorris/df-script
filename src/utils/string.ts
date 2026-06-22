@@ -9,6 +9,21 @@ export function isBlankString(v: unknown): v is string {
     return false;
 }
 
+
+const ESCAPE_CHARS_REGEX = /[-\/\\^$*+?.()|\[\]{}]/g;
+
+export function escapeRegExp(val: unknown): string {
+    const cleanVal = unboxPrimitiveObj(val);
+    if (cleanVal == null) return "";
+    const str = String(cleanVal);
+
+    if (typeof (RegExp as any).escape === "function") {
+        return (RegExp as any).escape(str);
+    }
+
+    return str.replace(ESCAPE_CHARS_REGEX, "\\$&");
+}
+
 export type StripMode = "both" | "start" | "end";
 
 export type StripCharsOptions = {
@@ -346,4 +361,3 @@ export function toCanonicalString(
 
     return `${typeof val}:${val}`;
 }
-

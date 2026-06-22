@@ -1,5 +1,5 @@
 declare const process: any;
-import { strftime } from "../../src/utils/date";
+import { strftime, strptime, toValidDate } from "../../src/utils/date";
 
 console.log("=========================================");
 console.log("STARTING DATE UTILS ROBUSTNESS TESTS...");
@@ -68,6 +68,35 @@ try {
     } else {
         console.log("✓ strftime lazy evaluation performance gain confirmed!");
     }
+
+    // 6. Test parsing and formatting of year 0-99 (handling JavaScript Date.UTC 0-99 gotcha)
+    const dYear50 = new Date(0);
+    dYear50.setUTCFullYear(50, 4, 25); // 0050-05-25
+    dYear50.setUTCHours(10, 37, 16, 123);
+
+    const formattedYear50 = strftime(dYear50, "%Y-%m-%d %H:%M:%S.%ms");
+    if (formattedYear50 !== "0050-05-25 10:37:16.123") {
+        throw new Error(`Expected "0050-05-25 10:37:16.123" for year 50, got "${formattedYear50}"`);
+    }
+
+    const parsedYear50 = strptime("0050-05-25 10:37:16.123", "%Y-%m-%d %H:%M:%S.%ms");
+    if (!parsedYear50 || parsedYear50.getUTCFullYear() !== 50 || parsedYear50.getUTCMonth() !== 4 || parsedYear50.getUTCDate() !== 25) {
+        throw new Error(`Expected parsed year 50, month 4, date 25, got "${parsedYear50 ? parsedYear50.toISOString() : "null"}"`);
+    }
+    console.log("✓ Parsing/formatting for years 0-99 (setUTCFullYear workaround) passed");
+
+    // 7. Test invalid timezone gracefully falling back to UTC instead of throwing
+    const dInvalidTz = new Date("2026-05-25T10:37:16.123Z");
+    const formattedInvalidTz = strftime(dInvalidTz, "%Y-%m-%d %H:%M:%S.%ms %Z %z", undefined, "Invalid/TimeZone_Name");
+    if (formattedInvalidTz !== "2026-05-25 10:37:16.123 UTC +0000") {
+        throw new Error(`Expected fallback to UTC offset (+0000) for invalid timezone, got "${formattedInvalidTz}"`);
+    }
+
+    const parsedInvalidTz = strptime("2026-05-25 10:37:16.123", "%Y-%m-%d %H:%M:%S.%ms", true, "Invalid/TimeZone_Name");
+    if (!parsedInvalidTz || parsedInvalidTz.getTime() !== dInvalidTz.getTime()) {
+        throw new Error(`Expected parsed date to match UTC input when default timezone is invalid, got "${parsedInvalidTz ? parsedInvalidTz.toISOString() : "null"}"`);
+    }
+    console.log("✓ Invalid timezone fallback to UTC passed");
 
     console.log("\n🎉 ALL DATE UTILS ROBUSTNESS TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

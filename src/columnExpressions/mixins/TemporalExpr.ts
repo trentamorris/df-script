@@ -11,14 +11,16 @@ import {
     isLeapYear,
     getMonthOffset,
     getCentury,
-    getMillennium,
+    getMillennium
+} from "../../utils";
+import {
     MS_PER_SECOND,
     MS_PER_MINUTE,
     MS_PER_HOUR,
     MS_PER_DAY,
     US_PER_MS,
     NS_PER_MS
-} from "../../utils";
+} from "../../constants";
 
 export class DateTimeExprNamespace {
     constructor(public expr: any) {}

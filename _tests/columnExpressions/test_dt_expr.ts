@@ -1,6 +1,6 @@
 declare const process: any;
 import { $df } from "../../src/index";
-import { MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY } from "../../src/utils";
+import { MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY } from "../../src/constants";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION DT NAMESPACE TESTS...");
@@ -116,7 +116,7 @@ try {
     if (r0.epoch_s !== Math.floor(t0 / 1000)) throw new Error(`Expected r0.epoch_s to be ${Math.floor(t0 / 1000)}, got ${r0.epoch_s}`);
     if (r0.epoch_ms !== t0) throw new Error(`Expected r0.epoch_ms to be ${t0}, got ${r0.epoch_ms}`);
     if (r0.timestamp_alias !== t0) throw new Error(`Expected r0.timestamp_alias to be ${t0}, got ${r0.timestamp_alias}`);
-    if (r0.timestamp_us !== t0 * 1000) throw new Error(`Expected r0.timestamp_us to be ${t0 * 1000}, got ${r0.timestamp_us}`);
+    if (r0.timestamp_us !== BigInt(t0) * 1000n) throw new Error(`Expected r0.timestamp_us to be ${BigInt(t0) * 1000n}, got ${r0.timestamp_us}`);
 
     if (r0.dur_ms !== 123456789) throw new Error(`Expected r0.dur_ms to be 123456789, got ${r0.dur_ms}`);
     if (r0.dur_us !== 123456789000) throw new Error(`Expected r0.dur_us to be 123456789000, got ${r0.dur_us}`);
