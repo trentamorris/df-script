@@ -94,6 +94,31 @@ function _createUTCDate(
     return d;
 }
 
+function _getUTCTimestamp(
+    year: number,
+    monthZeroIndexed = 0,
+    day = 1,
+    hour = 0,
+    minute = 0,
+    second = 0,
+    ms = 0
+): number {
+    if (year >= 100 || year < 0) {
+        return Date.UTC(year, monthZeroIndexed, day, hour, minute, second, ms);
+    }
+    const d = new Date(0);
+    d.setUTCFullYear(year, monthZeroIndexed, day);
+    d.setUTCHours(hour, minute, second, ms);
+    return d.getTime();
+}
+
+function _getDayOfWeek(y: number, m: number, d: number): number {
+    const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+    let year = y;
+    if (m < 3) year -= 1;
+    return (year + Math.floor(year/4) - Math.floor(year/100) + Math.floor(year/400) + t[m-1] + d) % 7;
+}
+
 interface DateTimeParts {
     year: number;
     month: number;
@@ -148,7 +173,7 @@ function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
     const year = parseInt(yearStr, 10);
     const month = parseInt(monthStr, 10);
     const day = parseInt(dayStr, 10);
-    const dayOfWeek = _createUTCDate(year, month - 1, day).getUTCDay();
+    const dayOfWeek = _getDayOfWeek(year, month, day);
 
     return {
         year,
@@ -168,8 +193,8 @@ function _getTimeZoneOffsetMinutes(d: Date, tz: string): number {
     const utcParts = _getDateTimeParts(d, "UTC");
     const targetParts = _getDateTimeParts(d, tz);
 
-    const utcDate = _createUTCDate(utcParts.year, utcParts.month - 1, utcParts.day, utcParts.hour, utcParts.minute, utcParts.second, utcParts.ms).getTime();
-    const targetDate = _createUTCDate(targetParts.year, targetParts.month - 1, targetParts.day, targetParts.hour, targetParts.minute, targetParts.second, targetParts.ms).getTime();
+    const utcDate = _getUTCTimestamp(utcParts.year, utcParts.month - 1, utcParts.day, utcParts.hour, utcParts.minute, utcParts.second, utcParts.ms);
+    const targetDate = _getUTCTimestamp(targetParts.year, targetParts.month - 1, targetParts.day, targetParts.hour, targetParts.minute, targetParts.second, targetParts.ms);
 
     return Math.round((targetDate - utcDate) / 60000);
 }
@@ -287,8 +312,8 @@ export function getMonthOffset(d: Date, monthOffset: number, day: number = 1): D
 
 export function getOrdinalDay(d: Date): number | null {
     if (!isValidDateObj(d)) return null;
-    const utcDate = _createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()).getTime();
-    const start = _createUTCDate(d.getUTCFullYear(), 0, 1).getTime();
+    const utcDate = _getUTCTimestamp(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    const start = _getUTCTimestamp(d.getUTCFullYear(), 0, 1);
     return Math.floor((utcDate - start) / MS_PER_DAY) + 1;
 }
 
