@@ -2,6 +2,6 @@
 
 The following domains are registered and will be used as URLs for the project website:
 
-- https://df-script.org
-- https://df-script.net
-- https://dfscript.com
+- https://df-script.org (expires Jun 4, 2027)
+- https://df-script.net (expires Jun 4, 2027)
+- https://dfscript.com (expires Jun 4, 2027)

@@ -7,6 +7,33 @@ DFScript is a lightweight, high-performance, and **zero-dependency** data analys
 
 With optimized columnar storage under the hood, DFScript enables you to build clean, maintainable, and type-safe data pipelines using a declarative expression API.
 
+## 💡 Why DFScript?
+
+Like many developers, I spent years working on frontend codebases filled with deeply nested, unoptimized data processing loops. We've all seen them: chained `.map()`, `.filter()`, `.sort()`, and `.forEach()` loops processing arrays of objects. Each step in the chain allocates new intermediate arrays, triggers garbage collection thrashing, and operates on row-based layouts that slow down browser main threads.
+
+When you need to perform complex analytical transformations on the client-side—handling missing values, formatting timezone-aware datetimes, parsing decimals, or computing rolling averages—relying on standard JavaScript array methods quickly becomes a performance and maintenance nightmare. There had to be a better, cleaner, and faster way to express these pipelines. I realized that if nobody else had built a lightweight, zero-dependency columnar expression engine for the JavaScript ecosystem yet, why not roll up my sleeves and build it myself?
+
+DFScript was born from that frustration. It brings Polars-like columnar execution, strict domain namespaces (`.str`, `.dt`, `.arr`, `.struct`), and lazy/declarative expression compilation to JavaScript. Under the hood, it avoids intermediate array allocations and uses highly optimized loops with cached lengths, so your frontend code stays clean, type-safe, and incredibly fast.
+
+---
+
+## 🗺️ Table of Contents
+
+- [✨ Key Features](#-key-features)
+- [⚙️ Compatibility & Design Principles](#-compatibility--design-principles)
+- [🤝 Contributing & Collective Wisdom](#-contributing--collective-wisdom)
+- [📦 Installation](#-installation)
+- [🚀 Quick Start](#-quick-start)
+- [📖 Core Concepts](#-core-concepts)
+- [🛠️ DataFrame API Reference](#-dataframe-api-reference)
+- [📂 File / Data I/O](#-file--data-io)
+- [🧮 Expressions API Reference](#-expressions-api-reference)
+- [📂 Namespaces](#-namespaces)
+- [🪟 Window & Rolling Expressions](#-window--rolling-expressions)
+- [🛡️ Typing and Schema Registry](#-typing-and-schema-registry)
+- [🧑‍💻 Contributing & Development](#-contributing--development)
+- [📄 License](#-license)
+
 ---
 
 ## ✨ Key Features
@@ -17,7 +44,8 @@ With optimized columnar storage under the hood, DFScript enables you to build cl
 - 📂 **Strict Namespaces** — Clear API organization for specific domains:
   - `.str` for advanced string manipulations.
   - `.dt` for microsecond-precision datetimes, timezones, and duration calculations.
-  - `.list` for robust array/list column operations.
+  - `.arr` for robust array/list column operations.
+  - `.struct` for nested object and struct manipulation.
 - 🪟 **Analytical Window Functions** — Windowing (`over()`), cumulative aggregations (`cum_sum()`, `cum_max()`), and rolling metrics (`rolling_mean()`, `rolling_std()`).
 - 🛠️ **Relational Operations** — Rich, high-speed joins, pivots, unpivots, vertical/horizontal concatenations, and group-by aggregations.
 - 🛡️ **Defensive & Type-Safe** — Native type-coercion, robust null-safety, and strict schema validation.
@@ -33,6 +61,14 @@ DFScript is designed with a **low-abstraction, zero-dependency** philosophy to g
 - 🧱 **Built-in Standards** — Prioritizes native, built-in APIs (like standard `Date`, `Intl` formatting, and `TextEncoder`) and standard arrays rather than custom wrappers or heavy runtime abstractions.
 - ⚡ **Optimized Execution Paths** — Under the hood, performance-critical code avoids higher-level array iterators and short-lived intermediate allocations in favor of simple, fast `for` and `while` loops with cached lengths, keeping garbage collection overhead to an absolute minimum.
 - 🔄 **Easy Transpilation** — Relies strictly on low-level native operations, making it fully compatible with older environments (like ES6 or even ES5) without requiring complex polyfills or modern engine-specific features.
+
+---
+
+## 🤝 Contributing & Collective Wisdom
+
+We don’t pretend to have encountered every localized date format, database quirk, or environment-specific edge case. DFScript is built on the belief that software correctness is a collective endeavor. 
+
+If you run into an unsupported edge case or unexpected behavior in any of our functions, we want to hear about it. Help us harden this engine by opening a GitHub Issue or submitting a PR—every report makes the library more robust for everyone.
 
 ---
 
@@ -74,7 +110,7 @@ const processedDf = df.select(
   $df.col("name").str.upper().alias("NAME_UPPER"),
   $df.col("join_date").str.to_datetime().dt.year().alias("join_year"),
   $df.col("sales").add(500).alias("sales_adjusted"),
-  $df.col("tags").list.lengths().alias("tag_count")
+  $df.col("tags").arr.lengths().alias("tag_count")
 );
 
 console.log(processedDf.to_dicts());
@@ -94,12 +130,20 @@ console.log(processedDf.to_dicts());
 
 ### The `$df` Entry Point
 
-DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, and access general types.
+DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, build expressions, and access data types.
 
 - `$df.data(dataRowsOrCols, schema?)`: Instantiates a new `DataFrame`.
 - `$df.read_json(content, options?)`: Reads JSON/NDJSON content into a new `DataFrame`.
+- `$df.read_csv(content, options?)`: Reads CSV content into a new `DataFrame`.
 - `$df.col(name)`: Creates a column reference expression.
 - `$df.all()`: Selects all columns in the DataFrame.
+- `$df.exclude(columns)`: Creates an expression matching all columns except the specified ones.
+- `$df.coalesce(...exprs)`: Returns the first non-null value among columns or literal expressions.
+- `$df.lit(val)`: Explicitly wraps a raw value into a literal expression.
+- `$df.when(predicate).then(value)...otherwise(value)`: Constructs a conditional expression (when-then-otherwise chain).
+- `$df.implode(column)`: Aggregates a column's rows (or grouped values) into a list.
+- `$df.seq_range(value, options?)`: Generates a sequence range of values.
+- `$df.element()`: References the current array element within an `.arr.eval(...)` expression.
 - `$df.DataType`: Direct access to the `DataTypeRegistry` for schema specification.
 
 ### DataFrames vs. Columns
@@ -155,6 +199,17 @@ DFScript provides helpers to serialize and parse data formats like JSON and CSV.
   // Read Newline Delimited JSON (NDJSON)
   const dfNdjson = $df.read_json('{"id": 1}\n{"id": 2}', { format: "ndjson" });
   ```
+- **`$df.read_csv(content, options?)`**: Reads a CSV string and loads it into a new DataFrame, with automatic data type inference.
+  ```typescript
+  import { $df } from "df-script";
+
+  const csvContent = "id,name,active\n1,Alice,true\n2,Bob,false";
+  const df = $df.read_csv(csvContent, {
+    separator: ",",
+    hasHeader: true,
+    inferSchema: true
+  });
+  ```
 
 ### Writing Data
 - **`df.write_json(file?, options?)`**: Serializes a DataFrame into a JSON or NDJSON string. If a file path or writable stream/object (with a `.write` method) is provided, writes/streams the content as a side-effect. Always returns the serialized string.
@@ -198,6 +253,23 @@ Chained mathematical functions execute cleanly with built-in null-safety (Kleene
 - `.first()`, `.last()`
 - `.any()`, `.all()`, `.any_null()`, `.all_null()`, `.n_unique()`
 
+### 🔀 Control Flow & Conditionals
+Construct dynamic `CASE WHEN` branches using the `$df.when` API:
+```typescript
+import { $df } from "df-script";
+
+df.select(
+  $df.col("sales"),
+  $df.when($df.col("sales").gt(2000)).then("High Performance")
+     .when($df.col("sales").gt(1000)).then("Standard Performance")
+     .otherwise("Low Performance")
+     .alias("sales_category")
+);
+```
+- `$df.when(predicate).then(value)`: Starts a conditional evaluation.
+- `.when(predicate).then(value)`: Chains additional conditions.
+- `.otherwise(value)`: Specifies the fallback value when no conditions match (returns a complete `ColumnExpr`).
+
 ---
 
 ## 📂 Namespaces
@@ -223,13 +295,36 @@ $df.col("duration").dt.total_seconds()
 - **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinal_day()`, `is_leap_year()`, `month_start()`, `month_end()`, `date()`, `time()`, `datetime()`, `epoch(unit)`, `timestamp(unit)`, `strftime(format, locale?)`.
 - **Duration Methods**: `total_days()`, `total_hours()`, `total_minutes()`, `total_seconds()`, `total_milliseconds()`, `total_microseconds()`, `total_nanoseconds()`.
 
-### 📊 List Operations (`.list`)
-Available on arrays or lists via `.list`:
+### 📊 Array/List Operations (`.arr`)
+Available on any array or list column expression via `.arr`:
 ```typescript
-$df.col("tags").list.contains("vip")
-$df.col("matrix").list.get(2)
+$df.col("tags").arr.contains("vip")
+$df.col("matrix").arr.get(2)
+
+// Element-wise manipulation inside arrays:
+$df.col("numbers").arr.eval(element().mul(2)).alias("numbers_doubled")
+$df.col("tags").arr.eval(element().str.to_uppercase()).alias("upper_tags")
 ```
-- **Methods**: `lengths()`, `len()`, `get(idx, null_on_oob?)`, `first(null_on_oob?)`, `last(null_on_oob?)`, `gather(indices, null_on_oob?)`, `gather_every(n, offset?)`, `slice(offset, length?)`, `contains(item)`, `count_matches(item)`, `join(separator)`, `sort(descending?)`, `reverse()`, `unique()`, `sum()`, `mean()`, `median()`, `mode()`, `min()`, `max()`.
+- **Methods**: `lengths()`, `len()`, `get(idx, null_on_oob?)`, `first(null_on_oob?)`, `last(null_on_oob?)`, `gather(indices, null_on_oob?)`, `gather_every(n, offset?)`, `slice(offset, length?)`, `contains(item)`, `count_matches(item)`, `join(separator)`, `sort(descending?)`, `reverse()`, `unique()`, `sum()`, `mean()`, `median()`, `mode()`, `min()`, `max()`, `eval(expr)`.
+
+### 🗃️ Struct/Object Operations (`.struct`)
+Available on any struct or nested object column expression via `.struct`. You can access fields dynamically via properties or explicit methods:
+```typescript
+// Sibling fields access via Proxy
+$df.col("address").struct.city.alias("city")
+
+// Or using the explicit field method
+$df.col("address").struct.field("city")
+```
+- **Methods**:
+  - `field(name)`: Accesses a field within the struct.
+  - `rename_fields(mapping)`: Renames fields in the struct based on a `{ oldKey: newKey }` mapping.
+  - `with_fields(fields)`: Adds or overrides fields in the struct. Accepts an array of aliased expressions or an object.
+  - `unnest()`: Expands the fields of the struct into individual top-level columns in a select projection.
+    ```typescript
+    // Flattens the address struct into "city", "state", etc. at the top-level
+    df.select($df.col("address").struct.unnest())
+    ```
 
 ---
 
@@ -290,6 +385,26 @@ const schema = {
 };
 
 const df = $df.data(rawData, schema);
+```
+
+### 🧠 TypeScript Type Inference & IDE Safety
+
+When you pass a schema to `$df.data()`, DFScript's types automatically infer the target types of the fields, turning dynamic dataframes into compile-safe records. Your IDE will auto-complete column names and validate that operations match the underlying types.
+
+```typescript
+import { $df } from "df-script";
+
+const schema = {
+  name: $df.DataType.Utf8,
+  age: $df.DataType.Int32,
+  is_active: $df.DataType.Boolean
+};
+
+// Inferred DataFrame type is DataFrame<{ name: string; age: number; is_active: boolean }>
+const df = $df.data(rawData, schema);
+
+// Full IDE autocomplete, type validation, and compiler safety!
+const activeUsers = df.filter($df.col("is_active").eq(true));
 ```
 
 ### Supported Data Types

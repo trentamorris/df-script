@@ -192,7 +192,17 @@ export function sortArray(
         } else if (isAllStrings) {
             valid.sort(descending ? (a, b) => b.localeCompare(a) : (a, b) => a.localeCompare(b));
         } else {
-            valid.sort(descending ? (a, b) => (a < b ? 1 : a > b ? -1 : 0) : (a, b) => (a < b ? -1 : a > b ? 1 : 0));
+            valid.sort((a, b) => {
+                const typeA = typeof a;
+                const typeB = typeof b;
+                if (typeA !== typeB) {
+                    const cmp = typeA < typeB ? -1 : 1;
+                    return descending ? -cmp : cmp;
+                }
+                if (a < b) return descending ? 1 : -1;
+                if (a > b) return descending ? -1 : 1;
+                return 0;
+            });
         }
     }
 
@@ -237,7 +247,7 @@ export function getArrayStats(arr: unknown): {
 
     for (let i = 0; i < len; i++) {
         const val = (arr as any)[i];
-        if (val == null) {
+        if (val == null || (typeof val === "number" && !isValidNumber(val, { allowNonFiniteNumbers: true, allowNaN: false }))) {
             nullCount++;
             continue;
         }
@@ -706,9 +716,9 @@ function getSortedValidNumbers(values: ArrayLike<any>): Float64Array | null {
     const nums = new Float64Array(len);
     for (let i = 0; i < len; i++) {
         const val = values[i];
-        // Only include actual numbers that aren't NaN (but preserve Infinity for bounds)
-        if (typeof val === "number" && !Number.isNaN(val)) {
-            nums[validCount++] = val;
+        const n = toValidNumber(val, { allowNonFiniteNumbers: true });
+        if (n !== null && isValidNumber(n, { allowNonFiniteNumbers: true, allowNaN: false })) {
+            nums[validCount++] = n;
         }
     }
     if (validCount === 0) return null;
@@ -759,7 +769,7 @@ export function computeMode(values: ArrayLike<any>): any[] | null {
 
     for (let i = 0; i < len; i++) {
         const val = values[i];
-        if (val == null) continue;
+        if (val == null || (typeof val === "number" && !isValidNumber(val, { allowNonFiniteNumbers: true, allowNaN: false }))) continue;
         const c = (counts.get(val) ?? 0) + 1;
         counts.set(val, c);
 

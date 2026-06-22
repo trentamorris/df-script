@@ -20,6 +20,7 @@ import "./dataframe/read_csv.test";
 
 import "./datatypes/test_polars_types";
 import "./utils/test_date_robustness";
+import "./utils/test_array_robustness";
 import "./utils/test_types";
 import "./utils/test_string";
 import "./utils/test_io";

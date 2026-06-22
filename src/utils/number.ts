@@ -12,6 +12,7 @@ const EXPONENT_INDICATOR_REGEX = /[eE]/;
 
 export interface NumericValidationOptions {
     allowNonFiniteNumbers?: boolean;
+    allowNaN?: boolean;
 }
 
 export function isValidNumber(
@@ -19,8 +20,16 @@ export function isValidNumber(
     options?: NumericValidationOptions
 ): v is number {
     if (typeof v !== "number") return false;
-    if (options && options.allowNonFiniteNumbers) return true;
-    return Number.isFinite(v);
+    
+    if (Number.isNaN(v)) {
+        return options?.allowNaN ?? options?.allowNonFiniteNumbers ?? false;
+    }
+    
+    if (!Number.isFinite(v)) {
+        return options?.allowNonFiniteNumbers ?? false;
+    }
+    
+    return true;
 }
 
 export interface ParseNumberOptions extends NumericValidationOptions {
