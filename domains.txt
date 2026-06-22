@@ -1,0 +1,7 @@
+# Website Domains for df-script
+
+The following domains are registered and will be used as URLs for the project website:
+
+- https://df-script.org
+- https://df-script.net
+- https://dfscript.com
