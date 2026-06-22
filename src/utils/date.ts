@@ -112,12 +112,6 @@ function _getUTCTimestamp(
     return d.getTime();
 }
 
-function _getDayOfWeek(y: number, m: number, d: number): number {
-    const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
-    let year = y;
-    if (m < 3) year -= 1;
-    return (year + Math.floor(year/4) - Math.floor(year/100) + Math.floor(year/400) + t[m-1] + d) % 7;
-}
 
 interface DateTimeParts {
     year: number;
@@ -173,7 +167,9 @@ function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
     const year = parseInt(yearStr, 10);
     const month = parseInt(monthStr, 10);
     const day = parseInt(dayStr, 10);
-    const dayOfWeek = _getDayOfWeek(year, month, day);
+    const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
+    const yShift = month < 3 ? year - 1 : year;
+    const dayOfWeek = (yShift + Math.floor(yShift / 4) - Math.floor(yShift / 100) + Math.floor(yShift / 400) + t[month - 1] + day) % 7;
 
     return {
         year,
