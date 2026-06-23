@@ -28,7 +28,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 
 ---
 
-## 🎯 V1.6.0 Release Scope
+## 🎯 V1.7.0 Release Scope
 
 ### 🤝 Advanced Joins
 - [ ] **Semi-Join & Anti-Join Support**:
