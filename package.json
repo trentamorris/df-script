@@ -3,14 +3,22 @@
   "version": "1.7.0",
   "description": "A zero-dependency, high-performance, expression-based DataFrame library for TypeScript/JavaScript.",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
   "files": [
     "dist",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
-    "build": "tsc --emitDeclarationOnly && esbuild src/index.ts --bundle --minify --outfile=dist/index.js --platform=node",
+    "build": "tsc --emitDeclarationOnly && esbuild src/index.ts --bundle --minify --outfile=dist/index.js --platform=node && esbuild src/index.ts --bundle --minify --outfile=dist/index.mjs --platform=neutral --format=esm --external:fs",
     "test": "tsx _tests/run_all_project_tests.ts",
     "prepublishOnly": "npm run build"
   },
