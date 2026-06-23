@@ -20,9 +20,13 @@
     "pandas",
     "data-analysis",
     "typescript",
+    "javascript",
     "columnar",
     "data-science",
-    "zero-dependency"
+    "zero-dependency",
+    "data-manipulation",
+    "csv",
+    "expression-engine"
   ],
   "author": "Trent Morris",
   "license": "MIT",
