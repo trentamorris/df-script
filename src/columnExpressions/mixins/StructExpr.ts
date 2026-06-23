@@ -86,7 +86,7 @@ export class StructExprNamespace {
                 for (let j = 0; j < fieldsLen; j++) {
                     const f = fields[j];
                     const expr = toColExpr(f);
-                    const name = expr.outputName || expr.colName;
+                    const name = expr._outputName || expr._colName;
                     if (!name) {
                         throw new Error("Expressions passed to struct.with_fields must have a name/alias.");
                     }

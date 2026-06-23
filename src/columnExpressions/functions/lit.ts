@@ -14,7 +14,7 @@ export function lit(value: any, options?: LitOptions): ColumnExpr<any> {
         dtype: options?.dtype,
         name: options?.name,
     } as any);
-    expr.isLiteral = true;
+    expr._isLiteral = true;
     return expr;
 }
 

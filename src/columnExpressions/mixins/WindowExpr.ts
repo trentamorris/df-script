@@ -42,13 +42,13 @@ function computeRank(
 
 
 export class WindowExpr extends ExprBase {
-    public partitionBy: (string | IExpr)[] | null = (this as any).partitionBy || null;
+    public _partitionBy: (string | IExpr)[] | null = (this as any)._partitionBy || null;
 
     _window(evaluateWindow: (this: IExpr, groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any) {
         const newInst = derive(this);
-        newInst.partitionOpsIndex = this.ops.length;
-        newInst.groupingOpsIndex = this.ops.length;
-        newInst.evaluateWindow = evaluateWindow;
+        newInst._partitionOpsIndex = this._ops.length;
+        newInst._groupingOpsIndex = this._ops.length;
+        newInst._evaluateWindow = evaluateWindow;
         return newInst;
     }
 
@@ -83,8 +83,8 @@ export class WindowExpr extends ExprBase {
         });
     }
 
-    get isWindow(): boolean {
-        return this.partitionBy !== null || (this as any).evaluateWindow !== undefined || (this as any).aggFn !== null;
+    get _isWindow(): boolean {
+        return this._partitionBy !== null || (this as any)._evaluateWindow !== undefined || (this as any)._aggFn !== null;
     }
 
     cum_count(reverse: boolean = false) {
@@ -136,7 +136,7 @@ export class WindowExpr extends ExprBase {
     over(columns: string | IExpr | (string | IExpr)[]) {
         const newInst = derive(this);
         const cols = Array.isArray(columns) ? columns : [columns];
-        newInst.partitionBy = cols;
+        newInst._partitionBy = cols;
         return newInst;
     }
 
@@ -184,7 +184,7 @@ export class WindowExpr extends ExprBase {
         const newInst = this._window(function (this: IExpr, _groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
             return currentIndex + 1;
         });
-        newInst.outputName = "row_number";
+        newInst._outputName = "row_number";
         return newInst;
     }
 }

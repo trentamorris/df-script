@@ -10,7 +10,7 @@ export function coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidSca
         : (exprs as (IExpr | ValidScalarTypes)[]);
 
     const expr = new ColumnExpr(COALESCE_MARKER);
-    expr.ops.push((_, columns) => {
+    expr._ops.push((_, columns) => {
         const height = _.length;
         const evaluateArg = (arg: any): any => {
             if (ColumnExpr.isColExpr(arg)) {

@@ -42,14 +42,14 @@ export function seq_range(
     const opts = options as FlattenUnion<SeqRangeOptions>;
 
     const expr = new ColumnExpr(LITERAL_MARKER);
-    expr.literalValue = value;
+    expr._literalValue = value;
 
 
     if (opts.name) {
-        expr.outputName = opts.name;
+        expr._outputName = opts.name;
     }
 
-    expr.ops.push((vArray) => {
+    expr._ops.push((vArray) => {
         const targetHeight = vArray.length;
 
         const getIdx = (val: number | undefined, def: number) => {

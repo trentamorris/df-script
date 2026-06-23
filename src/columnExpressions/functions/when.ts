@@ -5,43 +5,43 @@ import { isArrayOrTypedArray } from "../../utils";
 type WhenArg = IExpr | ValidScalarTypes;
 
 export class WhenThenChain {
-    private predicates: WhenArg[];
-    private values: WhenArg[];
+    private _predicates: WhenArg[];
+    private _values: WhenArg[];
 
     constructor(predicates: WhenArg[], values: WhenArg[]) {
-        this.predicates = predicates;
-        this.values = values;
+        this._predicates = predicates;
+        this._values = values;
     }
 
     then(value: WhenArg): WhenThen {
-        return new WhenThen(this.predicates, this.values.concat(value));
+        return new WhenThen(this._predicates, this._values.concat(value));
     }
 }
 
 export class When {
-    private predicates: WhenArg[];
+    private _predicates: WhenArg[];
 
     constructor(predicate: WhenArg) {
-        this.predicates = [predicate];
+        this._predicates = [predicate];
     }
 
     then(value: WhenArg): WhenThen {
-        return new WhenThen(this.predicates, [value]);
+        return new WhenThen(this._predicates, [value]);
     }
 }
 
 export class WhenThen extends ColumnExpr<any> {
-    private predicates: WhenArg[];
-    private values: WhenArg[];
-    private otherwiseValue: WhenArg;
+    private _predicates: WhenArg[];
+    private _values: WhenArg[];
+    private _otherwiseValue: WhenArg;
 
     constructor(predicates: WhenArg[] | string, values?: WhenArg[], otherwiseValue: WhenArg = null) {
         super(typeof predicates === "string" ? predicates : "*when*");
-        this.predicates = Array.isArray(predicates) ? predicates : [];
-        this.values = values || [];
-        this.otherwiseValue = otherwiseValue;
+        this._predicates = Array.isArray(predicates) ? predicates : [];
+        this._values = values || [];
+        this._otherwiseValue = otherwiseValue;
 
-        this.ops.push((_, columns) => {
+        this._ops.push((_, columns) => {
             const height = _.length;
 
             const evaluateArg = (arg: any): any => {
@@ -54,14 +54,14 @@ export class WhenThen extends ColumnExpr<any> {
                 return arg;
             };
 
-            const numConditions = this.predicates.length;
+            const numConditions = this._predicates.length;
             const evaluatedPreds = new Array(numConditions);
             const evaluatedVals = new Array(numConditions);
             for (let j = 0; j < numConditions; j++) {
-                evaluatedPreds[j] = evaluateArg(this.predicates[j]);
-                evaluatedVals[j] = evaluateArg(this.values[j]);
+                evaluatedPreds[j] = evaluateArg(this._predicates[j]);
+                evaluatedVals[j] = evaluateArg(this._values[j]);
             }
-            const evaluatedOtherwise = evaluateArg(this.otherwiseValue);
+            const evaluatedOtherwise = evaluateArg(this._otherwiseValue);
 
             const result = new Array(height);
 
@@ -84,11 +84,11 @@ export class WhenThen extends ColumnExpr<any> {
     }
 
     when(predicate: WhenArg): WhenThenChain {
-        return new WhenThenChain(this.predicates.concat(predicate), this.values);
+        return new WhenThenChain(this._predicates.concat(predicate), this._values);
     }
 
     otherwise(value: WhenArg): ColumnExpr<any> {
-        return new WhenThen(this.predicates, this.values, value);
+        return new WhenThen(this._predicates, this._values, value);
     }
 }
 

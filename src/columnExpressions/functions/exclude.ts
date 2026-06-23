@@ -6,6 +6,6 @@ import { ALL_COLUMNS_MARKER } from "../constants";
  */
 export function exclude(columns: string | string[]): ColumnExpr<any> {
     const expr = new ColumnExpr(ALL_COLUMNS_MARKER);
-    expr.excludedCols = Array.isArray(columns) ? columns : [columns];
+    expr._excludedCols = Array.isArray(columns) ? columns : [columns];
     return expr;
 }

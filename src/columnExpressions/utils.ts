@@ -36,7 +36,7 @@ export const kleeneBinary = (expr: IExpr, other: any, fn: (v: any, r: any) => an
 };
 
 export function evaluateExpression(expr: IExpr, columns: ColumnDict, height: number): ColumnData {
-    return expr.isWindow
+    return expr._isWindow
         ? resolveWindowExpr(expr, columns, height)
         : expr.evaluate(columns, height);
 }

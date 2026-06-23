@@ -42,23 +42,23 @@ export class DataFrame<T extends RowRecord = any> {
             const { columns, height: h } = rowsToColumns(data);
             this._columns = columns as DataFrameColumns<T>;
             this._height = h;
-            schema ? this.applySchema(schema) : this.inferSchema();
+            schema ? this._applySchema(schema) : this._inferSchema();
             return;
         }
 
         if (isObj(data)) {
             this._columns = data as DataFrameColumns<T>;
             this._height = assertHeight(data, height);
-            schema ? this.applySchema(schema) : this.inferSchema();
+            schema ? this._applySchema(schema) : this._inferSchema();
             return;
         }
 
         this._columns = {} as DataFrameColumns<T>;
         this._height = 0;
-        schema ? this.applySchema(schema) : (this._schema = {});
+        schema ? this._applySchema(schema) : (this._schema = {});
     }
 
-    private inferSchema() {
+    private _inferSchema() {
         const schema: DataFrameSchema = {};
         const keys = Object.keys(this._columns);
         const numKeys = keys.length;
@@ -66,10 +66,10 @@ export class DataFrame<T extends RowRecord = any> {
             const key = keys[i];
             schema[key] = inferColumnType(this._columns[key]);
         }
-        this.applySchema(schema);
+        this._applySchema(schema);
     }
 
-    private applySchema(schema: DataFrameSchema) {
+    private _applySchema(schema: DataFrameSchema) {
         this._schema = schema;
         const keys = Object.keys(schema);
         const newColumns: ColumnDict = {};
@@ -133,7 +133,7 @@ export class DataFrame<T extends RowRecord = any> {
         options?: ExplodeOptions
     ): DataFrame<any> {
         const expr = ColumnExpr.toColExpr(columns);
-        const colNames = expr.colNames || [expr.colName || expr.outputName];
+        const colNames = expr._colNames || [expr._colName || expr._outputName];
         const colsToExplode = new Set<string>();
         const numCols = colNames.length;
         for (let i = 0; i < numCols; i++) {
@@ -670,7 +670,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         for (let i = 0; i < numExprs; i++) {
             const expr = expandedExprs[i];
-            const targetKey = expr.outputName || expr.colName || ALL_COLUMNS_MARKER;
+            const targetKey = expr._outputName || expr._colName || ALL_COLUMNS_MARKER;
 
             if (selectedKeys.has(targetKey)) {
                 throw new DataFrameError(`Duplicate column selection: "${targetKey}" is selected multiple times.`);
@@ -709,8 +709,8 @@ export class DataFrame<T extends RowRecord = any> {
         let shouldCollapse = numExprs > 0;
         for (let i = 0; i < numExprs; i++) {
             const expr = expandedExprs[i];
-            const isGlobalAgg = expr.aggFn != null && (expr.partitionBy == null || expr.partitionBy.length === 0);
-            const isLit = !!expr.isLiteral;
+            const isGlobalAgg = expr._aggFn != null && (expr._partitionBy == null || expr._partitionBy.length === 0);
+            const isLit = !!expr._isLiteral;
             if (!isGlobalAgg && !isLit) {
                 shouldCollapse = false;
                 break;
@@ -759,8 +759,8 @@ export class DataFrame<T extends RowRecord = any> {
             const expr = expandedExprs[i];
             const targetKey = targetKeys[i];
             const col = evaluatedCols[i];
-            const originalKey = expr.colName || targetKey;
-            const isPureCol = expr instanceof ColumnExpr && expr.ops.length === 0 && !expr.isWindow && !expr.aggFn;
+            const originalKey = expr._colName || targetKey;
+            const isPureCol = expr instanceof ColumnExpr && expr._ops.length === 0 && !expr._isWindow && !expr._aggFn;
             const type = (isPureCol && this._schema[originalKey]) || inferColumnType(col);
 
             outSchema[targetKey] = type;
@@ -795,8 +795,8 @@ export class DataFrame<T extends RowRecord = any> {
 
         for (let i = 0; i < sortKeys.length; i++) {
             const expr = ColumnExpr.toColExpr(sortKeys[i] as any);
-            if (expr.colName) {
-                assertColumnExists(expr.colName, this._columns, "Sort key");
+            if (expr._colName) {
+                assertColumnExists(expr._colName, this._columns, "Sort key");
             }
         }
 
@@ -1095,7 +1095,7 @@ export class DataFrame<T extends RowRecord = any> {
         const overrides = new Map<string, IExpr>();
         for (let j = 0; j < numEntries; j++) {
             const expr = expandedExprs[j];
-            const name = expr.outputName || expr.colName || ALL_COLUMNS_MARKER;
+            const name = expr._outputName || expr._colName || ALL_COLUMNS_MARKER;
             overrides.set(name, expr);
         }
 

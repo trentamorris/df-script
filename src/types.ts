@@ -40,24 +40,24 @@ export type OpFn = (vals: ColumnData, columns: ColumnDict) => ColumnData;
 export type IntoExpr = string | IExpr;
 
 export interface IExpr {
-    ops: OpFn[];
-    colName?: string;
-    outputName?: string;
-    isLiteral?: boolean;
-    literalValue?: any;
-    aggFn?: AggFn<any> | null;
-    groupingOpsIndex?: number;
-    partitionOpsIndex?: number;
-    partitionBy?: (string | IExpr)[] | null;
-    windowOp?: { type: string;[key: string]: any } | null;
-    isWindow?: boolean;
+    _ops: OpFn[];
+    _colName?: string;
+    _outputName?: string;
+    _isLiteral?: boolean;
+    _literalValue?: any;
+    _aggFn?: AggFn<any> | null;
+    _groupingOpsIndex?: number;
+    _partitionOpsIndex?: number;
+    _partitionBy?: (string | IExpr)[] | null;
+    _windowOp?: { type: string;[key: string]: any } | null;
+    _isWindow?: boolean;
     alias(name: string): this;
     cast(dataType: RegisteredDataType): this;
     _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
     evaluate(columns: ColumnDict, height: number): ColumnData;
-    evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
-    evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
-    evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
+    _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
+    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
     debug(label?: string): this;
 }
 

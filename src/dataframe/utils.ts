@@ -59,10 +59,10 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
     const results = new Array(height);
     if (height === 0) return results;
 
-    const partitionKeys = expr.partitionBy || [];
+    const partitionKeys = expr._partitionBy || [];
     const partitionGroups = partition_by_columns(columns, height, partitionKeys);
 
-    const prePartitionArray = expr.evaluatePre(expr.partitionOpsIndex, columns, height);
+    const prePartitionArray = expr._evaluatePre(expr._partitionOpsIndex, columns, height);
 
     for (const indices of partitionGroups.values()) {
         const groupLen = indices.length;
@@ -71,15 +71,15 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
             groupPreValues[k] = prePartitionArray[indices[k]];
         }
 
-        if (expr.evaluateWindow) {
+        if (expr._evaluateWindow) {
             for (let k = 0; k < groupLen; k++) {
-                results[indices[k]] = expr.evaluateWindow(groupPreValues, indices, k);
+                results[indices[k]] = expr._evaluateWindow(groupPreValues, indices, k);
             }
             continue;
         }
 
-        if (expr.aggFn) {
-            const aggregatedVal = expr.aggFn(groupPreValues);
+        if (expr._aggFn) {
+            const aggregatedVal = expr._aggFn(groupPreValues);
             for (let k = 0; k < groupLen; k++) {
                 results[indices[k]] = aggregatedVal;
             }
@@ -91,7 +91,7 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
         }
     }
 
-    return expr.evaluatePost(expr.partitionOpsIndex, results, columns);
+    return expr._evaluatePost(expr._partitionOpsIndex, results, columns);
 }
 
 export function rowsToColumns(rows: any[]): { columns: ColumnDict; height: number } {

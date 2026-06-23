@@ -15,11 +15,11 @@ import type { IntoExpr, IExpr, DataFrameSchema, ColumnDict } from "../types"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
 export class ColumnExpr<T> extends ExprBase {
-    public colName: string
-    public colNames?: string[];
-    public excludedCols: string[] = [];
-    public targetType?: any;
-    public targetTypes?: any[];
+    public _colName: string
+    public _colNames?: string[];
+    public _excludedCols: string[] = [];
+    public _targetType?: any;
+    public _targetTypes?: any[];
 
     static isColExpr(v: unknown): v is ColumnExpr<any> {
         if (!isObj(v)) return false;
@@ -42,21 +42,21 @@ export class ColumnExpr<T> extends ExprBase {
         if (Array.isArray(colName)) {
             const hasTypes = colName.some(x => x instanceof DataType || typeof x === "function");
             if (hasTypes) {
-                this.targetTypes = colName;
-                this.colName = "";
-                this.outputName = "";
+                this._targetTypes = colName;
+                this._colName = "";
+                this._outputName = "";
             } else {
-                this.colNames = colName.map(String);
-                this.colName = "";
-                this.outputName = "";
+                this._colNames = colName.map(String);
+                this._colName = "";
+                this._outputName = "";
             }
         } else if (colName instanceof DataType || typeof colName === "function") {
-            this.targetType = colName;
-            this.colName = "";
-            this.outputName = "";
+            this._targetType = colName;
+            this._colName = "";
+            this._outputName = "";
         } else {
-            this.colName = String(colName);
-            this.outputName = this.colName;
+            this._colName = String(colName);
+            this._outputName = this._colName;
         }
     }
 }
@@ -111,7 +111,7 @@ function getTargetKeys(
     schema?: DataFrameSchema
 ): string[] | null {
     if (!(expr instanceof ColumnExpr)) {
-        if (isObj(expr) && "evaluate" in expr && !expr.colName) {
+        if (isObj(expr) && "evaluate" in expr && !expr._colName) {
             const targets: string[] = [];
             for (let i = 0; i < allKeys.length; i++) {
                 if (!excludeSet.has(allKeys[i])) {
@@ -123,12 +123,12 @@ function getTargetKeys(
         return null;
     }
 
-    if (expr.colNames && expr.colNames.length > 0) {
-        return expr.colNames;
+    if (expr._colNames && expr._colNames.length > 0) {
+        return expr._colNames;
     }
 
-    if (expr.colName === ALL_COLUMNS_MARKER) {
-        const excluded = new Set(expr.excludedCols);
+    if (expr._colName === ALL_COLUMNS_MARKER) {
+        const excluded = new Set(expr._excludedCols);
         const targets: string[] = [];
         for (let i = 0; i < allKeys.length; i++) {
             const key = allKeys[i];
@@ -139,7 +139,7 @@ function getTargetKeys(
         return targets;
     }
 
-    if (expr.targetType || (expr.targetTypes && expr.targetTypes.length > 0)) {
+    if (expr._targetType || (expr._targetTypes && expr._targetTypes.length > 0)) {
         if (!schema) {
             throw new Error("Cannot resolve DataType column selector without DataFrame schema.");
         }
@@ -155,13 +155,13 @@ function getTargetKeys(
                 continue;
             }
 
-            if (expr.targetType) {
-                if (colType.matches(expr.targetType)) {
+            if (expr._targetType) {
+                if (colType.matches(expr._targetType)) {
                     targets.push(key);
                 }
-            } else if (expr.targetTypes) {
-                for (let k = 0; k < expr.targetTypes.length; k++) {
-                    if (colType.matches(expr.targetTypes[k])) {
+            } else if (expr._targetTypes) {
+                for (let k = 0; k < expr._targetTypes.length; k++) {
+                    if (colType.matches(expr._targetTypes[k])) {
                         targets.push(key);
                         break;
                     }
@@ -199,7 +199,7 @@ export function resolveColumnSelectors(
         // Handle struct unnesting expansion
         if (isObj(expr) && (expr as any).isUnnest) {
             let fields: string[] = [];
-            const colName = expr.colName;
+            const colName = expr._colName;
             if (typeof colName === "string" && schema && schema[colName] && schema[colName].name === "Struct") {
                 fields = Object.keys((schema[colName] as any).fields);
             }
@@ -232,16 +232,16 @@ export function resolveColumnSelectors(
         if (targets !== null) {
             for (let j = 0; j < targets.length; j++) {
                 const concrete = new ColumnExpr(targets[j]);
-                concrete.ops = [...(expr.ops || [])];
-                concrete.aggFn = expr.aggFn;
-                concrete.partitionOpsIndex = expr.partitionOpsIndex;
-                concrete.groupingOpsIndex = expr.groupingOpsIndex;
-                concrete.partitionBy = expr.partitionBy;
-                if (expr.evaluateWindow) {
-                    concrete.evaluateWindow = expr.evaluateWindow;
+                concrete._ops = [...(expr._ops || [])];
+                concrete._aggFn = expr._aggFn;
+                concrete._partitionOpsIndex = expr._partitionOpsIndex;
+                concrete._groupingOpsIndex = expr._groupingOpsIndex;
+                concrete._partitionBy = expr._partitionBy;
+                if (expr._evaluateWindow) {
+                    concrete._evaluateWindow = expr._evaluateWindow;
                 }
-                if (expr.outputName && expr.outputName !== ALL_COLUMNS_MARKER) {
-                    concrete.outputName = expr.outputName;
+                if (expr._outputName && expr._outputName !== ALL_COLUMNS_MARKER) {
+                    concrete._outputName = expr._outputName;
                 }
                 expanded.push(concrete);
             }

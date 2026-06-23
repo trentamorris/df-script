@@ -232,12 +232,12 @@ export class ArrayExprNamespace {
                 }
                 const subHeight = val.length;
                 const subColumns = { ...columns, [ELEMENT_MARKER]: val };
-                const isGlobalAgg = expr.aggFn != null && (expr.partitionBy == null || expr.partitionBy.length === 0);
+                const isGlobalAgg = expr._aggFn != null && (expr._partitionBy == null || expr._partitionBy.length === 0);
                 if (isGlobalAgg) {
-                    const preOpsIdx = expr.groupingOpsIndex !== undefined ? expr.groupingOpsIndex : expr.ops.length;
-                    const preVal = expr.evaluatePre(preOpsIdx, subColumns, subHeight);
-                    const aggVal = expr.aggFn!(Array.from(preVal));
-                    result[i] = expr.evaluatePost(preOpsIdx, [aggVal], subColumns);
+                    const preOpsIdx = expr._groupingOpsIndex !== undefined ? expr._groupingOpsIndex : expr._ops.length;
+                    const preVal = expr._evaluatePre(preOpsIdx, subColumns, subHeight);
+                    const aggVal = expr._aggFn!(Array.from(preVal));
+                    result[i] = expr._evaluatePost(preOpsIdx, [aggVal], subColumns);
                 } else {
                     result[i] = evaluateExpression(expr, subColumns, subHeight);
                 }

@@ -9,9 +9,9 @@ export class AggregationExpr extends ExprBase {
 
         _deriveAgg(fn: AggFn<any>) {
             const newInst = derive(this);
-            newInst.aggFn = fn;
-            newInst.groupingOpsIndex = this.ops.length;
-            newInst.partitionOpsIndex = this.ops.length;
+            newInst._aggFn = fn;
+            newInst._groupingOpsIndex = this._ops.length;
+            newInst._partitionOpsIndex = this._ops.length;
             return newInst;
         }
 
