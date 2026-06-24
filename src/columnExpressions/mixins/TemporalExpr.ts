@@ -1,6 +1,6 @@
-import type { TimeUnit } from "../../types";
+import type { TimeUnit, StrftimeOptions, BusinessDayOffsetOptions } from "../../types";
 import { ExprBase, derive } from "../ExprBase";
-import { kleeneUnary } from "../utils";
+import { kleeneUnary, kleeneBinary } from "../utils";
 import {
     toValidDate,
     toEpoch,
@@ -11,7 +11,8 @@ import {
     isLeapYear,
     getMonthOffset,
     getCentury,
-    getMillennium
+    getMillennium,
+    offsetDay
 } from "../../utils";
 import {
     MS_PER_SECOND,
@@ -23,7 +24,7 @@ import {
 } from "../../constants";
 
 export class DateTimeExprNamespace {
-    constructor(public expr: any) {}
+    constructor(public expr: any) { }
 
     _deriveDate(fn: (d: Date) => any) {
         return derive(this.expr, kleeneUnary((v) => {
@@ -46,12 +47,15 @@ export class DateTimeExprNamespace {
         return this._deriveDate((d) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
     }
 
-    datetime() {
-        return this._deriveDate((d) => d);
-    }
-
     day() {
         return this._deriveDate((d) => d.getUTCDate());
+    }
+
+    days_in_month() {
+        return this._deriveDate((d) => {
+            const end = getMonthOffset(d, 1, 0);
+            return end ? end.getUTCDate() : null;
+        });
     }
 
     epoch(unit: TimeUnit = "ms") {
@@ -98,6 +102,13 @@ export class DateTimeExprNamespace {
         return this._deriveDate((d) => d.getUTCMilliseconds() * NS_PER_MS);
     }
 
+    offset_business_day(n: number | any, options: BusinessDayOffsetOptions = {}) {
+        return derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
+            const d = toValidDate(v);
+            return d ? offsetDay(d, nVal, options) : null;
+        }));
+    }
+
     ordinal_day() {
         return this._deriveDate(getOrdinalDay);
     }
@@ -110,8 +121,8 @@ export class DateTimeExprNamespace {
         return this._deriveDate((d) => d.getUTCSeconds());
     }
 
-    strftime(format: string, locale?: string) {
-        return this._deriveDate((d) => strftime(d, format, locale));
+    strftime(options: StrftimeOptions) {
+        return this._deriveDate((d) => strftime(d, options));
     }
 
     time() {
@@ -122,8 +133,8 @@ export class DateTimeExprNamespace {
         return this.epoch(unit);
     }
 
-    to_string(format: string, locale?: string) {
-        return this.strftime(format, locale);
+    to_string(options: StrftimeOptions) {
+        return this.strftime(options);
     }
 
     total_days() {

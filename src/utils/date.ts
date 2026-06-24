@@ -1,35 +1,12 @@
 import { isBlankString, escapeRegExp } from "./string";
-import type { TimeUnit } from "../types";
+import type { TimeUnit, StrptimeOptions, StrftimeOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions } from "../types";
+import { ComputeError } from "../exceptions";
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
-import { isValidNumber } from "./number";
-import { MS_PER_SECOND, MS_PER_DAY, US_PER_MS_BI, NS_PER_MS_BI } from "../constants";
+import { isValidNumber, isValidInt } from "./number";
+import { MS_PER_SECOND, MS_PER_MINUTE, MS_PER_HOUR, MS_PER_DAY, US_PER_MS_BI, NS_PER_MS_BI } from "../constants";
 
-/**
- * Matches string values beginning with standard hour-and-minute formatting.
- * Examples:
- * - "12:34" (matches "12:34")
- * - "10:37:16.123" (matches "10:37")
- * - "2026-05-25" (does not match)
- * */
 export const TIME_PREFIX_REGEX = /^\d{2}:\d{2}/;
-
-/**
- * Matches timezone offset indicators at the end of a string.
- * Examples:
- * - "12:34:56Z" (matches "Z")
- * - "12:34:56+02:00" (matches "+02:00")
- * - "12:34:56-0500" (matches "-0500")
- * - "12:34:56-05" (matches "-05")
- * - "12:34:56" (does not match)
- */
 export const ZONE_OFFSET_REGEX = /(?:Z|[+-]\d{2}(?::?\d{2})?)$/i;
-
-/**
- * Matches strict ISO 8601 date-only format (YYYY-MM-DD).
- * Examples:
- * - "2026-05-25" (matches)
- * - "2026-05-25T10:37:16Z" (does not match)
- */
 export const ISO_DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
 const dtfCache = new Map<string, Intl.DateTimeFormat>();
@@ -116,9 +93,8 @@ function _getDayOfWeek(y: number, m: number, d: number): number {
     const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
     let year = y;
     if (m < 3) year -= 1;
-    return (year + Math.floor(year/4) - Math.floor(year/100) + Math.floor(year/400) + t[m-1] + d) % 7;
+    return (year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400) + t[m - 1] + d) % 7;
 }
-
 
 interface DateTimeParts {
     year: number;
@@ -211,7 +187,6 @@ function _getTimeZoneOffsetString(d: Date, timeZone?: string): string {
     return `${sign}${hours}${mins}`;
 }
 
-
 export function toValidDate(input: unknown, options?: { dateOnly?: boolean }): Date | null {
     const cleanInput = unboxPrimitiveObj(input);
     if (cleanInput == null) return null;
@@ -255,9 +230,8 @@ export function toValidTime(val: unknown): string | null {
     const dateObj = d || toValidDate(cleanVal);
     if (!dateObj) return null;
 
-    return strftime(dateObj, "%H:%M:%S.%ms");
+    return strftime(dateObj, { format: "%H:%M:%S.%ms" });
 }
-
 
 export function toEpoch(d: Date, unit: TimeUnit = "ms"): number | bigint {
     const ms = d.getTime();
@@ -311,6 +285,63 @@ export function getMonthOffset(d: Date, monthOffset: number, day: number = 1): D
     return _createUTCDate(d.getUTCFullYear(), d.getUTCMonth() + monthOffset, day);
 }
 
+function _getMonthDiff(d1: Date, d2: Date): number {
+    const y1 = d1.getUTCFullYear();
+    const y2 = d2.getUTCFullYear();
+    const m1 = d1.getUTCMonth();
+    const m2 = d2.getUTCMonth();
+    const baseMonths = (y2 - y1) * 12 + (m2 - m1);
+
+    const day1 = d1.getUTCDate();
+    const day2 = d2.getUTCDate();
+    const ms1 = d1.getTime() - _getUTCTimestamp(y1, m1, day1);
+    const ms2 = d2.getTime() - _getUTCTimestamp(y2, m2, day2);
+
+    const dayDiff = (day2 - day1) + (ms2 - ms1) / MS_PER_DAY;
+    if (dayDiff === 0) return baseMonths;
+
+    let daysInMonth = 30;
+    if (dayDiff > 0) {
+        daysInMonth = new Date(Date.UTC(y1, m1 + 1, 0)).getUTCDate();
+    } else {
+        daysInMonth = new Date(Date.UTC(y2, m2, 0)).getUTCDate();
+    }
+    return baseMonths + dayDiff / daysInMonth;
+}
+
+export function dateDiff(
+    d1: Date,
+    d2: Date,
+    unit: DateDiffUnit,
+    { roundMode = "exact" }: DateDiffOptions = {}
+): number | null {
+    if (!isValidDateObj(d1) || !isValidDateObj(d2)) return null;
+
+    let val: number;
+    const diffMs = d2.getTime() - d1.getTime();
+
+    switch (unit) {
+        case "ms": case "milliseconds": val = diffMs; break;
+        case "s": case "seconds": val = diffMs / MS_PER_SECOND; break;
+        case "m": case "minutes": val = diffMs / MS_PER_MINUTE; break;
+        case "h": case "hours": val = diffMs / MS_PER_HOUR; break;
+        case "d": case "days": val = diffMs / MS_PER_DAY; break;
+        case "w": case "weeks": val = diffMs / (7 * MS_PER_DAY); break;
+        case "mo": case "months": val = _getMonthDiff(d1, d2); break;
+        case "q": case "quarters": val = _getMonthDiff(d1, d2) / 3; break;
+        case "y": case "years": val = _getMonthDiff(d1, d2) / 12; break;
+        default: return null;
+    }
+    switch (roundMode) {
+        case "floor": return Math.floor(val);
+        case "ceil": return Math.ceil(val);
+        case "round": return Math.round(val);
+        case "trunc": return Math.trunc(val);
+        case "exact":
+        default: return val;
+    }
+}
+
 export function getOrdinalDay(d: Date): number | null {
     if (!isValidDateObj(d)) return null;
     const utcDate = _getUTCTimestamp(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
@@ -350,7 +381,7 @@ const DIRECTIVES: Record<string, DateDirective> = {
             const y = parts.year;
             return y >= 0 ? String(y).padStart(4, "0") : "-" + String(Math.abs(y)).padStart(4, "0");
         },
-        parseRegex: "\\d{4}",
+        parseRegex: "[+-]?\\d{4,}",
         parseField: "year"
     },
     "y": {
@@ -438,7 +469,7 @@ const SHORTHANDS: Record<string, string> = {
     "%D": "%m/%d/%y"
 };
 
-export function expandFormatShorthands(format: string): string {
+function _expandFormatShorthands(format: string): string {
     return format.replace(/%[FTRD]/g, (m) => SHORTHANDS[m] || m);
 }
 
@@ -453,12 +484,18 @@ function _parseOffsetMinutes(offsetStr: string): number {
     return sign * (hours * 60 + mins);
 }
 
-
-export function strftime(d: Date, format: string, locale?: string, timeZone = "UTC"): string {
+export function strftime(
+    d: Date,
+    {
+        format,
+        locale,
+        timeZone = "UTC"
+    }: StrftimeOptions
+): string {
     if (!isValidDateObj(d) || typeof format !== "string") return "";
 
     const activeLocale = (locale && locale.trim()) || Intl.DateTimeFormat().resolvedOptions().locale || "en-US";
-    const expanded = expandFormatShorthands(format);
+    const expanded = _expandFormatShorthands(format);
 
     let parts: DateTimeParts | null = null;
     const getParts = (): DateTimeParts => (parts ??= _getDateTimeParts(d, timeZone));
@@ -469,10 +506,18 @@ export function strftime(d: Date, format: string, locale?: string, timeZone = "U
         return dir ? dir.format(d, activeLocale, timeZone, getParts()) : match;
     });
 }
-export function strptime(str: string, format: string, strict = true, defaultTimeZone = "UTC"): Date | null {
+
+export function strptime(
+    str: string,
+    {
+        format,
+        strict = true,
+        defaultTimeZone = "UTC"
+    }: StrptimeOptions
+): Date | null {
     if (typeof str !== "string" || typeof format !== "string") return null;
 
-    const expanded = expandFormatShorthands(format);
+    const expanded = _expandFormatShorthands(format);
     const placeholders: DateDirective[] = [];
 
     let regexStr = "";
@@ -584,4 +629,62 @@ export function strptime(str: string, format: string, strict = true, defaultTime
     return isValidDateObj(d) ? d : null;
 }
 
+export function offsetDay(
+    d: Date,
+    n: number | any,
+    {
+        exclude_weekdays: excludeWeekdays = [0, 6],
+        holidays = [],
+        roll
+    }: BusinessDayOffsetOptions = {}
+): Date {
+    if (!isValidInt(n)) {
+        throw new ComputeError(`The offset parameter 'n' must be a whole integer. Received: ${n}`);
+    }
 
+    const activeDaysPerWeek = 7 - excludeWeekdays.length;
+    if (activeDaysPerWeek <= 0) {
+        throw new ComputeError("All weekdays are excluded; cannot offset.");
+    }
+
+    const holidayTimestamps = new Set<number>();
+    for (let i = 0; i < holidays.length; i++) {
+        const hd = toValidDate(holidays[i]);
+        if (!hd) continue;
+        if (excludeWeekdays.includes(hd.getUTCDay())) continue;
+
+        const hdUTC = _createUTCDate(hd.getUTCFullYear(), hd.getUTCMonth(), hd.getUTCDate());
+        holidayTimestamps.add(hdUTC.getTime());
+    }
+
+    const isExcluded = (date: Date): boolean => {
+        if (excludeWeekdays.includes(date.getUTCDay())) return true;
+        return holidayTimestamps.has(date.getTime());
+    };
+
+    let currentDate = _createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    if (roll && isExcluded(currentDate)) {
+        if (roll === "raise") {
+            throw new ComputeError("Start date falls on an excluded day or holiday.");
+        }
+        const rollDir = roll === "forward" ? 1 : -1;
+        while (isExcluded(currentDate)) {
+            currentDate.setUTCDate(currentDate.getUTCDate() + rollDir);
+        }
+    }
+
+    if (n === 0) return currentDate;
+
+    const stepDir = n > 0 ? 1 : -1;
+    let businessDaysCount = 0;
+    const targetOffset = Math.abs(n);
+
+    while (businessDaysCount < targetOffset) {
+        currentDate.setUTCDate(currentDate.getUTCDate() + stepDir);
+        if (!isExcluded(currentDate)) {
+            businessDaysCount++;
+        }
+    }
+
+    return currentDate;
+}
