@@ -168,7 +168,7 @@ try {
 
     const castDf = $df.data(castData, castSchema);
     const castProjected = castDf.select([
-        $df.col("date_str").str.strptime("%Y-%m-%d %H:%M:%S").alias("parsed_datetime"),
+        $df.col("date_str").str.strptime({ format: "%Y-%m-%d %H:%M:%S" }).alias("parsed_datetime"),
         $df.col("iso_date").str.to_date().alias("parsed_date"),
         $df.col("iso_datetime").str.to_datetime().alias("parsed_iso_datetime"),
         $df.col("decimal_str").str.to_decimal(10, 2).alias("parsed_decimal"),

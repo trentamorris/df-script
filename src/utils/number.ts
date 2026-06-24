@@ -287,6 +287,18 @@ export interface IntOptions {
     coerce?: IntCoerceType;
 }
 
+export function isValidInt(
+    v: unknown,
+    {
+        range = "Int32"
+    }: IntOptions = {}
+): v is number {
+    if (!isValidNumber(v)) return false;
+    if (!Number.isInteger(v)) return false;
+    const limits = typeof range === "string" ? INT_RANGES[range] : range;
+    return v >= limits.min && v <= limits.max;
+}
+
 export function toValidInt(
     v: unknown,
     {

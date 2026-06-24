@@ -90,9 +90,9 @@ function formatCsvValueInternal(options: FormatCSVValueOptions = {}) {
     const replacerOptions = options.replacerOptions || {};
 
     const formatDate = (v: Date): string => {
-        if (options.datetimeFormat) return strftime(v, options.datetimeFormat);
-        if (options.dateFormat) return strftime(v, options.dateFormat);
-        if (options.timeFormat) return strftime(v, options.timeFormat);
+        if (options.datetimeFormat) return strftime(v, { format: options.datetimeFormat });
+        if (options.dateFormat) return strftime(v, { format: options.dateFormat });
+        if (options.timeFormat) return strftime(v, { format: options.timeFormat });
         return v.toISOString();
     };
 

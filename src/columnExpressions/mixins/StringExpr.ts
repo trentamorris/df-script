@@ -1,4 +1,4 @@
-import type { IExpr } from "../../types";
+import type { IExpr, StrptimeOptions } from "../../types";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
 import {
@@ -206,8 +206,8 @@ export class StringExprNamespace {
         });
     }
 
-    strptime(format: string, strict: boolean = true) {
-        return this._deriveString((str) => strptime(str, format, strict));
+    strptime(options: StrptimeOptions) {
+        return this._deriveString((str) => strptime(str, options));
     }
 
     to_date() {

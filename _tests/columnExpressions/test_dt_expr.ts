@@ -36,6 +36,7 @@ try {
         $df.col("date_str").dt.year().alias("year"),
         $df.col("date_str").dt.month().alias("month"),
         $df.col("date_str").dt.day().alias("day"),
+        $df.col("date_str").dt.days_in_month().alias("days_in_month"),
         $df.col("date_str").dt.weekday().alias("weekday"),
         $df.col("date_str").dt.is_leap_year().alias("is_leap"),
         $df.col("date_str").dt.ordinal_day().alias("ordinal"),
@@ -52,7 +53,6 @@ try {
         // Date truncation and string formatting checks
         $df.col("datetime_str").dt.date().alias("truncated_date"),
         $df.col("datetime_str").dt.time().alias("time_str_extracted"),
-        $df.col("datetime_str").dt.datetime().alias("datetime_extracted"),
 
         // Epoch check
         $df.col("datetime_str").dt.epoch("s").alias("epoch_s"),
@@ -75,11 +75,11 @@ try {
         $df.col("date_str").dt.millennium().alias("millennium"),
         $df.col("date_str").dt.month_start().alias("m_start"),
         $df.col("date_str").dt.month_end().alias("m_end"),
-        $df.col("datetime_str").dt.strftime("%Y/%m/%d %H:%M:%S.%ms").alias("formatted_str"),
-        $df.col("datetime_str").dt.strftime("%F %T %% %A %B %j %I:%M %p", "en-US").alias("formatted_shorthands"),
-        $df.col("datetime_str").dt.strftime("%A %B", "fr-FR").alias("formatted_fr"),
-        $df.col("datetime_str").dt.strftime("%A %B", "de-DE").alias("formatted_de"),
-        $df.col("datetime_str").dt.to_string("%Y-%m-%d").alias("to_str_formatted")
+        $df.col("datetime_str").dt.strftime({ format: "%Y/%m/%d %H:%M:%S.%ms" }).alias("formatted_str"),
+        $df.col("datetime_str").dt.strftime({ format: "%F %T %% %A %B %j %I:%M %p", locale: "en-US" }).alias("formatted_shorthands"),
+        $df.col("datetime_str").dt.strftime({ format: "%A %B", locale: "fr-FR" }).alias("formatted_fr"),
+        $df.col("datetime_str").dt.strftime({ format: "%A %B", locale: "de-DE" }).alias("formatted_de"),
+        $df.col("datetime_str").dt.to_string({ format: "%Y-%m-%d" }).alias("to_str_formatted")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.dt results:");
@@ -90,6 +90,7 @@ try {
     if (r0.year !== 2024) throw new Error(`Expected r0.year to be 2024, got ${r0.year}`);
     if (r0.month !== 2) throw new Error(`Expected r0.month to be 2, got ${r0.month}`);
     if (r0.day !== 29) throw new Error(`Expected r0.day to be 29, got ${r0.day}`);
+    if (r0.days_in_month !== 29) throw new Error(`Expected r0.days_in_month to be 29, got ${r0.days_in_month}`);
     if (r0.weekday !== 4) throw new Error(`Expected r0.weekday to be 4 (Thursday), got ${r0.weekday}`);
     if (r0.is_leap !== true) throw new Error(`Expected r0.is_leap to be true, got ${r0.is_leap}`);
     if (r0.ordinal !== 60) throw new Error(`Expected r0.ordinal to be 60, got ${r0.ordinal}`);
@@ -107,9 +108,6 @@ try {
     }
     if (r0.time_str_extracted !== "10:37:16.123") {
         throw new Error(`Expected r0.time_str_extracted to be "10:37:16.123", got ${r0.time_str_extracted}`);
-    }
-    if (!(r0.datetime_extracted instanceof Date) || r0.datetime_extracted.getTime() !== new Date("2026-05-25T10:37:16.123Z").getTime()) {
-        throw new Error(`Expected r0.datetime_extracted to match date, got ${r0.datetime_extracted}`);
     }
 
     const t0 = new Date("2026-05-25T10:37:16.123Z").getTime();
@@ -141,6 +139,7 @@ try {
     // Assert Row 1
     const r1 = projected[1];
     if (r1.year !== 2023) throw new Error(`Expected r1.year to be 2023, got ${r1.year}`);
+    if (r1.days_in_month !== 31) throw new Error(`Expected r1.days_in_month to be 31, got ${r1.days_in_month}`);
     if (r1.is_leap !== false) throw new Error(`Expected r1.is_leap to be false, got ${r1.is_leap}`);
     if (r1.ordinal !== 74) throw new Error(`Expected r1.ordinal to be 74, got ${r1.ordinal}`); // 31 (Jan) + 28 (Feb) + 15 (Mar) = 74
     if (r1.dur_h !== 1.0) throw new Error(`Expected r1.dur_h to be 1.0, got ${r1.dur_h}`);
@@ -158,6 +157,71 @@ try {
     if (r1.formatted_fr !== "jeudi décembre") throw new Error(`Expected r1.formatted_fr to be "jeudi décembre", got ${r1.formatted_fr}`);
     if (r1.formatted_de !== "Donnerstag Dezember") throw new Error(`Expected r1.formatted_de to be "Donnerstag Dezember", got ${r1.formatted_de}`);
     if (r1.to_str_formatted !== "2026-12-31") throw new Error(`Expected r1.to_str_formatted to be "2026-12-31", got ${r1.to_str_formatted}`);
+
+    // Test offset_business_day
+    console.log("Testing Expr.dt.offset_business_day...");
+
+    const bizData = [
+        { date: "2026-05-21", offset: 3 }, // Thursday
+        { date: "2026-05-22", offset: 1 }, // Friday
+    ];
+    const bizSchema = {
+        date: $df.DataType.Date,
+        offset: $df.DataType.Int32
+    };
+    const dfBiz = $df.data(bizData, bizSchema);
+    const dfWeekend = $df.data([{ date: "2026-05-23", offset: 0 }], bizSchema);
+
+    // Test 1: Basic addition and column-based offset
+    const projectedBiz1 = dfBiz.select([
+        $df.col("date").dt.offset_business_day(3, {}).alias("add_scalar"),
+        $df.col("date").dt.offset_business_day($df.col("offset")).alias("add_col"),
+        $df.col("date").dt.offset_business_day($df.lit(3)).alias("add_lit")
+    ]).to_dicts() as any[];
+
+    // Thursday + 3 biz days = Tuesday 26th
+    const rBiz0 = projectedBiz1[0];
+    if (rBiz0.add_scalar.getUTCDate() !== 26) {
+        throw new Error(`Expected Thursday + 3 biz days to be Tuesday 26th, got ${rBiz0.add_scalar.toISOString()}`);
+    }
+    if (rBiz0.add_col.getUTCDate() !== 26) {
+        throw new Error(`Expected Thursday + col(3) biz days to be Tuesday 26th, got ${rBiz0.add_col.toISOString()}`);
+    }
+    if (rBiz0.add_lit.getUTCDate() !== 26) {
+        throw new Error(`Expected Thursday + lit(3) biz days to be Tuesday 26th, got ${rBiz0.add_lit.toISOString()}`);
+    }
+
+    // Friday + 1 biz day = Monday 25th
+    const rBiz1 = projectedBiz1[1];
+    if (rBiz1.add_scalar.getUTCDate() !== 27) { // Friday + 3 biz days = Wednesday 27th
+        throw new Error(`Expected Friday + 3 biz days to be Wednesday 27th, got ${rBiz1.add_scalar.toISOString()}`);
+    }
+    if (rBiz1.add_col.getUTCDate() !== 25) { // Friday + 1 biz day = Monday 25th
+        throw new Error(`Expected Friday + col(1) biz day to be Monday 25th, got ${rBiz1.add_col.toISOString()}`);
+    }
+    if (rBiz1.add_lit.getUTCDate() !== 27) { // Friday + lit(3) biz days = Wednesday 27th
+        throw new Error(`Expected Friday + lit(3) biz days to be Wednesday 27th, got ${rBiz1.add_lit.toISOString()}`);
+    }
+
+    // Test 2: Saturday 23rd + 1 business day should skip weekend and yield Monday 25th
+    const projectedWeekend = dfWeekend.select([
+        $df.col("date").dt.offset_business_day(1).alias("add_one")
+    ]).to_dicts() as any[];
+    if (projectedWeekend[0].add_one.getUTCDate() !== 25) {
+        throw new Error(`Expected Saturday + 1 business day to yield Monday 25th, got ${projectedWeekend[0].add_one.toISOString()}`);
+    }
+
+    // Test 3: Holidays
+    // Thursday + 3 biz days with Friday 22nd as holiday.
+    // Friday is skipped -> Monday is +1, Tuesday is +2, Wednesday is +3 (2026-05-27)
+    const projectedHolidays = dfBiz.filter($df.col("offset").eq(3)).select([
+        $df.col("date").dt.offset_business_day(3, { holidays: ["2026-05-22"] }).alias("with_holiday")
+    ]).to_dicts() as any[];
+    if (projectedHolidays[0].with_holiday.getUTCDate() !== 27) {
+        throw new Error(`Expected Thursday + 3 biz days with Friday holiday to be Wednesday 27th, got ${projectedHolidays[0].with_holiday.toISOString()}`);
+    }
+
+    console.log("Expr.dt.offset_business_day tests passed!");
 
     console.log("\n🎉 ALL Expr.dt COLUMN EXPRESSION TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

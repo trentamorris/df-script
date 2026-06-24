@@ -292,7 +292,7 @@ $df.col("timestamp").dt.year()
 $df.col("timestamp").dt.strftime("%Y-%m-%d %H:%M:%S")
 $df.col("duration").dt.total_seconds()
 ```
-- **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinal_day()`, `is_leap_year()`, `month_start()`, `month_end()`, `date()`, `time()`, `datetime()`, `epoch(unit)`, `timestamp(unit)`, `strftime(format, locale?)`.
+- **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinal_day()`, `is_leap_year()`, `month_start()`, `month_end()`, `date()`, `time()`, `offset_business_day(n, options?)`, `epoch(unit)`, `timestamp(unit)`, `strftime(format, locale?)`.
 - **Duration Methods**: `total_days()`, `total_hours()`, `total_minutes()`, `total_seconds()`, `total_milliseconds()`, `total_microseconds()`, `total_nanoseconds()`.
 
 ### 📊 Array/List Operations (`.arr`)
