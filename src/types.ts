@@ -94,8 +94,16 @@ export type BusinessDayRollType = "raise" | "forward" | "backward";
 
 export interface BusinessDayOffsetOptions {
     holidays?: (Date | string | number)[];
-    exclude_weekdays?: number[];
+    excludeWeekdays?: number[];
     roll?: BusinessDayRollType;
+}
+
+export type UtcOffsetType = "base" | "total" | "daylightSavingTime";
+export type UtcOffsetFormat = "milliseconds" | "minutes" | "hours" | "iso" | "basic";
+
+export interface UtcOffsetOptions {
+    type?: UtcOffsetType;
+    format?: UtcOffsetFormat;
 }
 
 

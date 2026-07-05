@@ -1,5 +1,5 @@
 import { isBlankString, escapeRegExp } from "./string";
-import type { TimeUnit, StrptimeOptions, StrftimeOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions } from "../types";
+import type { TimeUnit, StrptimeOptions, StrftimeOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat } from "../types";
 import { ComputeError } from "../exceptions";
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidNumber, isValidInt } from "./number";
@@ -16,8 +16,13 @@ function _getCachedDtf(timeZone: string): Intl.DateTimeFormat {
         dtf = new Intl.DateTimeFormat("en-US", {
             timeZone,
             hourCycle: "h23",
-            year: "numeric", month: "2-digit", day: "2-digit",
-            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            weekday: "short",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
             fractionalSecondDigits: 3
         });
         dtfCache.set(timeZone, dtf);
@@ -71,23 +76,6 @@ function _createUTCDate(
     return d;
 }
 
-function _getUTCTimestamp(
-    year: number,
-    monthZeroIndexed = 0,
-    day = 1,
-    hour = 0,
-    minute = 0,
-    second = 0,
-    ms = 0
-): number {
-    if (year >= 100 || year < 0) {
-        return Date.UTC(year, monthZeroIndexed, day, hour, minute, second, ms);
-    }
-    const d = new Date(0);
-    d.setUTCFullYear(year, monthZeroIndexed, day);
-    d.setUTCHours(hour, minute, second, ms);
-    return d.getTime();
-}
 
 function _getDayOfWeek(y: number, m: number, d: number): number {
     const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
@@ -150,42 +138,47 @@ function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
     const year = parseInt(yearStr, 10);
     const month = parseInt(monthStr, 10);
     const day = parseInt(dayStr, 10);
+
+    let hour = parseInt(hourStr, 10);
+    if (hour === 24) hour = 0;
+
+    const ms = Math.round(parseFloat("0." + msStr) * 1000) || 0;
+
     const dayOfWeek = _getDayOfWeek(year, month, day);
 
     return {
         year,
         month,
         day,
-        hour: parseInt(hourStr, 10),
+        hour,
         minute: parseInt(minuteStr, 10),
         second: parseInt(secondStr, 10),
-        ms: parseInt(msStr, 10),
+        ms,
         dayOfWeek
     };
 }
 
-function _getTimeZoneOffsetMinutes(d: Date, tz: string): number {
+function _getTimeZoneOffsetMinutes(d: Date, tz: string, targetParts?: DateTimeParts): number {
     if (tz.toUpperCase() === "UTC") return 0;
 
     const utcParts = _getDateTimeParts(d, "UTC");
-    const targetParts = _getDateTimeParts(d, tz);
+    const resolvedTargetParts = targetParts || _getDateTimeParts(d, tz);
 
-    const utcDate = _getUTCTimestamp(utcParts.year, utcParts.month - 1, utcParts.day, utcParts.hour, utcParts.minute, utcParts.second, utcParts.ms);
-    const targetDate = _getUTCTimestamp(targetParts.year, targetParts.month - 1, targetParts.day, targetParts.hour, targetParts.minute, targetParts.second, targetParts.ms);
+    const utcDate = _createUTCDate(utcParts.year, utcParts.month - 1, utcParts.day, utcParts.hour, utcParts.minute, utcParts.second, utcParts.ms).getTime();
+    const targetDate = _createUTCDate(resolvedTargetParts.year, resolvedTargetParts.month - 1, resolvedTargetParts.day, resolvedTargetParts.hour, resolvedTargetParts.minute, resolvedTargetParts.second, resolvedTargetParts.ms).getTime();
 
-    return Math.round((targetDate - utcDate) / 60000);
+    return Math.round((targetDate - utcDate) / MS_PER_MINUTE);
 }
 
-function _getTimeZoneOffsetString(d: Date, timeZone?: string): string {
-    const tz = _resolveTimeZone(timeZone);
-    const offsetMin = _getTimeZoneOffsetMinutes(d, tz);
+function _formatOffsetMinutes(offsetMin: number, format: Extract<UtcOffsetFormat, "iso" | "basic">): string {
     const sign = offsetMin >= 0 ? "+" : "-";
     const absMin = Math.abs(offsetMin);
     const hours = String(Math.floor(absMin / 60)).padStart(2, "0");
     const mins = String(absMin % 60).padStart(2, "0");
-
-    return `${sign}${hours}${mins}`;
+    return format === "iso" ? `${sign}${hours}:${mins}` : `${sign}${hours}${mins}`;
 }
+
+
 
 export function toValidDate(input: unknown, options?: { dateOnly?: boolean }): Date | null {
     const cleanInput = unboxPrimitiveObj(input);
@@ -294,17 +287,17 @@ function _getMonthDiff(d1: Date, d2: Date): number {
 
     const day1 = d1.getUTCDate();
     const day2 = d2.getUTCDate();
-    const ms1 = d1.getTime() - _getUTCTimestamp(y1, m1, day1);
-    const ms2 = d2.getTime() - _getUTCTimestamp(y2, m2, day2);
+    const ms1 = d1.getTime() - _createUTCDate(y1, m1, day1).getTime();
+    const ms2 = d2.getTime() - _createUTCDate(y2, m2, day2).getTime();
 
     const dayDiff = (day2 - day1) + (ms2 - ms1) / MS_PER_DAY;
     if (dayDiff === 0) return baseMonths;
 
     let daysInMonth = 30;
     if (dayDiff > 0) {
-        daysInMonth = new Date(Date.UTC(y1, m1 + 1, 0)).getUTCDate();
+        daysInMonth = _createUTCDate(y1, m1 + 1, 0).getUTCDate();
     } else {
-        daysInMonth = new Date(Date.UTC(y2, m2, 0)).getUTCDate();
+        daysInMonth = _createUTCDate(y2, m2, 0).getUTCDate();
     }
     return baseMonths + dayDiff / daysInMonth;
 }
@@ -344,8 +337,8 @@ export function dateDiff(
 
 export function getOrdinalDay(d: Date): number | null {
     if (!isValidDateObj(d)) return null;
-    const utcDate = _getUTCTimestamp(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-    const start = _getUTCTimestamp(d.getUTCFullYear(), 0, 1);
+    const utcDate = _createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()).getTime();
+    const start = _createUTCDate(d.getUTCFullYear(), 0, 1).getTime();
     return Math.floor((utcDate - start) / MS_PER_DAY) + 1;
 }
 
@@ -438,7 +431,7 @@ const DIRECTIVES: Record<string, DateDirective> = {
     },
     "z": {
         key: "z",
-        format: (d, _locale, tz) => _getTimeZoneOffsetString(d, tz),
+        format: (d, _locale, tz) => getTimeZoneOffset(d, tz, { format: "basic" }) as string,
         parseRegex: "[+-]\\d{2}(?::?\\d{2})?",
         parseField: "offset",
         parseNormalize: (s) => s.replace(":", "")
@@ -478,11 +471,13 @@ function _applyOffsetMinutes(d: Date, offsetMinutes: number): Date {
 }
 
 function _parseOffsetMinutes(offsetStr: string): number {
-    const sign = offsetStr[0] === "+" ? 1 : -1;
-    const hours = parseInt(offsetStr.slice(1, 3), 10) || 0;
-    const mins = parseInt(offsetStr.slice(3, 5), 10) || 0;
+    const clean = offsetStr.replace(":", "");
+    const sign = clean[0] === "+" ? 1 : -1;
+    const hours = parseInt(clean.slice(1, 3), 10) || 0;
+    const mins = parseInt(clean.slice(3, 5), 10) || 0;
     return sign * (hours * 60 + mins);
 }
+
 
 export function strftime(
     d: Date,
@@ -633,7 +628,7 @@ export function offsetDay(
     d: Date,
     n: number | any,
     {
-        exclude_weekdays: excludeWeekdays = [0, 6],
+        excludeWeekdays = [],
         holidays = [],
         roll
     }: BusinessDayOffsetOptions = {}
@@ -687,4 +682,44 @@ export function offsetDay(
     }
 
     return currentDate;
+}
+
+export function getTimeZoneOffset(
+    d: Date,
+    timeZone?: string,
+    options?: UtcOffsetOptions
+): number | string {
+    const tz = _resolveTimeZone(timeZone);
+    const type = options?.type ?? "total";
+
+    let offsetMinutes: number;
+
+    if (type === "total") {
+        offsetMinutes = _getTimeZoneOffsetMinutes(d, tz);
+    } else {
+        const localParts = _getDateTimeParts(d, tz);
+        const year = localParts.year;
+
+        const janOffset = _getTimeZoneOffsetMinutes(_createUTCDate(year, 0, 1), tz);
+        const julOffset = _getTimeZoneOffsetMinutes(_createUTCDate(year, 6, 1), tz);
+        const baseOffset = Math.min(janOffset, julOffset);
+
+        if (type === "daylightSavingTime") {
+            const totalOffsetMinutes = _getTimeZoneOffsetMinutes(d, tz, localParts);
+            offsetMinutes = totalOffsetMinutes - baseOffset;
+        } else {
+            offsetMinutes = baseOffset;
+        }
+    }
+
+    const fmt = options?.format ?? "milliseconds";
+    switch (fmt) {
+        case "minutes": return offsetMinutes;
+        case "hours": return offsetMinutes / 60;
+        case "iso": return _formatOffsetMinutes(offsetMinutes, "iso");
+        case "basic": return _formatOffsetMinutes(offsetMinutes, "basic");
+        case "milliseconds":
+        default:
+            return offsetMinutes * MS_PER_MINUTE;
+    }
 }

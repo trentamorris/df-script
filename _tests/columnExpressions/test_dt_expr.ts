@@ -221,7 +221,101 @@ try {
         throw new Error(`Expected Thursday + 3 biz days with Friday holiday to be Wednesday 27th, got ${projectedHolidays[0].with_holiday.toISOString()}`);
     }
 
-    console.log("Expr.dt.offset_business_day tests passed!");
+    // Test 4: offset_day calendar addition (no exclusions)
+    // Thursday 21st + 3 days = Sunday 24th
+    const projectedCal = dfBiz.filter($df.col("offset").eq(3)).select([
+        $df.col("date").dt.offset_day(3).alias("cal_add_three")
+    ]).to_dicts() as any[];
+    if (projectedCal[0].cal_add_three.getUTCDate() !== 24) {
+        throw new Error(`Expected Thursday + 3 calendar days to be Sunday 24th, got ${projectedCal[0].cal_add_three.toISOString()}`);
+    }
+
+    // Test 5: offset_day with custom excludeWeekdays
+    // Thursday 21st + 3 business days, excluding only Friday (5)
+    // Friday is skipped -> Saturday (6) is +1, Sunday (0) is +2, Monday (1) is +3 (2026-05-25)
+    const projectedCustomWeekdays = dfBiz.filter($df.col("offset").eq(3)).select([
+        $df.col("date").dt.offset_day(3, { excludeWeekdays: [5] }).alias("custom_exclude")
+    ]).to_dicts() as any[];
+    if (projectedCustomWeekdays[0].custom_exclude.getUTCDate() !== 25) {
+        throw new Error(`Expected Thursday + 3 days with custom exclude to be Monday 25th, got ${projectedCustomWeekdays[0].custom_exclude.toISOString()}`);
+    }
+
+    // Test 6: utc_offset
+    console.log("Testing Expr.dt.utc_offset...");
+    const tzData = [
+        { date: "2011-12-29T00:00:00Z" }, // Samoa before shift
+        { date: "2012-01-01T00:00:00Z" }, // Samoa after shift
+        { date: "2026-07-01T00:00:00Z" }, // New York Summer (DST active)
+    ];
+    const dfTz = $df.data(tzData, { date: $df.DataType.Date });
+
+    const projectedTz = dfTz.select([
+        $df.col("date").dt.utc_offset("Pacific/Apia", { type: "base" }).alias("samoa_base"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "base" }).alias("ny_base"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "total" }).alias("ny_dst"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "daylightSavingTime" }).alias("ny_dst_only"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "total", format: "iso" }).alias("ny_dst_iso"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "total", format: "basic" }).alias("ny_dst_basic"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "total", format: "minutes" }).alias("ny_dst_min"),
+        $df.col("date").dt.utc_offset("America/New_York", { type: "total", format: "hours" }).alias("ny_dst_hr"),
+        $df.col("date").dt.utc_offset("America/New_York").alias("ny_no_opts")
+    ]).to_dicts() as any[];
+
+    // Samoa before shift (Dec 29, 2011) base offset = -11 hours
+    const h11 = -11 * 3600000;
+    if (projectedTz[0].samoa_base !== h11) {
+        throw new Error(`Expected Samoa Dec 2011 base offset to be -11 hours (${h11} ms), got ${projectedTz[0].samoa_base}`);
+    }
+
+    // Samoa after shift (Jan 1, 2012) base offset = +13 hours
+    const h13 = 13 * 3600000;
+    if (projectedTz[1].samoa_base !== h13) {
+        throw new Error(`Expected Samoa Jan 2012 base offset to be +13 hours (${h13} ms), got ${projectedTz[1].samoa_base}`);
+    }
+
+    // New York base offset on Jul 1, 2026 is always standard winter offset (-5 hours)
+    const h5neg = -5 * 3600000;
+    if (projectedTz[2].ny_base !== h5neg) {
+        throw new Error(`Expected NY July base offset to be -5 hours (${h5neg} ms), got ${projectedTz[2].ny_base}`);
+    }
+
+    // New York total offset on Jul 1, 2026 with DST included is -4 hours
+    const h4neg = -4 * 3600000;
+    if (projectedTz[2].ny_dst !== h4neg) {
+        throw new Error(`Expected NY July total offset with DST to be -4 hours (${h4neg} ms), got ${projectedTz[2].ny_dst}`);
+    }
+
+    if (projectedTz[2].ny_no_opts !== h4neg) {
+        throw new Error(`Expected NY July offset without options to default to total offset (${h4neg} ms), got ${projectedTz[2].ny_no_opts}`);
+    }
+
+    // NY DST only portion in summer is 1 hour (3600000 ms)
+    const h1 = 3600000;
+    if (projectedTz[2].ny_dst_only !== h1) {
+        throw new Error(`Expected NY July DST portion to be 1 hour (${h1} ms), got ${projectedTz[2].ny_dst_only}`);
+    }
+
+    // NY DST ISO format is "-04:00"
+    if (projectedTz[2].ny_dst_iso !== "-04:00") {
+        throw new Error(`Expected NY July DST ISO format to be "-04:00", got "${projectedTz[2].ny_dst_iso}"`);
+    }
+
+    // NY DST Basic format is "-0400"
+    if (projectedTz[2].ny_dst_basic !== "-0400") {
+        throw new Error(`Expected NY July DST Basic format to be "-0400", got "${projectedTz[2].ny_dst_basic}"`);
+    }
+
+    // NY DST Minutes format is -240
+    if (projectedTz[2].ny_dst_min !== -240) {
+        throw new Error(`Expected NY July DST minutes to be -240, got ${projectedTz[2].ny_dst_min}`);
+    }
+
+    // NY DST Hours format is -4
+    if (projectedTz[2].ny_dst_hr !== -4) {
+        throw new Error(`Expected NY July DST hours to be -4, got ${projectedTz[2].ny_dst_hr}`);
+    }
+
+    console.log("Expr.dt.offset_business_day, offset_day, and utc_offset tests passed!");
 
     console.log("\n🎉 ALL Expr.dt COLUMN EXPRESSION TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

@@ -1,4 +1,4 @@
-import type { TimeUnit, StrftimeOptions, BusinessDayOffsetOptions } from "../../types";
+import type { TimeUnit, StrftimeOptions, BusinessDayOffsetOptions, UtcOffsetOptions } from "../../types";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
 import {
@@ -12,7 +12,8 @@ import {
     getMonthOffset,
     getCentury,
     getMillennium,
-    offsetDay
+    offsetDay,
+    getTimeZoneOffset
 } from "../../utils";
 import {
     MS_PER_SECOND,
@@ -102,10 +103,18 @@ export class DateTimeExprNamespace {
         return this._deriveDate((d) => d.getUTCMilliseconds() * NS_PER_MS);
     }
 
-    offset_business_day(n: number | any, options: BusinessDayOffsetOptions = {}) {
+    offset_day(n: number | any, options: BusinessDayOffsetOptions = {}) {
         return derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
             const d = toValidDate(v);
             return d ? offsetDay(d, nVal, options) : null;
+        }));
+    }
+
+    offset_business_day(n: number | any, { excludeWeekdays = [0, 6], ...options }: BusinessDayOffsetOptions = {}) {
+        const fullOptions = { excludeWeekdays, ...options };
+        return derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
+            const d = toValidDate(v);
+            return d ? offsetDay(d, nVal, fullOptions) : null;
         }));
     }
 
@@ -171,6 +180,13 @@ export class DateTimeExprNamespace {
 
     weekday() {
         return this._deriveDate((d) => d.getUTCDay() || 7);
+    }
+
+    utc_offset(timeZone?: string, options: UtcOffsetOptions = {}) {
+        return derive(this.expr, kleeneUnary((v) => {
+            const d = toValidDate(v);
+            return d ? getTimeZoneOffset(d, timeZone, options) : null;
+        }));
     }
 
     year() {
