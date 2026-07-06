@@ -9,7 +9,8 @@ import {
     strptime,
     stripChars,
     StripCharsOptions,
-    isRegExp
+    isRegExp,
+    changeCase
 } from "../../utils";
 
 export class StringExprNamespace {
@@ -210,6 +211,10 @@ export class StringExprNamespace {
         return this._deriveString((str) => strptime(str, options));
     }
 
+    to_camelcase() {
+        return this._deriveString((str) => changeCase(str, { format: "camel" }));
+    }
+
     to_date() {
         return this._deriveString((str) => toValidDate(str, { dateOnly: true }));
     }
@@ -226,8 +231,20 @@ export class StringExprNamespace {
         return this._deriveString((str) => toValidInt(str));
     }
 
+    to_kebabcase() {
+        return this._deriveString((str) => changeCase(str, { format: "kebab" }));
+    }
+
     to_lowercase() {
         return this.lower();
+    }
+
+    to_pascalcase() {
+        return this._deriveString((str) => changeCase(str, { format: "pascal" }));
+    }
+
+    to_snakecase() {
+        return this._deriveString((str) => changeCase(str, { format: "snake" }));
     }
 
     to_time() {

@@ -361,3 +361,88 @@ export function toCanonicalString(
 
     return `${typeof val}:${val}`;
 }
+
+export interface ChangeCaseOptions {
+    format: "camel" | "kebab" | "pascal" | "snake";
+}
+
+const CONTRACTION_REGEX = /(\p{L})['’](\p{L})/gu;
+const WORDS_REGEX = new RegExp(
+    [
+        // Rule A: Acronym Plurals (e.g., 'KPIs', 'APIs')
+        `\\p{Lu}+s(?!\\p{Ll})`,
+        // Rule B: Acronym Transitions (e.g., 'HTTP' in 'HTTPClient')
+        `\\p{Lu}+(?=\\p{Lu}\\p{Ll})`,
+        // Rule C: TitleCase / PascalCase words (e.g., 'Client')
+        `\\p{Lu}+\\p{Ll}*`,
+        // Rule D: Pure lowercase words
+        `\\p{Ll}+`,
+        // Rule E: Numeric digit groups
+        `\\p{N}+`,
+        // Rule F: Non-cased global scripts (e.g., Kanji, Cyrillic variants, Arabic)
+        `\\p{L}+`
+    ].join("|"),
+    "gu"
+);
+
+// JavaScript language-level reserved keywords to block prototype pollution attacks
+const DANGEROUS_PROPERTIES = new Set(["__proto__", "proto", "constructor", "prototype"]);
+
+/**
+ * Fully robust, Unicode-aware string tokenization engine.
+ * Guarded against prototype pollution, type errors, and NFD text formatting.
+ */
+export function toWords(str: any): string[] {
+    if (str === null || str === undefined) return [];
+    const primitiveStr = String(str);
+    if (!primitiveStr) return [];
+
+    const normalized = primitiveStr
+        .normalize("NFC")
+        .replace(CONTRACTION_REGEX, "$1$2");
+
+    const matches = normalized.match(WORDS_REGEX) || [];
+
+    const safeTokens: string[] = [];
+    for (let i = 0; i < matches.length; i++) {
+        const token = matches[i];
+        if (!DANGEROUS_PROPERTIES.has(token)) {
+            safeTokens.push(token);
+        }
+    }
+
+    return safeTokens;
+}
+
+/**
+ * High-performance, predictable case converter
+ */
+export function changeCase(str: any, options: ChangeCaseOptions): string {
+    const words = toWords(str);
+    const len = words.length;
+    if (len === 0) return "";
+
+    const { format } = options;
+
+    if (format === "camel" || format === "pascal") {
+        let res = "";
+        for (let i = 0; i < len; i++) {
+            const w = words[i];
+            res += (i === 0 && format === "camel")
+                ? w.toLowerCase()
+                : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+        }
+        return res;
+    }
+
+    if (format === "kebab" || format === "snake") {
+        const joinChar = format === "kebab" ? "-" : "_";
+        const lowerWords = new Array(len);
+        for (let i = 0; i < len; i++) {
+            lowerWords[i] = words[i].toLowerCase();
+        }
+        return lowerWords.join(joinChar);
+    }
+
+    return String(str);
+}

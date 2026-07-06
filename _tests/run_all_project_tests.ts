@@ -15,6 +15,7 @@ import "./columnExpressions/test_new_manipulations";
 import "./columnExpressions/test_when_then";
 import "./columnExpressions/test_seq_range";
 import "./columnExpressions/test_type_selector";
+import "./columnExpressions/test_new_aggregations";
 import "./dataframe/run_all";
 import "./dataframe/read_csv.test";
 

@@ -1,7 +1,7 @@
 import type { RandomOptions, NumericArg } from "../types"
 import { ExprBase, derive } from "../ExprBase"
 import { kleeneUnary, kleeneBinary } from "../utils"
-import { clamp, mulberry32, roundToScale } from "../../utils"
+import { clamp, isValidNumber, mulberry32, roundToScale } from "../../utils"
 
 export class ArithmeticExpr extends ExprBase {
     abs() {
@@ -137,6 +137,10 @@ export class ArithmeticExpr extends ExprBase {
 
     round(decimals: number = 0) {
         return derive(this, kleeneUnary((v) => roundToScale(v, decimals)));
+    }
+
+    round_sig_figs(sig_figs: number) {
+        return derive(this, kleeneUnary((v) => isValidNumber(v) ? Number(v.toPrecision(sig_figs)) : v));
     }
 
     sign() {

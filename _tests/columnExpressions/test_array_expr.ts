@@ -72,8 +72,8 @@ try {
         $df.col("tags").arr.n_unique().alias("n_unique_tags"),
 
         // slice
-        $df.col("numbers").arr.slice(2, 3).alias("slice_nums"),
-        $df.col("numbers").arr.slice(-4, 2).alias("slice_nums_neg"),
+        $df.col("numbers").arr.slice(2, 5).alias("slice_nums"),
+        $df.col("numbers").arr.slice(-4, -2).alias("slice_nums_neg"),
 
         // count_matches
         $df.col("tags").arr.count_matches("apple").alias("apple_count"),
@@ -102,7 +102,16 @@ try {
         $df.col("string_nums").arr.mean().alias("coerced_mean"),
         $df.col("numbers").arr.gather(new Int32Array([0, 2, -2])).alias("gather_typed_indices"),
         $df.col("typed_array").arr.contains_all(new Int32Array([10, 30])).alias("typed_contains_all"),
-        $df.col("typed_array").arr.contains_any(new Int32Array([10, 40])).alias("typed_contains_any")
+        $df.col("typed_array").arr.contains_any(new Int32Array([10, 40])).alias("typed_contains_any"),
+        $df.col("numbers").arr.max_index().alias("max_index_nums"),
+        $df.col("numbers").arr.min_index().alias("min_index_nums"),
+        $df.col("numbers").arr.shift(2).alias("shifted_nums_2"),
+        $df.col("numbers").arr.shift(-1).alias("shifted_nums_neg_1"),
+        $df.col("numbers").arr.std().alias("std_nums"),
+        $df.col("numbers").arr.variance().alias("variance_nums"),
+        $df.col("numbers").arr.splice(1, 2, 99, 100).alias("spliced_nums"),
+        $df.col("numbers").arr.filter($df.element().is_not_null()).alias("dropped_nulls_nums"),
+        $df.col("numbers").arr.filter($df.element().gt(4)).alias("filtered_nums")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.arr results:");
@@ -120,6 +129,15 @@ try {
     if (Math.abs(r0.mean_nums - 36 / 9) > 1e-6) throw new Error(`Expected mean_nums 4, got ${r0.mean_nums}`);
     if (r0.median_nums !== 4) throw new Error(`Expected median_nums 4, got ${r0.median_nums}`);
     if (r0.mode_tags.length !== 1 || r0.mode_tags[0] !== "apple") throw new Error(`Expected mode_tags ["apple"], got ${r0.mode_tags}`);
+    if (r0.max_index_nums !== 5) throw new Error(`Expected max_index_nums 5, got ${r0.max_index_nums}`);
+    if (r0.min_index_nums !== 1) throw new Error(`Expected min_index_nums 1, got ${r0.min_index_nums}`);
+    if (r0.shifted_nums_2[2] !== 3 || r0.shifted_nums_2[0] !== null || r0.shifted_nums_2[9] !== null) throw new Error("r0.shifted_nums_2 failed");
+    if (r0.shifted_nums_neg_1[0] !== 1 || r0.shifted_nums_neg_1[9] !== null) throw new Error("r0.shifted_nums_neg_1 failed");
+    if (Math.abs(r0.variance_nums - 6.75) > 1e-6) throw new Error(`Expected r0.variance_nums to be 6.75, got ${r0.variance_nums}`);
+    if (Math.abs(r0.std_nums - Math.sqrt(6.75)) > 1e-6) throw new Error(`Expected r0.std_nums to match, got ${r0.std_nums}`);
+    if (r0.spliced_nums[0] !== 3 || r0.spliced_nums[1] !== 99 || r0.spliced_nums[2] !== 100 || r0.spliced_nums[3] !== 1) throw new Error("r0.spliced_nums failed");
+    if (r0.dropped_nulls_nums.length !== 9 || r0.dropped_nulls_nums.includes(null)) throw new Error("r0.dropped_nulls_nums failed");
+    if (r0.filtered_nums.length !== 4 || r0.filtered_nums[0] !== 5 || r0.filtered_nums[1] !== 9 || r0.filtered_nums[2] !== 6 || r0.filtered_nums[3] !== 5) throw new Error("r0.filtered_nums failed");
 
     if (r0.get_idx_2 !== 4) throw new Error(`Expected get_idx_2 4, got ${r0.get_idx_2}`);
     if (r0.get_idx_neg_2 !== 6) throw new Error(`Expected get_idx_neg_2 6, got ${r0.get_idx_neg_2}`);
@@ -250,6 +268,15 @@ try {
     }
     if (r1.typed_contains_all !== false) throw new Error(`Expected r1.typed_contains_all false, got ${r1.typed_contains_all}`);
     if (r1.typed_contains_any !== false) throw new Error(`Expected r1.typed_contains_any false, got ${r1.typed_contains_any}`);
+    if (r1.max_index_nums !== 2) throw new Error(`Expected r1.max_index_nums 2, got ${r1.max_index_nums}`);
+    if (r1.min_index_nums !== 1) throw new Error(`Expected r1.min_index_nums 1, got ${r1.min_index_nums}`);
+    if (r1.shifted_nums_2[2] !== 10 || r1.shifted_nums_2[0] !== null || r1.shifted_nums_2[3] !== -5) throw new Error("r1.shifted_nums_2 failed");
+    if (r1.shifted_nums_neg_1[0] !== -5 || r1.shifted_nums_neg_1[3] !== null) throw new Error("r1.shifted_nums_neg_1 failed");
+    if (Math.abs(r1.variance_nums - 122.916667) > 1e-4) throw new Error(`Expected r1.variance_nums to be 122.916667, got ${r1.variance_nums}`);
+    if (Math.abs(r1.std_nums - Math.sqrt(122.916667)) > 1e-6) throw new Error(`Expected r1.std_nums to match, got ${r1.std_nums}`);
+    if (r1.spliced_nums[0] !== 10 || r1.spliced_nums[1] !== 99 || r1.spliced_nums[2] !== 100 || r1.spliced_nums[3] !== 0) throw new Error("r1.spliced_nums failed");
+    if (r1.dropped_nulls_nums.length !== 4) throw new Error("r1.dropped_nulls_nums failed");
+    if (r1.filtered_nums.length !== 2 || r1.filtered_nums[0] !== 10 || r1.filtered_nums[1] !== 20) throw new Error("r1.filtered_nums failed");
 
     // Test null_on_oob = false throws
     let threwOob = false;
@@ -282,6 +309,143 @@ try {
         throw new Error("Expected index out of bounds to throw in gather when null_on_oob is false");
     }
     console.log("✓ gather null_on_oob=false bounds check passed");
+
+    // ----------------------------------------------------
+    // START COMPLEX ELEMENT OPERATIONS TESTS
+    // ----------------------------------------------------
+    console.log("Starting complex element operations tests...");
+
+    const complexData = [
+        {
+            id: 1,
+            tags: ["apple", "banana", null],
+            numbers: [1, 2, 3, 4, 5],
+            dates: ["2026-05-20", "2026-05-21", "2026-05-22"],
+            nested: [[1, 2], [3, 4], null, [5]]
+        },
+        {
+            id: 2,
+            tags: ["peach", null, "cherry", "pear"],
+            numbers: [10, 20, 30],
+            dates: ["2026-05-24", "2026-05-25"],
+            nested: [[6], [], [7, 8, 9]]
+        }
+    ];
+
+    const complexDf = $df.data(complexData);
+
+    const projectedComplex = complexDf.select([
+        // Arithmetic & Math
+        $df.col("numbers").arr.filter($df.element().mod(2).ne(0)).alias("odd_numbers"),
+        $df.col("numbers").arr.filter($df.element().pow(2).gt(15)).alias("pow_numbers"),
+
+        // String Exprs on Element
+        $df.col("tags").arr.filter($df.element().is_not_null().and($df.element().str.starts_with("a"))).alias("a_tags"),
+        $df.col("tags").arr.eval($df.when($df.element().is_null()).then("N/A").otherwise($df.element().str.to_uppercase())).alias("upper_tags"),
+
+        // Date Exprs on Element
+        $df.col("dates").arr.eval($df.element().str.to_datetime().dt.day()).alias("date_days"),
+
+        // Conditional expression logic on elements
+        $df.col("numbers").arr.eval(
+            $df.when($df.element().gt(3))
+               .then($df.element().mul(10))
+               .otherwise($df.element().add(100))
+        ).alias("conditional_numbers"),
+
+        // Nested lists
+        $df.col("nested").arr.eval($df.element().arr.sum()).alias("nested_sums"),
+        $df.col("nested").arr.eval($df.element().arr.filter($df.element().gt(2))).alias("nested_filtered"),
+
+        // Scalar broadcasts
+        $df.col("numbers").arr.filter($df.lit(true)).alias("broadcast_true"),
+        $df.col("numbers").arr.filter($df.lit(false)).alias("broadcast_false"),
+
+        // to_struct operations with upper_bound and fields sequences
+        $df.col("tags").arr.to_struct({ fields: ["t1", "t2"] }).alias("tags_struct_fields"),
+        $df.col("tags").arr.to_struct().alias("tags_struct_default"),
+        $df.col("tags").arr.to_struct({ upper_bound: 4 }).alias("tags_struct_upper_bound"),
+        $df.col("tags").arr.to_struct({ upper_bound: 4, fields: (idx) => `idx_${idx}` }).alias("tags_struct_upper_bound_custom_fn")
+    ]).to_dicts() as any[];
+
+    console.log("Complex element projection results:");
+    console.dir(projectedComplex, { depth: null });
+
+    const cx0 = projectedComplex[0];
+    const cx1 = projectedComplex[1];
+
+    // Assert odd_numbers: odd numbers kept
+    if (JSON.stringify(cx0.odd_numbers) !== JSON.stringify([1, 3, 5])) throw new Error("odd_numbers cx0 failed");
+    if (JSON.stringify(cx1.odd_numbers) !== JSON.stringify([])) throw new Error("odd_numbers cx1 failed");
+
+    // Assert pow_numbers: values whose square is > 15
+    if (JSON.stringify(cx0.pow_numbers) !== JSON.stringify([4, 5])) throw new Error("pow_numbers cx0 failed");
+    if (JSON.stringify(cx1.pow_numbers) !== JSON.stringify([10, 20, 30])) throw new Error("pow_numbers cx1 failed");
+
+    // Assert a_tags: tags that start with 'a' and are not null
+    if (JSON.stringify(cx0.a_tags) !== JSON.stringify(["apple"])) throw new Error("a_tags cx0 failed");
+    if (JSON.stringify(cx1.a_tags) !== JSON.stringify([])) throw new Error("a_tags cx1 failed");
+
+    // Assert upper_tags: conditional N/A string and uppercase
+    if (JSON.stringify(cx0.upper_tags) !== JSON.stringify(["APPLE", "BANANA", "N/A"])) throw new Error("upper_tags cx0 failed");
+    if (JSON.stringify(cx1.upper_tags) !== JSON.stringify(["PEACH", "N/A", "CHERRY", "PEAR"])) throw new Error("upper_tags cx1 failed");
+
+    // Assert date_days: day component extracted from dates
+    if (JSON.stringify(cx0.date_days) !== JSON.stringify([20, 21, 22])) throw new Error("date_days cx0 failed");
+    if (JSON.stringify(cx1.date_days) !== JSON.stringify([24, 25])) throw new Error("date_days cx1 failed");
+
+    // Assert conditional_numbers: if element > 3 multiply by 10, else add 100
+    if (JSON.stringify(cx0.conditional_numbers) !== JSON.stringify([101, 102, 103, 40, 50])) throw new Error("conditional_numbers cx0 failed");
+    if (JSON.stringify(cx1.conditional_numbers) !== JSON.stringify([100, 200, 300])) throw new Error("conditional_numbers cx1 failed");
+
+    // Assert nested_sums: sub-array elements summed
+    if (JSON.stringify(cx0.nested_sums) !== JSON.stringify([3, 7, null, 5])) throw new Error("nested_sums cx0 failed");
+    if (JSON.stringify(cx1.nested_sums) !== JSON.stringify([6, null, 24])) throw new Error("nested_sums cx1 failed");
+
+    // Assert nested_filtered: sub-array elements filtered to keep values > 2
+    if (JSON.stringify(cx0.nested_filtered) !== JSON.stringify([[], [3, 4], null, [5]])) throw new Error("nested_filtered cx0 failed");
+    if (JSON.stringify(cx1.nested_filtered) !== JSON.stringify([[6], [], [7, 8, 9]])) throw new Error("nested_filtered cx1 failed");
+
+    // Assert scalar broadcasts
+    if (JSON.stringify(cx0.broadcast_true) !== JSON.stringify([1, 2, 3, 4, 5])) throw new Error("broadcast_true cx0 failed");
+    if (JSON.stringify(cx1.broadcast_true) !== JSON.stringify([10, 20, 30])) throw new Error("broadcast_true cx1 failed");
+    if (JSON.stringify(cx0.broadcast_false) !== JSON.stringify([])) throw new Error("broadcast_false cx0 failed");
+    if (JSON.stringify(cx1.broadcast_false) !== JSON.stringify([])) throw new Error("broadcast_false cx1 failed");
+
+    // Assert to_struct strategy outputs
+    if (JSON.stringify(cx0.tags_struct_fields) !== JSON.stringify({ t1: "apple", t2: "banana" })) throw new Error("tags_struct_fields cx0 failed");
+    if (JSON.stringify(cx1.tags_struct_fields) !== JSON.stringify({ t1: "peach", t2: null })) throw new Error("tags_struct_fields cx1 failed");
+
+    // tags_struct_default now uses max_width fallback, matching upper_bound=4
+    if (JSON.stringify(cx0.tags_struct_default) !== JSON.stringify({ field_0: "apple", field_1: "banana", field_2: null, field_3: null })) throw new Error("tags_struct_default cx0 failed");
+    if (JSON.stringify(cx1.tags_struct_default) !== JSON.stringify({ field_0: "peach", field_1: null, field_2: "cherry", field_3: "pear" })) throw new Error("tags_struct_default cx1 failed");
+
+    if (JSON.stringify(cx0.tags_struct_upper_bound) !== JSON.stringify({ field_0: "apple", field_1: "banana", field_2: null, field_3: null })) throw new Error("tags_struct_upper_bound cx0 failed");
+    if (JSON.stringify(cx1.tags_struct_upper_bound) !== JSON.stringify({ field_0: "peach", field_1: null, field_2: "cherry", field_3: "pear" })) throw new Error("tags_struct_upper_bound cx1 failed");
+
+    if (JSON.stringify(cx0.tags_struct_upper_bound_custom_fn) !== JSON.stringify({ idx_0: "apple", idx_1: "banana", idx_2: null, idx_3: null })) throw new Error("tags_struct_upper_bound_custom_fn cx0 failed");
+    if (JSON.stringify(cx1.tags_struct_upper_bound_custom_fn) !== JSON.stringify({ idx_0: "peach", idx_1: null, idx_2: "cherry", idx_3: "pear" })) throw new Error("tags_struct_upper_bound_custom_fn cx1 failed");
+
+    // Test zero-width error guard
+    let threwZeroWidth = false;
+    try {
+        complexDf.select([
+            $df.col("tags").arr.to_struct({ upper_bound: 0 })
+        ]).to_dicts();
+    } catch (e: any) {
+        if (e.message && e.message.includes("width is 0")) {
+            threwZeroWidth = true;
+        }
+    }
+    if (!threwZeroWidth) {
+        throw new Error("Expected zero width to_struct to throw an error");
+    }
+    console.log("✓ to_struct width === 0 error guard passed");
+
+    console.log("✓ Complex element operations tests passed successfully!");
+    // ----------------------------------------------------
+    // END COMPLEX ELEMENT OPERATIONS TESTS
+    // ----------------------------------------------------
 
     console.log("\n🎉 ALL Expr.arr COLUMN EXPRESSION TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

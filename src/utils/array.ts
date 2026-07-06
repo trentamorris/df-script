@@ -1,7 +1,8 @@
 import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
 import { toValidNumber, isValidNumber } from "./number";
 import { toCanonicalString } from "./string";
-import type { AnyTypedArray } from "../types";
+import type { AnyTypedArray, ColumnData } from "../types";
+import { ComputeError } from "../exceptions";
 
 /** Array Guards **/
 const typedArrayTagGetter = (() => {
@@ -64,6 +65,15 @@ export function toValidStringArray(val: unknown): string[] {
         res[i] = String(arr[i]);
     }
     return res;
+}
+
+export function getArrayElement(arr: any[] | AnyTypedArray, index: number, null_on_oob: boolean): any {
+    const len = arr.length;
+    const isOob = index < -len || index >= len;
+    if (isOob && !null_on_oob) {
+        throw new ComputeError(`Index ${index} is out of bounds for array of length ${len}`);
+    }
+    return isOob ? null : (arr.at(index) ?? null);
 }
 
 export function isArrayOfType(
@@ -213,13 +223,15 @@ export function sortArray(
     return nullsLast ? valid.concat(nulls) : nulls.concat(valid);
 }
 
-const DEFAULT_STATS = { sum: null, count: 0, min: null, max: null, mean: null, variance: 0, std: 0, nullCount: 0, len: 0, hasNulls: false, isNumeric: false };
+const DEFAULT_STATS = { sum: null, count: 0, min: null, max: null, minIdx: null, maxIdx: null, mean: null, variance: 0, std: 0, nullCount: 0, len: 0, hasNulls: false, isNumeric: false };
 
 export function getArrayStats(arr: unknown): {
     sum: number | null;
     count: number;
     min: any;
     max: any;
+    minIdx: number | null;
+    maxIdx: number | null;
     mean: number | null;
     variance: number;
     std: number;
@@ -229,15 +241,17 @@ export function getArrayStats(arr: unknown): {
     isNumeric: boolean;
 } {
     if (!isArrayOrTypedArray(arr)) {
-        return { ...DEFAULT_STATS };
+        return DEFAULT_STATS;
     }
     const len = (arr as any).length;
     if (len === 0) {
-        return { ...DEFAULT_STATS };
+        return DEFAULT_STATS;
     }
 
     let minVal: any = null;
     let maxVal: any = null;
+    let minIdx: number | null = null;
+    let maxIdx: number | null = null;
     let count = 0;
     let nullCount = 0;
     let total = 0;
@@ -252,8 +266,14 @@ export function getArrayStats(arr: unknown): {
             continue;
         }
 
-        if (minVal == null || val < minVal) minVal = val;
-        if (maxVal == null || val > maxVal) maxVal = val;
+        if (minVal == null || val < minVal) {
+            minVal = val;
+            minIdx = i;
+        }
+        if (maxVal == null || val > maxVal) {
+            maxVal = val;
+            maxIdx = i;
+        }
 
         const n = toValidNumber(val);
         if (n !== null) {
@@ -281,6 +301,8 @@ export function getArrayStats(arr: unknown): {
         count,
         min: minVal,
         max: maxVal,
+        minIdx,
+        maxIdx,
         mean: count > 0 ? (total + sumCompensation) / count : null,
         variance,
         std: Math.sqrt(variance),
@@ -783,4 +805,248 @@ export function computeMode(values: ArrayLike<any>): any[] | null {
 
     if (modes.length === 0) return null;
     return sortArray(modes);
+}
+
+export function shiftArray(arr: any[] | AnyTypedArray, n: number): any[] {
+    const len = arr.length;
+    if (len === 0) return [];
+
+    const shiftCount = Math.trunc(n);
+    if (isNaN(shiftCount) || shiftCount === 0) {
+        return Array.isArray(arr) ? arr.slice() : Array.from(arr as any);
+    }
+
+    const absN = Math.abs(shiftCount);
+    if (absN >= len) return new Array(len).fill(null);
+
+    const result = new Array(len);
+
+    if (shiftCount > 0) {
+        result.fill(null, 0, shiftCount);
+        for (let i = shiftCount; i < len; i++) {
+            const val = arr[i - shiftCount];
+            result[i] = val ?? null;
+        }
+    } else {
+        const limit = len - absN;
+        for (let i = 0; i < limit; i++) {
+            const val = arr[i + absN];
+            result[i] = val ?? null;
+        }
+        result.fill(null, limit, len);
+    }
+
+    return result;
+}
+
+
+/**
+ * Robust, single-pass computation using Welford's algorithm to calculate
+ * covariance, variances, and correlation simultaneously with high numerical stability.
+ */
+export function computeStatisticalMatrix(
+    pairs: ColumnData<[any, any]>
+): { covariance: number | null; correlation: number | null } | null {
+    const len = pairs.length;
+    let count = 0;
+
+    let meanX = 0;
+    let meanY = 0;
+    let M2_X = 0;
+    let M2_Y = 0;
+    let C_XY = 0;
+
+    for (let i = 0; i < len; i++) {
+        const pair = pairs[i];
+        if (!pair) continue;
+
+        const x = toValidNumber(pair[0]);
+        const y = toValidNumber(pair[1]);
+        if (x === null || y === null) continue;
+
+        count++;
+
+        const deltaX = x - meanX;
+        meanX += deltaX / count;
+        const deltaX2 = x - meanX;
+
+        const deltaY = y - meanY;
+        meanY += deltaY / count;
+        const deltaY2 = y - meanY;
+
+        C_XY += deltaX * deltaY2;
+        M2_X += deltaX * deltaX2;
+        M2_Y += deltaY * deltaY2;
+    }
+
+    if (count < 2) return { covariance: null, correlation: null };
+
+    const covariance = C_XY / (count - 1);
+
+    if (M2_X === 0 || M2_Y === 0) {
+        return { covariance, correlation: null };
+    }
+
+    const denominator = Math.sqrt(M2_X * M2_Y);
+    if (denominator === 0 || Number.isNaN(denominator)) {
+        return { covariance, correlation: null };
+    }
+
+    const correlation = C_XY / denominator;
+    const clampedCorrelation = Math.max(-1, Math.min(1, correlation));
+
+    return {
+        covariance,
+        correlation: clampedCorrelation
+    };
+}
+
+/**
+ * Computes the fractional ranks of a numeric array.
+ */
+function _computeRanks(arr: Float64Array): Float64Array {
+    const len = arr.length;
+    const indices = new Int32Array(len);
+    for (let i = 0; i < len; i++) {
+        indices[i] = i;
+    }
+
+    indices.sort((a, b) => arr[a] - arr[b]);
+    const ranks = new Float64Array(len);
+    let i = 0;
+    while (i < len) {
+        let j = i + 1;
+        while (j < len && arr[indices[j]] === arr[indices[i]]) {
+            j++;
+        }
+        const rank = (i + 1 + j) / 2;
+        for (let k = i; k < j; k++) {
+            ranks[indices[k]] = rank;
+        }
+        i = j;
+    }
+
+    return ranks;
+}
+
+/**
+ * Core mathematical engine that runs a high-performance, single-pass Welford calculation
+ * directly on two flat, unzipped numeric buffers to maximize memory efficiency.
+ */
+export function computeCorrelationOfFlatArrays(
+    xArr: ArrayLike<number>,
+    yArr: ArrayLike<number>,
+    count: number
+): number | null {
+    if (count < 2) return null;
+
+    let meanX = 0, meanY = 0;
+    let M2_X = 0, M2_Y = 0;
+    let C_XY = 0;
+
+    for (let i = 0; i < count; i++) {
+        const x = xArr[i];
+        const y = yArr[i];
+
+        const deltaX = x - meanX;
+        meanX += deltaX / (i + 1);
+        const deltaX2 = x - meanX;
+
+        const deltaY = y - meanY;
+        meanY += deltaY / (i + 1);
+        const deltaY2 = y - meanY;
+
+        C_XY += deltaX * deltaY2;
+        M2_X += deltaX * deltaX2;
+        M2_Y += deltaY * deltaY2;
+    }
+
+    if (M2_X === 0 || M2_Y === 0) return null;
+
+    const denominator = Math.sqrt(M2_X * M2_Y);
+    if (denominator === 0 || Number.isNaN(denominator)) return null;
+
+    const correlation = C_XY / denominator;
+    return Math.max(-1, Math.min(1, correlation));
+}
+
+/**
+ * Computes Spearman Rank Correlation Coefficient
+ * Optimized to achieve near-zero secondary allocations.
+ */
+export function computeSpearmanCorrelation(pairs: ColumnData<[any, any]>): number | null {
+    const len = pairs.length;
+    const xArr = new Float64Array(len);
+    const yArr = new Float64Array(len);
+    let count = 0;
+
+    for (let i = 0; i < len; i++) {
+        const pair = pairs[i];
+        if (pair) {
+            const x = toValidNumber(pair[0]);
+            const y = toValidNumber(pair[1]);
+            if (x !== null && y !== null) {
+                xArr[count] = x;
+                yArr[count] = y;
+                count++;
+            }
+        }
+    }
+
+    if (count < 2) return null;
+
+    const xRanks = _computeRanks(xArr.subarray(0, count));
+    const yRanks = _computeRanks(yArr.subarray(0, count));
+
+    return computeCorrelationOfFlatArrays(xRanks, yRanks, count);
+}
+
+/**
+ * Computes the dot product of two arrays of pairs.
+ */
+export function computeDotProduct(pairs: ColumnData<[any, any]>): number | null {
+    const len = pairs.length;
+    let sum = 0;
+    let count = 0;
+
+    for (let i = 0; i < len; i++) {
+        const pair = pairs[i];
+        if (!pair) continue;
+
+        const x = toValidNumber(pair[0]);
+        const y = toValidNumber(pair[1]);
+        if (x === null || y === null) continue;
+
+        sum += x * y;
+        count++;
+    }
+
+    return count > 0 ? sum : null;
+}
+
+/**
+ * Computes the weighted average of two arrays of pairs.
+ * Defensive against absolute sum-zero weight errors.
+ */
+export function computeWeightedAverage(pairs: ColumnData<[any, any]>): number | null {
+    const len = pairs.length;
+    let sumProducts = 0;
+    let sumWeights = 0;
+    let count = 0;
+
+    for (let i = 0; i < len; i++) {
+        const pair = pairs[i];
+        if (!pair) continue;
+
+        const x = toValidNumber(pair[0]);
+        const w = toValidNumber(pair[1]);
+        if (x === null || w === null) continue;
+
+        sumProducts += x * w;
+        sumWeights += w;
+        count++;
+    }
+
+    if (count === 0 || Math.abs(sumWeights) < 1e-12) return null;
+    return sumProducts / sumWeights;
 }

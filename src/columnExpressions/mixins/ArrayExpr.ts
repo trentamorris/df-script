@@ -1,14 +1,27 @@
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, evaluateExpression } from "../utils";
-import { isArrayOrTypedArray, getArrayStats, sortArray, SortArrayOptions, computeMedian, getUniqueArrayStats, computeMode, isArrayOfType, stepSliceArray, StepSliceArrayOptions, joinArray } from "../../utils";
-import { ComputeError } from "../../exceptions";
-import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr } from "../../types";
+import {
+    isArrayOrTypedArray,
+    getArrayStats,
+    sortArray,
+    SortArrayOptions,
+    computeMedian,
+    getUniqueArrayStats,
+    computeMode,
+    isArrayOfType,
+    stepSliceArray,
+    StepSliceArrayOptions,
+    joinArray,
+    getArrayElement,
+    shiftArray
+} from "../../utils";
+import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr, AnyTypedArray, ToStructOptions } from "../../types";
 import { ELEMENT_MARKER } from "../constants";
 
 export class ArrayExprNamespace {
     constructor(public expr: any) { }
 
-    _deriveArray(fn: (arr: any[] | ArrayBufferView) => any) {
+    _deriveArray(fn: (arr: any[] | AnyTypedArray) => any) {
         return derive(this.expr, kleeneUnary((v) => {
             return isArrayOrTypedArray(v) ? fn(v as any) : null;
         }));
@@ -23,36 +36,49 @@ export class ArrayExprNamespace {
     }
 
     contains(item: any) {
-        return this._deriveArray((arr: any) => arr.includes(item));
+        return this._deriveArray((arr) => arr.includes(item));
     }
 
     contains_all(items: ArrayLike<any>) {
-        return this._deriveArray((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
+        return this._deriveArray((arr) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
     }
 
     contains_any(items: ArrayLike<any>) {
-        return this._deriveArray((arr: any) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
+        return this._deriveArray((arr) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
     }
 
-    count_matches(item: any) {
-        return this._deriveArray((arr: any) => {
-            let count = 0;
-            const len = arr.length;
-            for (let i = 0; i < len; i++) {
-                if (arr[i] === item) {
-                    count++;
+    count_matches(item: any, options: UniqueArrayStatsOptions = {}) {
+        return this._deriveArray((arr) => getUniqueArrayStats(arr, options).frequencies.get(item) ?? 0);
+    }
+
+    filter(expr: IExpr) {
+        return derive(this.expr, (vArray, columns) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            const subColumns = Object.create(columns);
+            for (let i = 0; i < height; i++) {
+                const val = vArray[i];
+                if (!isArrayOrTypedArray(val)) {
+                    result[i] = null;
+                    continue;
                 }
-            }
-            return count;
-        });
-    }
-
-    drop_nulls() {
-        return this._deriveArray((arr: any) => {
-            const len = arr.length;
-            const result: any[] = [];
-            for (let i = 0; i < len; i++) {
-                if (arr[i] != null) result.push(arr[i]);
+                const subHeight = val.length;
+                subColumns[ELEMENT_MARKER] = val;
+                const mask = evaluateExpression(expr, subColumns, subHeight);
+                const res = [];
+                if (isArrayOrTypedArray(mask)) {
+                    const limit = Math.min(subHeight, mask.length);
+                    for (let j = 0; j < limit; j++) {
+                        if (mask[j]) {
+                            res.push(val[j]);
+                        }
+                    }
+                } else if (mask) {
+                    for (let j = 0; j < subHeight; j++) {
+                        res.push(val[j]);
+                    }
+                }
+                result[i] = res;
             }
             return result;
         });
@@ -124,39 +150,27 @@ export class ArrayExprNamespace {
         indices: number | ArrayLike<number>,
         null_on_oob: boolean = true
     ) {
-        return this._deriveArray((arr: any) => {
-            const len = arr.length;
-            const idxs = isArrayOrTypedArray(indices) ? indices : [indices];
+        return this._deriveArray((arr) => {
+            const idxs = typeof indices === "number" ? [indices] : indices;
             const numIndices = idxs.length;
             const res = new Array(numIndices);
             for (let i = 0; i < numIndices; i++) {
-                const index = idxs[i];
-                const val = arr.at(index);
-                if (val === undefined && !null_on_oob) {
-                    throw new ComputeError(`Index ${index} is out of bounds for array of length ${len}`);
-                }
-                res[i] = val ?? null;
+                res[i] = getArrayElement(arr, idxs[i], null_on_oob);
             }
             return res;
         });
     }
 
     gather_every(options: StepSliceArrayOptions = {}) {
-        return this._deriveArray((arr: any) => stepSliceArray(arr, options));
+        return this._deriveArray((arr) => stepSliceArray(arr, options));
     }
 
     get(index: number, null_on_oob: boolean = true) {
-        return this._deriveArray((arr: any) => {
-            const val = arr.at(index);
-            if (val === undefined && !null_on_oob) {
-                throw new ComputeError(`Index ${index} is out of bounds for array of length ${arr.length}`);
-            }
-            return val ?? null;
-        });
+        return this._deriveArray((arr) => getArrayElement(arr, index, null_on_oob));
     }
 
     join(separator: string = ",", options: JoinArrayOptions = {}) {
-        return this._deriveArray((arr: any) => joinArray(arr, separator, options));
+        return this._deriveArray((arr) => joinArray(arr, separator, options));
     }
 
     last(null_on_oob: boolean = true) {
@@ -168,11 +182,15 @@ export class ArrayExprNamespace {
     }
 
     lengths() {
-        return this._deriveArray((arr: any) => arr.length);
+        return this._deriveArray((arr) => arr.length);
     }
 
     max() {
         return this._deriveArray((arr) => getArrayStats(arr).max);
+    }
+
+    max_index() {
+        return this._deriveArray((arr) => getArrayStats(arr).maxIdx);
     }
 
     mean() {
@@ -180,31 +198,42 @@ export class ArrayExprNamespace {
     }
 
     median() {
-        return this._deriveArray((arr: any) => computeMedian(arr));
+        return this._deriveArray((arr) => computeMedian(arr));
     }
 
     min() {
         return this._deriveArray((arr) => getArrayStats(arr).min);
     }
 
+    min_index() {
+        return this._deriveArray((arr) => getArrayStats(arr).minIdx);
+    }
+
     mode() {
-        return this._deriveArray((arr: any) => computeMode(arr));
+        return this._deriveArray((arr) => computeMode(arr));
     }
 
     n_unique(options: UniqueArrayStatsOptions = {}) {
-        return this._deriveArray((arr: any) => getUniqueArrayStats(arr, options).count);
+        return this._deriveArray((arr) => getUniqueArrayStats(arr, options).count);
     }
 
     reverse() {
-        return this._deriveArray((arr: any) => arr.slice().reverse());
+        return this._deriveArray((arr) => arr.slice().reverse());
     }
 
-    slice(offset: number, length?: number) {
-        return this._deriveArray((arr: any) => {
-            const len = arr.length;
-            const start = offset < 0 ? Math.max(0, len + offset) : offset;
-            const end = length !== undefined ? start + length : len;
-            return arr.slice(start, end);
+    shift(n: number = 1) {
+        return this._deriveArray((arr) => shiftArray(arr, n));
+    }
+
+    slice(start?: number, end?: number) {
+        return this._deriveArray((arr) => arr.slice(start, end));
+    }
+
+    splice(start: number, deleteCount?: number, ...items: any[]) {
+        return this._deriveArray((arr) => {
+            const copy = [...arr];
+            copy.splice(start, deleteCount ?? copy.length, ...items);
+            return copy;
         });
     }
 
@@ -212,12 +241,68 @@ export class ArrayExprNamespace {
         return this._deriveArray((arr) => sortArray(arr, options));
     }
 
+    std() {
+        return this._deriveArray((arr) => getArrayStats(arr).std);
+    }
+
     sum() {
         return this._deriveArray((arr) => getArrayStats(arr).sum);
     }
 
+    to_struct({ upper_bound, fields }: ToStructOptions = {}) {
+        return derive(this.expr, (vArray) => {
+            const height = vArray.length;
+            const result = new Array(height);
+
+            let width = 0;
+            if (Array.isArray(fields)) {
+                width = fields.length;
+            } else if (typeof upper_bound === "number") {
+                width = upper_bound;
+            } else {
+                for (let i = 0; i < height; i++) {
+                    const val = vArray[i];
+                    if (isArrayOrTypedArray(val) && val.length > width) {
+                        width = val.length;
+                    }
+                }
+            }
+
+            if (width === 0) {
+                throw new Error("to_struct cannot be evaluated: struct width is 0. Provide an upper_bound, non-empty fields names, or non-empty lists.");
+            }
+
+            const names = new Array<string>(width);
+            for (let j = 0; j < width; j++) {
+                if (typeof fields === "function") {
+                    names[j] = fields(j);
+                } else {
+                    names[j] = (Array.isArray(fields) ? fields[j] : null) ?? `field_${j}`;
+                }
+            }
+
+            for (let i = 0; i < height; i++) {
+                const val = vArray[i];
+                if (!isArrayOrTypedArray(val)) {
+                    result[i] = null;
+                    continue;
+                }
+                const obj: any = {};
+                for (let j = 0; j < width; j++) {
+                    obj[names[j]] = getArrayElement(val, j, true);
+                }
+                result[i] = obj;
+            }
+            return result;
+        });
+    }
+
     unique(options: UniqueArrayStatsOptions = {}) {
-        return this._deriveArray((arr: any) => getUniqueArrayStats(arr, options).values);
+        return this._deriveArray((arr) => getUniqueArrayStats(arr, options).values);
+    }
+
+    variance() {
+        return this._deriveArray((arr) => getArrayStats(arr).variance);
     }
 
     eval(expr: IExpr) {

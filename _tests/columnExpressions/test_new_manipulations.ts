@@ -53,7 +53,7 @@ try {
         $df.col("list_val").arr.all().alias("list_all"),
         $df.col("list_val").arr.contains_any([true, "nonexistent"]).alias("list_contains_any"),
         $df.col("list_val").arr.contains_all([true, false]).alias("list_contains_all"),
-        $df.col("list_val").arr.drop_nulls().alias("list_dropped_nulls"),
+        $df.col("list_val").arr.filter($df.element().is_not_null()).alias("list_dropped_nulls"),
 
         // 5. string count_matches / extract
         $df.col("str_val").str.count_matches("apple").alias("str_matches_str"),

@@ -18,6 +18,12 @@ const data = [
         datetime_str: "2026-12-31T23:59:59.999Z",
         time_str: "00:00:00.000",
         duration_ms: 3600000 // 1 hour
+    },
+    {
+        date_str: "2027-01-02", // Gregorian 2027, ISO 2026 (Saturday)
+        datetime_str: "2027-01-02T12:00:00.000Z",
+        time_str: "12:00:00.000",
+        duration_ms: 0
     }
 ];
 
@@ -71,6 +77,7 @@ try {
 
         // New Polars operations
         $df.col("date_str").dt.week().alias("week"),
+        $df.col("date_str").dt.iso_week().alias("iso_week"),
         $df.col("date_str").dt.century().alias("century"),
         $df.col("date_str").dt.millennium().alias("millennium"),
         $df.col("date_str").dt.month_start().alias("m_start"),
@@ -79,7 +86,10 @@ try {
         $df.col("datetime_str").dt.strftime({ format: "%F %T %% %A %B %j %I:%M %p", locale: "en-US" }).alias("formatted_shorthands"),
         $df.col("datetime_str").dt.strftime({ format: "%A %B", locale: "fr-FR" }).alias("formatted_fr"),
         $df.col("datetime_str").dt.strftime({ format: "%A %B", locale: "de-DE" }).alias("formatted_de"),
-        $df.col("datetime_str").dt.to_string({ format: "%Y-%m-%d" }).alias("to_str_formatted")
+        $df.col("datetime_str").dt.to_string({ format: "%Y-%m-%d" }).alias("to_str_formatted"),
+        $df.col("date_str").dt.iso_year().alias("iso_yr"),
+        $df.col("date_str").dt.is_business_day().alias("is_biz"),
+        $df.col("date_str").dt.is_business_day({ holidays: ["2024-02-29"] }).alias("is_biz_holiday")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.dt results:");
@@ -102,6 +112,25 @@ try {
     if (r0.ms !== 123) throw new Error(`Expected r0.ms to be 123, got ${r0.ms}`);
     if (r0.us !== 123000) throw new Error(`Expected r0.us to be 123000, got ${r0.us}`);
     if (r0.ns !== 123000000) throw new Error(`Expected r0.ns to be 123000000, got ${r0.ns}`);
+    if (r0.iso_yr !== 2024) throw new Error(`Expected r0.iso_yr to be 2024, got ${r0.iso_yr}`);
+    if (r0.is_biz !== true) throw new Error(`Expected r0.is_biz to be true, got ${r0.is_biz}`);
+    if (r0.is_biz_holiday !== false) throw new Error(`Expected r0.is_biz_holiday to be false, got ${r0.is_biz_holiday}`);
+
+    {
+        const r1 = projected[1];
+        if (r1.iso_yr !== 2023) throw new Error(`Expected r1.iso_yr to be 2023, got ${r1.iso_yr}`);
+        if (r1.week !== 11) throw new Error(`Expected r1.week to be 11, got ${r1.week}`);
+        if (r1.iso_week !== 11) throw new Error(`Expected r1.iso_week to be 11, got ${r1.iso_week}`);
+        if (r1.is_biz !== true) throw new Error(`Expected r1.is_biz to be true, got ${r1.is_biz}`);
+        if (r1.is_biz_holiday !== true) throw new Error(`Expected r1.is_biz_holiday to be true, got ${r1.is_biz_holiday}`);
+
+        const r2 = projected[2];
+        if (r2.iso_yr !== 2026) throw new Error(`Expected r2.iso_yr to be 2026, got ${r2.iso_yr}`);
+        if (r2.week !== 53) throw new Error(`Expected r2.week to be 53, got ${r2.week}`);
+        if (r2.iso_week !== 53) throw new Error(`Expected r2.iso_week to be 53, got ${r2.iso_week}`);
+        if (r2.is_biz !== false) throw new Error(`Expected r2.is_biz to be false, got ${r2.is_biz}`);
+        if (r2.is_biz_holiday !== false) throw new Error(`Expected r2.is_biz_holiday to be false, got ${r2.is_biz_holiday}`);
+    }
 
     if (!(r0.truncated_date instanceof Date) || r0.truncated_date.getUTCHours() !== 0) {
         throw new Error(`Expected r0.truncated_date to be midnight UTC, got ${r0.truncated_date}`);
@@ -126,6 +155,7 @@ try {
 
     // Assert New Operations for Row 0
     if (r0.week !== 9) throw new Error(`Expected r0.week to be 9, got ${r0.week}`);
+    if (r0.iso_week !== 9) throw new Error(`Expected r0.iso_week to be 9, got ${r0.iso_week}`);
     if (r0.century !== 21) throw new Error(`Expected r0.century to be 21, got ${r0.century}`);
     if (r0.millennium !== 3) throw new Error(`Expected r0.millennium to be 3, got ${r0.millennium}`);
     if (r0.m_start.toISOString() !== "2024-02-01T00:00:00.000Z") throw new Error(`Expected r0.m_start to be "2024-02-01T00:00:00.000Z", got ${r0.m_start.toISOString()}`);
@@ -148,6 +178,7 @@ try {
 
     // Assert New Operations for Row 1
     if (r1.week !== 11) throw new Error(`Expected r1.week to be 11, got ${r1.week}`);
+    if (r1.iso_week !== 11) throw new Error(`Expected r1.iso_week to be 11, got ${r1.iso_week}`);
     if (r1.century !== 21) throw new Error(`Expected r1.century to be 21, got ${r1.century}`);
     if (r1.millennium !== 3) throw new Error(`Expected r1.millennium to be 3, got ${r1.millennium}`);
     if (r1.m_start.toISOString() !== "2023-03-01T00:00:00.000Z") throw new Error(`Expected r1.m_start to be "2023-03-01T00:00:00.000Z", got ${r1.m_start.toISOString()}`);

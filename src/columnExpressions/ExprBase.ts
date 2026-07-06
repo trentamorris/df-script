@@ -1,6 +1,7 @@
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict, RegisteredDataType } from "../types"
 import { ALL_COLUMNS_MARKER } from "./constants"
 import { ColumnNotFoundError } from "../exceptions"
+import { evaluateExpression } from "./utils"
 
 export const derive = <T extends IExpr>(
     instance: T,
@@ -30,7 +31,7 @@ export class ExprBase implements IExpr {
             if (val._isLiteral && val._ops.length === 1) {
                 return val._literalValue;
             }
-            return val.evaluate(columns, height);
+            return evaluateExpression(val, columns, height);
         }
         return val;
     }

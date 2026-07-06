@@ -222,6 +222,196 @@ try {
     if (c0.to_upper !== "HELLO WORLD") throw new Error(`Expected to_upper to be "HELLO WORLD", got ${c0.to_upper}`);
     if (c0.to_title !== "Hello World") throw new Error(`Expected to_title to be "Hello World", got ${c0.to_title}`);
 
+    // Assert new case conversions (camel, kebab, pascal, snake)
+    const caseData = [
+        { raw: "hello_world" },
+        { raw: "Hello World" },
+        { raw: "hello-world" },
+        { raw: "helloWorld" },
+        { raw: "HelloWorld" },
+        { raw: "hello   world" },
+        { raw: "hello__world" },
+        { raw: "__hello__world--" }
+    ];
+    const caseDf = $df.data(caseData, { raw: $df.DataType.Utf8 });
+    const caseRes = caseDf.select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_kebabcase().alias("kebab"),
+        $df.col("raw").str.to_pascalcase().alias("pascal"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts() as any[];
+
+    console.log("Case conversion results:");
+    console.dir(caseRes, { depth: null });
+
+    for (const r of caseRes) {
+        if (r.camel !== "helloWorld") throw new Error(`to_camelcase failed: got ${r.camel}`);
+        if (r.kebab !== "hello-world") throw new Error(`to_kebabcase failed: got ${r.kebab}`);
+        if (r.pascal !== "HelloWorld") throw new Error(`to_pascalcase failed: got ${r.pascal}`);
+        if (r.snake !== "hello_world") throw new Error(`to_snakecase failed: got ${r.snake}`);
+    }
+
+    // Assert acronym casing boundaries
+    const acronymData = [{ raw: "myHTTPClient" }];
+    const acroRes = $df.data(acronymData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_kebabcase().alias("kebab"),
+        $df.col("raw").str.to_pascalcase().alias("pascal"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts()[0] as any;
+
+    if (acroRes.camel !== "myHttpClient") throw new Error(`acronym camel failed: got ${acroRes.camel}`);
+    if (acroRes.kebab !== "my-http-client") throw new Error(`acronym kebab failed: got ${acroRes.kebab}`);
+    if (acroRes.pascal !== "MyHttpClient") throw new Error(`acronym pascal failed: got ${acroRes.pascal}`);
+    if (acroRes.snake !== "my_http_client") throw new Error(`acronym snake failed: got ${acroRes.snake}`);
+
+    // Assert digit and complex acronym separation
+    const complexData = [{ raw: "JSON2String" }];
+    const complexRes = $df.data(complexData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_kebabcase().alias("kebab"),
+        $df.col("raw").str.to_pascalcase().alias("pascal"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts()[0] as any;
+
+    if (complexRes.camel !== "json2String") throw new Error(`complex camel failed: got ${complexRes.camel}`);
+    if (complexRes.kebab !== "json-2-string") throw new Error(`complex kebab failed: got ${complexRes.kebab}`);
+    if (complexRes.pascal !== "Json2String") throw new Error(`complex pascal failed: got ${complexRes.pascal}`);
+    if (complexRes.snake !== "json_2_string") throw new Error(`complex snake failed: got ${complexRes.snake}`);
+
+    // Assert round-tripping for digit structures
+    const digitData = [{ raw: "user_1_active" }];
+    const digitRes = $df.data(digitData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts()[0] as any;
+    if (digitRes.camel !== "user1Active") throw new Error(`digit camel failed: got ${digitRes.camel}`);
+    if (digitRes.snake !== "user_1_active") throw new Error(`digit snake failed: got ${digitRes.snake}`);
+
+    // Assert international / accented and CJK characters support
+    const intlData = [
+        { raw: "coopération_api".normalize("NFD") },
+        { raw: "데이터_table" }
+    ];
+    const intlRes = $df.data(intlData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_kebabcase().alias("kebab"),
+        $df.col("raw").str.to_pascalcase().alias("pascal"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts() as any[];
+
+    console.log("International Casing results:");
+    console.dir(intlRes, { depth: null });
+
+    const rCoop = intlRes[0];
+    if (rCoop.camel !== "coopérationApi") throw new Error(`accented camel failed: got ${rCoop.camel}`);
+    if (rCoop.kebab !== "coopération-api") throw new Error(`accented kebab failed: got ${rCoop.kebab}`);
+    if (rCoop.pascal !== "CoopérationApi") throw new Error(`accented pascal failed: got ${rCoop.pascal}`);
+    if (rCoop.snake !== "coopération_api") throw new Error(`accented snake failed: got ${rCoop.snake}`);
+
+    const rKoran = intlRes[1];
+    if (rKoran.camel !== "데이터Table") throw new Error(`cjk camel failed: got ${rKoran.camel}`);
+    if (rKoran.kebab !== "데이터-table") throw new Error(`cjk kebab failed: got ${rKoran.kebab}`);
+    if (rKoran.pascal !== "데이터Table") throw new Error(`cjk pascal failed: got ${rKoran.pascal}`);
+    if (rKoran.snake !== "데이터_table") throw new Error(`cjk snake failed: got ${rKoran.snake}`);
+
+    // Assert contractions/possession apostrophe normalization
+    const contraData = [
+        { raw: "don't_blink" },
+        { raw: "user's_data" }
+    ];
+    const contraRes = $df.data(contraData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_kebabcase().alias("kebab"),
+        $df.col("raw").str.to_pascalcase().alias("pascal"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts() as any[];
+
+    console.log("Contraction Casing results:");
+    console.dir(contraRes, { depth: null });
+
+    const rDont = contraRes[0];
+    if (rDont.camel !== "dontBlink") throw new Error(`contraction camel failed: got ${rDont.camel}`);
+    if (rDont.kebab !== "dont-blink") throw new Error(`contraction kebab failed: got ${rDont.kebab}`);
+    if (rDont.pascal !== "DontBlink") throw new Error(`contraction pascal failed: got ${rDont.pascal}`);
+    if (rDont.snake !== "dont_blink") throw new Error(`contraction snake failed: got ${rDont.snake}`);
+
+    const rUsers = contraRes[1];
+    if (rUsers.camel !== "usersData") throw new Error(`possession camel failed: got ${rUsers.camel}`);
+    if (rUsers.kebab !== "users-data") throw new Error(`possession kebab failed: got ${rUsers.kebab}`);
+    if (rUsers.pascal !== "UsersData") throw new Error(`possession pascal failed: got ${rUsers.pascal}`);
+    if (rUsers.snake !== "users_data") throw new Error(`possession snake failed: got ${rUsers.snake}`);
+
+    // Assert acronym plurals and compound boundary padding edge cases
+    const pluralEdgeData = [
+        { raw: "activeKPIs" },
+        { raw: "userIDs" },
+        { raw: "JSONs" },
+        { raw: "__user_1_active__" }
+    ];
+    const pluralEdgeRes = $df.data(pluralEdgeData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_kebabcase().alias("kebab"),
+        $df.col("raw").str.to_pascalcase().alias("pascal"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts() as any[];
+
+    console.log("Plural Acronyms & Boundary Edge Casing results:");
+    console.dir(pluralEdgeRes, { depth: null });
+
+    const rKpis = pluralEdgeRes[0];
+    if (rKpis.camel !== "activeKpis") throw new Error(`activeKPIs camel failed: got ${rKpis.camel}`);
+    if (rKpis.kebab !== "active-kpis") throw new Error(`activeKPIs kebab failed: got ${rKpis.kebab}`);
+    if (rKpis.pascal !== "ActiveKpis") throw new Error(`activeKPIs pascal failed: got ${rKpis.pascal}`);
+    if (rKpis.snake !== "active_kpis") throw new Error(`activeKPIs snake failed: got ${rKpis.snake}`);
+
+    const rIds = pluralEdgeRes[1];
+    if (rIds.camel !== "userIds") throw new Error(`userIDs camel failed: got ${rIds.camel}`);
+    if (rIds.kebab !== "user-ids") throw new Error(`userIDs kebab failed: got ${rIds.kebab}`);
+    if (rIds.pascal !== "UserIds") throw new Error(`userIDs pascal failed: got ${rIds.pascal}`);
+    if (rIds.snake !== "user_ids") throw new Error(`userIDs snake failed: got ${rIds.snake}`);
+
+    const rJsons = pluralEdgeRes[2];
+    if (rJsons.camel !== "jsons") throw new Error(`JSONs camel failed: got ${rJsons.camel}`);
+    if (rJsons.kebab !== "jsons") throw new Error(`JSONs kebab failed: got ${rJsons.kebab}`);
+    if (rJsons.pascal !== "Jsons") throw new Error(`JSONs pascal failed: got ${rJsons.pascal}`);
+    if (rJsons.snake !== "jsons") throw new Error(`JSONs snake failed: got ${rJsons.snake}`);
+
+    const rPadded = pluralEdgeRes[3];
+    if (rPadded.camel !== "user1Active") throw new Error(`padded camel failed: got ${rPadded.camel}`);
+    if (rPadded.kebab !== "user-1-active") throw new Error(`padded kebab failed: got ${rPadded.kebab}`);
+    if (rPadded.pascal !== "User1Active") throw new Error(`padded pascal failed: got ${rPadded.pascal}`);
+    if (rPadded.snake !== "user_1_active") throw new Error(`padded snake failed: got ${rPadded.snake}`);
+
+    // Assert prototype pollution guard, mixed scripts, and safe type coercion
+    const pollutionData = [
+        { raw: "__proto__" },
+        { raw: "constructor" },
+        { raw: "myTable데이터" },
+        { raw: 12345 } // testing loose coercion
+    ];
+    const pollutionRes = $df.data(pollutionData, { raw: $df.DataType.Utf8 }).select([
+        $df.col("raw").str.to_camelcase().alias("camel"),
+        $df.col("raw").str.to_snakecase().alias("snake")
+    ]).to_dicts() as any[];
+
+    console.log("Pollution / Coercion / Mixed Casing results:");
+    console.dir(pollutionRes, { depth: null });
+
+    // __proto__ and constructor should return empty string since they are filtered out
+    if (pollutionRes[0].camel !== "") throw new Error(`__proto__ camel failed: got ${pollutionRes[0].camel}`);
+    if (pollutionRes[0].snake !== "") throw new Error(`__proto__ snake failed: got ${pollutionRes[0].snake}`);
+    if (pollutionRes[1].camel !== "") throw new Error(`constructor camel failed: got ${pollutionRes[1].camel}`);
+    if (pollutionRes[1].snake !== "") throw new Error(`constructor snake failed: got ${pollutionRes[1].snake}`);
+
+    // myTable데이터 should split and case convert correctly
+    if (pollutionRes[2].camel !== "myTable데이터") throw new Error(`mixed camel failed: got ${pollutionRes[2].camel}`);
+    if (pollutionRes[2].snake !== "my_table_데이터") throw new Error(`mixed snake failed: got ${pollutionRes[2].snake}`);
+
+    // numbers (loose coercion) should case convert without crash
+    if (pollutionRes[3].camel !== "12345") throw new Error(`coerced number camel failed: got ${pollutionRes[3].camel}`);
+    if (pollutionRes[3].snake !== "12345") throw new Error(`coerced number snake failed: got ${pollutionRes[3].snake}`);
+
     console.log("\n🎉 ALL Expr.str COLUMN EXPRESSION & CASTING TESTS PASSED SUCCESSFULLY!");
 } catch (err) {
     console.error("\n❌ Expr.str COLUMN EXPRESSION TESTS FAILED:", err);

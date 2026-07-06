@@ -1,5 +1,5 @@
 import { isBlankString, escapeRegExp } from "./string";
-import type { TimeUnit, StrptimeOptions, StrftimeOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat } from "../types";
+import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat } from "../types";
 import { ComputeError } from "../exceptions";
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidNumber, isValidInt } from "./number";
@@ -257,11 +257,18 @@ export function getCentury(d: Date): number | null {
     return Math.floor((y - 1) / 100) + 1;
 }
 
-export function getISOWeek(d: Date): number | null {
+export function getISO(
+    d: Date,
+    options: { field: "week" | "year" } = { field: "week" }
+): number | null {
     if (!isValidDateObj(d)) return null;
     const date = _createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
     const dayNum = date.getUTCDay() || 7;
     date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+
+    if (options.field === "year") {
+        return date.getUTCFullYear();
+    }
     const yearStart = _createUTCDate(date.getUTCFullYear(), 0, 1);
     const dayDiff = Math.round((date.getTime() - yearStart.getTime()) / MS_PER_DAY);
     return Math.floor(dayDiff / 7) + 1;
@@ -643,13 +650,21 @@ export function offsetDay(
     }
 
     const holidayTimestamps = new Set<number>();
-    for (let i = 0; i < holidays.length; i++) {
-        const hd = toValidDate(holidays[i]);
-        if (!hd) continue;
-        if (excludeWeekdays.includes(hd.getUTCDay())) continue;
+    if (holidays instanceof Set) {
+        for (const ts of holidays) {
+            const hd = new Date(ts);
+            if (excludeWeekdays.includes(hd.getUTCDay())) continue;
+            holidayTimestamps.add(ts);
+        }
+    } else if (Array.isArray(holidays)) {
+        for (let i = 0; i < holidays.length; i++) {
+            const hd = toValidDate(holidays[i]);
+            if (!hd) continue;
+            if (excludeWeekdays.includes(hd.getUTCDay())) continue;
 
-        const hdUTC = _createUTCDate(hd.getUTCFullYear(), hd.getUTCMonth(), hd.getUTCDate());
-        holidayTimestamps.add(hdUTC.getTime());
+            const hdUTC = _createUTCDate(hd.getUTCFullYear(), hd.getUTCMonth(), hd.getUTCDate());
+            holidayTimestamps.add(hdUTC.getTime());
+        }
     }
 
     const isExcluded = (date: Date): boolean => {
@@ -722,4 +737,34 @@ export function getTimeZoneOffset(
         default:
             return offsetMinutes * MS_PER_MINUTE;
     }
+}
+
+export function isBusinessDay(
+    d: Date,
+    options: IsBusinessDayOptions = {}
+): boolean | null {
+    if (!isValidDateObj(d)) return null;
+    const excludeWeekdays = options.excludeWeekdays ?? [0, 6];
+    const day = d.getUTCDay();
+    if (excludeWeekdays.includes(day)) return false;
+
+    const holidays = options.holidays;
+    if (holidays) {
+        if (holidays instanceof Set) {
+            const dUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            if (holidays.has(dUTC)) return false;
+        } else if (Array.isArray(holidays) && holidays.length > 0) {
+            const holidayTimestamps = new Set<number>();
+            for (let i = 0; i < holidays.length; i++) {
+                const hd = toValidDate(holidays[i]);
+                if (hd) {
+                    holidayTimestamps.add(Date.UTC(hd.getUTCFullYear(), hd.getUTCMonth(), hd.getUTCDate()));
+                }
+            }
+            const dUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+            if (holidayTimestamps.has(dUTC)) return false;
+        }
+    }
+
+    return true;
 }

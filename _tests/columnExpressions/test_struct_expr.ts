@@ -109,6 +109,42 @@ try {
     if (r8[0].a !== 1 || r8[0].b !== "foo" || !("s" in r8[0])) {
         throw new Error("r8 unnest with_columns failed: " + JSON.stringify(r8[0]));
     }
+    // 9. $df.struct constructor helper (object, array, and positional parameter signatures)
+    const df9 = $df.data([
+        { x: 10, y: "apple" },
+        { x: 20, y: "banana" }
+    ]);
+    const r9 = df9.select([
+        $df.struct({
+            a: $df.col("x"),
+            b: $df.col("y")
+        }).alias("nested"),
+        $df.struct([
+            $df.col("x").alias("x_val"),
+            $df.col("y").alias("y_val")
+        ]).alias("nested_arr"),
+        $df.struct(
+            $df.col("x").alias("x_pos"),
+            $df.col("y").alias("y_pos")
+        ).alias("nested_pos")
+    ]).to_dicts() as any[];
+
+    if (r9.length !== 2) throw new Error("r9 length mismatch");
+    if (r9[0].nested.a !== 10 || r9[0].nested.b !== "apple") throw new Error("r9 row 0 nested object mismatch");
+    if (r9[0].nested_arr.x_val !== 10 || r9[0].nested_arr.y_val !== "apple") throw new Error("r9 row 0 nested array mismatch");
+    if (r9[0].nested_pos.x_pos !== 10 || r9[0].nested_pos.y_pos !== "apple") throw new Error("r9 row 0 nested pos mismatch");
+    // 10. $df.struct inside with_columns
+    const r10 = df9.with_columns([
+        $df.struct({
+            a: $df.col("x"),
+            b: $df.col("y")
+        }).alias("nested_with_cols")
+    ]).to_dicts() as any[];
+
+    if (r10.length !== 2) throw new Error("r10 length mismatch");
+    if (r10[0].x !== 10 || r10[0].nested_with_cols.a !== 10 || r10[0].nested_with_cols.b !== "apple") {
+        throw new Error("r10 with_columns failed: " + JSON.stringify(r10[0]));
+    }
 
     console.log("\n🎉 ALL COLUMN EXPRESSION STRUCT TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

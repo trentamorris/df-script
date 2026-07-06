@@ -92,9 +92,12 @@ export interface StrftimeOptions {
 
 export type BusinessDayRollType = "raise" | "forward" | "backward";
 
-export interface BusinessDayOffsetOptions {
-    holidays?: (Date | string | number)[];
+export interface IsBusinessDayOptions {
+    holidays?: (Date | string | number)[] | Set<number>;
     excludeWeekdays?: number[];
+}
+
+export interface BusinessDayOffsetOptions extends IsBusinessDayOptions {
     roll?: BusinessDayRollType;
 }
 
@@ -144,5 +147,10 @@ export interface FillNullOptions {
     value?: any;
     strategy?: FillNullStrategy;
     limit?: number;
+}
+
+export interface ToStructOptions {
+    fields?: string[] | ((idx: number) => string);
+    upper_bound?: number;
 }
 

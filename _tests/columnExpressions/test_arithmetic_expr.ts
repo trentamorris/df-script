@@ -67,6 +67,8 @@ try {
         $df.col("val5").radians().alias("radians"),
         $df.col("val3").round(1).alias("round_1"),
         $df.col("val3").round().alias("round_0"),
+        $df.col("val3").round_sig_figs(2).alias("round_sig_figs_2"),
+        $df.col("val3").round_sig_figs(1).alias("round_sig_figs_1"),
         $df.col("val3").sin().alias("sin"),
         $df.col("val3").sinh().alias("sinh"),
         $df.col("val3").sign().alias("sign"),
@@ -131,6 +133,8 @@ try {
     if (Math.abs(r0.radians - 2.7182818 * Math.PI / 180) > 1e-6) throw new Error(`radians failed: got ${r0.radians}`);
     if (r0.round_1 !== -5.5) throw new Error(`round_1 failed: expected -5.5, got ${r0.round_1}`);
     if (r0.round_0 !== -5) throw new Error(`round_0 failed: expected -5, got ${r0.round_0}`);
+    if (r0.round_sig_figs_2 !== -5.5) throw new Error(`round_sig_figs_2 failed: expected -5.5, got ${r0.round_sig_figs_2}`);
+    if (r0.round_sig_figs_1 !== -6) throw new Error(`round_sig_figs_1 failed: expected -6, got ${r0.round_sig_figs_1}`);
     if (Math.abs(r0.sin - Math.sin(-5.5)) > 1e-6) throw new Error(`sin failed: got ${r0.sin}`);
     if (Math.abs(r0.sinh - Math.sinh(-5.5)) > 1e-6) throw new Error(`sinh failed: got ${r0.sinh}`);
     if (r0.sign !== -1) throw new Error(`sign failed: expected -1, got ${r0.sign}`);
@@ -192,6 +196,8 @@ try {
     if (Math.abs(r1.radians - Math.PI / 180) > 1e-6) throw new Error(`radians failed: got ${r1.radians}`);
     if (r1.round_1 !== 4.9) throw new Error(`round_1 failed: expected 4.9, got ${r1.round_1}`);
     if (r1.round_0 !== 5) throw new Error(`round_0 failed: expected 5, got ${r1.round_0}`);
+    if (r1.round_sig_figs_2 !== 4.9) throw new Error(`round_sig_figs_2 failed: expected 4.9, got ${r1.round_sig_figs_2}`);
+    if (r1.round_sig_figs_1 !== 5) throw new Error(`round_sig_figs_1 failed: expected 5, got ${r1.round_sig_figs_1}`);
     if (Math.abs(r1.sin - Math.sin(4.88)) > 1e-6) throw new Error(`sin failed: got ${r1.sin}`);
     if (Math.abs(r1.sinh - Math.sinh(4.88)) > 1e-6) throw new Error(`sinh failed: got ${r1.sinh}`);
     if (r1.sign !== 1) throw new Error(`sign failed: expected 1, got ${r1.sign}`);
