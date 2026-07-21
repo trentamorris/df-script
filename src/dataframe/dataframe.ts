@@ -47,7 +47,7 @@ export class DataFrame<T extends RowRecord = any> {
      * @param height Optional explicit height (row count).
      * @example
      * >>> const df = $df.data([{ a: 1, b: "x" }, { a: 2, b: "y" }])
-     * >>> df.print()
+     * >>> df
      * shape: (2, 2)
      * ┌─────┬─────┐
      * │ a   │ b   │
@@ -108,6 +108,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of column name strings.
      * @example
      * >>> const df = $df.data({ a: [1], b: [2] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ 2 │
+     * └───┴───┘
      * >>> df.columns
      * ["a", "b"]
      * @since v1.5.0
@@ -123,6 +130,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ a: [1] })
+     * >>> df1
+     * shape: (1, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * └───┘
      * >>> const df2 = $df.data({ a: [2] })
      * >>> df1.concat(df2)
      * shape: (2, 1)
@@ -150,6 +164,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1], b: [2] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ 2 │
+     * └───┴───┘
      * >>> df.drop("b")
      * shape: (1, 1)
      * ┌───┐
@@ -179,6 +200,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, null, 3] })
+     * >>> df
+     * shape: (3, 1)
+     * ┌──────┐
+     * │ a    │
+     * ├──────┤
+     * │ 1    │
+     * │ null │
+     * │ 3    │
+     * └──────┘
      * >>> df.drop_nulls()
      * shape: (2, 1)
      * ┌───┐
@@ -199,6 +229,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of RegisteredDataType definitions.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["text"] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬──────┐
+     * │ a │ b    │
+     * ├───┼──────┤
+     * │ 1 │ text │
+     * └───┴──────┘
      * >>> df.dtypes
      * [Float64, Utf8]
      * @since v1.5.0
@@ -220,6 +257,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ group: ["A"], values: [[1, 2]] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───────┬────────┐
+     * │ group │ values │
+     * ├───────┼────────┤
+     * │ A     │ [1, 2] │
+     * └───────┴────────┘
      * >>> df.explode("values")
      * shape: (2, 2)
      * ┌───────┬────────┐
@@ -267,6 +311,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, null, 3] })
+     * >>> df
+     * shape: (3, 1)
+     * ┌──────┐
+     * │ a    │
+     * ├──────┤
+     * │ 1    │
+     * │ null │
+     * │ 3    │
+     * └──────┘
      * >>> df.fill_null({ value: 0 })
      * shape: (3, 1)
      * ┌───┐
@@ -289,6 +342,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2, 3] })
+     * >>> df
+     * shape: (3, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * │ 3 │
+     * └───┘
      * >>> df.filter($df.col("a").gt(1))
      * shape: (2, 1)
      * ┌───┐
@@ -385,6 +447,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrameSchema
      * @example
      * >>> const df = $df.data({ a: [1], b: ["text"] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬──────┐
+     * │ a │ b    │
+     * ├───┼──────┤
+     * │ 1 │ text │
+     * └───┴──────┘
      * >>> df.get_schema()
      * { a: Float64, b: Utf8 }
      * @since v1.5.0
@@ -399,6 +468,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns GroupedData
      * @example
      * >>> const df = $df.data({ cat: ["A", "A", "B"], val: [10, 20, 30] })
+     * >>> df
+     * shape: (3, 2)
+     * ┌─────┬─────┐
+     * │ cat │ val │
+     * ├─────┼─────┤
+     * │ A   │ 10  │
+     * │ A   │ 20  │
+     * │ B   │ 30  │
+     * └─────┴─────┘
      * >>> df.groupby("cat").agg($df.col("val").sum().alias("sum"))
      * shape: (2, 2)
      * ┌─────┬─────┐
@@ -439,6 +517,16 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2, 3, 4] })
+     * >>> df
+     * shape: (4, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * │ 3 │
+     * │ 4 │
+     * └───┘
      * >>> df.head(2)
      * shape: (2, 1)
      * ┌───┐
@@ -458,6 +546,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Number of rows.
      * @example
      * >>> const df = $df.data({ a: [10, 20, 30] })
+     * >>> df
+     * shape: (3, 1)
+     * ┌────┐
+     * │ a  │
+     * ├────┤
+     * │ 10 │
+     * │ 20 │
+     * │ 30 │
+     * └────┘
      * >>> df.height
      * 3
      * @since v1.5.0
@@ -473,6 +570,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ a: [1, 2] })
+     * >>> df1
+     * shape: (2, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * └───┘
      * >>> const df2 = $df.data({ b: [10, 20] })
      * >>> df1.hstack(df2)
      * shape: (2, 2)
@@ -499,6 +604,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1], c: [3] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ c │
+     * ├───┼───┤
+     * │ 1 │ 3 │
+     * └───┴───┘
      * >>> df.insert_column(1, "b", 2)
      * shape: (1, 3)
      * ┌───┬───┬───┐
@@ -536,6 +648,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @throws {ShapeError} If row or column index is out of bounds.
      * @example
      * >>> const df = $df.data({ val: [42] })
+     * >>> df
+     * shape: (1, 1)
+     * ┌─────┐
+     * │ val │
+     * ├─────┤
+     * │ 42  │
+     * └─────┘
      * >>> df.item(0, "val")
      * 42
      * @since v1.5.0
@@ -581,6 +700,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Generator of ColumnData arrays.
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: [3, 4] })
+     * >>> df
+     * shape: (2, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ 3 │
+     * │ 2 │ 4 │
+     * └───┴───┘
      * >>> for (const col of df.iter_columns()) { console.log(col); }
      * Float64Array([1, 2])
      * Float64Array([3, 4])
@@ -601,6 +728,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Generator of rows.
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
+     * >>> df
+     * shape: (2, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * │ 2 │ y │
+     * └───┴───┘
      * >>> for (const row of df.iter_rows({ named: true })) { console.log(row); }
      * { a: 1, b: "x" }
      * { a: 2, b: "y" }
@@ -642,6 +777,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
+     * >>> df1
+     * shape: (2, 2)
+     * ┌────┬─────┐
+     * │ id │ val │
+     * ├────┼─────┤
+     * │ 1  │ a   │
+     * │ 2  │ b   │
+     * └────┴─────┘
      * >>> const df2 = $df.data({ id: [1, 2], num: [100, 200] })
      * >>> df1.join({ other: df2, on: "id" })
      * shape: (2, 3)
@@ -796,6 +939,16 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [10, 20, 30, 40] })
+     * >>> df
+     * shape: (4, 1)
+     * ┌────┐
+     * │ a  │
+     * ├────┤
+     * │ 10 │
+     * │ 20 │
+     * │ 30 │
+     * │ 40 │
+     * └────┘
      * >>> df.limit(2, { offset: 1 })
      * shape: (2, 1)
      * ┌────┐
@@ -842,6 +995,16 @@ export class DataFrame<T extends RowRecord = any> {
      * ...   month: ["Jan", "Feb", "Jan", "Feb"],
      * ...   revenue: [100, 150, 120, 180]
      * ... })
+     * >>> df
+     * shape: (4, 3)
+     * ┌──────┬───────┬─────────┐
+     * │ year │ month │ revenue │
+     * ├──────┼───────┼─────────┤
+     * │ 2020 │ Jan   │ 100     │
+     * │ 2020 │ Feb   │ 150     │
+     * │ 2021 │ Jan   │ 120     │
+     * │ 2021 │ Feb   │ 180     │
+     * └──────┴───────┴─────────┘
      * >>> df.pivot({ index: "year", columns: "month", values: "revenue" })
      * shape: (2, 3)
      * ┌──────┬─────┬─────┐
@@ -921,6 +1084,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ old_name: [1] })
+     * >>> df
+     * shape: (1, 1)
+     * ┌──────────┐
+     * │ old_name │
+     * ├──────────┤
+     * │ 1        │
+     * └──────────┘
      * >>> df.rename({ old_name: "new_name" })
      * shape: (1, 1)
      * ┌──────────┐
@@ -955,6 +1125,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2, 3] })
+     * >>> df
+     * shape: (3, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * │ 3 │
+     * └───┘
      * >>> df.reverse()
      * shape: (3, 1)
      * ┌───┐
@@ -986,6 +1165,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrameSchema mapping.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["text"] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬──────┐
+     * │ a │ b    │
+     * ├───┼──────┤
+     * │ 1 │ text │
+     * └───┴──────┘
      * >>> df.schema
      * { a: Float64, b: Utf8 }
      * @since v1.5.0
@@ -1000,6 +1186,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: [10, 20] })
+     * >>> df
+     * shape: (2, 2)
+     * ┌───┬────┐
+     * │ a │ b  │
+     * ├───┼────┤
+     * │ 1 │ 10 │
+     * │ 2 │ 20 │
+     * └───┴────┘
      * >>> df.select("a", $df.col("b").add(100).alias("b_plus"))
      * shape: (2, 2)
      * ┌───┬────────┐
@@ -1137,6 +1331,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Tuple [height, width].
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
+     * >>> df
+     * shape: (2, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * │ 2 │ y │
+     * └───┴───┘
      * >>> df.shape
      * [2, 2]
      * @since v1.5.0
@@ -1152,6 +1354,16 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [10, 20, 30, 40] })
+     * >>> df
+     * shape: (4, 1)
+     * ┌────┐
+     * │ a  │
+     * ├────┤
+     * │ 10 │
+     * │ 20 │
+     * │ 30 │
+     * │ 40 │
+     * └────┘
      * >>> df.slice(1, 3)
      * shape: (2, 1)
      * ┌────┐
@@ -1181,6 +1393,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ val: [3, 1, 2] })
+     * >>> df
+     * shape: (3, 1)
+     * ┌─────┐
+     * │ val │
+     * ├─────┤
+     * │ 3   │
+     * │ 1   │
+     * │ 2   │
+     * └─────┘
      * >>> df.sort({ by: "val" })
      * shape: (3, 1)
      * ┌─────┐
@@ -1268,6 +1489,16 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2, 3, 4] })
+     * >>> df
+     * shape: (4, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * │ 3 │
+     * │ 4 │
+     * └───┘
      * >>> df.tail(2)
      * shape: (2, 1)
      * ┌───┐
@@ -1287,6 +1518,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Column dictionary map.
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
+     * >>> df
+     * shape: (2, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * │ 2 │ y │
+     * └───┴───┘
      * >>> df.to_dict()
      * { a: Float64Array([1, 2]), b: ["x", "y"] }
      * @since v1.5.0
@@ -1300,6 +1539,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of row record objects.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * └───┴───┘
      * >>> df.to_dicts()
      * [{ a: 1, b: "x" }]
      * @since v1.5.0
@@ -1314,6 +1560,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of column scalar values.
      * @example
      * >>> const df = $df.data({ a: [10, 20] })
+     * >>> df
+     * shape: (2, 1)
+     * ┌────┐
+     * │ a  │
+     * ├────┤
+     * │ 10 │
+     * │ 20 │
+     * └────┘
      * >>> df.to_array("a")
      * [10, 20]
      * @since v1.6.0
@@ -1335,6 +1589,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ metric: ["sales", "clicks"], q1: [100, 500], q2: [120, 600] })
+     * >>> df
+     * shape: (2, 3)
+     * ┌────────┬─────┬─────┐
+     * │ metric │ q1  │ q2  │
+     * ├────────┼─────┼─────┤
+     * │ sales  │ 100 │ 120 │
+     * │ clicks │ 500 │ 600 │
+     * └────────┴─────┴─────┘
      * >>> df.transpose({ include_header: true, header_name: "metric" })
      * shape: (2, 3)
      * ┌────────┬──────────┬──────────┐
@@ -1435,6 +1697,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2, 2], b: ["x", "y", "y"] })
+     * >>> df
+     * shape: (3, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * │ 2 │ y │
+     * │ 2 │ y │
+     * └───┴───┘
      * >>> df.unique()
      * shape: (2, 2)
      * ┌───┬───┐
@@ -1482,6 +1753,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ year: [2020], Jan: [100], Feb: [150] })
+     * >>> df
+     * shape: (1, 3)
+     * ┌──────┬─────┬─────┐
+     * │ year │ Jan │ Feb │
+     * ├──────┼─────┼─────┤
+     * │ 2020 │ 100 │ 150 │
+     * └──────┴─────┴─────┘
      * >>> df.unpivot({ idVars: "year", valueVars: ["Jan", "Feb"], varName: "month", valueName: "revenue" })
      * shape: (2, 3)
      * ┌──────┬───────┬─────────┐
@@ -1547,6 +1825,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ a: [1] })
+     * >>> df1
+     * shape: (1, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * └───┘
      * >>> const df2 = $df.data({ a: [2] })
      * >>> df1.vstack(df2)
      * shape: (2, 1)
@@ -1569,6 +1854,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Number of columns.
      * @example
      * >>> const df = $df.data({ a: [1], b: [2] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ 2 │
+     * └───┴───┘
      * >>> df.width
      * 2
      * @since v1.5.0
@@ -1610,6 +1902,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, 2] })
+     * >>> df
+     * shape: (2, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * └───┘
      * >>> df.with_columns($df.col("a").add(10).alias("b"))
      * shape: (2, 2)
      * ┌───┬────┐
@@ -1660,6 +1960,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ val: ["a", "b"] })
+     * >>> df
+     * shape: (2, 1)
+     * ┌─────┐
+     * │ val │
+     * ├─────┤
+     * │ a   │
+     * │ b   │
+     * └─────┘
      * >>> df.with_row_index("idx")
      * shape: (2, 2)
      * ┌─────┬─────┐
@@ -1689,6 +1997,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns JSON string representation.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * └───┴───┘
      * >>> df.write_json()
      * '[{"a":1,"b":"x"}]'
      * @since v1.6.0
@@ -1729,6 +2044,13 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns CSV string output.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })
+     * >>> df
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ x │
+     * └───┴───┘
      * >>> df.write_csv()
      * "a,b\n1,x"
      * @since v1.6.0
