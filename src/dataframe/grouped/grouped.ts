@@ -4,6 +4,9 @@ import type { GroupMap } from "../types"
 import { resolveColumnSelectors, ALL_COLUMNS_MARKER } from "../../columnExpressions"
 import type { IExpr, ColumnDict, RowRecord, DataFrameSchema } from "../../types"
 
+/**
+ * Represents a DataFrame grouped by key columns, supporting aggregation operations.
+ */
 export class GroupedData<T, K extends keyof T> {
     private _groups: GroupMap
     private _keys: K[]
@@ -29,6 +32,21 @@ export class GroupedData<T, K extends keyof T> {
         this._parentSchema = parentSchema
     }
 
+    /**
+     * Converts group keys back into a single distinct DataFrame without aggregations.
+     * @returns DataFrame
+     * @example
+     * >>> const df = $df.data({ group: ["A", "A", "B"], val: [1, 2, 3] })
+     * >>> df.groupby("group").to_dataframe()
+     * shape: (2, 1)
+     * ┌───────┐
+     * │ group │
+     * ├───────┤
+     * │ A     │
+     * │ B     │
+     * └───────┘
+     * @since v1.5.0
+     */
     to_dataframe<U extends RowRecord = any>(): DataFrame<U> {
         const keysLen = this._keys.length;
         const keysStr = new Array(keysLen);
@@ -61,6 +79,22 @@ export class GroupedData<T, K extends keyof T> {
         return DataFrame._createDirect<U>(newColumns as any, outSchema, groupIdx);
     }
 
+    /**
+     * Aggregates grouped partitions using aggregation column expressions.
+     * @param exprs One or more aggregation column expressions.
+     * @returns DataFrame
+     * @example
+     * >>> const df = $df.data({ group: ["A", "A", "B"], val: [10, 20, 30] })
+     * >>> df.groupby("group").agg($df.col("val").sum().alias("sum_val"))
+     * shape: (2, 2)
+     * ┌───────┬─────────┐
+     * │ group │ sum_val │
+     * ├───────┼─────────┤
+     * │ A     │ 30      │
+     * │ B     │ 30      │
+     * └───────┴─────────┘
+     * @since v1.5.0
+     */
     agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
         const allKeysLen = this._allKeys.length;
         const allKeysStr = new Array(allKeysLen);

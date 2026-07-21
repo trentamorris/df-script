@@ -43,6 +43,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts century index of a Datetime value.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.century().alias("century"))
+     * shape: (1, 2)
+     * ┌────────────┬─────────┐
+     * │ d          │ century │
+     * ├────────────┼─────────┤
+     * │ 2026-05-20 │ 21      │
+     * └────────────┴─────────┘
      * @since v1.7.0
      */
     century() {
@@ -51,6 +61,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts Date object component from Datetime.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:30:00Z"] })
+     * >>> df.with_columns($df.col("ts").dt.date().alias("date_only"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬──────────────────────────┐
+     * │ ts                   │ date_only                │
+     * ├──────────────────────┼──────────────────────────┤
+     * │ 2026-05-20T10:30:00Z │ 2026-05-20T00:00:00.000Z │
+     * └──────────────────────┴──────────────────────────┘
      * @since v1.6.0
      */
     date() {
@@ -59,6 +79,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the calendar day component (1-31) from a Datetime column.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.day().alias("day"))
+     * shape: (1, 2)
+     * ┌────────────┬─────┐
+     * │ d          │ day │
+     * ├────────────┼─────┤
+     * │ 2026-05-20 │ 20  │
+     * └────────────┴─────┘
      * @since v1.5.0
      */
     day() {
@@ -67,6 +97,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts number of days in the month.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2024-02-15"] })
+     * >>> df.with_columns($df.col("d").dt.days_in_month().alias("dim"))
+     * shape: (1, 2)
+     * ┌────────────┬─────┐
+     * │ d          │ dim │
+     * ├────────────┼─────┤
+     * │ 2024-02-15 │ 29  │
+     * └────────────┴─────┘
      * @since v1.6.0
      */
     days_in_month() {
@@ -78,6 +118,17 @@ export class DateTimeExprNamespace {
 
     /**
      * Returns epoch duration timestamp offset.
+     * @param unit Time resolution unit ("ms", "us", "ns", "s").
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-01-01T00:00:00Z"] })
+     * >>> df.with_columns($df.col("d").dt.epoch("s").alias("epoch_s"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬────────────┐
+     * │ d                    │ epoch_s    │
+     * ├──────────────────────┼────────────┤
+     * │ 2026-01-01T00:00:00Z │ 1767225600 │
+     * └──────────────────────┴────────────┘
      * @since v1.6.0
      */
     epoch(unit: TimeUnit = "ms") {
@@ -86,6 +137,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the hour component (0-23) from a Datetime column.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T14:30:00Z"] })
+     * >>> df.with_columns($df.col("ts").dt.hour().alias("hr"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬────┐
+     * │ ts                   │ hr │
+     * ├──────────────────────┼────┤
+     * │ 2026-05-20T14:30:00Z │ 14 │
+     * └──────────────────────┴────┘
      * @since v1.7.0
      */
     hour() {
@@ -94,6 +155,17 @@ export class DateTimeExprNamespace {
 
     /**
      * Boolean check: Returns true if target falls on a business day.
+     * @param options Config options including custom weekend or holiday definitions.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-18"] })
+     * >>> df.with_columns($df.col("d").dt.is_business_day().alias("is_bday"))
+     * shape: (1, 2)
+     * ┌────────────┬─────────┐
+     * │ d          │ is_bday │
+     * ├────────────┼─────────┤
+     * │ 2026-05-18 │ true    │
+     * └────────────┴─────────┘
      * @since v1.7.0
      */
     is_business_day(options: IsBusinessDayOptions = {}) {
@@ -102,6 +174,17 @@ export class DateTimeExprNamespace {
 
     /**
      * Checks if year is a leap year.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2024-01-01", "2026-01-01"] })
+     * >>> df.with_columns($df.col("d").dt.is_leap_year().alias("leap"))
+     * shape: (2, 2)
+     * ┌────────────┬───────┐
+     * │ d          │ leap  │
+     * ├────────────┼───────┤
+     * │ 2024-01-01 │ true  │
+     * │ 2026-01-01 │ false │
+     * └────────────┴───────┘
      * @since v1.6.0
      */
     is_leap_year() {
@@ -110,6 +193,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts ISO week index.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.iso_week().alias("week"))
+     * shape: (1, 2)
+     * ┌────────────┬──────┐
+     * │ d          │ week │
+     * ├────────────┼──────┤
+     * │ 2026-05-20 │ 21   │
+     * └────────────┴──────┘
      * @since v1.6.0
      */
     iso_week() {
@@ -118,6 +211,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts ISO calendar year.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.iso_year().alias("iso_yr"))
+     * shape: (1, 2)
+     * ┌────────────┬────────┐
+     * │ d          │ iso_yr │
+     * ├────────────┼────────┤
+     * │ 2026-05-20 │ 2026   │
+     * └────────────┴────────┘
      * @since v1.6.0
      */
     iso_year() {
@@ -126,6 +229,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts microseconds component.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.123Z"] })
+     * >>> df.with_columns($df.col("ts").dt.microsecond().alias("us"))
+     * shape: (1, 2)
+     * ┌──────────────────────────┬────────┐
+     * │ ts                       │ us     │
+     * ├──────────────────────────┼────────┤
+     * │ 2026-05-20T10:00:00.123Z │ 123000 │
+     * └──────────────────────────┴────────┘
      * @since v1.7.0
      */
     microsecond() {
@@ -134,6 +247,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts millennium component index.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.millennium().alias("mil"))
+     * shape: (1, 2)
+     * ┌────────────┬─────┐
+     * │ d          │ mil │
+     * ├────────────┼─────┤
+     * │ 2026-05-20 │ 3   │
+     * └────────────┴─────┘
      * @since v1.7.0
      */
     millennium() {
@@ -142,6 +265,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts milliseconds component.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.456Z"] })
+     * >>> df.with_columns($df.col("ts").dt.millisecond().alias("ms"))
+     * shape: (1, 2)
+     * ┌──────────────────────────┬─────┐
+     * │ ts                       │ ms  │
+     * ├──────────────────────────┼─────┤
+     * │ 2026-05-20T10:00:00.456Z │ 456 │
+     * └──────────────────────────┴─────┘
      * @since v1.6.0
      */
     millisecond() {
@@ -150,6 +283,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the minute component (0-59) from a Datetime column.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:45:00Z"] })
+     * >>> df.with_columns($df.col("ts").dt.minute().alias("min"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬─────┐
+     * │ ts                   │ min │
+     * ├──────────────────────┼─────┤
+     * │ 2026-05-20T10:45:00Z │ 45  │
+     * └──────────────────────┴─────┘
      * @since v1.7.0
      */
     minute() {
@@ -158,6 +301,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the calendar month component (1-12) from a Datetime column.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.month().alias("m"))
+     * shape: (1, 2)
+     * ┌────────────┬───┐
+     * │ d          │ m │
+     * ├────────────┼───┤
+     * │ 2026-05-20 │ 5 │
+     * └────────────┴───┘
      * @since v1.5.0
      */
     month() {
@@ -166,6 +319,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Returns date representing end of the month.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.month_end().alias("m_end"))
+     * shape: (1, 2)
+     * ┌────────────┬──────────────────────────┐
+     * │ d          │ m_end                    │
+     * ├────────────┼──────────────────────────┤
+     * │ 2026-05-20 │ 2026-05-31T00:00:00.000Z │
+     * └────────────┴──────────────────────────┘
      * @since v1.7.0
      */
     month_end() {
@@ -174,6 +337,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Returns date representing start of the month.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.month_start().alias("m_start"))
+     * shape: (1, 2)
+     * ┌────────────┬──────────────────────────┐
+     * │ d          │ m_start                  │
+     * ├────────────┼──────────────────────────┤
+     * │ 2026-05-20 │ 2026-05-01T00:00:00.000Z │
+     * └────────────┴──────────────────────────┘
      * @since v1.7.0
      */
     month_start() {
@@ -182,6 +355,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts nanoseconds component.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.001Z"] })
+     * >>> df.with_columns($df.col("ts").dt.nanosecond().alias("ns"))
+     * shape: (1, 2)
+     * ┌──────────────────────────┬─────────┐
+     * │ ts                       │ ns      │
+     * ├──────────────────────────┼─────────┤
+     * │ 2026-05-20T10:00:00.001Z │ 1000000 │
+     * └──────────────────────────┴─────────┘
      * @since v1.7.0
      */
     nanosecond() {
@@ -190,6 +373,18 @@ export class DateTimeExprNamespace {
 
     /**
      * Offsets date by N business days.
+     * @param n Number of business days to offset.
+     * @param options Business day rules and holidays options.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-15"] })
+     * >>> df.with_columns($df.col("d").dt.offset_business_day(2).alias("next_bday"))
+     * shape: (1, 2)
+     * ┌────────────┬──────────────────────────┐
+     * │ d          │ next_bday                │
+     * ├────────────┼──────────────────────────┤
+     * │ 2026-05-15 │ 2026-05-19T00:00:00.000Z │
+     * └────────────┴──────────────────────────┘
      * @since v1.7.0
      */
     offset_business_day(n: number | any, { excludeWeekdays = [0, 6], ...options }: BusinessDayOffsetOptions = {}) {
@@ -202,6 +397,18 @@ export class DateTimeExprNamespace {
 
     /**
      * Offsets date by N calendar days.
+     * @param n Number of calendar days to offset.
+     * @param options Offset options.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.offset_day(5).alias("later"))
+     * shape: (1, 2)
+     * ┌────────────┬──────────────────────────┐
+     * │ d          │ later                    │
+     * ├────────────┼──────────────────────────┤
+     * │ 2026-05-20 │ 2026-05-25T00:00:00.000Z │
+     * └────────────┴──────────────────────────┘
      * @since v1.7.0
      */
     offset_day(n: number | any, options: BusinessDayOffsetOptions = {}) {
@@ -213,6 +420,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Returns day of the year (1-366).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-02-01"] })
+     * >>> df.with_columns($df.col("d").dt.ordinal_day().alias("doy"))
+     * shape: (1, 2)
+     * ┌────────────┬─────┐
+     * │ d          │ doy │
+     * ├────────────┼─────┤
+     * │ 2026-02-01 │ 32  │
+     * └────────────┴─────┘
      * @since v1.6.0
      */
     ordinal_day() {
@@ -221,6 +438,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Returns quarter of the year (1-4).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.quarter().alias("qtr"))
+     * shape: (1, 2)
+     * ┌────────────┬─────┐
+     * │ d          │ qtr │
+     * ├────────────┼─────┤
+     * │ 2026-05-20 │ 2   │
+     * └────────────┴─────┘
      * @since v1.6.0
      */
     quarter() {
@@ -229,6 +456,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts seconds component (0-59).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:00:45Z"] })
+     * >>> df.with_columns($df.col("ts").dt.second().alias("sec"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬─────┐
+     * │ ts                   │ sec │
+     * ├──────────────────────┼─────┤
+     * │ 2026-05-20T10:00:45Z │ 45  │
+     * └──────────────────────┴─────┘
      * @since v1.6.0
      */
     second() {
@@ -236,7 +473,18 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Formats dates to custom strings.
+     * Formats dates to custom strings using strftime format tokens.
+     * @param options Formatting pattern configuration.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.strftime("%Y/%m/%d").alias("formatted"))
+     * shape: (1, 2)
+     * ┌────────────┬────────────┐
+     * │ d          │ formatted  │
+     * ├────────────┼────────────┤
+     * │ 2026-05-20 │ 2026/05/20 │
+     * └────────────┴────────────┘
      * @since v1.6.0
      */
     strftime(options: StrftimeOptions) {
@@ -244,7 +492,17 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts time component index.
+     * Extracts time component string ("HH:MM:SS.mmm").
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:30:00Z"] })
+     * >>> df.with_columns($df.col("ts").dt.time().alias("time"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬──────────────┐
+     * │ ts                   │ time         │
+     * ├──────────────────────┼──────────────┤
+     * │ 2026-05-20T10:30:00Z │ 10:30:00.000 │
+     * └──────────────────────┴──────────────┘
      * @since v1.6.0
      */
     time() {
@@ -252,7 +510,18 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns numeric timestamp relative to Epoch.
+     * Returns numeric timestamp relative to Epoch. Alias for epoch.
+     * @param unit Time unit resolution.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-01-01T00:00:00Z"] })
+     * >>> df.with_columns($df.col("d").dt.timestamp("s").alias("ts"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬────────────┐
+     * │ d                    │ ts         │
+     * ├──────────────────────┼────────────┤
+     * │ 2026-01-01T00:00:00Z │ 1767225600 │
+     * └──────────────────────┴────────────┘
      * @since v1.6.0
      */
     timestamp(unit: TimeUnit = "ms") {
@@ -260,7 +529,18 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Formats dates to custom strings.
+     * Formats dates to custom strings. Alias for strftime.
+     * @param options Formatting configuration.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.to_string("%Y-%m-%d").alias("str"))
+     * shape: (1, 2)
+     * ┌────────────┬────────────┐
+     * │ d          │ str        │
+     * ├────────────┼────────────┤
+     * │ 2026-05-20 │ 2026-05-20 │
+     * └────────────┴────────────┘
      * @since v1.6.0
      */
     to_string(options: StrftimeOptions) {
@@ -269,6 +549,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to integer day count.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [86400000] })
+     * >>> df.with_columns($df.col("dur").dt.total_days().alias("days"))
+     * shape: (1, 2)
+     * ┌──────────┬──────┐
+     * │ dur      │ days │
+     * ├──────────┼──────┤
+     * │ 86400000 │ 1    │
+     * └──────────┴──────┘
      * @since v1.6.0
      */
     total_days() {
@@ -277,6 +567,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to floating point hours.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [3600000] })
+     * >>> df.with_columns($df.col("dur").dt.total_hours().alias("hrs"))
+     * shape: (1, 2)
+     * ┌─────────┬─────┐
+     * │ dur     │ hrs │
+     * ├─────────┼─────┤
+     * │ 3600000 │ 1   │
+     * └─────────┴─────┘
      * @since v1.6.0
      */
     total_hours() {
@@ -285,6 +585,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to microsecond count.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [10] })
+     * >>> df.with_columns($df.col("dur").dt.total_microseconds().alias("us"))
+     * shape: (1, 2)
+     * ┌─────┬───────┐
+     * │ dur │ us    │
+     * ├─────┼───────┤
+     * │ 10  │ 10000 │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     total_microseconds() {
@@ -293,6 +603,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to millisecond count.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [500] })
+     * >>> df.with_columns($df.col("dur").dt.total_milliseconds().alias("ms"))
+     * shape: (1, 2)
+     * ┌─────┬─────┐
+     * │ dur │ ms  │
+     * ├─────┼─────┤
+     * │ 500 │ 500 │
+     * └─────┴─────┘
      * @since v1.6.0
      */
     total_milliseconds() {
@@ -301,6 +621,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to floating point minutes.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [60000] })
+     * >>> df.with_columns($df.col("dur").dt.total_minutes().alias("mins"))
+     * shape: (1, 2)
+     * ┌───────┬──────┐
+     * │ dur   │ mins │
+     * ├───────┼──────┤
+     * │ 60000 │ 1    │
+     * └───────┴──────┘
      * @since v1.6.0
      */
     total_minutes() {
@@ -309,6 +639,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to nanosecond count.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [1] })
+     * >>> df.with_columns($df.col("dur").dt.total_nanoseconds().alias("ns"))
+     * shape: (1, 2)
+     * ┌─────┬─────────┐
+     * │ dur │ ns      │
+     * ├─────┼─────────┤
+     * │ 1   │ 1000000 │
+     * └─────┴─────────┘
      * @since v1.7.0
      */
     total_nanoseconds() {
@@ -317,6 +657,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts Duration to floating point seconds.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ dur: [1000] })
+     * >>> df.with_columns($df.col("dur").dt.total_seconds().alias("secs"))
+     * shape: (1, 2)
+     * ┌──────┬──────┐
+     * │ dur  │ secs │
+     * ├──────┼──────┤
+     * │ 1000 │ 1    │
+     * └──────┴──────┘
      * @since v1.6.0
      */
     total_seconds() {
@@ -324,7 +674,19 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns the offset of local timezone relative to UTC.
+     * Returns the offset of local timezone relative to UTC in minutes.
+     * @param timeZone Target timezone string identifier.
+     * @param options Utc offset calculation options.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.utc_offset("UTC").alias("offset"))
+     * shape: (1, 2)
+     * ┌────────────┬────────┐
+     * │ d          │ offset │
+     * ├────────────┼────────┤
+     * │ 2026-05-20 │ 0      │
+     * └────────────┴────────┘
      * @since v1.7.0
      */
     utc_offset(timeZone?: string, options: UtcOffsetOptions = {}) {
@@ -335,7 +697,17 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts ISO week index.
+     * Extracts ISO week index. Alias for iso_week.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.week().alias("week"))
+     * shape: (1, 2)
+     * ┌────────────┬──────┐
+     * │ d          │ week │
+     * ├────────────┼──────┤
+     * │ 2026-05-20 │ 21   │
+     * └────────────┴──────┘
      * @since v1.6.0
      */
     week() {
@@ -344,6 +716,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts weekday component (1=Monday, 7=Sunday).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-18"] })
+     * >>> df.with_columns($df.col("d").dt.weekday().alias("wd"))
+     * shape: (1, 2)
+     * ┌────────────┬────┐
+     * │ d          │ wd │
+     * ├────────────┼────┤
+     * │ 2026-05-18 │ 1  │
+     * └────────────┴────┘
      * @since v1.6.0
      */
     weekday() {
@@ -352,6 +734,16 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the year component from a Datetime column.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ d: ["2026-05-20"] })
+     * >>> df.with_columns($df.col("d").dt.year().alias("yr"))
+     * shape: (1, 2)
+     * ┌────────────┬──────┐
+     * │ d          │ yr   │
+     * ├────────────┼──────┤
+     * │ 2026-05-20 │ 2026 │
+     * └────────────┴──────┘
      * @since v1.5.0
      */
     year() {
@@ -360,6 +752,13 @@ export class DateTimeExprNamespace {
 }
 
 export class TemporalExpr extends ExprBase {
+    /**
+     * Datetime namespace accessor for date, time, and duration operations.
+     * @returns DateTimeExprNamespace
+     * @example
+     * >>> df.select($df.col("date").dt.year())
+     * @since v1.5.0
+     */
     get dt() {
         return new DateTimeExprNamespace(this);
     }

@@ -28,7 +28,18 @@ export class StructExprNamespace {
     }
 
     /**
-     * Extracts a sub-field property value from nested objects.
+     * Extracts a sub-field property value from nested objects/struct columns.
+     * @param name Name of the field key to extract.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ user: [{ name: "Alice", id: 1 }] })
+     * >>> df.with_columns($df.col("user").struct.field("name").alias("user_name"))
+     * shape: (1, 2)
+     * ┌─────────────────────────┬───────────┐
+     * │ user                    │ user_name │
+     * ├─────────────────────────┼───────────┤
+     * │ { name: "Alice", id: 1 }│ Alice     │
+     * └─────────────────────────┴───────────┘
      * @since v1.6.0
      */
     field(name: string) {
@@ -44,7 +55,18 @@ export class StructExprNamespace {
     }
 
     /**
-     * Renames fields inside structured columns.
+     * Renames existing field keys inside structured object columns.
+     * @param mapping Key-value map of current field names to new field names.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ user: [{ first: "Alice" }] })
+     * >>> df.with_columns($df.col("user").struct.rename_fields({ first: "first_name" }).alias("user_renamed"))
+     * shape: (1, 2)
+     * ┌───────────────────┬─────────────────────────┐
+     * │ user              │ user_renamed            │
+     * ├───────────────────┼─────────────────────────┤
+     * │ { first: "Alice" }│ { first_name: "Alice" } │
+     * └───────────────────┴─────────────────────────┘
      * @since v1.7.0
      */
     rename_fields(mapping: Record<string, string>) {
@@ -84,7 +106,19 @@ export class StructExprNamespace {
     }
 
     /**
-     * Inserts or updates fields inside structured columns.
+     * Inserts or updates fields inside structured object columns.
+     * @param fields Expressions or field map defining new or updated fields.
+     * @returns ColumnExpression
+     * @throws {Error} If expressions passed without an alias or name.
+     * @example
+     * >>> const df = $df.data({ user: [{ name: "Alice" }], age: [30] })
+     * >>> df.with_columns($df.col("user").struct.with_fields({ user_age: $df.col("age") }).alias("updated_user"))
+     * shape: (1, 3)
+     * ┌─────────────────┬─────┬───────────────────────────────┐
+     * │ user            │ age │ updated_user                  │
+     * ├─────────────────┼─────┼───────────────────────────────┤
+     * │ { name: "Alice"}│ 30  │ { name: "Alice", user_age: 30}│
+     * └─────────────────┴─────┴───────────────────────────────┘
      * @since v1.7.0
      */
     with_fields(fields: IntoExpr[] | Record<string, IntoExpr>) {
@@ -145,7 +179,17 @@ export class StructExprNamespace {
     }
 
     /**
-     * Expands nested struct attributes into distinct columns in the row schema.
+     * Expands nested struct attributes into distinct columns in the DataFrame schema.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ user: [{ name: "Alice", age: 30 }] })
+     * >>> df.select($df.col("user").struct.unnest())
+     * shape: (1, 2)
+     * ┌───────┬─────┐
+     * │ name  │ age │
+     * ├───────┼─────┤
+     * │ Alice │ 30  │
+     * └───────┴─────┘
      * @since v1.7.0
      */
     unnest() {
@@ -161,6 +205,13 @@ export interface StructExprNamespace {
 }
 
 export class StructExpr extends ExprBase {
+    /**
+     * Struct namespace accessor for operating on nested object/struct columns.
+     * @returns StructExprNamespace
+     * @example
+     * >>> df.select($df.col("user").struct.field("name"))
+     * @since v1.6.0
+     */
     get struct() {
         return new StructExprNamespace(this);
     }

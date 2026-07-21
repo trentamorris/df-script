@@ -6,8 +6,22 @@ export class LogicalExpr extends ExprBase {
         /**
          * Logical AND check supporting Kleene logic.
          * @param other The other boolean column expression or literal value to compare.
+         * @returns ColumnExpression
          * @example
-         * $df.col("category").eq("toys").and($df.col("price").lt(50))
+         * >>> const df = $df.data({
+         * ...   a: [true, true, false, null],
+         * ...   b: [true, false, false, true]
+         * ... })
+         * >>> df.with_columns($df.col("a").and($df.col("b")).alias("and_res"))
+         * shape: (4, 3)
+         * ┌───────┬───────┬─────────┐
+         * │ a     │ b     │ and_res │
+         * ├───────┼───────┼─────────┤
+         * │ true  │ true  │ true    │
+         * │ true  │ false │ false   │
+         * │ false │ false │ false   │
+         * │ null  │ true  │ null    │
+         * └───────┴───────┴─────────┘
          * @since v1.5.0
          */
         and(other: any) { 
@@ -26,20 +40,48 @@ export class LogicalExpr extends ExprBase {
                 return result;
             }); 
         }
+
         /**
          * Logical negation.
+         * @returns ColumnExpression
          * @example
-         * $df.col("is_active").not()
+         * >>> const df = $df.data({
+         * ...   is_active: [true, false, null]
+         * ... })
+         * >>> df.with_columns($df.col("is_active").not().alias("is_inactive"))
+         * shape: (3, 2)
+         * ┌───────────┬─────────────┐
+         * │ is_active │ is_inactive │
+         * ├───────────┼─────────────┤
+         * │ true      │ false       │
+         * │ false     │ true        │
+         * │ null      │ null        │
+         * └───────────┴─────────────┘
          * @since v1.5.0
          */
         not() {
             return derive(this, kleeneUnary((v) => !v));
         }
+
         /**
          * Logical OR check supporting Kleene logic.
          * @param other The other boolean column expression or literal value to compare.
+         * @returns ColumnExpression
          * @example
-         * $df.col("category").eq("toys").or($df.col("category").eq("books"))
+         * >>> const df = $df.data({
+         * ...   a: [true, false, false, null],
+         * ...   b: [false, false, true, false]
+         * ... })
+         * >>> df.with_columns($df.col("a").or($df.col("b")).alias("or_res"))
+         * shape: (4, 3)
+         * ┌───────┬───────┬────────┐
+         * │ a     │ b     │ or_res │
+         * ├───────┼───────┼────────┤
+         * │ true  │ false │ true   │
+         * │ false │ false │ false  │
+         * │ false │ true  │ true   │
+         * │ null  │ false │ null   │
+         * └───────┴───────┴────────┘
          * @since v1.5.0
          */
         or(other: any) { 
@@ -58,11 +100,26 @@ export class LogicalExpr extends ExprBase {
                 return result;
             }); 
         }
+
         /**
          * Logical XOR check.
          * @param other The other boolean column expression or literal value to compare.
+         * @returns ColumnExpression
          * @example
-         * $df.col("is_subscribed").xor($df.col("is_member"))
+         * >>> const df = $df.data({
+         * ...   a: [true, true, false, false],
+         * ...   b: [true, false, true, false]
+         * ... })
+         * >>> df.with_columns($df.col("a").xor($df.col("b")).alias("xor_res"))
+         * shape: (4, 3)
+         * ┌───────┬───────┬─────────┐
+         * │ a     │ b     │ xor_res │
+         * ├───────┼───────┼─────────┤
+         * │ true  │ true  │ false   │
+         * │ true  │ false │ true    │
+         * │ false │ true  │ true    │
+         * │ false │ false │ false   │
+         * └───────┴───────┴─────────┘
          * @since v1.6.0
          */
         xor(other: any) {

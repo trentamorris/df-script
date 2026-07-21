@@ -89,6 +89,19 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Window: Computes cumulative count.
+     * @param reverse Flag indicating whether to compute from reverse direction.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").cum_count().alias("c_count"))
+     * shape: (3, 2)
+     * ┌─────┬─────────┐
+     * │ val │ c_count │
+     * ├─────┼─────────┤
+     * │ 10  │ 1       │
+     * │ 20  │ 2       │
+     * │ 30  │ 3       │
+     * └─────┴─────────┘
      * @since v1.7.0
      */
     cum_count(reverse: boolean = false) {
@@ -96,7 +109,20 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes cumulative max.
+     * Window: Computes cumulative maximum value.
+     * @param reverse Flag indicating whether to compute in reverse direction.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [1, 3, 2] })
+     * >>> df.with_columns($df.col("val").cum_max().alias("c_max"))
+     * shape: (3, 2)
+     * ┌─────┬───────┐
+     * │ val │ c_max │
+     * ├─────┼───────┤
+     * │ 1   │ 1     │
+     * │ 3   │ 3     │
+     * │ 2   │ 3     │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     cum_max(reverse: boolean = false) {
@@ -104,7 +130,20 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes cumulative min.
+     * Window: Computes cumulative minimum value.
+     * @param reverse Flag indicating whether to compute in reverse direction.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [3, 1, 2] })
+     * >>> df.with_columns($df.col("val").cum_min().alias("c_min"))
+     * shape: (3, 2)
+     * ┌─────┬───────┐
+     * │ val │ c_min │
+     * ├─────┼───────┤
+     * │ 3   │ 3     │
+     * │ 1   │ 1     │
+     * │ 2   │ 1     │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     cum_min(reverse: boolean = false) {
@@ -112,7 +151,21 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes cumulative product.
+     * Window: Computes cumulative product of values.
+     * @param reverse Flag indicating whether to compute in reverse direction.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [1, 2, 3, 4] })
+     * >>> df.with_columns($df.col("val").cum_prod().alias("c_prod"))
+     * shape: (4, 2)
+     * ┌─────┬────────┐
+     * │ val │ c_prod │
+     * ├─────┼────────┤
+     * │ 1   │ 1      │
+     * │ 2   │ 2      │
+     * │ 3   │ 6      │
+     * │ 4   │ 24     │
+     * └─────┴────────┘
      * @since v1.7.0
      */
     cum_prod(reverse: boolean = false) {
@@ -120,7 +173,20 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes cumulative sum.
+     * Window: Computes cumulative sum of values.
+     * @param reverse Flag indicating whether to compute in reverse direction.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").cum_sum().alias("c_sum"))
+     * shape: (3, 2)
+     * ┌─────┬───────┐
+     * │ val │ c_sum │
+     * ├─────┼───────┤
+     * │ 10  │ 10    │
+     * │ 20  │ 30    │
+     * │ 30  │ 60    │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     cum_sum(reverse: boolean = false) {
@@ -128,7 +194,19 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes dense rank within group partition.
+     * Window: Computes dense rank (ranks without gaps) within group partition.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ score: [100, 100, 90] })
+     * >>> df.with_columns($df.col("score").dense_rank().alias("dr"))
+     * shape: (3, 2)
+     * ┌───────┬────┐
+     * │ score │ dr │
+     * ├───────┼────┤
+     * │ 100   │ 2  │
+     * │ 100   │ 2  │
+     * │ 90    │ 1  │
+     * └───────┴────┘
      * @since v1.7.0
      */
     dense_rank() {
@@ -138,7 +216,21 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Shifts values down by offset, filling with default.
+     * Window: Shifts values down by offset, filling missing slots with default value.
+     * @param offset Number of rows to shift down (default 1).
+     * @param defaultVal Fallback fill value for empty slots (default null).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").lag(1, 0).alias("prev"))
+     * shape: (3, 2)
+     * ┌─────┬──────┐
+     * │ val │ prev │
+     * ├─────┼──────┤
+     * │ 10  │ 0    │
+     * │ 20  │ 10   │
+     * │ 30  │ 20   │
+     * └─────┴──────┘
      * @since v1.7.0
      */
     lag(offset: number = 1, defaultVal: any = null) {
@@ -152,7 +244,21 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Shifts values up by offset, filling with default.
+     * Window: Shifts values up by offset, filling missing slots with default value.
+     * @param offset Number of rows to shift up (default 1).
+     * @param defaultVal Fallback fill value for empty slots (default null).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").lead(1, 0).alias("next"))
+     * shape: (3, 2)
+     * ┌─────┬──────┐
+     * │ val │ next │
+     * ├─────┼──────┤
+     * │ 10  │ 20   │
+     * │ 20  │ 30   │
+     * │ 30  │ 0    │
+     * └─────┴──────┘
      * @since v1.7.0
      */
     lead(offset: number = 1, defaultVal: any = null) {
@@ -167,6 +273,19 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Executes a window aggregation partitioned by column keys.
+     * @param columns Column expression or array of columns to partition by.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ cat: ["A", "A", "B"], val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").sum().over("cat").alias("cat_sum"))
+     * shape: (3, 3)
+     * ┌─────┬─────┬─────────┐
+     * │ cat │ val │ cat_sum │
+     * ├─────┼─────┼─────────┤
+     * │ A   │ 10  │ 30      │
+     * │ A   │ 20  │ 30      │
+     * │ B   │ 30  │ 30      │
+     * └─────┴─────┴─────────┘
      * @since v1.7.0
      */
     over(columns: string | IExpr | (string | IExpr)[]) {
@@ -178,6 +297,18 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Window: Computes rank within group partition.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ score: [100, 80, 90] })
+     * >>> df.with_columns($df.col("score").rank().alias("rank"))
+     * shape: (3, 2)
+     * ┌───────┬──────┐
+     * │ score │ rank │
+     * ├───────┼──────┤
+     * │ 100   │ 3    │
+     * │ 80    │ 1    │
+     * │ 90    │ 2    │
+     * └───────┴──────┘
      * @since v1.7.0
      */
     rank() {
@@ -187,7 +318,21 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes rolling window max.
+     * Window: Computes rolling window maximum value.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [1, 5, 2, 8] })
+     * >>> df.with_columns($df.col("val").rolling_max(2).alias("r_max"))
+     * shape: (4, 2)
+     * ┌─────┬───────┐
+     * │ val │ r_max │
+     * ├─────┼───────┤
+     * │ 1   │ 1     │
+     * │ 5   │ 5     │
+     * │ 2   │ 5     │
+     * │ 8   │ 8     │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     rolling_max(windowSize: number) {
@@ -195,7 +340,20 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes rolling window mean.
+     * Window: Computes rolling window mean average.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").rolling_mean(2).alias("r_mean"))
+     * shape: (3, 2)
+     * ┌─────┬────────┐
+     * │ val │ r_mean │
+     * ├─────┼────────┤
+     * │ 10  │ 10     │
+     * │ 20  │ 15     │
+     * │ 30  │ 25     │
+     * └─────┴────────┘
      * @since v1.7.0
      */
     rolling_mean(windowSize: number) {
@@ -203,7 +361,20 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes rolling window median.
+     * Window: Computes rolling window median value.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 30, 20] })
+     * >>> df.with_columns($df.col("val").rolling_median(2).alias("r_med"))
+     * shape: (3, 2)
+     * ┌─────┬───────┐
+     * │ val │ r_med │
+     * ├─────┼───────┤
+     * │ 10  │ 10    │
+     * │ 30  │ 20    │
+     * │ 20  │ 25    │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     rolling_median(windowSize: number) {
@@ -211,7 +382,20 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes rolling window min.
+     * Window: Computes rolling window minimum value.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 5, 20] })
+     * >>> df.with_columns($df.col("val").rolling_min(2).alias("r_min"))
+     * shape: (3, 2)
+     * ┌─────┬───────┐
+     * │ val │ r_min │
+     * ├─────┼───────┤
+     * │ 10  │ 10    │
+     * │ 5   │ 5     │
+     * │ 20  │ 5     │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     rolling_min(windowSize: number) {
@@ -220,6 +404,20 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Window: Computes rolling window quantile value.
+     * @param quantile Quantile boundary between 0.0 and 1.0.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").rolling_quantile(0.5, 2).alias("r_quant"))
+     * shape: (3, 2)
+     * ┌─────┬─────────┐
+     * │ val │ r_quant │
+     * ├─────┼─────────┤
+     * │ 10  │ 10      │
+     * │ 20  │ 15      │
+     * │ 30  │ 25      │
+     * └─────┴─────────┘
      * @since v1.7.0
      */
     rolling_quantile(quantile: number, windowSize: number) {
@@ -228,6 +426,19 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Window: Computes rolling window rank.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 15] })
+     * >>> df.with_columns($df.col("val").rolling_rank(2).alias("r_rank"))
+     * shape: (3, 2)
+     * ┌─────┬────────┐
+     * │ val │ r_rank │
+     * ├─────┼────────┤
+     * │ 10  │ 1      │
+     * │ 20  │ 2      │
+     * │ 15  │ 1      │
+     * └─────┴────────┘
      * @since v1.7.0
      */
     rolling_rank(windowSize: number) {
@@ -238,6 +449,19 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Window: Computes rolling window standard deviation.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").rolling_std(2).alias("r_std"))
+     * shape: (3, 2)
+     * ┌─────┬────────┐
+     * │ val │ r_std  │
+     * ├─────┼────────┤
+     * │ 10  │ 0      │
+     * │ 20  │ 7.071  │
+     * │ 30  │ 7.071  │
+     * └─────┴────────┘
      * @since v1.7.0
      */
     rolling_std(windowSize: number) {
@@ -246,6 +470,19 @@ export class WindowExpr extends ExprBase {
 
     /**
      * Window: Computes rolling window sum.
+     * @param windowSize Size of rolling window.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 20, 30] })
+     * >>> df.with_columns($df.col("val").rolling_sum(2).alias("r_sum"))
+     * shape: (3, 2)
+     * ┌─────┬───────┐
+     * │ val │ r_sum │
+     * ├─────┼───────┤
+     * │ 10  │ 10    │
+     * │ 20  │ 30    │
+     * │ 30  │ 50    │
+     * └─────┴───────┘
      * @since v1.7.0
      */
     rolling_sum(windowSize: number) {
@@ -253,7 +490,19 @@ export class WindowExpr extends ExprBase {
     }
 
     /**
-     * Window: Computes row index count within group partitions.
+     * Window: Computes 1-indexed row number count within group partitions.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ cat: ["A", "A", "B"] })
+     * >>> df.with_columns($df.col("cat").row_number().over("cat").alias("rn"))
+     * shape: (3, 2)
+     * ┌─────┬────┐
+     * │ cat │ rn │
+     * ├─────┼────┤
+     * │ A   │ 1  │
+     * │ A   │ 2  │
+     * │ B   │ 1  │
+     * └─────┴────┘
      * @since v1.7.0
      */
     row_number() {
