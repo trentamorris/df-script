@@ -124,11 +124,19 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     /**
-     * Concatenates items vertically or horizontally to the current DataFrame.
-     * @param items Single DataFrame or array of DataFrames to concatenate.
-     * @param options Concatenation strategy and join settings.
+     * Concatenates items vertically, horizontally, or diagonally.
+     * 
+     * @param items Single DataFrame or array of DataFrames/rows to concatenate.
+     * @param options Configuration options for concatenation layout and strictness:
+     *   - `how`: Layout strategy.
+     *     - `"vertical"` (default): Appends rows top-to-bottom. Requires matching column names and types.
+     *     - `"horizontal"`: Joins unique columns side-by-side. Requires unique column names.
+     *     - `"diagonal"`: Concatenates DataFrames with mismatched columns, padding missing values with `null`.
+     *   - `horizontal.strict`: When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
      * @returns DataFrame
+     * 
      * @example
+     * // 1. Vertical Concatenation (default):
      * >>> const df1 = $df.data({ a: [1] })
      * >>> df1
      * shape: (1, 1)
@@ -138,7 +146,7 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │
      * └───┘
      * >>> const df2 = $df.data({ a: [2] })
-     * >>> df1.concat(df2)
+     * >>> df1.concat(df2, { how: "vertical" })
      * shape: (2, 1)
      * ┌───┐
      * │ a │
@@ -146,6 +154,32 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │
      * │ 2 │
      * └───┘
+     * 
+     * @example
+     * // 2. Horizontal Concatenation:
+     * >>> const df1 = $df.data({ a: [1] })
+     * >>> const df2 = $df.data({ b: [2] })
+     * >>> df1.concat(df2, { how: "horizontal" })
+     * shape: (1, 2)
+     * ┌───┬───┐
+     * │ a │ b │
+     * ├───┼───┤
+     * │ 1 │ 2 │
+     * └───┴───┘
+     * 
+     * @example
+     * // 3. Diagonal Concatenation (mismatched columns):
+     * >>> const df1 = $df.data({ a: [1] })
+     * >>> const df2 = $df.data({ b: [2] })
+     * >>> df1.concat(df2, { how: "diagonal" })
+     * shape: (2, 2)
+     * ┌──────┬──────┐
+     * │ a    │ b    │
+     * ├──────┼──────┤
+     * │ 1    │ null │
+     * │ null │ 2    │
+     * └──────┴──────┘
+     * 
      * @since v1.5.0
      */
     concat<U extends RowRecord = any>(

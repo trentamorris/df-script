@@ -36,6 +36,58 @@ function normalizeToDataFrames(item: any, context: string, index: number): DataF
     throw new DataFrameError(`Invalid input to ${context} at index ${index}: expected DataFrame, row array, or column dictionary.`);
 }
 
+/**
+ * Concatenates items vertically, horizontally, or diagonally.
+ * 
+ * @param rawItems Single DataFrame or array of DataFrames/rows to concatenate.
+ * @param options Configuration options for concatenation layout and strictness:
+ *   - `how`: Layout strategy.
+ *     - `"vertical"` (default): Appends rows top-to-bottom. Requires matching column names and types.
+ *     - `"horizontal"`: Joins unique columns side-by-side. Requires unique column names.
+ *     - `"diagonal"`: Concatenates DataFrames with mismatched columns, padding missing values with `null`.
+ *   - `horizontal.strict`: When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
+ * @returns DataFrame
+ * 
+ * @example
+ * // 1. Vertical Concatenation (default):
+ * >>> const df1 = $df.data({ a: [1] })
+ * >>> const df2 = $df.data({ a: [2] })
+ * >>> $df.concat([df1, df2], { how: "vertical" })
+ * shape: (2, 1)
+ * ┌───┐
+ * │ a │
+ * ├───┤
+ * │ 1 │
+ * │ 2 │
+ * └───┘
+ * 
+ * @example
+ * // 2. Horizontal Concatenation:
+ * >>> const df1 = $df.data({ a: [1] })
+ * >>> const df2 = $df.data({ b: [2] })
+ * >>> $df.concat([df1, df2], { how: "horizontal" })
+ * shape: (1, 2)
+ * ┌───┬───┐
+ * │ a │ b │
+ * ├───┼───┤
+ * │ 1 │ 2 │
+ * └───┴───┘
+ * 
+ * @example
+ * // 3. Diagonal Concatenation (mismatched columns):
+ * >>> const df1 = $df.data({ a: [1] })
+ * >>> const df2 = $df.data({ b: [2] })
+ * >>> $df.concat([df1, df2], { how: "diagonal" })
+ * shape: (2, 2)
+ * ┌──────┬──────┐
+ * │ a    │ b    │
+ * ├──────┼──────┤
+ * │ 1    │ null │
+ * │ null │ 2    │
+ * └──────┴──────┘
+ * 
+ * @since v1.5.0
+ */
 export function concat<U extends RowRecord = any>(
     rawItems: ConcatItem | ConcatItem[],
     { how = 'vertical', horizontal }: ConcatOptions = {}
