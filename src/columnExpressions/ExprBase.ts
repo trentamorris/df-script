@@ -36,12 +36,20 @@ export class ExprBase implements IExpr {
         return val;
     }
 
+    /**
+     * Renames the output expression column key.
+     * @since v1.5.0
+     */
     alias(name: string): this {
         const newInst = derive(this);
         newInst._outputName = name;
         return newInst;
     }
 
+    /**
+     * Coerces the column data type to another type.
+     * @since v1.5.0
+     */
     cast(dataType: RegisteredDataType): this {
         return derive(this, (vArray) => {
             const height = vArray.length;
@@ -53,6 +61,10 @@ export class ExprBase implements IExpr {
         }) as this;
     }
 
+    /**
+     * Prints the current evaluation intermediate array to console for debugging.
+     * @since v1.5.0
+     */
     debug(label?: string): this {
         return derive(this, (vArray) => {
             console.log(`[DEBUG] ${label ? label + ': ' : ''}`, vArray);

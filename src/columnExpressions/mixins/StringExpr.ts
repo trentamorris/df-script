@@ -31,6 +31,13 @@ export class StringExprNamespace {
         return derive(this.expr, kleeneBinary(this.expr, other, (v, o) => String(v) + String(o)));
     }
 
+    /**
+     * Checks if a string contains the search substring pattern (supports Regex).
+     * @param pattern The search substring or regular expression pattern.
+     * @example
+     * $df.col("email").str.contains("@example.com")
+     * @since v1.7.0
+     */
     contains(pattern: string | RegExp) {
         return this._patternGuard(pattern, () =>
             this._deriveString((str) => isRegExp(pattern) ? pattern.test(str) : str.includes(pattern))
@@ -79,6 +86,13 @@ export class StringExprNamespace {
         });
     }
 
+    /**
+     * Checks if string ends with a suffix suffix.
+     * @param suffix The suffix substring.
+     * @example
+     * $df.col("email").str.ends_with(".org")
+     * @since v1.5.0
+     */
     ends_with(suffix: string) {
         return this._deriveString((str) => str.endsWith(suffix));
     }
@@ -125,6 +139,14 @@ export class StringExprNamespace {
         return this.lpad(width, fill);
     }
 
+    /**
+     * Replaces the first occurrence matching a string pattern.
+     * @param pattern The search pattern string or regular expression.
+     * @param replacement The string value or match replacement function.
+     * @example
+     * $df.col("email").str.replace("old.com", "new.com")
+     * @since v1.6.0
+     */
     replace(
         pattern: string | RegExp,
         replacement: string | ((match: string, ...args: any[]) => string)
@@ -167,6 +189,13 @@ export class StringExprNamespace {
         return this._deriveString((str) => str.split(delimiter));
     }
 
+    /**
+     * Checks if string starts with a prefix prefix.
+     * @param prefix The prefix substring.
+     * @example
+     * $df.col("name").str.starts_with("John")
+     * @since v1.5.0
+     */
     starts_with(prefix: string) {
         return this._deriveString((str) => str.startsWith(prefix));
     }
@@ -235,6 +264,33 @@ export class StringExprNamespace {
         return this._deriveString((str) => changeCase(str, { format: "kebab" }));
     }
 
+    /**
+     * Converts all string elements in the column to lowercase.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({
+     * ...   c: ["ALICE", "Bob", "charlie"]
+     * ... })
+     * shape: (3, 1)
+     * ┌─────────┐
+     * │ c       │
+     * ├─────────┤
+     * │ ALICE   │
+     * │ Bob     │
+     * │ charlie │
+     * └─────────┘
+     * 
+     * >>> df.with_columns($df.col("c").str.to_lowercase().alias("lower_name"))
+     * shape: (3, 2)
+     * ┌─────────┬────────────┐
+     * │ c       │ lower_name │
+     * ├─────────┼────────────┤
+     * │ ALICE   │ alice      │
+     * │ Bob     │ bob        │
+     * │ charlie │ charlie    │
+     * └─────────┴────────────┘
+     * @since v1.5.0
+     */
     to_lowercase() {
         return this.lower();
     }
@@ -255,10 +311,22 @@ export class StringExprNamespace {
         return this._deriveString((str) => str.replace(/\b\w/g, c => c.toUpperCase()));
     }
 
+    /**
+     * Converts all string elements in the column to uppercase.
+     * @example
+     * $df.col("name").str.to_uppercase()
+     * @since v1.5.0
+     */
     to_uppercase() {
         return this.upper();
     }
 
+    /**
+     * Trims leading and trailing white space characters from each string element.
+     * @example
+     * $df.col("name").str.trim()
+     * @since v1.6.0
+     */
     trim() {
         return this.strip_chars();
     }

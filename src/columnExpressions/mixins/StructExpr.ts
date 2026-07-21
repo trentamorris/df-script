@@ -27,6 +27,10 @@ export class StructExprNamespace {
         });
     }
 
+    /**
+     * Extracts a sub-field property value from nested objects.
+     * @since v1.6.0
+     */
     field(name: string) {
         return derive(this.expr, (vArray) => {
             const height = vArray.length;
@@ -39,6 +43,10 @@ export class StructExprNamespace {
         }).alias(name);
     }
 
+    /**
+     * Renames fields inside structured columns.
+     * @since v1.7.0
+     */
     rename_fields(mapping: Record<string, string>) {
         return derive(this.expr, (vArray) => {
             const height = vArray.length;
@@ -75,6 +83,10 @@ export class StructExprNamespace {
         });
     }
 
+    /**
+     * Inserts or updates fields inside structured columns.
+     * @since v1.7.0
+     */
     with_fields(fields: IntoExpr[] | Record<string, IntoExpr>) {
         return derive(this.expr, (vArray, columns) => {
             const height = vArray.length;
@@ -132,6 +144,10 @@ export class StructExprNamespace {
         });
     }
 
+    /**
+     * Expands nested struct attributes into distinct columns in the row schema.
+     * @since v1.7.0
+     */
     unnest() {
         const newInst = derive(this.expr);
         (newInst as any).isUnnest = true;

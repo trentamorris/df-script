@@ -99,6 +99,10 @@ export class DataFrame<T extends RowRecord = any> {
         return concat([this, ...arrayItems], options);
     }
 
+    /**
+     * Drops specified columns from the DataFrame.
+     * @since v1.5.0
+     */
     drop<K extends keyof T>(...args: (K | K[])[]): DataFrame<Omit<T, K>> {
         const columnsToDrop = new Set(args.flat() as string[]);
         const newColumns: ColumnDict = {};
@@ -113,6 +117,10 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<Omit<T, K>>(newColumns, outSchema, this._height);
     }
 
+    /**
+     * Drops rows that contain null or undefined values in specified columns.
+     * @since v1.6.0
+     */
     drop_nulls(subset?: string | string[]): DataFrame<T> {
         if (this._height === 0) return this;
         return this.filter(subset ? new ColumnExpr(subset).is_not_null() : all().is_not_null());
@@ -128,6 +136,21 @@ export class DataFrame<T extends RowRecord = any> {
         return result;
     }
 
+    /**
+     * Explodes an array column into multiple rows, replicating other row columns.
+     * 
+     * @param columns One or more columns containing arrays to explode.
+     * @param options Configuration options for handling empty lists.
+     * 
+     * @example
+     * const df = $df.data({
+     *   group: ["A", "B"],
+     *   values: [[1, 2], [3]]
+     * })
+     * df.explode("values")
+     * 
+     * @since v1.7.0
+     */
     explode(
         columns: IntoExpr | IntoExpr[],
         options?: ExplodeOptions
@@ -159,11 +182,61 @@ export class DataFrame<T extends RowRecord = any> {
         return this.select(...selectList);
     }
 
+    /**
+     * Fills null values in the column with a constant value or a statistical strategy.
+     * @since v1.6.0
+     */
     fill_null(options: FillNullOptions = {}): DataFrame<T> {
         if (this._height === 0) return this;
         return this.with_columns(all().fill_null(options));
     }
 
+    /**
+     * Filters rows matching one or more boolean expressions.
+     * 
+     * @param exprs One or more column expressions or row predicate functions.
+     * 
+     * @example
+     * >>> const df = $df.data({
+     * ...   a: [1, 2, 3],
+     * ...   b: ["x", "y", "z"]
+     * ... })
+     * >>> df.print()
+     * shape: (3, 2)
+     * ┌─────┬─────┐
+     * │ a   │ b   │
+     * ├─────┼─────┤
+     * │ 1   │ x   │
+     * │ 2   │ y   │
+     * │ 3   │ z   │
+     * └─────┴─────┘
+     * 
+     * >>> df.filter($df.col("a").gt(1))
+     * shape: (2, 2)
+     * ┌─────┬─────┐
+     * │ a   │ b   │
+     * ├─────┼─────┤
+     * │ 2   │ y   │
+     * │ 3   │ z   │
+     * └─────┴─────┘
+     * 
+     * @example
+     * // Filter using a row predicate callback function:
+     * >>> const df = $df.data({
+     * ...   a: [1, 2, 3],
+     * ...   b: ["x", "y", "z"]
+     * ... })
+     * >>> df.filter(row => row.a > 1)
+     * shape: (2, 2)
+     * ┌─────┬─────┐
+     * │ a   │ b   │
+     * ├─────┼─────┤
+     * │ 2   │ y   │
+     * │ 3   │ z   │
+     * └─────┴─────┘
+     * 
+     * @since v1.5.0
+     */
     filter(...exprs: (IExpr | ((row: T) => any))[]): DataFrame<T> {
         if (this._height === 0) return DataFrame._createDirect({}, this._schema, 0);
 
@@ -245,10 +318,18 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
     }
 
+    /**
+     * Returns the mapping of column names to their registered DataType.
+     * @since v1.5.0
+     */
     get_schema(): DataFrameSchema {
         return this._schema;
     }
 
+    /**
+     * Groups rows by key columns and applies aggregated operations.
+     * @since v1.5.0
+     */
     groupby<K extends keyof T>(keys: K | K[]): GroupedData<T, K> {
         const keysArr = toValidArray(keys);
         const groups: GroupMap = new Map();
@@ -273,6 +354,10 @@ export class DataFrame<T extends RowRecord = any> {
         return new GroupedData(groups, keysArr, allKeys, this._columns, this._height, this._schema);
     }
 
+    /**
+     * Returns the first N rows as a new DataFrame.
+     * @since v1.5.0
+     */
     head(n: number = 10): DataFrame<T> {
         return this.limit(n, { offset: 0, from: "start" })
     }
@@ -288,6 +373,10 @@ export class DataFrame<T extends RowRecord = any> {
         return this.concat<U>(other, { how: "horizontal", horizontal: options });
     }
 
+    /**
+     * Inserts a new column at a specific index.
+     * @since v1.6.0
+     */
     insert_column(index: number, name: string, expr: IntoExpr): DataFrame<any> {
         const colExpr = ColumnExpr.toColExpr(expr).alias(name);
         const keys = Object.keys(this._columns);
@@ -307,6 +396,10 @@ export class DataFrame<T extends RowRecord = any> {
         return this.select<any>(...selectList);
     }
 
+    /**
+     * Returns a single scalar cell value by row index and column name/index.
+     * @since v1.5.0
+     */
     item(row?: number, column?: number | string): any {
         const height = this._height;
         const keys = Object.keys(this._columns);
@@ -382,6 +475,10 @@ export class DataFrame<T extends RowRecord = any> {
         }
     }
 
+    /**
+     * Joins two DataFrames on a key column using inner, left, or outer join strategy.
+     * @since v1.6.0
+     */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
         const { other, on, how = "inner", suffixes = ["", "_right"] } = config;
         const joinKeysStr = toValidStringArray(on);
@@ -518,6 +615,10 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<R>(newColumns, outSchema, outHeight);
     }
 
+    /**
+     * Limits the output to the first N rows with optional offset.
+     * @since v1.5.0
+     */
     limit(n: number, { offset = 0, from = "start" }: LimitOptions = {}): DataFrame<T> {
         const len = this._height;
         const safeN = clamp(Math.floor(n), { min: 0, max: len });
@@ -544,6 +645,25 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
     }
 
+    /**
+     * Pivots columns from long format to a wide datagrid structure.
+     * 
+     * @param config The pivot configuration containing index, columns, and values.
+     * 
+     * @example
+     * const df = $df.data({
+     *   year: [2020, 2020, 2021, 2021],
+     *   month: ["Jan", "Feb", "Jan", "Feb"],
+     *   revenue: [100, 150, 120, 180]
+     * })
+     * df.pivot({
+     *   index: "year",
+     *   columns: "month",
+     *   values: "revenue"
+     * })
+     * 
+     * @since v1.7.0
+     */
     pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U> {
         if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0);
 
@@ -609,6 +729,10 @@ export class DataFrame<T extends RowRecord = any> {
 
 
 
+    /**
+     * Renames columns based on a key-value mapping object.
+     * @since v1.6.0
+     */
     rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> {
         const renameMapping = mapping || {};
         const newColumns: ColumnDict = {};
@@ -629,6 +753,10 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect(newColumns, outSchema, this._height);
     }
 
+    /**
+     * Reverses the row order of the DataFrame.
+     * @since v1.5.0
+     */
     reverse(): DataFrame<T> {
         if (this._height === 0) return this;
 
@@ -648,6 +776,10 @@ export class DataFrame<T extends RowRecord = any> {
         return this._schema;
     }
 
+    /**
+     * Selects specific columns or compiles column expression evaluations.
+     * @since v1.5.0
+     */
     select<U extends RowRecord = any>(
         ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
     ): DataFrame<U> {
@@ -774,6 +906,10 @@ export class DataFrame<T extends RowRecord = any> {
         return [this.height, this.width];
     }
 
+    /**
+     * Slices a range of rows from start to end index.
+     * @since v1.5.0
+     */
     slice(start: number, end?: number): DataFrame<T> {
         const total = this._height;
 
@@ -787,6 +923,10 @@ export class DataFrame<T extends RowRecord = any> {
         return this.limit(n, { offset: actualStart });
     }
 
+    /**
+     * Sorts the DataFrame rows by one or more column expressions.
+     * @since v1.5.0
+     */
     sort(config?: SortOptions<T>): DataFrame<T> {
         if (!config || !config.by || this._height === 0) return this;
 
@@ -857,14 +997,26 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<T>(newColumns, this._schema, this._height);
     }
 
+    /**
+     * Returns the last N rows as a new DataFrame.
+     * @since v1.5.0
+     */
     tail(n: number = 10): DataFrame<T> {
         return this.limit(n, { offset: 0, from: 'end' })
     }
 
+    /**
+     * Converts columns to a dictionary mapping column keys to arrays.
+     * @since v1.5.0
+     */
     to_dict(): DataFrameColumns<T> {
         return { ...this._columns };
     }
 
+    /**
+     * Converts rows into an array of JavaScript objects.
+     * @since v1.5.0
+     */
     to_dicts(): T[] {
         return columnsToRows(this._columns, this._height);
     }
@@ -880,6 +1032,21 @@ export class DataFrame<T extends RowRecord = any> {
         return Array.isArray(colData) ? colData : Array.from(colData);
     }
 
+    /**
+     * Transposes rows into columns and columns into rows.
+     * 
+     * @param options Configuration for transposing columns and header names.
+     * 
+     * @example
+     * const df = $df.data({
+     *   metric: ["sales", "clicks"],
+     *   q1: [100, 500],
+     *   q2: [120, 600]
+     * })
+     * df.transpose({ include_header: true, header_name: "metric" })
+     * 
+     * @since v1.7.0
+     */
     transpose({
         include_header: includeHeader = false,
         header_name: headerName = "column",
@@ -995,6 +1162,26 @@ export class DataFrame<T extends RowRecord = any> {
         return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
     }
 
+    /**
+     * Unpivots a wide DataFrame into a long format by melting value columns.
+     * 
+     * @param config The unpivot configuration containing idVars, valueVars, varName, and valueName.
+     * 
+     * @example
+     * const df = $df.data({
+     *   year: [2020, 2021],
+     *   Jan: [100, 120],
+     *   Feb: [150, 180]
+     * })
+     * df.unpivot({
+     *   idVars: "year",
+     *   valueVars: ["Jan", "Feb"],
+     *   varName: "month",
+     *   valueName: "revenue"
+     * })
+     * 
+     * @since v1.7.0
+     */
     unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> {
         const { idVars, valueVars, varName = "variable", valueName = "value" } = config;
         const idVarsStr = toValidStringArray(idVars);
@@ -1081,6 +1268,10 @@ export class DataFrame<T extends RowRecord = any> {
         return exprs;
     }
 
+    /**
+     * Adds new columns or updates existing ones with expression results.
+     * @since v1.6.0
+     */
     with_columns(
         ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
     ): DataFrame<any> {
@@ -1114,6 +1305,10 @@ export class DataFrame<T extends RowRecord = any> {
         return this.select(...selectList);
     }
 
+    /**
+     * Appends an incremental index column named index or custom key.
+     * @since v1.6.0
+     */
     with_row_index(name: string = "index", offset: number = 0): DataFrame<any> {
         const expr = seq_range(offset, {
             mode: "independent",

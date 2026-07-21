@@ -92,6 +92,10 @@ export class WhenThen extends ColumnExpr<any> {
     }
 }
 
+/**
+ * Provides conditional branch evaluations inside column expressions.
+ * @since v1.5.0
+ */
 export function when(predicate: WhenArg): When {
     return new When(predicate);
 }

@@ -87,32 +87,60 @@ export class WindowExpr extends ExprBase {
         return this._partitionBy !== null || (this as any)._evaluateWindow !== undefined || (this as any)._aggFn !== null;
     }
 
+    /**
+     * Window: Computes cumulative count.
+     * @since v1.7.0
+     */
     cum_count(reverse: boolean = false) {
         return this._cum(reverse, 0, (acc) => acc + 1);
     }
 
+    /**
+     * Window: Computes cumulative max.
+     * @since v1.7.0
+     */
     cum_max(reverse: boolean = false) {
         return this._cum(reverse, null, (acc, val) => (acc === null || val > acc ? val : acc));
     }
 
+    /**
+     * Window: Computes cumulative min.
+     * @since v1.7.0
+     */
     cum_min(reverse: boolean = false) {
         return this._cum(reverse, null, (acc, val) => (acc === null || val < acc ? val : acc));
     }
 
+    /**
+     * Window: Computes cumulative product.
+     * @since v1.7.0
+     */
     cum_prod(reverse: boolean = false) {
         return this._cum(reverse, 1, (acc, val) => acc * val, (acc, hasValid) => (hasValid ? acc : null));
     }
 
+    /**
+     * Window: Computes cumulative sum.
+     * @since v1.7.0
+     */
     cum_sum(reverse: boolean = false) {
         return this._cum(reverse, 0, (acc, val) => acc + val);
     }
 
+    /**
+     * Window: Computes dense rank within group partition.
+     * @since v1.7.0
+     */
     dense_rank() {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
             return computeRank(groupPreValues, groupPreValues[currentIndex], { dense: true });
         });
     }
 
+    /**
+     * Window: Shifts values down by offset, filling with default.
+     * @since v1.7.0
+     */
     lag(offset: number = 1, defaultVal: any = null) {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
             let val = defaultVal;
@@ -123,6 +151,10 @@ export class WindowExpr extends ExprBase {
         });
     }
 
+    /**
+     * Window: Shifts values up by offset, filling with default.
+     * @since v1.7.0
+     */
     lead(offset: number = 1, defaultVal: any = null) {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
             let val = defaultVal;
@@ -133,6 +165,10 @@ export class WindowExpr extends ExprBase {
         });
     }
 
+    /**
+     * Executes a window aggregation partitioned by column keys.
+     * @since v1.7.0
+     */
     over(columns: string | IExpr | (string | IExpr)[]) {
         const newInst = derive(this);
         const cols = Array.isArray(columns) ? columns : [columns];
@@ -140,46 +176,86 @@ export class WindowExpr extends ExprBase {
         return newInst;
     }
 
+    /**
+     * Window: Computes rank within group partition.
+     * @since v1.7.0
+     */
     rank() {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
             return computeRank(groupPreValues, groupPreValues[currentIndex]);
         });
     }
 
+    /**
+     * Window: Computes rolling window max.
+     * @since v1.7.0
+     */
     rolling_max(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).max);
     }
 
+    /**
+     * Window: Computes rolling window mean.
+     * @since v1.7.0
+     */
     rolling_mean(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).mean);
     }
 
+    /**
+     * Window: Computes rolling window median.
+     * @since v1.7.0
+     */
     rolling_median(windowSize: number) {
         return this._rolling(windowSize, v => computeMedian(v));
     }
 
+    /**
+     * Window: Computes rolling window min.
+     * @since v1.7.0
+     */
     rolling_min(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).min);
     }
 
+    /**
+     * Window: Computes rolling window quantile value.
+     * @since v1.7.0
+     */
     rolling_quantile(quantile: number, windowSize: number) {
         return this._rolling(windowSize, v => computeQuantile(v, quantile));
     }
 
+    /**
+     * Window: Computes rolling window rank.
+     * @since v1.7.0
+     */
     rolling_rank(windowSize: number) {
         return this._rolling(windowSize, (vals) => {
             return computeRank(vals, vals[vals.length - 1], { ignoreNulls: true });
         });
     }
 
+    /**
+     * Window: Computes rolling window standard deviation.
+     * @since v1.7.0
+     */
     rolling_std(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).std);
     }
 
+    /**
+     * Window: Computes rolling window sum.
+     * @since v1.7.0
+     */
     rolling_sum(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).sum);
     }
 
+    /**
+     * Window: Computes row index count within group partitions.
+     * @since v1.7.0
+     */
     row_number() {
         const newInst = this._window(function (this: IExpr, _groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
             return currentIndex + 1;
