@@ -20,7 +20,6 @@ export class ManipulationExpr extends ExprBase {
          * │ null │ 0      │
          * │ 3    │ 3      │
          * └──────┴────────┘
-         * @since v1.5.0
          */
         fill_null({
             value = undefined,
@@ -99,7 +98,6 @@ export class ManipulationExpr extends ExprBase {
          * │ 2 │ 2        │
          * │ 3 │ 1        │
          * └───┴──────────┘
-         * @since v1.5.0
          */
         reverse(): this {
             return derive(this, (vArray) => {

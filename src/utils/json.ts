@@ -1,3 +1,4 @@
+/** @internalfile */
 import type { JSONFormat } from "../types";
 import { isTypedArray } from "./array";
 import { isSet, isMap, isRegExp, isError, isURLSearchParams, isValidDateObj } from "./object";

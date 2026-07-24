@@ -53,7 +53,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────────┤
      * │ 2026-05-20 │ 21      │
      * └────────────┴─────────┘
-     * @since v1.7.0
      */
     century() {
         return this._deriveDate(getCentury);
@@ -71,7 +70,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼──────────────────────────┤
      * │ 2026-05-20T10:30:00Z │ 2026-05-20T00:00:00.000Z │
      * └──────────────────────┴──────────────────────────┘
-     * @since v1.6.0
      */
     date() {
         return this._deriveDate((d) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())));
@@ -89,7 +87,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────┤
      * │ 2026-05-20 │ 20  │
      * └────────────┴─────┘
-     * @since v1.5.0
      */
     day() {
         return this._deriveDate((d) => d.getUTCDate());
@@ -107,7 +104,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────┤
      * │ 2024-02-15 │ 29  │
      * └────────────┴─────┘
-     * @since v1.6.0
      */
     days_in_month() {
         return this._deriveDate((d) => {
@@ -129,7 +125,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼────────────┤
      * │ 2026-01-01T00:00:00Z │ 1767225600 │
      * └──────────────────────┴────────────┘
-     * @since v1.6.0
      */
     epoch(unit: TimeUnit = "ms") {
         return this._deriveDate((d) => toEpoch(d, unit));
@@ -147,7 +142,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼────┤
      * │ 2026-05-20T14:30:00Z │ 14 │
      * └──────────────────────┴────┘
-     * @since v1.7.0
      */
     hour() {
         return this._deriveDate((d) => d.getUTCHours());
@@ -166,7 +160,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────────┤
      * │ 2026-05-18 │ true    │
      * └────────────┴─────────┘
-     * @since v1.7.0
      */
     is_business_day(options: IsBusinessDayOptions = {}) {
         return this._deriveDate((d) => isBusinessDay(d, options));
@@ -185,7 +178,6 @@ export class DateTimeExprNamespace {
      * │ 2024-01-01 │ true  │
      * │ 2026-01-01 │ false │
      * └────────────┴───────┘
-     * @since v1.6.0
      */
     is_leap_year() {
         return this._deriveDate(isLeapYear);
@@ -203,7 +195,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────┤
      * │ 2026-05-20 │ 21   │
      * └────────────┴──────┘
-     * @since v1.6.0
      */
     iso_week() {
         return this._deriveDate((d) => getISO(d, { field: "week" }));
@@ -221,7 +212,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼────────┤
      * │ 2026-05-20 │ 2026   │
      * └────────────┴────────┘
-     * @since v1.6.0
      */
     iso_year() {
         return this._deriveDate((d) => getISO(d, { field: "year" }));
@@ -239,7 +229,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────────┼────────┤
      * │ 2026-05-20T10:00:00.123Z │ 123000 │
      * └──────────────────────────┴────────┘
-     * @since v1.7.0
      */
     microsecond() {
         return this._deriveDate((d) => d.getUTCMilliseconds() * US_PER_MS);
@@ -257,7 +246,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────┤
      * │ 2026-05-20 │ 3   │
      * └────────────┴─────┘
-     * @since v1.7.0
      */
     millennium() {
         return this._deriveDate(getMillennium);
@@ -275,7 +263,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────────┼─────┤
      * │ 2026-05-20T10:00:00.456Z │ 456 │
      * └──────────────────────────┴─────┘
-     * @since v1.6.0
      */
     millisecond() {
         return this._deriveDate((d) => d.getUTCMilliseconds());
@@ -293,7 +280,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼─────┤
      * │ 2026-05-20T10:45:00Z │ 45  │
      * └──────────────────────┴─────┘
-     * @since v1.7.0
      */
     minute() {
         return this._deriveDate((d) => d.getUTCMinutes());
@@ -311,7 +297,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼───┤
      * │ 2026-05-20 │ 5 │
      * └────────────┴───┘
-     * @since v1.5.0
      */
     month() {
         return this._deriveDate((d) => d.getUTCMonth() + 1);
@@ -329,7 +314,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────────────────────────┤
      * │ 2026-05-20 │ 2026-05-31T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
-     * @since v1.7.0
      */
     month_end() {
         return this._deriveDate((d) => getMonthOffset(d, 1, 0));
@@ -347,7 +331,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────────────────────────┤
      * │ 2026-05-20 │ 2026-05-01T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
-     * @since v1.7.0
      */
     month_start() {
         return this._deriveDate((d) => getMonthOffset(d, 0, 1));
@@ -365,7 +348,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────────┼─────────┤
      * │ 2026-05-20T10:00:00.001Z │ 1000000 │
      * └──────────────────────────┴─────────┘
-     * @since v1.7.0
      */
     nanosecond() {
         return this._deriveDate((d) => d.getUTCMilliseconds() * NS_PER_MS);
@@ -385,7 +367,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────────────────────────┤
      * │ 2026-05-15 │ 2026-05-19T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
-     * @since v1.7.0
      */
     offset_business_day(n: number | any, { excludeWeekdays = [0, 6], ...options }: BusinessDayOffsetOptions = {}) {
         const fullOptions = { excludeWeekdays, ...options };
@@ -409,7 +390,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────────────────────────┤
      * │ 2026-05-20 │ 2026-05-25T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
-     * @since v1.7.0
      */
     offset_day(n: number | any, options: BusinessDayOffsetOptions = {}) {
         return derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
@@ -430,7 +410,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────┤
      * │ 2026-02-01 │ 32  │
      * └────────────┴─────┘
-     * @since v1.6.0
      */
     ordinal_day() {
         return this._deriveDate(getOrdinalDay);
@@ -448,7 +427,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼─────┤
      * │ 2026-05-20 │ 2   │
      * └────────────┴─────┘
-     * @since v1.6.0
      */
     quarter() {
         return this._deriveDate(getQuarter);
@@ -466,7 +444,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼─────┤
      * │ 2026-05-20T10:00:45Z │ 45  │
      * └──────────────────────┴─────┘
-     * @since v1.6.0
      */
     second() {
         return this._deriveDate((d) => d.getUTCSeconds());
@@ -485,7 +462,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼────────────┤
      * │ 2026-05-20 │ 2026/05/20 │
      * └────────────┴────────────┘
-     * @since v1.6.0
      */
     strftime(options: StrftimeOptions) {
         return this._deriveDate((d) => strftime(d, options));
@@ -503,7 +479,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼──────────────┤
      * │ 2026-05-20T10:30:00Z │ 10:30:00.000 │
      * └──────────────────────┴──────────────┘
-     * @since v1.6.0
      */
     time() {
         return this._deriveDate((d) => d.toISOString().split("T")[1].slice(0, 12));
@@ -522,7 +497,6 @@ export class DateTimeExprNamespace {
      * ├──────────────────────┼────────────┤
      * │ 2026-01-01T00:00:00Z │ 1767225600 │
      * └──────────────────────┴────────────┘
-     * @since v1.6.0
      */
     timestamp(unit: TimeUnit = "ms") {
         return this.epoch(unit);
@@ -541,7 +515,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼────────────┤
      * │ 2026-05-20 │ 2026-05-20 │
      * └────────────┴────────────┘
-     * @since v1.6.0
      */
     to_string(options: StrftimeOptions) {
         return this.strftime(options);
@@ -559,7 +532,6 @@ export class DateTimeExprNamespace {
      * ├──────────┼──────┤
      * │ 86400000 │ 1    │
      * └──────────┴──────┘
-     * @since v1.6.0
      */
     total_days() {
         return this._deriveDuration((v) => v / MS_PER_DAY);
@@ -577,7 +549,6 @@ export class DateTimeExprNamespace {
      * ├─────────┼─────┤
      * │ 3600000 │ 1   │
      * └─────────┴─────┘
-     * @since v1.6.0
      */
     total_hours() {
         return this._deriveDuration((v) => v / MS_PER_HOUR);
@@ -595,7 +566,6 @@ export class DateTimeExprNamespace {
      * ├─────┼───────┤
      * │ 10  │ 10000 │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     total_microseconds() {
         return this._deriveDuration((v) => v * US_PER_MS);
@@ -613,7 +583,6 @@ export class DateTimeExprNamespace {
      * ├─────┼─────┤
      * │ 500 │ 500 │
      * └─────┴─────┘
-     * @since v1.6.0
      */
     total_milliseconds() {
         return this._deriveDuration((v) => v);
@@ -631,7 +600,6 @@ export class DateTimeExprNamespace {
      * ├───────┼──────┤
      * │ 60000 │ 1    │
      * └───────┴──────┘
-     * @since v1.6.0
      */
     total_minutes() {
         return this._deriveDuration((v) => v / MS_PER_MINUTE);
@@ -649,7 +617,6 @@ export class DateTimeExprNamespace {
      * ├─────┼─────────┤
      * │ 1   │ 1000000 │
      * └─────┴─────────┘
-     * @since v1.7.0
      */
     total_nanoseconds() {
         return this._deriveDuration((v) => v * NS_PER_MS);
@@ -667,7 +634,6 @@ export class DateTimeExprNamespace {
      * ├──────┼──────┤
      * │ 1000 │ 1    │
      * └──────┴──────┘
-     * @since v1.6.0
      */
     total_seconds() {
         return this._deriveDuration((v) => v / MS_PER_SECOND);
@@ -687,7 +653,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼────────┤
      * │ 2026-05-20 │ 0      │
      * └────────────┴────────┘
-     * @since v1.7.0
      */
     utc_offset(timeZone?: string, options: UtcOffsetOptions = {}) {
         return derive(this.expr, kleeneUnary((v) => {
@@ -708,7 +673,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────┤
      * │ 2026-05-20 │ 21   │
      * └────────────┴──────┘
-     * @since v1.6.0
      */
     week() {
         return this.iso_week();
@@ -726,7 +690,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼────┤
      * │ 2026-05-18 │ 1  │
      * └────────────┴────┘
-     * @since v1.6.0
      */
     weekday() {
         return this._deriveDate((d) => d.getUTCDay() || 7);
@@ -744,7 +707,6 @@ export class DateTimeExprNamespace {
      * ├────────────┼──────┤
      * │ 2026-05-20 │ 2026 │
      * └────────────┴──────┘
-     * @since v1.5.0
      */
     year() {
         return this._deriveDate((d) => d.getUTCFullYear());
@@ -757,7 +719,6 @@ export class TemporalExpr extends ExprBase {
      * @returns DateTimeExprNamespace
      * @example
      * >>> df.select($df.col("date").dt.year())
-     * @since v1.5.0
      */
     get dt() {
         return new DateTimeExprNamespace(this);

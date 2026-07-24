@@ -1,3 +1,4 @@
+/** @internalfile */
 export const TAG_DATE = "[object Date]";
 export const TAG_REGEXP = "[object RegExp]";
 export const TAG_SET = "[object Set]";

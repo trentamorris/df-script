@@ -6,7 +6,6 @@ import { COALESCE_MARKER } from "../constants";
 
 /**
  * Returns the first non-null value among the specified expressions.
- * @since v1.6.0
  */
 export function coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))

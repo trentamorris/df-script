@@ -1,6 +1,6 @@
+
 /**
  * Base exception class for all df-script errors.
- * @since v1.5.0
  */
 export class DFScriptError extends Error {
     constructor(message: string) {
@@ -14,13 +14,11 @@ export class DFScriptError extends Error {
 
 /**
  * General error thrown during DataFrame instantiation or execution.
- * @since v1.5.0
  */
-export class DataFrameError extends DFScriptError {}
+export class DataFrameError extends DFScriptError { }
 
 /**
  * Error thrown when a specified column name does not exist in the DataFrame schema.
- * @since v1.5.0
  */
 export class ColumnNotFoundError extends DataFrameError {
     constructor(columnName: string, message?: string) {
@@ -30,20 +28,17 @@ export class ColumnNotFoundError extends DataFrameError {
 
 /**
  * Error thrown when schema definitions, coercions, or data types are invalid.
- * @since v1.5.0
  */
-export class SchemaError extends DFScriptError {}
+export class SchemaError extends DFScriptError { }
 
 /**
  * Error thrown during expression evaluation or element-wise calculations.
- * @since v1.5.0
  */
-export class ComputeError extends DFScriptError {}
+export class ComputeError extends DFScriptError { }
 
 /**
  * Error thrown when shape dimensions or column heights mismatch.
- * @since v1.5.0
  */
-export class ShapeError extends DFScriptError {}
+export class ShapeError extends DFScriptError { }
 
 export * from "./utils";

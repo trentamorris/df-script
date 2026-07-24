@@ -1,3 +1,4 @@
+/** @internalfile */
 import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
 import { toValidNumber, isValidNumber } from "./number";
 import { toCanonicalString } from "./string";
@@ -838,7 +839,6 @@ export function shiftArray(arr: any[] | AnyTypedArray, n: number): any[] {
 
     return result;
 }
-
 
 /**
  * Robust, single-pass computation using Welford's algorithm to calculate

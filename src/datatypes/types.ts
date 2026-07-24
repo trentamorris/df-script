@@ -1,3 +1,4 @@
+/** @typefile */
 import {
     DataType,
     SignedIntegerType,
@@ -41,6 +42,10 @@ export class Int16Type extends SignedIntegerType {
 }
 export const Int16 = new Int16Type();
 
+/**
+ * 32-bit signed integer type (values from -2,147,483,648 to 2,147,483,647).
+ * 
+ */
 export class Int32Type extends SignedIntegerType {
     readonly name = "Int32";
     coerce(val: unknown): number | null { return toValidInt(val, { range: "Int32" }); }
@@ -49,6 +54,10 @@ export class Int32Type extends SignedIntegerType {
 }
 export const Int32 = new Int32Type();
 
+/**
+ * 64-bit signed integer type (represented as JavaScript BigInt).
+ * 
+ */
 export class Int64Type extends SignedIntegerType<bigint | null> {
     readonly name = "Int64";
     coerce(val: unknown): bigint | null { return toValidBigInt(val, { truncate: true }); }
@@ -97,6 +106,10 @@ export class Float32Type extends FloatDataType {
 }
 export const Float32 = new Float32Type();
 
+/**
+ * 64-bit double precision floating point number type.
+ * 
+ */
 export class Float64Type extends FloatDataType {
     readonly name = "Float64";
     coerce(val: unknown): number | null { return toValidFloat(val, { floatPrecision: "Float64" }); }
@@ -105,6 +118,12 @@ export class Float64Type extends FloatDataType {
 }
 export const Float64 = new Float64Type();
 
+/**
+ * Fixed point decimal type with optional precision and scale arguments.
+ * 
+ * @param precision Precision level (total number of digits)
+ * @param scale Scale level (number of decimal place digits)
+ */
 export class DecimalType extends NumericDataType {
     readonly name: string;
     constructor(public readonly precision?: number, public readonly scale?: number) {
@@ -128,6 +147,10 @@ export class DecimalType extends NumericDataType {
 // Standard Types
 // ============================================================================
 
+/**
+ * Boolean datatype representing binary values (true or false).
+ * 
+ */
 export class BooleanType extends DataType<boolean | null> {
     readonly name = "Boolean";
     override get isBoolean(): boolean { return true; }
@@ -140,6 +163,10 @@ export class BooleanType extends DataType<boolean | null> {
 }
 export const BooleanDataType = new BooleanType();
 
+/**
+ * Unicode UTF-8 string datatype.
+ * 
+ */
 export class Utf8Type extends DataType<string | null> {
     readonly name = "Utf8";
     override get isString(): boolean { return true; }
@@ -184,6 +211,10 @@ export const ObjectDataType = new ObjectType();
 // Temporal Types
 // ============================================================================
 
+/**
+ * Calendar date type storing UTC year, month, and day.
+ * 
+ */
 export class DateType extends TemporalDataType<Date | null> {
     readonly name = "Date";
     coerce(val: unknown): Date | null { return toValidDate(val, { dateOnly: true }); }
@@ -192,6 +223,10 @@ export class DateType extends TemporalDataType<Date | null> {
 }
 export const DateDataType = new DateType();
 
+/**
+ * Date and time type (year, month, day, hour, minute, second, millisecond).
+ * 
+ */
 export class DatetimeType extends TemporalDataType<Date | null> {
     readonly name = "Datetime";
     coerce(val: unknown): Date | null { return toValidDate(val); }
@@ -220,6 +255,11 @@ export const Duration = new DurationType();
 // Nested Types
 // ============================================================================
 
+/**
+ * Nested array list datatype wrapping an inner element type.
+ * 
+ * @param innerType The child elements datatype
+ */
 export class ArrayType<TInner = any> extends NestedDataType<TInner[] | null> {
     readonly name = "Array";
     constructor(public readonly innerType: RegisteredDataType & DataType<TInner>) { super(); }
@@ -240,6 +280,11 @@ export class ArrayType<TInner = any> extends NestedDataType<TInner[] | null> {
 }
 export const ArrayDataType = <TInner>(inner: RegisteredDataType & DataType<TInner>) => new ArrayType<TInner>(inner);
 
+/**
+ * Keyed struct object datatype wrapping sub-field schemas.
+ * 
+ * @param fields Schema mapping of field names to Datatypes
+ */
 export class StructType<TFields extends RowRecord = any> extends NestedDataType<TFields | null> {
     readonly name = "Struct";
     constructor(public readonly fields: { [K in keyof TFields]: RegisteredDataType & DataType<TFields[K]> }) { super(); }

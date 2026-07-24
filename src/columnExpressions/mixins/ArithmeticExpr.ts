@@ -18,7 +18,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2    │ 2     │
      * │ -3.5 │ 3.5   │
      * └──────┴───────┘
-     * @since v1.5.0
      */
     abs() {
         return derive(this, kleeneUnary(Math.abs));
@@ -38,7 +37,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0.5 │ 1.047197  │
      * │ 1   │ 0         │
      * └─────┴───────────┘
-     * @since v1.5.0
      */
     acos() {
         return derive(this, kleeneUnary((v) => (v < -1 || v > 1) ? null : Math.acos(v)));
@@ -58,7 +56,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2 │ 1.316957  │
      * │ 5 │ 2.292431  │
      * └───┴───────────┘
-     * @since v1.5.0
      */
     acosh() {
         return derive(this, kleeneUnary((v) => v < 1 ? null : Math.acosh(v)));
@@ -79,7 +76,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2 │ 12    │
      * │ 3 │ 13    │
      * └───┴───────┘
-     * @since v1.5.0
      */
     add(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => v + r));
@@ -99,7 +95,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0.5 │ 0.523598  │
      * │ 1   │ 1.570796  │
      * └─────┴───────────┘
-     * @since v1.5.0
      */
     asin() {
         return derive(this, kleeneUnary((v) => (v < -1 || v > 1) ? null : Math.asin(v)));
@@ -119,7 +114,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1 │ 0.881373  │
      * │ 2 │ 1.443635  │
      * └───┴───────────┘
-     * @since v1.5.0
      */
     asinh() {
         return derive(this, kleeneUnary(Math.asinh));
@@ -139,7 +133,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1 │ 0.785398  │
      * │ 2 │ 1.107148  │
      * └───┴───────────┘
-     * @since v1.5.0
      */
     atan() {
         return derive(this, kleeneUnary(Math.atan));
@@ -159,7 +152,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1 │ 2 │ 0.463647  │
      * │ 2 │ 1 │ 1.107148  │
      * └───┴───┴───────────┘
-     * @since v1.5.0
      */
     atan2(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, Math.atan2));
@@ -178,7 +170,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0   │ 0         │
      * │ 0.5 │ 0.549306  │
      * └─────┴───────────┘
-     * @since v1.5.0
      */
     atanh() {
         return derive(this, kleeneUnary((v) => (v <= -1 || v >= 1) ? null : Math.atanh(v)));
@@ -198,7 +189,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 8  │ 2      │
      * │ 27 │ 3      │
      * └────┴────────┘
-     * @since v1.5.0
      */
     cbrt() {
         return derive(this, kleeneUnary(Math.cbrt));
@@ -218,7 +208,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2.8  │ 3      │
      * │ -0.5 │ 0      │
      * └──────┴────────┘
-     * @since v1.5.0
      */
     ceil() {
         return derive(this, kleeneUnary(Math.ceil));
@@ -240,7 +229,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 15 │ 15      │
      * │ 25 │ 20      │
      * └────┴─────────┘
-     * @since v1.6.0
      */
     clip(lower: number | null = null, upper: number | null = null) {
         return derive(this, kleeneUnary((v) => clamp(v, { min: lower, max: upper })));
@@ -260,7 +248,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 5  │ -1 │ -5     │
      * │ 10 │ 1  │ 10     │
      * └────┴────┴────────┘
-     * @since v1.5.0
      */
     copysign(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => Math.abs(v) * (r >= 0 ? 1 : -1)));
@@ -279,7 +266,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0     │ 1     │
      * │ 3.141 │ -1    │
      * └───────┴───────┘
-     * @since v1.5.0
      */
     cos() {
         return derive(this, kleeneUnary(Math.cos));
@@ -298,7 +284,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0 │ 1         │
      * │ 1 │ 1.543080  │
      * └───┴───────────┘
-     * @since v1.5.0
      */
     cosh() {
         return derive(this, kleeneUnary(Math.cosh));
@@ -317,7 +302,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0     │ 0   │
      * │ 3.141 │ 180 │
      * └───────┴─────┘
-     * @since v1.5.0
      */
     degrees() {
         return derive(this, kleeneUnary((v) => v * (180 / Math.PI)));
@@ -338,7 +322,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 20 │ 10    │
      * │ 30 │ 15    │
      * └────┴───────┘
-     * @since v1.5.0
      */
     div(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => r === 0 ? null : v / r));
@@ -358,7 +341,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1 │ 2.718281 │
      * │ 2 │ 7.389056 │
      * └───┴──────────┘
-     * @since v1.5.0
      */
     exp() {
         return derive(this, kleeneUnary(Math.exp));
@@ -378,7 +360,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1 │ 1.718281 │
      * │ 2 │ 6.389056 │
      * └───┴──────────┘
-     * @since v1.5.0
      */
     expm1() {
         return derive(this, kleeneUnary(Math.expm1));
@@ -398,7 +379,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2.8  │ 2       │
      * │ -0.5 │ -1      │
      * └──────┴─────────┘
-     * @since v1.5.0
      */
     floor() {
         return derive(this, kleeneUnary(Math.floor));
@@ -419,7 +399,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 10 │ 5    │
      * │ 15 │ 7    │
      * └────┴──────┘
-     * @since v1.5.0
      */
     floordiv(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => r === 0 ? null : Math.floor(v / r)));
@@ -439,7 +418,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 3 │ 4  │ 5       │
      * │ 5 │ 12 │ 13      │
      * └───┴────┴─────────┘
-     * @since v1.5.0
      */
     hypot(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, Math.hypot));
@@ -460,7 +438,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 10  │ 1     │
      * │ 100 │ 2     │
      * └─────┴───────┘
-     * @since v1.6.0
      */
     log(base: number = Math.E) {
         return derive(this, kleeneUnary((v) => v <= 0 ? null : (base === Math.E ? Math.log(v) : Math.log(v) / Math.log(base))));
@@ -480,7 +457,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1 │ 0.693147 │
      * │ 2 │ 1.098612 │
      * └───┴──────────┘
-     * @since v1.5.0
      */
     log1p() {
         return derive(this, kleeneUnary((v) => v <= -1 ? null : Math.log1p(v)));
@@ -501,7 +477,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 11 │ 1     │
      * │ 12 │ 0     │
      * └────┴───────┘
-     * @since v1.5.0
      */
     mod(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => r === 0 ? null : v % r));
@@ -522,7 +497,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2 │ 10         │
      * │ 3 │ 15         │
      * └───┴────────────┘
-     * @since v1.5.0
      */
     mul(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => v * r));
@@ -542,7 +516,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ -2 │ 2       │
      * │ 3  │ -3      │
      * └────┴─────────┘
-     * @since v1.5.0
      */
     negate() {
         return derive(this, kleeneUnary((v) => -v));
@@ -563,7 +536,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 3 │ 9     │
      * │ 4 │ 16    │
      * └───┴───────┘
-     * @since v1.5.0
      */
     pow(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, Math.pow));
@@ -582,7 +554,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0   │ 0        │
      * │ 180 │ 3.141592 │
      * └─────┴──────────┘
-     * @since v1.5.0
      */
     radians() {
         return derive(this, kleeneUnary((v) => v * (Math.PI / 180)));
@@ -604,7 +575,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2     │ 5      │
      * │ 3     │ 6      │
      * └───────┴────────┘
-     * @since v1.6.0
      */
     rand(seed?: number, { min = 0, max = 1, integer = false }: RandomOptions = {}) {
         return derive(this, (vArray) => {
@@ -635,7 +605,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 1.123 │ 1.12    │
      * │ 2.789 │ 2.79    │
      * └───────┴─────────┘
-     * @since v1.5.0
      */
     round(decimals: number = 0) {
         return derive(this, kleeneUnary((v) => roundToScale(v, decimals)));
@@ -655,7 +624,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 123.45   │ 123      │
      * │ 0.006789 │ 0.00679  │
      * └──────────┴──────────┘
-     * @since v1.6.0
      */
     round_sig_figs(sig_figs: number) {
         return derive(this, kleeneUnary((v) => isValidNumber(v) ? Number(v.toPrecision(sig_figs)) : v));
@@ -675,7 +643,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0   │ 0      │
      * │ 50  │ 1      │
      * └─────┴────────┘
-     * @since v1.5.0
      */
     sign() {
         return derive(this, kleeneUnary(Math.sign));
@@ -694,7 +661,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0     │ 0     │
      * │ 1.570 │ 1     │
      * └───────┴───────┘
-     * @since v1.5.0
      */
     sin() {
         return derive(this, kleeneUnary(Math.sin));
@@ -713,7 +679,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0 │ 0         │
      * │ 1 │ 1.175201  │
      * └───┴───────────┘
-     * @since v1.5.0
      */
     sinh() {
         return derive(this, kleeneUnary(Math.sinh));
@@ -733,7 +698,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 9  │ 3      │
      * │ 16 │ 4      │
      * └────┴────────┘
-     * @since v1.5.0
      */
     sqrt() {
         return derive(this, kleeneUnary((v) => v < 0 ? null : Math.sqrt(v)));
@@ -754,7 +718,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 20 │ 15    │
      * │ 30 │ 25    │
      * └────┴───────┘
-     * @since v1.5.0
      */
     sub(val: NumericArg) {
         return derive(this, kleeneBinary(this, val, (v, r) => v - r));
@@ -773,7 +736,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0     │ 0     │
      * │ 0.785 │ 1     │
      * └───────┴───────┘
-     * @since v1.5.0
      */
     tan() {
         return derive(this, kleeneUnary(Math.tan));
@@ -792,7 +754,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 0 │ 0         │
      * │ 1 │ 0.761594  │
      * └───┴───────────┘
-     * @since v1.5.0
      */
     tanh() {
         return derive(this, kleeneUnary(Math.tanh));
@@ -812,7 +773,6 @@ export class ArithmeticExpr extends ExprBase {
      * │ 2.9  │ 2       │
      * │ -3.5 │ -3      │
      * └──────┴─────────┘
-     * @since v1.5.0
      */
     trunc() {
         return derive(this, kleeneUnary(Math.trunc));

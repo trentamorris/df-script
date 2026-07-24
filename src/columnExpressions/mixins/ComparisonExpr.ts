@@ -105,7 +105,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 2 │ y │ true     │
          * │ 3 │ z │ false    │
          * └───┴───┴──────────┘
-         * @since v1.5.0
          */
         between(lower: any, upper: any, closed: "both" | "left" | "right" | "none" = "both") {
             return derive(this, (vArray, columns) => {
@@ -160,7 +159,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 2 │ true   │
          * │ 3 │ false  │
          * └───┴────────┘
-         * @since v1.5.0
          */
         eq(val: any) {
             return derive(this, kleeneBinary(this, val, (v, r) => v === r));
@@ -181,7 +179,6 @@ export class ComparisonExpr extends ExprBase {
          * │ null │ true       │
          * │ 3    │ false      │
          * └──────┴────────────┘
-         * @since v1.6.0
          */
         eq_missing(val: any) {
             return derive(this, (vArray, columns) => {
@@ -205,7 +202,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 100   │ true   │
          * │ 110   │ true   │
          * └───────┴────────┘
-         * @since v1.5.0
          */
         ge(val: any) {
             return derive(this, kleeneBinary(this, val, (v, r) => v >= r));
@@ -226,7 +222,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 100   │ false  │
          * │ 110   │ true   │
          * └───────┴────────┘
-         * @since v1.5.0
          */
         gt(val: any) {
             return derive(this, kleeneBinary(this, val, (v, r) => v > r));
@@ -244,7 +239,6 @@ export class ComparisonExpr extends ExprBase {
          * ├───────┼───────────┤
          * │ "A"   │ true      │
          * └───────┴───────────┘
-         * @since v1.6.0
          */
         has_nulls() {
             return (this as any)._deriveAgg((v: any[]) => {
@@ -270,7 +264,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 1.000000001 │ true  │
          * │ 2.0         │ false │
          * └─────────────┴───────┘
-         * @since v1.7.0
          */
         is_close(
             other: any,
@@ -322,7 +315,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 2 │ true  │
          * │ 2 │ true  │
          * └───┴───────┘
-         * @since v1.7.0
          */
         is_duplicated() {
             return derive(this, (vArray) => evaluateDuplication(vArray, true));
@@ -343,7 +335,6 @@ export class ComparisonExpr extends ExprBase {
          * │ "hello" │ false │
          * │ []      │ true  │
          * └─────────┴───────┘
-         * @since v1.6.0
          */
         is_empty({ ignoreNulls = false }: { ignoreNulls?: boolean } = {}) {
             return derive(this, kleeneUnary((v) => {
@@ -376,7 +367,6 @@ export class ComparisonExpr extends ExprBase {
          * │ Infinity │ false  │
          * │ NaN      │ false  │
          * └──────────┴────────┘
-         * @since v1.5.0
          */
         is_finite() {
             return derive(this, kleeneUnary(Number.isFinite));
@@ -398,7 +388,6 @@ export class ComparisonExpr extends ExprBase {
          * │ "books"  │ true    │
          * │ "food"   │ false   │
          * └──────────┴─────────┘
-         * @since v1.5.0
          */
         is_in(values: any[] | any) {
             return derive(this, (vArray, columns) => computeIsIn(vArray, columns, values, false));
@@ -418,7 +407,6 @@ export class ComparisonExpr extends ExprBase {
          * │ Infinity  │ true  │
          * │ -Infinity │ true  │
          * └───────────┴───────┘
-         * @since v1.5.0
          */
         is_infinite() {
             return derive(this, kleeneUnary((v) => v === Infinity || v === -Infinity));
@@ -438,7 +426,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 1.5 │ false │
          * │ NaN │ true  │
          * └─────┴───────┘
-         * @since v1.5.0
          */
         is_nan() {
             return derive(this, kleeneUnary(Number.isNaN));
@@ -457,7 +444,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 1.5 │ true    │
          * │ NaN │ false   │
          * └─────┴─────────┘
-         * @since v1.5.0
          */
         is_not_nan() {
             return derive(this, kleeneUnary((v) => !Number.isNaN(v)));
@@ -476,7 +462,6 @@ export class ComparisonExpr extends ExprBase {
          * │ alice@example.com │ true  │
          * │ null              │ false │
          * └───────────────────┴───────┘
-         * @since v1.6.0
          */
         is_not_null() {
             return derive(this, (vArray) => {
@@ -502,7 +487,6 @@ export class ComparisonExpr extends ExprBase {
          * │ alice@example.com │ false   │
          * │ null              │ true    │
          * └───────────────────┴─────────┘
-         * @since v1.6.0
          */
         is_null() {
             return derive(this, (vArray) => {
@@ -529,7 +513,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 2 │ false │
          * │ 2 │ false │
          * └───┴───────┘
-         * @since v1.7.0
          */
         is_unique() {
             return derive(this, (vArray) => evaluateDuplication(vArray, false));
@@ -550,7 +533,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 50    │ true  │
          * │ 60    │ false │
          * └───────┴───────┘
-         * @since v1.5.0
          */
         le(val: any) {
             return derive(this, kleeneBinary(this, val, (v, r) => v <= r));
@@ -571,7 +553,6 @@ export class ComparisonExpr extends ExprBase {
          * │ 50    │ false │
          * │ 60    │ false │
          * └───────┴───────┘
-         * @since v1.5.0
          */
         lt(val: any) {
             return derive(this, kleeneBinary(this, val, (v, r) => v < r));
@@ -591,7 +572,6 @@ export class ComparisonExpr extends ExprBase {
          * │ electronics │ false    │
          * │ toys        │ true     │
          * └─────────────┴──────────┘
-         * @since v1.5.0
          */
         ne(val: any) {
             return derive(this, kleeneBinary(this, val, (v, r) => v !== r));
@@ -612,7 +592,6 @@ export class ComparisonExpr extends ExprBase {
          * │ null │ false       │
          * │ 3    │ true        │
          * └──────┴─────────────┘
-         * @since v1.6.0
          */
         ne_missing(val: any) {
             return derive(this, (vArray, columns) => {
@@ -636,7 +615,6 @@ export class ComparisonExpr extends ExprBase {
          * │ books    │ false  │
          * │ food     │ true   │
          * └──────────┴────────┘
-         * @since v1.5.0
          */
         not_in(values: any[] | any) {
             return derive(this, (vArray, columns) => computeIsIn(vArray, columns, values, true));

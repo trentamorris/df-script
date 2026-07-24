@@ -55,7 +55,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1   │ x   │
      * │ 2   │ y   │
      * └─────┴─────┘
-     * @since v1.5.0
      */
     constructor(data: T[] | ColumnDict, schema?: DataFrameSchema, height?: number) {
         if (Array.isArray(data)) {
@@ -117,7 +116,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.columns
      * ["a", "b"]
-     * @since v1.5.0
      */
     get columns(): string[] {
         return Object.keys(this._columns);
@@ -127,12 +125,9 @@ export class DataFrame<T extends RowRecord = any> {
      * Concatenates items vertically, horizontally, or diagonally.
      * 
      * @param items Single DataFrame or array of DataFrames/rows to concatenate.
-     * @param options Configuration options for concatenation layout and strictness:
-     *   - `how`: Layout strategy.
-     *     - `"vertical"` (default): Appends rows top-to-bottom. Requires matching column names and types.
-     *     - `"horizontal"`: Joins unique columns side-by-side. Requires unique column names.
-     *     - `"diagonal"`: Concatenates DataFrames with mismatched columns, padding missing values with `null`.
-     *   - `horizontal.strict`: When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
+     * @param options Configuration options for concatenation layout and strictness.
+     * @param options.how Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
+     * @param options.horizontal.strict When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
      * @returns DataFrame
      * 
      * @example
@@ -180,7 +175,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ null │ 2    │
      * └──────┴──────┘
      * 
-     * @since v1.5.0
      */
     concat<U extends RowRecord = any>(
         items: ConcatItem | ConcatItem[],
@@ -212,7 +206,6 @@ export class DataFrame<T extends RowRecord = any> {
      * ├───┤
      * │ 1 │
      * └───┘
-     * @since v1.5.0
      */
     drop<K extends keyof T>(...args: (K | K[])[]): DataFrame<Omit<T, K>> {
         const columnsToDrop = new Set(args.flat() as string[]);
@@ -251,7 +244,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │
      * │ 3 │
      * └───┘
-     * @since v1.6.0
      */
     drop_nulls(subset?: string | string[]): DataFrame<T> {
         if (this._height === 0) return this;
@@ -272,7 +264,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴──────┘
      * >>> df.dtypes
      * [Float64, Utf8]
-     * @since v1.5.0
      */
     get dtypes(): RegisteredDataType[] {
         const keys = Object.keys(this._columns);
@@ -287,7 +278,9 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Explodes an array column into multiple rows, replicating non-target row attributes.
      * @param columns Target column expression or array column name to explode.
-     * @param options Config options for empty array behavior.
+     * @param options Configuration options for empty array and null handling.
+     * @param options.empty_as_null When `true`, converts empty arrays to `null` rows.
+     * @param options.keep_nulls When `true`, retains `null` array values during explosion.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ group: ["A"], values: [[1, 2]] })
@@ -306,7 +299,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ A     │ 1      │
      * │ A     │ 2      │
      * └───────┴────────┘
-     * @since v1.7.0
      */
     explode(
         columns: IntoExpr | IntoExpr[],
@@ -341,7 +333,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Fills null values across columns using scalar values or statistical strategies.
-     * @param options Configuration options including value, strategy ("zero", "forward", etc.), and limit.
+     * @param options Configuration options for null replacement.
+     * @param options.value Scalar replacement value or dict mapping column names to values.
+     * @param options.strategy Statistical filling strategy (`"zero"`, `"mean"`, `"min"`, `"max"`, `"forward"`, `"backward"`).
+     * @param options.limit Maximum consecutive nulls to fill when using propagation strategies.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, null, 3] })
@@ -363,7 +358,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 0 │
      * │ 3 │
      * └───┘
-     * @since v1.6.0
      */
     fill_null(options: FillNullOptions = {}): DataFrame<T> {
         if (this._height === 0) return this;
@@ -393,7 +387,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 2 │
      * │ 3 │
      * └───┘
-     * @since v1.5.0
      */
     filter(...exprs: (IExpr | ((row: T) => any))[]): DataFrame<T> {
         if (this._height === 0) return DataFrame._createDirect({}, this._schema, 0);
@@ -490,7 +483,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴──────┘
      * >>> df.get_schema()
      * { a: Float64, b: Utf8 }
-     * @since v1.5.0
      */
     get_schema(): DataFrameSchema {
         return this._schema;
@@ -519,7 +511,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ A   │ 30  │
      * │ B   │ 30  │
      * └─────┴─────┘
-     * @since v1.5.0
      */
     groupby<K extends keyof T>(keys: K | K[]): GroupedData<T, K> {
         const keysArr = toValidArray(keys);
@@ -569,7 +560,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │
      * │ 2 │
      * └───┘
-     * @since v1.5.0
      */
     head(n: number = 10): DataFrame<T> {
         return this.limit(n, { offset: 0, from: "start" })
@@ -591,7 +581,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┘
      * >>> df.height
      * 3
-     * @since v1.5.0
      */
     get height(): number {
         return this._height;
@@ -600,7 +589,8 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Concatenates columns horizontally to the current DataFrame.
      * @param other DataFrame or array of DataFrames to append side-by-side.
-     * @param options Horizontal concat options.
+     * @param options Horizontal concat configuration options.
+     * @param options.strict When `true` (default), throws an error if row counts mismatch. Set `false` to allow null padding.
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ a: [1, 2] })
@@ -621,7 +611,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │ 10 │
      * │ 2 │ 20 │
      * └───┴────┘
-     * @since v1.6.0
      */
     hstack<U extends RowRecord = any>(
         other: ConcatItem | ConcatItem[],
@@ -652,7 +641,6 @@ export class DataFrame<T extends RowRecord = any> {
      * ├───┼───┼───┤
      * │ 1 │ 2 │ 3 │
      * └───┴───┴───┘
-     * @since v1.6.0
      */
     insert_column(index: number, name: string, expr: IntoExpr): DataFrame<any> {
         const colExpr = ColumnExpr.toColExpr(expr).alias(name);
@@ -691,7 +679,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └─────┘
      * >>> df.item(0, "val")
      * 42
-     * @since v1.5.0
      */
     item(row?: number, column?: number | string): any {
         const height = this._height;
@@ -745,7 +732,6 @@ export class DataFrame<T extends RowRecord = any> {
      * >>> for (const col of df.iter_columns()) { console.log(col); }
      * Float64Array([1, 2])
      * Float64Array([3, 4])
-     * @since v1.6.0
      */
     *iter_columns(): Generator<ColumnData> {
         const keys = Object.keys(this._columns);
@@ -758,7 +744,8 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Yields a generator iterating over rows as tuples or named objects.
-     * @param options Dict options (`named: true` for objects, `false` for positional arrays).
+     * @param config Iteration format configuration.
+     * @param config.named When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`).
      * @returns Generator of rows.
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
@@ -773,7 +760,6 @@ export class DataFrame<T extends RowRecord = any> {
      * >>> for (const row of df.iter_rows({ named: true })) { console.log(row); }
      * { a: 1, b: "x" }
      * { a: 2, b: "y" }
-     * @since v1.6.0
      */
     *iter_rows({ named = false }: { named?: boolean } = {}): Generator<any[] | Record<string, any>> {
         const keys = Object.keys(this._columns);
@@ -807,7 +793,11 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Joins two DataFrames on key columns using inner, left, right, or outer join strategy.
-     * @param config Join configuration containing right DataFrame, on keys, strategy, and suffixes.
+     * @param config Join configuration object.
+     * @param config.other Right DataFrame to join with left DataFrame.
+     * @param config.on Join key column name or array of key column names.
+     * @param config.how Join strategy (`"inner"`, `"left"`, `"right"`, or `"outer"`). Default `"inner"`.
+     * @param config.suffixes Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `["", "_right"]`).
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
@@ -828,7 +818,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1  │ a   │ 100 │
      * │ 2  │ b   │ 200 │
      * └────┴─────┴─────┘
-     * @since v1.6.0
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
         const { other, on, how = "inner", suffixes = ["", "_right"] } = config;
@@ -969,7 +958,9 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Limits the output to N rows starting from offset.
      * @param n Maximum number of rows to take.
-     * @param options Offset and position options.
+     * @param options Offset and slice direction options.
+     * @param options.offset Number of rows to skip before taking `n` rows (default 0).
+     * @param options.from Slice direction starting point (`"start"` or `"end"`). Default `"start"`.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [10, 20, 30, 40] })
@@ -991,7 +982,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 20 │
      * │ 30 │
      * └────┘
-     * @since v1.5.0
      */
     limit(n: number, { offset = 0, from = "start" }: LimitOptions = {}): DataFrame<T> {
         const len = this._height;
@@ -1021,7 +1011,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Pivots columns from long format to a wide datagrid structure.
-     * @param config Pivot configuration containing index, columns, and values.
+     * @param config Pivot table configuration options.
+     * @param config.index Key column(s) to use as new DataFrame rows.
+     * @param config.columns Column whose distinct values become new wide column headers.
+     * @param config.values Column whose cell values populate the pivoted grid cells.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({
@@ -1047,7 +1040,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 2020 │ 100 │ 150 │
      * │ 2021 │ 120 │ 180 │
      * └──────┴─────┴─────┘
-     * @since v1.7.0
      */
     pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U> {
         if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0);
@@ -1132,7 +1124,6 @@ export class DataFrame<T extends RowRecord = any> {
      * ├──────────┤
      * │ 1        │
      * └──────────┘
-     * @since v1.6.0
      */
     rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> {
         const renameMapping = mapping || {};
@@ -1177,7 +1168,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 2 │
      * │ 1 │
      * └───┘
-     * @since v1.5.0
      */
     reverse(): DataFrame<T> {
         if (this._height === 0) return this;
@@ -1208,7 +1198,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴──────┘
      * >>> df.schema
      * { a: Float64, b: Utf8 }
-     * @since v1.5.0
      */
     get schema(): DataFrameSchema {
         return this._schema;
@@ -1236,7 +1225,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │ 110    │
      * │ 2 │ 120    │
      * └───┴────────┘
-     * @since v1.5.0
      */
     select<U extends RowRecord = any>(
         ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
@@ -1375,7 +1363,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.shape
      * [2, 2]
-     * @since v1.5.0
      */
     get shape(): [number, number] {
         return [this.height, this.width];
@@ -1406,7 +1393,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 20 │
      * │ 30 │
      * └────┘
-     * @since v1.5.0
      */
     slice(start: number, end?: number): DataFrame<T> {
         const total = this._height;
@@ -1423,7 +1409,11 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Sorts DataFrame rows by one or more column expressions or custom sorters.
-     * @param config Configuration options containing by keys, descending, and nullsLast options.
+     * @param config Sort configuration options.
+     * @param config.by Column name(s) or expression(s) to sort by.
+     * @param config.descending Sort order boolean or array of booleans per key (default `false`).
+     * @param config.nullsLast When `true` (default), places nulls at the end of sorted output.
+     * @param config.custom Optional dictionary mapping column names to custom comparator functions.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ val: [3, 1, 2] })
@@ -1445,7 +1435,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 2   │
      * │ 3   │
      * └─────┘
-     * @since v1.5.0
      */
     sort(config?: SortOptions<T>): DataFrame<T> {
         if (!config || !config.by || this._height === 0) return this;
@@ -1541,7 +1530,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 3 │
      * │ 4 │
      * └───┘
-     * @since v1.5.0
      */
     tail(n: number = 10): DataFrame<T> {
         return this.limit(n, { offset: 0, from: 'end' })
@@ -1562,7 +1550,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.to_dict()
      * { a: Float64Array([1, 2]), b: ["x", "y"] }
-     * @since v1.5.0
      */
     to_dict(): DataFrameColumns<T> {
         return { ...this._columns };
@@ -1582,7 +1569,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.to_dicts()
      * [{ a: 1, b: "x" }]
-     * @since v1.5.0
      */
     to_dicts(): T[] {
         return columnsToRows(this._columns, this._height);
@@ -1604,7 +1590,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┘
      * >>> df.to_array("a")
      * [10, 20]
-     * @since v1.6.0
      */
     to_array<K extends keyof T>(nameOrExpr: K | IExpr): any[] {
         if (this._height === 0) return [];
@@ -1619,7 +1604,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Transposes rows into columns and columns into rows.
-     * @param options Configuration for headers, header names, and output columns.
+     * @param options Transpose layout options.
+     * @param options.include_header When `true`, includes original column names as a new header column (default `false`).
+     * @param options.header_name Name of the header column when `include_header` is `true` (default `"column"`).
+     * @param options.column_names Column name or iterable of strings to use as transposed column headers.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ metric: ["sales", "clicks"], q1: [100, 500], q2: [120, 600] })
@@ -1639,7 +1627,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ q1     │ 100      │ 500      │
      * │ q2     │ 120      │ 600      │
      * └────────┴──────────┴──────────┘
-     * @since v1.7.0
      */
     transpose({
         include_header: includeHeader = false,
@@ -1748,7 +1735,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │ x │
      * │ 2 │ y │
      * └───┴───┘
-     * @since v1.5.0
      */
     unique<K extends keyof T>(columns?: K | K[]): DataFrame<T> {
         if (this._height === 0) return DataFrame._createDirect<T>({}, this._schema, 0);
@@ -1783,7 +1769,11 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Unpivots a wide DataFrame into a long format structure.
-     * @param config Unpivot configuration containing idVars, valueVars, varName, and valueName.
+     * @param config Unpivot configuration options.
+     * @param config.idVars Key column(s) to retain as identifier variables.
+     * @param config.valueVars Column(s) to unpivot into variable-value pairs.
+     * @param config.varName Name for the new variable column holding old column headers (default `"variable"`).
+     * @param config.valueName Name for the new value column holding cell values (default `"value"`).
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ year: [2020], Jan: [100], Feb: [150] })
@@ -1802,7 +1792,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 2020 │ Jan   │ 100     │
      * │ 2020 │ Feb   │ 150     │
      * └──────┴───────┴─────────┘
-     * @since v1.7.0
      */
     unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> {
         const { idVars, valueVars, varName = "variable", valueName = "value" } = config;
@@ -1875,7 +1864,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │
      * │ 2 │
      * └───┘
-     * @since v1.6.0
      */
     vstack<U extends RowRecord = any>(
         other: ConcatItem | ConcatItem[]
@@ -1897,7 +1885,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.width
      * 2
-     * @since v1.5.0
      */
     get width(): number {
         return Object.keys(this._columns).length;
@@ -1952,7 +1939,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 1 │ 11 │
      * │ 2 │ 12 │
      * └───┴────┘
-     * @since v1.6.0
      */
     with_columns(
         ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
@@ -2010,7 +1996,6 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 0   │ a   │
      * │ 1   │ b   │
      * └─────┴─────┘
-     * @since v1.6.0
      */
     with_row_index(name: string = "index", offset: number = 0): DataFrame<any> {
         const expr = seq_range(offset, {
@@ -2026,8 +2011,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Writes DataFrame rows to JSON format string or file/stream target.
-     * @param file Target file path or stream object.
-     * @param options Formatting and replacer configuration options.
+     * @param file Target file path or writable stream target (optional).
+     * @param options JSON formatting and replacer options.
+     * @param options.format JSON output format structure (`"json"` or `"ndjson"`). Default `"json"`.
+     * @param options.replacerOptions Serialization options including custom `replacer` function or replacer array.
      * @returns JSON string representation.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })
@@ -2040,7 +2027,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.write_json()
      * '[{"a":1,"b":"x"}]'
-     * @since v1.6.0
      */
     write_json(
         file?: string | { write: (str: string) => void },
@@ -2073,8 +2059,11 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Writes DataFrame to CSV format string or file/stream target.
-     * @param file Target file path or stream object.
-     * @param options CSV formatting options (delimiter, header, quoteChar).
+     * @param file Target file path or writable stream target (optional).
+     * @param options CSV formatting options.
+     * @param options.delimiter Column delimiter character (default `","`).
+     * @param options.header When `true` (default), includes column header row.
+     * @param options.quoteChar Character used to enclose fields containing special characters (default `'"'`).
      * @returns CSV string output.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })
@@ -2087,7 +2076,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴───┘
      * >>> df.write_csv()
      * "a,b\n1,x"
-     * @since v1.6.0
      */
     write_csv(
         file?: string | { write: (str: string) => void },

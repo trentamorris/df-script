@@ -40,7 +40,6 @@ export class StringExprNamespace {
      * ├───────┼──────┼──────────┤
      * │ John  │ Doe  │ John Doe │
      * └───────┴──────┴──────────┘
-     * @since v1.6.0
      */
     concat(other: string | IExpr) {
         return derive(this.expr, kleeneBinary(this.expr, other, (v, o) => String(v) + String(o)));
@@ -60,7 +59,6 @@ export class StringExprNamespace {
      * │ user@example.com │ true       │
      * │ admin@test.org   │ false      │
      * └──────────────────┴────────────┘
-     * @since v1.7.0
      */
     contains(pattern: string | RegExp) {
         return this._patternGuard(pattern, () =>
@@ -82,7 +80,6 @@ export class StringExprNamespace {
      * │ banana │ 3       │
      * │ apple  │ 1       │
      * └────────┴─────────┘
-     * @since v1.7.0
      */
     count_matches(pattern: string | RegExp) {
         return this._patternGuard(pattern, () =>
@@ -118,7 +115,6 @@ export class StringExprNamespace {
      * ├───────────────┼─────────────┤
      * │ hello%20world │ hello world │
      * └───────────────┴─────────────┘
-     * @since v1.7.0
      */
     decode_uri_component() {
         return this._deriveString((str) => {
@@ -142,7 +138,6 @@ export class StringExprNamespace {
      * ├─────────────┼───────────────┤
      * │ hello world │ hello%20world │
      * └─────────────┴───────────────┘
-     * @since v1.7.0
      */
     encode_uri_component() {
         return this._deriveString((str) => {
@@ -168,7 +163,6 @@ export class StringExprNamespace {
      * │ user@org.org │ true   │
      * │ admin@com.com│ false  │
      * └──────────────┴────────┘
-     * @since v1.5.0
      */
     ends_with(suffix: string) {
         return this._deriveString((str) => str.endsWith(suffix));
@@ -186,7 +180,6 @@ export class StringExprNamespace {
      * ├──────┼─────────────────┤
      * │ cat  │ ["c", "a", "t"] │
      * └──────┴─────────────────┘
-     * @since v1.7.0
      */
     explode() {
         return this._deriveString((str) => str.split(""));
@@ -206,7 +199,6 @@ export class StringExprNamespace {
      * ├────────┼─────┤
      * │ id:123 │ 123 │
      * └────────┴─────┘
-     * @since v1.7.0
      */
     extract(pattern: RegExp, group: number = 0) {
         return this._patternGuard(pattern, () =>
@@ -230,7 +222,6 @@ export class StringExprNamespace {
      * ├───────┼────────┤
      * │ hello │ 5      │
      * └───────┴────────┘
-     * @since v1.5.0
      */
     len() {
         return this.len_chars();
@@ -248,7 +239,6 @@ export class StringExprNamespace {
      * ├───────┼───────┤
      * │ hello │ 5     │
      * └───────┴───────┘
-     * @since v1.6.0
      */
     len_bytes() {
         return this._deriveString((str) => new TextEncoder().encode(str).length);
@@ -266,7 +256,6 @@ export class StringExprNamespace {
      * ├───────┼────────┤
      * │ hello │ 5      │
      * └───────┴────────┘
-     * @since v1.6.0
      */
     len_chars() {
         return this._deriveString((str) => str.length);
@@ -284,7 +273,6 @@ export class StringExprNamespace {
      * ├───────┼─────────┤
      * │ HELLO │ hello   │
      * └───────┴─────────┘
-     * @since v1.5.0
      */
     lower() {
         return this._deriveString((str) => str.toLowerCase());
@@ -304,7 +292,6 @@ export class StringExprNamespace {
      * ├─────┼────────┤
      * │ 5   │ 005    │
      * └─────┴────────┘
-     * @since v1.6.0
      */
     lpad(width: number, fill: string = " ") {
         return this._deriveString((str) => str.padStart(width, fill));
@@ -324,7 +311,6 @@ export class StringExprNamespace {
      * ├──────┼────────┤
      * │ a    │ a--    │
      * └──────┴────────┘
-     * @since v1.6.0
      */
     pad_end(width: number, fill: string = " ") {
         return this.rpad(width, fill);
@@ -344,7 +330,6 @@ export class StringExprNamespace {
      * ├─────┼────────┤
      * │ 5   │ 005    │
      * └─────┴────────┘
-     * @since v1.6.0
      */
     pad_start(width: number, fill: string = " ") {
         return this.lpad(width, fill);
@@ -364,7 +349,6 @@ export class StringExprNamespace {
      * ├─────────┼─────────┤
      * │ old.com │ new.com │
      * └─────────┴─────────┘
-     * @since v1.6.0
      */
     replace(
         pattern: string | RegExp,
@@ -389,7 +373,6 @@ export class StringExprNamespace {
      * ├─────────────┼─────────────┤
      * │ foo bar foo │ baz bar baz │
      * └─────────────┴─────────────┘
-     * @since v1.6.0
      */
     replace_all(
         pattern: string | RegExp,
@@ -412,7 +395,6 @@ export class StringExprNamespace {
      * ├─────┼─────┤
      * │ abc │ cba │
      * └─────┴─────┘
-     * @since v1.7.0
      */
     reverse() {
         return this._deriveString((str) => str.split("").reverse().join(""));
@@ -432,7 +414,6 @@ export class StringExprNamespace {
      * ├──────┼────────┤
      * │ a    │ a--    │
      * └──────┴────────┘
-     * @since v1.6.0
      */
     rpad(width: number, fill: string = " ") {
         return this._deriveString((str) => str.padEnd(width, fill));
@@ -452,7 +433,6 @@ export class StringExprNamespace {
      * ├─────────────┼───────┤
      * │ hello world │ hello │
      * └─────────────┴───────┘
-     * @since v1.6.0
      */
     slice(offset: number, length?: number) {
         return this._deriveString((str) => {
@@ -476,7 +456,6 @@ export class StringExprNamespace {
      * ├─────────────┼───────┤
      * │ hello world │ hello │
      * └─────────────┴───────┘
-     * @since v1.6.0
      */
     slice_str(offset: number, length?: number) {
         return this.slice(offset, length);
@@ -495,7 +474,6 @@ export class StringExprNamespace {
      * ├───────┼─────────────────┤
      * │ a,b,c │ ["a", "b", "c"] │
      * └───────┴─────────────────┘
-     * @since v1.6.0
      */
     split(delimiter: string) {
         return this._deriveString((str) => str.split(delimiter));
@@ -515,7 +493,6 @@ export class StringExprNamespace {
      * │ John Doe │ true    │
      * │ Alice    │ false   │
      * └──────────┴─────────┘
-     * @since v1.5.0
      */
     starts_with(prefix: string) {
         return this._deriveString((str) => str.startsWith(prefix));
@@ -535,7 +512,6 @@ export class StringExprNamespace {
      * ├───────────┼──────────┤
      * │ --hello-- │ hello    │
      * └───────────┴──────────┘
-     * @since v1.7.0
      */
     strip_chars(characters?: string | RegExp, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "both", ...options }));
@@ -555,7 +531,6 @@ export class StringExprNamespace {
      * ├─────────┼──────────┤
      * │ hello-- │ hello    │
      * └─────────┴──────────┘
-     * @since v1.7.0
      */
     strip_chars_end(characters?: string | RegExp, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "end", ...options }));
@@ -575,7 +550,6 @@ export class StringExprNamespace {
      * ├─────────┼──────────┤
      * │ --hello │ hello    │
      * └─────────┴──────────┘
-     * @since v1.7.0
      */
     strip_chars_start(characters?: string | RegExp, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "start", ...options }));
@@ -594,7 +568,6 @@ export class StringExprNamespace {
      * ├─────────┼──────────┤
      * │ pre_fix │ fix      │
      * └─────────┴──────────┘
-     * @since v1.7.0
      */
     strip_prefix(prefix: string) {
         return this._deriveString((str) => {
@@ -621,7 +594,6 @@ export class StringExprNamespace {
      * ├──────────┼──────────┤
      * │ fix_post │ fix      │
      * └──────────┴──────────┘
-     * @since v1.7.0
      */
     strip_suffix(suffix: string) {
         return this._deriveString((str) => {
@@ -648,7 +620,6 @@ export class StringExprNamespace {
      * ├────────────┼──────────────────────────┤
      * │ 2026-05-20 │ 2026-05-20T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
-     * @since v1.6.0
      */
     strptime(options: StrptimeOptions) {
         return this._deriveString((str) => strptime(str, options));
@@ -666,7 +637,6 @@ export class StringExprNamespace {
      * ├─────────────┼────────────┤
      * │ hello_world │ helloWorld │
      * └─────────────┴────────────┘
-     * @since v1.7.0
      */
     to_camelcase() {
         return this._deriveString((str) => changeCase(str, { format: "camel" }));
@@ -684,7 +654,6 @@ export class StringExprNamespace {
      * ├────────────┼──────────────────────────┤
      * │ 2026-05-20 │ 2026-05-20T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
-     * @since v1.6.0
      */
     to_date() {
         return this._deriveString((str) => toValidDate(str, { dateOnly: true }));
@@ -702,7 +671,6 @@ export class StringExprNamespace {
      * ├──────────────────────┼──────────────────────────┤
      * │ 2026-05-20T10:00:00Z │ 2026-05-20T10:00:00.000Z │
      * └──────────────────────┴──────────────────────────┘
-     * @since v1.6.0
      */
     to_datetime() {
         return this._deriveString(toValidDate);
@@ -722,7 +690,6 @@ export class StringExprNamespace {
      * ├───────┼───────┤
      * │ 12.34 │ 12.34 │
      * └───────┴───────┘
-     * @since v1.7.0
      */
     to_decimal(precision?: number, scale?: number) {
         return this._deriveString((str) => toValidDecimal(str, { precision, scale }));
@@ -740,7 +707,6 @@ export class StringExprNamespace {
      * ├─────┼─────┤
      * │ 42  │ 42  │
      * └─────┴─────┘
-     * @since v1.6.0
      */
     to_integer() {
         return this._deriveString((str) => toValidInt(str));
@@ -758,7 +724,6 @@ export class StringExprNamespace {
      * ├────────────┼─────────────┤
      * │ helloWorld │ hello-world │
      * └────────────┴─────────────┘
-     * @since v1.7.0
      */
     to_kebabcase() {
         return this._deriveString((str) => changeCase(str, { format: "kebab" }));
@@ -789,7 +754,6 @@ export class StringExprNamespace {
      * │ Bob     │ bob        │
      * │ charlie │ charlie    │
      * └─────────┴────────────┘
-     * @since v1.5.0
      */
     to_lowercase() {
         return this.lower();
@@ -807,7 +771,6 @@ export class StringExprNamespace {
      * ├─────────────┼────────────┤
      * │ hello_world │ HelloWorld │
      * └─────────────┴────────────┘
-     * @since v1.7.0
      */
     to_pascalcase() {
         return this._deriveString((str) => changeCase(str, { format: "pascal" }));
@@ -825,7 +788,6 @@ export class StringExprNamespace {
      * ├────────────┼─────────────┤
      * │ helloWorld │ hello_world │
      * └────────────┴─────────────┘
-     * @since v1.7.0
      */
     to_snakecase() {
         return this._deriveString((str) => changeCase(str, { format: "snake" }));
@@ -843,7 +805,6 @@ export class StringExprNamespace {
      * ├──────────┼──────────┤
      * │ 10:30:00 │ 10:30:00 │
      * └──────────┴──────────┘
-     * @since v1.6.0
      */
     to_time() {
         return this._deriveString(toValidTime);
@@ -861,7 +822,6 @@ export class StringExprNamespace {
      * ├─────────────┼─────────────┤
      * │ hello world │ Hello World │
      * └─────────────┴─────────────┘
-     * @since v1.7.0
      */
     to_titlecase() {
         return this._deriveString((str) => str.replace(/\b\w/g, c => c.toUpperCase()));
@@ -879,7 +839,6 @@ export class StringExprNamespace {
      * ├───────┼───────┤
      * │ alice │ ALICE │
      * └───────┴───────┘
-     * @since v1.5.0
      */
     to_uppercase() {
         return this.upper();
@@ -897,7 +856,6 @@ export class StringExprNamespace {
      * ├───────────┼───────┤
      * │   alice   │ alice │
      * └───────────┴───────┘
-     * @since v1.6.0
      */
     trim() {
         return this.strip_chars();
@@ -915,7 +873,6 @@ export class StringExprNamespace {
      * ├─────────┼───────┤
      * │ alice   │ alice │
      * └─────────┴───────┘
-     * @since v1.6.0
      */
     trim_end() {
         return this.strip_chars_end();
@@ -933,7 +890,6 @@ export class StringExprNamespace {
      * ├─────────┼───────┤
      * │   alice │ alice │
      * └─────────┴───────┘
-     * @since v1.6.0
      */
     trim_start() {
         return this.strip_chars_start();
@@ -951,7 +907,6 @@ export class StringExprNamespace {
      * ├───────┼───────┤
      * │ alice │ ALICE │
      * └───────┴───────┘
-     * @since v1.5.0
      */
     upper() {
         return this._deriveString((str) => str.toUpperCase());
@@ -970,7 +925,6 @@ export class StringExprNamespace {
      * ├─────┼────────┤
      * │ 42  │ 00042  │
      * └─────┴────────┘
-     * @since v1.6.0
      */
     zfill(width: number) {
         return this._deriveString((str) => str.padStart(width, "0"));

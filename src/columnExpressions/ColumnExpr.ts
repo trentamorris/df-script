@@ -15,11 +15,11 @@ import type { IntoExpr, IExpr, DataFrameSchema, ColumnDict } from "../types"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
 export class ColumnExpr<T> extends ExprBase {
-    public _colName: string
-    public _colNames?: string[];
-    public _excludedCols: string[] = [];
-    public _targetType?: any;
-    public _targetTypes?: any[];
+    _colName: string = "";
+    _colNames?: string[];
+    _excludedCols: string[] = [];
+    _targetType?: any;
+    _targetTypes?: any[];
 
     static isColExpr(v: unknown): v is ColumnExpr<any> {
         if (!isObj(v)) return false;
@@ -43,17 +43,11 @@ export class ColumnExpr<T> extends ExprBase {
             const hasTypes = colName.some(x => x instanceof DataType || typeof x === "function");
             if (hasTypes) {
                 this._targetTypes = colName;
-                this._colName = "";
-                this._outputName = "";
             } else {
                 this._colNames = colName.map(String);
-                this._colName = "";
-                this._outputName = "";
             }
         } else if (colName instanceof DataType || typeof colName === "function") {
             this._targetType = colName;
-            this._colName = "";
-            this._outputName = "";
         } else {
             this._colName = String(colName);
             this._outputName = this._colName;
@@ -101,6 +95,7 @@ applyMixins(ColumnExpr, [
 ]);
 
 /**
+ * @internal
  * Determines which concrete keys a column selector matches.
  * Returns null if the expression is not a multi-column selector.
  */
@@ -175,6 +170,7 @@ function getTargetKeys(
 }
 
 /**
+ * @internal
  * Resolves column selectors, expanding wildcards, datatypes, and arrays of columns/types
  * into concrete ColumnExpr instances.
  */

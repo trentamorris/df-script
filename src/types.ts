@@ -1,3 +1,4 @@
+/** @typefile */
 import type { DataFrame } from "./dataframe/dataframe";
 import type { RegisteredDataType } from "./datatypes";
 

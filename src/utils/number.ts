@@ -1,5 +1,5 @@
+/** @internalfile */
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
-
 
 const STRICT_SCIENTIFIC_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
 const NON_BASE10_INJECTION_REGEX = /0[xobXOB]/;
@@ -161,7 +161,6 @@ export function toValidNumber(
             return null;
     }
 }
-
 
 export interface NumericFormatOptions extends Intl.NumberFormatOptions {
     /** BCP 47 language tag (e.g., 'en-US' for dot, 'de-DE' for comma). Defaults to 'en-US'. */

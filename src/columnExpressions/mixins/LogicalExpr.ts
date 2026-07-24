@@ -22,7 +22,6 @@ export class LogicalExpr extends ExprBase {
          * │ false │ false │ false   │
          * │ null  │ true  │ null    │
          * └───────┴───────┴─────────┘
-         * @since v1.5.0
          */
         and(other: any) { 
             return derive(this, (vArray, columns) => {
@@ -57,7 +56,6 @@ export class LogicalExpr extends ExprBase {
          * │ false     │ true        │
          * │ null      │ null        │
          * └───────────┴─────────────┘
-         * @since v1.5.0
          */
         not() {
             return derive(this, kleeneUnary((v) => !v));
@@ -82,7 +80,6 @@ export class LogicalExpr extends ExprBase {
          * │ false │ true  │ true   │
          * │ null  │ false │ null   │
          * └───────┴───────┴────────┘
-         * @since v1.5.0
          */
         or(other: any) { 
             return derive(this, (vArray, columns) => {
@@ -120,7 +117,6 @@ export class LogicalExpr extends ExprBase {
          * │ false │ true  │ true    │
          * │ false │ false │ false   │
          * └───────┴───────┴─────────┘
-         * @since v1.6.0
          */
         xor(other: any) {
             return derive(this, kleeneBinary(this, other, (v, w) => !!v !== !!w));

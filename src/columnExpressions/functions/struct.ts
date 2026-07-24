@@ -5,7 +5,6 @@ import { STRUCT_MARKER } from "../constants";
 
 /**
  * Packages multiple expressions into a structured object column.
- * @since v1.6.0
  */
 export function struct(
     fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,

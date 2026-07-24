@@ -1,3 +1,4 @@
+/** @internalfile */
 import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types"
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR } from "./constants"

@@ -1,3 +1,4 @@
+/** @internalfile */
 import type { ColumnDict } from "../types";
 import { strftime, toValidDate } from "./date";
 import { createSafeJsonReplacer, type SafeJsonReplacerOptions } from "./json";

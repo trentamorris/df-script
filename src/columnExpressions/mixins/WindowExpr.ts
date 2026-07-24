@@ -102,7 +102,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 2       │
      * │ 30  │ 3       │
      * └─────┴─────────┘
-     * @since v1.7.0
      */
     cum_count(reverse: boolean = false) {
         return this._cum(reverse, 0, (acc) => acc + 1);
@@ -123,7 +122,6 @@ export class WindowExpr extends ExprBase {
      * │ 3   │ 3     │
      * │ 2   │ 3     │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     cum_max(reverse: boolean = false) {
         return this._cum(reverse, null, (acc, val) => (acc === null || val > acc ? val : acc));
@@ -144,7 +142,6 @@ export class WindowExpr extends ExprBase {
      * │ 1   │ 1     │
      * │ 2   │ 1     │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     cum_min(reverse: boolean = false) {
         return this._cum(reverse, null, (acc, val) => (acc === null || val < acc ? val : acc));
@@ -166,7 +163,6 @@ export class WindowExpr extends ExprBase {
      * │ 3   │ 6      │
      * │ 4   │ 24     │
      * └─────┴────────┘
-     * @since v1.7.0
      */
     cum_prod(reverse: boolean = false) {
         return this._cum(reverse, 1, (acc, val) => acc * val, (acc, hasValid) => (hasValid ? acc : null));
@@ -187,7 +183,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 30    │
      * │ 30  │ 60    │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     cum_sum(reverse: boolean = false) {
         return this._cum(reverse, 0, (acc, val) => acc + val);
@@ -207,7 +202,6 @@ export class WindowExpr extends ExprBase {
      * │ 100   │ 2  │
      * │ 90    │ 1  │
      * └───────┴────┘
-     * @since v1.7.0
      */
     dense_rank() {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
@@ -231,7 +225,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 10   │
      * │ 30  │ 20   │
      * └─────┴──────┘
-     * @since v1.7.0
      */
     lag(offset: number = 1, defaultVal: any = null) {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
@@ -259,7 +252,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 30   │
      * │ 30  │ 0    │
      * └─────┴──────┘
-     * @since v1.7.0
      */
     lead(offset: number = 1, defaultVal: any = null) {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
@@ -286,7 +278,6 @@ export class WindowExpr extends ExprBase {
      * │ A   │ 20  │ 30      │
      * │ B   │ 30  │ 30      │
      * └─────┴─────┴─────────┘
-     * @since v1.7.0
      */
     over(columns: string | IExpr | (string | IExpr)[]) {
         const newInst = derive(this);
@@ -309,7 +300,6 @@ export class WindowExpr extends ExprBase {
      * │ 80    │ 1    │
      * │ 90    │ 2    │
      * └───────┴──────┘
-     * @since v1.7.0
      */
     rank() {
         return this._window(function (this: IExpr, groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {
@@ -333,7 +323,6 @@ export class WindowExpr extends ExprBase {
      * │ 2   │ 5     │
      * │ 8   │ 8     │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     rolling_max(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).max);
@@ -354,7 +343,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 15     │
      * │ 30  │ 25     │
      * └─────┴────────┘
-     * @since v1.7.0
      */
     rolling_mean(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).mean);
@@ -375,7 +363,6 @@ export class WindowExpr extends ExprBase {
      * │ 30  │ 20    │
      * │ 20  │ 25    │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     rolling_median(windowSize: number) {
         return this._rolling(windowSize, v => computeMedian(v));
@@ -396,7 +383,6 @@ export class WindowExpr extends ExprBase {
      * │ 5   │ 5     │
      * │ 20  │ 5     │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     rolling_min(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).min);
@@ -418,7 +404,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 15      │
      * │ 30  │ 25      │
      * └─────┴─────────┘
-     * @since v1.7.0
      */
     rolling_quantile(quantile: number, windowSize: number) {
         return this._rolling(windowSize, v => computeQuantile(v, quantile));
@@ -439,7 +424,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 2      │
      * │ 15  │ 1      │
      * └─────┴────────┘
-     * @since v1.7.0
      */
     rolling_rank(windowSize: number) {
         return this._rolling(windowSize, (vals) => {
@@ -462,7 +446,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 7.071  │
      * │ 30  │ 7.071  │
      * └─────┴────────┘
-     * @since v1.7.0
      */
     rolling_std(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).std);
@@ -483,7 +466,6 @@ export class WindowExpr extends ExprBase {
      * │ 20  │ 30    │
      * │ 30  │ 50    │
      * └─────┴───────┘
-     * @since v1.7.0
      */
     rolling_sum(windowSize: number) {
         return this._rolling(windowSize, v => getArrayStats(v).sum);
@@ -503,7 +485,6 @@ export class WindowExpr extends ExprBase {
      * │ A   │ 2  │
      * │ B   │ 1  │
      * └─────┴────┘
-     * @since v1.7.0
      */
     row_number() {
         const newInst = this._window(function (this: IExpr, _groupPreValues: any[], _partitionIndices: number[], currentIndex: number) {

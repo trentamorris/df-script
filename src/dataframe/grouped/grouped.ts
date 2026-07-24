@@ -45,7 +45,6 @@ export class GroupedData<T, K extends keyof T> {
      * │ A     │
      * │ B     │
      * └───────┘
-     * @since v1.5.0
      */
     to_dataframe<U extends RowRecord = any>(): DataFrame<U> {
         const keysLen = this._keys.length;
@@ -93,7 +92,6 @@ export class GroupedData<T, K extends keyof T> {
      * │ A     │ 30      │
      * │ B     │ 30      │
      * └───────┴─────────┘
-     * @since v1.5.0
      */
     agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
         const allKeysLen = this._allKeys.length;

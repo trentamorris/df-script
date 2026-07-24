@@ -40,7 +40,6 @@ export class ArrayExprNamespace {
      * │ [true, true]  │ true     │
      * │ [true, false] │ false    │
      * └───────────────┴──────────┘
-     * @since v1.6.0
      */
     all() {
         return this._deriveArray((arr) => isArrayOfType(arr, (x) => !!x, { mode: "every" }));
@@ -59,7 +58,6 @@ export class ArrayExprNamespace {
      * │ [true, false]  │ true     │
      * │ [false, false] │ false    │
      * └────────────────┴──────────┘
-     * @since v1.6.0
      */
     any() {
         return this._deriveArray((arr) => isArrayOfType(arr, (x) => !!x, { mode: "some" }));
@@ -79,7 +77,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ true      │
      * │ [4, 5]    │ false     │
      * └───────────┴───────────┘
-     * @since v1.6.0
      */
     contains(item: any) {
         return this._deriveArray((arr) => arr.includes(item));
@@ -99,7 +96,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ true    │
      * │ [1, 5]    │ false   │
      * └───────────┴─────────┘
-     * @since v1.6.0
      */
     contains_all(items: ArrayLike<any>) {
         return this._deriveArray((arr) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
@@ -119,7 +115,6 @@ export class ArrayExprNamespace {
      * │ [1, 2] │ true    │
      * │ [3, 4] │ true    │
      * └────────┴─────────┘
-     * @since v1.6.0
      */
     contains_any(items: ArrayLike<any>) {
         return this._deriveArray((arr) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
@@ -140,7 +135,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 2, 3] │ 2    │
      * │ [4, 5]       │ 0    │
      * └──────────────┴──────┘
-     * @since v1.7.0
      */
     count_matches(item: any, options: UniqueArrayStatsOptions = {}) {
         return this._deriveArray((arr) => getUniqueArrayStats(arr, options).frequencies.get(item) ?? 0);
@@ -160,7 +154,6 @@ export class ArrayExprNamespace {
      * │ [1, 5, 10] │ [5, 10]  │
      * │ [2, 8]     │ [8]      │
      * └────────────┴──────────┘
-     * @since v1.7.0
      */
     filter(expr: IExpr) {
         return derive(this.expr, (vArray, columns) => {
@@ -210,7 +203,6 @@ export class ArrayExprNamespace {
      * │ 2 │
      * │ 3 │
      * └───┘
-     * @since v1.7.0
      */
     explode({ empty_as_null = true, keep_nulls = true }: ExplodeOptions = {}) {
         return derive(this.expr, (vArray) => {
@@ -284,7 +276,6 @@ export class ArrayExprNamespace {
      * │ [10, 20] │ 10      │
      * │ [30]     │ 30      │
      * └──────────┴─────────┘
-     * @since v1.6.0
      */
     first(null_on_oob: boolean = true) {
         return this.get(0, null_on_oob);
@@ -305,7 +296,6 @@ export class ArrayExprNamespace {
      * │ [10, 20, 30] │ [10, 30] │
      * │ [40, 50]     │ [40, null]│
      * └──────────────┴──────────┘
-     * @since v1.7.0
      */
     gather(
         indices: number | ArrayLike<number>,
@@ -336,7 +326,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3, 4] │ [1, 3] │
      * │ [5, 6, 7]    │ [5, 7] │
      * └──────────────┴────────┘
-     * @since v1.7.0
      */
     gather_every(options: StepSliceArrayOptions = {}) {
         return this._deriveArray((arr) => stepSliceArray(arr, options));
@@ -357,7 +346,6 @@ export class ArrayExprNamespace {
      * │ [10, 20] │ 20     │
      * │ [30]     │ null   │
      * └──────────┴────────┘
-     * @since v1.6.0
      */
     get(index: number, null_on_oob: boolean = true) {
         return this._deriveArray((arr) => getArrayElement(arr, index, null_on_oob));
@@ -378,7 +366,6 @@ export class ArrayExprNamespace {
      * │ ["a","b"]│ "a-b"  │
      * │ ["c"]    │ "c"    │
      * └──────────┴────────┘
-     * @since v1.7.0
      */
     join(separator: string = ",", options: JoinArrayOptions = {}) {
         return this._deriveArray((arr) => joinArray(arr, separator, options));
@@ -398,7 +385,6 @@ export class ArrayExprNamespace {
      * │ [10, 20] │ 20     │
      * │ [30]     │ 30     │
      * └──────────┴────────┐
-     * @since v1.6.0
      */
     last(null_on_oob: boolean = true) {
         return this.get(-1, null_on_oob);
@@ -406,7 +392,6 @@ export class ArrayExprNamespace {
 
     /**
      * Returns the length of each list inside the column cell.
-     * @since v1.6.0
      */
     len() {
         return this.lengths();
@@ -425,7 +410,6 @@ export class ArrayExprNamespace {
      * │ [10, 20]     │ 2     │
      * │ [30, 40, 50] │ 3     │
      * └──────────────┴───────┘
-     * @since v1.6.0
      */
     lengths() {
         return this._deriveArray((arr) => arr.length);
@@ -444,7 +428,6 @@ export class ArrayExprNamespace {
      * │ [1, 5, 2] │ 5     │
      * │ [10, 4]   │ 10    │
      * └───────────┴───────┘
-     * @since v1.6.0
      */
     max() {
         return this._deriveArray((arr) => getArrayStats(arr).max);
@@ -463,7 +446,6 @@ export class ArrayExprNamespace {
      * │ [1, 5, 2] │ 1       │
      * │ [10, 4]   │ 0       │
      * └───────────┴─────────┘
-     * @since v1.7.0
      */
     max_index() {
         return this._deriveArray((arr) => getArrayStats(arr).maxIdx);
@@ -482,7 +464,6 @@ export class ArrayExprNamespace {
      * │ [1, 5, 9] │ 5      │
      * │ [10, 40]  │ 25     │
      * └───────────┴────────┘
-     * @since v1.6.0
      */
     mean() {
         return this._deriveArray((arr) => getArrayStats(arr).mean);
@@ -501,7 +482,6 @@ export class ArrayExprNamespace {
      * │ [1, 3, 5, 7]   │ 4    │
      * │ [10, 20, 30]   │ 20   │
      * └────────────────┴──────┘
-     * @since v1.6.0
      */
     median() {
         return this._deriveArray((arr) => computeMedian(arr));
@@ -520,7 +500,6 @@ export class ArrayExprNamespace {
      * │ [1, 5, 2] │ 1     │
      * │ [10, 4]   │ 4     │
      * └───────────┴───────┘
-     * @since v1.6.0
      */
     min() {
         return this._deriveArray((arr) => getArrayStats(arr).min);
@@ -539,7 +518,6 @@ export class ArrayExprNamespace {
      * │ [5, 1, 2] │ 1       │
      * │ [10, 4]   │ 1       │
      * └───────────┴─────────┘
-     * @since v1.7.0
      */
     min_index() {
         return this._deriveArray((arr) => getArrayStats(arr).minIdx);
@@ -558,7 +536,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 2, 3] │ 2      │
      * │ [5, 5, 6]    │ 5      │
      * └──────────────┴────────┘
-     * @since v1.7.0
      */
     mode() {
         return this._deriveArray((arr) => computeMode(arr));
@@ -578,7 +555,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 2, 3] │ 3          │
      * │ [4, 5]       │ 2          │
      * └──────────────┴────────────┘
-     * @since v1.7.0
      */
     n_unique(options: UniqueArrayStatsOptions = {}) {
         return this._deriveArray((arr) => getUniqueArrayStats(arr, options).count);
@@ -597,7 +573,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ [3, 2, 1] │
      * │ [4, 5]    │ [5, 4]    │
      * └───────────┴───────────┘
-     * @since v1.6.0
      */
     reverse() {
         return this._deriveArray((arr) => arr.slice().reverse());
@@ -617,7 +592,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ [null, 1, 2]     │
      * │ [4, 5]    │ [null, 4]        │
      * └───────────┴──────────────────┘
-     * @since v1.7.0
      */
     shift(n: number = 1) {
         return this._deriveArray((arr) => shiftArray(arr, n));
@@ -638,7 +612,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3, 4] │ [2, 3] │
      * │ [5, 6]       │ [6]    │
      * └──────────────┴────────┘
-     * @since v1.6.0
      */
     slice(start?: number, end?: number) {
         return this._deriveArray((arr) => arr.slice(start, end));
@@ -660,7 +633,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ [1, 10, 20, 3]  │
      * │ [4, 5]    │ [4, 10, 20]     │
      * └───────────┴─────────────────┘
-     * @since v1.7.0
      */
     splice(start: number, deleteCount?: number, ...items: any[]) {
         return this._deriveArray((arr) => {
@@ -684,7 +656,6 @@ export class ArrayExprNamespace {
      * │ [3, 1, 2] │ [1, 2, 3] │
      * │ [5, 4]    │ [4, 5]    │
      * └───────────┴───────────┘
-     * @since v1.6.0
      */
     sort(options?: SortArrayOptions) {
         return this._deriveArray((arr) => sortArray(arr, options));
@@ -703,7 +674,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ 1       │
      * │ [10, 20]  │ 7.071   │
      * └───────────┴─────────┘
-     * @since v1.7.0
      */
     std() {
         return this._deriveArray((arr) => getArrayStats(arr).std);
@@ -722,7 +692,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ 6     │
      * │ [10, 20]  │ 30    │
      * └───────────┴───────┘
-     * @since v1.6.0
      */
     sum() {
         return this._deriveArray((arr) => getArrayStats(arr).sum);
@@ -742,7 +711,6 @@ export class ArrayExprNamespace {
      * │ [1, 2] │ { x: 1, y: 2 } │
      * │ [3, 4] │ { x: 3, y: 4 } │
      * └────────┴────────────────┘
-     * @since v1.7.0
      */
     to_struct({ upper_bound, fields }: ToStructOptions = {}) {
         return derive(this.expr, (vArray) => {
@@ -806,7 +774,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 2, 3] │ [1, 2, 3] │
      * │ [4, 4, 5]    │ [4, 5]    │
      * └──────────────┴───────────┘
-     * @since v1.6.0
      */
     unique(options: UniqueArrayStatsOptions = {}) {
         return this._deriveArray((arr) => getUniqueArrayStats(arr, options).values);
@@ -825,7 +792,6 @@ export class ArrayExprNamespace {
      * │ [1, 2, 3] │ 1     │
      * │ [10, 20]  │ 50    │
      * └───────────┴───────┘
-     * @since v1.7.0
      */
     variance() {
         return this._deriveArray((arr) => getArrayStats(arr).variance);
@@ -845,7 +811,6 @@ export class ArrayExprNamespace {
      * │ [1, 2] │ [10, 20]   │
      * │ [3, 4] │ [30, 40]   │
      * └────────┴────────────┘
-     * @since v1.7.0
      */
     eval(expr: IExpr) {
         return derive(this.expr, (vArray, columns) => {

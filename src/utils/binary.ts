@@ -1,3 +1,4 @@
+/** @internalfile */
 import { isTypedArray } from "./array";
 import type { AnyTypedArray } from "../types";
 

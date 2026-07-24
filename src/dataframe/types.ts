@@ -1,3 +1,4 @@
+/** @typefile */
 import type { IExpr, AggFn, RowRecord, DataFrameSchema, JSONFormat } from "../types";
 import type { DataFrame } from "./dataframe";
 import type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions } from "../utils";

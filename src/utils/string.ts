@@ -1,3 +1,4 @@
+/** @internalfile */
 import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, unboxPrimitiveObj } from "./object";
 import { isTypedArray } from "./array";
 
@@ -8,7 +9,6 @@ export function isBlankString(v: unknown): v is string {
     }
     return false;
 }
-
 
 const ESCAPE_CHARS_REGEX = /[-\/\\^$*+?.()|\[\]{}]/g;
 

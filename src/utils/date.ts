@@ -1,3 +1,4 @@
+/** @internalfile */
 import { isBlankString, escapeRegExp } from "./string";
 import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat } from "../types";
 import { ComputeError } from "../exceptions";
@@ -75,7 +76,6 @@ function _createUTCDate(
     d.setUTCHours(hour, minute, second, ms);
     return d;
 }
-
 
 function _getDayOfWeek(y: number, m: number, d: number): number {
     const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4];
@@ -177,7 +177,6 @@ function _formatOffsetMinutes(offsetMin: number, format: Extract<UtcOffsetFormat
     const mins = String(absMin % 60).padStart(2, "0");
     return format === "iso" ? `${sign}${hours}:${mins}` : `${sign}${hours}${mins}`;
 }
-
 
 
 export function toValidDate(input: unknown, options?: { dateOnly?: boolean }): Date | null {
@@ -484,7 +483,6 @@ function _parseOffsetMinutes(offsetStr: string): number {
     const mins = parseInt(clean.slice(3, 5), 10) || 0;
     return sign * (hours * 60 + mins);
 }
-
 
 export function strftime(
     d: Date,

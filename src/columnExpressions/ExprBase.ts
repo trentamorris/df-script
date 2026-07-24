@@ -16,77 +16,21 @@ export const derive = <T extends IExpr>(
 };
 
 export class ExprBase implements IExpr {
-    public _ops: OpFn[] = [];
-    public _outputName: string = "";
-    public _isLiteral?: boolean;
-    public _literalValue?: any;
-    public _aggFn?: AggFn<any> | null = null;
-    public _groupingOpsIndex?: number;
-    public _partitionOpsIndex?: number;
-    public _partitionBy: (string | IExpr)[] | null = null;
-    public _evaluateWindow?: (groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any;
+    _ops: OpFn[] = [];
+    _outputName: string = "";
+    _isLiteral?: boolean;
+    _literalValue?: any;
+    _aggFn?: AggFn<any> | null = null;
+    _groupingOpsIndex?: number;
+    _partitionOpsIndex?: number;
+    _partitionBy: (string | IExpr)[] | null = null;
+    _evaluateWindow?: (groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any;
 
-    public _resolve(val: any, columns: ColumnDict, height: number) {
-        if (val instanceof ExprBase) {
-            if (val._isLiteral && val._ops.length === 1) {
-                return val._literalValue;
-            }
-            return evaluateExpression(val, columns, height);
-        }
-        return val;
-    }
-
-    /**
-     * Renames the output expression column key.
-     * @since v1.5.0
-     */
-    alias(name: string): this {
-        const newInst = derive(this);
-        newInst._outputName = name;
-        return newInst;
-    }
-
-    /**
-     * Coerces the column data type to another type.
-     * @since v1.5.0
-     */
-    cast(dataType: RegisteredDataType): this {
-        return derive(this, (vArray) => {
-            const height = vArray.length;
-            const result = new Array(height);
-            for (let i = 0; i < height; i++) {
-                result[i] = dataType.coerce(vArray[i]);
-            }
-            return result;
-        }) as this;
-    }
-
-    /**
-     * Prints the current evaluation intermediate array to console for debugging.
-     * @since v1.5.0
-     */
-    debug(label?: string): this {
-        return derive(this, (vArray) => {
-            console.log(`[DEBUG] ${label ? label + ': ' : ''}`, vArray);
-            return vArray;
-        }) as this;
-    }
-
-    private _getInitialValue(columns: ColumnDict, height: number): ColumnData {
-        const name = (this as any)._colName;
-        if (name && name !== ALL_COLUMNS_MARKER && !name.startsWith("*") && !(name in columns)) {
-            throw new ColumnNotFoundError(name);
-        }
-        return name && name !== ALL_COLUMNS_MARKER
-            ? (columns[name] || new Array(height).fill(null))
-            : new Array(height).fill(null);
-    }
-
-    evaluate(columns: ColumnDict, height: number): ColumnData {
-        let value = this._getInitialValue(columns, height);
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
         const ops = this._ops;
-        const len = ops.length;
-        for (let i = 0; i < len; i++) {
+        const idx = opsIndex !== undefined ? opsIndex : ops.length;
+        let value: ColumnData = aggregatedArray;
+        for (let i = idx; i < ops.length; i++) {
             value = ops[i](value, columns);
         }
         return value as ColumnData;
@@ -102,13 +46,59 @@ export class ExprBase implements IExpr {
         return value as ColumnData;
     }
 
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
-        const ops = this._ops;
-        const idx = opsIndex !== undefined ? opsIndex : ops.length;
-        let value: ColumnData = aggregatedArray;
-        for (let i = idx; i < ops.length; i++) {
-            value = ops[i](value, columns);
+    _getInitialValue(columns: ColumnDict, height: number): ColumnData {
+        const name = (this as any)._colName;
+        if (name && name !== ALL_COLUMNS_MARKER && !name.startsWith(ALL_COLUMNS_MARKER) && !(name in columns)) {
+            throw new ColumnNotFoundError(name);
         }
-        return value as ColumnData;
+        const val = name && name !== ALL_COLUMNS_MARKER ? columns[name] : null;
+        return val || new Array(height).fill(null);
+    }
+
+    _resolve(val: any, columns: ColumnDict, height: number) {
+        if (val instanceof ExprBase) {
+            if (val._isLiteral && val._ops.length === 1) {
+                return val._literalValue;
+            }
+            return evaluateExpression(val, columns, height);
+        }
+        return val;
+    }
+
+    /**
+     * Renames the output expression column key.
+     */
+    alias(name: string): this {
+        const newInst = derive(this);
+        newInst._outputName = name;
+        return newInst;
+    }
+
+    /**
+     * Coerces the column data type to another type.
+     */
+    cast(dataType: RegisteredDataType): this {
+        return derive(this, (vArray) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            for (let i = 0; i < height; i++) {
+                result[i] = dataType.coerce(vArray[i]);
+            }
+            return result;
+        }) as this;
+    }
+
+    /**
+     * Prints the current evaluation intermediate array to console for debugging.
+     */
+    debug(label?: string): this {
+        return derive(this, (vArray) => {
+            console.log(`[DEBUG] ${label ? label + ': ' : ''}`, vArray);
+            return vArray;
+        }) as this;
+    }
+
+    evaluate(columns: ColumnDict, height: number): ColumnData {
+        return this._evaluatePre(undefined, columns, height);
     }
 }

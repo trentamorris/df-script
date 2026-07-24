@@ -40,12 +40,9 @@ function normalizeToDataFrames(item: any, context: string, index: number): DataF
  * Concatenates items vertically, horizontally, or diagonally.
  * 
  * @param rawItems Single DataFrame or array of DataFrames/rows to concatenate.
- * @param options Configuration options for concatenation layout and strictness:
- *   - `how`: Layout strategy.
- *     - `"vertical"` (default): Appends rows top-to-bottom. Requires matching column names and types.
- *     - `"horizontal"`: Joins unique columns side-by-side. Requires unique column names.
- *     - `"diagonal"`: Concatenates DataFrames with mismatched columns, padding missing values with `null`.
- *   - `horizontal.strict`: When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
+ * @param options Configuration options for concatenation layout and strictness.
+ * @param options.how Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
+ * @param options.horizontal.strict When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
  * @returns DataFrame
  * 
  * @example
@@ -86,7 +83,6 @@ function normalizeToDataFrames(item: any, context: string, index: number): DataF
  * │ null │ 2    │
  * └──────┴──────┘
  * 
- * @since v1.5.0
  */
 export function concat<U extends RowRecord = any>(
     rawItems: ConcatItem | ConcatItem[],

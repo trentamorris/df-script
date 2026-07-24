@@ -33,7 +33,6 @@ export class AggregationExpr extends ExprBase {
      * │ "A"   │ true     │
      * │ "B"   │ false    │
      * └───────┴──────────┘
-     * @since v1.6.0
      */
     all() {
         return this._deriveAgg(v => isArrayOfType(v, (x) => !!x, { mode: "every" }));
@@ -51,7 +50,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼─────────┤
      * │ "A"   │ true    │
      * └───────┴─────────┘
-     * @since v1.6.0
      */
     all_null() {
         return this._deriveAgg(v => isArrayOfType(v, "nullish", { mode: "every" }));
@@ -70,7 +68,6 @@ export class AggregationExpr extends ExprBase {
      * │ "A"   │ true     │
      * │ "B"   │ false    │
      * └───────┴──────────┘
-     * @since v1.5.0
      */
     any() {
         return this._deriveAgg(v => isArrayOfType(v, (x) => !!x, { mode: "some" }));
@@ -88,7 +85,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼──────────┤
      * │ "A"   │ true     │
      * └───────┴──────────┘
-     * @since v1.6.0
      */
     any_null() {
         return this._deriveAgg(v => isArrayOfType(v, "nullish", { mode: "some" }));
@@ -106,7 +102,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼──────┤
      * │ "A"   │ 15   │
      * └───────┴──────┘
-     * @since v1.5.0
      */
     avg() {
         return this._deriveAgg(v => getArrayStats(v).mean);
@@ -125,7 +120,6 @@ export class AggregationExpr extends ExprBase {
      * ├─────────────┤
      * │ 1           │
      * └─────────────┘
-     * @since v1.7.0
      */
     corr(other: any) {
         return this._deriveAggBinary(other, pairs => computeStatisticalMatrix(pairs)?.correlation ?? null);
@@ -144,7 +138,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼─────┤
      * │ "A"   │ 1   │
      * └───────┴─────┘
-     * @since v1.5.0
      */
     count(options: { includeNulls?: boolean } = {}) {
         if (options.includeNulls) return this._deriveAgg(v => v.length);
@@ -164,7 +157,6 @@ export class AggregationExpr extends ExprBase {
      * ├────────────┤
      * │ 2          │
      * └────────────┘
-     * @since v1.7.0
      */
     cov(other: any) {
         return this._deriveAggBinary(other, pairs => computeStatisticalMatrix(pairs)?.covariance ?? null);
@@ -183,7 +175,6 @@ export class AggregationExpr extends ExprBase {
      * ├─────────────┤
      * │ 20          │
      * └─────────────┘
-     * @since v1.6.0
      */
     dot(other: any) {
         return this._deriveAggBinary(other, pairs => computeDotProduct(pairs));
@@ -201,7 +192,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼───────────┤
      * │ "A"   │ 10        │
      * └───────┴───────────┘
-     * @since v1.5.0
      */
     first() {
         return this._deriveAgg(v => v[0] ?? null);
@@ -219,7 +209,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼──────────┤
      * │ "A"   │ [10, 20] │
      * └───────┴──────────┘
-     * @since v1.6.0
      */
     implode() {
         return this._deriveAgg(v => v);
@@ -237,7 +226,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼──────────┤
      * │ "A"   │ 20       │
      * └───────┴──────────┘
-     * @since v1.5.0
      */
     last() {
         return this._deriveAgg(v => v[v.length - 1] ?? null);
@@ -255,7 +243,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼─────────┤
      * │ "A"   │ 50      │
      * └───────┴─────────┘
-     * @since v1.5.0
      */
     max() {
         return this._deriveAgg(v => getArrayStats(v).max);
@@ -273,7 +260,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼──────────┤
      * │ "A"   │ 20       │
      * └───────┴──────────┘
-     * @since v1.5.0
      */
     mean() {
         return this.avg();
@@ -291,7 +277,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼─────┤
      * │ "A"   │ 20  │
      * └───────┴─────┘
-     * @since v1.6.0
      */
     median() {
         return this._deriveAgg(v => computeMedian(v));
@@ -309,7 +294,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼─────────┤
      * │ "A"   │ 10      │
      * └───────┴─────────┘
-     * @since v1.5.0
      */
     min() {
         return this._deriveAgg(v => getArrayStats(v).min);
@@ -327,7 +311,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼──────────┤
      * │ "A"   │ 5        │
      * └───────┴──────────┘
-     * @since v1.6.0
      */
     mode() {
         return this._deriveAgg(v => computeMode(v));
@@ -346,7 +329,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼────────────┤
      * │ "A"   │ 2          │
      * └───────┴────────────┘
-     * @since v1.6.0
      */
     n_unique(options: UniqueArrayStatsOptions = {}) {
         return this._deriveAgg(v => {
@@ -366,7 +348,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼───────┤
      * │ "A"   │ 1     │
      * └───────┴───────┘
-     * @since v1.6.0
      */
     null_count() {
         return this._deriveAgg(v => getArrayStats(v).nullCount);
@@ -385,7 +366,6 @@ export class AggregationExpr extends ExprBase {
      * ├─────┤
      * │ 32.5│
      * └─────┘
-     * @since v1.6.0
      */
     quantile(q: number) {
         if (q < 0 || q > 1) throw new ComputeError("Quantile q must be between 0 and 1");
@@ -405,7 +385,6 @@ export class AggregationExpr extends ExprBase {
      * ├──────────┤
      * │ 1        │
      * └──────────┘
-     * @since v1.7.0
      */
     spearman_corr(other: any) {
         return this._deriveAggBinary(other, pairs => computeSpearmanCorrelation(pairs));
@@ -423,7 +402,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼─────────┤
      * │ "A"   │ 10      │
      * └───────┴─────────┘
-     * @since v1.6.0
      */
     std() {
         return this._deriveAgg(v => getArrayStats(v).std);
@@ -441,7 +419,6 @@ export class AggregationExpr extends ExprBase {
      * ├───────┼───────┤
      * │ "A"   │ 30    │
      * └───────┴───────┘
-     * @since v1.5.0
      */
     sum() {
         return this._deriveAgg(v => getArrayStats(v).sum);
@@ -460,7 +437,6 @@ export class AggregationExpr extends ExprBase {
      * ├────────┤
      * │ 17.5   │
      * └────────┘
-     * @since v1.7.0
      */
     w_avg(weights: any) {
         return this._deriveAggBinary(weights, pairs => computeWeightedAverage(pairs));

@@ -21,7 +21,8 @@
   "scripts": {
     "build": "tsc --emitDeclarationOnly && esbuild src/index.ts --bundle --minify --outfile=dist/index.js --platform=node --mangle-props=^_ && esbuild src/index.ts --bundle --minify --outfile=dist/index.mjs --platform=neutral --format=esm --external:fs --mangle-props=^_",
     "test": "tsx _tests/run_all_project_tests.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "extract-docs": "node scripts/extract-docs.mjs"
   },
   "keywords": [
     "dataframe",

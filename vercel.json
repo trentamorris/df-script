@@ -1,9 +1,0 @@
-{
-  "installCommand": "npm install --prefix website",
-  "buildCommand": "npm run --prefix website build",
-  "outputDirectory": "website/dist",
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}

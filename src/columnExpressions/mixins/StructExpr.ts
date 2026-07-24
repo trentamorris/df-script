@@ -40,7 +40,6 @@ export class StructExprNamespace {
      * ├─────────────────────────┼───────────┤
      * │ { name: "Alice", id: 1 }│ Alice     │
      * └─────────────────────────┴───────────┘
-     * @since v1.6.0
      */
     field(name: string) {
         return derive(this.expr, (vArray) => {
@@ -67,7 +66,6 @@ export class StructExprNamespace {
      * ├───────────────────┼─────────────────────────┤
      * │ { first: "Alice" }│ { first_name: "Alice" } │
      * └───────────────────┴─────────────────────────┘
-     * @since v1.7.0
      */
     rename_fields(mapping: Record<string, string>) {
         return derive(this.expr, (vArray) => {
@@ -119,7 +117,6 @@ export class StructExprNamespace {
      * ├─────────────────┼─────┼───────────────────────────────┤
      * │ { name: "Alice"}│ 30  │ { name: "Alice", user_age: 30}│
      * └─────────────────┴─────┴───────────────────────────────┘
-     * @since v1.7.0
      */
     with_fields(fields: IntoExpr[] | Record<string, IntoExpr>) {
         return derive(this.expr, (vArray, columns) => {
@@ -190,7 +187,6 @@ export class StructExprNamespace {
      * ├───────┼─────┤
      * │ Alice │ 30  │
      * └───────┴─────┘
-     * @since v1.7.0
      */
     unnest() {
         const newInst = derive(this.expr);
@@ -210,7 +206,6 @@ export class StructExpr extends ExprBase {
      * @returns StructExprNamespace
      * @example
      * >>> df.select($df.col("user").struct.field("name"))
-     * @since v1.6.0
      */
     get struct() {
         return new StructExprNamespace(this);
