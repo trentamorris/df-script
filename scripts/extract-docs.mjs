@@ -33,44 +33,54 @@ function parseJSDocComment(comment) {
   const examplesList = [];
   const paramsList = [];
 
-  const lines = comment.split("\n").map(l => l.replace(/^\s*\*?\s?/, "").trim());
-
   const descLines = [];
   let currentExampleLines = [];
   let inExample = false;
 
-  for (const line of lines) {
-    if (line.startsWith("@")) {
+  for (const rawLine of comment.split("\n")) {
+    const line = rawLine.replace(/^\s*\*?\s?/, "");
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith("@")) {
       if (inExample) {
-        examplesList.push(currentExampleLines.join("\n").trim());
+        examplesList.push(currentExampleLines.join("\n").trimEnd());
         currentExampleLines = [];
         inExample = false;
       }
-      if (line.startsWith("@example")) {
+      if (trimmed.startsWith("@example")) {
         inExample = true;
-      } else if (line.startsWith("@param")) {
-        const m = line.match(PARAM_REGEX);
+      } else if (trimmed.startsWith("@param")) {
+        const m = trimmed.match(PARAM_REGEX);
         if (m) {
           const type = m[1] ? m[1].trim() : undefined;
           const name = m[2];
           const desc = m[3].trim();
           paramsList.push(type ? { name, type, desc } : { name, desc });
         }
-      } else if (line.startsWith("@returns")) {
-        const m = line.match(RETURNS_REGEX);
+      } else if (trimmed.startsWith("@returns")) {
+        const m = trimmed.match(RETURNS_REGEX);
         if (m) returns = m[1].trim();
       }
     } else {
-      if (inExample) currentExampleLines.push(line);
-      else if (line !== "") descLines.push(line);
+      if (inExample) {
+        currentExampleLines.push(line);
+      } else {
+        descLines.push(trimmed);
+      }
     }
   }
 
   if (inExample && currentExampleLines.length > 0) {
-    examplesList.push(currentExampleLines.join("\n").trim());
+    examplesList.push(currentExampleLines.join("\n").trimEnd());
   }
 
-  desc = descLines.join(" ");
+  desc = descLines
+    .reduce((acc, line) => {
+      if (line === "") return acc + "\n\n";
+      return acc ? (acc.endsWith("\n\n") ? acc + line : acc + " " + line) : line;
+    }, "")
+    .trim();
+
   return {
     desc,
     examples: examplesList.length > 0 ? examplesList : undefined,
@@ -83,36 +93,39 @@ function extractSignatureFromCode(rawContent, startIndex, symbolName, isGetter) 
   let parenDepth = 0;
   let braceDepth = 0;
   let angleDepth = 0;
+  let inString = null; // Track string char: ", ', or `
+  let isEscaped = false;
   let signature = isGetter ? "get " + symbolName : symbolName;
-  
+
   let i = startIndex;
-  // Skip leading whitespace
-  while (i < rawContent.length && /\s/.test(rawContent[i])) {
-    i++;
-  }
-  
+  while (i < rawContent.length && /\s/.test(rawContent[i])) i++;
+
   while (i < rawContent.length) {
     const char = rawContent[i];
-    
-    if (char === "(") parenDepth++;
-    else if (char === ")") parenDepth--;
-    else if (char === "{") {
-      if (parenDepth === 0 && angleDepth === 0 && braceDepth === 0) {
-        break; // Opening brace of function body
+
+    if (inString) {
+      if (char === inString && !isEscaped) {
+        inString = null; // String closed
       }
-      braceDepth++;
+      isEscaped = char === "\\" && !isEscaped;
+    } else {
+      if (char === '"' || char === "'" || char === "`") {
+        inString = char;
+      } else if (char === "(") parenDepth++;
+      else if (char === ")") parenDepth--;
+      else if (char === "{") {
+        if (parenDepth === 0 && angleDepth === 0 && braceDepth === 0) break;
+        braceDepth++;
+      } else if (char === "}") braceDepth--;
+      else if (char === "<") angleDepth++;
+      else if (char === ">") angleDepth--;
+      else if (char === ";" && parenDepth === 0 && braceDepth === 0) break;
     }
-    else if (char === "}") braceDepth--;
-    else if (char === "<") angleDepth++;
-    else if (char === ">") angleDepth--;
-    else if (char === ";") {
-      break; // End of statement / abstract method
-    }
-    
+
     signature += char;
     i++;
   }
-  
+
   return signature.replace(/\s+/g, " ").trim();
 }
 
