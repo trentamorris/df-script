@@ -123,6 +123,52 @@ function extractRawDocs() {
 
       const parsed = parseJSDocComment(comment);
 
+      // Determine category and syntax based on file structure
+      const isDf = relativePath.includes("dataframe/");
+      const isException = relativePath.includes("exceptions/");
+      const isDatatype = relativePath.includes("datatypes/") || relativePath.includes("types.ts");
+      const isGlobal = relativePath.includes("functions/");
+      const isExprBase = relativePath.includes("ExprBase.ts");
+
+      let mixinNamespace = "";
+      if (relativePath.includes("mixins/")) {
+        if (relativePath.includes("StringExpr")) mixinNamespace = "str";
+        else if (relativePath.includes("TemporalExpr")) mixinNamespace = "dt";
+        else if (relativePath.includes("ArrayExpr")) mixinNamespace = "arr";
+        else if (relativePath.includes("StructExpr")) mixinNamespace = "struct";
+      }
+
+      let category = "ColumnExpression";
+      let syntax = "";
+
+      if (isDf) {
+        category = "DataFrame";
+        syntax = `df.${symbolName}(...)`;
+      } else if (isException) {
+        category = "Exception";
+        syntax = `throw new ${symbolName}("message")`;
+      } else if (isDatatype) {
+        category = "DataType";
+        let typeDisplay = symbolName;
+        if (symbolName.endsWith("DataType")) typeDisplay = symbolName.slice(0, -8);
+        syntax = `DataType.${typeDisplay}`;
+      } else if (isGlobal) {
+        category = "ColumnExpression";
+        syntax = `$df.${symbolName}(...)`;
+      } else if (isExprBase) {
+        category = "ColumnExpression";
+        syntax = `$df.col(<column_name>).${symbolName}(...)`;
+      } else if (mixinNamespace) {
+        category = "ColumnExpression";
+        syntax = `$df.col(<column_name>).${mixinNamespace}.${symbolName}(...)`;
+      } else {
+        category = "ColumnExpression";
+        syntax = `$df.col(<column_name>).${symbolName}(...)`;
+      }
+
+      parsed.category = category;
+      parsed.syntax = syntax;
+
       // If we successfully parsed JSDoc details, add them
       if (parsed.desc || parsed.params || parsed.returns || parsed.examples) {
         if (!fileDocs) {

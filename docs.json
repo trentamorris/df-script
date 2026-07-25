@@ -1,13 +1,19 @@
 {
   "columnExpressions/ExprBase.ts": {
     "alias": {
-      "desc": "Renames the output expression column key."
+      "desc": "Renames the output expression column key.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).alias(...)"
     },
     "cast": {
-      "desc": "Coerces the column data type to another type."
+      "desc": "Coerces the column data type to another type.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cast(...)"
     },
     "debug": {
-      "desc": "Prints the current evaluation intermediate array to console for debugging."
+      "desc": "Prints the current evaluation intermediate array to console for debugging.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).debug(...)"
     }
   },
   "columnExpressions/functions/all.ts": {
@@ -16,7 +22,9 @@
       "examples": [
         ">>> const df = $df.data({ a: [1, 2], b: [3, 4] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ 3   │\n│ 2   │ 4   │\n└─────┴─────┘\n>>> df.select($df.all())\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ 3   │\n│ 2   │ 4   │\n└─────┴─────┘"
       ],
-      "returns": "{ColumnExpr<any>} A column expression targeting all columns."
+      "returns": "{ColumnExpr<any>} A column expression targeting all columns.",
+      "category": "ColumnExpression",
+      "syntax": "$df.all(...)"
     }
   },
   "columnExpressions/functions/coalesce.ts": {
@@ -25,7 +33,9 @@
       "examples": [
         ">>> const df = $df.data({ a: [1, null, null], b: [null, 2, null] })\n>>> df\nshape: (3, 2)\n┌──────┬──────┐\n│ a    │ b    │\n├──────┼──────┤\n│ 1    │ null │\n│ null │ 2    │\n│ null │ null │\n└──────┴──────┘\n>>> df.select($df.coalesce($df.col(\"a\"), $df.col(\"b\"), $df.lit(3)).alias(\"coalesced\"))\nshape: (3, 1)\n┌───────────┐\n│ coalesced │\n├───────────┤\n│ 1         │\n│ 2         │\n│ 3         │\n└───────────┘"
       ],
-      "returns": "{ColumnExpr<any>} A column expression resolving to the first non-null value."
+      "returns": "{ColumnExpr<any>} A column expression resolving to the first non-null value.",
+      "category": "ColumnExpression",
+      "syntax": "$df.coalesce(...)"
     }
   },
   "columnExpressions/functions/element.ts": {
@@ -34,7 +44,9 @@
       "examples": [
         ">>> const df = $df.data({ a: [[1, 5, 10], [2, 8]] })\n>>> df\nshape: (2, 1)\n┌────────────┐\n│ a          │\n├────────────┤\n│ [1, 5, 10] │\n│ [2, 8]     │\n└────────────┘\n>>> df.select($df.col(\"a\").arr.filter($df.element().gt(5)).alias(\"filtered\"))\nshape: (2, 1)\n┌──────────┐\n│ filtered │\n├──────────┤\n│ [10]     │\n│ [8]      │\n└──────────┘"
       ],
-      "returns": "{ColumnExpr<T>} A column expression referencing the array element."
+      "returns": "{ColumnExpr<T>} A column expression referencing the array element.",
+      "category": "ColumnExpression",
+      "syntax": "$df.element(...)"
     }
   },
   "columnExpressions/functions/exclude.ts": {
@@ -43,7 +55,9 @@
       "examples": [
         ">>> const df = $df.data({ id: [101, 102], val: [10, 20] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ id  │ val │\n├─────┼─────┤\n│ 101 │ 10  │\n│ 102 │ 20  │\n└─────┴─────┘\n>>> df.select($df.exclude(\"id\"))\nshape: (2, 1)\n┌─────┐\n│ val │\n├─────┤\n│ 10  │\n│ 20  │\n└─────┘"
       ],
-      "returns": "{ColumnExpr<any>} A column expression targeting all columns except the specified ones."
+      "returns": "{ColumnExpr<any>} A column expression targeting all columns except the specified ones.",
+      "category": "ColumnExpression",
+      "syntax": "$df.exclude(...)"
     }
   },
   "columnExpressions/functions/implode.ts": {
@@ -52,7 +66,9 @@
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [1, 2, 3] })\n>>> df\nshape: (3, 2)\n┌───────┬─────┐\n│ group │ val │\n├───────┼─────┤\n│ A     │ 1   │\n│ A     │ 2   │\n│ B     │ 3   │\n└───────┴─────┘\n>>> df.group_by(\"group\").agg($df.implode(\"val\").alias(\"imploded\"))\nshape: (2, 2)\n┌───────┬──────────┐\n│ group │ imploded │\n├───────┼──────────┤\n│ A     │ [1, 2]   │\n│ B     │ [3]      │\n└───────┴──────────┘"
       ],
-      "returns": "{ColumnExpr<any>} A column expression representing the list of values."
+      "returns": "{ColumnExpr<any>} A column expression representing the list of values.",
+      "category": "ColumnExpression",
+      "syntax": "$df.implode(...)"
     }
   },
   "columnExpressions/functions/lit.ts": {
@@ -61,7 +77,9 @@
       "examples": [
         ">>> const df = $df.data({ a: [1, 2] })\n>>> df\nshape: (2, 1)\n┌───┐\n│ a │\n├───┤\n│ 1 │\n│ 2 │\n└───┘\n>>> df.select($df.lit(42).alias(\"answer\"))\nshape: (2, 1)\n┌────────┐\n│ answer │\n├────────┤\n│ 42     │\n│ 42     │\n└────────┘"
       ],
-      "returns": "{ColumnExpr<any>} A column expression with the literal value."
+      "returns": "{ColumnExpr<any>} A column expression with the literal value.",
+      "category": "ColumnExpression",
+      "syntax": "$df.lit(...)"
     }
   },
   "columnExpressions/functions/seq_range.ts": {
@@ -124,7 +142,9 @@
           "desc": "The ending index in the DataFrame to insert the sequence."
         }
       ],
-      "returns": "{ColumnExpr<any>} A column expression generating the sequence."
+      "returns": "{ColumnExpr<any>} A column expression generating the sequence.",
+      "category": "ColumnExpression",
+      "syntax": "$df.seq_range(...)"
     }
   },
   "columnExpressions/functions/struct.ts": {
@@ -133,7 +153,9 @@
       "examples": [
         ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ x   │\n│ 2   │ y   │\n└─────┴─────┘\n>>> df.select($df.struct({ x: \"a\", y: \"b\" }).alias(\"coord\"))\nshape: (2, 1)\n┌──────────────────┐\n│ coord            │\n├──────────────────┤\n│ { x: 1, y: \"x\" } │\n│ { x: 2, y: \"y\" } │\n└──────────────────┘"
       ],
-      "returns": "{ColumnExpr<any>} A column expression packaging the specified fields."
+      "returns": "{ColumnExpr<any>} A column expression packaging the specified fields.",
+      "category": "ColumnExpression",
+      "syntax": "$df.struct(...)"
     }
   },
   "columnExpressions/functions/when.ts": {
@@ -142,7 +164,9 @@
       "examples": [
         ">>> const df = $df.data({ score: [75, 95] })\n>>> df\nshape: (2, 1)\n┌───────┐\n│ score │\n├───────┤\n│ 75    │\n│ 95    │\n└───────┘\n>>> df.select(\n...   $df.when($df.col(\"score\").gt(90)).then(\"A\")\n...     .otherwise(\"B\").alias(\"grade\")\n... )\nshape: (2, 1)\n┌───────┐\n│ grade │\n├───────┤\n│ B     │\n│ A     │\n└───────┘"
       ],
-      "returns": "{When} A When object builder to chain `.then()` and `.otherwise()`/`.when()`."
+      "returns": "{When} A When object builder to chain `.then()` and `.otherwise()`/`.when()`.",
+      "category": "ColumnExpression",
+      "syntax": "$df.when(...)"
     }
   },
   "columnExpressions/mixins/AggregationExpr.ts": {
@@ -151,35 +175,45 @@
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [true, true, false] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").all().alias(\"all_true\"))\nshape: (2, 2)\n┌───────┬──────────┐\n│ group │ all_true │\n├───────┼──────────┤\n│ \"A\"   │ true     │\n│ \"B\"   │ false    │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).all(...)"
     },
     "all_null": {
       "desc": "Aggregation: Checks if all values in the group are null.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [null, null] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").all_null().alias(\"is_null\"))\nshape: (1, 2)\n┌───────┬─────────┐\n│ group │ is_null │\n├───────┼─────────┤\n│ \"A\"   │ true    │\n└───────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).all_null(...)"
     },
     "any": {
       "desc": "Aggregation: Checks if any value in the group is truthy.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [true, false, false] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").any().alias(\"any_true\"))\nshape: (2, 2)\n┌───────┬──────────┐\n│ group │ any_true │\n├───────┼──────────┤\n│ \"A\"   │ true     │\n│ \"B\"   │ false    │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).any(...)"
     },
     "any_null": {
       "desc": "Aggregation: Checks if any value in the group is null.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, null] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").any_null().alias(\"has_null\"))\nshape: (1, 2)\n┌───────┬──────────┐\n│ group │ has_null │\n├───────┼──────────┤\n│ \"A\"   │ true     │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).any_null(...)"
     },
     "avg": {
       "desc": "Aggregation: Computes the arithmetic mean of the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 20] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").avg().alias(\"mean\"))\nshape: (1, 2)\n┌───────┬──────┐\n│ group │ mean │\n├───────┼──────┤\n│ \"A\"   │ 15   │\n└───────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).avg(...)"
     },
     "corr": {
       "desc": "Aggregation: Computes the Pearson correlation coefficient between two columns.",
@@ -192,7 +226,9 @@
           "desc": "The target column expression to correlate with."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).corr(...)"
     },
     "count": {
       "desc": "Aggregation: Returns the count of records inside the group.",
@@ -205,7 +241,9 @@
           "desc": "Config flags including whether to count null values."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).count(...)"
     },
     "cov": {
       "desc": "Aggregation: Computes the covariance between two columns.",
@@ -218,7 +256,9 @@
           "desc": "The target column expression to compute covariance with."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cov(...)"
     },
     "dot": {
       "desc": "Aggregation: Computes the dot product with another column.",
@@ -231,63 +271,81 @@
           "desc": "The other column expression to compute the dot product with."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dot(...)"
     },
     "first": {
       "desc": "Aggregation: Finds the first value in the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 20] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").first().alias(\"first_val\"))\nshape: (1, 2)\n┌───────┬───────────┐\n│ group │ first_val │\n├───────┼───────────┤\n│ \"A\"   │ 10        │\n└───────┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).first(...)"
     },
     "implode": {
       "desc": "Aggregation: Combines all values in the group into a single array/list cell.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 20] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").implode().alias(\"list_val\"))\nshape: (1, 2)\n┌───────┬──────────┐\n│ group │ list_val │\n├───────┼──────────┤\n│ \"A\"   │ [10, 20] │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).implode(...)"
     },
     "last": {
       "desc": "Aggregation: Finds the last value in the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 20] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").last().alias(\"last_val\"))\nshape: (1, 2)\n┌───────┬──────────┐\n│ group │ last_val │\n├───────┼──────────┤\n│ \"A\"   │ 20       │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).last(...)"
     },
     "max": {
       "desc": "Aggregation: Finds the maximum value in the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 50] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").max().alias(\"max_val\"))\nshape: (1, 2)\n┌───────┬─────────┐\n│ group │ max_val │\n├───────┼─────────┤\n│ \"A\"   │ 50      │\n└───────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).max(...)"
     },
     "mean": {
       "desc": "Aggregation: Computes the arithmetic mean of elements in the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 30] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").mean().alias(\"mean_val\"))\nshape: (1, 2)\n┌───────┬──────────┐\n│ group │ mean_val │\n├───────┼──────────┤\n│ \"A\"   │ 20       │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).mean(...)"
     },
     "median": {
       "desc": "Aggregation: Computes the 50th percentile median.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"A\"], val: [10, 50, 20] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").median().alias(\"med\"))\nshape: (1, 2)\n┌───────┬─────┐\n│ group │ med │\n├───────┼─────┤\n│ \"A\"   │ 20  │\n└───────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).median(...)"
     },
     "min": {
       "desc": "Aggregation: Finds the minimum value in the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 50] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").min().alias(\"min_val\"))\nshape: (1, 2)\n┌───────┬─────────┐\n│ group │ min_val │\n├───────┼─────────┤\n│ \"A\"   │ 10      │\n└───────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).min(...)"
     },
     "mode": {
       "desc": "Aggregation: Finds the statistical mode (most frequent value).",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"A\"], val: [5, 5, 10] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").mode().alias(\"mode_val\"))\nshape: (1, 2)\n┌───────┬──────────┐\n│ group │ mode_val │\n├───────┼──────────┤\n│ \"A\"   │ 5        │\n└───────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).mode(...)"
     },
     "n_unique": {
       "desc": "Aggregation: Computes number of unique elements.",
@@ -300,14 +358,18 @@
           "desc": "Uniqueness options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).n_unique(...)"
     },
     "null_count": {
       "desc": "Aggregation: Counts the number of null or missing records.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, null] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").null_count().alias(\"nulls\"))\nshape: (1, 2)\n┌───────┬───────┐\n│ group │ nulls │\n├───────┼───────┤\n│ \"A\"   │ 1     │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).null_count(...)"
     },
     "quantile": {
       "desc": "Aggregation: Computes the specific quantile values (0.0 to 1.0).",
@@ -320,7 +382,9 @@
           "desc": "The quantile parameter value between 0.0 and 1.0."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).quantile(...)"
     },
     "spearman_corr": {
       "desc": "Aggregation: Computes the Spearman rank correlation coefficient.",
@@ -333,21 +397,27 @@
           "desc": "The other column expression to correlate with."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).spearman_corr(...)"
     },
     "std": {
       "desc": "Aggregation: Computes sample standard deviation.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"A\"], val: [10, 20, 30] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").std().alias(\"std_dev\"))\nshape: (1, 2)\n┌───────┬─────────┐\n│ group │ std_dev │\n├───────┼─────────┤\n│ \"A\"   │ 10      │\n└───────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).std(...)"
     },
     "sum": {
       "desc": "Aggregation: Computes the sum of elements in the group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, 20] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").sum().alias(\"total\"))\nshape: (1, 2)\n┌───────┬───────┐\n│ group │ total │\n├───────┼───────┤\n│ \"A\"   │ 30    │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).sum(...)"
     },
     "w_avg": {
       "desc": "Aggregation: Computes weighted average.",
@@ -360,7 +430,9 @@
           "desc": "The weight values or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).w_avg(...)"
     }
   },
   "columnExpressions/mixins/ArithmeticExpr.ts": {
@@ -369,21 +441,27 @@
       "examples": [
         ">>> const df = $df.data({ a: [-1, 2, -3.5] })\n>>> df.with_columns($df.col(\"a\").abs().alias(\"abs_a\"))\nshape: (3, 2)\n┌──────┬───────┐\n│ a    │ abs_a │\n├──────┼───────┤\n│ -1   │ 1     │\n│ 2    │ 2     │\n│ -3.5 │ 3.5   │\n└──────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).abs(...)"
     },
     "acos": {
       "desc": "Computes the mathematical arccosine (inverse cosine) of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 0.5, 1] })\n>>> df.with_columns($df.col(\"a\").acos().alias(\"acos_a\"))\nshape: (3, 2)\n┌─────┬───────────┐\n│ a   │ acos_a    │\n├─────┼───────────┤\n│ 0   │ 1.570796  │\n│ 0.5 │ 1.047197  │\n│ 1   │ 0         │\n└─────┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).acos(...)"
     },
     "acosh": {
       "desc": "Computes the hyperbolic arccosine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2, 5] })\n>>> df.with_columns($df.col(\"a\").acosh().alias(\"acosh_a\"))\nshape: (3, 2)\n┌───┬───────────┐\n│ a │ acosh_a   │\n├───┼───────────┤\n│ 1 │ 0         │\n│ 2 │ 1.316957  │\n│ 5 │ 2.292431  │\n└───┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).acosh(...)"
     },
     "add": {
       "desc": "Adds a scalar value or another column expression.",
@@ -396,28 +474,36 @@
           "desc": "The number or column expression to add."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).add(...)"
     },
     "asin": {
       "desc": "Computes the arcsine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 0.5, 1] })\n>>> df.with_columns($df.col(\"a\").asin().alias(\"asin_a\"))\nshape: (3, 2)\n┌─────┬───────────┐\n│ a   │ asin_a    │\n├─────┼───────────┤\n│ 0   │ 0         │\n│ 0.5 │ 0.523598  │\n│ 1   │ 1.570796  │\n└─────┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).asin(...)"
     },
     "asinh": {
       "desc": "Computes the hyperbolic arcsine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1, 2] })\n>>> df.with_columns($df.col(\"a\").asinh().alias(\"asinh_a\"))\nshape: (3, 2)\n┌───┬───────────┐\n│ a │ asinh_a   │\n├───┼───────────┤\n│ 0 │ 0         │\n│ 1 │ 0.881373  │\n│ 2 │ 1.443635  │\n└───┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).asinh(...)"
     },
     "atan": {
       "desc": "Computes the arctangent of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1, 2] })\n>>> df.with_columns($df.col(\"a\").atan().alias(\"atan_a\"))\nshape: (3, 2)\n┌───┬───────────┐\n│ a │ atan_a    │\n├───┼───────────┤\n│ 0 │ 0         │\n│ 1 │ 0.785398  │\n│ 2 │ 1.107148  │\n└───┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).atan(...)"
     },
     "atan2": {
       "desc": "Computes the quadrant-aware arctangent of two values.",
@@ -430,28 +516,36 @@
           "desc": "The x denominator number or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).atan2(...)"
     },
     "atanh": {
       "desc": "Computes the hyperbolic arctangent of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 0.5] })\n>>> df.with_columns($df.col(\"a\").atanh().alias(\"atanh_a\"))\nshape: (2, 2)\n┌─────┬───────────┐\n│ a   │ atanh_a   │\n├─────┼───────────┤\n│ 0   │ 0         │\n│ 0.5 │ 0.549306  │\n└─────┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).atanh(...)"
     },
     "cbrt": {
       "desc": "Computes the cube root of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 8, 27] })\n>>> df.with_columns($df.col(\"a\").cbrt().alias(\"cbrt_a\"))\nshape: (3, 2)\n┌────┬────────┐\n│ a  │ cbrt_a │\n├────┼────────┤\n│ 1  │ 1      │\n│ 8  │ 2      │\n│ 27 │ 3      │\n└────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cbrt(...)"
     },
     "ceil": {
       "desc": "Rounds column values up to the nearest integer.",
       "examples": [
         ">>> const df = $df.data({ a: [1.1, 2.8, -0.5] })\n>>> df.with_columns($df.col(\"a\").ceil().alias(\"ceil_a\"))\nshape: (3, 2)\n┌──────┬────────┐\n│ a    │ ceil_a │\n├──────┼────────┤\n│ 1.1  │ 2      │\n│ 2.8  │ 3      │\n│ -0.5 │ 0      │\n└──────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).ceil(...)"
     },
     "clip": {
       "desc": "Clamps column values between lower and upper numeric thresholds.",
@@ -468,7 +562,9 @@
           "desc": "The upper threshold value (default: null)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).clip(...)"
     },
     "copysign": {
       "desc": "Returns absolute value of expr with the sign of other.",
@@ -481,28 +577,36 @@
           "desc": "The sign source value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).copysign(...)"
     },
     "cos": {
       "desc": "Computes the cosine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, Math.PI] })\n>>> df.with_columns($df.col(\"a\").cos().alias(\"cos_a\"))\nshape: (2, 2)\n┌───────┬───────┐\n│ a     │ cos_a │\n├───────┼───────┤\n│ 0     │ 1     │\n│ 3.141 │ -1    │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cos(...)"
     },
     "cosh": {
       "desc": "Computes the hyperbolic cosine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1] })\n>>> df.with_columns($df.col(\"a\").cosh().alias(\"cosh_a\"))\nshape: (2, 2)\n┌───┬───────────┐\n│ a │ cosh_a    │\n├───┼───────────┤\n│ 0 │ 1         │\n│ 1 │ 1.543080  │\n└───┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cosh(...)"
     },
     "degrees": {
       "desc": "Converts angles from radians to degrees.",
       "examples": [
         ">>> const df = $df.data({ a: [0, Math.PI] })\n>>> df.with_columns($df.col(\"a\").degrees().alias(\"deg\"))\nshape: (2, 2)\n┌───────┬─────┐\n│ a     │ deg │\n├───────┼─────┤\n│ 0     │ 0   │\n│ 3.141 │ 180 │\n└───────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).degrees(...)"
     },
     "div": {
       "desc": "Divides column values by a scalar or another column expression.",
@@ -515,28 +619,36 @@
           "desc": "The denominator value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).div(...)"
     },
     "exp": {
       "desc": "Computes natural exponent (e^x) of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1, 2] })\n>>> df.with_columns($df.col(\"a\").exp().alias(\"exp_a\"))\nshape: (3, 2)\n┌───┬──────────┐\n│ a │ exp_a    │\n├───┼──────────┤\n│ 0 │ 1        │\n│ 1 │ 2.718281 │\n│ 2 │ 7.389056 │\n└───┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).exp(...)"
     },
     "expm1": {
       "desc": "Computes e^x - 1 for each element in the column.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1, 2] })\n>>> df.with_columns($df.col(\"a\").expm1().alias(\"expm1_a\"))\nshape: (3, 2)\n┌───┬──────────┐\n│ a │ expm1_a  │\n├───┼──────────┤\n│ 0 │ 0        │\n│ 1 │ 1.718281 │\n│ 2 │ 6.389056 │\n└───┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).expm1(...)"
     },
     "floor": {
       "desc": "Rounds column values down to the nearest integer.",
       "examples": [
         ">>> const df = $df.data({ a: [1.1, 2.8, -0.5] })\n>>> df.with_columns($df.col(\"a\").floor().alias(\"floor_a\"))\nshape: (3, 2)\n┌──────┬─────────┐\n│ a    │ floor_a │\n├──────┼─────────┤\n│ 1.1  │ 1       │\n│ 2.8  │ 2       │\n│ -0.5 │ -1      │\n└──────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).floor(...)"
     },
     "floordiv": {
       "desc": "Performs integer division floor(x / y) on column values.",
@@ -549,7 +661,9 @@
           "desc": "The divisor value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).floordiv(...)"
     },
     "hypot": {
       "desc": "Computes the hypotenuse sqrt(x^2 + y^2) of two values.",
@@ -562,7 +676,9 @@
           "desc": "The other numeric value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).hypot(...)"
     },
     "log": {
       "desc": "Computes the logarithm of positive values with a specified base.",
@@ -575,14 +691,18 @@
           "desc": "The base of the logarithm (default: Math.E)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).log(...)"
     },
     "log1p": {
       "desc": "Computes natural logarithm of 1 + x.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1, 2] })\n>>> df.with_columns($df.col(\"a\").log1p().alias(\"log1p_a\"))\nshape: (3, 2)\n┌───┬──────────┐\n│ a │ log1p_a  │\n├───┼──────────┤\n│ 0 │ 0        │\n│ 1 │ 0.693147 │\n│ 2 │ 1.098612 │\n└───┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).log1p(...)"
     },
     "mod": {
       "desc": "Computes modulo remainder (x % y) of column values.",
@@ -595,7 +715,9 @@
           "desc": "The divisor value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).mod(...)"
     },
     "mul": {
       "desc": "Multiplies column values by a scalar or another column expression.",
@@ -608,14 +730,18 @@
           "desc": "The multiplier value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).mul(...)"
     },
     "negate": {
       "desc": "Negates column values (-x).",
       "examples": [
         ">>> const df = $df.data({ a: [1, -2, 3] })\n>>> df.with_columns($df.col(\"a\").negate().alias(\"negated\"))\nshape: (3, 2)\n┌────┬─────────┐\n│ a  │ negated │\n├────┼─────────┤\n│ 1  │ -1      │\n│ -2 │ 2       │\n│ 3  │ -3      │\n└────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).negate(...)"
     },
     "pow": {
       "desc": "Raises column values to the specified power.",
@@ -628,14 +754,18 @@
           "desc": "The exponent power value or column expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).pow(...)"
     },
     "radians": {
       "desc": "Converts angles from degrees to radians.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 180] })\n>>> df.with_columns($df.col(\"a\").radians().alias(\"rad\"))\nshape: (2, 2)\n┌─────┬──────────┐\n│ a   │ rad      │\n├─────┼──────────┤\n│ 0   │ 0        │\n│ 180 │ 3.141592 │\n└─────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).radians(...)"
     },
     "rand": {
       "desc": "Fills sequence with pseudo-random generated floats or integers.",
@@ -652,7 +782,9 @@
           "desc": "Config options including min, max, and integer flag."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rand(...)"
     },
     "round": {
       "desc": "Rounds values to a specific scale of decimal digits.",
@@ -665,7 +797,9 @@
           "desc": "Number of decimal places to round to (default: 0)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).round(...)"
     },
     "round_sig_figs": {
       "desc": "Rounds values to a specific number of significant figures.",
@@ -678,35 +812,45 @@
           "desc": "Number of significant figures."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).round_sig_figs(...)"
     },
     "sign": {
       "desc": "Returns sign indicator of column values (-1, 0, or 1).",
       "examples": [
         ">>> const df = $df.data({ a: [-10, 0, 50] })\n>>> df.with_columns($df.col(\"a\").sign().alias(\"sign_a\"))\nshape: (3, 2)\n┌─────┬────────┐\n│ a   │ sign_a │\n├─────┼────────┤\n│ -10 │ -1     │\n│ 0   │ 0      │\n│ 50  │ 1      │\n└─────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).sign(...)"
     },
     "sin": {
       "desc": "Computes the sine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, Math.PI / 2] })\n>>> df.with_columns($df.col(\"a\").sin().alias(\"sin_a\"))\nshape: (2, 2)\n┌───────┬───────┐\n│ a     │ sin_a │\n├───────┼───────┤\n│ 0     │ 0     │\n│ 1.570 │ 1     │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).sin(...)"
     },
     "sinh": {
       "desc": "Computes the hyperbolic sine of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1] })\n>>> df.with_columns($df.col(\"a\").sinh().alias(\"sinh_a\"))\nshape: (2, 2)\n┌───┬───────────┐\n│ a │ sinh_a    │\n├───┼───────────┤\n│ 0 │ 0         │\n│ 1 │ 1.175201  │\n└───┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).sinh(...)"
     },
     "sqrt": {
       "desc": "Computes the square root of non-negative column values.",
       "examples": [
         ">>> const df = $df.data({ a: [4, 9, 16] })\n>>> df.with_columns($df.col(\"a\").sqrt().alias(\"sqrt_a\"))\nshape: (3, 2)\n┌────┬────────┐\n│ a  │ sqrt_a │\n├────┼────────┤\n│ 4  │ 2      │\n│ 9  │ 3      │\n│ 16 │ 4      │\n└────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).sqrt(...)"
     },
     "sub": {
       "desc": "Subtracts a scalar or another column expression.",
@@ -719,28 +863,36 @@
           "desc": "The value or column expression to subtract."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).sub(...)"
     },
     "tan": {
       "desc": "Computes the tangent of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, Math.PI / 4] })\n>>> df.with_columns($df.col(\"a\").tan().alias(\"tan_a\"))\nshape: (2, 2)\n┌───────┬───────┐\n│ a     │ tan_a │\n├───────┼───────┤\n│ 0     │ 0     │\n│ 0.785 │ 1     │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).tan(...)"
     },
     "tanh": {
       "desc": "Computes the hyperbolic tangent of the column values.",
       "examples": [
         ">>> const df = $df.data({ a: [0, 1] })\n>>> df.with_columns($df.col(\"a\").tanh().alias(\"tanh_a\"))\nshape: (2, 2)\n┌───┬───────────┐\n│ a │ tanh_a    │\n├───┼───────────┤\n│ 0 │ 0         │\n│ 1 │ 0.761594  │\n└───┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).tanh(...)"
     },
     "trunc": {
       "desc": "Truncates fractional digits of column values.",
       "examples": [
         ">>> const df = $df.data({ a: [1.1, 2.9, -3.5] })\n>>> df.with_columns($df.col(\"a\").trunc().alias(\"trunc_a\"))\nshape: (3, 2)\n┌──────┬─────────┐\n│ a    │ trunc_a │\n├──────┼─────────┤\n│ 1.1  │ 1       │\n│ 2.9  │ 2       │\n│ -3.5 │ -3      │\n└──────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).trunc(...)"
     }
   },
   "columnExpressions/mixins/ArrayExpr.ts": {
@@ -749,14 +901,18 @@
       "examples": [
         ">>> const df = $df.data({ a: [[true, true], [true, false]] })\n>>> df.with_columns($df.col(\"a\").arr.all().alias(\"all_true\"))\nshape: (2, 2)\n┌───────────────┬──────────┐\n│ a             │ all_true │\n├───────────────┼──────────┤\n│ [true, true]  │ true     │\n│ [true, false] │ false    │\n└───────────────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.all(...)"
     },
     "any": {
       "desc": "Returns true if any item in nested list cells is truthy.",
       "examples": [
         ">>> const df = $df.data({ a: [[true, false], [false, false]] })\n>>> df.with_columns($df.col(\"a\").arr.any().alias(\"any_true\"))\nshape: (2, 2)\n┌────────────────┬──────────┐\n│ a              │ any_true │\n├────────────────┼──────────┤\n│ [true, false]  │ true     │\n│ [false, false] │ false    │\n└────────────────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.any(...)"
     },
     "contains": {
       "desc": "Checks if nested lists contain item.",
@@ -769,7 +925,9 @@
           "desc": "The element to search for."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.contains(...)"
     },
     "contains_all": {
       "desc": "Checks if nested lists contain all elements in items.",
@@ -782,7 +940,9 @@
           "desc": "Array of elements that must all be present."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.contains_all(...)"
     },
     "contains_any": {
       "desc": "Checks if nested lists contain any element in items.",
@@ -795,7 +955,9 @@
           "desc": "Array of elements where at least one must be present."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.contains_any(...)"
     },
     "count_matches": {
       "desc": "Counts occurrence frequency of item inside nested lists.",
@@ -812,7 +974,9 @@
           "desc": "Statistics and matching options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.count_matches(...)"
     },
     "filter": {
       "desc": "Filters elements of list columns matching a boolean sub-expression.",
@@ -825,7 +989,9 @@
           "desc": "The boolean column expression to filter by."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.filter(...)"
     },
     "explode": {
       "desc": "Expands lists into row-wise records.",
@@ -838,7 +1004,9 @@
           "desc": "Config options including handling of empty arrays and nulls."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.explode(...)"
     },
     "first": {
       "desc": "Returns the first element of each list.",
@@ -851,7 +1019,9 @@
           "desc": "If true, returns null if the list is empty (default: true)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.first(...)"
     },
     "gather": {
       "desc": "Gathers specific indices from each nested list.",
@@ -868,7 +1038,9 @@
           "desc": "If true, returns null for indices out of bounds (default: true)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.gather(...)"
     },
     "gather_every": {
       "desc": "Gather element slices with custom steps.",
@@ -881,7 +1053,9 @@
           "desc": "Config options including offset, limit, and step size."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.gather_every(...)"
     },
     "get": {
       "desc": "Extracts a single list element by its index position.",
@@ -898,7 +1072,9 @@
           "desc": "If true, returns null if index is out of bounds (default: true)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.get(...)"
     },
     "join": {
       "desc": "Joins elements of list columns into a single string column.",
@@ -915,7 +1091,9 @@
           "desc": "String conversion options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.join(...)"
     },
     "last": {
       "desc": "Returns the last element of each list.",
@@ -928,66 +1106,86 @@
           "desc": "If true, returns null if the list is empty (default: true)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.last(...)"
     },
     "len": {
-      "desc": "Returns the length of each list inside the column cell."
+      "desc": "Returns the length of each list inside the column cell.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.len(...)"
     },
     "lengths": {
       "desc": "Returns the length of each list inside the column cell.",
       "examples": [
         ">>> const df = $df.data({ a: [[10, 20], [30, 40, 50]] })\n>>> df.with_columns($df.col(\"a\").arr.lengths().alias(\"len_a\"))\nshape: (2, 2)\n┌──────────────┬───────┐\n│ a            │ len_a │\n├──────────────┼───────┤\n│ [10, 20]     │ 2     │\n│ [30, 40, 50] │ 3     │\n└──────────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.lengths(...)"
     },
     "max": {
       "desc": "Returns the maximum value of elements inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 5, 2], [10, 4]] })\n>>> df.with_columns($df.col(\"a\").arr.max().alias(\"max_a\"))\nshape: (2, 2)\n┌───────────┬───────┐\n│ a         │ max_a │\n├───────────┼───────┤\n│ [1, 5, 2] │ 5     │\n│ [10, 4]   │ 10    │\n└───────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.max(...)"
     },
     "max_index": {
       "desc": "Returns the index of maximum value.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 5, 2], [10, 4]] })\n>>> df.with_columns($df.col(\"a\").arr.max_index().alias(\"max_idx\"))\nshape: (2, 2)\n┌───────────┬─────────┐\n│ a         │ max_idx │\n├───────────┼─────────┤\n│ [1, 5, 2] │ 1       │\n│ [10, 4]   │ 0       │\n└───────────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.max_index(...)"
     },
     "mean": {
       "desc": "Returns average of elements inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 5, 9], [10, 40]] })\n>>> df.with_columns($df.col(\"a\").arr.mean().alias(\"mean_a\"))\nshape: (2, 2)\n┌───────────┬────────┐\n│ a         │ mean_a │\n├───────────┼────────┤\n│ [1, 5, 9] │ 5      │\n│ [10, 40]  │ 25     │\n└───────────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.mean(...)"
     },
     "median": {
       "desc": "Returns statistical median inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 3, 5, 7], [10, 20, 30]] })\n>>> df.with_columns($df.col(\"a\").arr.median().alias(\"med\"))\nshape: (2, 2)\n┌────────────────┬──────┐\n│ a              │ med  │\n├────────────────┼──────┤\n│ [1, 3, 5, 7]   │ 4    │\n│ [10, 20, 30]   │ 20   │\n└────────────────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.median(...)"
     },
     "min": {
       "desc": "Returns minimum of elements inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 5, 2], [10, 4]] })\n>>> df.with_columns($df.col(\"a\").arr.min().alias(\"min_a\"))\nshape: (2, 2)\n┌───────────┬───────┐\n│ a         │ min_a │\n├───────────┼───────┤\n│ [1, 5, 2] │ 1     │\n│ [10, 4]   │ 4     │\n└───────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.min(...)"
     },
     "min_index": {
       "desc": "Returns the index of minimum value.",
       "examples": [
         ">>> const df = $df.data({ a: [[5, 1, 2], [10, 4]] })\n>>> df.with_columns($df.col(\"a\").arr.min_index().alias(\"min_idx\"))\nshape: (2, 2)\n┌───────────┬─────────┐\n│ a         │ min_idx │\n├───────────┼─────────┤\n│ [5, 1, 2] │ 1       │\n│ [10, 4]   │ 1       │\n└───────────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.min_index(...)"
     },
     "mode": {
       "desc": "Returns the mode value inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 2, 2, 3], [5, 5, 6]] })\n>>> df.with_columns($df.col(\"a\").arr.mode().alias(\"mode_a\"))\nshape: (2, 2)\n┌──────────────┬────────┐\n│ a            │ mode_a │\n├──────────────┼────────┤\n│ [1, 2, 2, 3] │ 2      │\n│ [5, 5, 6]    │ 5      │\n└──────────────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.mode(...)"
     },
     "n_unique": {
       "desc": "Returns the unique count of elements inside each list.",
@@ -1000,14 +1198,18 @@
           "desc": "Formatting/statistics parameters."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.n_unique(...)"
     },
     "reverse": {
       "desc": "Reverses elements of list columns.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df.with_columns($df.col(\"a\").arr.reverse().alias(\"reversed\"))\nshape: (2, 2)\n┌───────────┬───────────┐\n│ a         │ reversed  │\n├───────────┼───────────┤\n│ [1, 2, 3] │ [3, 2, 1] │\n│ [4, 5]    │ [5, 4]    │\n└───────────┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.reverse(...)"
     },
     "shift": {
       "desc": "Shifts elements of list columns by N offsets.",
@@ -1020,7 +1222,9 @@
           "desc": "Positive or negative offsets shift amount (default: 1)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.shift(...)"
     },
     "slice": {
       "desc": "Slices nested list arrays.",
@@ -1037,7 +1241,9 @@
           "desc": "The slice ending index."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.slice(...)"
     },
     "splice": {
       "desc": "Splices elements in list cells.",
@@ -1058,7 +1264,9 @@
           "desc": "The elements to insert."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.splice(...)"
     },
     "sort": {
       "desc": "Sorts elements inside each list.",
@@ -1071,21 +1279,27 @@
           "desc": "Sort customization parameters (e.g. descending flag)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.sort(...)"
     },
     "std": {
       "desc": "Returns sample standard deviation of elements inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 2, 3], [10, 20]] })\n>>> df.with_columns($df.col(\"a\").arr.std().alias(\"std_dev\"))\nshape: (2, 2)\n┌───────────┬─────────┐\n│ a         │ std_dev │\n├───────────┼─────────┤\n│ [1, 2, 3] │ 1       │\n│ [10, 20]  │ 7.071   │\n└───────────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.std(...)"
     },
     "sum": {
       "desc": "Returns sum of elements inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 2, 3], [10, 20]] })\n>>> df.with_columns($df.col(\"a\").arr.sum().alias(\"sum_a\"))\nshape: (2, 2)\n┌───────────┬───────┐\n│ a         │ sum_a │\n├───────────┼───────┤\n│ [1, 2, 3] │ 6     │\n│ [10, 20]  │ 30    │\n└───────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.sum(...)"
     },
     "to_struct": {
       "desc": "Converts list column elements to struct columns.",
@@ -1098,7 +1312,9 @@
           "desc": "Config flags including custom field names or upper bound size."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.to_struct(...)"
     },
     "unique": {
       "desc": "Fills each list with unique elements only.",
@@ -1111,14 +1327,18 @@
           "desc": "Custom uniqueness matching configuration."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.unique(...)"
     },
     "variance": {
       "desc": "Returns sample variance of elements inside each list.",
       "examples": [
         ">>> const df = $df.data({ a: [[1, 2, 3], [10, 20]] })\n>>> df.with_columns($df.col(\"a\").arr.variance().alias(\"var_a\"))\nshape: (2, 2)\n┌───────────┬───────┐\n│ a         │ var_a │\n├───────────┼───────┤\n│ [1, 2, 3] │ 1     │\n│ [10, 20]  │ 50    │\n└───────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.variance(...)"
     },
     "eval": {
       "desc": "Evaluates subExpr element-wise across array lists.",
@@ -1131,7 +1351,9 @@
           "desc": "The sub-expression to evaluate inside each nested list."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.eval(...)"
     }
   },
   "columnExpressions/mixins/ComparisonExpr.ts": {
@@ -1154,7 +1376,9 @@
           "desc": "Control boundary inclusivity: \"both\", \"left\", \"right\", or \"none\" (default: \"both\")."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).between(...)"
     },
     "eq": {
       "desc": "Boolean comparison: Returns true if column values match the specified value exactly.",
@@ -1167,7 +1391,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).eq(...)"
     },
     "eq_missing": {
       "desc": "Equivalence check that treats null values as equal to each other.",
@@ -1180,7 +1406,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).eq_missing(...)"
     },
     "ge": {
       "desc": "Boolean comparison: Returns true if greater than or equal to argument.",
@@ -1193,7 +1421,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).ge(...)"
     },
     "gt": {
       "desc": "Boolean comparison: Returns true if column value is greater than argument.",
@@ -1206,14 +1436,18 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).gt(...)"
     },
     "has_nulls": {
       "desc": "Aggregation: Checks if any value in the group is null.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\"], val: [10, null] })\n>>> df.group_by(\"group\").agg($df.col(\"val\").has_nulls().alias(\"has_nulls\"))\nshape: (1, 2)\n┌───────┬───────────┐\n│ group │ has_nulls │\n├───────┼───────────┤\n│ \"A\"   │ true      │\n└───────┴───────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).has_nulls(...)"
     },
     "is_close": {
       "desc": "Determines if floating-point values are approximately equal within tolerances.",
@@ -1230,14 +1464,18 @@
           "desc": "Tolerance values absolute (abs_tol) and relative (rel_tol), and NaN options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_close(...)"
     },
     "is_duplicated": {
       "desc": "Checks if values occur more than once in the column.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2, 2] })\n>>> df.with_columns($df.col(\"a\").is_duplicated().alias(\"dup\"))\nshape: (3, 2)\n┌───┬───────┐\n│ a │ dup   │\n├───┼───────┤\n│ 1 │ false │\n│ 2 │ true  │\n│ 2 │ true  │\n└───┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_duplicated(...)"
     },
     "is_empty": {
       "desc": "Checks if strings or nested arrays have length 0.",
@@ -1250,14 +1488,18 @@
           "desc": "Config options including whether to ignore nulls inside arrays."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_empty(...)"
     },
     "is_finite": {
       "desc": "Checks if values are finite numbers (not NaN or Infinity).",
       "examples": [
         ">>> const df = $df.data({ a: [1.5, Infinity, NaN] })\n>>> df.with_columns($df.col(\"a\").is_finite().alias(\"finite\"))\nshape: (3, 2)\n┌──────────┬────────┐\n│ a        │ finite │\n├──────────┼────────┤\n│ 1.5      │ true   │\n│ Infinity │ false  │\n│ NaN      │ false  │\n└──────────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_finite(...)"
     },
     "is_in": {
       "desc": "Checks if column values are members of a specified array or list.",
@@ -1270,49 +1512,63 @@
           "desc": "An array of candidate values or a single value to match against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_in(...)"
     },
     "is_infinite": {
       "desc": "Checks if values are positive or negative Infinity.",
       "examples": [
         ">>> const df = $df.data({ a: [1.5, Infinity, -Infinity] })\n>>> df.with_columns($df.col(\"a\").is_infinite().alias(\"inf\"))\nshape: (3, 2)\n┌───────────┬───────┐\n│ a         │ inf   │\n├───────────┼───────┤\n│ 1.5       │ false │\n│ Infinity  │ true  │\n│ -Infinity │ true  │\n└───────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_infinite(...)"
     },
     "is_nan": {
       "desc": "Checks if values are NaN.",
       "examples": [
         ">>> const df = $df.data({ a: [1.5, NaN] })\n>>> df.with_columns($df.col(\"a\").is_nan().alias(\"nan\"))\nshape: (2, 2)\n┌─────┬───────┐\n│ a   │ nan   │\n├─────┼───────┤\n│ 1.5 │ false │\n│ NaN │ true  │\n└─────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_nan(...)"
     },
     "is_not_nan": {
       "desc": "Checks if values are not NaN.",
       "examples": [
         ">>> const df = $df.data({ a: [1.5, NaN] })\n>>> df.with_columns($df.col(\"a\").is_not_nan().alias(\"not_nan\"))\nshape: (2, 2)\n┌─────┬─────────┐\n│ a   │ not_nan │\n├─────┼─────────┤\n│ 1.5 │ true    │\n│ NaN │ false   │\n└─────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_not_nan(...)"
     },
     "is_not_null": {
       "desc": "Checks if column values are non-null and valid (not null, undefined, or missing).",
       "examples": [
         ">>> const df = $df.data({ email: [\"alice@example.com\", null] })\n>>> df.with_columns($df.col(\"email\").is_not_null().alias(\"valid\"))\nshape: (2, 2)\n┌───────────────────┬───────┐\n│ email             │ valid │\n├───────────────────┼───────┤\n│ alice@example.com │ true  │\n│ null              │ false │\n└───────────────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_not_null(...)"
     },
     "is_null": {
       "desc": "Checks if column values are null, undefined, or missing.",
       "examples": [
         ">>> const df = $df.data({ email: [\"alice@example.com\", null] })\n>>> df.with_columns($df.col(\"email\").is_null().alias(\"missing\"))\nshape: (2, 2)\n┌───────────────────┬─────────┐\n│ email             │ missing │\n├───────────────────┼─────────┤\n│ alice@example.com │ false   │\n│ null              │ true    │\n└───────────────────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_null(...)"
     },
     "is_unique": {
       "desc": "Checks if values occur exactly once in the column.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2, 2] })\n>>> df.with_columns($df.col(\"a\").is_unique().alias(\"uniq\"))\nshape: (3, 2)\n┌───┬───────┐\n│ a │ uniq  │\n├───┼───────┤\n│ 1 │ true  │\n│ 2 │ false │\n│ 2 │ false │\n└───┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).is_unique(...)"
     },
     "le": {
       "desc": "Boolean comparison: Returns true if less than or equal to argument.",
@@ -1325,7 +1581,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).le(...)"
     },
     "lt": {
       "desc": "Boolean comparison: Returns true if less than argument.",
@@ -1338,7 +1596,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).lt(...)"
     },
     "ne": {
       "desc": "Boolean comparison: Returns true if values do not match.",
@@ -1351,7 +1611,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).ne(...)"
     },
     "ne_missing": {
       "desc": "Difference check that treats null values as equal to each other.",
@@ -1364,7 +1626,9 @@
           "desc": "The value or column expression to compare against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).ne_missing(...)"
     },
     "not_in": {
       "desc": "Checks if values are not elements of a specific array or set list.",
@@ -1377,7 +1641,9 @@
           "desc": "An array of candidate values or a single value to match against."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).not_in(...)"
     }
   },
   "columnExpressions/mixins/LogicalExpr.ts": {
@@ -1392,14 +1658,18 @@
           "desc": "The other boolean column expression or literal value to compare."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).and(...)"
     },
     "not": {
       "desc": "Logical negation.",
       "examples": [
         ">>> const df = $df.data({\n...   is_active: [true, false, null]\n... })\n>>> df.with_columns($df.col(\"is_active\").not().alias(\"is_inactive\"))\nshape: (3, 2)\n┌───────────┬─────────────┐\n│ is_active │ is_inactive │\n├───────────┼─────────────┤\n│ true      │ false       │\n│ false     │ true        │\n│ null      │ null        │\n└───────────┴─────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).not(...)"
     },
     "or": {
       "desc": "Logical OR check supporting Kleene logic.",
@@ -1412,7 +1682,9 @@
           "desc": "The other boolean column expression or literal value to compare."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).or(...)"
     },
     "xor": {
       "desc": "Logical XOR check.",
@@ -1425,7 +1697,9 @@
           "desc": "The other boolean column expression or literal value to compare."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).xor(...)"
     }
   },
   "columnExpressions/mixins/ManipulationExpr.ts": {
@@ -1440,14 +1714,18 @@
           "desc": "Configuration options including fill value, strategy (\"forward\", \"backward\", \"zero\", \"one\", \"mean\", \"min\", \"max\"), and optional limit."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).fill_null(...)"
     },
     "reverse": {
       "desc": "Reverses the order of values in the column.",
       "examples": [
         ">>> const df = $df.data({\n...   a: [1, 2, 3]\n... })\n>>> df.with_columns($df.col(\"a\").reverse().alias(\"reversed\"))\nshape: (3, 2)\n┌───┬──────────┐\n│ a │ reversed │\n├───┼──────────┤\n│ 1 │ 3        │\n│ 2 │ 2        │\n│ 3 │ 1        │\n└───┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).reverse(...)"
     }
   },
   "columnExpressions/mixins/StringExpr.ts": {
@@ -1462,7 +1740,9 @@
           "desc": "The string value or column expression to concatenate."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.concat(...)"
     },
     "contains": {
       "desc": "Checks if a string contains the search substring pattern (supports Regex).",
@@ -1475,7 +1755,9 @@
           "desc": "The search substring or regular expression pattern."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.contains(...)"
     },
     "count_matches": {
       "desc": "Counts occurrences of a substring or regular expression match in each string element.",
@@ -1488,21 +1770,27 @@
           "desc": "Search substring or regular expression."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.count_matches(...)"
     },
     "decode_uri_component": {
       "desc": "Decodes Uniform Resource Identifier (URI) components.",
       "examples": [
         ">>> const df = $df.data({ url: [\"hello%20world\"] })\n>>> df.with_columns($df.col(\"url\").str.decode_uri_component().alias(\"decoded\"))\nshape: (1, 2)\n┌───────────────┬─────────────┐\n│ url           │ decoded     │\n├───────────────┼─────────────┤\n│ hello%20world │ hello world │\n└───────────────┴─────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.decode_uri_component(...)"
     },
     "encode_uri_component": {
       "desc": "Encodes Uniform Resource Identifier (URI) components.",
       "examples": [
         ">>> const df = $df.data({ term: [\"hello world\"] })\n>>> df.with_columns($df.col(\"term\").str.encode_uri_component().alias(\"encoded\"))\nshape: (1, 2)\n┌─────────────┬───────────────┐\n│ term        │ encoded       │\n├─────────────┼───────────────┤\n│ hello world │ hello%20world │\n└─────────────┴───────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.encode_uri_component(...)"
     },
     "ends_with": {
       "desc": "Checks if string ends with a suffix.",
@@ -1515,14 +1803,18 @@
           "desc": "The suffix substring."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.ends_with(...)"
     },
     "explode": {
       "desc": "Splits strings into lists of single characters.",
       "examples": [
         ">>> const df = $df.data({ word: [\"cat\"] })\n>>> df.with_columns($df.col(\"word\").str.explode().alias(\"chars\"))\nshape: (1, 2)\n┌──────┬─────────────────┐\n│ word │ chars           │\n├──────┼─────────────────┤\n│ cat  │ [\"c\", \"a\", \"t\"] │\n└──────┴─────────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.explode(...)"
     },
     "extract": {
       "desc": "Extracts captured group matching a regular expression pattern.",
@@ -1539,35 +1831,45 @@
           "desc": "Group index to extract (default 0 for whole match)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.extract(...)"
     },
     "len": {
       "desc": "Returns string length in UTF-16 code units. Alias for len_chars.",
       "examples": [
         ">>> const df = $df.data({ str: [\"hello\"] })\n>>> df.with_columns($df.col(\"str\").str.len().alias(\"length\"))\nshape: (1, 2)\n┌───────┬────────┐\n│ str   │ length │\n├───────┼────────┤\n│ hello │ 5      │\n└───────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.len(...)"
     },
     "len_bytes": {
       "desc": "Returns string length in UTF-8 encoded bytes.",
       "examples": [
         ">>> const df = $df.data({ str: [\"hello\"] })\n>>> df.with_columns($df.col(\"str\").str.len_bytes().alias(\"bytes\"))\nshape: (1, 2)\n┌───────┬───────┐\n│ str   │ bytes │\n├───────┼───────┤\n│ hello │ 5     │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.len_bytes(...)"
     },
     "len_chars": {
       "desc": "Returns string length in character count.",
       "examples": [
         ">>> const df = $df.data({ text: [\"hello\"] })\n>>> df.with_columns($df.col(\"text\").str.len_chars().alias(\"length\"))\nshape: (1, 2)\n┌───────┬────────┐\n│ text  │ length │\n├───────┼────────┤\n│ hello │ 5      │\n└───────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.len_chars(...)"
     },
     "lower": {
       "desc": "Converts strings to lowercase.",
       "examples": [
         ">>> const df = $df.data({ str: [\"HELLO\"] })\n>>> df.with_columns($df.col(\"str\").str.lower().alias(\"lowered\"))\nshape: (1, 2)\n┌───────┬─────────┐\n│ str   │ lowered │\n├───────┼─────────┤\n│ HELLO │ hello   │\n└───────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.lower(...)"
     },
     "lpad": {
       "desc": "Pads start of strings to specified width.",
@@ -1584,7 +1886,9 @@
           "desc": "Character sequence used for padding."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.lpad(...)"
     },
     "pad_end": {
       "desc": "Pads end of strings to specified width. Alias for rpad.",
@@ -1601,7 +1905,9 @@
           "desc": "Character sequence used for padding."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.pad_end(...)"
     },
     "pad_start": {
       "desc": "Pads start of strings to specified width. Alias for lpad.",
@@ -1618,7 +1924,9 @@
           "desc": "Character sequence used for padding."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.pad_start(...)"
     },
     "replace": {
       "desc": "Replaces the first occurrence matching a string pattern.",
@@ -1635,7 +1943,9 @@
           "desc": "The string value or match replacement function."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.replace(...)"
     },
     "replace_all": {
       "desc": "Replaces all occurrences matching a string pattern or global regular expression.",
@@ -1652,14 +1962,18 @@
           "desc": "The replacement value."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.replace_all(...)"
     },
     "reverse": {
       "desc": "Reverses characters in each string element.",
       "examples": [
         ">>> const df = $df.data({ str: [\"abc\"] })\n>>> df.with_columns($df.col(\"str\").str.reverse().alias(\"rev\"))\nshape: (1, 2)\n┌─────┬─────┐\n│ str │ rev │\n├─────┼─────┤\n│ abc │ cba │\n└─────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.reverse(...)"
     },
     "rpad": {
       "desc": "Pads end of strings to specified width.",
@@ -1676,7 +1990,9 @@
           "desc": "Character sequence used for padding."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.rpad(...)"
     },
     "slice": {
       "desc": "Extracts a substring slice using start offset and length.",
@@ -1693,7 +2009,9 @@
           "desc": "Number of characters to include."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.slice(...)"
     },
     "slice_str": {
       "desc": "Extracts a substring slice. Alias for slice.",
@@ -1710,7 +2028,9 @@
           "desc": "Number of characters to include."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.slice_str(...)"
     },
     "split": {
       "desc": "Splits strings into lists by delimiter.",
@@ -1723,7 +2043,9 @@
           "desc": "Substring delimiter."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.split(...)"
     },
     "starts_with": {
       "desc": "Checks if string starts with a prefix.",
@@ -1736,7 +2058,9 @@
           "desc": "The prefix substring."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.starts_with(...)"
     },
     "strip_chars": {
       "desc": "Strips matching characters from start and end of string.",
@@ -1753,7 +2077,9 @@
           "desc": "Configuration options for strip operation."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.strip_chars(...)"
     },
     "strip_chars_end": {
       "desc": "Strips matching characters from end of string.",
@@ -1770,7 +2096,9 @@
           "desc": "Configuration options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.strip_chars_end(...)"
     },
     "strip_chars_start": {
       "desc": "Strips matching characters from start of string.",
@@ -1787,7 +2115,9 @@
           "desc": "Configuration options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.strip_chars_start(...)"
     },
     "strip_prefix": {
       "desc": "Strips matching prefix substring from start of string.",
@@ -1800,7 +2130,9 @@
           "desc": "Prefix substring to remove."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.strip_prefix(...)"
     },
     "strip_suffix": {
       "desc": "Strips matching suffix substring from end of string.",
@@ -1813,7 +2145,9 @@
           "desc": "Suffix substring to remove."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.strip_suffix(...)"
     },
     "strptime": {
       "desc": "Parses date/time string into Datetime.",
@@ -1826,28 +2160,36 @@
           "desc": "Parsing configuration options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.strptime(...)"
     },
     "to_camelcase": {
       "desc": "Converts string casing to camelCase.",
       "examples": [
         ">>> const df = $df.data({ text: [\"hello_world\"] })\n>>> df.with_columns($df.col(\"text\").str.to_camelcase().alias(\"camel\"))\nshape: (1, 2)\n┌─────────────┬────────────┐\n│ text        │ camel      │\n├─────────────┼────────────┤\n│ hello_world │ helloWorld │\n└─────────────┴────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_camelcase(...)"
     },
     "to_date": {
       "desc": "Parses string into Date object.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").str.to_date().alias(\"date\"))\nshape: (1, 2)\n┌────────────┬──────────────────────────┐\n│ d          │ date                     │\n├────────────┼──────────────────────────┤\n│ 2026-05-20 │ 2026-05-20T00:00:00.000Z │\n└────────────┴──────────────────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_date(...)"
     },
     "to_datetime": {
       "desc": "Parses string into Datetime value.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:00:00Z\"] })\n>>> df.with_columns($df.col(\"ts\").str.to_datetime().alias(\"dt\"))\nshape: (1, 2)\n┌──────────────────────┬──────────────────────────┐\n│ ts                   │ dt                       │\n├──────────────────────┼──────────────────────────┤\n│ 2026-05-20T10:00:00Z │ 2026-05-20T10:00:00.000Z │\n└──────────────────────┴──────────────────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_datetime(...)"
     },
     "to_decimal": {
       "desc": "Converts string into numeric decimal representation.",
@@ -1864,91 +2206,117 @@
           "desc": "Optional scale limit."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_decimal(...)"
     },
     "to_integer": {
       "desc": "Parses string into integer number.",
       "examples": [
         ">>> const df = $df.data({ val: [\"42\"] })\n>>> df.with_columns($df.col(\"val\").str.to_integer().alias(\"num\"))\nshape: (1, 2)\n┌─────┬─────┐\n│ val │ num │\n├─────┼─────┤\n│ 42  │ 42  │\n└─────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_integer(...)"
     },
     "to_kebabcase": {
       "desc": "Converts string casing to kebab-case.",
       "examples": [
         ">>> const df = $df.data({ text: [\"helloWorld\"] })\n>>> df.with_columns($df.col(\"text\").str.to_kebabcase().alias(\"kebab\"))\nshape: (1, 2)\n┌────────────┬─────────────┐\n│ text       │ kebab       │\n├────────────┼─────────────┤\n│ helloWorld │ hello-world │\n└────────────┴─────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_kebabcase(...)"
     },
     "to_lowercase": {
       "desc": "Converts all string elements in the column to lowercase.",
       "examples": [
         ">>> const df = $df.data({\n...   c: [\"ALICE\", \"Bob\", \"charlie\"]\n... })\nshape: (3, 1)\n┌─────────┐\n│ c       │\n├─────────┤\n│ ALICE   │\n│ Bob     │\n│ charlie │\n└─────────┘\n\n>>> df.with_columns($df.col(\"c\").str.to_lowercase().alias(\"lower_name\"))\nshape: (3, 2)\n┌─────────┬────────────┐\n│ c       │ lower_name │\n├─────────┼────────────┤\n│ ALICE   │ alice      │\n│ Bob     │ bob        │\n│ charlie │ charlie    │\n└─────────┴────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_lowercase(...)"
     },
     "to_pascalcase": {
       "desc": "Converts string casing to PascalCase.",
       "examples": [
         ">>> const df = $df.data({ text: [\"hello_world\"] })\n>>> df.with_columns($df.col(\"text\").str.to_pascalcase().alias(\"pascal\"))\nshape: (1, 2)\n┌─────────────┬────────────┐\n│ text        │ pascal     │\n├─────────────┼────────────┤\n│ hello_world │ HelloWorld │\n└─────────────┴────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_pascalcase(...)"
     },
     "to_snakecase": {
       "desc": "Converts string casing to snake_case.",
       "examples": [
         ">>> const df = $df.data({ text: [\"helloWorld\"] })\n>>> df.with_columns($df.col(\"text\").str.to_snakecase().alias(\"snake\"))\nshape: (1, 2)\n┌────────────┬─────────────┐\n│ text       │ snake       │\n├────────────┼─────────────┤\n│ helloWorld │ hello_world │\n└────────────┴─────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_snakecase(...)"
     },
     "to_time": {
       "desc": "Parses string into time component representation.",
       "examples": [
         ">>> const df = $df.data({ t: [\"10:30:00\"] })\n>>> df.with_columns($df.col(\"t\").str.to_time().alias(\"time\"))\nshape: (1, 2)\n┌──────────┬──────────┐\n│ t        │ time     │\n├──────────┼──────────┤\n│ 10:30:00 │ 10:30:00 │\n└──────────┴──────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_time(...)"
     },
     "to_titlecase": {
       "desc": "Converts string casing to Title Case.",
       "examples": [
         ">>> const df = $df.data({ text: [\"hello world\"] })\n>>> df.with_columns($df.col(\"text\").str.to_titlecase().alias(\"title\"))\nshape: (1, 2)\n┌─────────────┬─────────────┐\n│ text        │ title       │\n├─────────────┼─────────────┤\n│ hello world │ Hello World │\n└─────────────┴─────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_titlecase(...)"
     },
     "to_uppercase": {
       "desc": "Converts all string elements in the column to uppercase.",
       "examples": [
         ">>> const df = $df.data({ name: [\"alice\"] })\n>>> df.with_columns($df.col(\"name\").str.to_uppercase().alias(\"upper\"))\nshape: (1, 2)\n┌───────┬───────┐\n│ name  │ upper │\n├───────┼───────┤\n│ alice │ ALICE │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.to_uppercase(...)"
     },
     "trim": {
       "desc": "Trims leading and trailing whitespace characters from each string element.",
       "examples": [
         ">>> const df = $df.data({ name: [\"  alice  \"] })\n>>> df.with_columns($df.col(\"name\").str.trim().alias(\"clean\"))\nshape: (1, 2)\n┌───────────┬───────┐\n│ name      │ clean │\n├───────────┼───────┤\n│   alice   │ alice │\n└───────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.trim(...)"
     },
     "trim_end": {
       "desc": "Trims trailing whitespace characters from each string element.",
       "examples": [
         ">>> const df = $df.data({ name: [\"alice  \"] })\n>>> df.with_columns($df.col(\"name\").str.trim_end().alias(\"clean\"))\nshape: (1, 2)\n┌─────────┬───────┐\n│ name    │ clean │\n├─────────┼───────┤\n│ alice   │ alice │\n└─────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.trim_end(...)"
     },
     "trim_start": {
       "desc": "Trims leading whitespace characters from each string element.",
       "examples": [
         ">>> const df = $df.data({ name: [\"  alice\"] })\n>>> df.with_columns($df.col(\"name\").str.trim_start().alias(\"clean\"))\nshape: (1, 2)\n┌─────────┬───────┐\n│ name    │ clean │\n├─────────┼───────┤\n│   alice │ alice │\n└─────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.trim_start(...)"
     },
     "upper": {
       "desc": "Converts string to uppercase.",
       "examples": [
         ">>> const df = $df.data({ text: [\"alice\"] })\n>>> df.with_columns($df.col(\"text\").str.upper().alias(\"upper\"))\nshape: (1, 2)\n┌───────┬───────┐\n│ text  │ upper │\n├───────┼───────┤\n│ alice │ ALICE │\n└───────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.upper(...)"
     },
     "zfill": {
       "desc": "Pads start of string with zeros to target width.",
@@ -1961,7 +2329,9 @@
           "desc": "Minimum resulting string width."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.zfill(...)"
     }
   },
   "columnExpressions/mixins/StructExpr.ts": {
@@ -1976,7 +2346,9 @@
           "desc": "Name of the field key to extract."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).struct.field(...)"
     },
     "rename_fields": {
       "desc": "Renames existing field keys inside structured object columns.",
@@ -1989,7 +2361,9 @@
           "desc": "Key-value map of current field names to new field names."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).struct.rename_fields(...)"
     },
     "with_fields": {
       "desc": "Inserts or updates fields inside structured object columns.",
@@ -2002,21 +2376,27 @@
           "desc": "Expressions or field map defining new or updated fields."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).struct.with_fields(...)"
     },
     "unnest": {
       "desc": "Expands nested struct attributes into distinct columns in the DataFrame schema.",
       "examples": [
         ">>> const df = $df.data({ user: [{ name: \"Alice\", age: 30 }] })\n>>> df.select($df.col(\"user\").struct.unnest())\nshape: (1, 2)\n┌───────┬─────┐\n│ name  │ age │\n├───────┼─────┤\n│ Alice │ 30  │\n└───────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).struct.unnest(...)"
     },
     "struct": {
       "desc": "Struct namespace accessor for operating on nested object/struct columns.",
       "examples": [
         ">>> df.select($df.col(\"user\").struct.field(\"name\"))"
       ],
-      "returns": "StructExprNamespace"
+      "returns": "StructExprNamespace",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).struct.struct(...)"
     }
   },
   "columnExpressions/mixins/TemporalExpr.ts": {
@@ -2025,28 +2405,36 @@
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.century().alias(\"century\"))\nshape: (1, 2)\n┌────────────┬─────────┐\n│ d          │ century │\n├────────────┼─────────┤\n│ 2026-05-20 │ 21      │\n└────────────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.century(...)"
     },
     "date": {
       "desc": "Extracts Date object component from Datetime.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:30:00Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.date().alias(\"date_only\"))\nshape: (1, 2)\n┌──────────────────────┬──────────────────────────┐\n│ ts                   │ date_only                │\n├──────────────────────┼──────────────────────────┤\n│ 2026-05-20T10:30:00Z │ 2026-05-20T00:00:00.000Z │\n└──────────────────────┴──────────────────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.date(...)"
     },
     "day": {
       "desc": "Extracts the calendar day component (1-31) from a Datetime column.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.day().alias(\"day\"))\nshape: (1, 2)\n┌────────────┬─────┐\n│ d          │ day │\n├────────────┼─────┤\n│ 2026-05-20 │ 20  │\n└────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.day(...)"
     },
     "days_in_month": {
       "desc": "Extracts number of days in the month.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2024-02-15\"] })\n>>> df.with_columns($df.col(\"d\").dt.days_in_month().alias(\"dim\"))\nshape: (1, 2)\n┌────────────┬─────┐\n│ d          │ dim │\n├────────────┼─────┤\n│ 2024-02-15 │ 29  │\n└────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.days_in_month(...)"
     },
     "epoch": {
       "desc": "Returns epoch duration timestamp offset.",
@@ -2059,14 +2447,18 @@
           "desc": "Time resolution unit (\"ms\", \"us\", \"ns\", \"s\")."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.epoch(...)"
     },
     "hour": {
       "desc": "Extracts the hour component (0-23) from a Datetime column.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T14:30:00Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.hour().alias(\"hr\"))\nshape: (1, 2)\n┌──────────────────────┬────┐\n│ ts                   │ hr │\n├──────────────────────┼────┤\n│ 2026-05-20T14:30:00Z │ 14 │\n└──────────────────────┴────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.hour(...)"
     },
     "is_business_day": {
       "desc": "Boolean check: Returns true if target falls on a business day.",
@@ -2079,84 +2471,108 @@
           "desc": "Config options including custom weekend or holiday definitions."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.is_business_day(...)"
     },
     "is_leap_year": {
       "desc": "Checks if year is a leap year.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2024-01-01\", \"2026-01-01\"] })\n>>> df.with_columns($df.col(\"d\").dt.is_leap_year().alias(\"leap\"))\nshape: (2, 2)\n┌────────────┬───────┐\n│ d          │ leap  │\n├────────────┼───────┤\n│ 2024-01-01 │ true  │\n│ 2026-01-01 │ false │\n└────────────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.is_leap_year(...)"
     },
     "iso_week": {
       "desc": "Extracts ISO week index.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.iso_week().alias(\"week\"))\nshape: (1, 2)\n┌────────────┬──────┐\n│ d          │ week │\n├────────────┼──────┤\n│ 2026-05-20 │ 21   │\n└────────────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.iso_week(...)"
     },
     "iso_year": {
       "desc": "Extracts ISO calendar year.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.iso_year().alias(\"iso_yr\"))\nshape: (1, 2)\n┌────────────┬────────┐\n│ d          │ iso_yr │\n├────────────┼────────┤\n│ 2026-05-20 │ 2026   │\n└────────────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.iso_year(...)"
     },
     "microsecond": {
       "desc": "Extracts microseconds component.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:00:00.123Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.microsecond().alias(\"us\"))\nshape: (1, 2)\n┌──────────────────────────┬────────┐\n│ ts                       │ us     │\n├──────────────────────────┼────────┤\n│ 2026-05-20T10:00:00.123Z │ 123000 │\n└──────────────────────────┴────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.microsecond(...)"
     },
     "millennium": {
       "desc": "Extracts millennium component index.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.millennium().alias(\"mil\"))\nshape: (1, 2)\n┌────────────┬─────┐\n│ d          │ mil │\n├────────────┼─────┤\n│ 2026-05-20 │ 3   │\n└────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.millennium(...)"
     },
     "millisecond": {
       "desc": "Extracts milliseconds component.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:00:00.456Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.millisecond().alias(\"ms\"))\nshape: (1, 2)\n┌──────────────────────────┬─────┐\n│ ts                       │ ms  │\n├──────────────────────────┼─────┤\n│ 2026-05-20T10:00:00.456Z │ 456 │\n└──────────────────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.millisecond(...)"
     },
     "minute": {
       "desc": "Extracts the minute component (0-59) from a Datetime column.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:45:00Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.minute().alias(\"min\"))\nshape: (1, 2)\n┌──────────────────────┬─────┐\n│ ts                   │ min │\n├──────────────────────┼─────┤\n│ 2026-05-20T10:45:00Z │ 45  │\n└──────────────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.minute(...)"
     },
     "month": {
       "desc": "Extracts the calendar month component (1-12) from a Datetime column.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.month().alias(\"m\"))\nshape: (1, 2)\n┌────────────┬───┐\n│ d          │ m │\n├────────────┼───┤\n│ 2026-05-20 │ 5 │\n└────────────┴───┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.month(...)"
     },
     "month_end": {
       "desc": "Returns date representing end of the month.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.month_end().alias(\"m_end\"))\nshape: (1, 2)\n┌────────────┬──────────────────────────┐\n│ d          │ m_end                    │\n├────────────┼──────────────────────────┤\n│ 2026-05-20 │ 2026-05-31T00:00:00.000Z │\n└────────────┴──────────────────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.month_end(...)"
     },
     "month_start": {
       "desc": "Returns date representing start of the month.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.month_start().alias(\"m_start\"))\nshape: (1, 2)\n┌────────────┬──────────────────────────┐\n│ d          │ m_start                  │\n├────────────┼──────────────────────────┤\n│ 2026-05-20 │ 2026-05-01T00:00:00.000Z │\n└────────────┴──────────────────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.month_start(...)"
     },
     "nanosecond": {
       "desc": "Extracts nanoseconds component.",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:00:00.001Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.nanosecond().alias(\"ns\"))\nshape: (1, 2)\n┌──────────────────────────┬─────────┐\n│ ts                       │ ns      │\n├──────────────────────────┼─────────┤\n│ 2026-05-20T10:00:00.001Z │ 1000000 │\n└──────────────────────────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.nanosecond(...)"
     },
     "offset_business_day": {
       "desc": "Offsets date by N business days.",
@@ -2173,7 +2589,9 @@
           "desc": "Business day rules and holidays options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.offset_business_day(...)"
     },
     "offset_day": {
       "desc": "Offsets date by N calendar days.",
@@ -2190,28 +2608,36 @@
           "desc": "Offset options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.offset_day(...)"
     },
     "ordinal_day": {
       "desc": "Returns day of the year (1-366).",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-02-01\"] })\n>>> df.with_columns($df.col(\"d\").dt.ordinal_day().alias(\"doy\"))\nshape: (1, 2)\n┌────────────┬─────┐\n│ d          │ doy │\n├────────────┼─────┤\n│ 2026-02-01 │ 32  │\n└────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.ordinal_day(...)"
     },
     "quarter": {
       "desc": "Returns quarter of the year (1-4).",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.quarter().alias(\"qtr\"))\nshape: (1, 2)\n┌────────────┬─────┐\n│ d          │ qtr │\n├────────────┼─────┤\n│ 2026-05-20 │ 2   │\n└────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.quarter(...)"
     },
     "second": {
       "desc": "Extracts seconds component (0-59).",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:00:45Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.second().alias(\"sec\"))\nshape: (1, 2)\n┌──────────────────────┬─────┐\n│ ts                   │ sec │\n├──────────────────────┼─────┤\n│ 2026-05-20T10:00:45Z │ 45  │\n└──────────────────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.second(...)"
     },
     "strftime": {
       "desc": "Formats dates to custom strings using strftime format tokens.",
@@ -2224,14 +2650,18 @@
           "desc": "Formatting pattern configuration."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.strftime(...)"
     },
     "time": {
       "desc": "Extracts time component string (\"HH:MM:SS.mmm\").",
       "examples": [
         ">>> const df = $df.data({ ts: [\"2026-05-20T10:30:00Z\"] })\n>>> df.with_columns($df.col(\"ts\").dt.time().alias(\"time\"))\nshape: (1, 2)\n┌──────────────────────┬──────────────┐\n│ ts                   │ time         │\n├──────────────────────┼──────────────┤\n│ 2026-05-20T10:30:00Z │ 10:30:00.000 │\n└──────────────────────┴──────────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.time(...)"
     },
     "timestamp": {
       "desc": "Returns numeric timestamp relative to Epoch. Alias for epoch.",
@@ -2244,7 +2674,9 @@
           "desc": "Time unit resolution."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.timestamp(...)"
     },
     "to_string": {
       "desc": "Formats dates to custom strings. Alias for strftime.",
@@ -2257,56 +2689,72 @@
           "desc": "Formatting configuration."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.to_string(...)"
     },
     "total_days": {
       "desc": "Converts Duration to integer day count.",
       "examples": [
         ">>> const df = $df.data({ dur: [86400000] })\n>>> df.with_columns($df.col(\"dur\").dt.total_days().alias(\"days\"))\nshape: (1, 2)\n┌──────────┬──────┐\n│ dur      │ days │\n├──────────┼──────┤\n│ 86400000 │ 1    │\n└──────────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_days(...)"
     },
     "total_hours": {
       "desc": "Converts Duration to floating point hours.",
       "examples": [
         ">>> const df = $df.data({ dur: [3600000] })\n>>> df.with_columns($df.col(\"dur\").dt.total_hours().alias(\"hrs\"))\nshape: (1, 2)\n┌─────────┬─────┐\n│ dur     │ hrs │\n├─────────┼─────┤\n│ 3600000 │ 1   │\n└─────────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_hours(...)"
     },
     "total_microseconds": {
       "desc": "Converts Duration to microsecond count.",
       "examples": [
         ">>> const df = $df.data({ dur: [10] })\n>>> df.with_columns($df.col(\"dur\").dt.total_microseconds().alias(\"us\"))\nshape: (1, 2)\n┌─────┬───────┐\n│ dur │ us    │\n├─────┼───────┤\n│ 10  │ 10000 │\n└─────┴───────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_microseconds(...)"
     },
     "total_milliseconds": {
       "desc": "Converts Duration to millisecond count.",
       "examples": [
         ">>> const df = $df.data({ dur: [500] })\n>>> df.with_columns($df.col(\"dur\").dt.total_milliseconds().alias(\"ms\"))\nshape: (1, 2)\n┌─────┬─────┐\n│ dur │ ms  │\n├─────┼─────┤\n│ 500 │ 500 │\n└─────┴─────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_milliseconds(...)"
     },
     "total_minutes": {
       "desc": "Converts Duration to floating point minutes.",
       "examples": [
         ">>> const df = $df.data({ dur: [60000] })\n>>> df.with_columns($df.col(\"dur\").dt.total_minutes().alias(\"mins\"))\nshape: (1, 2)\n┌───────┬──────┐\n│ dur   │ mins │\n├───────┼──────┤\n│ 60000 │ 1    │\n└───────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_minutes(...)"
     },
     "total_nanoseconds": {
       "desc": "Converts Duration to nanosecond count.",
       "examples": [
         ">>> const df = $df.data({ dur: [1] })\n>>> df.with_columns($df.col(\"dur\").dt.total_nanoseconds().alias(\"ns\"))\nshape: (1, 2)\n┌─────┬─────────┐\n│ dur │ ns      │\n├─────┼─────────┤\n│ 1   │ 1000000 │\n└─────┴─────────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_nanoseconds(...)"
     },
     "total_seconds": {
       "desc": "Converts Duration to floating point seconds.",
       "examples": [
         ">>> const df = $df.data({ dur: [1000] })\n>>> df.with_columns($df.col(\"dur\").dt.total_seconds().alias(\"secs\"))\nshape: (1, 2)\n┌──────┬──────┐\n│ dur  │ secs │\n├──────┼──────┤\n│ 1000 │ 1    │\n└──────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.total_seconds(...)"
     },
     "utc_offset": {
       "desc": "Returns the offset of local timezone relative to UTC in minutes.",
@@ -2323,35 +2771,45 @@
           "desc": "Utc offset calculation options."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.utc_offset(...)"
     },
     "week": {
       "desc": "Extracts ISO week index. Alias for iso_week.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.week().alias(\"week\"))\nshape: (1, 2)\n┌────────────┬──────┐\n│ d          │ week │\n├────────────┼──────┤\n│ 2026-05-20 │ 21   │\n└────────────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.week(...)"
     },
     "weekday": {
       "desc": "Extracts weekday component (1=Monday, 7=Sunday).",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-18\"] })\n>>> df.with_columns($df.col(\"d\").dt.weekday().alias(\"wd\"))\nshape: (1, 2)\n┌────────────┬────┐\n│ d          │ wd │\n├────────────┼────┤\n│ 2026-05-18 │ 1  │\n└────────────┴────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.weekday(...)"
     },
     "year": {
       "desc": "Extracts the year component from a Datetime column.",
       "examples": [
         ">>> const df = $df.data({ d: [\"2026-05-20\"] })\n>>> df.with_columns($df.col(\"d\").dt.year().alias(\"yr\"))\nshape: (1, 2)\n┌────────────┬──────┐\n│ d          │ yr   │\n├────────────┼──────┤\n│ 2026-05-20 │ 2026 │\n└────────────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.year(...)"
     },
     "dt": {
       "desc": "Datetime namespace accessor for date, time, and duration operations.",
       "examples": [
         ">>> df.select($df.col(\"date\").dt.year())"
       ],
-      "returns": "DateTimeExprNamespace"
+      "returns": "DateTimeExprNamespace",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dt.dt(...)"
     }
   },
   "columnExpressions/mixins/WindowExpr.ts": {
@@ -2366,7 +2824,9 @@
           "desc": "Flag indicating whether to compute from reverse direction."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cum_count(...)"
     },
     "cum_max": {
       "desc": "Window: Computes cumulative maximum value.",
@@ -2379,7 +2839,9 @@
           "desc": "Flag indicating whether to compute in reverse direction."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cum_max(...)"
     },
     "cum_min": {
       "desc": "Window: Computes cumulative minimum value.",
@@ -2392,7 +2854,9 @@
           "desc": "Flag indicating whether to compute in reverse direction."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cum_min(...)"
     },
     "cum_prod": {
       "desc": "Window: Computes cumulative product of values.",
@@ -2405,7 +2869,9 @@
           "desc": "Flag indicating whether to compute in reverse direction."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cum_prod(...)"
     },
     "cum_sum": {
       "desc": "Window: Computes cumulative sum of values.",
@@ -2418,14 +2884,18 @@
           "desc": "Flag indicating whether to compute in reverse direction."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).cum_sum(...)"
     },
     "dense_rank": {
       "desc": "Window: Computes dense rank (ranks without gaps) within group partition.",
       "examples": [
         ">>> const df = $df.data({ score: [100, 100, 90] })\n>>> df.with_columns($df.col(\"score\").dense_rank().alias(\"dr\"))\nshape: (3, 2)\n┌───────┬────┐\n│ score │ dr │\n├───────┼────┤\n│ 100   │ 2  │\n│ 100   │ 2  │\n│ 90    │ 1  │\n└───────┴────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).dense_rank(...)"
     },
     "lag": {
       "desc": "Window: Shifts values down by offset, filling missing slots with default value.",
@@ -2442,7 +2912,9 @@
           "desc": "Fallback fill value for empty slots (default null)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).lag(...)"
     },
     "lead": {
       "desc": "Window: Shifts values up by offset, filling missing slots with default value.",
@@ -2459,7 +2931,9 @@
           "desc": "Fallback fill value for empty slots (default null)."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).lead(...)"
     },
     "over": {
       "desc": "Executes a window aggregation partitioned by column keys.",
@@ -2472,14 +2946,18 @@
           "desc": "Column expression or array of columns to partition by."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).over(...)"
     },
     "rank": {
       "desc": "Window: Computes rank within group partition.",
       "examples": [
         ">>> const df = $df.data({ score: [100, 80, 90] })\n>>> df.with_columns($df.col(\"score\").rank().alias(\"rank\"))\nshape: (3, 2)\n┌───────┬──────┐\n│ score │ rank │\n├───────┼──────┤\n│ 100   │ 3    │\n│ 80    │ 1    │\n│ 90    │ 2    │\n└───────┴──────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rank(...)"
     },
     "rolling_max": {
       "desc": "Window: Computes rolling window maximum value.",
@@ -2492,7 +2970,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_max(...)"
     },
     "rolling_mean": {
       "desc": "Window: Computes rolling window mean average.",
@@ -2505,7 +2985,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_mean(...)"
     },
     "rolling_median": {
       "desc": "Window: Computes rolling window median value.",
@@ -2518,7 +3000,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_median(...)"
     },
     "rolling_min": {
       "desc": "Window: Computes rolling window minimum value.",
@@ -2531,7 +3015,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_min(...)"
     },
     "rolling_quantile": {
       "desc": "Window: Computes rolling window quantile value.",
@@ -2548,7 +3034,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_quantile(...)"
     },
     "rolling_rank": {
       "desc": "Window: Computes rolling window rank.",
@@ -2561,7 +3049,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_rank(...)"
     },
     "rolling_std": {
       "desc": "Window: Computes rolling window standard deviation.",
@@ -2574,7 +3064,9 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_std(...)"
     },
     "rolling_sum": {
       "desc": "Window: Computes rolling window sum.",
@@ -2587,26 +3079,34 @@
           "desc": "Size of rolling window."
         }
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).rolling_sum(...)"
     },
     "row_number": {
       "desc": "Window: Computes 1-indexed row number count within group partitions.",
       "examples": [
         ">>> const df = $df.data({ cat: [\"A\", \"A\", \"B\"] })\n>>> df.with_columns($df.col(\"cat\").row_number().over(\"cat\").alias(\"rn\"))\nshape: (3, 2)\n┌─────┬────┐\n│ cat │ rn │\n├─────┼────┤\n│ A   │ 1  │\n│ A   │ 2  │\n│ B   │ 1  │\n└─────┴────┘"
       ],
-      "returns": "ColumnExpression"
+      "returns": "ColumnExpression",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).row_number(...)"
     }
   },
   "dataframe/dataframe.ts": {
     "DataFrame": {
-      "desc": "Two-dimensional columnar tabular data structure supporting expression execution and reshaping."
+      "desc": "Two-dimensional columnar tabular data structure supporting expression execution and reshaping.",
+      "category": "DataFrame",
+      "syntax": "df.DataFrame(...)"
     },
     "columns": {
       "desc": "Gets array of column names in the DataFrame.",
       "examples": [
         ">>> const df = $df.data({ a: [1], b: [2] })\n>>> df\nshape: (1, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ 2 │\n└───┴───┘\n>>> df.columns\n[\"a\", \"b\"]"
       ],
-      "returns": "Array of column name strings."
+      "returns": "Array of column name strings.",
+      "category": "DataFrame",
+      "syntax": "df.columns(...)"
     },
     "concat": {
       "desc": "Concatenates items vertically, horizontally, or diagonally.",
@@ -2633,7 +3133,9 @@
           "desc": "When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.concat(...)"
     },
     "drop": {
       "desc": "Drops specified columns from the DataFrame.",
@@ -2646,7 +3148,9 @@
           "desc": "Column names or arrays of column names to remove."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.drop(...)"
     },
     "drop_nulls": {
       "desc": "Drops rows containing null or undefined values in specified subset columns.",
@@ -2659,14 +3163,18 @@
           "desc": "Column name or array of column names to check for nulls."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.drop_nulls(...)"
     },
     "dtypes": {
       "desc": "Gets array of registered column DataTypes matching current schema order.",
       "examples": [
         ">>> const df = $df.data({ a: [1], b: [\"text\"] })\n>>> df\nshape: (1, 2)\n┌───┬──────┐\n│ a │ b    │\n├───┼──────┤\n│ 1 │ text │\n└───┴──────┘\n>>> df.dtypes\n[Float64, Utf8]"
       ],
-      "returns": "Array of RegisteredDataType definitions."
+      "returns": "Array of RegisteredDataType definitions.",
+      "category": "DataFrame",
+      "syntax": "df.dtypes(...)"
     },
     "explode": {
       "desc": "Explodes an array column into multiple rows, replicating non-target row attributes.",
@@ -2691,7 +3199,9 @@
           "desc": "When `true`, retains `null` array values during explosion."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.explode(...)"
     },
     "fill_null": {
       "desc": "Fills null values across columns using scalar values or statistical strategies.",
@@ -2716,7 +3226,9 @@
           "desc": "Maximum consecutive nulls to fill when using propagation strategies."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.fill_null(...)"
     },
     "filter": {
       "desc": "Filters rows matching boolean column expressions or predicate callbacks.",
@@ -2729,14 +3241,18 @@
           "desc": "Expressions or predicate functions evaluated per row."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.filter(...)"
     },
     "get_schema": {
       "desc": "Returns the mapping dictionary of column names to DataType.",
       "examples": [
         ">>> const df = $df.data({ a: [1], b: [\"text\"] })\n>>> df\nshape: (1, 2)\n┌───┬──────┐\n│ a │ b    │\n├───┼──────┤\n│ 1 │ text │\n└───┴──────┘\n>>> df.get_schema()\n{ a: Float64, b: Utf8 }"
       ],
-      "returns": "DataFrameSchema"
+      "returns": "DataFrameSchema",
+      "category": "DataFrame",
+      "syntax": "df.get_schema(...)"
     },
     "groupby": {
       "desc": "Groups rows by key columns to prepare for aggregations.",
@@ -2749,7 +3265,9 @@
           "desc": "Column name or array of key column names."
         }
       ],
-      "returns": "GroupedData"
+      "returns": "GroupedData",
+      "category": "DataFrame",
+      "syntax": "df.groupby(...)"
     },
     "head": {
       "desc": "Returns the first N rows as a new DataFrame.",
@@ -2762,14 +3280,18 @@
           "desc": "Number of leading rows to slice (default 10)."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.head(...)"
     },
     "height": {
       "desc": "Gets height (total row count) of the DataFrame.",
       "examples": [
         ">>> const df = $df.data({ a: [10, 20, 30] })\n>>> df\nshape: (3, 1)\n┌────┐\n│ a  │\n├────┤\n│ 10 │\n│ 20 │\n│ 30 │\n└────┘\n>>> df.height\n3"
       ],
-      "returns": "Number of rows."
+      "returns": "Number of rows.",
+      "category": "DataFrame",
+      "syntax": "df.height(...)"
     },
     "hstack": {
       "desc": "Concatenates columns horizontally to the current DataFrame.",
@@ -2790,7 +3312,9 @@
           "desc": "When `true` (default), throws an error if row counts mismatch. Set `false` to allow null padding."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.hstack(...)"
     },
     "insert_column": {
       "desc": "Inserts a new column at a specific ordinal index position.",
@@ -2811,7 +3335,9 @@
           "desc": "Value expression or column definition."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.insert_column(...)"
     },
     "item": {
       "desc": "Retrieves a single scalar cell value by row and column position or name.",
@@ -2828,14 +3354,18 @@
           "desc": "Column index or column name string."
         }
       ],
-      "returns": "Cell scalar value."
+      "returns": "Cell scalar value.",
+      "category": "DataFrame",
+      "syntax": "df.item(...)"
     },
     "iter_columns": {
       "desc": "Yields a generator iterating over raw column arrays.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2], b: [3, 4] })\n>>> df\nshape: (2, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ 3 │\n│ 2 │ 4 │\n└───┴───┘\n>>> for (const col of df.iter_columns()) { console.log(col); }\nFloat64Array([1, 2])\nFloat64Array([3, 4])"
       ],
-      "returns": "Generator of ColumnData arrays."
+      "returns": "Generator of ColumnData arrays.",
+      "category": "DataFrame",
+      "syntax": "df.iter_columns(...)"
     },
     "iter_rows": {
       "desc": "Yields a generator iterating over rows as tuples or named objects.",
@@ -2852,7 +3382,9 @@
           "desc": "When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`)."
         }
       ],
-      "returns": "Generator of rows."
+      "returns": "Generator of rows.",
+      "category": "DataFrame",
+      "syntax": "df.iter_rows(...)"
     },
     "join": {
       "desc": "Joins two DataFrames on key columns using inner, left, right, or outer join strategy.",
@@ -2881,7 +3413,9 @@
           "desc": "Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `[\"\", \"_right\"]`)."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.join(...)"
     },
     "limit": {
       "desc": "Limits the output to N rows starting from offset.",
@@ -2906,7 +3440,9 @@
           "desc": "Slice direction starting point (`\"start\"` or `\"end\"`). Default `\"start\"`."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.limit(...)"
     },
     "pivot": {
       "desc": "Pivots columns from long format to a wide datagrid structure.",
@@ -2931,7 +3467,9 @@
           "desc": "Column whose cell values populate the pivoted grid cells."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.pivot(...)"
     },
     "rename": {
       "desc": "Renames columns based on a key-value mapping dictionary.",
@@ -2944,21 +3482,27 @@
           "desc": "Dictionary mapping old column names to new names."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.rename(...)"
     },
     "reverse": {
       "desc": "Reverses the row ordering of the DataFrame.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n┌───┐\n│ a │\n├───┤\n│ 1 │\n│ 2 │\n│ 3 │\n└───┘\n>>> df.reverse()\nshape: (3, 1)\n┌───┐\n│ a │\n├───┤\n│ 3 │\n│ 2 │\n│ 1 │\n└───┘"
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.reverse(...)"
     },
     "schema": {
       "desc": "Gets current DataFrameSchema dictionary mapping column names to DataType.",
       "examples": [
         ">>> const df = $df.data({ a: [1], b: [\"text\"] })\n>>> df\nshape: (1, 2)\n┌───┬──────┐\n│ a │ b    │\n├───┼──────┤\n│ 1 │ text │\n└───┴──────┘\n>>> df.schema\n{ a: Float64, b: Utf8 }"
       ],
-      "returns": "DataFrameSchema mapping."
+      "returns": "DataFrameSchema mapping.",
+      "category": "DataFrame",
+      "syntax": "df.schema(...)"
     },
     "select": {
       "desc": "Selects specific columns or evaluates column expressions.",
@@ -2971,14 +3515,18 @@
           "desc": "Column names, column expressions, or object maps to evaluate."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.select(...)"
     },
     "shape": {
       "desc": "Gets DataFrame dimensions as [height, width] tuple.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ x │\n│ 2 │ y │\n└───┴───┘\n>>> df.shape\n[2, 2]"
       ],
-      "returns": "Tuple [height, width]."
+      "returns": "Tuple [height, width].",
+      "category": "DataFrame",
+      "syntax": "df.shape(...)"
     },
     "slice": {
       "desc": "Slices a subset range of rows between start and end index.",
@@ -2995,7 +3543,9 @@
           "desc": "Optional ending row index (exclusive)."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.slice(...)"
     },
     "sort": {
       "desc": "Sorts DataFrame rows by one or more column expressions or custom sorters.",
@@ -3024,7 +3574,9 @@
           "desc": "Optional dictionary mapping column names to custom comparator functions."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.sort(...)"
     },
     "tail": {
       "desc": "Returns the last N rows as a new DataFrame.",
@@ -3037,21 +3589,27 @@
           "desc": "Number of trailing rows to take (default 10)."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.tail(...)"
     },
     "to_dict": {
       "desc": "Converts columns into a JavaScript dictionary mapping column keys to raw arrays.",
       "examples": [
         ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ x │\n│ 2 │ y │\n└───┴───┘\n>>> df.to_dict()\n{ a: Float64Array([1, 2]), b: [\"x\", \"y\"] }"
       ],
-      "returns": "Column dictionary map."
+      "returns": "Column dictionary map.",
+      "category": "DataFrame",
+      "syntax": "df.to_dict(...)"
     },
     "to_dicts": {
       "desc": "Converts rows into an array of JavaScript objects.",
       "examples": [
         ">>> const df = $df.data({ a: [1], b: [\"x\"] })\n>>> df\nshape: (1, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ x │\n└───┴───┘\n>>> df.to_dicts()\n[{ a: 1, b: \"x\" }]"
       ],
-      "returns": "Array of row record objects."
+      "returns": "Array of row record objects.",
+      "category": "DataFrame",
+      "syntax": "df.to_dicts(...)"
     },
     "to_array": {
       "desc": "Evaluates a column expression or retrieves column values as a raw JavaScript array.",
@@ -3064,7 +3622,9 @@
           "desc": "Target column name or column expression."
         }
       ],
-      "returns": "Array of column scalar values."
+      "returns": "Array of column scalar values.",
+      "category": "DataFrame",
+      "syntax": "df.to_array(...)"
     },
     "transpose": {
       "desc": "Transposes rows into columns and columns into rows.",
@@ -3089,7 +3649,9 @@
           "desc": "Column name or iterable of strings to use as transposed column headers."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.transpose(...)"
     },
     "unique": {
       "desc": "Filters distinct unique rows matching target key columns.",
@@ -3102,7 +3664,9 @@
           "desc": "Target column or array of column names to evaluate uniqueness."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.unique(...)"
     },
     "unpivot": {
       "desc": "Unpivots a wide DataFrame into a long format structure.",
@@ -3131,7 +3695,9 @@
           "desc": "Name for the new value column holding cell values (default `\"value\"`)."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.unpivot(...)"
     },
     "vstack": {
       "desc": "Concatenates DataFrames vertically. Alias for concat({ how: \"vertical\" }).",
@@ -3144,14 +3710,18 @@
           "desc": "Single DataFrame or array of DataFrames to append vertically."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.vstack(...)"
     },
     "width": {
       "desc": "Gets width (total column count) of the DataFrame.",
       "examples": [
         ">>> const df = $df.data({ a: [1], b: [2] })\n>>> df\nshape: (1, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ 2 │\n└───┴───┘\n>>> df.width\n2"
       ],
-      "returns": "Number of columns."
+      "returns": "Number of columns.",
+      "category": "DataFrame",
+      "syntax": "df.width(...)"
     },
     "with_columns": {
       "desc": "Adds new columns or updates existing ones using column expressions.",
@@ -3164,7 +3734,9 @@
           "desc": "Expressions or field objects defining column calculations."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.with_columns(...)"
     },
     "with_row_index": {
       "desc": "Appends an incremental index column.",
@@ -3181,7 +3753,9 @@
           "desc": "Starting numeric index offset (default 0)."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.with_row_index(...)"
     },
     "write_json": {
       "desc": "Writes DataFrame rows to JSON format string or file/stream target.",
@@ -3206,7 +3780,9 @@
           "desc": "Serialization options including custom `replacer` function or replacer array."
         }
       ],
-      "returns": "JSON string representation."
+      "returns": "JSON string representation.",
+      "category": "DataFrame",
+      "syntax": "df.write_json(...)"
     },
     "write_csv": {
       "desc": "Writes DataFrame to CSV format string or file/stream target.",
@@ -3235,19 +3811,25 @@
           "desc": "Character used to enclose fields containing special characters (default `'\"'`)."
         }
       ],
-      "returns": "CSV string output."
+      "returns": "CSV string output.",
+      "category": "DataFrame",
+      "syntax": "df.write_csv(...)"
     }
   },
   "dataframe/grouped/grouped.ts": {
     "GroupedData": {
-      "desc": "Represents a DataFrame grouped by key columns, supporting aggregation operations."
+      "desc": "Represents a DataFrame grouped by key columns, supporting aggregation operations.",
+      "category": "DataFrame",
+      "syntax": "df.GroupedData(...)"
     },
     "to_dataframe": {
       "desc": "Converts group keys back into a single distinct DataFrame without aggregations.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [1, 2, 3] })\n>>> df.groupby(\"group\").to_dataframe()\nshape: (2, 1)\n┌───────┐\n│ group │\n├───────┤\n│ A     │\n│ B     │\n└───────┘"
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.to_dataframe(...)"
     },
     "agg": {
       "desc": "Aggregates grouped partitions using aggregation column expressions.",
@@ -3260,27 +3842,41 @@
           "desc": "One or more aggregation column expressions."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "DataFrame",
+      "syntax": "df.agg(...)"
     }
   },
   "exceptions/index.ts": {
     "DFScriptError": {
-      "desc": "Base exception class for all df-script errors."
+      "desc": "Base exception class for all df-script errors.",
+      "category": "Exception",
+      "syntax": "throw new DFScriptError(\"message\")"
     },
     "DataFrameError": {
-      "desc": "General error thrown during DataFrame instantiation or execution."
+      "desc": "General error thrown during DataFrame instantiation or execution.",
+      "category": "Exception",
+      "syntax": "throw new DataFrameError(\"message\")"
     },
     "ColumnNotFoundError": {
-      "desc": "Error thrown when a specified column name does not exist in the DataFrame schema."
+      "desc": "Error thrown when a specified column name does not exist in the DataFrame schema.",
+      "category": "Exception",
+      "syntax": "throw new ColumnNotFoundError(\"message\")"
     },
     "SchemaError": {
-      "desc": "Error thrown when schema definitions, coercions, or data types are invalid."
+      "desc": "Error thrown when schema definitions, coercions, or data types are invalid.",
+      "category": "Exception",
+      "syntax": "throw new SchemaError(\"message\")"
     },
     "ComputeError": {
-      "desc": "Error thrown during expression evaluation or element-wise calculations."
+      "desc": "Error thrown during expression evaluation or element-wise calculations.",
+      "category": "Exception",
+      "syntax": "throw new ComputeError(\"message\")"
     },
     "ShapeError": {
-      "desc": "Error thrown when shape dimensions or column heights mismatch."
+      "desc": "Error thrown when shape dimensions or column heights mismatch.",
+      "category": "Exception",
+      "syntax": "throw new ShapeError(\"message\")"
     }
   },
   "functions/concat.ts": {
@@ -3309,12 +3905,16 @@
           "desc": "When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`."
         }
       ],
-      "returns": "DataFrame"
+      "returns": "DataFrame",
+      "category": "ColumnExpression",
+      "syntax": "$df.concat(...)"
     }
   },
   "functions/read_csv.ts": {
     "read_csv": {
-      "desc": "Reads a CSV string and constructs a DataFrame. Automatically infers column data types unless an explicit schema is provided."
+      "desc": "Reads a CSV string and constructs a DataFrame. Automatically infers column data types unless an explicit schema is provided.",
+      "category": "ColumnExpression",
+      "syntax": "$df.read_csv(...)"
     }
   },
   "functions/read_json.ts": {
@@ -3330,7 +3930,9 @@
           "desc": "Parse and configuration options."
         }
       ],
-      "returns": "A new DataFrame instance populated with the parsed records."
+      "returns": "A new DataFrame instance populated with the parsed records.",
+      "category": "ColumnExpression",
+      "syntax": "$df.read_json(...)"
     }
   }
 }
