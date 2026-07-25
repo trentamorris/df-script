@@ -448,25 +448,6 @@ export class StringExprNamespace {
     }
 
     /**
-     * Extracts a substring slice. Alias for slice.
-     * @param offset Starting position index.
-     * @param length Number of characters to include.
-     * @returns ColumnExpression
-     * @example
-     * >>> const df = $df.data({ str: ["hello world"] })
-     * >>> df.with_columns($df.col("str").str.slice_str(0, 5).alias("sub"))
-     * shape: (1, 2)
-     * ┌─────────────┬───────┐
-     * │ str         │ sub   │
-     * ├─────────────┼───────┤
-     * │ hello world │ hello │
-     * └─────────────┴───────┘
-     */
-    slice_str(offset: number, length?: number) {
-        return this.slice(offset, length);
-    }
-
-    /**
      * Splits strings into lists by delimiter.
      * @param delimiter Substring delimiter.
      * @returns ColumnExpression

@@ -2200,26 +2200,6 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.slice(...)"
     },
-    "slice_str": {
-      "desc": "Extracts a substring slice. Alias for slice.",
-      "examples": [
-        ">>> const df = $df.data({ str: [\"hello world\"] })\n>>> df.with_columns($df.col(\"str\").str.slice_str(0, 5).alias(\"sub\"))\nshape: (1, 2)\n┌─────────────┬───────┐\n│ str         │ sub   │\n├─────────────┼───────┤\n│ hello world │ hello │\n└─────────────┴───────┘"
-      ],
-      "params": [
-        {
-          "name": "offset",
-          "desc": "Starting position index."
-        },
-        {
-          "name": "length",
-          "desc": "Number of characters to include."
-        }
-      ],
-      "returns": "ColumnExpression",
-      "namespace": "$df.col.str",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).str.slice_str(...)"
-    },
     "split": {
       "desc": "Splits strings into lists by delimiter.",
       "examples": [
