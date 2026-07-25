@@ -2018,7 +2018,27 @@ export class DataFrame<T extends RowRecord = any> {
      * @param {string | { write: (str: string) => void }} [file] Target file path or writable stream target (optional).
      * @param {WriteJSONOptions} [options] JSON formatting and replacer options.
      * @param {JSONFormat} [options.format] JSON output format structure (`"json"` or `"ndjson"`). Default `"json"`.
-     * @param {SafeJsonReplacerOptions} [options.replacerOptions] Serialization options including custom `replacer` function or replacer array.
+     * @param {SafeJsonReplacerOptions} [options.replacerOptions] Serialization options for custom type handling.
+     * @param {(v: Date) => string} [options.replacerOptions.formatDate] Custom formatter function for Date objects. Ignored if `onDate` is specified.
+     * @param {"string" | "number"} [options.replacerOptions.bigintStrategy] Convert BigInts to numeric strings or numbers if safe. Default `"string"`.
+     * @param {(v: bigint) => any} [options.replacerOptions.onBigInt] Custom serialization override for BigInt values.
+     * @param {(v: any) => any} [options.replacerOptions.onTypedArray] Custom serialization override for TypedArray values.
+     * @param {(v: Set<any>) => any} [options.replacerOptions.onSet] Custom serialization override for Set objects.
+     * @param {(v: Map<any, any>) => any} [options.replacerOptions.onMap] Custom serialization override for Map objects.
+     * @param {(v: RegExp) => any} [options.replacerOptions.onRegExp] Custom serialization override for RegExp objects.
+     * @param {(v: Date) => any} [options.replacerOptions.onDate] Custom serialization override for Date objects. Takes precedence over `formatDate`.
+     * @param {(v: Error) => any} [options.replacerOptions.onError] Custom serialization override for Error objects. Prevents empty `{}` output.
+     * @param {(v: URLSearchParams) => any} [options.replacerOptions.onURLSearchParams] Custom serialization override for URLSearchParams objects.
+     * @param {(this: any, k: string, v: any) => any} [options.replacerOptions.onCustom] Catch-all serialization override for custom types. Runs after native type checks.
+     * @param {boolean} [options.replacerOptions.handleCircular] If `true`, handles circular references by replacing them instead of throwing.
+     * @param {(this: any, k: string, v: any) => any} [options.replacerOptions.onCircular] Custom fallback when a circular reference is found. Default `"[Circular]"`.
+     * @param {boolean} [options.replacerOptions.voidBigIntReplacement] If `true`, disables the default safe serialization for BigInt values.
+     * @param {boolean} [options.replacerOptions.voidTypedArrayReplacement] If `true`, disables the default safe serialization for TypedArray values.
+     * @param {boolean} [options.replacerOptions.voidSetReplacement] If `true`, disables the default safe serialization for Set objects.
+     * @param {boolean} [options.replacerOptions.voidMapReplacement] If `true`, disables the default safe serialization for Map objects.
+     * @param {boolean} [options.replacerOptions.voidRegExpReplacement] If `true`, disables the default safe serialization for RegExp objects.
+     * @param {boolean} [options.replacerOptions.voidDateReplacement] If `true`, disables the default safe serialization for Date objects.
+     * @param {((this: any, k: string, v: any) => any) | (string | number)[] | null} [options.replacerOptions.replacer] Custom replacer function or array whitelist that runs first for pre-processing.
      * @returns {string} JSON string representation.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })

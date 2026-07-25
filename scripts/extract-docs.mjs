@@ -147,6 +147,38 @@ function extractSignatureFromCode(rawContent, startIndex, symbolName, isGetter) 
   return signature.replace(/\s+/g, " ").trim();
 }
 
+// splitByComma: Splits a string on commas at the top-level (respecting nested parentheses, curly braces, and generics).
+function splitByComma(str) {
+  const parts = [];
+  let current = "";
+  let parenDepth = 0;
+  let braceDepth = 0;
+  let angleDepth = 0;
+  
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    if (char === "(") parenDepth++;
+    else if (char === ")") parenDepth--;
+    else if (char === "{") braceDepth++;
+    else if (char === "}") braceDepth--;
+    else if (char === "<") angleDepth++;
+    else if (char === ">") {
+      if (angleDepth > 0) angleDepth--;
+    }
+    
+    if (char === "," && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
+      parts.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+  if (current.trim()) {
+    parts.push(current.trim());
+  }
+  return parts;
+}
+
 // formatSignature: splits params onto individual lines and, when a function has a
 // single config/options param with documented sub-properties, expands them inline.
 function formatSignature(signatureStr, params) {
@@ -161,33 +193,7 @@ function formatSignature(signatureStr, params) {
   const suffix = signatureStr.substring(lastParen + 1);
   
   // Split top-level params from the raw signature
-  const rawParams = [];
-  let currentParam = "";
-  let parenDepth = 0;
-  let braceDepth = 0;
-  let angleDepth = 0;
-  
-  for (let i = 0; i < paramsStr.length; i++) {
-    const char = paramsStr[i];
-    if (char === "(") parenDepth++;
-    else if (char === ")") parenDepth--;
-    else if (char === "{") braceDepth++;
-    else if (char === "}") braceDepth--;
-    else if (char === "<") angleDepth++;
-    else if (char === ">") {
-      if (angleDepth > 0) angleDepth--;
-    }
-    
-    if (char === "," && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
-      rawParams.push(currentParam.trim());
-      currentParam = "";
-    } else {
-      currentParam += char;
-    }
-  }
-  if (currentParam.trim()) {
-    rawParams.push(currentParam.trim());
-  }
+  const rawParams = splitByComma(paramsStr);
   
   if (rawParams.length === 0) {
     return `${prefix}()${suffix}`;
@@ -202,27 +208,7 @@ function formatSignature(signatureStr, params) {
       const typeName = destructuringMatch[2].trim();
       const defaultValue = destructuringMatch[3] ? destructuringMatch[3].trim() : undefined;
       
-      const fields = [];
-      let currentField = "";
-      let pDepth = 0;
-      let bDepth = 0;
-      for (let i = 0; i < fieldsStr.length; i++) {
-        const char = fieldsStr[i];
-        if (char === "(") pDepth++;
-        else if (char === ")") pDepth--;
-        else if (char === "{") bDepth++;
-        else if (char === "}") bDepth--;
-        
-        if (char === "," && pDepth === 0 && bDepth === 0) {
-          fields.push(currentField.trim());
-          currentField = "";
-        } else {
-          currentField += char;
-        }
-      }
-      if (currentField.trim()) {
-        fields.push(currentField.trim());
-      }
+      const fields = splitByComma(fieldsStr);
 
       const lines = fields.map(f => `    ${f}`);
       const defaultPart = defaultValue ? ` = ${defaultValue}` : "";

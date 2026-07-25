@@ -4479,7 +4479,107 @@
         {
           "name": "[options.replacerOptions]",
           "type": "SafeJsonReplacerOptions",
-          "desc": "Serialization options including custom `replacer` function or replacer array."
+          "desc": "Serialization options for custom type handling."
+        },
+        {
+          "name": "[options.replacerOptions.formatDate]",
+          "type": "(v: Date) => string",
+          "desc": "Custom formatter function for Date objects. Ignored if `onDate` is specified."
+        },
+        {
+          "name": "[options.replacerOptions.bigintStrategy]",
+          "type": "\"string\" | \"number\"",
+          "desc": "Convert BigInts to numeric strings or numbers if safe. Default `\"string\"`."
+        },
+        {
+          "name": "[options.replacerOptions.onBigInt]",
+          "type": "(v: bigint) => any",
+          "desc": "Custom serialization override for BigInt values."
+        },
+        {
+          "name": "[options.replacerOptions.onTypedArray]",
+          "type": "(v: any) => any",
+          "desc": "Custom serialization override for TypedArray values."
+        },
+        {
+          "name": "[options.replacerOptions.onSet]",
+          "type": "(v: Set<any>) => any",
+          "desc": "Custom serialization override for Set objects."
+        },
+        {
+          "name": "[options.replacerOptions.onMap]",
+          "type": "(v: Map<any, any>) => any",
+          "desc": "Custom serialization override for Map objects."
+        },
+        {
+          "name": "[options.replacerOptions.onRegExp]",
+          "type": "(v: RegExp) => any",
+          "desc": "Custom serialization override for RegExp objects."
+        },
+        {
+          "name": "[options.replacerOptions.onDate]",
+          "type": "(v: Date) => any",
+          "desc": "Custom serialization override for Date objects. Takes precedence over `formatDate`."
+        },
+        {
+          "name": "[options.replacerOptions.onError]",
+          "type": "(v: Error) => any",
+          "desc": "Custom serialization override for Error objects. Prevents empty `{}` output."
+        },
+        {
+          "name": "[options.replacerOptions.onURLSearchParams]",
+          "type": "(v: URLSearchParams) => any",
+          "desc": "Custom serialization override for URLSearchParams objects."
+        },
+        {
+          "name": "[options.replacerOptions.onCustom]",
+          "type": "(this: any, k: string, v: any) => any",
+          "desc": "Catch-all serialization override for custom types. Runs after native type checks."
+        },
+        {
+          "name": "[options.replacerOptions.handleCircular]",
+          "type": "boolean",
+          "desc": "If `true`, handles circular references by replacing them instead of throwing."
+        },
+        {
+          "name": "[options.replacerOptions.onCircular]",
+          "type": "(this: any, k: string, v: any) => any",
+          "desc": "Custom fallback when a circular reference is found. Default `\"[Circular]\"`."
+        },
+        {
+          "name": "[options.replacerOptions.voidBigIntReplacement]",
+          "type": "boolean",
+          "desc": "If `true`, disables the default safe serialization for BigInt values."
+        },
+        {
+          "name": "[options.replacerOptions.voidTypedArrayReplacement]",
+          "type": "boolean",
+          "desc": "If `true`, disables the default safe serialization for TypedArray values."
+        },
+        {
+          "name": "[options.replacerOptions.voidSetReplacement]",
+          "type": "boolean",
+          "desc": "If `true`, disables the default safe serialization for Set objects."
+        },
+        {
+          "name": "[options.replacerOptions.voidMapReplacement]",
+          "type": "boolean",
+          "desc": "If `true`, disables the default safe serialization for Map objects."
+        },
+        {
+          "name": "[options.replacerOptions.voidRegExpReplacement]",
+          "type": "boolean",
+          "desc": "If `true`, disables the default safe serialization for RegExp objects."
+        },
+        {
+          "name": "[options.replacerOptions.voidDateReplacement]",
+          "type": "boolean",
+          "desc": "If `true`, disables the default safe serialization for Date objects."
+        },
+        {
+          "name": "[options.replacerOptions.replacer]",
+          "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+          "desc": "Custom replacer function or array whitelist that runs first for pre-processing."
         }
       ],
       "returns": "{string} JSON string representation.",
