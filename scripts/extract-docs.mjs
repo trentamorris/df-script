@@ -16,14 +16,30 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const srcDir = path.resolve(__dirname, "../src");
 
+// ─── JSDoc Tag Constants ──────────────────────────────────────────────────────
+const TAG_PREFIX = "@";
+const TAG_EXAMPLE = "@example";
+const TAG_PARAM = "@param";
+const TAG_RETURNS = "@returns";
+const TAG_NAMESPACE = "@namespace";
+const TAG_CATEGORY = "@category";
+const TAG_SYNTAX = "@syntax";
+const TAG_INTERNAL = "@internal";
+const TAG_IGNORE = "@ignore";
+const TAG_TYPEFILE = "@typefile";
+const TAG_INTERNALFILE = "@internalfile";
+
 // ─── Regexes to capture JSDoc comments followed by identifiers ────────────────
 
 // Capture any JSDoc block + the immediate next declaration name (method, function, or class)
 const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:(?:export|public|private|static|function|class|get|set)\s+|\*\s*)*([a-zA-Z0-9_$]+)/g;
 
-// @param {Type} [optional.name] desc  — type group is optional
-const PARAM_REGEX = /@param\s+(?:\{([^}]+)\}\s+)?([\[\]a-zA-Z0-9_$.?]+)\s+(.*)/;
-const RETURNS_REGEX = /@returns\s+(.*)/;
+// Regexes for specific tags
+const PARAM_REGEX = new RegExp(`${TAG_PARAM}\\s+(?:\\{([^}]+)\\}\\s+)?([\\[\\]a-zA-Z0-9_$.?]+)\\s+(.*)`);
+const RETURNS_REGEX = new RegExp(`${TAG_RETURNS}\\s+(.*)`);
+const NAMESPACE_REGEX = new RegExp(`${TAG_NAMESPACE}\\s+([a-zA-Z0-9_$..]+)`);
+const CATEGORY_REGEX = new RegExp(`${TAG_CATEGORY}\\s+([a-zA-Z0-9_$..]+)`);
+const SYNTAX_REGEX = new RegExp(`${TAG_SYNTAX}\\s+(.+)`);
 
 // ─── JSDoc Parser ────────────────────────────────────────────────────────────
 
@@ -41,15 +57,15 @@ function parseJSDocComment(comment) {
     const line = rawLine.replace(/^\s*\*?\s?/, "");
     const trimmed = line.trim();
 
-    if (trimmed.startsWith("@")) {
+    if (trimmed.startsWith(TAG_PREFIX)) {
       if (inExample) {
         examplesList.push(currentExampleLines.join("\n").trimEnd());
         currentExampleLines = [];
         inExample = false;
       }
-      if (trimmed.startsWith("@example")) {
+      if (trimmed.startsWith(TAG_EXAMPLE)) {
         inExample = true;
-      } else if (trimmed.startsWith("@param")) {
+      } else if (trimmed.startsWith(TAG_PARAM)) {
         const m = trimmed.match(PARAM_REGEX);
         if (m) {
           const type = m[1] ? m[1].trim() : undefined;
@@ -57,7 +73,7 @@ function parseJSDocComment(comment) {
           const desc = m[3].trim();
           paramsList.push(type ? { name, type, desc } : { name, desc });
         }
-      } else if (trimmed.startsWith("@returns")) {
+      } else if (trimmed.startsWith(TAG_RETURNS)) {
         const m = trimmed.match(RETURNS_REGEX);
         if (m) returns = m[1].trim();
       }
@@ -230,7 +246,7 @@ function extractRawDocs() {
     const rawContent = fs.readFileSync(filePath, "utf-8");
 
     // Skip pure type definition files (@typefile) or internal utility files (@internalfile)
-    if (rawContent.includes("@typefile") || rawContent.includes("@internalfile")) {
+    if (rawContent.includes(TAG_TYPEFILE) || rawContent.includes(TAG_INTERNALFILE)) {
       continue;
     }
 
@@ -241,15 +257,15 @@ function extractRawDocs() {
     let match;
 
     // Scan the raw file content for an `@namespace <value>` tag in any JSDoc block
-    const namespaceMatch = rawContent.match(/@namespace\s+([a-zA-Z0-9_$..]+)/);
+    const namespaceMatch = rawContent.match(NAMESPACE_REGEX);
     const fileNamespace = namespaceMatch ? namespaceMatch[1].trim() : null;
 
     // Scan for `@category <value>`
-    const categoryMatch = rawContent.match(/@category\s+([a-zA-Z0-9_$..]+)/);
+    const categoryMatch = rawContent.match(CATEGORY_REGEX);
     const fileCategory = categoryMatch ? categoryMatch[1].trim() : "ColumnExpression";
 
     // Scan for `@syntax <template>`
-    const syntaxMatch = rawContent.match(/@syntax\s+(.+)/);
+    const syntaxMatch = rawContent.match(SYNTAX_REGEX);
     const fileSyntaxTemplate = syntaxMatch ? syntaxMatch[1].trim() : null;
 
     JSDOC_BLOCK_REGEX.lastIndex = 0;
@@ -258,7 +274,7 @@ function extractRawDocs() {
       const symbolName = match[2];
 
       // Skip internal functions marked with @internal or @ignore, or constructor / leading underscore symbols
-      if (comment.includes("@internal") || comment.includes("@ignore") || symbolName.startsWith("_") || symbolName === "constructor") {
+      if (comment.includes(TAG_INTERNAL) || comment.includes(TAG_IGNORE) || symbolName.startsWith("_") || symbolName === "constructor") {
         continue;
       }
 
@@ -266,7 +282,7 @@ function extractRawDocs() {
 
       // Parse @namespace from the individual JSDoc if overridden, otherwise use file-level namespace
       let symbolNamespace = fileNamespace;
-      const localNamespaceMatch = comment.match(/@namespace\s+([a-zA-Z0-9_$..]+)/);
+      const localNamespaceMatch = comment.match(NAMESPACE_REGEX);
       if (localNamespaceMatch) {
         symbolNamespace = localNamespaceMatch[1].trim();
       }
@@ -277,7 +293,7 @@ function extractRawDocs() {
 
       // Parse @category from the individual JSDoc if overridden, otherwise use file-level category
       let symbolCategory = fileCategory;
-      const localCategoryMatch = comment.match(/@category\s+([a-zA-Z0-9_$..]+)/);
+      const localCategoryMatch = comment.match(CATEGORY_REGEX);
       if (localCategoryMatch) {
         symbolCategory = localCategoryMatch[1].trim();
       }
@@ -285,7 +301,7 @@ function extractRawDocs() {
 
       // Parse @syntax from the individual JSDoc if overridden, otherwise use file-level syntax template
       let symbolSyntax = null;
-      const localSyntaxMatch = comment.match(/@syntax\s+(.+)/);
+      const localSyntaxMatch = comment.match(SYNTAX_REGEX);
       if (localSyntaxMatch) {
         symbolSyntax = localSyntaxMatch[1].trim().replace("{symbol}", symbolName);
       } else if (fileSyntaxTemplate) {
