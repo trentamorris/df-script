@@ -35,8 +35,19 @@ export type SeqRangeOptions = {
  * If mode is "cumulative" (default) or "independent", it generates a sequence.
  * If mode is "constant", it repeats the given value.
  *
- * @param {any} value The initial value to start the sequence or the constant value to repeat.
- * @param {SeqRangeOptions} [options={ strict: true }] Configuration options.
+ * @param value The initial value to start the sequence or the constant value to repeat.
+ * @param options Configuration options.
+ * @param options.n The number of values to generate. Defaults to the slice/DataFrame height.
+ * @param options.dtype The registered data type to coerce/allocate for the generated sequence.
+ * @param options.name The name of the output column.
+ * @param options.mode The sequence generation mode ("constant", "cumulative", or "independent").
+ * @param options.step The step value or function to compute the step at each row.
+ * @param options.strict If true, throws an error if the generated sequence height does not match the target height.
+ * @param options.pad In non-strict mode, pads the sequence with `padValue` if it is shorter than target range.
+ * @param options.truncate In non-strict mode, truncates the sequence if it exceeds target range.
+ * @param options.padValue The value to use for padding in non-strict mode.
+ * @param options.startIndex The starting index in the DataFrame to insert the sequence.
+ * @param options.endIndex The ending index in the DataFrame to insert the sequence.
  * @returns {ColumnExpr<any>} A column expression generating the sequence.
  * @example
  * >>> const df = $df.data({ a: [10, 20] })

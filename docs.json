@@ -70,6 +70,60 @@
       "examples": [
         ">>> const df = $df.data({ a: [10, 20] })\n>>> df\nshape: (2, 1)\n┌────┐\n│ a  │\n├────┤\n│ 10 │\n│ 20 │\n└────┘\n>>> df.select($df.seq_range(1, { step: 2 }).alias(\"odd\"))\nshape: (2, 1)\n┌─────┐\n│ odd │\n├─────┤\n│ 1   │\n│ 3   │\n└─────┘"
       ],
+      "params": [
+        {
+          "name": "value",
+          "desc": "The initial value to start the sequence or the constant value to repeat."
+        },
+        {
+          "name": "options",
+          "desc": "Configuration options."
+        },
+        {
+          "name": "options.n",
+          "desc": "The number of values to generate. Defaults to the slice/DataFrame height."
+        },
+        {
+          "name": "options.dtype",
+          "desc": "The registered data type to coerce/allocate for the generated sequence."
+        },
+        {
+          "name": "options.name",
+          "desc": "The name of the output column."
+        },
+        {
+          "name": "options.mode",
+          "desc": "The sequence generation mode (\"constant\", \"cumulative\", or \"independent\")."
+        },
+        {
+          "name": "options.step",
+          "desc": "The step value or function to compute the step at each row."
+        },
+        {
+          "name": "options.strict",
+          "desc": "If true, throws an error if the generated sequence height does not match the target height."
+        },
+        {
+          "name": "options.pad",
+          "desc": "In non-strict mode, pads the sequence with `padValue` if it is shorter than target range."
+        },
+        {
+          "name": "options.truncate",
+          "desc": "In non-strict mode, truncates the sequence if it exceeds target range."
+        },
+        {
+          "name": "options.padValue",
+          "desc": "The value to use for padding in non-strict mode."
+        },
+        {
+          "name": "options.startIndex",
+          "desc": "The starting index in the DataFrame to insert the sequence."
+        },
+        {
+          "name": "options.endIndex",
+          "desc": "The ending index in the DataFrame to insert the sequence."
+        }
+      ],
       "returns": "{ColumnExpr<any>} A column expression generating the sequence."
     }
   },
