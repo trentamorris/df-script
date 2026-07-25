@@ -41,6 +41,13 @@
       "examples": [
         ">>> const df = $df.data({ a: [1, null, null], b: [null, 2, null] })\n>>> df\nshape: (3, 2)\n┌──────┬──────┐\n│ a    │ b    │\n├──────┼──────┤\n│ 1    │ null │\n│ null │ 2    │\n│ null │ null │\n└──────┴──────┘\n>>> df.select($df.coalesce($df.col(\"a\"), $df.col(\"b\"), $df.lit(3)).alias(\"coalesced\"))\nshape: (3, 1)\n┌───────────┐\n│ coalesced │\n├───────────┤\n│ 1         │\n│ 2         │\n│ 3         │\n└───────────┘"
       ],
+      "params": [
+        {
+          "name": "exprs",
+          "type": "...(IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]",
+          "desc": "The list of expressions or columns to coalesce."
+        }
+      ],
       "returns": "{ColumnExpr<any>} A column expression resolving to the first non-null value.",
       "namespace": "$df",
       "category": "ColumnExpression",
@@ -67,6 +74,13 @@
       "examples": [
         ">>> const df = $df.data({ id: [101, 102], val: [10, 20] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ id  │ val │\n├─────┼─────┤\n│ 101 │ 10  │\n│ 102 │ 20  │\n└─────┴─────┘\n>>> df.select($df.exclude(\"id\"))\nshape: (2, 1)\n┌─────┐\n│ val │\n├─────┤\n│ 10  │\n│ 20  │\n└─────┘"
       ],
+      "params": [
+        {
+          "name": "columns",
+          "type": "string | string[]",
+          "desc": "The name or names of columns to exclude."
+        }
+      ],
       "returns": "{ColumnExpr<any>} A column expression targeting all columns except the specified ones.",
       "namespace": "$df",
       "category": "ColumnExpression",
@@ -79,6 +93,13 @@
       "desc": "Aggregates values of a column into a list within each group.",
       "examples": [
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [1, 2, 3] })\n>>> df\nshape: (3, 2)\n┌───────┬─────┐\n│ group │ val │\n├───────┼─────┤\n│ A     │ 1   │\n│ A     │ 2   │\n│ B     │ 3   │\n└───────┴─────┘\n>>> df.group_by(\"group\").agg($df.implode(\"val\").alias(\"imploded\"))\nshape: (2, 2)\n┌───────┬──────────┐\n│ group │ imploded │\n├───────┼──────────┤\n│ A     │ [1, 2]   │\n│ B     │ [3]      │\n└───────┴──────────┘"
+      ],
+      "params": [
+        {
+          "name": "column",
+          "type": "IntoExpr | IntoExpr[]",
+          "desc": "The column or expression to implode."
+        }
       ],
       "returns": "{ColumnExpr<any>} A column expression representing the list of values.",
       "namespace": "$df",
@@ -191,6 +212,18 @@
       "examples": [
         ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ x   │\n│ 2   │ y   │\n└─────┴─────┘\n>>> df.select($df.struct({ x: \"a\", y: \"b\" }).alias(\"coord\"))\nshape: (2, 1)\n┌──────────────────┐\n│ coord            │\n├──────────────────┤\n│ { x: 1, y: \"x\" } │\n│ { x: 2, y: \"y\" } │\n└──────────────────┘"
       ],
+      "params": [
+        {
+          "name": "fields",
+          "type": "IntoExpr[] | Record<string, IntoExpr> | IntoExpr",
+          "desc": "An array of expressions, a record of field names to expressions, or a single expression."
+        },
+        {
+          "name": "moreFields",
+          "type": "...IntoExpr[]",
+          "desc": "Additional fields when a single expression is passed as the first parameter."
+        }
+      ],
       "returns": "{ColumnExpr<any>} A column expression packaging the specified fields.",
       "namespace": "$df",
       "category": "ColumnExpression",
@@ -203,6 +236,13 @@
       "desc": "Provides conditional branch evaluations inside column expressions.",
       "examples": [
         ">>> const df = $df.data({ score: [75, 95] })\n>>> df\nshape: (2, 1)\n┌───────┐\n│ score │\n├───────┤\n│ 75    │\n│ 95    │\n└───────┘\n>>> df.select(\n...   $df.when($df.col(\"score\").gt(90)).then(\"A\")\n...     .otherwise(\"B\").alias(\"grade\")\n... )\nshape: (2, 1)\n┌───────┐\n│ grade │\n├───────┤\n│ B     │\n│ A     │\n└───────┘"
+      ],
+      "params": [
+        {
+          "name": "predicate",
+          "type": "WhenArg",
+          "desc": "The boolean condition or expression."
+        }
       ],
       "returns": "{When} A When object builder to chain `.then()` and `.otherwise()`/`.when()`.",
       "namespace": "$df",
@@ -3968,7 +4008,7 @@
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.join(...)",
-      "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  config: JoinOptions<T, U>\n): DataFrame<R>"
+      "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  config: {\n    other,\n    on,\n    how?,\n    suffixes?\n  }\n): DataFrame<R>"
     },
     "limit": {
       "desc": "Limits the output to N rows starting from offset.",
@@ -4011,22 +4051,30 @@
         },
         {
           "name": "config.index",
+          "type": "string | string[]",
           "desc": "Key column(s) to use as new DataFrame rows."
         },
         {
           "name": "config.columns",
+          "type": "string",
           "desc": "Column whose distinct values become new wide column headers."
         },
         {
           "name": "config.values",
+          "type": "string",
           "desc": "Column whose cell values populate the pivoted grid cells."
+        },
+        {
+          "name": "[config.agg]",
+          "type": "AggFn | string",
+          "desc": "Aggregation function to apply when multiple values exist for a cell."
         }
       ],
       "returns": "DataFrame",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.pivot(...)",
-      "signature": "df.pivot<U extends RowRecord = any>(\n  config: PivotOptions<T>\n): DataFrame<U>"
+      "signature": "df.pivot<U extends RowRecord = any>(\n  config: {\n    index: string | string[],\n    columns: string,\n    values: string,\n    agg?: AggFn | string\n  }\n): DataFrame<U>"
     },
     "rename": {
       "desc": "Renames columns based on a key-value mapping dictionary.",
@@ -4282,7 +4330,7 @@
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.unpivot(...)",
-      "signature": "df.unpivot<U extends RowRecord = any>(\n  config: UnpivotOptions<T>\n): DataFrame<U>"
+      "signature": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars,\n    valueVars,\n    varName?,\n    valueName?\n  }\n): DataFrame<U>"
     },
     "vstack": {
       "desc": "Concatenates DataFrames vertically. Alias for concat({ how: \"vertical\" }).",

@@ -1015,9 +1015,10 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Pivots columns from long format to a wide datagrid structure.
      * @param config Pivot table configuration options.
-     * @param config.index Key column(s) to use as new DataFrame rows.
-     * @param config.columns Column whose distinct values become new wide column headers.
-     * @param config.values Column whose cell values populate the pivoted grid cells.
+     * @param {string | string[]} config.index Key column(s) to use as new DataFrame rows.
+     * @param {string} config.columns Column whose distinct values become new wide column headers.
+     * @param {string} config.values Column whose cell values populate the pivoted grid cells.
+     * @param {AggFn | string} [config.agg] Aggregation function to apply when multiple values exist for a cell.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({

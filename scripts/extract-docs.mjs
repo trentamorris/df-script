@@ -21,7 +21,8 @@ const srcDir = path.resolve(__dirname, "../src");
 // Capture any JSDoc block + the immediate next declaration name (method, function, or class)
 const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:(?:export|public|private|static|function|class|get|set)\s+|\*\s*)*([a-zA-Z0-9_$]+)/g;
 
-const PARAM_REGEX = /@param\s+([\[\]a-zA-Z0-9_$.?]+)\s+(.*)/;
+// @param {Type} [optional.name] desc  — type group is optional
+const PARAM_REGEX = /@param\s+(?:\{([^}]+)\}\s+)?([\[\]a-zA-Z0-9_$.?]+)\s+(.*)/;
 const RETURNS_REGEX = /@returns\s+(.*)/;
 
 // ─── JSDoc Parser ────────────────────────────────────────────────────────────
@@ -49,7 +50,12 @@ function parseJSDocComment(comment) {
         inExample = true;
       } else if (line.startsWith("@param")) {
         const m = line.match(PARAM_REGEX);
-        if (m) paramsList.push({ name: m[1], desc: m[2].trim() });
+        if (m) {
+          const type = m[1] ? m[1].trim() : undefined;
+          const name = m[2];
+          const desc = m[3].trim();
+          paramsList.push(type ? { name, type, desc } : { name, desc });
+        }
       } else if (line.startsWith("@returns")) {
         const m = line.match(RETURNS_REGEX);
         if (m) returns = m[1].trim();
@@ -110,7 +116,9 @@ function extractSignatureFromCode(rawContent, startIndex, symbolName, isGetter) 
   return signature.replace(/\s+/g, " ").trim();
 }
 
-function formatSignature(signatureStr) {
+// formatSignature: splits params onto individual lines and, when a function has a
+// single config/options param with documented sub-properties, expands them inline.
+function formatSignature(signatureStr, params) {
   const firstParen = signatureStr.indexOf("(");
   const lastParen = signatureStr.lastIndexOf(")");
   if (firstParen === -1 || lastParen === -1) {
@@ -121,7 +129,8 @@ function formatSignature(signatureStr) {
   const paramsStr = signatureStr.substring(firstParen + 1, lastParen);
   const suffix = signatureStr.substring(lastParen + 1);
   
-  const params = [];
+  // Split top-level params from the raw signature
+  const rawParams = [];
   let currentParam = "";
   let parenDepth = 0;
   let braceDepth = 0;
@@ -137,22 +146,47 @@ function formatSignature(signatureStr) {
     else if (char === ">") angleDepth--;
     
     if (char === "," && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
-      params.push(currentParam.trim());
+      rawParams.push(currentParam.trim());
       currentParam = "";
     } else {
       currentParam += char;
     }
   }
   if (currentParam.trim()) {
-    params.push(currentParam.trim());
+    rawParams.push(currentParam.trim());
   }
   
-  if (params.length === 0) {
+  if (rawParams.length === 0) {
     return `${prefix}()${suffix}`;
   }
+
+  // Try to expand a config/options param using JSDoc sub-params
+  const expandedParams = rawParams.map(p => {
+    // Match e.g. "config: PivotOptions<T>" or "options: WriteCSVOptions"
+    const configMatch = p.match(/^([a-zA-Z0-9_$]+)\s*:\s*([A-Z][a-zA-Z0-9_$<>, ]+)$/);
+    if (!configMatch || !params) return "  " + p;
+
+    const paramName = configMatch[1]; // e.g. "config"
+    // Collect documented sub-params for this param name (e.g. config.on, config.values)
+    const subParams = params.filter(pr => {
+      const cleanName = pr.name.replace(/^\[|\]$/g, ""); // strip optional brackets
+      return cleanName.startsWith(paramName + ".");
+    });
+
+    if (subParams.length === 0) return "  " + p;
+
+    const lines = subParams.map(sp => {
+      const cleanName = sp.name.replace(/^\[|\]$/g, "");
+      const propName = cleanName.slice(paramName.length + 1); // strip "config."
+      const isOptional = sp.name.startsWith("[");
+      const typePart = sp.type ? `: ${sp.type}` : "";
+      return `    ${propName}${isOptional ? "?" : ""}${typePart}`;
+    });
+
+    return `  ${paramName}: {\n${lines.join(",\n")}\n  }`;
+  });
   
-  const formattedParams = params.map(p => "  " + p).join(",\n");
-  return `${prefix}(\n${formattedParams}\n)${suffix}`;
+  return `${prefix}(\n${expandedParams.join(",\n")}\n)${suffix}`;
 }
 
 // ─── Recursive Directory Walker ──────────────────────────────────────────────
@@ -251,7 +285,7 @@ function extractRawDocs() {
       const afterComment = match[0].substring(match[0].lastIndexOf("*/") + 2);
       const isGetter = /\bget\b/.test(afterComment);
       const rawSignature = extractSignatureFromCode(rawContent, JSDOC_BLOCK_REGEX.lastIndex, symbolName, isGetter);
-      const formattedSignature = formatSignature(rawSignature);
+      const formattedSignature = formatSignature(rawSignature, parsed.params);
 
       const symbolIndex = symbolSyntax.indexOf(symbolName);
       const callerPrefix = symbolIndex !== -1 ? symbolSyntax.substring(0, symbolIndex) : "";
