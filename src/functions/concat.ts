@@ -38,7 +38,9 @@ function normalizeToDataFrames(item: any, context: string, index: number): DataF
 
 /**
  * Concatenates items vertically, horizontally, or diagonally.
- * 
+ * @namespace $df
+ * @category ColumnExpression
+ * @syntax $df.{symbol}(...)
  * @param rawItems Single DataFrame or array of DataFrames/rows to concatenate.
  * @param [options] Configuration options for concatenation layout and strictness.
  * @param [options.how] Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).

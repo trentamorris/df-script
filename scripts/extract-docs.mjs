@@ -110,6 +110,51 @@ function extractSignatureFromCode(rawContent, startIndex, symbolName, isGetter) 
   return signature.replace(/\s+/g, " ").trim();
 }
 
+function formatSignature(signatureStr) {
+  const firstParen = signatureStr.indexOf("(");
+  const lastParen = signatureStr.lastIndexOf(")");
+  if (firstParen === -1 || lastParen === -1) {
+    return signatureStr;
+  }
+  
+  const prefix = signatureStr.substring(0, firstParen);
+  const paramsStr = signatureStr.substring(firstParen + 1, lastParen);
+  const suffix = signatureStr.substring(lastParen + 1);
+  
+  const params = [];
+  let currentParam = "";
+  let parenDepth = 0;
+  let braceDepth = 0;
+  let angleDepth = 0;
+  
+  for (let i = 0; i < paramsStr.length; i++) {
+    const char = paramsStr[i];
+    if (char === "(") parenDepth++;
+    else if (char === ")") parenDepth--;
+    else if (char === "{") braceDepth++;
+    else if (char === "}") braceDepth--;
+    else if (char === "<") angleDepth++;
+    else if (char === ">") angleDepth--;
+    
+    if (char === "," && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
+      params.push(currentParam.trim());
+      currentParam = "";
+    } else {
+      currentParam += char;
+    }
+  }
+  if (currentParam.trim()) {
+    params.push(currentParam.trim());
+  }
+  
+  if (params.length === 0) {
+    return `${prefix}()${suffix}`;
+  }
+  
+  const formattedParams = params.map(p => "  " + p).join(",\n");
+  return `${prefix}(\n${formattedParams}\n)${suffix}`;
+}
+
 // ─── Recursive Directory Walker ──────────────────────────────────────────────
 
 function getSourceFiles(dir) {
@@ -205,8 +250,12 @@ function extractRawDocs() {
 
       const afterComment = match[0].substring(match[0].lastIndexOf("*/") + 2);
       const isGetter = /\bget\b/.test(afterComment);
-      const signature = extractSignatureFromCode(rawContent, JSDOC_BLOCK_REGEX.lastIndex, symbolName, isGetter);
-      parsed.signature = signature;
+      const rawSignature = extractSignatureFromCode(rawContent, JSDOC_BLOCK_REGEX.lastIndex, symbolName, isGetter);
+      const formattedSignature = formatSignature(rawSignature);
+
+      const symbolIndex = symbolSyntax.indexOf(symbolName);
+      const callerPrefix = symbolIndex !== -1 ? symbolSyntax.substring(0, symbolIndex) : "";
+      parsed.signature = callerPrefix + formattedSignature;
 
       // If we successfully parsed JSDoc details, add them
       if (parsed.desc || parsed.params || parsed.returns || parsed.examples) {

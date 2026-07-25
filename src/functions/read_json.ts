@@ -5,9 +5,14 @@ import { DataFrameError } from "../exceptions";
 
 /**
  * Parses JSON content (JSON or NDJSON) and loads it into a new DataFrame.
- *
+ * @namespace $df
+ * @category ColumnExpression
+ * @syntax $df.{symbol}(...)
  * @param content The JSON or NDJSON content string.
- * @param options Parse and configuration options.
+ * @param [options] Parse and configuration options.
+ * @param [options.format] Input format (`"json"` or `"ndjson"`). Default `"json"`.
+ * @param [options.trimBeforeParse] When `true` (default), trims whitespace before parsing.
+ * @param [options.schema] Optional column schema to coerce types.
  * @returns A new DataFrame instance populated with the parsed records.
  */
 export function read_json(

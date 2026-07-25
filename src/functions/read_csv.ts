@@ -6,6 +6,15 @@ import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
 /**
  * Reads a CSV string and constructs a DataFrame.
  * Automatically infers column data types unless an explicit schema is provided.
+ * @namespace $df
+ * @category ColumnExpression
+ * @syntax $df.{symbol}(...)
+ * @param content The CSV content string.
+ * @param [options] Parse and configuration options.
+ * @param [options.hasHeader] Whether the first row is a header row (default `true`).
+ * @param [options.schema] Optional column schema to coerce types.
+ * @param [options.inferSchema] When `true` (default), automatically infers column types.
+ * @returns DataFrame
  */
 export function read_csv<T extends RowRecord = any>(
     content: string,
