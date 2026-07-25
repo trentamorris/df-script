@@ -35,7 +35,7 @@ const TAG_INTERNALFILE = "@internalfile";
 const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:(?:export|public|private|static|function|class|get|set)\s+|\*\s*)*([a-zA-Z0-9_$]+)/g;
 
 // Regexes for specific tags
-const PARAM_REGEX = new RegExp(`${TAG_PARAM}\\s+(?:\\{([^}]+)\\}\\s+)?([\\[\\]a-zA-Z0-9_$.?]+)\\s+(.*)`);
+const PARAM_REGEX = new RegExp(`${TAG_PARAM}\\s+(?:\\{([^{}]*(?:\\{[^{}]*\\}[^{}]*)*)\\}\\s+)?([\\[\\]a-zA-Z0-9_$.?]+)\\s+(.*)`);
 const RETURNS_REGEX = new RegExp(`${TAG_RETURNS}\\s+(.*)`);
 const NAMESPACE_REGEX = new RegExp(`${TAG_NAMESPACE}\\s+([a-zA-Z0-9_$..]+)`);
 const CATEGORY_REGEX = new RegExp(`${TAG_CATEGORY}\\s+([a-zA-Z0-9_$..]+)`);
@@ -134,7 +134,9 @@ function extractSignatureFromCode(rawContent, startIndex, symbolName, isGetter) 
         braceDepth++;
       } else if (char === "}") braceDepth--;
       else if (char === "<") angleDepth++;
-      else if (char === ">") angleDepth--;
+      else if (char === ">") {
+        if (angleDepth > 0) angleDepth--;
+      }
       else if (char === ";" && parenDepth === 0 && braceDepth === 0) break;
     }
 
@@ -172,7 +174,9 @@ function formatSignature(signatureStr, params) {
     else if (char === "{") braceDepth++;
     else if (char === "}") braceDepth--;
     else if (char === "<") angleDepth++;
-    else if (char === ">") angleDepth--;
+    else if (char === ">") {
+      if (angleDepth > 0) angleDepth--;
+    }
     
     if (char === "," && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
       rawParams.push(currentParam.trim());
@@ -191,11 +195,34 @@ function formatSignature(signatureStr, params) {
 
   // Try to expand a config/options param using JSDoc sub-params
   const expandedParams = rawParams.map(p => {
-    // Match e.g. "config: PivotOptions<T>" or "options: WriteCSVOptions"
-    const configMatch = p.match(/^([a-zA-Z0-9_$]+)\s*:\s*([A-Z][a-zA-Z0-9_$<>, ]+)$/);
-    if (!configMatch || !params) return "  " + p;
+    let namePart = p;
+    let typePart = "";
+    
+    const lastColon = p.lastIndexOf(":");
+    if (lastColon !== -1) {
+      namePart = p.substring(0, lastColon).trim();
+      typePart = p.substring(lastColon + 1).trim();
+    }
 
-    const paramName = configMatch[1]; // e.g. "config"
+    let cleanType = typePart.split("=")[0].trim();
+    let isOptionalParam = namePart.endsWith("?") || typePart.includes("=");
+    let paramName = namePart.replace(/\?$/, "").trim();
+    
+    if (paramName.startsWith("{")) {
+      paramName = undefined;
+    }
+
+    // Fallback to match destructured params
+    if (!paramName && cleanType && params) {
+      const cleanTypeNoGenerics = cleanType.replace(/<.*>$/, "").trim();
+      const matchingParam = params.find(pr => pr.type && pr.type.replace(/<.*>$/, "").trim() === cleanTypeNoGenerics);
+      if (matchingParam) {
+        paramName = matchingParam.name.replace(/^\[|\]$/g, "");
+      }
+    }
+
+    if (!paramName || !cleanType || !params) return "  " + p;
+
     // Collect documented sub-params for this param name (e.g. config.on, config.values)
     const subParams = params.filter(pr => {
       const cleanName = pr.name.replace(/^\[|\]$/g, ""); // strip optional brackets
@@ -212,7 +239,7 @@ function formatSignature(signatureStr, params) {
       return `    ${propName}${isOptional ? "?" : ""}${typePart}`;
     });
 
-    return `  ${paramName}: {\n${lines.join(",\n")}\n  }`;
+    return `  ${paramName}${isOptionalParam ? "?" : ""}: {\n${lines.join(",\n")}\n  }`;
   });
   
   return `${prefix}(\n${expandedParams.join(",\n")}\n)${suffix}`;

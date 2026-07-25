@@ -136,7 +136,7 @@
       "namespace": "$df",
       "category": "ColumnExpression",
       "syntax": "$df.lit(...)",
-      "signature": "$df.lit(\n  value: any,\n  options?: LitOptions\n): ColumnExpr<any>"
+      "signature": "$df.lit(\n  value: any,\n  options?: {\n    dtype?,\n    name?\n  }\n): ColumnExpr<any>"
     }
   },
   "columnExpressions/functions/seq_range.ts": {
@@ -2324,7 +2324,7 @@
       "namespace": "$df.col.str",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.replace(...)",
-      "signature": "$df.col(<column_name>).str.replace(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string) ) { return this._patternGuard(pattern, () => this._deriveString((str) => str.replace(pattern, replacement as any)) ); } /** * Replaces all occurrences matching a string pattern or global regular expression. * @param pattern The search pattern string or regular expression. * @param replacement The replacement value. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"foo bar foo\"] }) * >>> df.with_columns($df.col(\"text\").str.replace_all(\"foo\", \"baz\").alias(\"replaced\")) * shape: (1, 2) * ┌─────────────┬─────────────┐ * │ text │ replaced │ * ├─────────────┼─────────────┤ * │ foo bar foo │ baz bar baz │ * └─────────────┴─────────────┘ */ replace_all( pattern: string | RegExp, replacement: string | ((match: string, ...args: any[]) => string) ) { return this._patternGuard(pattern, () => this._deriveString((str) => str.replaceAll(pattern, replacement as any)) ); } /** * Reverses characters in each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ str: [\"abc\"] }) * >>> df.with_columns($df.col(\"str\").str.reverse().alias(\"rev\")) * shape: (1, 2) * ┌─────┬─────┐ * │ str │ rev │ * ├─────┼─────┤ * │ abc │ cba │ * └─────┴─────┘ */ reverse() { return this._deriveString((str) => str.split(\"\").reverse().join(\"\")); } /** * Pads end of strings to specified width. * @param width Minimum resulting string length. * @param fill Character sequence used for padding. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"a\"] }) * >>> df.with_columns($df.col(\"text\").str.rpad(3, \"-\").alias(\"padded\")) * shape: (1, 2) * ┌──────┬────────┐ * │ text │ padded │ * ├──────┼────────┤ * │ a │ a-- │ * └──────┴────────┘ */ rpad(width: number, fill: string = \" \") { return this._deriveString((str) => str.padEnd(width, fill)); } /** * Extracts a substring slice using start offset and length. * @param offset Starting position index. * @param length Number of characters to include. * @returns ColumnExpression * @example * >>> const df = $df.data({ str: [\"hello world\"] }) * >>> df.with_columns($df.col(\"str\").str.slice(0, 5).alias(\"sub\")) * shape: (1, 2) * ┌─────────────┬───────┐ * │ str │ sub │ * ├─────────────┼───────┤ * │ hello world │ hello │ * └─────────────┴───────┘ */ slice(offset: number, length?: number) { return this._deriveString((str) => { const start = offset < 0 ? str.length + offset : offset; const end = length !== undefined ? start + length : undefined; return str.slice(start, end); }); } /** * Splits strings into lists by delimiter. * @param delimiter Substring delimiter. * @returns ColumnExpression * @example * >>> const df = $df.data({ csv: [\"a,b,c\"] }) * >>> df.with_columns($df.col(\"csv\").str.split(\",\").alias(\"items\")) * shape: (1, 2) * ┌───────┬─────────────────┐ * │ csv │ items │ * ├───────┼─────────────────┤ * │ a,b,c │ [\"a\", \"b\", \"c\"] │ * └───────┴─────────────────┘ */ split(delimiter: string) { return this._deriveString((str) => str.split(delimiter)); } /** * Checks if string starts with a prefix. * @param prefix The prefix substring. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\"John Doe\", \"Alice\"] }) * >>> df.with_columns($df.col(\"name\").str.starts_with(\"John\").alias(\"is_john\")) * shape: (2, 2) * ┌──────────┬─────────┐ * │ name │ is_john │ * ├──────────┼─────────┤ * │ John Doe │ true │ * │ Alice │ false │ * └──────────┴─────────┘ */ starts_with(prefix: string) { return this._deriveString((str) => str.startsWith(prefix)); } /** * Strips matching characters from start and end of string. * @param characters Characters or regex pattern to strip. * @param options Configuration options for strip operation. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"--hello--\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_chars(\"-\").alias(\"stripped\")) * shape: (1, 2) * ┌───────────┬──────────┐ * │ text │ stripped │ * ├───────────┼──────────┤ * │ --hello-- │ hello │ * └───────────┴──────────┘ */ strip_chars(characters?: string | RegExp, options?: StripCharsOptions) { return this._deriveString((str) => stripChars(str, characters, { mode: \"both\", ...options })); } /** * Strips matching characters from end of string. * @param characters Characters or regex pattern to strip. * @param options Configuration options. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello--\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_chars_end(\"-\").alias(\"stripped\")) * shape: (1, 2) * ┌─────────┬──────────┐ * │ text │ stripped │ * ├─────────┼──────────┤ * │ hello-- │ hello │ * └─────────┴──────────┘ */ strip_chars_end(characters?: string | RegExp, options?: StripCharsOptions) { return this._deriveString((str) => stripChars(str, characters, { mode: \"end\", ...options })); } /** * Strips matching characters from start of string. * @param characters Characters or regex pattern to strip. * @param options Configuration options. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"--hello\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_chars_start(\"-\").alias(\"stripped\")) * shape: (1, 2) * ┌─────────┬──────────┐ * │ text │ stripped │ * ├─────────┼──────────┤ * │ --hello │ hello │ * └─────────┴──────────┘ */ strip_chars_start(characters?: string | RegExp, options?: StripCharsOptions) { return this._deriveString((str) => stripChars(str, characters, { mode: \"start\", ...options })); } /** * Strips matching prefix substring from start of string. * @param prefix Prefix substring to remove. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"pre_fix\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_prefix(\"pre_\").alias(\"stripped\")) * shape: (1, 2) * ┌─────────┬──────────┐ * │ text │ stripped │ * ├─────────┼──────────┤ * │ pre_fix │ fix │ * └─────────┴──────────┘ */ strip_prefix(prefix: string) { return this._deriveString((str) => { return stripChars(str, prefix, { mode: \"start\", maxScanStart: 1, maxMatchesStart: 1, returnStringOnNull: true, stringOptions: { literal: true } }) as string; }); } /** * Strips matching suffix substring from end of string. * @param suffix Suffix substring to remove. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"fix_post\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_suffix(\"_post\").alias(\"stripped\")) * shape: (1, 2) * ┌──────────┬──────────┐ * │ text │ stripped │ * ├──────────┼──────────┤ * │ fix_post │ fix │ * └──────────┴──────────┘ */ strip_suffix(suffix: string) { return this._deriveString((str) => { return stripChars(str, suffix, { mode: \"end\", maxScanEnd: 1, maxMatchesEnd: 1, returnStringOnNull: true, stringOptions: { literal: true } }) as string; }); } /** * Parses date/time string into Datetime. * @param options Parsing configuration options. * @returns ColumnExpression * @example * >>> const df = $df.data({ d: [\"2026-05-20\"] }) * >>> df.with_columns($df.col(\"d\").str.strptime({ format: \"%Y-%m-%d\" }).alias(\"parsed\")) * shape: (1, 2) * ┌────────────┬──────────────────────────┐ * │ d │ parsed │ * ├────────────┼──────────────────────────┤ * │ 2026-05-20 │ 2026-05-20T00:00:00.000Z │ * └────────────┴──────────────────────────┘ */ strptime(options: StrptimeOptions) { return this._deriveString((str) => strptime(str, options)); } /** * Converts string casing to camelCase. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello_world\"] }) * >>> df.with_columns($df.col(\"text\").str.to_camelcase().alias(\"camel\")) * shape: (1, 2) * ┌─────────────┬────────────┐ * │ text │ camel │ * ├─────────────┼────────────┤ * │ hello_world │ helloWorld │ * └─────────────┴────────────┘ */ to_camelcase() { return this._deriveString((str) => changeCase(str, { format: \"camel\" })); } /** * Parses string into Date object. * @returns ColumnExpression * @example * >>> const df = $df.data({ d: [\"2026-05-20\"] }) * >>> df.with_columns($df.col(\"d\").str.to_date().alias(\"date\")) * shape: (1, 2) * ┌────────────┬──────────────────────────┐ * │ d │ date │ * ├────────────┼──────────────────────────┤ * │ 2026-05-20 │ 2026-05-20T00:00:00.000Z │ * └────────────┴──────────────────────────┘ */ to_date() { return this._deriveString((str) => toValidDate(str, { dateOnly: true })); } /** * Parses string into Datetime value. * @returns ColumnExpression * @example * >>> const df = $df.data({ ts: [\"2026-05-20T10:00:00Z\"] }) * >>> df.with_columns($df.col(\"ts\").str.to_datetime().alias(\"dt\")) * shape: (1, 2) * ┌──────────────────────┬──────────────────────────┐ * │ ts │ dt │ * ├──────────────────────┼──────────────────────────┤ * │ 2026-05-20T10:00:00Z │ 2026-05-20T10:00:00.000Z │ * └──────────────────────┴──────────────────────────┘ */ to_datetime() { return this._deriveString(toValidDate); } /** * Converts string into numeric decimal representation. * @param precision Optional precision limit. * @param scale Optional scale limit. * @returns ColumnExpression * @example * >>> const df = $df.data({ val: [\"12.34\"] }) * >>> df.with_columns($df.col(\"val\").str.to_decimal().alias(\"num\")) * shape: (1, 2) * ┌───────┬───────┐ * │ val │ num │ * ├───────┼───────┤ * │ 12.34 │ 12.34 │ * └───────┴───────┘ */ to_decimal(precision?: number, scale?: number) { return this._deriveString((str) => toValidDecimal(str, { precision, scale })); } /** * Parses string into integer number. * @returns ColumnExpression * @example * >>> const df = $df.data({ val: [\"42\"] }) * >>> df.with_columns($df.col(\"val\").str.to_integer().alias(\"num\")) * shape: (1, 2) * ┌─────┬─────┐ * │ val │ num │ * ├─────┼─────┤ * │ 42 │ 42 │ * └─────┴─────┘ */ to_integer() { return this._deriveString((str) => toValidInt(str)); } /** * Converts string casing to kebab-case. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"helloWorld\"] }) * >>> df.with_columns($df.col(\"text\").str.to_kebabcase().alias(\"kebab\")) * shape: (1, 2) * ┌────────────┬─────────────┐ * │ text │ kebab │ * ├────────────┼─────────────┤ * │ helloWorld │ hello-world │ * └────────────┴─────────────┘ */ to_kebabcase() { return this._deriveString((str) => changeCase(str, { format: \"kebab\" })); } /** * Converts all string elements in the column to lowercase. * @returns ColumnExpression * @example * >>> const df = $df.data({ * ... c: [\"ALICE\", \"Bob\", \"charlie\"] * ... }) * shape: (3, 1) * ┌─────────┐ * │ c │ * ├─────────┤ * │ ALICE │ * │ Bob │ * │ charlie │ * └─────────┘ * * >>> df.with_columns($df.col(\"c\").str.to_lowercase().alias(\"lower_name\")) * shape: (3, 2) * ┌─────────┬────────────┐ * │ c │ lower_name │ * ├─────────┼────────────┤ * │ ALICE │ alice │ * │ Bob │ bob │ * │ charlie │ charlie │ * └─────────┴────────────┘ */ to_lowercase() { return this.lower(); } /** * Converts string casing to PascalCase. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello_world\"] }) * >>> df.with_columns($df.col(\"text\").str.to_pascalcase().alias(\"pascal\")) * shape: (1, 2) * ┌─────────────┬────────────┐ * │ text │ pascal │ * ├─────────────┼────────────┤ * │ hello_world │ HelloWorld │ * └─────────────┴────────────┘ */ to_pascalcase() { return this._deriveString((str) => changeCase(str, { format: \"pascal\" })); } /** * Converts string casing to snake_case. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"helloWorld\"] }) * >>> df.with_columns($df.col(\"text\").str.to_snakecase().alias(\"snake\")) * shape: (1, 2) * ┌────────────┬─────────────┐ * │ text │ snake │ * ├────────────┼─────────────┤ * │ helloWorld │ hello_world │ * └────────────┴─────────────┘ */ to_snakecase() { return this._deriveString((str) => changeCase(str, { format: \"snake\" })); } /** * Parses string into time component representation. * @returns ColumnExpression * @example * >>> const df = $df.data({ t: [\"10:30:00\"] }) * >>> df.with_columns($df.col(\"t\").str.to_time().alias(\"time\")) * shape: (1, 2) * ┌──────────┬──────────┐ * │ t │ time │ * ├──────────┼──────────┤ * │ 10:30:00 │ 10:30:00 │ * └──────────┴──────────┘ */ to_time() { return this._deriveString(toValidTime); } /** * Converts string casing to Title Case. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello world\"] }) * >>> df.with_columns($df.col(\"text\").str.to_titlecase().alias(\"title\")) * shape: (1, 2) * ┌─────────────┬─────────────┐ * │ text │ title │ * ├─────────────┼─────────────┤ * │ hello world │ Hello World │ * └─────────────┴─────────────┘ */ to_titlecase() { return this._deriveString((str) => str.replace(/\\b\\w/g, c => c.toUpperCase())); } /** * Converts all string elements in the column to uppercase. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\"alice\"] }) * >>> df.with_columns($df.col(\"name\").str.to_uppercase().alias(\"upper\")) * shape: (1, 2) * ┌───────┬───────┐ * │ name │ upper │ * ├───────┼───────┤ * │ alice │ ALICE │ * └───────┴───────┘ */ to_uppercase() { return this.upper(); } /** * Trims leading and trailing whitespace characters from each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\" alice \"] }) * >>> df.with_columns($df.col(\"name\").str.trim().alias(\"clean\")) * shape: (1, 2) * ┌───────────┬───────┐ * │ name │ clean │ * ├───────────┼───────┤ * │ alice │ alice │ * └───────────┴───────┘ */ trim() { return this.strip_chars(); } /** * Trims trailing whitespace characters from each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\"alice \"] }) * >>> df.with_columns($df.col(\"name\").str.trim_end().alias(\"clean\")) * shape: (1, 2) * ┌─────────┬───────┐ * │ name │ clean │ * ├─────────┼───────┤ * │ alice │ alice │ * └─────────┴───────┘ */ trim_end() { return this.strip_chars_end(); } /** * Trims leading whitespace characters from each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\" alice\"] }) * >>> df.with_columns($df.col(\"name\").str.trim_start().alias(\"clean\")) * shape: (1, 2) * ┌─────────┬───────┐ * │ name │ clean │ * ├─────────┼───────┤ * │ alice │ alice │ * └─────────┴───────┘ */ trim_start() { return this.strip_chars_start(); } /** * Converts string to uppercase. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"alice\"] }) * >>> df.with_columns($df.col(\"text\").str.upper().alias(\"upper\")) * shape: (1, 2) * ┌───────┬───────┐ * │ text │ upper │ * ├───────┼───────┤ * │ alice │ ALICE │ * └───────┴───────┘ */ upper() { return this._deriveString((str) => str.toUpperCase()); } /** * Pads start of string with zeros to target width. * @param width Minimum resulting string width. * @returns ColumnExpression * @example * >>> const df = $df.data({ num: [\"42\"] }) * >>> df.with_columns($df.col(\"num\").str.zfill(5).alias(\"padded\")) * shape: (1, 2) * ┌─────┬────────┐ * │ num │ padded │ * ├─────┼────────┤ * │ 42 │ 00042 │ * └─────┴────────┘ */ zfill(width: number) { return this._deriveString((str) => str.padStart(width, \"0\")); } } export class StringExpr extends ExprBase { /** * String namespace accessor for text operations. * @namespace $df.col * @category ColumnExpression * @syntax $df.col(<column_name>).str * @returns StringExprNamespace * @example * >>> df.select($df.col(\"a\").str.len()) */ get str() { return new StringExprNamespace(this\n); } }"
+      "signature": "$df.col(<column_name>).str.replace(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string)\n)"
     },
     "replace_all": {
       "desc": "Replaces all occurrences matching a string pattern or global regular expression.",
@@ -2345,7 +2345,7 @@
       "namespace": "$df.col.str",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.replace_all(...)",
-      "signature": "$df.col(<column_name>).str.replace_all(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string) ) { return this._patternGuard(pattern, () => this._deriveString((str) => str.replaceAll(pattern, replacement as any)) ); } /** * Reverses characters in each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ str: [\"abc\"] }) * >>> df.with_columns($df.col(\"str\").str.reverse().alias(\"rev\")) * shape: (1, 2) * ┌─────┬─────┐ * │ str │ rev │ * ├─────┼─────┤ * │ abc │ cba │ * └─────┴─────┘ */ reverse() { return this._deriveString((str) => str.split(\"\").reverse().join(\"\")); } /** * Pads end of strings to specified width. * @param width Minimum resulting string length. * @param fill Character sequence used for padding. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"a\"] }) * >>> df.with_columns($df.col(\"text\").str.rpad(3, \"-\").alias(\"padded\")) * shape: (1, 2) * ┌──────┬────────┐ * │ text │ padded │ * ├──────┼────────┤ * │ a │ a-- │ * └──────┴────────┘ */ rpad(width: number, fill: string = \" \") { return this._deriveString((str) => str.padEnd(width, fill)); } /** * Extracts a substring slice using start offset and length. * @param offset Starting position index. * @param length Number of characters to include. * @returns ColumnExpression * @example * >>> const df = $df.data({ str: [\"hello world\"] }) * >>> df.with_columns($df.col(\"str\").str.slice(0, 5).alias(\"sub\")) * shape: (1, 2) * ┌─────────────┬───────┐ * │ str │ sub │ * ├─────────────┼───────┤ * │ hello world │ hello │ * └─────────────┴───────┘ */ slice(offset: number, length?: number) { return this._deriveString((str) => { const start = offset < 0 ? str.length + offset : offset; const end = length !== undefined ? start + length : undefined; return str.slice(start, end); }); } /** * Splits strings into lists by delimiter. * @param delimiter Substring delimiter. * @returns ColumnExpression * @example * >>> const df = $df.data({ csv: [\"a,b,c\"] }) * >>> df.with_columns($df.col(\"csv\").str.split(\",\").alias(\"items\")) * shape: (1, 2) * ┌───────┬─────────────────┐ * │ csv │ items │ * ├───────┼─────────────────┤ * │ a,b,c │ [\"a\", \"b\", \"c\"] │ * └───────┴─────────────────┘ */ split(delimiter: string) { return this._deriveString((str) => str.split(delimiter)); } /** * Checks if string starts with a prefix. * @param prefix The prefix substring. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\"John Doe\", \"Alice\"] }) * >>> df.with_columns($df.col(\"name\").str.starts_with(\"John\").alias(\"is_john\")) * shape: (2, 2) * ┌──────────┬─────────┐ * │ name │ is_john │ * ├──────────┼─────────┤ * │ John Doe │ true │ * │ Alice │ false │ * └──────────┴─────────┘ */ starts_with(prefix: string) { return this._deriveString((str) => str.startsWith(prefix)); } /** * Strips matching characters from start and end of string. * @param characters Characters or regex pattern to strip. * @param options Configuration options for strip operation. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"--hello--\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_chars(\"-\").alias(\"stripped\")) * shape: (1, 2) * ┌───────────┬──────────┐ * │ text │ stripped │ * ├───────────┼──────────┤ * │ --hello-- │ hello │ * └───────────┴──────────┘ */ strip_chars(characters?: string | RegExp, options?: StripCharsOptions) { return this._deriveString((str) => stripChars(str, characters, { mode: \"both\", ...options })); } /** * Strips matching characters from end of string. * @param characters Characters or regex pattern to strip. * @param options Configuration options. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello--\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_chars_end(\"-\").alias(\"stripped\")) * shape: (1, 2) * ┌─────────┬──────────┐ * │ text │ stripped │ * ├─────────┼──────────┤ * │ hello-- │ hello │ * └─────────┴──────────┘ */ strip_chars_end(characters?: string | RegExp, options?: StripCharsOptions) { return this._deriveString((str) => stripChars(str, characters, { mode: \"end\", ...options })); } /** * Strips matching characters from start of string. * @param characters Characters or regex pattern to strip. * @param options Configuration options. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"--hello\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_chars_start(\"-\").alias(\"stripped\")) * shape: (1, 2) * ┌─────────┬──────────┐ * │ text │ stripped │ * ├─────────┼──────────┤ * │ --hello │ hello │ * └─────────┴──────────┘ */ strip_chars_start(characters?: string | RegExp, options?: StripCharsOptions) { return this._deriveString((str) => stripChars(str, characters, { mode: \"start\", ...options })); } /** * Strips matching prefix substring from start of string. * @param prefix Prefix substring to remove. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"pre_fix\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_prefix(\"pre_\").alias(\"stripped\")) * shape: (1, 2) * ┌─────────┬──────────┐ * │ text │ stripped │ * ├─────────┼──────────┤ * │ pre_fix │ fix │ * └─────────┴──────────┘ */ strip_prefix(prefix: string) { return this._deriveString((str) => { return stripChars(str, prefix, { mode: \"start\", maxScanStart: 1, maxMatchesStart: 1, returnStringOnNull: true, stringOptions: { literal: true } }) as string; }); } /** * Strips matching suffix substring from end of string. * @param suffix Suffix substring to remove. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"fix_post\"] }) * >>> df.with_columns($df.col(\"text\").str.strip_suffix(\"_post\").alias(\"stripped\")) * shape: (1, 2) * ┌──────────┬──────────┐ * │ text │ stripped │ * ├──────────┼──────────┤ * │ fix_post │ fix │ * └──────────┴──────────┘ */ strip_suffix(suffix: string) { return this._deriveString((str) => { return stripChars(str, suffix, { mode: \"end\", maxScanEnd: 1, maxMatchesEnd: 1, returnStringOnNull: true, stringOptions: { literal: true } }) as string; }); } /** * Parses date/time string into Datetime. * @param options Parsing configuration options. * @returns ColumnExpression * @example * >>> const df = $df.data({ d: [\"2026-05-20\"] }) * >>> df.with_columns($df.col(\"d\").str.strptime({ format: \"%Y-%m-%d\" }).alias(\"parsed\")) * shape: (1, 2) * ┌────────────┬──────────────────────────┐ * │ d │ parsed │ * ├────────────┼──────────────────────────┤ * │ 2026-05-20 │ 2026-05-20T00:00:00.000Z │ * └────────────┴──────────────────────────┘ */ strptime(options: StrptimeOptions) { return this._deriveString((str) => strptime(str, options)); } /** * Converts string casing to camelCase. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello_world\"] }) * >>> df.with_columns($df.col(\"text\").str.to_camelcase().alias(\"camel\")) * shape: (1, 2) * ┌─────────────┬────────────┐ * │ text │ camel │ * ├─────────────┼────────────┤ * │ hello_world │ helloWorld │ * └─────────────┴────────────┘ */ to_camelcase() { return this._deriveString((str) => changeCase(str, { format: \"camel\" })); } /** * Parses string into Date object. * @returns ColumnExpression * @example * >>> const df = $df.data({ d: [\"2026-05-20\"] }) * >>> df.with_columns($df.col(\"d\").str.to_date().alias(\"date\")) * shape: (1, 2) * ┌────────────┬──────────────────────────┐ * │ d │ date │ * ├────────────┼──────────────────────────┤ * │ 2026-05-20 │ 2026-05-20T00:00:00.000Z │ * └────────────┴──────────────────────────┘ */ to_date() { return this._deriveString((str) => toValidDate(str, { dateOnly: true })); } /** * Parses string into Datetime value. * @returns ColumnExpression * @example * >>> const df = $df.data({ ts: [\"2026-05-20T10:00:00Z\"] }) * >>> df.with_columns($df.col(\"ts\").str.to_datetime().alias(\"dt\")) * shape: (1, 2) * ┌──────────────────────┬──────────────────────────┐ * │ ts │ dt │ * ├──────────────────────┼──────────────────────────┤ * │ 2026-05-20T10:00:00Z │ 2026-05-20T10:00:00.000Z │ * └──────────────────────┴──────────────────────────┘ */ to_datetime() { return this._deriveString(toValidDate); } /** * Converts string into numeric decimal representation. * @param precision Optional precision limit. * @param scale Optional scale limit. * @returns ColumnExpression * @example * >>> const df = $df.data({ val: [\"12.34\"] }) * >>> df.with_columns($df.col(\"val\").str.to_decimal().alias(\"num\")) * shape: (1, 2) * ┌───────┬───────┐ * │ val │ num │ * ├───────┼───────┤ * │ 12.34 │ 12.34 │ * └───────┴───────┘ */ to_decimal(precision?: number, scale?: number) { return this._deriveString((str) => toValidDecimal(str, { precision, scale })); } /** * Parses string into integer number. * @returns ColumnExpression * @example * >>> const df = $df.data({ val: [\"42\"] }) * >>> df.with_columns($df.col(\"val\").str.to_integer().alias(\"num\")) * shape: (1, 2) * ┌─────┬─────┐ * │ val │ num │ * ├─────┼─────┤ * │ 42 │ 42 │ * └─────┴─────┘ */ to_integer() { return this._deriveString((str) => toValidInt(str)); } /** * Converts string casing to kebab-case. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"helloWorld\"] }) * >>> df.with_columns($df.col(\"text\").str.to_kebabcase().alias(\"kebab\")) * shape: (1, 2) * ┌────────────┬─────────────┐ * │ text │ kebab │ * ├────────────┼─────────────┤ * │ helloWorld │ hello-world │ * └────────────┴─────────────┘ */ to_kebabcase() { return this._deriveString((str) => changeCase(str, { format: \"kebab\" })); } /** * Converts all string elements in the column to lowercase. * @returns ColumnExpression * @example * >>> const df = $df.data({ * ... c: [\"ALICE\", \"Bob\", \"charlie\"] * ... }) * shape: (3, 1) * ┌─────────┐ * │ c │ * ├─────────┤ * │ ALICE │ * │ Bob │ * │ charlie │ * └─────────┘ * * >>> df.with_columns($df.col(\"c\").str.to_lowercase().alias(\"lower_name\")) * shape: (3, 2) * ┌─────────┬────────────┐ * │ c │ lower_name │ * ├─────────┼────────────┤ * │ ALICE │ alice │ * │ Bob │ bob │ * │ charlie │ charlie │ * └─────────┴────────────┘ */ to_lowercase() { return this.lower(); } /** * Converts string casing to PascalCase. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello_world\"] }) * >>> df.with_columns($df.col(\"text\").str.to_pascalcase().alias(\"pascal\")) * shape: (1, 2) * ┌─────────────┬────────────┐ * │ text │ pascal │ * ├─────────────┼────────────┤ * │ hello_world │ HelloWorld │ * └─────────────┴────────────┘ */ to_pascalcase() { return this._deriveString((str) => changeCase(str, { format: \"pascal\" })); } /** * Converts string casing to snake_case. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"helloWorld\"] }) * >>> df.with_columns($df.col(\"text\").str.to_snakecase().alias(\"snake\")) * shape: (1, 2) * ┌────────────┬─────────────┐ * │ text │ snake │ * ├────────────┼─────────────┤ * │ helloWorld │ hello_world │ * └────────────┴─────────────┘ */ to_snakecase() { return this._deriveString((str) => changeCase(str, { format: \"snake\" })); } /** * Parses string into time component representation. * @returns ColumnExpression * @example * >>> const df = $df.data({ t: [\"10:30:00\"] }) * >>> df.with_columns($df.col(\"t\").str.to_time().alias(\"time\")) * shape: (1, 2) * ┌──────────┬──────────┐ * │ t │ time │ * ├──────────┼──────────┤ * │ 10:30:00 │ 10:30:00 │ * └──────────┴──────────┘ */ to_time() { return this._deriveString(toValidTime); } /** * Converts string casing to Title Case. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"hello world\"] }) * >>> df.with_columns($df.col(\"text\").str.to_titlecase().alias(\"title\")) * shape: (1, 2) * ┌─────────────┬─────────────┐ * │ text │ title │ * ├─────────────┼─────────────┤ * │ hello world │ Hello World │ * └─────────────┴─────────────┘ */ to_titlecase() { return this._deriveString((str) => str.replace(/\\b\\w/g, c => c.toUpperCase())); } /** * Converts all string elements in the column to uppercase. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\"alice\"] }) * >>> df.with_columns($df.col(\"name\").str.to_uppercase().alias(\"upper\")) * shape: (1, 2) * ┌───────┬───────┐ * │ name │ upper │ * ├───────┼───────┤ * │ alice │ ALICE │ * └───────┴───────┘ */ to_uppercase() { return this.upper(); } /** * Trims leading and trailing whitespace characters from each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\" alice \"] }) * >>> df.with_columns($df.col(\"name\").str.trim().alias(\"clean\")) * shape: (1, 2) * ┌───────────┬───────┐ * │ name │ clean │ * ├───────────┼───────┤ * │ alice │ alice │ * └───────────┴───────┘ */ trim() { return this.strip_chars(); } /** * Trims trailing whitespace characters from each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\"alice \"] }) * >>> df.with_columns($df.col(\"name\").str.trim_end().alias(\"clean\")) * shape: (1, 2) * ┌─────────┬───────┐ * │ name │ clean │ * ├─────────┼───────┤ * │ alice │ alice │ * └─────────┴───────┘ */ trim_end() { return this.strip_chars_end(); } /** * Trims leading whitespace characters from each string element. * @returns ColumnExpression * @example * >>> const df = $df.data({ name: [\" alice\"] }) * >>> df.with_columns($df.col(\"name\").str.trim_start().alias(\"clean\")) * shape: (1, 2) * ┌─────────┬───────┐ * │ name │ clean │ * ├─────────┼───────┤ * │ alice │ alice │ * └─────────┴───────┘ */ trim_start() { return this.strip_chars_start(); } /** * Converts string to uppercase. * @returns ColumnExpression * @example * >>> const df = $df.data({ text: [\"alice\"] }) * >>> df.with_columns($df.col(\"text\").str.upper().alias(\"upper\")) * shape: (1, 2) * ┌───────┬───────┐ * │ text │ upper │ * ├───────┼───────┤ * │ alice │ ALICE │ * └───────┴───────┘ */ upper() { return this._deriveString((str) => str.toUpperCase()); } /** * Pads start of string with zeros to target width. * @param width Minimum resulting string width. * @returns ColumnExpression * @example * >>> const df = $df.data({ num: [\"42\"] }) * >>> df.with_columns($df.col(\"num\").str.zfill(5).alias(\"padded\")) * shape: (1, 2) * ┌─────┬────────┐ * │ num │ padded │ * ├─────┼────────┤ * │ 42 │ 00042 │ * └─────┴────────┘ */ zfill(width: number) { return this._deriveString((str) => str.padStart(width, \"0\")); } } export class StringExpr extends ExprBase { /** * String namespace accessor for text operations. * @namespace $df.col * @category ColumnExpression * @syntax $df.col(<column_name>).str * @returns StringExprNamespace * @example * >>> df.select($df.col(\"a\").str.len()) */ get str() { return new StringExprNamespace(this\n); } }"
+      "signature": "$df.col(<column_name>).str.replace_all(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string)\n)"
     },
     "reverse": {
       "desc": "Reverses characters in each string element.",
@@ -3677,26 +3677,30 @@
       "params": [
         {
           "name": "items",
+          "type": "ConcatItem | ConcatItem[]",
           "desc": "Single DataFrame or array of DataFrames/rows to concatenate."
         },
         {
           "name": "[options]",
+          "type": "ConcatOptions",
           "desc": "Configuration options for concatenation layout and strictness."
         },
         {
           "name": "[options.how]",
+          "type": "ConcatHow",
           "desc": "Layout strategy: `\"vertical\"` (default, appends rows top-to-bottom), `\"horizontal\"` (joins unique columns side-by-side), or `\"diagonal\"` (concatenates mismatched columns with null padding)."
         },
         {
           "name": "[options.horizontal.strict]",
+          "type": "boolean",
           "desc": "When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.concat(...)",
-      "signature": "df.concat<U extends RowRecord = any>(\n  items: ConcatItem | ConcatItem[],\n  options: ConcatOptions = {}\n): DataFrame<U>"
+      "signature": "df.concat<U extends RowRecord = any>(\n  items: ConcatItem | ConcatItem[],\n  options?: {\n    how?: ConcatHow,\n    horizontal.strict?: boolean\n  }\n): DataFrame<U>"
     },
     "drop": {
       "desc": "Drops specified columns from the DataFrame.",
@@ -3706,10 +3710,11 @@
       "params": [
         {
           "name": "args",
+          "type": "(K | K[])[]",
           "desc": "Column names or arrays of column names to remove."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.drop(...)",
@@ -3722,11 +3727,12 @@
       ],
       "params": [
         {
-          "name": "subset",
+          "name": "[subset]",
+          "type": "string | string[]",
           "desc": "Column name or array of column names to check for nulls."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.drop_nulls(...)",
@@ -3751,26 +3757,30 @@
       "params": [
         {
           "name": "columns",
+          "type": "IntoExpr | IntoExpr[]",
           "desc": "Target column expression or array column name to explode."
         },
         {
           "name": "[options]",
+          "type": "ExplodeOptions",
           "desc": "Configuration options for empty array and null handling."
         },
         {
           "name": "[options.empty_as_null]",
+          "type": "boolean",
           "desc": "When `true`, converts empty arrays to `null` rows."
         },
         {
           "name": "[options.keep_nulls]",
+          "type": "boolean",
           "desc": "When `true`, retains `null` array values during explosion."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.explode(...)",
-      "signature": "df.explode(\n  columns: IntoExpr | IntoExpr[],\n  options?: ExplodeOptions\n): DataFrame<any>"
+      "signature": "df.explode(\n  columns: IntoExpr | IntoExpr[],\n  options?: {\n    empty_as_null?: boolean,\n    keep_nulls?: boolean\n  }\n): DataFrame<any>"
     },
     "fill_null": {
       "desc": "Fills null values across columns using scalar values or statistical strategies.",
@@ -3780,26 +3790,30 @@
       "params": [
         {
           "name": "[options]",
+          "type": "FillNullOptions",
           "desc": "Configuration options for null replacement."
         },
         {
           "name": "[options.value]",
+          "type": "any",
           "desc": "Scalar replacement value or dict mapping column names to values."
         },
         {
           "name": "[options.strategy]",
+          "type": "FillNullStrategy",
           "desc": "Statistical filling strategy (`\"zero\"`, `\"mean\"`, `\"min\"`, `\"max\"`, `\"forward\"`, `\"backward\"`)."
         },
         {
           "name": "[options.limit]",
+          "type": "number",
           "desc": "Maximum consecutive nulls to fill when using propagation strategies."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.fill_null(...)",
-      "signature": "df.fill_null(\n  options: FillNullOptions = {}\n): DataFrame<T>"
+      "signature": "df.fill_null(\n  options?: {\n    value?: any,\n    strategy?: FillNullStrategy,\n    limit?: number\n  }\n): DataFrame<T>"
     },
     "filter": {
       "desc": "Filters rows matching boolean column expressions or predicate callbacks.",
@@ -3809,14 +3823,15 @@
       "params": [
         {
           "name": "exprs",
+          "type": "(IExpr | ((row: T) => any))[]",
           "desc": "Expressions or predicate functions evaluated per row."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.filter(...)",
-      "signature": "df.filter(\n  ...exprs: (IExpr | ((row: T) => any))[]): DataFrame<T> { if (this._height === 0) return DataFrame._createDirect({}, this._schema, 0); const height = this._height; const keys = Object.keys(this._columns); const numKeys = keys.length; const evaluatedExprs: ColumnData[] = []; const funcPredicates: ((row: T) => any)[] = []; const exprSelectors: IExpr[] = []; const numExprs = exprs.length; for (let i = 0; i < numExprs; i++) { const expr = exprs[i]; if (typeof expr === \"function\") { funcPredicates.push(expr); } else { exprSelectors.push(expr); } } const expandedExprs = resolveColumnSelectors(exprSelectors, keys, undefined, this._schema, this._columns); const numExpanded = expandedExprs.length; for (let i = 0; i < numExpanded; i++) { evaluatedExprs.push(expandedExprs[i].evaluate(this._columns, height)); } const matchingIndices: number[] = []; let currentIndex = 0; let rowObj: T | null = null; if (funcPredicates.length > 0) { const columns = this._columns; rowObj = {} as unknown as T; for (let k = 0; k < numKeys; k++) { const key = keys[k]; const col = columns[key]; Object.defineProperty(rowObj, key, { get() { const val = col[currentIndex]; return val === undefined ? null : val; }, enumerable: true, configurable: true }); } } for (let i = 0; i < height; i++) { let keep = true; for (let j = 0; j < evaluatedExprs.length; j++) { if (!evaluatedExprs[j][i]) { keep = false; break; } } if (!keep) continue; if (rowObj) { currentIndex = i; for (let j = 0; j < funcPredicates.length; j++) { if (!funcPredicates[j](rowObj)) { keep = false; break; } } } if (!keep) continue; matchingIndices.push(i); } const newColumns = gatherColumnsByIndices(this._columns, matchingIndices) as DataFrameColumns<T>; const newHeight = matchingIndices.length; return DataFrame._createDirect<T>(newColumns, this._schema, newHeight); } /** * Returns the mapping dictionary of column names to DataType. * @returns DataFrameSchema * @example * >>> const df = $df.data({ a: [1], b: [\"text\"] }) * >>> df * shape: (1, 2) * ┌───┬──────┐ * │ a │ b │ * ├───┼──────┤ * │ 1 │ text │ * └───┴──────┘ * >>> df.get_schema() * { a: Float64, b: Utf8 } */ get_schema(): DataFrameSchema { return this._schema; } /** * Groups rows by key columns to prepare for aggregations. * @param keys Column name or array of key column names. * @returns GroupedData * @example * >>> const df = $df.data({ cat: [\"A\", \"A\", \"B\"], val: [10, 20, 30] }) * >>> df * shape: (3, 2) * ┌─────┬─────┐ * │ cat │ val │ * ├─────┼─────┤ * │ A │ 10 │ * │ A │ 20 │ * │ B │ 30 │ * └─────┴─────┘ * >>> df.groupby(\"cat\").agg($df.col(\"val\").sum().alias(\"sum\")) * shape: (2, 2) * ┌─────┬─────┐ * │ cat │ sum │ * ├─────┼─────┤ * │ A │ 30 │ * │ B │ 30 │ * └─────┴─────┘ */ groupby<K extends keyof T>(keys: K | K[]): GroupedData<T, K> { const keysArr = toValidArray(keys); const groups: GroupMap = new Map(); const len = this._height; const keysStr = toValidStringArray(keys); for (let j = 0; j < keysStr.length; j++) { assertColumnExists(keysStr[j], this._columns, \"Grouping key\"); } for (let i = 0; i < len; i++) { const hash = computeRowHash(this._columns, keysStr, i); let group = groups.get(hash); if (group === undefined) { groups.set(hash, group = []); } group.push(i); } const allKeys = Object.keys(this._columns) as (keyof T)[]; return new GroupedData(groups, keysArr, allKeys, this._columns, this._height, this._schema); } /** * Returns the first N rows as a new DataFrame. * @param n Number of leading rows to slice (default 10). * @returns DataFrame * @example * >>> const df = $df.data({ a: [1, 2, 3, 4] }) * >>> df * shape: (4, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * │ 3 │ * │ 4 │ * └───┘ * >>> df.head(2) * shape: (2, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * └───┘ */ head(n: number = 10): DataFrame<T> { return this.limit(n, { offset: 0, from: \"start\" }) } /** * Gets height (total row count) of the DataFrame. * @returns Number of rows. * @example * >>> const df = $df.data({ a: [10, 20, 30] }) * >>> df * shape: (3, 1) * ┌────┐ * │ a │ * ├────┤ * │ 10 │ * │ 20 │ * │ 30 │ * └────┘ * >>> df.height * 3 */ get height(): number { return this._height; } /** * Concatenates columns horizontally to the current DataFrame. * @param other DataFrame or array of DataFrames to append side-by-side. * @param [options] Horizontal concat configuration options. * @param [options.strict] When `true` (default), throws an error if row counts mismatch. Set `false` to allow null padding. * @returns DataFrame * @example * >>> const df1 = $df.data({ a: [1, 2] }) * >>> df1 * shape: (2, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * └───┘ * >>> const df2 = $df.data({ b: [10, 20] }) * >>> df1.hstack(df2) * shape: (2, 2) * ┌───┬────┐ * │ a │ b │ * ├───┼────┤ * │ 1 │ 10 │ * │ 2 │ 20 │ * └───┴────┘ */ hstack<U extends RowRecord = any>( other: ConcatItem | ConcatItem[], options: HorizontalConcatOptions = {} ): DataFrame<U> { return this.concat<U>(other, { how: \"horizontal\", horizontal: options }); } /** * Inserts a new column at a specific ordinal index position. * @param index Target column index position. * @param name Name of the inserted column. * @param expr Value expression or column definition. * @returns DataFrame * @example * >>> const df = $df.data({ a: [1], c: [3] }) * >>> df * shape: (1, 2) * ┌───┬───┐ * │ a │ c │ * ├───┼───┤ * │ 1 │ 3 │ * └───┴───┘ * >>> df.insert_column(1, \"b\", 2) * shape: (1, 3) * ┌───┬───┬───┐ * │ a │ b │ c │ * ├───┼───┼───┤ * │ 1 │ 2 │ 3 │ * └───┴───┴───┘ */ insert_column(index: number, name: string, expr: IntoExpr): DataFrame<any> { const colExpr = ColumnExpr.toColExpr(expr).alias(name); const keys = Object.keys(this._columns); const keysLen = keys.length; const selectList: any[] = []; for (let i = 0; i < keysLen; i++) { const k = keys[i]; if (k !== name) { selectList.push(k); } } const targetIndex = Math.max(0, Math.min(index, selectList.length)); selectList.splice(targetIndex, 0, colExpr); return this.select<any>(...selectList); } /** * Retrieves a single scalar cell value by row and column position or name. * @param row Row index position. * @param column Column index or column name string. * @returns Cell scalar value. * @throws {DataFrameError} If shape is not (1, 1) when called without arguments. * @throws {ShapeError} If row or column index is out of bounds. * @example * >>> const df = $df.data({ val: [42] }) * >>> df * shape: (1, 1) * ┌─────┐ * │ val │ * ├─────┤ * │ 42 │ * └─────┘ * >>> df.item(0, \"val\") * 42 */ item(row?: number, column?: number | string): any { const height = this._height; const keys = Object.keys(this._columns); const width = keys.length; if (row === undefined && column === undefined) { if (height !== 1 || width !== 1) { throw new DataFrameError(\"DataFrame.item() can only be called without arguments if the shape is (1, 1).\"); } return this._columns[keys[0]][0]; } if (row === undefined || column === undefined) { throw new DataFrameError(\"DataFrame.item() requires both row and column to be specified if not empty.\"); } if (row < 0 || row >= height) { throw new ShapeError(`Row index ${row} is out of bounds for DataFrame height ${height}.`); } let colName: string; if (typeof column === \"number\") { if (column < 0 || column >= width) { throw new ShapeError(`Column index ${column} is out of bounds for DataFrame width ${width}.`); } colName = keys[column]; } else { colName = column; if (this._columns[colName] === undefined) { throw new ColumnNotFoundError(colName); } } return this._columns[colName][row]; } /** * Yields a generator iterating over raw column arrays. * @returns Generator of ColumnData arrays. * @example * >>> const df = $df.data({ a: [1, 2], b: [3, 4] }) * >>> df * shape: (2, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ 3 │ * │ 2 │ 4 │ * └───┴───┘ * >>> for (const col of df.iter_columns()) { console.log(col); } * Float64Array([1, 2]) * Float64Array([3, 4]) */ *iter_columns(): Generator<ColumnData> { const keys = Object.keys(this._columns); const keysLen = keys.length; const columns = this._columns; for (let j = 0; j < keysLen; j++) { yield columns[keys[j]]; } } /** * Yields a generator iterating over rows as tuples or named objects. * @param [config] Iteration format configuration. * @param [config.named] When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`). * @returns Generator of rows. * @example * >>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] }) * >>> df * shape: (2, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * │ 2 │ y │ * └───┴───┘ * >>> for (const row of df.iter_rows({ named: true })) { console.log(row); } * { a: 1, b: \"x\" } * { a: 2, b: \"y\" } */ *iter_rows({ named = false }: { named?: boolean } = {}): Generator<any[] | Record<string, any>> { const keys = Object.keys(this._columns); const keysLen = keys.length; const columns = this._columns; const height = this._height; const colArrays = new Array(keysLen); for (let j = 0; j < keysLen; j++) { colArrays[j] = columns[keys[j]]; } if (named) { for (let i = 0; i < height; i++) { const row: Record<string, any> = {}; for (let j = 0; j < keysLen; j++) { row[keys[j]] = colArrays[j][i]; } yield row; } } else { for (let i = 0; i < height; i++) { const row = new Array(keysLen); for (let j = 0; j < keysLen; j++) { row[j] = colArrays[j][i]; } yield row; } } } /** * Joins two DataFrames on key columns using inner, left, right, or outer join strategy. * @param config Join configuration object. * @param config.other Right DataFrame to join with left DataFrame. * @param config.on Join key column name or array of key column names. * @param [config.how] Join strategy (`\"inner\"`, `\"left\"`, `\"right\"`, or `\"outer\"`). Default `\"inner\"`. * @param [config.suffixes] Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `[\"\", \"_right\"]`). * @returns DataFrame * @example * >>> const df1 = $df.data({ id: [1, 2], val: [\"a\", \"b\"] }) * >>> df1 * shape: (2, 2) * ┌────┬─────┐ * │ id │ val │ * ├────┼─────┤ * │ 1 │ a │ * │ 2 │ b │ * └────┴─────┘ * >>> const df2 = $df.data({ id: [1, 2], num: [100, 200] }) * >>> df1.join({ other: df2, on: \"id\" }) * shape: (2, 3) * ┌────┬─────┬─────┐ * │ id │ val │ num │ * ├────┼─────┼─────┤ * │ 1 │ a │ 100 │ * │ 2 │ b │ 200 │ * └────┴─────┴─────┘ */ join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> { const { other, on, how = \"inner\", suffixes = [\"\", \"_right\"] } = config; const joinKeysStr = toValidStringArray(on); for (let i = 0; i < joinKeysStr.length; i++) { const keyStr = joinKeysStr[i]; assertColumnExists(keyStr, this._columns, \"Join key\", \" in the left DataFrame.\"); assertColumnExists(keyStr, other._columns, \"Join key\", \" in the right DataFrame.\"); } const [leftSuffix, rightSuffix] = suffixes; const leftKeys = Object.keys(this._columns); const rightKeys = Object.keys(other._columns); const joinKeySet = new Set(joinKeysStr); const leftLen = leftKeys.length; const rightLen = rightKeys.length; const getColumnHashAt = (columns: ColumnDict, idx: number): string | null => { const len = joinKeysStr.length; for (let i = 0; i < len; i++) { if (columns[joinKeysStr[i]][idx] == null) return null; } return computeRowHash(columns, joinKeysStr, idx); }; const rightHash = new Map<string, number[]>(); const rightHeight = other._height; const rightCols = other._columns; for (let i = 0; i < rightHeight; i++) { const hash = getColumnHashAt(rightCols, i); if (hash === null) continue; let list = rightHash.get(hash); if (list === undefined) { list = []; rightHash.set(hash, list); } list.push(i); } const leftHeight = this._height; const leftCols = this._columns; const leftIndices: number[] = []; const rightIndices: (number | null)[] = []; const trackRight = how === \"outer\" || how === \"right\"; const matchedRightIndices = trackRight ? new Set<number>() : null; for (let i = 0; i < leftHeight; i++) { const hash = getColumnHashAt(leftCols, i); const matches = hash === null ? undefined : rightHash.get(hash); if (matches === undefined) { if (how === \"left\" || how === \"outer\") { leftIndices.push(i); rightIndices.push(null); } } else { for (let m = 0; m < matches.length; m++) { const rIdx = matches[m]; if (trackRight) { matchedRightIndices!.add(rIdx); } leftIndices.push(i); rightIndices.push(rIdx); } } } if (trackRight) { for (let j = 0; j < rightHeight; j++) { if (!matchedRightIndices!.has(j)) { leftIndices.push(-1); rightIndices.push(j); } } } const outHeight = leftIndices.length; const newColumns: ColumnDict = {}; const outSchema: DataFrameSchema = {}; for (let i = 0; i < leftLen; i++) { const k = leftKeys[i]; const mappedName = (k in other._columns && !joinKeySet.has(k)) ? `${k}${leftSuffix}` : k; const leftCol = this._columns[k]; const isJoinKey = joinKeySet.has(k); const outCol = new Array(outHeight); if (isJoinKey) { const rightCol = other._columns[k]; for (let r = 0; r < outHeight; r++) { const leftIdx = leftIndices[r]; if (leftIdx !== -1) { outCol[r] = leftCol[leftIdx]; } else { const rightIdx = rightIndices[r]; outCol[r] = rightIdx !== null ? rightCol[rightIdx] : null; } } } else { for (let r = 0; r < outHeight; r++) { const leftIdx = leftIndices[r]; outCol[r] = leftIdx !== -1 ? leftCol[leftIdx] : null; } } newColumns[mappedName] = outCol; if (this._schema[k]) { outSchema[mappedName] = this._schema[k]; } } for (let i = 0; i < rightLen; i++) { const k = rightKeys[i]; if (!joinKeySet.has(k)) { const mappedName = k in this._columns ? `${k}${rightSuffix}` : k; const rightCol = other._columns[k]; const outCol = new Array(outHeight); for (let r = 0; r < outHeight; r++) { const rightIdx = rightIndices[r]; outCol[r] = rightIdx !== null ? rightCol[rightIdx] : null; } newColumns[mappedName] = outCol; if (other._schema[k]) { outSchema[mappedName] = other._schema[k]; } } } return DataFrame._createDirect<R>(newColumns, outSchema, outHeight); } /** * Limits the output to N rows starting from offset. * @param n Maximum number of rows to take. * @param [options] Offset and slice direction options. * @param [options.offset] Number of rows to skip before taking `n` rows (default 0). * @param [options.from] Slice direction starting point (`\"start\"` or `\"end\"`). Default `\"start\"`. * @returns DataFrame * @example * >>> const df = $df.data({ a: [10, 20, 30, 40] }) * >>> df * shape: (4, 1) * ┌────┐ * │ a │ * ├────┤ * │ 10 │ * │ 20 │ * │ 30 │ * │ 40 │ * └────┘ * >>> df.limit(2, { offset: 1 }) * shape: (2, 1) * ┌────┐ * │ a │ * ├────┤ * │ 20 │ * │ 30 │ * └────┘ */ limit(n: number, { offset = 0, from = \"start\" }: LimitOptions = {}): DataFrame<T> { const len = this._height; const safeN = clamp(Math.floor(n), { min: 0, max: len }); const safeOffset = clamp(Math.floor(offset), { min: 0, max: len }); let actualStart = safeOffset; let actualEnd = Math.min(safeOffset + safeN, len); if (from === \"end\") { actualEnd = len - safeOffset; actualStart = Math.max(actualEnd - safeN, 0); } const newHeight = actualEnd - actualStart; const newColumns: ColumnDict = {}; const keys = Object.keys(this._columns); const keysLen = keys.length; for (let i = 0; i < keysLen; i++) { const key = keys[i]; newColumns[key] = (this._columns[key] as any).slice(actualStart, actualEnd); } return DataFrame._createDirect<T>(newColumns, this._schema, newHeight); } /** * Pivots columns from long format to a wide datagrid structure. * @param config Pivot table configuration options. * @param {string | string[]} config.index Key column(s) to use as new DataFrame rows. * @param {string} config.columns Column whose distinct values become new wide column headers. * @param {string} config.values Column whose cell values populate the pivoted grid cells. * @param {AggFn | string} [config.agg] Aggregation function to apply when multiple values exist for a cell. * @returns DataFrame * @example * >>> const df = $df.data({ * ... year: [2020, 2020, 2021, 2021], * ... month: [\"Jan\", \"Feb\", \"Jan\", \"Feb\"], * ... revenue: [100, 150, 120, 180] * ... }) * >>> df * shape: (4, 3) * ┌──────┬───────┬─────────┐ * │ year │ month │ revenue │ * ├──────┼───────┼─────────┤ * │ 2020 │ Jan │ 100 │ * │ 2020 │ Feb │ 150 │ * │ 2021 │ Jan │ 120 │ * │ 2021 │ Feb │ 180 │ * └──────┴───────┴─────────┘ * >>> df.pivot({ index: \"year\", columns: \"month\", values: \"revenue\" }) * shape: (2, 3) * ┌──────┬─────┬─────┐ * │ year │ Jan │ Feb │ * ├──────┼─────┼─────┤ * │ 2020 │ 100 │ 150 │ * │ 2021 │ 120 │ 180 │ * └──────┴─────┴─────┘ */ pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U> { if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0); const { index, columns, values } = config; const indexStr = toValidStringArray(index); const indexLen = indexStr.length; for (let j = 0; j < indexLen; j++) { assertColumnExists(indexStr[j], this._columns, \"Pivot index key\"); } const colKey = String(columns); const valKey = String(values); assertColumnExists(colKey, this._columns, \"Pivot column key\"); assertColumnExists(valKey, this._columns, \"Pivot values key\"); const groups = new Map<string, number>(); const firstRowIdxs: number[] = []; const colNames = new Set<string>(); const height = this._height; const pivotCol = this._columns[colKey]; const valCol = this._columns[valKey]; for (let i = 0; i < height; i++) { const rowKey = computeRowHash(this._columns, indexStr, i); colNames.add(String(pivotCol[i])); if (groups.get(rowKey) === undefined) { groups.set(rowKey, groups.size); firstRowIdxs.push(i); } } const outHeight = groups.size; const indexColsDict: ColumnDict = {}; const outSchema: DataFrameSchema = {}; for (let j = 0; j < indexLen; j++) { const idxKey = indexStr[j]; indexColsDict[idxKey] = this._columns[idxKey]; if (this._schema[idxKey]) { outSchema[idxKey] = this._schema[idxKey]; } } const newColumns = gatherColumnsByIndices(indexColsDict, firstRowIdxs) as Record<string, any[]>; const allCols = Array.from(colNames); const valType = this._schema[valKey] || DataTypeRegistry.Utf8; for (let j = 0; j < allCols.length; j++) { const colName = allCols[j]; newColumns[colName] = new Array(outHeight).fill(null); outSchema[colName] = valType; } for (let i = 0; i < height; i++) { const rowKey = computeRowHash(this._columns, indexStr, i); const groupIdx = groups.get(rowKey)!; const pivotColName = String(pivotCol[i]); newColumns[pivotColName][groupIdx] = valCol[i]; } return DataFrame._createDirect<U>(newColumns, outSchema, outHeight); } /** * Renames columns based on a key-value mapping dictionary. * @param mapping Dictionary mapping old column names to new names. * @returns DataFrame * @example * >>> const df = $df.data({ old_name: [1] }) * >>> df * shape: (1, 1) * ┌──────────┐ * │ old_name │ * ├──────────┤ * │ 1 │ * └──────────┘ * >>> df.rename({ old_name: \"new_name\" }) * shape: (1, 1) * ┌──────────┐ * │ new_name │ * ├──────────┤ * │ 1 │ * └──────────┘ */ rename(mapping?: Partial<Record<keyof T, string>>): DataFrame<any> { const renameMapping = mapping || {}; const newColumns: ColumnDict = {}; const outSchema: DataFrameSchema = {}; const originalKeys = Object.keys(this._columns); for (const key of originalKeys) { const newKey = (renameMapping as any)[key] || key; newColumns[newKey] = this._columns[key]; outSchema[newKey] = this._schema[key]; } const finalKeys = Object.keys(newColumns); if (finalKeys.length < originalKeys.length) { throw new DataFrameError(\"Rename collision: Multiple columns mapped to the same output name.\"); } return DataFrame._createDirect(newColumns, outSchema, this._height); } /** * Reverses the row ordering of the DataFrame. * @returns DataFrame * @example * >>> const df = $df.data({ a: [1, 2, 3] }) * >>> df * shape: (3, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * │ 3 │ * └───┘ * >>> df.reverse() * shape: (3, 1) * ┌───┐ * │ a │ * ├───┤ * │ 3 │ * │ 2 │ * │ 1 │ * └───┘ */ reverse(): DataFrame<T> { if (this._height === 0) return this; const newColumns: ColumnDict = {}; const keys = Object.keys(this._columns); const len = keys.length; for (let i = 0; i < len; i++) { const key = keys[i]; newColumns[key] = (this._columns[key] as any).slice().reverse(); } return DataFrame._createDirect<T>(newColumns, this._schema, this._height); } /** * Gets current DataFrameSchema dictionary mapping column names to DataType. * @returns DataFrameSchema mapping. * @example * >>> const df = $df.data({ a: [1], b: [\"text\"] }) * >>> df * shape: (1, 2) * ┌───┬──────┐ * │ a │ b │ * ├───┼──────┤ * │ 1 │ text │ * └───┴──────┘ * >>> df.schema * { a: Float64, b: Utf8 } */ get schema(): DataFrameSchema { return this._schema; } /** * Selects specific columns or evaluates column expressions. * @param args Column names, column expressions, or object maps to evaluate. * @returns DataFrame * @example * >>> const df = $df.data({ a: [1, 2], b: [10, 20] }) * >>> df * shape: (2, 2) * ┌───┬────┐ * │ a │ b │ * ├───┼────┤ * │ 1 │ 10 │ * │ 2 │ 20 │ * └───┴────┘ * >>> df.select(\"a\", $df.col(\"b\").add(100).alias(\"b_plus\")) * shape: (2, 2) * ┌───┬────────┐ * │ a │ b_plus │ * ├───┼────────┤ * │ 1 │ 110 │ * │ 2 │ 120 │ * └───┴────────┘ */ select<U extends RowRecord = any>( ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[] ): DataFrame<U> { const exprs = this._normalizeArgs(args); const allKeys = Object.keys(this._columns); const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns); const numExprs = expandedExprs.length; if (numExprs === 0) { return DataFrame._createDirect<U>({}, {}, this._height); } const newColumns: ColumnDict = {}; const outSchema: DataFrameSchema = {}; const evaluatedCols = new Array(numExprs); const targetKeys = new Array(numExprs); const selectedKeys = new Set<string>(); let activeRowMap: Int32Array | null = null; for (let i = 0; i < numExprs; i++) { const expr = expandedExprs[i]; const targetKey = expr._outputName || expr._colName || ALL_COLUMNS_MARKER; if (selectedKeys.has(targetKey)) { throw new DataFrameError(`Duplicate column selection: \"${targetKey}\" is selected multiple times.`); } selectedKeys.add(targetKey); const col = evaluateExpression(expr, this._columns, this._height); evaluatedCols[i] = col; targetKeys[i] = targetKey; const rowMap = col && (col as any).rowMap; if (rowMap) { if (activeRowMap) { const len = rowMap.length; if (len !== activeRowMap.length) { throw new ShapeError( `Mismatched explode heights: Column \"${targetKey}\" has length ${len}, but another exploded column has length ${activeRowMap.length}` ); } for (let j = 0; j < len; j++) { if (rowMap[j] !== activeRowMap[j]) { throw new ShapeError( `Mismatched explode heights: Column \"${targetKey}\" has mismatched row lengths compared to another exploded column.` ); } } } else { activeRowMap = rowMap; } } } let targetHeight = activeRowMap ? activeRowMap.length : this._height; let shouldCollapse = numExprs > 0; for (let i = 0; i < numExprs; i++) { const expr = expandedExprs[i]; const isGlobalAgg = expr._aggFn != null && (expr._partitionBy == null || expr._partitionBy.length === 0); const isLit = !!expr._isLiteral; if (!isGlobalAgg && !isLit) { shouldCollapse = false; break; } } for (let i = 0; i < numExprs; i++) { const targetKey = targetKeys[i]; let col = evaluatedCols[i]; const colObj = col as any; const hasRowMap = colObj && colObj.rowMap; const len = isArrayOrTypedArray(col) ? col.length : 0; const expectedLen = (activeRowMap && !hasRowMap) ? this._height : targetHeight; if (len !== expectedLen) { throw new ShapeError( `Column height mismatch: Column \"${targetKey}\" has length ${len}, but expected ${expectedLen}` ); } if (activeRowMap && !hasRowMap) { const mapLen = activeRowMap.length; if (isTypedArray(col)) { const newCol = new colObj.constructor(mapLen); for (let j = 0; j < mapLen; j++) { newCol[j] = colObj[activeRowMap[j]]; } col = newCol; } else { const newCol = new Array(mapLen); for (let j = 0; j < mapLen; j++) { newCol[j] = colObj[activeRowMap[j]]; } col = newCol; } } evaluatedCols[i] = col; } if (shouldCollapse) { targetHeight = 1; } for (let i = 0; i < numExprs; i++) { const expr = expandedExprs[i]; const targetKey = targetKeys[i]; const col = evaluatedCols[i]; const originalKey = expr._colName || targetKey; const isPureCol = expr instanceof ColumnExpr && expr._ops.length === 0 && !expr._isWindow && !expr._aggFn; const type = (isPureCol && this._schema[originalKey]) || inferColumnType(col); outSchema[targetKey] = type; newColumns[targetKey] = coerceColumn(col, type, targetHeight); } return DataFrame._createDirect<U>(newColumns, outSchema, targetHeight); } /** * Gets DataFrame dimensions as [height, width] tuple. * @returns Tuple [height, width]. * @example * >>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] }) * >>> df * shape: (2, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * │ 2 │ y │ * └───┴───┘ * >>> df.shape * [2, 2] */ get shape(): [number, number] { return [this.height, this.width]; } /** * Slices a subset range of rows between start and end index. * @param start Starting row index. * @param end Optional ending row index (exclusive). * @returns DataFrame * @example * >>> const df = $df.data({ a: [10, 20, 30, 40] }) * >>> df * shape: (4, 1) * ┌────┐ * │ a │ * ├────┤ * │ 10 │ * │ 20 │ * │ 30 │ * │ 40 │ * └────┘ * >>> df.slice(1, 3) * shape: (2, 1) * ┌────┐ * │ a │ * ├────┤ * │ 20 │ * │ 30 │ * └────┘ */ slice(start: number, end?: number): DataFrame<T> { const total = this._height; const actualStart = start < 0 ? Math.max(total + start, 0) : Math.min(start, total); const actualEnd = end === undefined ? total : (end < 0 ? Math.max(total + end, 0) : Math.min(end, total)); const n = Math.max(actualEnd - actualStart, 0); return this.limit(n, { offset: actualStart }); } /** * Sorts DataFrame rows by one or more column expressions or custom sorters. * @param config Sort configuration options. * @param config.by Column name(s) or expression(s) to sort by. * @param [config.descending] Sort order boolean or array of booleans per key (default `false`). * @param [config.nullsLast] When `true` (default), places nulls at the end of sorted output. * @param [config.custom] Optional dictionary mapping column names to custom comparator functions. * @returns DataFrame * @example * >>> const df = $df.data({ val: [3, 1, 2] }) * >>> df * shape: (3, 1) * ┌─────┐ * │ val │ * ├─────┤ * │ 3 │ * │ 1 │ * │ 2 │ * └─────┘ * >>> df.sort({ by: \"val\" }) * shape: (3, 1) * ┌─────┐ * │ val │ * ├─────┤ * │ 1 │ * │ 2 │ * │ 3 │ * └─────┘ */ sort(config?: SortOptions<T>): DataFrame<T> { if (!config || !config.by || this._height === 0) return this; const { by, descending = false, nullsLast = true, custom } = config; const sortKeys = toValidArray(by); for (let i = 0; i < sortKeys.length; i++) { const expr = ColumnExpr.toColExpr(sortKeys[i] as any); if (expr._colName) { assertColumnExists(expr._colName, this._columns, \"Sort key\"); } } const descArray = Array.isArray(descending) ? descending : new Array(sortKeys.length).fill(descending); const sortKeysLen = sortKeys.length; const plan = new Array(sortKeysLen); for (let i = 0; i < sortKeysLen; i++) { const keyOrExpr = sortKeys[i]; const isDesc = descArray[i] ? -1 : 1; const customComp = (custom && typeof keyOrExpr === \"string\") ? custom[keyOrExpr as keyof T] : null; const values = ColumnExpr.toColExpr(keyOrExpr as any).evaluate(this._columns, this._height); plan[i] = { values, isDesc, customComp }; } const planLen = plan.length; const nullMultiplier = nullsLast ? 1 : -1; const indices = new Array(this._height); for (let i = 0; i < this._height; i++) { indices[i] = i; } indices.sort((idxA, idxB) => { for (let i = 0; i < planLen; i++) { const { values, isDesc, customComp } = plan[i]; const vA = values[idxA]; const vB = values[idxB]; if (customComp) { const res = customComp(vA, vB); if (res !== 0) return res * isDesc; continue; } if (vA == null || vB == null) { if (vA === vB) continue; return (vA == null ? 1 : -1) * nullMultiplier; } if (vA === vB) continue; const res = vA < vB ? -1 : 1; return res * isDesc; } return 0; }); const newColumns = gatherColumnsByIndices(this._columns, indices) as DataFrameColumns<T>; return DataFrame._createDirect<T>(newColumns, this._schema, this._height); } /** * Returns the last N rows as a new DataFrame. * @param n Number of trailing rows to take (default 10). * @returns DataFrame * @example * >>> const df = $df.data({ a: [1, 2, 3, 4] }) * >>> df * shape: (4, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * │ 3 │ * │ 4 │ * └───┘ * >>> df.tail(2) * shape: (2, 1) * ┌───┐ * │ a │ * ├───┤ * │ 3 │ * │ 4 │ * └───┘ */ tail(n: number = 10): DataFrame<T> { return this.limit(n, { offset: 0, from: 'end' }) } /** * Converts columns into a JavaScript dictionary mapping column keys to raw arrays. * @returns Column dictionary map. * @example * >>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] }) * >>> df * shape: (2, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * │ 2 │ y │ * └───┴───┘ * >>> df.to_dict() * { a: Float64Array([1, 2]), b: [\"x\", \"y\"] } */ to_dict(): DataFrameColumns<T> { return { ...this._columns }; } /** * Converts rows into an array of JavaScript objects. * @returns Array of row record objects. * @example * >>> const df = $df.data({ a: [1], b: [\"x\"] }) * >>> df * shape: (1, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * └───┴───┘ * >>> df.to_dicts() * [{ a: 1, b: \"x\" }] */ to_dicts(): T[] { return columnsToRows(this._columns, this._height); } /** * Evaluates a column expression or retrieves column values as a raw JavaScript array. * @param nameOrExpr Target column name or column expression. * @returns Array of column scalar values. * @example * >>> const df = $df.data({ a: [10, 20] }) * >>> df * shape: (2, 1) * ┌────┐ * │ a │ * ├────┤ * │ 10 │ * │ 20 │ * └────┘ * >>> df.to_array(\"a\") * [10, 20] */ to_array<K extends keyof T>(nameOrExpr: K | IExpr): any[] { if (this._height === 0) return []; if (nameOrExpr == null) { return new Array(this._height).fill(null); } const expr = ColumnExpr.toColExpr(nameOrExpr as any); const colData = expr.evaluate(this._columns, this._height); return Array.isArray(colData) ? colData : Array.from(colData); } /** * Transposes rows into columns and columns into rows. * @param [options] Transpose layout options. * @param [options.include_header] When `true`, includes original column names as a new header column (default `false`). * @param [options.header_name] Name of the header column when `include_header` is `true` (default `\"column\"`). * @param [options.column_names] Column name or iterable of strings to use as transposed column headers. * @returns DataFrame * @example * >>> const df = $df.data({ metric: [\"sales\", \"clicks\"], q1: [100, 500], q2: [120, 600] }) * >>> df * shape: (2, 3) * ┌────────┬─────┬─────┐ * │ metric │ q1 │ q2 │ * ├────────┼─────┼─────┤ * │ sales │ 100 │ 120 │ * │ clicks │ 500 │ 600 │ * └────────┴─────┴─────┘ * >>> df.transpose({ include_header: true, header_name: \"metric\" }) * shape: (2, 3) * ┌────────┬──────────┬──────────┐ * │ metric │ column_0 │ column_1 │ * ├────────┼──────────┼──────────┤ * │ q1 │ 100 │ 500 │ * │ q2 │ 120 │ 600 │ * └────────┴──────────┴──────────┘ */ transpose({ include_header: includeHeader = false, header_name: headerName = \"column\", column_names: colNamesOpt }: TransposeOptions = {}): DataFrame<any> { if (this._height === 0) { const cols: ColumnDict = {}; const schema: DataFrameSchema = {}; if (includeHeader) { cols[headerName] = coerceColumn([], DataTypeRegistry.Utf8, 0); schema[headerName] = DataTypeRegistry.Utf8; } return DataFrame._createDirect(cols, schema, 0); } let dataColumns = this.columns; if (typeof colNamesOpt === \"string\") { assertColumnExists(colNamesOpt, this._columns, \"column_names\"); dataColumns = dataColumns.filter(c => c !== colNamesOpt); } let newColNames: string[] = []; if (typeof colNamesOpt === \"string\") { const keyCol = this._columns[colNamesOpt]; newColNames = new Array(this._height); for (let i = 0; i < this._height; i++) { const val = keyCol[i]; if (val == null) { throw new DataFrameError(`Transpose column_names column \"${colNamesOpt}\" contains null/undefined at index ${i}`); } newColNames[i] = String(val); } } else if (colNamesOpt != null && typeof colNamesOpt !== \"string\" && Symbol.iterator in Object(colNamesOpt)) { const colNamesArr = Array.from(colNamesOpt as Iterable<any>); if (colNamesArr.length !== this._height) { throw new DataFrameError(`column_names length (${colNamesArr.length}) must match the height of the DataFrame (${this._height})`); } newColNames = new Array(this._height); for (let i = 0; i < this._height; i++) { newColNames[i] = String(colNamesArr[i]); } } else { newColNames = new Array(this._height); for (let i = 0; i < this._height; i++) { newColNames[i] = `column_${i}`; } } const uniqueNames = new Set<string>(); if (includeHeader) { uniqueNames.add(headerName); } for (let i = 0; i < newColNames.length; i++) { const name = newColNames[i]; if (uniqueNames.has(name)) { throw new DataFrameError(`Duplicate column name in transposed DataFrame: \"${name}\"`); } uniqueNames.add(name); } const numDataCols = dataColumns.length; const newCols: ColumnDict = {}; const newSchema: DataFrameSchema = {}; if (includeHeader) { newCols[headerName] = coerceColumn(dataColumns, DataTypeRegistry.Utf8, numDataCols); newSchema[headerName] = DataTypeRegistry.Utf8; } for (let i = 0; i < this._height; i++) { const colName = newColNames[i]; const rawVals = new Array(numDataCols); for (let j = 0; j < numDataCols; j++) { rawVals[j] = this._columns[dataColumns[j]][i]; } const type = inferColumnType(rawVals); newCols[colName] = coerceColumn(rawVals, type, numDataCols); newSchema[colName] = type; } return DataFrame._createDirect(newCols, newSchema, numDataCols); } /** * Filters distinct unique rows matching target key columns. * @param columns Target column or array of column names to evaluate uniqueness. * @returns DataFrame * @example * >>> const df = $df.data({ a: [1, 2, 2], b: [\"x\", \"y\", \"y\"] }) * >>> df * shape: (3, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * │ 2 │ y │ * │ 2 │ y │ * └───┴───┘ * >>> df.unique() * shape: (2, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * │ 2 │ y │ * └───┴───┘ */ unique<K extends keyof T>(columns?: K | K[]): DataFrame<T> { if (this._height === 0) return DataFrame._createDirect<T>({}, this._schema, 0); const colsArr = toValidArray(columns); const colsStr = colsArr.length === 0 ? Object.keys(this._columns) : colsArr.map(String); for (const colKey of colsStr) { assertColumnExists(colKey, this._columns, \"Unique column key\"); } const seen = new Set<string>(); const matchingIndices: number[] = []; const height = this._height; for (let i = 0; i < height; i++) { const hash = computeRowHash(this._columns, colsStr, i); if (!seen.has(hash)) { seen.add(hash); matchingIndices.push(i); } } const newColumns = gatherColumnsByIndices(this._columns, matchingIndices) as DataFrameColumns<T>; const newHeight = matchingIndices.length; return DataFrame._createDirect<T>(newColumns, this._schema, newHeight); } /** * Unpivots a wide DataFrame into a long format structure. * @param config Unpivot configuration options. * @param config.idVars Key column(s) to retain as identifier variables. * @param config.valueVars Column(s) to unpivot into variable-value pairs. * @param [config.varName] Name for the new variable column holding old column headers (default `\"variable\"`). * @param [config.valueName] Name for the new value column holding cell values (default `\"value\"`). * @returns DataFrame * @example * >>> const df = $df.data({ year: [2020], Jan: [100], Feb: [150] }) * >>> df * shape: (1, 3) * ┌──────┬─────┬─────┐ * │ year │ Jan │ Feb │ * ├──────┼─────┼─────┤ * │ 2020 │ 100 │ 150 │ * └──────┴─────┴─────┘ * >>> df.unpivot({ idVars: \"year\", valueVars: [\"Jan\", \"Feb\"], varName: \"month\", valueName: \"revenue\" }) * shape: (2, 3) * ┌──────┬───────┬─────────┐ * │ year │ month │ revenue │ * ├──────┼───────┼─────────┤ * │ 2020 │ Jan │ 100 │ * │ 2020 │ Feb │ 150 │ * └──────┴───────┴─────────┘ */ unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> { const { idVars, valueVars, varName = \"variable\", valueName = \"value\" } = config; const idVarsStr = toValidStringArray(idVars); const valueVarsStr = toValidStringArray(valueVars); const idVarsLen = idVarsStr.length; const valueVarsLen = valueVarsStr.length; for (const idKey of idVarsStr) { assertColumnExists(idKey, this._columns, \"Unpivot id variable key\"); } for (const vKey of valueVarsStr) { assertColumnExists(vKey, this._columns, \"Unpivot value variable key\"); } const newHeight = this._height * valueVarsLen; const newColumns: Record<string, any[]> = {}; for (let k = 0; k < idVarsLen; k++) { newColumns[idVarsStr[k]] = new Array(newHeight); } newColumns[varName] = new Array(newHeight); newColumns[valueName] = new Array(newHeight); let outIdx = 0; for (let i = 0; i < this._height; i++) { for (let j = 0; j < valueVarsLen; j++) { const vVar = valueVarsStr[j]; for (let k = 0; k < idVarsLen; k++) { const idKey = idVarsStr[k]; newColumns[idKey][outIdx] = this._columns[idKey][i]; } newColumns[varName][outIdx] = vVar; newColumns[valueName][outIdx] = this._columns[vVar][i]; outIdx++; } } const outSchema: DataFrameSchema = {}; for (const key of idVarsStr) { outSchema[key] = this._schema[key]; } outSchema[varName] = DataTypeRegistry.Utf8; outSchema[valueName] = inferColumnType(newColumns[valueName]); return DataFrame._createDirect<U>(newColumns as any, outSchema, newHeight); } /** * Concatenates DataFrames vertically. Alias for concat({ how: \"vertical\" }). * @param other Single DataFrame or array of DataFrames to append vertically. * @returns DataFrame * @example * >>> const df1 = $df.data({ a: [1] }) * >>> df1 * shape: (1, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * └───┘ * >>> const df2 = $df.data({ a: [2] }) * >>> df1.vstack(df2) * shape: (2, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * └───┘ */ vstack<U extends RowRecord = any>( other: ConcatItem | ConcatItem[] ): DataFrame<U> { return this.concat<U>(other, { how: \"vertical\" }); } /** * Gets width (total column count) of the DataFrame. * @returns Number of columns. * @example * >>> const df = $df.data({ a: [1], b: [2] }) * >>> df * shape: (1, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ 2 │ * └───┴───┘ * >>> df.width * 2 */ get width(): number { return Object.keys(this._columns).length; } private _normalizeArgs(args: any[]): IExpr[] { const flatArgs = args.flat(); const exprs: IExpr[] = []; for (const arg of flatArgs) { if (typeof arg === \"string\") { exprs.push(new ColumnExpr(arg)); } else if (ColumnExpr.isColExpr(arg)) { exprs.push(arg); } else if (isObj(arg)) { const keys = Object.keys(arg); const numKeys = keys.length; for (let i = 0; i < numKeys; i++) { const key = keys[i]; const val = arg[key]; if (ColumnExpr.isColExpr(val)) { exprs.push(val.alias(key)); } else { const staticExpr = new ColumnExpr(key); staticExpr.evaluate = (_cols: ColumnDict, h: number) => new Array(h).fill(val) as any; exprs.push(staticExpr); } } } } return exprs; } /** * Adds new columns or updates existing ones using column expressions. * @param args Expressions or field objects defining column calculations. * @returns DataFrame * @example * >>> const df = $df.data({ a: [1, 2] }) * >>> df * shape: (2, 1) * ┌───┐ * │ a │ * ├───┤ * │ 1 │ * │ 2 │ * └───┘ * >>> df.with_columns($df.col(\"a\").add(10).alias(\"b\")) * shape: (2, 2) * ┌───┬────┐ * │ a │ b │ * ├───┼────┤ * │ 1 │ 11 │ * │ 2 │ 12 │ * └───┴────┘ */ with_columns( ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[] ): DataFrame<any> { if (args.length === 0) return this; const exprs = this._normalizeArgs(args); const allKeys = Object.keys(this._columns); const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns); const numEntries = expandedExprs.length; if (numEntries === 0) return this; const overrides = new Map<string, IExpr>(); for (let j = 0; j < numEntries; j++) { const expr = expandedExprs[j]; const name = expr._outputName || expr._colName || ALL_COLUMNS_MARKER; overrides.set(name, expr); } const selectList: IExpr[] = []; const numKeys = allKeys.length; for (let i = 0; i < numKeys; i++) { const key = allKeys[i]; selectList.push(overrides.get(key) || new ColumnExpr(key)); overrides.delete(key); } for (const expr of overrides.values()) { selectList.push(expr); } return this.select(...selectList); } /** * Appends an incremental index column. * @param name Name of index column (default \"index\"). * @param offset Starting numeric index offset (default 0). * @returns DataFrame * @example * >>> const df = $df.data({ val: [\"a\", \"b\"] }) * >>> df * shape: (2, 1) * ┌─────┐ * │ val │ * ├─────┤ * │ a │ * │ b │ * └─────┘ * >>> df.with_row_index(\"idx\") * shape: (2, 2) * ┌─────┬─────┐ * │ idx │ val │ * ├─────┼─────┤ * │ 0 │ a │ * │ 1 │ b │ * └─────┴─────┘ */ with_row_index(name: string = \"index\", offset: number = 0): DataFrame<any> { const expr = seq_range(offset, { mode: \"independent\", dtype: DataTypeRegistry.UInt32, step: 1 }); const df = this.insert_column(0, name, expr); df._schema[name] = DataTypeRegistry.UInt32; return df; } /** * Writes DataFrame rows to JSON format string or file/stream target. * @param [file] Target file path or writable stream target (optional). * @param [options] JSON formatting and replacer options. * @param [options.format] JSON output format structure (`\"json\"` or `\"ndjson\"`). Default `\"json\"`. * @param [options.replacerOptions] Serialization options including custom `replacer` function or replacer array. * @returns JSON string representation. * @example * >>> const df = $df.data({ a: [1], b: [\"x\"] }) * >>> df * shape: (1, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * └───┴───┘ * >>> df.write_json() * '[{\"a\":1,\"b\":\"x\"}]' */ write_json( file?: string | { write: (str: string) => void }, { format = \"json\", replacerOptions }: WriteJSONOptions = {} ): string { if (format !== \"json\" && format !== \"ndjson\") { throw new TypeError(`Unsupported JSON format: \"${format}\". Expected \"json\" or \"ndjson\".`); } const safeReplacer = replacerOptions?.replacer === null ? undefined : createSafeJsonReplacer(replacerOptions); let jsonStr: string; if (format === \"ndjson\") { const dicts = this.to_dicts(); const len = dicts.length; const lines = new Array(len); for (let i = 0; i < len; i++) { lines[i] = JSON.stringify(dicts[i], safeReplacer as any); } jsonStr = lines.join(NEWLINE); } else { jsonStr = JSON.stringify(this.to_dicts(), safeReplacer as any); } writeStringToFileOrStream(file, jsonStr); return jsonStr; } /** * Writes DataFrame to CSV format string or file/stream target. * @param [file] Target file path or writable stream target (optional). * @param [options] CSV formatting options. * @param [options.delimiter] Column delimiter character (default `\",\"`). * @param [options.header] When `true` (default), includes column header row. * @param [options.quoteChar] Character used to enclose fields containing special characters (default `'\"'`). * @returns CSV string output. * @example * >>> const df = $df.data({ a: [1], b: [\"x\"] }) * >>> df * shape: (1, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * └───┴───┘ * >>> df.write_csv() * \"a,b\\n1,x\" */ write_csv( file?: string | { write: (str: string) => void }, options: WriteCSVOptions = {} ): string { if (file) { if (typeof file === \"string\") { if (typeof require !== \"function\") { throw new Error(\"File writing is not supported in this environment (missing require('fs')).\"); } const fs = require(\"fs\"); const fd = fs.openSync(file, \"w\"); try { stringifyCSV(this._columns, this._height, { ...options, onRow: (str) => { fs.writeSync(fd, str, null, \"utf8\"); } }); } finally { fs.closeSync(fd); } } else if (isObj(file) && typeof (file as any).write === \"function\") { stringifyCSV(this._columns, this._height, { ...options, onRow: (str) => { (file as any).write(str); } }); } else { throw new TypeError(\"Invalid file argument. Expected a file path string or a writable stream/object with a write method.\"); } return \"\"; } return stringifyCSV(this._columns, this._height, options\n); } }"
+      "signature": "df.filter(\n  ...exprs: (IExpr | ((row: T) => any))[]\n): DataFrame<T>"
     },
     "get_schema": {
       "desc": "Returns the mapping dictionary of column names to DataType.",
@@ -3837,10 +3852,11 @@
       "params": [
         {
           "name": "keys",
+          "type": "K | K[]",
           "desc": "Column name or array of key column names."
         }
       ],
-      "returns": "GroupedData",
+      "returns": "{GroupedData}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.groupby(...)",
@@ -3882,22 +3898,25 @@
       "params": [
         {
           "name": "other",
+          "type": "ConcatItem | ConcatItem[]",
           "desc": "DataFrame or array of DataFrames to append side-by-side."
         },
         {
           "name": "[options]",
+          "type": "HorizontalConcatOptions",
           "desc": "Horizontal concat configuration options."
         },
         {
           "name": "[options.strict]",
+          "type": "boolean",
           "desc": "When `true` (default), throws an error if row counts mismatch. Set `false` to allow null padding."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.hstack(...)",
-      "signature": "df.hstack<U extends RowRecord = any>(\n  other: ConcatItem | ConcatItem[],\n  options: HorizontalConcatOptions = {}\n): DataFrame<U>"
+      "signature": "df.hstack<U extends RowRecord = any>(\n  other: ConcatItem | ConcatItem[],\n  options?: {\n    strict?: boolean\n  }\n): DataFrame<U>"
     },
     "insert_column": {
       "desc": "Inserts a new column at a specific ordinal index position.",
@@ -3907,18 +3926,21 @@
       "params": [
         {
           "name": "index",
+          "type": "number",
           "desc": "Target column index position."
         },
         {
           "name": "name",
+          "type": "string",
           "desc": "Name of the inserted column."
         },
         {
           "name": "expr",
+          "type": "IntoExpr",
           "desc": "Value expression or column definition."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.insert_column(...)",
@@ -3931,15 +3953,17 @@
       ],
       "params": [
         {
-          "name": "row",
+          "name": "[row]",
+          "type": "number",
           "desc": "Row index position."
         },
         {
-          "name": "column",
+          "name": "[column]",
+          "type": "number | string",
           "desc": "Column index or column name string."
         }
       ],
-      "returns": "Cell scalar value.",
+      "returns": "{any} Cell scalar value.",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.item(...)",
@@ -3985,30 +4009,35 @@
       "params": [
         {
           "name": "config",
+          "type": "JoinOptions",
           "desc": "Join configuration object."
         },
         {
           "name": "config.other",
+          "type": "DataFrame",
           "desc": "Right DataFrame to join with left DataFrame."
         },
         {
           "name": "config.on",
+          "type": "string | string[]",
           "desc": "Join key column name or array of key column names."
         },
         {
           "name": "[config.how]",
+          "type": "JoinType",
           "desc": "Join strategy (`\"inner\"`, `\"left\"`, `\"right\"`, or `\"outer\"`). Default `\"inner\"`."
         },
         {
           "name": "[config.suffixes]",
+          "type": "[string, string]",
           "desc": "Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `[\"\", \"_right\"]`)."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.join(...)",
-      "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  config: {\n    other,\n    on,\n    how?,\n    suffixes?\n  }\n): DataFrame<R>"
+      "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  config: {\n    other: DataFrame,\n    on: string | string[],\n    how?: JoinType,\n    suffixes?: [string, string]\n  }\n): DataFrame<R>"
     },
     "limit": {
       "desc": "Limits the output to N rows starting from offset.",
@@ -4018,26 +4047,30 @@
       "params": [
         {
           "name": "n",
+          "type": "number",
           "desc": "Maximum number of rows to take."
         },
         {
           "name": "[options]",
+          "type": "LimitOptions",
           "desc": "Offset and slice direction options."
         },
         {
           "name": "[options.offset]",
+          "type": "number",
           "desc": "Number of rows to skip before taking `n` rows (default 0)."
         },
         {
           "name": "[options.from]",
+          "type": "LimitPosition",
           "desc": "Slice direction starting point (`\"start\"` or `\"end\"`). Default `\"start\"`."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.limit(...)",
-      "signature": "df.limit(\n  n: number,\n  { offset = 0, from = \"start\" }: LimitOptions = {}\n): DataFrame<T>"
+      "signature": "df.limit(\n  n: number,\n  options?: {\n    offset?: number,\n    from?: LimitPosition\n  }\n): DataFrame<T>"
     },
     "pivot": {
       "desc": "Pivots columns from long format to a wide datagrid structure.",
@@ -4083,11 +4116,12 @@
       ],
       "params": [
         {
-          "name": "mapping",
+          "name": "[mapping]",
+          "type": "Partial<Record<keyof T, string>>",
           "desc": "Dictionary mapping old column names to new names."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.rename(...)",
@@ -4123,10 +4157,11 @@
       "params": [
         {
           "name": "args",
+          "type": "(string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]",
           "desc": "Column names, column expressions, or object maps to evaluate."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.select(...)",
@@ -4151,14 +4186,16 @@
       "params": [
         {
           "name": "start",
+          "type": "number",
           "desc": "Starting row index."
         },
         {
-          "name": "end",
+          "name": "[end]",
+          "type": "number",
           "desc": "Optional ending row index (exclusive)."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.slice(...)",
@@ -4171,31 +4208,36 @@
       ],
       "params": [
         {
-          "name": "config",
+          "name": "[config]",
+          "type": "SortOptions<T>",
           "desc": "Sort configuration options."
         },
         {
           "name": "config.by",
+          "type": "keyof T | (keyof T)[] | IExpr | IExpr[]",
           "desc": "Column name(s) or expression(s) to sort by."
         },
         {
           "name": "[config.descending]",
+          "type": "boolean | boolean[]",
           "desc": "Sort order boolean or array of booleans per key (default `false`)."
         },
         {
           "name": "[config.nullsLast]",
+          "type": "boolean",
           "desc": "When `true` (default), places nulls at the end of sorted output."
         },
         {
           "name": "[config.custom]",
+          "type": "Partial<Record<keyof T, (a: any, b: any) => number>>",
           "desc": "Optional dictionary mapping column names to custom comparator functions."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.sort(...)",
-      "signature": "df.sort(\n  config?: SortOptions<T>\n): DataFrame<T>"
+      "signature": "df.sort(\n  config?: {\n    by: keyof T | (keyof T)[] | IExpr | IExpr[],\n    descending?: boolean | boolean[],\n    nullsLast?: boolean,\n    custom?: Partial<Record<keyof T, (a: any, b: any) => number>>\n  }\n): DataFrame<T>"
     },
     "tail": {
       "desc": "Returns the last N rows as a new DataFrame.",
@@ -4244,10 +4286,11 @@
       "params": [
         {
           "name": "nameOrExpr",
+          "type": "K | IExpr",
           "desc": "Target column name or column expression."
         }
       ],
-      "returns": "Array of column scalar values.",
+      "returns": "{any[]} Array of column scalar values.",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.to_array(...)",
@@ -4261,26 +4304,30 @@
       "params": [
         {
           "name": "[options]",
+          "type": "TransposeOptions",
           "desc": "Transpose layout options."
         },
         {
           "name": "[options.include_header]",
+          "type": "boolean",
           "desc": "When `true`, includes original column names as a new header column (default `false`)."
         },
         {
           "name": "[options.header_name]",
+          "type": "string",
           "desc": "Name of the header column when `include_header` is `true` (default `\"column\"`)."
         },
         {
           "name": "[options.column_names]",
+          "type": "string | Iterable<string>",
           "desc": "Column name or iterable of strings to use as transposed column headers."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.transpose(...)",
-      "signature": "df.transpose(\n  { include_header: includeHeader = false, header_name: headerName = \"column\", column_names: colNamesOpt }: TransposeOptions = {}\n): DataFrame<any>"
+      "signature": "df.transpose(\n  options?: {\n    include_header?: boolean,\n    header_name?: string,\n    column_names?: string | Iterable<string>\n  }\n): DataFrame<any>"
     },
     "unique": {
       "desc": "Filters distinct unique rows matching target key columns.",
@@ -4289,11 +4336,12 @@
       ],
       "params": [
         {
-          "name": "columns",
+          "name": "[columns]",
+          "type": "K | K[]",
           "desc": "Target column or array of column names to evaluate uniqueness."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.unique(...)",
@@ -4307,30 +4355,35 @@
       "params": [
         {
           "name": "config",
+          "type": "UnpivotOptions<T>",
           "desc": "Unpivot configuration options."
         },
         {
           "name": "config.idVars",
+          "type": "keyof T | (keyof T)[]",
           "desc": "Key column(s) to retain as identifier variables."
         },
         {
           "name": "config.valueVars",
+          "type": "keyof T | (keyof T)[]",
           "desc": "Column(s) to unpivot into variable-value pairs."
         },
         {
           "name": "[config.varName]",
+          "type": "string",
           "desc": "Name for the new variable column holding old column headers (default `\"variable\"`)."
         },
         {
           "name": "[config.valueName]",
+          "type": "string",
           "desc": "Name for the new value column holding cell values (default `\"value\"`)."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.unpivot(...)",
-      "signature": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars,\n    valueVars,\n    varName?,\n    valueName?\n  }\n): DataFrame<U>"
+      "signature": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars: keyof T | (keyof T)[],\n    valueVars: keyof T | (keyof T)[],\n    varName?: string,\n    valueName?: string\n  }\n): DataFrame<U>"
     },
     "vstack": {
       "desc": "Concatenates DataFrames vertically. Alias for concat({ how: \"vertical\" }).",
@@ -4340,10 +4393,11 @@
       "params": [
         {
           "name": "other",
+          "type": "ConcatItem | ConcatItem[]",
           "desc": "Single DataFrame or array of DataFrames to append vertically."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.vstack(...)",
@@ -4368,10 +4422,11 @@
       "params": [
         {
           "name": "args",
+          "type": "(string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]",
           "desc": "Expressions or field objects defining column calculations."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.with_columns(...)",
@@ -4384,15 +4439,17 @@
       ],
       "params": [
         {
-          "name": "name",
+          "name": "[name]",
+          "type": "string",
           "desc": "Name of index column (default \"index\")."
         },
         {
-          "name": "offset",
+          "name": "[offset]",
+          "type": "number",
           "desc": "Starting numeric index offset (default 0)."
         }
       ],
-      "returns": "DataFrame",
+      "returns": "{DataFrame}",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.with_row_index(...)",
@@ -4406,26 +4463,30 @@
       "params": [
         {
           "name": "[file]",
+          "type": "string | { write: (str: string) => void }",
           "desc": "Target file path or writable stream target (optional)."
         },
         {
           "name": "[options]",
+          "type": "WriteJSONOptions",
           "desc": "JSON formatting and replacer options."
         },
         {
           "name": "[options.format]",
+          "type": "JSONFormat",
           "desc": "JSON output format structure (`\"json\"` or `\"ndjson\"`). Default `\"json\"`."
         },
         {
           "name": "[options.replacerOptions]",
+          "type": "SafeJsonReplacerOptions",
           "desc": "Serialization options including custom `replacer` function or replacer array."
         }
       ],
-      "returns": "JSON string representation.",
+      "returns": "{string} JSON string representation.",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.write_json(...)",
-      "signature": "df.write_json(\n  file?: string | { write: (str: string) => void }, { format = \"json\", replacerOptions }: WriteJSONOptions = {} ): string { if (format !== \"json\" && format !== \"ndjson\") { throw new TypeError(`Unsupported JSON format: \"${format}\". Expected \"json\" or \"ndjson\".`); } const safeReplacer = replacerOptions?.replacer === null ? undefined : createSafeJsonReplacer(replacerOptions); let jsonStr: string; if (format === \"ndjson\") { const dicts = this.to_dicts(); const len = dicts.length; const lines = new Array(len); for (let i = 0; i < len; i++) { lines[i] = JSON.stringify(dicts[i], safeReplacer as any); } jsonStr = lines.join(NEWLINE); } else { jsonStr = JSON.stringify(this.to_dicts(), safeReplacer as any); } writeStringToFileOrStream(file, jsonStr); return jsonStr; } /** * Writes DataFrame to CSV format string or file/stream target. * @param [file] Target file path or writable stream target (optional). * @param [options] CSV formatting options. * @param [options.delimiter] Column delimiter character (default `\",\n  \"`). * @param [options.header] When `true` (default), includes column header row. * @param [options.quoteChar] Character used to enclose fields containing special characters (default `'\"'`). * @returns CSV string output. * @example * >>> const df = $df.data({ a: [1], b: [\"x\"] }) * >>> df * shape: (1, 2) * ┌───┬───┐ * │ a │ b │ * ├───┼───┤ * │ 1 │ x │ * └───┴───┘ * >>> df.write_csv() * \"a,b\\n1,x\" */ write_csv( file?: string | { write: (str: string) => void }, options: WriteCSVOptions = {} ): string { if (file) { if (typeof file === \"string\") { if (typeof require !== \"function\") { throw new Error(\"File writing is not supported in this environment (missing require('fs')).\"); } const fs = require(\"fs\"); const fd = fs.openSync(file, \"w\"); try { stringifyCSV(this._columns, this._height, { ...options, onRow: (str) => { fs.writeSync(fd, str, null, \"utf8\"); } }); } finally { fs.closeSync(fd); } } else if (isObj(file) && typeof (file as any).write === \"function\") { stringifyCSV(this._columns, this._height, { ...options, onRow: (str) => { (file as any).write(str); } }); } else { throw new TypeError(\"Invalid file argument. Expected a file path string or a writable stream/object with a write method.\"); } return \"\"; } return stringifyCSV(this._columns, this._height, options\n); } }"
+      "signature": "df.write_json(\n  file?: string | { write: (str: string) => void },\n  options?: {\n    format?: JSONFormat,\n    replacerOptions?: SafeJsonReplacerOptions\n  }\n): string"
     },
     "write_csv": {
       "desc": "Writes DataFrame to CSV format string or file/stream target.",
@@ -4435,30 +4496,35 @@
       "params": [
         {
           "name": "[file]",
+          "type": "string | { write: (str: string) => void }",
           "desc": "Target file path or writable stream target (optional)."
         },
         {
           "name": "[options]",
+          "type": "WriteCSVOptions",
           "desc": "CSV formatting options."
         },
         {
           "name": "[options.delimiter]",
+          "type": "string",
           "desc": "Column delimiter character (default `\",\"`)."
         },
         {
           "name": "[options.header]",
+          "type": "boolean",
           "desc": "When `true` (default), includes column header row."
         },
         {
           "name": "[options.quoteChar]",
+          "type": "string",
           "desc": "Character used to enclose fields containing special characters (default `'\"'`)."
         }
       ],
-      "returns": "CSV string output.",
+      "returns": "{string} CSV string output.",
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.write_csv(...)",
-      "signature": "df.write_csv(\n  file?: string | { write: (str: string) => void }, options: WriteCSVOptions = {} ): string { if (file) { if (typeof file === \"string\") { if (typeof require !== \"function\") { throw new Error(\"File writing is not supported in this environment (missing require('fs')).\"); } const fs = require(\"fs\"); const fd = fs.openSync(file, \"w\"); try { stringifyCSV(this._columns, this._height, { ...options, onRow: (str) => { fs.writeSync(fd, str, null, \"utf8\"); } }); } finally { fs.closeSync(fd); } } else if (isObj(file) && typeof (file as any).write === \"function\") { stringifyCSV(this._columns, this._height, { ...options, onRow: (str) => { (file as any).write(str); } }); } else { throw new TypeError(\"Invalid file argument. Expected a file path string or a writable stream/object with a write method.\"); } return \"\"; } return stringifyCSV(this._columns, this._height, options\n); } }"
+      "signature": "df.write_csv(\n  file?: string | { write: (str: string) => void },\n  options?: {\n    delimiter?: string,\n    header?: boolean,\n    quoteChar?: string\n  }\n): string"
     }
   },
   "dataframe/grouped/grouped.ts": {
@@ -4604,7 +4670,7 @@
       "namespace": "$df",
       "category": "ColumnExpression",
       "syntax": "$df.read_csv(...)",
-      "signature": "$df.read_csv<T extends RowRecord = any>(\n  content: string,\n  options: ReadCSVOptions = {}\n): DataFrame<T>"
+      "signature": "$df.read_csv<T extends RowRecord = any>(\n  content: string,\n  options?: {\n    hasHeader?,\n    schema?,\n    inferSchema?\n  }\n): DataFrame<T>"
     }
   },
   "functions/read_json.ts": {
