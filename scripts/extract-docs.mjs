@@ -355,6 +355,11 @@ function extractRawDocs() {
       const callerPrefix = symbolIndex !== -1 ? symbolSyntax.substring(0, symbolIndex) : "";
       parsed.signature = callerPrefix + formattedSignature;
 
+      // Compute 1-based line number of the symbol declaration for GitHub source linking.
+      // match.index is the start of the JSDoc block; match[0].length covers the whole match
+      // ending exactly at the symbol name after the closing */, giving us the declaration line.
+      parsed.lineStart = rawContent.substring(0, match.index + match[0].length).split("\n").length;
+
       // If we successfully parsed JSDoc details, add them
       if (parsed.desc || parsed.params || parsed.returns || parsed.examples) {
         if (!fileDocs) {
