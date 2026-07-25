@@ -73,6 +73,43 @@ function parseJSDocComment(comment) {
   };
 }
 
+function extractSignatureFromCode(rawContent, startIndex, symbolName, isGetter) {
+  let parenDepth = 0;
+  let braceDepth = 0;
+  let angleDepth = 0;
+  let signature = isGetter ? "get " + symbolName : symbolName;
+  
+  let i = startIndex;
+  // Skip leading whitespace
+  while (i < rawContent.length && /\s/.test(rawContent[i])) {
+    i++;
+  }
+  
+  while (i < rawContent.length) {
+    const char = rawContent[i];
+    
+    if (char === "(") parenDepth++;
+    else if (char === ")") parenDepth--;
+    else if (char === "{") {
+      if (parenDepth === 0 && angleDepth === 0 && braceDepth === 0) {
+        break; // Opening brace of function body
+      }
+      braceDepth++;
+    }
+    else if (char === "}") braceDepth--;
+    else if (char === "<") angleDepth++;
+    else if (char === ">") angleDepth--;
+    else if (char === ";") {
+      break; // End of statement / abstract method
+    }
+    
+    signature += char;
+    i++;
+  }
+  
+  return signature.replace(/\s+/g, " ").trim();
+}
+
 // ─── Recursive Directory Walker ──────────────────────────────────────────────
 
 function getSourceFiles(dir) {
@@ -165,6 +202,11 @@ function extractRawDocs() {
         symbolSyntax = `$df.col(<column_name>).${symbolName}(...)`;
       }
       parsed.syntax = symbolSyntax;
+
+      const afterComment = match[0].substring(match[0].lastIndexOf("*/") + 2);
+      const isGetter = /\bget\b/.test(afterComment);
+      const signature = extractSignatureFromCode(rawContent, JSDOC_BLOCK_REGEX.lastIndex, symbolName, isGetter);
+      parsed.signature = signature;
 
       // If we successfully parsed JSDoc details, add them
       if (parsed.desc || parsed.params || parsed.returns || parsed.examples) {
