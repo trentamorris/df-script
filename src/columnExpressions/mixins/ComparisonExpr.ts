@@ -87,6 +87,9 @@ function compareMissing(vArray: ArrayLike<any>, rResolved: any, invert: boolean)
     return result;
 }
 
+/**
+ * @identifier $df.col
+ */
 export class ComparisonExpr extends ExprBase {
 
         /**

@@ -2,6 +2,9 @@ import { ExprBase, derive } from "../ExprBase"
 import { kleeneUnary, kleeneBinary } from "../utils"
 import { isArrayOrTypedArray } from "../../utils"
 
+/**
+ * @identifier $df.col
+ */
 export class LogicalExpr extends ExprBase {
         /**
          * Logical AND check supporting Kleene logic.

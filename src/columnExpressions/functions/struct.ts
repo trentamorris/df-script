@@ -9,6 +9,7 @@ import { STRUCT_MARKER } from "../constants";
  * @param {IntoExpr[] | Record<string, IntoExpr> | IntoExpr} fields An array of expressions, a record of field names to expressions, or a single expression.
  * @param {...IntoExpr[]} moreFields Additional fields when a single expression is passed as the first parameter.
  * @returns {ColumnExpr<any>} A column expression packaging the specified fields.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
  * >>> df

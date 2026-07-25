@@ -25,6 +25,9 @@ import {
     NS_PER_MS
 } from "../../constants";
 
+/**
+ * @identifier $df.col.dt
+ */
 export class DateTimeExprNamespace {
     constructor(public expr: any) { }
 

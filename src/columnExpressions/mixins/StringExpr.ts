@@ -13,6 +13,9 @@ import {
     changeCase
 } from "../../utils";
 
+/**
+ * @identifier $df.col.str
+ */
 export class StringExprNamespace {
     constructor(public expr: any) { }
 

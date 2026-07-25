@@ -3,6 +3,9 @@ import { ExprBase, derive } from "../ExprBase"
 import { kleeneUnary, kleeneBinary } from "../utils"
 import { clamp, isValidNumber, mulberry32, roundToScale } from "../../utils"
 
+/**
+ * @identifier $df.col
+ */
 export class ArithmeticExpr extends ExprBase {
     /**
      * Computes the absolute value of the column values.

@@ -6,6 +6,9 @@ import { getArrayStats, computeMedian, computeQuantile, getUniqueArrayStats, com
 
 
 
+/**
+ * @identifier $df.col
+ */
 export class AggregationExpr extends ExprBase {
 
     _deriveAgg(fn: AggFn<any>) {

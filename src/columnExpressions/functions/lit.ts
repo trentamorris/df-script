@@ -10,6 +10,7 @@ export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
  * @param {any} value The literal value (number, string, boolean, etc.).
  * @param {LitOptions} [options] Configuration options including data type and output name.
  * @returns {ColumnExpr<any>} A column expression with the literal value.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ a: [1, 2] })
  * >>> df

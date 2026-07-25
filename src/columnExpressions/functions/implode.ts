@@ -6,6 +6,7 @@ import type { IntoExpr } from "../../types";
  *
  * @param {IntoExpr | IntoExpr[]} column The column or expression to implode.
  * @returns {ColumnExpr<any>} A column expression representing the list of values.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ group: ["A", "A", "B"], val: [1, 2, 3] })
  * >>> df

@@ -18,6 +18,9 @@ import {
 import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr, AnyTypedArray, ToStructOptions } from "../../types";
 import { ELEMENT_MARKER } from "../constants";
 
+/**
+ * @identifier $df.col.arr
+ */
 export class ArrayExprNamespace {
     constructor(public expr: any) { }
 

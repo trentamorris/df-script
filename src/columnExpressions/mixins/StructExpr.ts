@@ -12,6 +12,9 @@ function toColExpr(col: any): any {
     return ColumnExprClass.isColExpr(col) ? col : new ColumnExprClass(col);
 }
 
+/**
+ * @identifier $df.col.struct
+ */
 export class StructExprNamespace {
     constructor(public expr: IExpr) {
         return new Proxy(this, {

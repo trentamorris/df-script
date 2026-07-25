@@ -3819,8 +3819,8 @@
   "dataframe/grouped/grouped.ts": {
     "GroupedData": {
       "desc": "Represents a DataFrame grouped by key columns, supporting aggregation operations.",
-      "category": "DataFrame",
-      "syntax": "df.GroupedData(...)"
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).GroupedData(...)"
     },
     "to_dataframe": {
       "desc": "Converts group keys back into a single distinct DataFrame without aggregations.",
@@ -3828,8 +3828,8 @@
         ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [1, 2, 3] })\n>>> df.groupby(\"group\").to_dataframe()\nshape: (2, 1)\n┌───────┐\n│ group │\n├───────┤\n│ A     │\n│ B     │\n└───────┘"
       ],
       "returns": "DataFrame",
-      "category": "DataFrame",
-      "syntax": "df.to_dataframe(...)"
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).to_dataframe(...)"
     },
     "agg": {
       "desc": "Aggregates grouped partitions using aggregation column expressions.",
@@ -3843,13 +3843,13 @@
         }
       ],
       "returns": "DataFrame",
-      "category": "DataFrame",
-      "syntax": "df.agg(...)"
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).agg(...)"
     }
   },
   "exceptions/index.ts": {
     "DFScriptError": {
-      "desc": "Base exception class for all df-script errors.",
+      "desc": "/ /** Base exception class for all df-script errors.",
       "category": "Exception",
       "syntax": "throw new DFScriptError(\"message\")"
     },
@@ -3907,14 +3907,14 @@
       ],
       "returns": "DataFrame",
       "category": "ColumnExpression",
-      "syntax": "$df.concat(...)"
+      "syntax": "$df.col(<column_name>).concat(...)"
     }
   },
   "functions/read_csv.ts": {
     "read_csv": {
       "desc": "Reads a CSV string and constructs a DataFrame. Automatically infers column data types unless an explicit schema is provided.",
       "category": "ColumnExpression",
-      "syntax": "$df.read_csv(...)"
+      "syntax": "$df.col(<column_name>).read_csv(...)"
     }
   },
   "functions/read_json.ts": {
@@ -3932,7 +3932,7 @@
       ],
       "returns": "A new DataFrame instance populated with the parsed records.",
       "category": "ColumnExpression",
-      "syntax": "$df.read_json(...)"
+      "syntax": "$df.col(<column_name>).read_json(...)"
     }
   }
 }

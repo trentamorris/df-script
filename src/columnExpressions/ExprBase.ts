@@ -15,6 +15,9 @@ export const derive = <T extends IExpr>(
     return newInst;
 };
 
+/**
+ * @identifier $df.col
+ */
 export class ExprBase implements IExpr {
     _ops: OpFn[] = [];
     _outputName: string = "";

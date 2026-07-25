@@ -6,6 +6,7 @@ import { ALL_COLUMNS_MARKER } from "../constants";
  *
  * @param {string | string[]} columns The name or names of columns to exclude.
  * @returns {ColumnExpr<any>} A column expression targeting all columns except the specified ones.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ id: [101, 102], val: [10, 20] })
  * >>> df

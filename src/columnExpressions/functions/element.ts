@@ -7,6 +7,7 @@ import { ELEMENT_MARKER } from "../constants";
  *
  * @template T The type of the element.
  * @returns {ColumnExpr<T>} A column expression referencing the array element.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ a: [[1, 5, 10], [2, 8]] })
  * >>> df

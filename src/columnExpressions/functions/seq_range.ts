@@ -49,6 +49,7 @@ export type SeqRangeOptions = {
  * @param options.startIndex The starting index in the DataFrame to insert the sequence.
  * @param options.endIndex The ending index in the DataFrame to insert the sequence.
  * @returns {ColumnExpr<any>} A column expression generating the sequence.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ a: [10, 20] })
  * >>> df

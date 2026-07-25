@@ -41,6 +41,9 @@ function computeRank(
 }
 
 
+/**
+ * @identifier $df.col
+ */
 export class WindowExpr extends ExprBase {
     public _partitionBy: (string | IExpr)[] | null = (this as any)._partitionBy || null;
 

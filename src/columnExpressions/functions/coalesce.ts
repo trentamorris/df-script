@@ -9,6 +9,7 @@ import { COALESCE_MARKER } from "../constants";
  *
  * @param {...(IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]} exprs The list of expressions or columns to coalesce.
  * @returns {ColumnExpr<any>} A column expression resolving to the first non-null value.
+ * @identifier $df
  * @example
  * >>> const df = $df.data({ a: [1, null, null], b: [null, 2, null] })
  * >>> df

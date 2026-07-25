@@ -37,6 +37,10 @@ export class ColumnExpr<T> extends ExprBase {
         return ColumnExpr.isColExpr(col) ? col : new ColumnExpr(col as string | string[]);
     }
 
+    /**
+     * Creates a column expression representing a column or a raw expression value.
+     * @identifier $df.col
+     */
     constructor(colName: keyof T | string | (keyof T | string)[] | DataType | Function | (DataType | Function)[]) {
         super()
         if (Array.isArray(colName)) {

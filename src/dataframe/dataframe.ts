@@ -45,6 +45,7 @@ export class DataFrame<T extends RowRecord = any> {
      * @param data Array of row objects or column data dictionary.
      * @param schema Optional explicit DataFrame schema mapping.
      * @param height Optional explicit height (row count).
+     * @identifier df
      * @example
      * >>> const df = $df.data([{ a: 1, b: "x" }, { a: 2, b: "y" }])
      * >>> df

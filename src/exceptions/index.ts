@@ -1,3 +1,6 @@
+/**
+ * @identifier Exception
+ */
 
 /**
  * Base exception class for all df-script errors.

@@ -2,6 +2,9 @@ import { ExprBase, derive } from "../ExprBase"
 import { isArrayOrTypedArray, getArrayStats, fillSequence } from "../../utils"
 import type { FillNullOptions } from "../../types"
 
+/**
+ * @identifier $df.col
+ */
 export class ManipulationExpr extends ExprBase {
         /**
          * Replaces null, undefined, or missing values with a specified value or strategy.
