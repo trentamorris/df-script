@@ -40,6 +40,14 @@
     "expression-engine"
   ],
   "author": "Trent Morris",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trentamorris/df-script.git"
+  },
+  "bugs": {
+    "url": "https://github.com/trentamorris/df-script/issues"
+  },
+  "homepage": "https://github.com/trentamorris/df-script#readme",
   "license": "MIT",
   "funding": {
     "type": "custom",
