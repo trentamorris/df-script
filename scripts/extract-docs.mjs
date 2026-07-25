@@ -195,6 +195,41 @@ function formatSignature(signatureStr, params) {
 
   // Try to expand a config/options param using JSDoc sub-params
   const expandedParams = rawParams.map(p => {
+    // 1. Check if the parameter is destructured (e.g. "{ a, b }: Type = {}")
+    const destructuringMatch = p.match(/^\s*\{([\s\S]*)\}\s*:\s*([a-zA-Z0-9_$<>, ]+)\s*(?:=\s*([\s\S]*))?$/);
+    if (destructuringMatch) {
+      const fieldsStr = destructuringMatch[1].trim();
+      const typeName = destructuringMatch[2].trim();
+      const defaultValue = destructuringMatch[3] ? destructuringMatch[3].trim() : undefined;
+      
+      const fields = [];
+      let currentField = "";
+      let pDepth = 0;
+      let bDepth = 0;
+      for (let i = 0; i < fieldsStr.length; i++) {
+        const char = fieldsStr[i];
+        if (char === "(") pDepth++;
+        else if (char === ")") pDepth--;
+        else if (char === "{") bDepth++;
+        else if (char === "}") bDepth--;
+        
+        if (char === "," && pDepth === 0 && bDepth === 0) {
+          fields.push(currentField.trim());
+          currentField = "";
+        } else {
+          currentField += char;
+        }
+      }
+      if (currentField.trim()) {
+        fields.push(currentField.trim());
+      }
+
+      const lines = fields.map(f => `    ${f}`);
+      const defaultPart = defaultValue ? ` = ${defaultValue}` : "";
+      return `  {\n${lines.join(",\n")}\n  }: ${typeName}${defaultPart}`;
+    }
+
+    // 2. Otherwise, check if we can expand a named config object parameter using JSDoc sub-params
     let namePart = p;
     let typePart = "";
     
@@ -207,19 +242,6 @@ function formatSignature(signatureStr, params) {
     let cleanType = typePart.split("=")[0].trim();
     let isOptionalParam = namePart.endsWith("?") || typePart.includes("=");
     let paramName = namePart.replace(/\?$/, "").trim();
-    
-    if (paramName.startsWith("{")) {
-      paramName = undefined;
-    }
-
-    // Fallback to match destructured params
-    if (!paramName && cleanType && params) {
-      const cleanTypeNoGenerics = cleanType.replace(/<.*>$/, "").trim();
-      const matchingParam = params.find(pr => pr.type && pr.type.replace(/<.*>$/, "").trim() === cleanTypeNoGenerics);
-      if (matchingParam) {
-        paramName = matchingParam.name.replace(/^\[|\]$/g, "");
-      }
-    }
 
     if (!paramName || !cleanType || !params) return "  " + p;
 

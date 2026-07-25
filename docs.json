@@ -974,7 +974,7 @@
       "namespace": "$df.col",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rand(...)",
-      "signature": "$df.col(<column_name>).rand(\n  seed?: number,\n  { min = 0, max = 1, integer = false }: RandomOptions = {}\n)"
+      "signature": "$df.col(<column_name>).rand(\n  seed?: number,\n  {\n    min = 0,\n    max = 1,\n    integer = false\n  }: RandomOptions = {}\n)"
     },
     "round": {
       "desc": "Rounds values to a specific scale of decimal digits.",
@@ -1232,7 +1232,7 @@
       "namespace": "$df.col.arr",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arr.explode(...)",
-      "signature": "$df.col(<column_name>).arr.explode(\n  { empty_as_null = true, keep_nulls = true }: ExplodeOptions = {}\n)"
+      "signature": "$df.col(<column_name>).arr.explode(\n  {\n    empty_as_null = true,\n    keep_nulls = true\n  }: ExplodeOptions = {}\n)"
     },
     "first": {
       "desc": "Returns the first element of each list.",
@@ -1588,7 +1588,7 @@
       "namespace": "$df.col.arr",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arr.to_struct(...)",
-      "signature": "$df.col(<column_name>).arr.to_struct(\n  { upper_bound, fields }: ToStructOptions = {}\n)"
+      "signature": "$df.col(<column_name>).arr.to_struct(\n  {\n    upper_bound,\n    fields\n  }: ToStructOptions = {}\n)"
     },
     "unique": {
       "desc": "Fills each list with unique elements only.",
@@ -2061,7 +2061,7 @@
       "namespace": "$df.col",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).fill_null(...)",
-      "signature": "$df.col(<column_name>).fill_null(\n  { value = undefined, strategy = undefined, limit = undefined }: FillNullOptions = {}\n): this"
+      "signature": "$df.col(<column_name>).fill_null(\n  {\n    value = undefined,\n    strategy = undefined,\n    limit = undefined\n  }: FillNullOptions = {}\n): this"
     },
     "reverse": {
       "desc": "Reverses the order of values in the column.",
@@ -3068,7 +3068,7 @@
       "namespace": "$df.col.dt",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.offset_business_day(...)",
-      "signature": "$df.col(<column_name>).dt.offset_business_day(\n  n: number | any,\n  { excludeWeekdays = [0, 6], ...options }: BusinessDayOffsetOptions = {}\n)"
+      "signature": "$df.col(<column_name>).dt.offset_business_day(\n  n: number | any,\n  {\n    excludeWeekdays = [0,\n    6],\n    ...options\n  }: BusinessDayOffsetOptions = {}\n)"
     },
     "offset_day": {
       "desc": "Offsets date by N calendar days.",
@@ -4070,7 +4070,7 @@
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.limit(...)",
-      "signature": "df.limit(\n  n: number,\n  options?: {\n    offset?: number,\n    from?: LimitPosition\n  }\n): DataFrame<T>"
+      "signature": "df.limit(\n  n: number,\n  {\n    offset = 0,\n    from = \"start\"\n  }: LimitOptions = {}\n): DataFrame<T>"
     },
     "pivot": {
       "desc": "Pivots columns from long format to a wide datagrid structure.",
@@ -4327,7 +4327,7 @@
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.transpose(...)",
-      "signature": "df.transpose(\n  options?: {\n    include_header?: boolean,\n    header_name?: string,\n    column_names?: string | Iterable<string>\n  }\n): DataFrame<any>"
+      "signature": "df.transpose(\n  {\n    include_header: includeHeader = false,\n    header_name: headerName = \"column\",\n    column_names: colNamesOpt\n  }: TransposeOptions = {}\n): DataFrame<any>"
     },
     "unique": {
       "desc": "Filters distinct unique rows matching target key columns.",
@@ -4486,7 +4486,7 @@
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.write_json(...)",
-      "signature": "df.write_json(\n  file?: string | { write: (str: string) => void },\n  options?: {\n    format?: JSONFormat,\n    replacerOptions?: SafeJsonReplacerOptions\n  }\n): string"
+      "signature": "df.write_json(\n  file?: string | { write: (str: string) => void },\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string"
     },
     "write_csv": {
       "desc": "Writes DataFrame to CSV format string or file/stream target.",
@@ -4638,7 +4638,7 @@
       "namespace": "$df",
       "category": "ColumnExpression",
       "syntax": "$df.concat(...)",
-      "signature": "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItem | ConcatItem[],\n  { how = 'vertical', horizontal }: ConcatOptions = {}\n): DataFrame<U>"
+      "signature": "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItem | ConcatItem[],\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>"
     }
   },
   "functions/read_csv.ts": {
@@ -4702,7 +4702,7 @@
       "namespace": "$df",
       "category": "ColumnExpression",
       "syntax": "$df.read_json(...)",
-      "signature": "$df.read_json(\n  content: string,\n  { format = \"json\", trimBeforeParse = true, schema, ...parseOpts }: ReadJSONOptions = {}\n): DataFrame<any>"
+      "signature": "$df.read_json(\n  content: string,\n  {\n    format = \"json\",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<any>"
     }
   }
 }
