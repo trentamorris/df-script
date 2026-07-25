@@ -6,6 +6,29 @@ import { COALESCE_MARKER } from "../constants";
 
 /**
  * Returns the first non-null value among the specified expressions.
+ *
+ * @param {...(IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]} exprs The list of expressions or columns to coalesce.
+ * @returns {ColumnExpr<any>} A column expression resolving to the first non-null value.
+ * @example
+ * >>> const df = $df.data({ a: [1, null, null], b: [null, 2, null] })
+ * >>> df
+ * shape: (3, 2)
+ * ┌──────┬──────┐
+ * │ a    │ b    │
+ * ├──────┼──────┤
+ * │ 1    │ null │
+ * │ null │ 2    │
+ * │ null │ null │
+ * └──────┴──────┘
+ * >>> df.select($df.coalesce($df.col("a"), $df.col("b"), $df.lit(3)).alias("coalesced"))
+ * shape: (3, 1)
+ * ┌───────────┐
+ * │ coalesced │
+ * ├───────────┤
+ * │ 1         │
+ * │ 2         │
+ * │ 3         │
+ * └───────────┘
  */
 export function coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))

@@ -11,48 +11,84 @@
     }
   },
   "columnExpressions/functions/all.ts": {
-    "export": {
-      "desc": "Creates an expression targeting all columns in the DataFrame."
+    "all": {
+      "desc": "Creates an expression targeting all columns in the DataFrame.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1, 2], b: [3, 4] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ 3   │\n│ 2   │ 4   │\n└─────┴─────┘\n>>> df.select($df.all())\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ 3   │\n│ 2   │ 4   │\n└─────┴─────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression targeting all columns."
     }
   },
   "columnExpressions/functions/coalesce.ts": {
-    "export": {
-      "desc": "Returns the first non-null value among the specified expressions."
+    "coalesce": {
+      "desc": "Returns the first non-null value among the specified expressions.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1, null, null], b: [null, 2, null] })\n>>> df\nshape: (3, 2)\n┌──────┬──────┐\n│ a    │ b    │\n├──────┼──────┤\n│ 1    │ null │\n│ null │ 2    │\n│ null │ null │\n└──────┴──────┘\n>>> df.select($df.coalesce($df.col(\"a\"), $df.col(\"b\"), $df.lit(3)).alias(\"coalesced\"))\nshape: (3, 1)\n┌───────────┐\n│ coalesced │\n├───────────┤\n│ 1         │\n│ 2         │\n│ 3         │\n└───────────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression resolving to the first non-null value."
     }
   },
   "columnExpressions/functions/element.ts": {
-    "export": {
-      "desc": "Creates an expression referencing the current element(s) of an array during evaluation."
+    "element": {
+      "desc": "Creates an expression referencing the current element(s) of an array during evaluation. Primarily used inside array operations like `filter`, `map`, or `eval`.",
+      "examples": [
+        ">>> const df = $df.data({ a: [[1, 5, 10], [2, 8]] })\n>>> df\nshape: (2, 1)\n┌────────────┐\n│ a          │\n├────────────┤\n│ [1, 5, 10] │\n│ [2, 8]     │\n└────────────┘\n>>> df.select($df.col(\"a\").arr.filter($df.element().gt(5)).alias(\"filtered\"))\nshape: (2, 1)\n┌──────────┐\n│ filtered │\n├──────────┤\n│ [10]     │\n│ [8]      │\n└──────────┘"
+      ],
+      "returns": "{ColumnExpr<T>} A column expression referencing the array element."
     }
   },
   "columnExpressions/functions/exclude.ts": {
-    "export": {
-      "desc": "Creates an expression targeting all columns except the specified ones."
+    "exclude": {
+      "desc": "Creates an expression targeting all columns except the specified ones.",
+      "examples": [
+        ">>> const df = $df.data({ id: [101, 102], val: [10, 20] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ id  │ val │\n├─────┼─────┤\n│ 101 │ 10  │\n│ 102 │ 20  │\n└─────┴─────┘\n>>> df.select($df.exclude(\"id\"))\nshape: (2, 1)\n┌─────┐\n│ val │\n├─────┤\n│ 10  │\n│ 20  │\n└─────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression targeting all columns except the specified ones."
     }
   },
   "columnExpressions/functions/implode.ts": {
-    "export": {
-      "desc": "Aggregates values of a column into a list within each group."
+    "implode": {
+      "desc": "Aggregates values of a column into a list within each group.",
+      "examples": [
+        ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [1, 2, 3] })\n>>> df\nshape: (3, 2)\n┌───────┬─────┐\n│ group │ val │\n├───────┼─────┤\n│ A     │ 1   │\n│ A     │ 2   │\n│ B     │ 3   │\n└───────┴─────┘\n>>> df.group_by(\"group\").agg($df.implode(\"val\").alias(\"imploded\"))\nshape: (2, 2)\n┌───────┬──────────┐\n│ group │ imploded │\n├───────┼──────────┤\n│ A     │ [1, 2]   │\n│ B     │ [3]      │\n└───────┴──────────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression representing the list of values."
     }
   },
   "columnExpressions/functions/lit.ts": {
-    "export": {
-      "desc": "Creates a literal column expression that repeats the given value for all rows."
+    "lit": {
+      "desc": "Creates a literal column expression that repeats the given value for all rows.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1, 2] })\n>>> df\nshape: (2, 1)\n┌───┐\n│ a │\n├───┤\n│ 1 │\n│ 2 │\n└───┘\n>>> df.select($df.lit(42).alias(\"answer\"))\nshape: (2, 1)\n┌────────┐\n│ answer │\n├────────┤\n│ 42     │\n│ 42     │\n└────────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression with the literal value."
     }
   },
   "columnExpressions/functions/seq_range.ts": {
-    "export": {
-      "desc": "Creates a column expression that generates a range of values. If mode is \"cumulative\" (default) or \"independent\", it generates a sequence. If mode is \"constant\", it repeats the given value."
+    "seq_range": {
+      "desc": "Creates a column expression that generates a range of values. If mode is \"cumulative\" (default) or \"independent\", it generates a sequence. If mode is \"constant\", it repeats the given value.",
+      "examples": [
+        ">>> const df = $df.data({ a: [10, 20] })\n>>> df\nshape: (2, 1)\n┌────┐\n│ a  │\n├────┤\n│ 10 │\n│ 20 │\n└────┘\n>>> df.select($df.seq_range(1, { step: 2 }).alias(\"odd\"))\nshape: (2, 1)\n┌─────┐\n│ odd │\n├─────┤\n│ 1   │\n│ 3   │\n└─────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression generating the sequence."
     }
   },
   "columnExpressions/functions/struct.ts": {
-    "export": {
-      "desc": "Packages multiple expressions into a structured object column."
+    "struct": {
+      "desc": "Packages multiple expressions into a structured object column.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n┌─────┬─────┐\n│ a   │ b   │\n├─────┼─────┤\n│ 1   │ x   │\n│ 2   │ y   │\n└─────┴─────┘\n>>> df.select($df.struct({ x: \"a\", y: \"b\" }).alias(\"coord\"))\nshape: (2, 1)\n┌──────────────────┐\n│ coord            │\n├──────────────────┤\n│ { x: 1, y: \"x\" } │\n│ { x: 2, y: \"y\" } │\n└──────────────────┘"
+      ],
+      "returns": "{ColumnExpr<any>} A column expression packaging the specified fields."
     }
   },
   "columnExpressions/functions/when.ts": {
-    "export": {
-      "desc": "Provides conditional branch evaluations inside column expressions."
+    "when": {
+      "desc": "Provides conditional branch evaluations inside column expressions.",
+      "examples": [
+        ">>> const df = $df.data({ score: [75, 95] })\n>>> df\nshape: (2, 1)\n┌───────┐\n│ score │\n├───────┤\n│ 75    │\n│ 95    │\n└───────┘\n>>> df.select(\n...   $df.when($df.col(\"score\").gt(90)).then(\"A\")\n...     .otherwise(\"B\").alias(\"grade\")\n... )\nshape: (2, 1)\n┌───────┐\n│ grade │\n├───────┤\n│ B     │\n│ A     │\n└───────┘"
+      ],
+      "returns": "{When} A When object builder to chain `.then()` and `.otherwise()`/`.when()`."
     }
   },
   "columnExpressions/mixins/AggregationExpr.ts": {
@@ -1921,7 +1957,7 @@
       ],
       "returns": "ColumnExpression"
     },
-    "get": {
+    "struct": {
       "desc": "Struct namespace accessor for operating on nested object/struct columns.",
       "examples": [
         ">>> df.select($df.col(\"user\").struct.field(\"name\"))"
@@ -2256,7 +2292,7 @@
       ],
       "returns": "ColumnExpression"
     },
-    "get": {
+    "dt": {
       "desc": "Datetime namespace accessor for date, time, and duration operations.",
       "examples": [
         ">>> df.select($df.col(\"date\").dt.year())"
@@ -2508,15 +2544,15 @@
     }
   },
   "dataframe/dataframe.ts": {
-    "export": {
+    "DataFrame": {
       "desc": "Two-dimensional columnar tabular data structure supporting expression execution and reshaping."
     },
-    "get": {
-      "desc": "Gets width (total column count) of the DataFrame.",
+    "columns": {
+      "desc": "Gets array of column names in the DataFrame.",
       "examples": [
-        ">>> const df = $df.data({ a: [1], b: [2] })\n>>> df\nshape: (1, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ 2 │\n└───┴───┘\n>>> df.width\n2"
+        ">>> const df = $df.data({ a: [1], b: [2] })\n>>> df\nshape: (1, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ 2 │\n└───┴───┘\n>>> df.columns\n[\"a\", \"b\"]"
       ],
-      "returns": "Number of columns."
+      "returns": "Array of column name strings."
     },
     "concat": {
       "desc": "Concatenates items vertically, horizontally, or diagonally.",
@@ -2570,6 +2606,13 @@
         }
       ],
       "returns": "DataFrame"
+    },
+    "dtypes": {
+      "desc": "Gets array of registered column DataTypes matching current schema order.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1], b: [\"text\"] })\n>>> df\nshape: (1, 2)\n┌───┬──────┐\n│ a │ b    │\n├───┼──────┤\n│ 1 │ text │\n└───┴──────┘\n>>> df.dtypes\n[Float64, Utf8]"
+      ],
+      "returns": "Array of RegisteredDataType definitions."
     },
     "explode": {
       "desc": "Explodes an array column into multiple rows, replicating non-target row attributes.",
@@ -2666,6 +2709,13 @@
         }
       ],
       "returns": "DataFrame"
+    },
+    "height": {
+      "desc": "Gets height (total row count) of the DataFrame.",
+      "examples": [
+        ">>> const df = $df.data({ a: [10, 20, 30] })\n>>> df\nshape: (3, 1)\n┌────┐\n│ a  │\n├────┤\n│ 10 │\n│ 20 │\n│ 30 │\n└────┘\n>>> df.height\n3"
+      ],
+      "returns": "Number of rows."
     },
     "hstack": {
       "desc": "Concatenates columns horizontally to the current DataFrame.",
@@ -2849,6 +2899,13 @@
       ],
       "returns": "DataFrame"
     },
+    "schema": {
+      "desc": "Gets current DataFrameSchema dictionary mapping column names to DataType.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1], b: [\"text\"] })\n>>> df\nshape: (1, 2)\n┌───┬──────┐\n│ a │ b    │\n├───┼──────┤\n│ 1 │ text │\n└───┴──────┘\n>>> df.schema\n{ a: Float64, b: Utf8 }"
+      ],
+      "returns": "DataFrameSchema mapping."
+    },
     "select": {
       "desc": "Selects specific columns or evaluates column expressions.",
       "examples": [
@@ -2861,6 +2918,13 @@
         }
       ],
       "returns": "DataFrame"
+    },
+    "shape": {
+      "desc": "Gets DataFrame dimensions as [height, width] tuple.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ x │\n│ 2 │ y │\n└───┴───┘\n>>> df.shape\n[2, 2]"
+      ],
+      "returns": "Tuple [height, width]."
     },
     "slice": {
       "desc": "Slices a subset range of rows between start and end index.",
@@ -3028,6 +3092,13 @@
       ],
       "returns": "DataFrame"
     },
+    "width": {
+      "desc": "Gets width (total column count) of the DataFrame.",
+      "examples": [
+        ">>> const df = $df.data({ a: [1], b: [2] })\n>>> df\nshape: (1, 2)\n┌───┬───┐\n│ a │ b │\n├───┼───┤\n│ 1 │ 2 │\n└───┴───┘\n>>> df.width\n2"
+      ],
+      "returns": "Number of columns."
+    },
     "with_columns": {
       "desc": "Adds new columns or updates existing ones using column expressions.",
       "examples": [
@@ -3114,7 +3185,7 @@
     }
   },
   "dataframe/grouped/grouped.ts": {
-    "export": {
+    "GroupedData": {
       "desc": "Represents a DataFrame grouped by key columns, supporting aggregation operations."
     },
     "to_dataframe": {
@@ -3139,12 +3210,27 @@
     }
   },
   "exceptions/index.ts": {
-    "export": {
+    "DFScriptError": {
+      "desc": "Base exception class for all df-script errors."
+    },
+    "DataFrameError": {
+      "desc": "General error thrown during DataFrame instantiation or execution."
+    },
+    "ColumnNotFoundError": {
+      "desc": "Error thrown when a specified column name does not exist in the DataFrame schema."
+    },
+    "SchemaError": {
+      "desc": "Error thrown when schema definitions, coercions, or data types are invalid."
+    },
+    "ComputeError": {
+      "desc": "Error thrown during expression evaluation or element-wise calculations."
+    },
+    "ShapeError": {
       "desc": "Error thrown when shape dimensions or column heights mismatch."
     }
   },
   "functions/concat.ts": {
-    "export": {
+    "concat": {
       "desc": "Concatenates items vertically, horizontally, or diagonally.",
       "examples": [
         "// 1. Vertical Concatenation (default):\n>>> const df1 = $df.data({ a: [1] })\n>>> const df2 = $df.data({ a: [2] })\n>>> $df.concat([df1, df2], { how: \"vertical\" })\nshape: (2, 1)\n┌───┐\n│ a │\n├───┤\n│ 1 │\n│ 2 │\n└───┘",
@@ -3173,12 +3259,12 @@
     }
   },
   "functions/read_csv.ts": {
-    "export": {
+    "read_csv": {
       "desc": "Reads a CSV string and constructs a DataFrame. Automatically infers column data types unless an explicit schema is provided."
     }
   },
   "functions/read_json.ts": {
-    "export": {
+    "read_json": {
       "desc": "Parses JSON content (JSON or NDJSON) and loads it into a new DataFrame.",
       "params": [
         {

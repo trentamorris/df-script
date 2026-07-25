@@ -19,7 +19,7 @@ const srcDir = path.resolve(__dirname, "../src");
 // ─── Regexes to capture JSDoc comments followed by identifiers ────────────────
 
 // Capture any JSDoc block + the immediate next declaration name (method, function, or class)
-const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:export\s+|public\s+|private\s+|static\s+)*?(?:function\s+|class\s+|\*?)([a-zA-Z0-9_$]+)/g;
+const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:(?:export|public|private|static|function|class|get|set)\s+|\*\s*)*([a-zA-Z0-9_$]+)/g;
 
 const PARAM_REGEX = /@param\s+([a-zA-Z0-9_$.?]+)\s+(.*)/;
 const RETURNS_REGEX = /@returns\s+(.*)/;

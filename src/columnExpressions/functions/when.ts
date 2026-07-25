@@ -94,6 +94,30 @@ export class WhenThen extends ColumnExpr<any> {
 
 /**
  * Provides conditional branch evaluations inside column expressions.
+ *
+ * @param {WhenArg} predicate The boolean condition or expression.
+ * @returns {When} A When object builder to chain `.then()` and `.otherwise()`/`.when()`.
+ * @example
+ * >>> const df = $df.data({ score: [75, 95] })
+ * >>> df
+ * shape: (2, 1)
+ * ┌───────┐
+ * │ score │
+ * ├───────┤
+ * │ 75    │
+ * │ 95    │
+ * └───────┘
+ * >>> df.select(
+ * ...   $df.when($df.col("score").gt(90)).then("A")
+ * ...     .otherwise("B").alias("grade")
+ * ... )
+ * shape: (2, 1)
+ * ┌───────┐
+ * │ grade │
+ * ├───────┤
+ * │ B     │
+ * │ A     │
+ * └───────┘
  */
 export function when(predicate: WhenArg): When {
     return new When(predicate);

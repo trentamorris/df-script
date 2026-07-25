@@ -34,6 +34,28 @@ export type SeqRangeOptions = {
  * Creates a column expression that generates a range of values.
  * If mode is "cumulative" (default) or "independent", it generates a sequence.
  * If mode is "constant", it repeats the given value.
+ *
+ * @param {any} value The initial value to start the sequence or the constant value to repeat.
+ * @param {SeqRangeOptions} [options={ strict: true }] Configuration options.
+ * @returns {ColumnExpr<any>} A column expression generating the sequence.
+ * @example
+ * >>> const df = $df.data({ a: [10, 20] })
+ * >>> df
+ * shape: (2, 1)
+ * ┌────┐
+ * │ a  │
+ * ├────┤
+ * │ 10 │
+ * │ 20 │
+ * └────┘
+ * >>> df.select($df.seq_range(1, { step: 2 }).alias("odd"))
+ * shape: (2, 1)
+ * ┌─────┐
+ * │ odd │
+ * ├─────┤
+ * │ 1   │
+ * │ 3   │
+ * └─────┘
  */
 export function seq_range(
     value: any,
