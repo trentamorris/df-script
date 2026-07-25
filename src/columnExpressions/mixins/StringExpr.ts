@@ -14,7 +14,9 @@ import {
 } from "../../utils";
 
 /**
- * @identifier $df.col.str
+ * @namespace $df.col.str
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).str.{symbol}(...)
  */
 export class StringExprNamespace {
     constructor(public expr: any) { }
@@ -935,6 +937,15 @@ export class StringExprNamespace {
 }
 
 export class StringExpr extends ExprBase {
+    /**
+     * String namespace accessor for text operations.
+     * @namespace $df.col
+     * @category ColumnExpression
+     * @syntax $df.col(<column_name>).str
+     * @returns StringExprNamespace
+     * @example
+     * >>> df.select($df.col("a").str.len())
+     */
     get str() {
         return new StringExprNamespace(this);
     }

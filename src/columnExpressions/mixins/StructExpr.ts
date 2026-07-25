@@ -13,7 +13,9 @@ function toColExpr(col: any): any {
 }
 
 /**
- * @identifier $df.col.struct
+ * @namespace $df.col.struct
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).struct.{symbol}(...)
  */
 export class StructExprNamespace {
     constructor(public expr: IExpr) {
@@ -206,6 +208,9 @@ export interface StructExprNamespace {
 export class StructExpr extends ExprBase {
     /**
      * Struct namespace accessor for operating on nested object/struct columns.
+     * @namespace $df.col
+     * @category ColumnExpression
+     * @syntax $df.col(<column_name>).struct
      * @returns StructExprNamespace
      * @example
      * >>> df.select($df.col("user").struct.field("name"))

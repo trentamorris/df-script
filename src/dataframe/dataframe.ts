@@ -45,7 +45,9 @@ export class DataFrame<T extends RowRecord = any> {
      * @param data Array of row objects or column data dictionary.
      * @param schema Optional explicit DataFrame schema mapping.
      * @param height Optional explicit height (row count).
-     * @identifier df
+     * @namespace df
+     * @category DataFrame
+     * @syntax df.{symbol}(...)
      * @example
      * >>> const df = $df.data([{ a: 1, b: "x" }, { a: 2, b: "y" }])
      * >>> df
@@ -126,9 +128,9 @@ export class DataFrame<T extends RowRecord = any> {
      * Concatenates items vertically, horizontally, or diagonally.
      * 
      * @param items Single DataFrame or array of DataFrames/rows to concatenate.
-     * @param options Configuration options for concatenation layout and strictness.
-     * @param options.how Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
-     * @param options.horizontal.strict When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
+     * @param [options] Configuration options for concatenation layout and strictness.
+     * @param [options.how] Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
+     * @param [options.horizontal.strict] When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
      * @returns DataFrame
      * 
      * @example
@@ -279,9 +281,9 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Explodes an array column into multiple rows, replicating non-target row attributes.
      * @param columns Target column expression or array column name to explode.
-     * @param options Configuration options for empty array and null handling.
-     * @param options.empty_as_null When `true`, converts empty arrays to `null` rows.
-     * @param options.keep_nulls When `true`, retains `null` array values during explosion.
+     * @param [options] Configuration options for empty array and null handling.
+     * @param [options.empty_as_null] When `true`, converts empty arrays to `null` rows.
+     * @param [options.keep_nulls] When `true`, retains `null` array values during explosion.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ group: ["A"], values: [[1, 2]] })
@@ -334,10 +336,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Fills null values across columns using scalar values or statistical strategies.
-     * @param options Configuration options for null replacement.
-     * @param options.value Scalar replacement value or dict mapping column names to values.
-     * @param options.strategy Statistical filling strategy (`"zero"`, `"mean"`, `"min"`, `"max"`, `"forward"`, `"backward"`).
-     * @param options.limit Maximum consecutive nulls to fill when using propagation strategies.
+     * @param [options] Configuration options for null replacement.
+     * @param [options.value] Scalar replacement value or dict mapping column names to values.
+     * @param [options.strategy] Statistical filling strategy (`"zero"`, `"mean"`, `"min"`, `"max"`, `"forward"`, `"backward"`).
+     * @param [options.limit] Maximum consecutive nulls to fill when using propagation strategies.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [1, null, 3] })
@@ -590,8 +592,8 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Concatenates columns horizontally to the current DataFrame.
      * @param other DataFrame or array of DataFrames to append side-by-side.
-     * @param options Horizontal concat configuration options.
-     * @param options.strict When `true` (default), throws an error if row counts mismatch. Set `false` to allow null padding.
+     * @param [options] Horizontal concat configuration options.
+     * @param [options.strict] When `true` (default), throws an error if row counts mismatch. Set `false` to allow null padding.
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ a: [1, 2] })
@@ -745,8 +747,8 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Yields a generator iterating over rows as tuples or named objects.
-     * @param config Iteration format configuration.
-     * @param config.named When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`).
+     * @param [config] Iteration format configuration.
+     * @param [config.named] When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`).
      * @returns Generator of rows.
      * @example
      * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
@@ -797,8 +799,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @param config Join configuration object.
      * @param config.other Right DataFrame to join with left DataFrame.
      * @param config.on Join key column name or array of key column names.
-     * @param config.how Join strategy (`"inner"`, `"left"`, `"right"`, or `"outer"`). Default `"inner"`.
-     * @param config.suffixes Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `["", "_right"]`).
+     * @param [config.how] Join strategy (`"inner"`, `"left"`, `"right"`, or `"outer"`). Default `"inner"`.
+     * @param [config.suffixes] Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `["", "_right"]`).
      * @returns DataFrame
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
@@ -959,9 +961,9 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Limits the output to N rows starting from offset.
      * @param n Maximum number of rows to take.
-     * @param options Offset and slice direction options.
-     * @param options.offset Number of rows to skip before taking `n` rows (default 0).
-     * @param options.from Slice direction starting point (`"start"` or `"end"`). Default `"start"`.
+     * @param [options] Offset and slice direction options.
+     * @param [options.offset] Number of rows to skip before taking `n` rows (default 0).
+     * @param [options.from] Slice direction starting point (`"start"` or `"end"`). Default `"start"`.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ a: [10, 20, 30, 40] })
@@ -1412,9 +1414,9 @@ export class DataFrame<T extends RowRecord = any> {
      * Sorts DataFrame rows by one or more column expressions or custom sorters.
      * @param config Sort configuration options.
      * @param config.by Column name(s) or expression(s) to sort by.
-     * @param config.descending Sort order boolean or array of booleans per key (default `false`).
-     * @param config.nullsLast When `true` (default), places nulls at the end of sorted output.
-     * @param config.custom Optional dictionary mapping column names to custom comparator functions.
+     * @param [config.descending] Sort order boolean or array of booleans per key (default `false`).
+     * @param [config.nullsLast] When `true` (default), places nulls at the end of sorted output.
+     * @param [config.custom] Optional dictionary mapping column names to custom comparator functions.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ val: [3, 1, 2] })
@@ -1605,10 +1607,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Transposes rows into columns and columns into rows.
-     * @param options Transpose layout options.
-     * @param options.include_header When `true`, includes original column names as a new header column (default `false`).
-     * @param options.header_name Name of the header column when `include_header` is `true` (default `"column"`).
-     * @param options.column_names Column name or iterable of strings to use as transposed column headers.
+     * @param [options] Transpose layout options.
+     * @param [options.include_header] When `true`, includes original column names as a new header column (default `false`).
+     * @param [options.header_name] Name of the header column when `include_header` is `true` (default `"column"`).
+     * @param [options.column_names] Column name or iterable of strings to use as transposed column headers.
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ metric: ["sales", "clicks"], q1: [100, 500], q2: [120, 600] })
@@ -1773,8 +1775,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @param config Unpivot configuration options.
      * @param config.idVars Key column(s) to retain as identifier variables.
      * @param config.valueVars Column(s) to unpivot into variable-value pairs.
-     * @param config.varName Name for the new variable column holding old column headers (default `"variable"`).
-     * @param config.valueName Name for the new value column holding cell values (default `"value"`).
+     * @param [config.varName] Name for the new variable column holding old column headers (default `"variable"`).
+     * @param [config.valueName] Name for the new value column holding cell values (default `"value"`).
      * @returns DataFrame
      * @example
      * >>> const df = $df.data({ year: [2020], Jan: [100], Feb: [150] })
@@ -2012,10 +2014,10 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Writes DataFrame rows to JSON format string or file/stream target.
-     * @param file Target file path or writable stream target (optional).
-     * @param options JSON formatting and replacer options.
-     * @param options.format JSON output format structure (`"json"` or `"ndjson"`). Default `"json"`.
-     * @param options.replacerOptions Serialization options including custom `replacer` function or replacer array.
+     * @param [file] Target file path or writable stream target (optional).
+     * @param [options] JSON formatting and replacer options.
+     * @param [options.format] JSON output format structure (`"json"` or `"ndjson"`). Default `"json"`.
+     * @param [options.replacerOptions] Serialization options including custom `replacer` function or replacer array.
      * @returns JSON string representation.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })
@@ -2060,11 +2062,11 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Writes DataFrame to CSV format string or file/stream target.
-     * @param file Target file path or writable stream target (optional).
-     * @param options CSV formatting options.
-     * @param options.delimiter Column delimiter character (default `","`).
-     * @param options.header When `true` (default), includes column header row.
-     * @param options.quoteChar Character used to enclose fields containing special characters (default `'"'`).
+     * @param [file] Target file path or writable stream target (optional).
+     * @param [options] CSV formatting options.
+     * @param [options.delimiter] Column delimiter character (default `","`).
+     * @param [options.header] When `true` (default), includes column header row.
+     * @param [options.quoteChar] Character used to enclose fields containing special characters (default `'"'`).
      * @returns CSV string output.
      * @example
      * >>> const df = $df.data({ a: [1], b: ["x"] })

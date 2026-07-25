@@ -42,7 +42,9 @@ function computeRank(
 
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class WindowExpr extends ExprBase {
     public _partitionBy: (string | IExpr)[] | null = (this as any)._partitionBy || null;

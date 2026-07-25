@@ -39,7 +39,9 @@ export class ColumnExpr<T> extends ExprBase {
 
     /**
      * Creates a column expression representing a column or a raw expression value.
-     * @identifier $df.col
+     * @namespace $df.col
+     * @category ColumnExpression
+     * @syntax $df.col(<column_name>).{symbol}(...)
      */
     constructor(colName: keyof T | string | (keyof T | string)[] | DataType | Function | (DataType | Function)[]) {
         super()

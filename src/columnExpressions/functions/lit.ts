@@ -7,10 +7,14 @@ export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
 /**
  * Creates a literal column expression that repeats the given value for all rows.
  *
- * @param {any} value The literal value (number, string, boolean, etc.).
- * @param {LitOptions} [options] Configuration options including data type and output name.
+ * @param value The literal value (number, string, boolean, etc.).
+ * @param [options] Configuration options.
+ * @param [options.dtype] The data type to allocate for the literal values.
+ * @param [options.name] The name of the output column.
  * @returns {ColumnExpr<any>} A column expression with the literal value.
- * @identifier $df
+ * @namespace $df
+ * @category ColumnExpression
+ * @syntax $df.{symbol}(...)
  * @example
  * >>> const df = $df.data({ a: [1, 2] })
  * >>> df

@@ -21,7 +21,7 @@ const srcDir = path.resolve(__dirname, "../src");
 // Capture any JSDoc block + the immediate next declaration name (method, function, or class)
 const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:(?:export|public|private|static|function|class|get|set)\s+|\*\s*)*([a-zA-Z0-9_$]+)/g;
 
-const PARAM_REGEX = /@param\s+([a-zA-Z0-9_$.?]+)\s+(.*)/;
+const PARAM_REGEX = /@param\s+([\[\]a-zA-Z0-9_$.?]+)\s+(.*)/;
 const RETURNS_REGEX = /@returns\s+(.*)/;
 
 // ─── JSDoc Parser ────────────────────────────────────────────────────────────
@@ -111,9 +111,17 @@ function extractRawDocs() {
     let fileDocs = null;
     let match;
 
-    // Scan the raw file content for an `@identifier <value>` tag in any JSDoc block
-    const identifierMatch = rawContent.match(/@identifier\s+([a-zA-Z0-9_$..]+)/);
-    const fileIdentifier = identifierMatch ? identifierMatch[1].trim() : null;
+    // Scan the raw file content for an `@namespace <value>` tag in any JSDoc block
+    const namespaceMatch = rawContent.match(/@namespace\s+([a-zA-Z0-9_$..]+)/);
+    const fileNamespace = namespaceMatch ? namespaceMatch[1].trim() : null;
+
+    // Scan for `@category <value>`
+    const categoryMatch = rawContent.match(/@category\s+([a-zA-Z0-9_$..]+)/);
+    const fileCategory = categoryMatch ? categoryMatch[1].trim() : "ColumnExpression";
+
+    // Scan for `@syntax <template>`
+    const syntaxMatch = rawContent.match(/@syntax\s+(.+)/);
+    const fileSyntaxTemplate = syntaxMatch ? syntaxMatch[1].trim() : null;
 
     JSDOC_BLOCK_REGEX.lastIndex = 0;
     while ((match = JSDOC_BLOCK_REGEX.exec(rawContent)) !== null) {
@@ -127,38 +135,36 @@ function extractRawDocs() {
 
       const parsed = parseJSDocComment(comment);
 
-      let category = "ColumnExpression";
-      let syntax = "";
-
-      if (fileIdentifier === "df") {
-        category = "DataFrame";
-        syntax = `df.${symbolName}(...)`;
-      } else if (fileIdentifier === "Exception") {
-        category = "Exception";
-        syntax = `throw new ${symbolName}("message")`;
-      } else if (fileIdentifier === "DataType") {
-        category = "DataType";
-        let typeDisplay = symbolName;
-        if (symbolName.endsWith("DataType")) typeDisplay = symbolName.slice(0, -8);
-        syntax = `DataType.${typeDisplay}`;
-      } else if (fileIdentifier === "$df") {
-        category = "ColumnExpression";
-        syntax = `$df.${symbolName}(...)`;
-      } else if (fileIdentifier === "$df.col") {
-        category = "ColumnExpression";
-        syntax = `$df.col(<column_name>).${symbolName}(...)`;
-      } else if (fileIdentifier && fileIdentifier.startsWith("$df.col.")) {
-        category = "ColumnExpression";
-        const namespace = fileIdentifier.slice(8); // e.g. "arr" from "$df.col.arr"
-        syntax = `$df.col(<column_name>).${namespace}.${symbolName}(...)`;
-      } else {
-        // Fallback default
-        category = "ColumnExpression";
-        syntax = `$df.col(<column_name>).${symbolName}(...)`;
+      // Parse @namespace from the individual JSDoc if overridden, otherwise use file-level namespace
+      let symbolNamespace = fileNamespace;
+      const localNamespaceMatch = comment.match(/@namespace\s+([a-zA-Z0-9_$..]+)/);
+      if (localNamespaceMatch) {
+        symbolNamespace = localNamespaceMatch[1].trim();
       }
 
-      parsed.category = category;
-      parsed.syntax = syntax;
+      if (symbolNamespace) {
+        parsed.namespace = symbolNamespace;
+      }
+
+      // Parse @category from the individual JSDoc if overridden, otherwise use file-level category
+      let symbolCategory = fileCategory;
+      const localCategoryMatch = comment.match(/@category\s+([a-zA-Z0-9_$..]+)/);
+      if (localCategoryMatch) {
+        symbolCategory = localCategoryMatch[1].trim();
+      }
+      parsed.category = symbolCategory;
+
+      // Parse @syntax from the individual JSDoc if overridden, otherwise use file-level syntax template
+      let symbolSyntax = null;
+      const localSyntaxMatch = comment.match(/@syntax\s+(.+)/);
+      if (localSyntaxMatch) {
+        symbolSyntax = localSyntaxMatch[1].trim().replace("{symbol}", symbolName);
+      } else if (fileSyntaxTemplate) {
+        symbolSyntax = fileSyntaxTemplate.replace("{symbol}", symbolName);
+      } else {
+        symbolSyntax = `$df.col(<column_name>).${symbolName}(...)`;
+      }
+      parsed.syntax = symbolSyntax;
 
       // If we successfully parsed JSDoc details, add them
       if (parsed.desc || parsed.params || parsed.returns || parsed.examples) {

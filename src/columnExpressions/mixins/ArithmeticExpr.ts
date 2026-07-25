@@ -4,7 +4,9 @@ import { kleeneUnary, kleeneBinary } from "../utils"
 import { clamp, isValidNumber, mulberry32, roundToScale } from "../../utils"
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class ArithmeticExpr extends ExprBase {
     /**

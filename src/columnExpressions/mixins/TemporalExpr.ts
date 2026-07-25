@@ -26,7 +26,9 @@ import {
 } from "../../constants";
 
 /**
- * @identifier $df.col.dt
+ * @namespace $df.col.dt
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).dt.{symbol}(...)
  */
 export class DateTimeExprNamespace {
     constructor(public expr: any) { }
@@ -719,6 +721,9 @@ export class DateTimeExprNamespace {
 export class TemporalExpr extends ExprBase {
     /**
      * Datetime namespace accessor for date, time, and duration operations.
+     * @namespace $df.col
+     * @category ColumnExpression
+     * @syntax $df.col(<column_name>).dt
      * @returns DateTimeExprNamespace
      * @example
      * >>> df.select($df.col("date").dt.year())

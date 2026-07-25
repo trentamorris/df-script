@@ -16,7 +16,9 @@ export const derive = <T extends IExpr>(
 };
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class ExprBase implements IExpr {
     _ops: OpFn[] = [];

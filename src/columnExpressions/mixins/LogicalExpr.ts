@@ -3,7 +3,9 @@ import { kleeneUnary, kleeneBinary } from "../utils"
 import { isArrayOrTypedArray } from "../../utils"
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class LogicalExpr extends ExprBase {
         /**

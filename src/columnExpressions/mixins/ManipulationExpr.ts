@@ -3,7 +3,9 @@ import { isArrayOrTypedArray, getArrayStats, fillSequence } from "../../utils"
 import type { FillNullOptions } from "../../types"
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class ManipulationExpr extends ExprBase {
         /**

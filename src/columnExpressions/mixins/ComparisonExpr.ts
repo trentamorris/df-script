@@ -88,7 +88,9 @@ function compareMissing(vArray: ArrayLike<any>, rResolved: any, invert: boolean)
 }
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class ComparisonExpr extends ExprBase {
 

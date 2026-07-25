@@ -6,6 +6,9 @@ import type { IExpr, ColumnDict, RowRecord, DataFrameSchema } from "../../types"
 
 /**
  * Represents a DataFrame grouped by key columns, supporting aggregation operations.
+ * @namespace df
+ * @category DataFrame
+ * @syntax df.groupby(...).{symbol}(...)
  */
 export class GroupedData<T, K extends keyof T> {
     private _groups: GroupMap

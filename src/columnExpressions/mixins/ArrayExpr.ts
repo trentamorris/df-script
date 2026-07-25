@@ -19,7 +19,9 @@ import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr, 
 import { ELEMENT_MARKER } from "../constants";
 
 /**
- * @identifier $df.col.arr
+ * @namespace $df.col.arr
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).arr.{symbol}(...)
  */
 export class ArrayExprNamespace {
     constructor(public expr: any) { }
@@ -843,6 +845,15 @@ export class ArrayExprNamespace {
 }
 
 export class ArrayExpr extends ExprBase {
+    /**
+     * Array namespace accessor for list-based column operations.
+     * @namespace $df.col
+     * @category ColumnExpression
+     * @syntax $df.col(<column_name>).arr
+     * @returns ArrayExprNamespace
+     * @example
+     * >>> df.select($df.col("a").arr.len())
+     */
     get arr() {
         return new ArrayExprNamespace(this);
     }

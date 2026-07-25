@@ -7,7 +7,9 @@ import { getArrayStats, computeMedian, computeQuantile, getUniqueArrayStats, com
 
 
 /**
- * @identifier $df.col
+ * @namespace $df.col
+ * @category ColumnExpression
+ * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class AggregationExpr extends ExprBase {
 

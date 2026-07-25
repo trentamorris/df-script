@@ -97,7 +97,9 @@ export class WhenThen extends ColumnExpr<any> {
  *
  * @param {WhenArg} predicate The boolean condition or expression.
  * @returns {When} A When object builder to chain `.then()` and `.otherwise()`/`.when()`.
- * @identifier $df
+ * @namespace $df
+ * @category ColumnExpression
+ * @syntax $df.{symbol}(...)
  * @example
  * >>> const df = $df.data({ score: [75, 95] })
  * >>> df
