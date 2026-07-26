@@ -78,3 +78,12 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [ ] **Performance Benchmarks**:
   * Create a performance benchmark suite comparing `df-script` to standard JS array manipulations and alternative JS libraries for common operations (groupby, join, pivot).
 
+---
+
+## 🎯 V1.8.0 Release Scope
+
+### 🗂️ DataFrame Operations
+- [ ] **DataFrame Find Method (`df.find()`)**:
+  * Implement `.find(predicate)` convenience method on `DataFrame` class (similar to `Array.prototype.find()`) to evaluate a predicate expression/filter and return the first matching record/row object (or `undefined` if no match is found).
+
+
