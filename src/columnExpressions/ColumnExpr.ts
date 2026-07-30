@@ -12,6 +12,7 @@ import { ManipulationExpr } from "./mixins/ManipulationExpr"
 import { isObj } from "../utils"
 import { DataType } from "../datatypes"
 import type { IntoExpr, IExpr, DataFrameSchema, ColumnDict } from "../types"
+import { assertNotNull, SchemaError } from "../exceptions"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
 export class ColumnExpr<T> extends ExprBase {
@@ -31,9 +32,7 @@ export class ColumnExpr<T> extends ExprBase {
     }
 
     static toColExpr(col: IntoExpr | IntoExpr[]): ColumnExpr<any> {
-        if (col == null) {
-            throw new Error("Column reference cannot be null or undefined.");
-        }
+        assertNotNull(col, "Column reference cannot be null or undefined.");
         return ColumnExpr.isColExpr(col) ? col : new ColumnExpr(col as string | string[]);
     }
 
@@ -142,7 +141,7 @@ function getTargetKeys(
 
     if (expr._targetType || (expr._targetTypes && expr._targetTypes.length > 0)) {
         if (!schema) {
-            throw new Error("Cannot resolve DataType column selector without DataFrame schema.");
+            throw new SchemaError("Cannot resolve DataType column selector without DataFrame schema.");
         }
         const targets: string[] = [];
         for (let i = 0; i < allKeys.length; i++) {

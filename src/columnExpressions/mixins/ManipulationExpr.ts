@@ -1,5 +1,6 @@
 import { ExprBase, derive } from "../ExprBase"
 import { isArrayOrTypedArray, getArrayStats, fillSequence } from "../../utils"
+import { InvalidArgumentError } from "../../exceptions"
 import type { FillNullOptions } from "../../types"
 
 /**
@@ -72,7 +73,7 @@ export class ManipulationExpr extends ExprBase {
                             }
                         });
                     } else {
-                        throw new Error(`Unsupported fill_null strategy: "${strategy}"`);
+                        throw new InvalidArgumentError(`Unsupported fill_null strategy: "${strategy}"`);
                     }
                 } else {
                     const resolved = this._resolve(value, columns, height);

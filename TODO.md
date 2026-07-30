@@ -77,7 +77,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Update `package.json` with `"exports"` map supporting both `"require"` and `"import"` to enable tree-shaking for modern bundlers (Vite/Webpack).
 
 ### 🛠️ Refactoring & Infrastructure
-- [ ] **Standardize Exception Assertions**:
+- [x] **Standardize Exception Assertions**:
   * Centralize check-and-throw assertion helper functions and ensure all inline exceptions throw specialized classes from `src/exceptions/`.
 
 ### 🗂️ DataFrame Operations
@@ -99,6 +99,16 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Allow `.dt.convert_time_zone()` and timezone extraction methods to accept an expression parameter (`IExpr` / column reference) as the timezone argument, enabling per-row dynamic timezone conversions.
 - [ ] **Dedicated Primitive `TimeType` & `DateType` Storage**:
   * Introduce dedicated low-level `TimeType` (nanoseconds/milliseconds since midnight) and 32-bit integer `DateType` (days since epoch) to match Polars native primitive types beyond combined JS `Date` objects.
+
+### 🧠 Lazy Execution & Query Optimization (`LazyFrame`)
+- [ ] **`df.lazy()` & `LazyFrame` API**:
+  * Implement `.lazy()` to transition a `DataFrame` into a `LazyFrame`, building a Directed Acyclic Graph (DAG) query plan instead of executing operations eagerly.
+- [ ] **Predicate & Projection Pushdown Optimizations**:
+  * **Predicate Pushdown**: Push `filter()` expressions up the DAG (and into `read_csv`/`read_json` readers) so unneeded rows are filtered out before transformations or joins occur.
+  * **Projection Pushdown**: Inspect final `select()` columns and prune unused columns early in the DAG to minimize memory allocations.
+- [ ] **Query Execution (`.collect()`)**:
+  * Execute the optimized logical plan on `.collect()` to return the materialized `DataFrame`.
+
 
 
 

@@ -46,4 +46,14 @@ export class ComputeError extends DFScriptError { }
  */
 export class ShapeError extends DFScriptError { }
 
+/**
+ * Error thrown when a parameter or argument provided to a function is invalid.
+ */
+export class InvalidArgumentError extends DFScriptError { }
+
+/**
+ * Error thrown during file I/O or streaming operations.
+ */
+export class IOStreamError extends DFScriptError { }
+
 export * from "./utils";

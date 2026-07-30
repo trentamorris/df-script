@@ -3,7 +3,7 @@ import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR } from "./constants"
 import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj } from "../utils"
-import { assertColumnExists } from "../exceptions"
+import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
 
 function partition_by_columns(
     columns: ColumnDict,
@@ -298,14 +298,14 @@ export function writeStringToFileOrStream(
     if (!file) return;
     if (typeof file === "string") {
         if (typeof require !== "function") {
-            throw new Error("File writing is not supported in this environment (missing require('fs')).");
+            throw new IOStreamError("File writing is not supported in this environment (missing require('fs')).");
         }
         const fs = require("fs");
         fs.writeFileSync(file, content, "utf8");
     } else if (isObj(file) && typeof (file as any).write === "function") {
         (file as any).write(content);
     } else {
-        throw new TypeError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
+        throw new InvalidArgumentError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
     }
 }
 

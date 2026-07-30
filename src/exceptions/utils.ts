@@ -1,4 +1,4 @@
-import { ColumnNotFoundError, ShapeError } from "./index";
+import { ColumnNotFoundError, ShapeError, InvalidArgumentError } from "./index";
 import type { ColumnDict } from "../types";
 import { isArrayOrTypedArray } from "../utils";
 
@@ -35,4 +35,21 @@ export function assertHeight(
     }
     return expectedHeight === undefined ? 0 : expectedHeight;
 }
+export function assertNotNull<T>(
+    value: T | null | undefined,
+    message: string = "Value cannot be null or undefined"
+): T {
+    if (value == null) {
+        throw new InvalidArgumentError(message);
+    }
+    return value;
+}
 
+export function assertValidArgument(
+    condition: boolean,
+    message: string
+): void {
+    if (!condition) {
+        throw new InvalidArgumentError(message);
+    }
+}

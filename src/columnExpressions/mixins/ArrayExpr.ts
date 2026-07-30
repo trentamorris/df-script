@@ -17,6 +17,7 @@ import {
 } from "../../utils";
 import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr, AnyTypedArray, ToStructOptions } from "../../types";
 import { ELEMENT_MARKER } from "../constants";
+import { ComputeError } from "../../exceptions";
 
 /**
  * @namespace $df.col.arr
@@ -737,7 +738,7 @@ export class ArrayExprNamespace {
             }
 
             if (width === 0) {
-                throw new Error("to_struct cannot be evaluated: struct width is 0. Provide an upper_bound, non-empty fields names, or non-empty lists.");
+                throw new ComputeError("to_struct cannot be evaluated: struct width is 0. Provide an upper_bound, non-empty fields names, or non-empty lists.");
             }
 
             const names = new Array<string>(width);

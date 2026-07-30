@@ -6,7 +6,7 @@ import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, Co
 import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
-import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError } from "../exceptions"
+import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError, InvalidArgumentError, IOStreamError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
     rowsToColumns,
@@ -2058,7 +2058,7 @@ export class DataFrame<T extends RowRecord = any> {
         { format = "json", replacerOptions }: WriteJSONOptions = {}
     ): string {
         if (format !== "json" && format !== "ndjson") {
-            throw new TypeError(`Unsupported JSON format: "${format}". Expected "json" or "ndjson".`);
+            throw new InvalidArgumentError(`Unsupported JSON format: "${format}". Expected "json" or "ndjson".`);
         }
 
         const safeReplacer = replacerOptions?.replacer === null
@@ -2109,7 +2109,7 @@ export class DataFrame<T extends RowRecord = any> {
         if (file) {
             if (typeof file === "string") {
                 if (typeof require !== "function") {
-                    throw new Error("File writing is not supported in this environment (missing require('fs')).");
+                    throw new IOStreamError("File writing is not supported in this environment (missing require('fs')).");
                 }
                 const fs = require("fs");
                 const fd = fs.openSync(file, "w");
@@ -2131,7 +2131,7 @@ export class DataFrame<T extends RowRecord = any> {
                     }
                 });
             } else {
-                throw new TypeError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
+                throw new InvalidArgumentError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
             }
             return "";
         }

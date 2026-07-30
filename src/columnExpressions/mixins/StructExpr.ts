@@ -1,11 +1,10 @@
 import { ExprBase, derive } from "../ExprBase";
 import type { IntoExpr, IExpr } from "../../types";
+import { assertNotNull, InvalidArgumentError } from "../../exceptions";
 
 let ColumnExprClass: any = null;
 function toColExpr(col: any): any {
-    if (col == null) {
-        throw new Error("Column reference cannot be null or undefined.");
-    }
+    assertNotNull(col, "Column reference cannot be null or undefined.");
     if (!ColumnExprClass) {
         ColumnExprClass = require("../ColumnExpr").ColumnExpr;
     }
@@ -136,7 +135,7 @@ export class StructExprNamespace {
                     const expr = toColExpr(f);
                     const name = expr._outputName || expr._colName;
                     if (!name) {
-                        throw new Error("Expressions passed to struct.with_fields must have a name/alias.");
+                        throw new InvalidArgumentError("Expressions passed to struct.with_fields must have a name/alias.");
                     }
                     resolved.push({ name, expr });
                 }

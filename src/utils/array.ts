@@ -3,7 +3,7 @@ import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
 import { toValidNumber, isValidNumber } from "./number";
 import { toCanonicalString } from "./string";
 import type { AnyTypedArray, ColumnData } from "../types";
-import { ComputeError } from "../exceptions";
+import { ComputeError, InvalidArgumentError } from "../exceptions";
 
 /** Array Guards **/
 const typedArrayTagGetter = (() => {
@@ -444,7 +444,7 @@ export function stepSliceArray<T>(
         return [];
     }
     if (step === 0) {
-        throw new Error("Step size step cannot be zero");
+        throw new InvalidArgumentError("Step size step cannot be zero");
     }
 
     const len = arr.length;
@@ -454,7 +454,7 @@ export function stepSliceArray<T>(
 
     if (isOob) {
         if (!null_on_oob) {
-            throw new Error(`Start offset ${offsetStart} is out of bounds for array of length ${len}`);
+            throw new ComputeError(`Start offset ${offsetStart} is out of bounds for array of length ${len}`);
         }
         return null;
     }

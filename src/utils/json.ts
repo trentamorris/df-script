@@ -2,6 +2,7 @@
 import type { JSONFormat } from "../types";
 import { isTypedArray } from "./array";
 import { isSet, isMap, isRegExp, isError, isURLSearchParams, isValidDateObj } from "./object";
+import { InvalidArgumentError, IOStreamError } from "../exceptions";
 
 const NEWLINE_REGEX = /\r\n|\n|\r/g;
 const NO_FALLBACK = Symbol("no_fallback");
@@ -178,7 +179,7 @@ export function safeJsonParse<T = unknown, I = unknown, F = T>(
                     if (skipLines === undefined || nonEmptyCount > skipLines) {
                         if (!allowPrimitives && !isWrapped(trimmedLine)) {
                             if (!skipInvalidLines) {
-                                throw new Error("NDJSON line is not wrapped and primitives are disallowed");
+                                throw new InvalidArgumentError("NDJSON line is not wrapped and primitives are disallowed");
                             }
                         } else {
                             try {
@@ -196,12 +197,12 @@ export function safeJsonParse<T = unknown, I = unknown, F = T>(
             }
 
             if (parsedData.length === 0) {
-                throw new Error("No valid NDJSON lines processed");
+                throw new IOStreamError("No valid NDJSON lines processed");
             }
             result = parsedData;
         } else {
             if (!allowPrimitives && !isWrappedUntrimmed(s)) {
-                throw new Error("JSON string is not wrapped and primitives are disallowed");
+                throw new InvalidArgumentError("JSON string is not wrapped and primitives are disallowed");
             }
             result = JSON.parse(s, reviver);
         }
