@@ -28,6 +28,7 @@ const TAG_INTERNAL = "@internal";
 const TAG_IGNORE = "@ignore";
 const TAG_TYPEFILE = "@typefile";
 const TAG_INTERNALFILE = "@internalfile";
+const TAG_NOTE = "@note";
 
 // ─── Regexes to capture JSDoc comments followed by identifiers ────────────────
 
@@ -48,6 +49,7 @@ function parseJSDocComment(comment) {
   let returns;
   const examplesList = [];
   const paramsList = [];
+  const notesList = [];
 
   const descLines = [];
   let currentExampleLines = [];
@@ -65,6 +67,9 @@ function parseJSDocComment(comment) {
       }
       if (trimmed.startsWith(TAG_EXAMPLE)) {
         inExample = true;
+      } else if (trimmed.startsWith(TAG_NOTE)) {
+        const noteContent = trimmed.substring(TAG_NOTE.length).trim();
+        if (noteContent) notesList.push(noteContent);
       } else if (trimmed.startsWith(TAG_PARAM)) {
         const m = trimmed.match(PARAM_REGEX);
         if (m) {
@@ -101,6 +106,7 @@ function parseJSDocComment(comment) {
     desc,
     examples: examplesList.length > 0 ? examplesList : undefined,
     params: paramsList.length > 0 ? paramsList : undefined,
+    notes: notesList.length > 0 ? notesList : undefined,
     returns
   };
 }
@@ -361,7 +367,7 @@ function extractRawDocs() {
       parsed.lineStart = rawContent.substring(0, match.index + match[0].length).split("\n").length;
 
       // If we successfully parsed JSDoc details, add them
-      if (parsed.desc || parsed.params || parsed.returns || parsed.examples) {
+      if (parsed.desc || parsed.params || parsed.returns || parsed.examples || parsed.notes) {
         if (!fileDocs) {
           fileDocs = {};
         }

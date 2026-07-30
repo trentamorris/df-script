@@ -77,8 +77,8 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Casts the schema time unit of a Datetime column.
-     * This is a metadata-only operation — stored values are not rescaled.
+     * Casts the schema time unit of a Datetime column (`"ms"`, `"us"`, `"ns"`).
+     * This is a metadata-only operation — underlying millisecond Date timestamps are preserved.
      * @param unit Target time unit: `"ms"` (milliseconds), `"us"` (microseconds), or `"ns"` (nanoseconds).
      * @returns ColumnExpression
      * @example
@@ -96,7 +96,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts century index of a Datetime value.
+     * Extracts the 1-indexed century component (e.g. 21 for 2026) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -114,8 +114,8 @@ export class DateTimeExprNamespace {
 
     /**
      * Converts a Datetime column to a different IANA timezone.
-     * The UTC instant is preserved — only the timezone label changes, affecting
-     * how component extractors and `strftime` interpret the value.
+     * Preserves the exact UTC epoch instant while changing the timezone label, affecting
+     * how local wall-clock component extractors (`hour()`, `day()`, etc.) and `strftime` interpret values.
      * Requires the column to already be timezone-aware; use `replace({ timeZone })`
      * to assign a timezone to a naive column first.
      * @param timeZone Target IANA timezone identifier (e.g. `"UTC"`, `"America/New_York"`, `"Europe/London"`).
@@ -124,11 +124,11 @@ export class DateTimeExprNamespace {
      * >>> const df = $df.data({ ts: ["2026-06-01T00:00:00.000Z"] })
      * >>> df.with_columns($df.col("ts").dt.convert_time_zone("America/New_York").alias("ts_ny"))
      * shape: (1, 2)
-     * ┌──────────────────────────┬──────────────────────────┐
-     * │ ts                       │ ts_ny                    │
-     * ├──────────────────────────┼──────────────────────────┤
-     * │ 2026-06-01T00:00:00.000Z │ 2026-06-01T00:00:00.000Z │
-     * └──────────────────────────┴──────────────────────────┘
+     * ┌──────────────────────────┬───────────────────────────────┐
+     * │ ts                       │ ts_ny                         │
+     * ├──────────────────────────┼───────────────────────────────┤
+     * │ 2026-06-01T00:00:00.000Z │ 2026-05-31 20:00:00.000 EDT   │
+     * └──────────────────────────┴───────────────────────────────┘
      */
     convert_time_zone(timeZone: string) {
         const colTz = this._colTz();
@@ -142,7 +142,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts Date object component from Datetime.
+     * Extracts the Date object component from a Datetime column, truncating time to 00:00:00.000 UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:30:00Z"] })
@@ -160,7 +160,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the calendar day component (1-31) from a Datetime column.
-     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -178,8 +178,8 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts number of days in the month.
-     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
+     * Extracts the total number of days in the month (28-31) for each Datetime value.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2024-02-15"] })
@@ -201,8 +201,8 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns epoch duration timestamp offset.
-     * @param unit Time resolution unit (`"ms"`, `"us"`, `"ns"`, `"s"`).
+     * Returns the epoch duration timestamp offset in the specified time resolution unit.
+     * @param unit Time resolution unit (`"ms"`, `"us"`, `"ns"`, `"s"`). Defaults to `"ms"`.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-01-01T00:00:00Z"] })
@@ -219,8 +219,8 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts the hour component (0-23) from a Datetime column.
-     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
+     * Extracts the local hour component (0-23) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T14:30:00Z"] })
@@ -238,8 +238,9 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Boolean check: Returns true if target falls on a business day.
-     * @param options Config options including custom weekend or holiday definitions.
+     * Evaluates whether each Datetime value falls on a business day.
+     * Supports custom weekend day definitions and holiday arrays or timestamp sets.
+     * @param options Business day rules and custom holiday configuration options.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-18"] })
@@ -256,7 +257,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Checks if year is a leap year.
+     * Checks if the calendar year of a Datetime value is a leap year (366 days).
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2024-01-01", "2026-01-01"] })
@@ -274,7 +275,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts ISO week index.
+     * Extracts the ISO 8601 week number (1-53) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -291,7 +292,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts ISO calendar year.
+     * Extracts the ISO 8601 week-numbering year from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -308,7 +309,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts microseconds component.
+     * Extracts the microsecond component (0-999,000) scaled from Datetime millisecond precision.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.123Z"] })
@@ -325,7 +326,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts millennium component index.
+     * Extracts the 1-indexed millennium component index (e.g. 3 for the year 2026) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -342,7 +343,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts milliseconds component.
+     * Extracts the millisecond component (0-999) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.456Z"] })
@@ -360,7 +361,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the minute component (0-59) from a Datetime column.
-     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:45:00Z"] })
@@ -379,7 +380,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the calendar month component (1-12) from a Datetime column.
-     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -397,7 +398,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns date representing end of the month.
+     * Returns a Datetime column shifted to the last calendar day of the month at 00:00:00.000 UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -414,7 +415,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns date representing start of the month.
+     * Returns a Datetime column shifted to the first calendar day of the month at 00:00:00.000 UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -431,7 +432,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts nanoseconds component.
+     * Extracts the nanosecond component (0-999,000,000) scaled from Datetime millisecond precision.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.001Z"] })
@@ -448,9 +449,9 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Offsets date by N business days.
-     * @param n Number of business days to offset.
-     * @param options Business day rules and holidays options.
+     * Offsets a Datetime column by N business days, skipping weekends and custom holiday dates.
+     * @param n Number of business days to offset (positive or negative).
+     * @param options Business day rules, custom weekend exclusions, and holiday configuration options.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-15"] })
@@ -471,9 +472,9 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Offsets date by N calendar days.
-     * @param n Number of calendar days to offset.
-     * @param options Offset options.
+     * Offsets a Datetime column by N calendar days.
+     * @param n Number of calendar days to offset (positive or negative).
+     * @param options Optional business day roll or holiday configuration.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -493,7 +494,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns day of the year (1-366).
+     * Extracts the day of the year (1-366) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-02-01"] })
@@ -510,7 +511,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns quarter of the year (1-4).
+     * Extracts the calendar quarter of the year (1-4) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -527,12 +528,11 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Replaces specific date and time components of a Datetime column.
+     * Replaces specific date and time components (`year`, `month`, `day`, `hour`, `minute`, `second`, `ms`, `timeZone`) of a Datetime column.
      * Unspecified components are preserved from the original value.
-     * When `timeZone` is provided, the existing components are first read in that
-     * timezone before the replacements are applied.
+     * When `timeZone` is provided in options, components are interpreted in that timezone.
      * Note: `month` is 1-indexed (1 = January, 12 = December); `day` is 1-indexed (1-31).
-     * @param options Object specifying which components to replace: `year`, `month`, `day`, `hour`, `minute`, `second`, `ms`, `timeZone`.
+     * @param options Object specifying which components to replace.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T14:30:00Z"] })
@@ -552,7 +552,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts seconds component (0-59).
+     * Extracts the second component (0-59) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:00:45Z"] })
@@ -569,8 +569,9 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Formats dates to custom strings using strftime format tokens.
-     * @param options Formatting pattern configuration.
+     * Formats Datetime values into custom formatted strings using strftime directive pattern tokens.
+     * Automatically applies the column's assigned timezone unless explicitly overridden in options.
+     * @param options Formatting pattern string (e.g. `"%Y-%m-%d %H:%M:%S"`) or configuration object.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -591,7 +592,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts time component string (`"HH:MM:SS.mmm"`).
+     * Extracts the time component formatted string (`"HH:MM:SS.mmm"`) from a Datetime column.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:30:00Z"] })
@@ -644,7 +645,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Converts Duration to integer day count.
+     * Converts a Duration value (in milliseconds) to total days count.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ dur: [86400000] })
@@ -661,7 +662,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Converts Duration to floating point hours.
+     * Converts a Duration value (in milliseconds) to total hours count.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ dur: [3600000] })
