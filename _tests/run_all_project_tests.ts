@@ -3,6 +3,7 @@ console.log("RUNNING ALL DFSCRIPT PROJECT TESTS...");
 console.log("=========================================");
 
 import "./columnExpressions/test_dt_expr";
+import "./columnExpressions/test_temporal_tz";
 import "./columnExpressions/test_array_expr";
 import "./columnExpressions/test_array_eval";
 import "./columnExpressions/test_struct_expr";

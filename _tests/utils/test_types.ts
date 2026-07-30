@@ -1,6 +1,10 @@
 declare const process: any;
+declare const require: any;
 import { isArrayOfType, toValidArray, toValidStringArray, getUniqueArrayStats, joinArray, sortArray, computeMedian, computeQuantile, computeMode } from "../../src/utils/array";
-import { toValidNumber, toValidFloat, formatNumber, isValidFloat, toValidBigInt, clamp } from "../../src/utils/number";
+import { toValidNumber, toValidFloat, formatNumber, isValidFloat, toValidBigInt, clamp, roundToScale } from "../../src/utils/number";
+import { isValidDateObj, isObj, isRegExp, isSet, isMap, unboxPrimitiveObj } from "../../src/utils/object";
+import { toCanonicalString } from "../../src/utils/string";
+import { createSafeJsonReplacer } from "../../src/utils/json";
 import { $df } from "../../src/index";
 
 
@@ -355,7 +359,6 @@ try {
     if (toValidNumber("NaN") !== null) throw new Error("Non-finite: strict should reject 'NaN'");
 
     // roundToScale negative scale tests
-    const { roundToScale } = require("../../src/utils/number");
     if (roundToScale(1234, -1) !== 1230) throw new Error("roundToScale negative scale -1 failed");
     if (roundToScale(1234, -2) !== 1200) throw new Error("roundToScale negative scale -2 failed");
     if (roundToScale(1.005, 2) !== 1.01) throw new Error("roundToScale positive scale failed");
@@ -430,8 +433,6 @@ try {
     const foreignRegExp = vm.runInContext("/abc/g", otherRealm);
     const foreignString = vm.runInContext("new String('hello')", otherRealm);
 
-    const { isValidDateObj } = require("../../src/utils/object");
-    const { toCanonicalString } = require("../../src/utils/string");
     if (!isValidDateObj(foreignDate)) {
         throw new Error("Expected cross-realm Date to be valid Date object");
     }
@@ -450,8 +451,10 @@ try {
     if (toCanonicalString(foreignRegExp) !== "r:/abc/g") {
         throw new Error("Expected toCanonicalString to format cross-realm RegExp");
     }
+    if (typeof toCanonicalString(foreignString) !== "string") {
+        throw new Error("Expected toCanonicalString to handle cross-realm String object");
+    }
 
-    const { createSafeJsonReplacer } = require("../../src/utils/json");
     const replacer = createSafeJsonReplacer();
     const serializedDate = replacer.call(null, "date", foreignDate);
     if (serializedDate !== "1970-01-01T00:29:37.000Z") {
@@ -473,13 +476,11 @@ try {
     }
 
     // Extra validation for object/guard robust type checking (fixing spoofing and Map/Set issues)
-    const {
-        isObj: oIsObj,
-        isRegExp: oIsRegExp,
-        isSet: oIsSet,
-        isMap: oIsMap,
-        isValidDateObj: oIsValidDateObj
-    } = require("../../src/utils/object");
+    const oIsObj = isObj;
+    const oIsRegExp = isRegExp;
+    const oIsSet = isSet;
+    const oIsMap = isMap;
+    const oIsValidDateObj = isValidDateObj;
 
     // 1. isObj returns true for all non-null non-array objects (original design)
     const spoofedDate = {
@@ -528,7 +529,7 @@ try {
     if (!oIsMap(foreignMap)) throw new Error("isMap should return true for cross-realm Map");
     if (!oIsRegExp(foreignRegExp)) throw new Error("isRegExp should return true for cross-realm RegExp");
     // Custom valueOf unboxing tests
-    const { unboxPrimitiveObj: testUnbox } = require("../../src/utils/object");
+    const testUnbox = unboxPrimitiveObj;
     class CustomVal {
         private val: number | string;
         constructor(val: number | string) { this.val = val; }

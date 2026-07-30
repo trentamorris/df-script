@@ -20,7 +20,7 @@ import {
     isObj,
     toValidTime
 } from "../utils";
-import type { RowRecord } from "../types";
+import type { RowRecord, DatetimeTimeUnit } from "../types";
 
 // ============================================================================
 // Numeric Types
@@ -224,13 +224,30 @@ export class DateType extends TemporalDataType<Date | null> {
 export const DateDataType = new DateType();
 
 /**
- * Date and time type (year, month, day, hour, minute, second, millisecond).
- * 
+ * Date and time type (year, month, day, hour, minute, second, millisecond)
+ * with timeUnit precision and optional timezone awareness.
  */
 export class DatetimeType extends TemporalDataType<Date | null> {
     readonly name = "Datetime";
+    readonly timeUnit: DatetimeTimeUnit;
+    readonly timeZone: string | null;
+
+    constructor(timeUnit: DatetimeTimeUnit = "ms", timeZone: string | null = null) {
+        super();
+        this.timeUnit = timeUnit;
+        this.timeZone = timeZone;
+    }
+
     coerce(val: unknown): Date | null { return toValidDate(val); }
-    equals(other: DataType): boolean { return other.name === "Datetime"; }
+
+    equals(other: DataType): boolean {
+        return (
+            other instanceof DatetimeType &&
+            other.timeUnit === this.timeUnit &&
+            other.timeZone === this.timeZone
+        );
+    }
+
     allocate(size: number): (Date | null)[] { return new Array(size).fill(null); }
 }
 export const Datetime = new DatetimeType();

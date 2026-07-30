@@ -115,4 +115,18 @@ if (!(row.val_binary instanceof Uint8Array) || row.val_binary[0] !== 104) { // '
 if (row.val_obj.x !== 1) throw new Error(`Expected val_obj to preserve properties, got ${row.val_obj}`);
 if (row.val_null !== null) throw new Error(`Expected val_null to be null, got ${row.val_null}`);
 
-console.log("✓ All Polars DataType tests passed!");
+// 3. Test Datetime Strict Typing & TimeZone Equality (Polars Behavior)
+const dtNaiveDefault = $df.DataType.Datetime; // Default: ms, null timezone (naive)
+const dtNaiveMs = new ($df.DataType.Datetime.constructor as any)("ms", null);
+const dtAwareUTC = new ($df.DataType.Datetime.constructor as any)("ms", "UTC");
+const dtAwareNY = new ($df.DataType.Datetime.constructor as any)("ms", "America/New_York");
+const dtAwareNsUTC = new ($df.DataType.Datetime.constructor as any)("ns", "UTC");
+
+if (dtNaiveDefault.timeZone !== null) throw new Error("Default Datetime should be timezone-naive (timeZone === null)");
+if (dtNaiveDefault.timeUnit !== "ms") throw new Error("Default Datetime timeUnit should be 'ms'");
+if (!dtNaiveDefault.equals(dtNaiveMs)) throw new Error("Naive Datetime equality failed");
+if (dtNaiveDefault.equals(dtAwareUTC)) throw new Error("Naive and UTC aware Datetime should NOT be equal");
+if (dtAwareUTC.equals(dtAwareNY)) throw new Error("UTC and America/New_York aware Datetime should NOT be equal");
+if (dtAwareUTC.equals(dtAwareNsUTC)) throw new Error("Different timeUnit Datetimes should NOT be equal");
+
+console.log("✓ All Polars DataType & Timezone Naive/Aware tests passed!");

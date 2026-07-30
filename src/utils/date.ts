@@ -1,6 +1,6 @@
 /** @internalfile */
 import { isBlankString, escapeRegExp } from "./string";
-import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat } from "../types";
+import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat, ReplaceDateOptions, DateTimeParts } from "../types";
 import { ComputeError } from "../exceptions";
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidNumber, isValidInt } from "./number";
@@ -62,7 +62,7 @@ function _resolveTimeZone(tz?: string): string {
     return _isValidTimeZone(resolved) ? resolved : "UTC";
 }
 
-function _createUTCDate(
+export function _createUTCDate(
     year: number,
     monthZeroIndexed = 0,
     day = 1,
@@ -84,18 +84,8 @@ function _getDayOfWeek(y: number, m: number, d: number): number {
     return (year + Math.floor(year / 4) - Math.floor(year / 100) + Math.floor(year / 400) + t[m - 1] + d) % 7;
 }
 
-interface DateTimeParts {
-    year: number;
-    month: number;
-    day: number;
-    hour: number;
-    minute: number;
-    second: number;
-    ms: number;
-    dayOfWeek: number;
-}
 
-function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
+export function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
     const tz = _resolveTimeZone(timeZone);
 
     if (tz.toUpperCase() === "UTC") {
@@ -107,7 +97,8 @@ function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
             minute: d.getUTCMinutes(),
             second: d.getUTCSeconds(),
             ms: d.getUTCMilliseconds(),
-            dayOfWeek: d.getUTCDay()
+            dayOfWeek: d.getUTCDay(),
+            timeZone: "UTC"
         };
     }
 
@@ -154,21 +145,24 @@ function _getDateTimeParts(d: Date, timeZone?: string): DateTimeParts {
         minute: parseInt(minuteStr, 10),
         second: parseInt(secondStr, 10),
         ms,
-        dayOfWeek
+        dayOfWeek,
+        timeZone: tz
     };
 }
 
-function _getTimeZoneOffsetMinutes(d: Date, tz: string, targetParts?: DateTimeParts): number {
-    if (tz.toUpperCase() === "UTC") return 0;
+export function _getTimeZoneOffsetMinutes(d: Date, tz: string): number {
+    const resolvedTz = _resolveTimeZone(tz);
+    if (resolvedTz.toUpperCase() === "UTC") return 0;
 
     const utcParts = _getDateTimeParts(d, "UTC");
-    const resolvedTargetParts = targetParts || _getDateTimeParts(d, tz);
+    const targetParts = _getDateTimeParts(d, resolvedTz);
 
     const utcDate = _createUTCDate(utcParts.year, utcParts.month - 1, utcParts.day, utcParts.hour, utcParts.minute, utcParts.second, utcParts.ms).getTime();
-    const targetDate = _createUTCDate(resolvedTargetParts.year, resolvedTargetParts.month - 1, resolvedTargetParts.day, resolvedTargetParts.hour, resolvedTargetParts.minute, resolvedTargetParts.second, resolvedTargetParts.ms).getTime();
+    const targetDate = _createUTCDate(targetParts.year, targetParts.month - 1, targetParts.day, targetParts.hour, targetParts.minute, targetParts.second, targetParts.ms).getTime();
 
     return Math.round((targetDate - utcDate) / MS_PER_MINUTE);
 }
+
 
 function _formatOffsetMinutes(offsetMin: number, format: Extract<UtcOffsetFormat, "iso" | "basic">): string {
     const sign = offsetMin >= 0 ? "+" : "-";
@@ -472,9 +466,6 @@ function _expandFormatShorthands(format: string): string {
     return format.replace(/%[FTRD]/g, (m) => SHORTHANDS[m] || m);
 }
 
-function _applyOffsetMinutes(d: Date, offsetMinutes: number): Date {
-    return new Date(d.getTime() - (offsetMinutes * 60 * 1000));
-}
 
 function _parseOffsetMinutes(offsetStr: string): number {
     const clean = offsetStr.replace(":", "");
@@ -613,16 +604,16 @@ export function strptime(
     }
 
     if (parts.offset) {
-        d = _applyOffsetMinutes(d, _parseOffsetMinutes(parts.offset));
+        d = new Date(d.getTime() - _parseOffsetMinutes(parts.offset) * MS_PER_MINUTE);
     } else if (defaultTimeZone.toUpperCase() !== "UTC") {
         const tz = _resolveTimeZone(defaultTimeZone);
 
         const offsetMinutes1 = _getTimeZoneOffsetMinutes(d, tz);
-        d = _applyOffsetMinutes(d, offsetMinutes1);
+        d = new Date(d.getTime() - offsetMinutes1 * MS_PER_MINUTE);
 
         const offsetMinutes2 = _getTimeZoneOffsetMinutes(d, tz);
         if (offsetMinutes2 !== offsetMinutes1) {
-            d = _applyOffsetMinutes(d, offsetMinutes2 - offsetMinutes1);
+            d = new Date(d.getTime() - (offsetMinutes2 - offsetMinutes1) * MS_PER_MINUTE);
         }
     }
 
@@ -718,7 +709,7 @@ export function getTimeZoneOffset(
         const baseOffset = Math.min(janOffset, julOffset);
 
         if (type === "daylightSavingTime") {
-            const totalOffsetMinutes = _getTimeZoneOffsetMinutes(d, tz, localParts);
+            const totalOffsetMinutes = _getTimeZoneOffsetMinutes(d, tz);
             offsetMinutes = totalOffsetMinutes - baseOffset;
         } else {
             offsetMinutes = baseOffset;
@@ -766,3 +757,21 @@ export function isBusinessDay(
 
     return true;
 }
+
+export function replaceDateComponents(
+    d: Date,
+    opts: ReplaceDateOptions = {}
+): Date {
+    const p = _getDateTimeParts(d, opts?.timeZone ?? undefined);
+    const year = opts?.year ?? p.year;
+    const month = opts?.month != null ? opts.month - 1 : p.month - 1;
+    const day = opts?.day ?? p.day;
+    const hour = opts?.hour ?? p.hour;
+    const minute = opts?.minute ?? p.minute;
+    const second = opts?.second ?? p.second;
+    const ms = opts?.ms ?? p.ms;
+    return _createUTCDate(year, month, day, hour, minute, second, ms);
+}
+
+
+

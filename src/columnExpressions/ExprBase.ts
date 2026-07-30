@@ -1,7 +1,7 @@
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict, RegisteredDataType } from "../types"
 import { ALL_COLUMNS_MARKER } from "./constants"
 import { ColumnNotFoundError } from "../exceptions"
-import { evaluateExpression } from "./utils"
+import { evaluateExpression, kleeneUnary } from "./utils"
 
 export const derive = <T extends IExpr>(
     instance: T,
@@ -26,6 +26,7 @@ export class ExprBase implements IExpr {
     _isLiteral?: boolean;
     _literalValue?: any;
     _aggFn?: AggFn<any> | null = null;
+    _castType?: RegisteredDataType;
     _groupingOpsIndex?: number;
     _partitionOpsIndex?: number;
     _partitionBy: (string | IExpr)[] | null = null;
@@ -83,14 +84,9 @@ export class ExprBase implements IExpr {
      * Coerces the column data type to another type.
      */
     cast(dataType: RegisteredDataType): this {
-        return derive(this, (vArray) => {
-            const height = vArray.length;
-            const result = new Array(height);
-            for (let i = 0; i < height; i++) {
-                result[i] = dataType.coerce(vArray[i]);
-            }
-            return result;
-        }) as this;
+        const derivedInst = derive(this, kleeneUnary((val) => dataType.coerce(val)));
+        derivedInst._castType = dataType;
+        return derivedInst as this;
     }
 
     /**

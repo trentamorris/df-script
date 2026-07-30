@@ -47,6 +47,7 @@ export interface IExpr {
     _isLiteral?: boolean;
     _literalValue?: any;
     _aggFn?: AggFn<any> | null;
+    _castType?: RegisteredDataType;
     _groupingOpsIndex?: number;
     _partitionOpsIndex?: number;
     _partitionBy?: (string | IExpr)[] | null;
@@ -63,6 +64,7 @@ export interface IExpr {
 }
 
 export type TimeUnit = "s" | "ms" | "us" | "ns";
+export type DatetimeTimeUnit = "ms" | "us" | "ns";
 
 export type DateDiffUnit =
     | "ms" | "milliseconds"
@@ -109,6 +111,29 @@ export interface UtcOffsetOptions {
     type?: UtcOffsetType;
     format?: UtcOffsetFormat;
 }
+
+export interface DateTimeParts {
+    /** Calendar year (e.g. 2026). */
+    year: number;
+    /** 1-indexed calendar month from 1 to 12 (1 = January, 12 = December). */
+    month: number;
+    /** 1-indexed day of the month from 1 to 31. */
+    day: number;
+    /** 0-indexed hour of day from 0 to 23 (0 = Midnight). */
+    hour: number;
+    /** 0-indexed minute of hour from 0 to 59. */
+    minute: number;
+    /** 0-indexed second of minute from 0 to 59. */
+    second: number;
+    /** 0-indexed millisecond from 0 to 999. */
+    ms: number;
+    /** 0-indexed day of week (0 = Sunday, 6 = Saturday). */
+    dayOfWeek?: number;
+    /** Optional target timezone identifier (e.g. "UTC", "America/New_York"). */
+    timeZone?: string | null;
+}
+
+export type ReplaceDateOptions = Partial<Omit<DateTimeParts, "dayOfWeek">>;
 
 
 /** Concatenation Configuration */

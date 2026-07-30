@@ -76,7 +76,7 @@ try {
         $df.col("phrase").str.replace(/IS/i, "was").alias("replaced_ci"),
         $df.col("phrase").str.replace_all(/E/gi, "3").alias("replaced_all_ci"),
         $df.col("phrase").str.replace("awesome", (m) => m.toUpperCase()).alias("replaced_fn"),
-        $df.col("phrase").str.replace_all("e", (m) => "3").alias("replaced_all_fn")
+        $df.col("phrase").str.replace_all("e", (_m) => "3").alias("replaced_all_fn")
     ]).to_dicts() as any[];
 
     console.log("Coerced Expr.str results:");

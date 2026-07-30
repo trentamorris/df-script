@@ -28,7 +28,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 
 ---
 
-## 🎯 V1.7.0 Release Scope
+## 🎯 V1.8.0 Release Scope
 
 ### 🤝 Advanced Joins
 - [ ] **Semi-Join & Anti-Join Support**:
@@ -36,24 +36,28 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Ensure they only select columns from the left DataFrame and do not join right-side columns, utilizing the existing hash matching logic.
 
 ### ⏰ Timezone & Temporal Extensions
-- [ ] **Timezone-Aware Datetime Columns (`.dt.convert_time_zone()`)**:
+- [x] **Timezone-Aware Datetime Columns (`.dt.convert_time_zone()`)**:
   * Extend `DatetimeType` to accept an optional `timeZone` metadata parameter (e.g. `Datetime("Europe/London")`).
   * Integrate timezone awareness into formatting (`strftime`) and temporal operations (`.dt.hour()`, `.dt.day()`, `.dt.utc_offset()`, etc.) by leveraging `Intl.DateTimeFormat`.
   * Implement `.dt.convert_time_zone(tz)` to allow converting timezone-aware columns from one timezone to another.
-- [ ] **Casting Time Units (`.dt.cast_time_unit()`)**:
+- [x] **Casting Time Units (`.dt.cast_time_unit()`)**:
   * Implement `.dt.cast_time_unit(unit)` to convert/cast between millisecond (`ms`), microsecond (`us`), and nanosecond (`ns`) datetime storage precisions.
-- [ ] **Offsetting by duration strings (`.dt.offset_by()`)**:
-  * Implement `.dt.offset_by(by)` supporting Polars duration strings like `"1y"`, `"2mo"`, `"3d"`, `"1w"`, `"4h"`, etc.
-- [ ] **Replacing date/datetime components (`.dt.replace()`)**:
-  * Implement `.dt.replace(options)` allowing replacement of year, month, day, hour, etc. components.
-- [ ] **Replacing time zones (`.dt.replace_time_zone()`)**:
-  * Implement `.dt.replace_time_zone(tz)` to replace timezone metadata without altering underlying timestamp values.
-- [ ] **Rounding temporal values (`.dt.round()`)**:
-  * Implement `.dt.round(every)` to round datetimes to the nearest interval boundary (e.g. `"1h"`, `"5m"`).
-- [ ] **Truncating temporal values (`.dt.truncate()`)**:
-  * Implement `.dt.truncate(every)` to truncate datetimes to a specified interval boundary (e.g. `"1d"`, `"1h"`).
-- [ ] **Replacing time units (`.dt.with_time_unit()`)**:
+- [x] **Replacing time units (`.dt.with_time_unit()`)**:
   * Implement `.dt.with_time_unit(unit)` to set metadata precision (e.g. `"ms"`, `"us"`, `"ns"`) without changing underlying values.
+- [x] **Replacing date/datetime components (`.dt.replace()`)**:
+  * Implement `.dt.replace(options)` allowing replacement of year, month, day, hour, timeZone, etc. components.
+- [x] **Truncating temporal values (`.dt.truncate()`)**:
+  * Implement `.dt.truncate(every)` to floor datetimes to interval boundaries.
+
+---
+
+## ⌛ V1.9.0 Release Scope
+
+### ⏱️ Dedicated Duration Data Type (`.duration`)
+- [ ] **Dedicated `DurationType` & `.duration` Namespace**:
+  * Separate `Duration` into a dedicated data type and expression namespace matching Polars `polars.datatypes.Duration`.
+  * Support duration string parsing (`"1y 2mo 3d"`), unit conversions (`.duration.total_hours()`), and datetime arithmetic (`dt - dt`).
+  * Implement `.dt.offset_by(by)` and duration rounding/offsetting when Duration namespace is added.
 
 ### 📊 Statistical Aggregations
 - [ ] **Mathematical & Distribution Statistics**:
@@ -68,22 +72,34 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement custom table stringifying writers to output beautiful Markdown or HTML tables for logs, terminal outputs, and reports.
 
 ### 📦 Build & Tree-Shaking (ESM Support)
-- [ ] **Dual CommonJS & ES Module (ESM) Build**:
+- [x] **Dual CommonJS & ES Module (ESM) Build**:
   * Configure the build script to output both CommonJS (`dist/index.js`) and ESM (`dist/index.mjs`) bundles.
   * Update `package.json` with `"exports"` map supporting both `"require"` and `"import"` to enable tree-shaking for modern bundlers (Vite/Webpack).
 
 ### 🛠️ Refactoring & Infrastructure
 - [ ] **Standardize Exception Assertions**:
   * Centralize check-and-throw assertion helper functions and ensure all inline exceptions throw specialized classes from `src/exceptions/`.
-- [ ] **Performance Benchmarks**:
-  * Create a performance benchmark suite comparing `df-script` to standard JS array manipulations and alternative JS libraries for common operations (groupby, join, pivot).
-
----
-
-## 🎯 V1.8.0 Release Scope
 
 ### 🗂️ DataFrame Operations
 - [ ] **DataFrame Find Method (`df.find()`)**:
   * Implement `.find(predicate)` convenience method on `DataFrame` class (similar to `Array.prototype.find()`) to evaluate a predicate expression/filter and return the first matching record/row object (or `undefined` if no match is found).
+
+---
+
+## 🔮 Future / Backlog Scope (V2.0+)
+
+### ⏰ Advanced Temporal Extensions & Storage Infrastructure
+- [ ] **`replace_time_zone(timeZone)` Method**:
+  * Implement `.dt.replace_time_zone(timeZone: string | null)` to re-interpret local wall-clock values in a new timezone (shifting the underlying UTC instant/epoch time) or unset timezone awareness (`timeZone = null`), distinct from `.convert_time_zone(tz)` which preserves the UTC instant.
+- [ ] **High-Precision Sub-Millisecond Datetime Storage (`us`, `ns`)**:
+  * Transition from standard JS `Date` objects (which are limited to millisecond resolution) to raw 64-bit integer / `BigInt` array representations for true sub-millisecond (`us` microsecond and `ns` nanosecond) storage and calculations.
+- [ ] **Evaluation-Time Timezone Guard Checks**:
+  * Add evaluation-time schema verification in DataFrame operations (`with_columns`/`select`) to enforce that `convert_time_zone()` is only called on timezone-aware input columns even when expressions are built stand-alone without explicit `.cast_time_unit()` chains.
+- [ ] **Row-Dynamic Timezone Conversions (`convert_time_zone(col("tz"))`)**:
+  * Allow `.dt.convert_time_zone()` and timezone extraction methods to accept an expression parameter (`IExpr` / column reference) as the timezone argument, enabling per-row dynamic timezone conversions.
+- [ ] **Dedicated Primitive `TimeType` & `DateType` Storage**:
+  * Introduce dedicated low-level `TimeType` (nanoseconds/milliseconds since midnight) and 32-bit integer `DateType` (days since epoch) to match Polars native primitive types beyond combined JS `Date` objects.
+
+
 
 

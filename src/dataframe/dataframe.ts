@@ -1343,7 +1343,8 @@ export class DataFrame<T extends RowRecord = any> {
             const col = evaluatedCols[i];
             const originalKey = expr._colName || targetKey;
             const isPureCol = expr instanceof ColumnExpr && expr._ops.length === 0 && !expr._isWindow && !expr._aggFn;
-            const type = (isPureCol && this._schema[originalKey]) || inferColumnType(col);
+            const castType = expr._castType;
+            const type = castType || (isPureCol && this._schema[originalKey]) || inferColumnType(col);
 
             outSchema[targetKey] = type;
             newColumns[targetKey] = coerceColumn(col, type, targetHeight);

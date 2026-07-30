@@ -1,4 +1,5 @@
-import type { TimeUnit, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, UtcOffsetOptions } from "../../types";
+import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
+import { DatetimeType } from "../../datatypes/types";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
 import {
@@ -14,7 +15,11 @@ import {
     offsetDay,
     getTimeZoneOffset,
     isBusinessDay,
-    getISO
+    getISO,
+    replaceDateComponents,
+    _createUTCDate,
+    _getDateTimeParts,
+    _getTimeZoneOffsetMinutes
 } from "../../utils";
 import {
     MS_PER_SECOND,
@@ -29,9 +34,33 @@ import {
  * @namespace $df.col.dt
  * @category ColumnExpression
  * @syntax $df.col(<column_name>).dt.{symbol}(...)
+ *
+ * **Implementation Notes**
+ *
+ * _TimeUnit_: `Date` objects are always millisecond-based, so `timeUnit` is schema
+ * metadata only. Sub-millisecond precision (`us`, `ns`) cannot be stored; methods such
+ * as `microsecond()` and `nanosecond()` always scale from milliseconds. Migrating to
+ * raw `BigInt` arrays would be required for true sub-ms storage.
+ *
+ * _Timezone enforcement_: `convert_time_zone` can only validate that the column is
+ * timezone-aware when `_castType` is explicitly set within the expression chain
+ * (e.g. after `cast_time_unit`). Enforcement against a column whose type is unknown
+ * at expression-build time requires schema-level checks in DataFrame operations.
  */
 export class DateTimeExprNamespace {
     constructor(public expr: any) { }
+
+    /** Returns the column's schema timezone from a prior convert_time_zone call, or null. */
+    _colTz(): string | null {
+        const ct = this.expr._castType;
+        return (ct instanceof DatetimeType) ? ct.timeZone : null;
+    }
+
+    /** Returns the column's schema time unit from a prior cast_time_unit call, or null. */
+    _colTu(): DatetimeTimeUnit | null {
+        const ct = this.expr._castType;
+        return (ct instanceof DatetimeType) ? ct.timeUnit : null;
+    }
 
     _deriveDate(fn: (d: Date) => any) {
         return derive(this.expr, kleeneUnary((v) => {
@@ -44,6 +73,25 @@ export class DateTimeExprNamespace {
         return derive(this.expr, kleeneUnary((v) => {
             return typeof v === "number" ? fn(v) : null;
         }));
+    }
+
+    /**
+     * Casts the schema time unit of a Datetime column.
+     * This is a metadata-only operation — stored values are not rescaled.
+     * @param unit Target time unit: `"ms"` (milliseconds), `"us"` (microseconds), or `"ns"` (nanoseconds).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T10:00:00.123Z"] })
+     * >>> df.with_columns($df.col("ts").dt.cast_time_unit("us").alias("ts_us"))
+     * shape: (1, 2)
+     * ┌──────────────────────────┬──────────────────────────┐
+     * │ ts                       │ ts_us                    │
+     * ├──────────────────────────┼──────────────────────────┤
+     * │ 2026-05-20T10:00:00.123Z │ 2026-05-20T10:00:00.123Z │
+     * └──────────────────────────┴──────────────────────────┘
+     */
+    cast_time_unit(unit: DatetimeTimeUnit) {
+        return this.expr.cast(new DatetimeType(unit, this._colTz()));
     }
 
     /**
@@ -61,6 +109,35 @@ export class DateTimeExprNamespace {
      */
     century() {
         return this._deriveDate(getCentury);
+    }
+
+    /**
+     * Converts a Datetime column to a different IANA timezone.
+     * The UTC instant is preserved — only the timezone label changes, affecting
+     * how component extractors and `strftime` interpret the value.
+     * Requires the column to already be timezone-aware; use `replace({ timeZone })`
+     * to assign a timezone to a naive column first.
+     * @param timeZone Target IANA timezone identifier (e.g. `"UTC"`, `"America/New_York"`, `"Europe/London"`).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-06-01T00:00:00.000Z"] })
+     * >>> df.with_columns($df.col("ts").dt.convert_time_zone("America/New_York").alias("ts_ny"))
+     * shape: (1, 2)
+     * ┌──────────────────────────┬──────────────────────────┐
+     * │ ts                       │ ts_ny                    │
+     * ├──────────────────────────┼──────────────────────────┤
+     * │ 2026-06-01T00:00:00.000Z │ 2026-06-01T00:00:00.000Z │
+     * └──────────────────────────┴──────────────────────────┘
+     */
+    convert_time_zone(timeZone: string) {
+        const colTz = this._colTz();
+        if (this.expr._castType instanceof DatetimeType && colTz === null) {
+            throw new TypeError(
+                `convert_time_zone() requires a timezone-aware Datetime column. ` +
+                `Use .dt.replace({ timeZone: "..." }) to assign a timezone first.`
+            );
+        }
+        return this.expr.cast(new DatetimeType(this._colTu() ?? "ms", timeZone));
     }
 
     /**
@@ -82,6 +159,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the calendar day component (1-31) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -93,12 +171,14 @@ export class DateTimeExprNamespace {
      * │ 2026-05-20 │ 20  │
      * └────────────┴─────┘
      */
-    day() {
-        return this._deriveDate((d) => d.getUTCDate());
+    day(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
+        return this._deriveDate((d) => _getDateTimeParts(d, tz).day);
     }
 
     /**
      * Extracts number of days in the month.
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2024-02-15"] })
@@ -110,16 +190,18 @@ export class DateTimeExprNamespace {
      * │ 2024-02-15 │ 29  │
      * └────────────┴─────┘
      */
-    days_in_month() {
+    days_in_month(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
         return this._deriveDate((d) => {
-            const end = getMonthOffset(d, 1, 0);
+            const p = _getDateTimeParts(d, tz);
+            const end = getMonthOffset(_createUTCDate(p.year, p.month - 1, 1), 1, 0);
             return end ? end.getUTCDate() : null;
         });
     }
 
     /**
      * Returns epoch duration timestamp offset.
-     * @param unit Time resolution unit ("ms", "us", "ns", "s").
+     * @param unit Time resolution unit (`"ms"`, `"us"`, `"ns"`, `"s"`).
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-01-01T00:00:00Z"] })
@@ -137,6 +219,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the hour component (0-23) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T14:30:00Z"] })
@@ -148,8 +231,9 @@ export class DateTimeExprNamespace {
      * │ 2026-05-20T14:30:00Z │ 14 │
      * └──────────────────────┴────┘
      */
-    hour() {
-        return this._deriveDate((d) => d.getUTCHours());
+    hour(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
+        return this._deriveDate((d) => _getDateTimeParts(d, tz).hour);
     }
 
     /**
@@ -275,6 +359,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the minute component (0-59) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:45:00Z"] })
@@ -286,12 +371,14 @@ export class DateTimeExprNamespace {
      * │ 2026-05-20T10:45:00Z │ 45  │
      * └──────────────────────┴─────┘
      */
-    minute() {
-        return this._deriveDate((d) => d.getUTCMinutes());
+    minute(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
+        return this._deriveDate((d) => _getDateTimeParts(d, tz).minute);
     }
 
     /**
      * Extracts the calendar month component (1-12) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -303,8 +390,9 @@ export class DateTimeExprNamespace {
      * │ 2026-05-20 │ 5 │
      * └────────────┴───┘
      */
-    month() {
-        return this._deriveDate((d) => d.getUTCMonth() + 1);
+    month(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
+        return this._deriveDate((d) => _getDateTimeParts(d, tz).month);
     }
 
     /**
@@ -438,6 +526,31 @@ export class DateTimeExprNamespace {
     }
 
     /**
+     * Replaces specific date and time components of a Datetime column.
+     * Unspecified components are preserved from the original value.
+     * When `timeZone` is provided, the existing components are first read in that
+     * timezone before the replacements are applied.
+     * Note: `month` is 1-indexed (1 = January, 12 = December); `day` is 1-indexed (1-31).
+     * @param options Object specifying which components to replace: `year`, `month`, `day`, `hour`, `minute`, `second`, `ms`, `timeZone`.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ ts: ["2026-05-20T14:30:00Z"] })
+     * >>> df.with_columns($df.col("ts").dt.replace({ year: 2030, month: 1, day: 1 }).alias("replaced"))
+     * shape: (1, 2)
+     * ┌──────────────────────┬──────────────────────────┐
+     * │ ts                   │ replaced                 │
+     * ├──────────────────────┼──────────────────────────┤
+     * │ 2026-05-20T14:30:00Z │ 2030-01-01T14:30:00.000Z │
+     * └──────────────────────┴──────────────────────────┘
+     */
+    replace(options: ReplaceDateOptions) {
+        return derive(this.expr, kleeneUnary((v) => {
+            const d = toValidDate(v);
+            return d ? replaceDateComponents(d, options) : null;
+        }));
+    }
+
+    /**
      * Extracts seconds component (0-59).
      * @returns ColumnExpression
      * @example
@@ -469,11 +582,15 @@ export class DateTimeExprNamespace {
      * └────────────┴────────────┘
      */
     strftime(options: StrftimeOptions) {
-        return this._deriveDate((d) => strftime(d, options));
+        const colTz = this._colTz();
+        const resolvedOptions = (colTz && !options.timeZone)
+            ? { ...options, timeZone: colTz }
+            : options;
+        return this._deriveDate((d) => strftime(d, resolvedOptions));
     }
 
     /**
-     * Extracts time component string ("HH:MM:SS.mmm").
+     * Extracts time component string (`"HH:MM:SS.mmm"`).
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ ts: ["2026-05-20T10:30:00Z"] })
@@ -645,9 +762,13 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Returns the offset of local timezone relative to UTC in minutes.
-     * @param timeZone Target timezone string identifier.
-     * @param options Utc offset calculation options.
+     * Returns the UTC offset of a timezone for a given Datetime value.
+     * Supports returning the total offset, the standard (base) offset, or just the
+     * daylight saving time component, in multiple output formats.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the system local timezone.
+     * @param options Output configuration: `type` selects which offset component to return
+     *   (`"total"` | `"standardTime"` | `"daylightSavingTime"`), and `format` controls the
+     *   output unit (`"milliseconds"` | `"minutes"` | `"hours"` | `"iso"` | `"basic"`).
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -685,6 +806,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts weekday component (1=Monday, 7=Sunday).
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-18"] })
@@ -696,12 +818,14 @@ export class DateTimeExprNamespace {
      * │ 2026-05-18 │ 1  │
      * └────────────┴────┘
      */
-    weekday() {
-        return this._deriveDate((d) => d.getUTCDay() || 7);
+    weekday(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
+        return this._deriveDate((d) => _getDateTimeParts(d, tz).dayOfWeek || 7);
     }
 
     /**
      * Extracts the year component from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to UTC.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -713,8 +837,9 @@ export class DateTimeExprNamespace {
      * │ 2026-05-20 │ 2026 │
      * └────────────┴──────┘
      */
-    year() {
-        return this._deriveDate((d) => d.getUTCFullYear());
+    year(timeZone?: string) {
+        const tz = timeZone || this._colTz() || "UTC";
+        return this._deriveDate((d) => _getDateTimeParts(d, tz).year);
     }
 }
 
