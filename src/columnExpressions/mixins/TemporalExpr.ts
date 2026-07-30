@@ -1,5 +1,6 @@
 import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
 import { DatetimeType } from "../../datatypes/types";
+import { InvalidArgumentError } from "../../exceptions";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
 import {
@@ -132,7 +133,7 @@ export class DateTimeExprNamespace {
     convert_time_zone(timeZone: string) {
         const colTz = this._colTz();
         if (this.expr._castType instanceof DatetimeType && colTz === null) {
-            throw new TypeError(
+            throw new InvalidArgumentError(
                 `convert_time_zone() requires a timezone-aware Datetime column. ` +
                 `Use .dt.replace({ timeZone: "..." }) to assign a timezone first.`
             );
