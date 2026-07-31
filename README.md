@@ -2,6 +2,8 @@
 
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/trentamorris/df-script)
 [![Donate](https://img.shields.io/badge/Donate-Support-green?style=for-the-badge)](DONATIONS.md)
+[![Environment](https://img.shields.io/badge/Environment-Node.js%20%7C%20Browser%20%7C%20Bun%20%7C%20Deno%20%7C%20Workers-brightgreen?style=for-the-badge)](#)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-success?style=for-the-badge)](#)
 
 DFScript is a lightweight, high-performance, and **zero-dependency** data analysis library for TypeScript and JavaScript. Heavily inspired by modern dataframe libraries like **Polars** and **Pandas**, DFScript brings a robust, expression-based columnar data processing engine directly to the JavaScript ecosystem.
 
