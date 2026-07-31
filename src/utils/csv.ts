@@ -3,7 +3,7 @@ import type { ColumnDict } from "../types";
 import { strftime, toValidDate } from "./date";
 import { createSafeJsonReplacer, type SafeJsonReplacerOptions } from "./json";
 import { formatNumber, toValidNumber, toValidBigInt, type NumericFormatOptions } from "./number";
-import { NEWLINE, CARRIAGE_RETURN, UTF8_BOM } from "../dataframe/constants";
+import { NEWLINE, CARRIAGE_RETURN, UTF8_BOM } from "../constants";
 import { DataType, Utf8, Boolean as BoolType, Int64, Float64, Datetime } from "../datatypes";
 import type { ReadCSVOptions } from "../dataframe/types";
 import { unboxPrimitiveObj } from "./object";

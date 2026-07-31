@@ -31,7 +31,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 ## 🎯 V1.8.0 Release Scope
 
 ### 🤝 Advanced Joins
-- [ ] **Semi-Join & Anti-Join Support**:
+- [x] **Semi-Join & Anti-Join Support**:
   * Add `"semi"` and `"anti"` join options to the `join` method inside `DataFrame.ts`.
   * Ensure they only select columns from the left DataFrame and do not join right-side columns, utilizing the existing hash matching logic.
 
@@ -106,8 +106,34 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [ ] **Predicate & Projection Pushdown Optimizations**:
   * **Predicate Pushdown**: Push `filter()` expressions up the DAG (and into `read_csv`/`read_json` readers) so unneeded rows are filtered out before transformations or joins occur.
   * **Projection Pushdown**: Inspect final `select()` columns and prune unused columns early in the DAG to minimize memory allocations.
-- [ ] **Query Execution (`.collect()`)**:
-  * Execute the optimized logical plan on `.collect()` to return the materialized `DataFrame`.
+- [ ] **Query Execution & Inspection (`.collect()`, `.explain()`)**:
+  * **`.collect()`**: Execute the optimized logical/physical query plan DAG and return a concrete `DataFrame`.
+  * **`.explain({ optimized?: boolean })`**: Format and return a text/tree string representation of the unoptimized or optimized query plan DAG, allowing developers to inspect predicate pushdown, projection pushdown, and join order optimizations.
+### 🤝 Advanced DataFrame Join Extensions
+- [ ] **Heterogeneous Key Names (`leftOn` & `rightOn`)**:
+  * Allow specify different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
+- [ ] **Cross Join (`how: "cross"`)**:
+  * Implement Cartesian product join between two DataFrames without requiring join key arguments.
+- [ ] **Asof Join (`df.join_asof(...)`)**:
+  * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).
+- [ ] **Join Key Coalescing (`coalesce`)**:
+  * Provide option to coalesce nulls across join key columns in outer joins.
+
+### ⚡ Performance & Interoperability
+- [ ] **Primitive Fast-Path Row Hashing**:
+  * Optimize `computeRowHash` and `toCanonicalString` to use numeric hashing algorithms (e.g., FNV-1a or 64-bit integer mixing) when keys consist strictly of primitive types (integers, strings, booleans), bypassing string allocations during large `DataFrame.join()` and `.groupby()` operations.
+- [ ] **Apache Arrow & IPC Interoperability**:
+  * Provide lightweight serialization adapters for Apache Arrow IPC memory format, facilitating zero-copy data exchange with Python Polars, PyArrow, and browser WebAssembly runtimes.
+### 🗂️ Recommended DataFrame Operations
+- [ ] **Random Sampling (`df.sample()`)**:
+  * Implement `.sample(nOrFraction, options)` to randomly select $N$ rows or a fractional percentage of rows (with optional seed and replacement), useful for ML train/test splitting and dataset exploration.
+- [ ] **DataFrame Partitioning (`df.partition_by()`)**:
+  * Implement `.partition_by(columns)` to split a DataFrame into a Map of distinct `DataFrame` chunks grouped by key column combinations.
+- [ ] **DataFrame Copying (`df.clone()`)**:
+  * Implement explicit deep/shallow cloning of a `DataFrame` instance and its underlying data arrays.
+- [ ] **Convenience Inspection Methods (`df.head()`, `df.tail()`)**:
+  * Provide `.head(n)` and `.tail(n)` convenience wrappers for quick inspection of top and bottom rows.
+
 
 
 

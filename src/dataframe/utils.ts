@@ -1,7 +1,8 @@
 /** @internalfile */
 import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types"
+import type { JoinOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
-import { KEY_SEPARATOR } from "./constants"
+import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
 import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj } from "../utils"
 import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
 
@@ -200,7 +201,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         }
     }
 
-    if (!hasNonNull) return DataTypeRegistry.Utf8;
+    if (!hasNonNull) return DataTypeRegistry.Null;
     if (isBinary) return DataTypeRegistry.Binary;
     if (isArrayVal) {
         const innerType = inferColumnType(allArrayElements);
@@ -252,13 +253,11 @@ export function gatherColumnsByIndices(columns: ColumnDict, indices: number[]): 
 export function computeRowHash(columns: ColumnDict, keys: string[], rowIndex: number): string {
     const len = keys.length;
     if (len === 1) {
-        const val = columns[keys[0]][rowIndex];
-        return val == null ? "" : toCanonicalString(val);
+        return toCanonicalString(columns[keys[0]][rowIndex]);
     }
     const vals = new Array(len);
     for (let i = 0; i < len; i++) {
-        const val = columns[keys[i]][rowIndex];
-        vals[i] = val == null ? "" : toCanonicalString(val);
+        vals[i] = toCanonicalString(columns[keys[i]][rowIndex]);
     }
     return vals.join(KEY_SEPARATOR);
 }
@@ -307,5 +306,96 @@ export function writeStringToFileOrStream(
     } else {
         throw new InvalidArgumentError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
     }
+}
+
+/**
+ * Generic key-alignment engine computing positional row index mappings (leftIndex <-> rightIndex)
+ * between two columnar datasets based on key hashing.
+ * Reusable for Joins, Set Operations (Intersect/Difference), Upserts, and Alignments.
+ */
+export function alignKeyIndices(
+    leftCols: ColumnDict,
+    rightCols: ColumnDict,
+    leftHeight: number,
+    rightHeight: number,
+    keys: string[],
+    options: Pick<JoinOptions, "how" | "join_nulls"> = {}
+): { leftIndices: number[]; rightIndices: (number | null)[] } {
+    const { how = "inner", join_nulls = false } = options;
+
+    const getRowHashAt = (cols: ColumnDict, idx: number): string | null => {
+        if (!join_nulls) {
+            for (let i = 0; i < keys.length; i++) {
+                if (cols[keys[i]][idx] == null) return null;
+            }
+        }
+        return computeRowHash(cols, keys, idx);
+    };
+
+    // 1. Build hash table for right DataFrame
+    const rightHash = new Map<string, number[]>();
+    for (let i = 0; i < rightHeight; i++) {
+        const hash = getRowHashAt(rightCols, i);
+        if (hash === null) continue;
+        let list = rightHash.get(hash);
+        if (list === undefined) {
+            list = [];
+            rightHash.set(hash, list);
+        }
+        list.push(i);
+    }
+
+    const leftIndices: number[] = [];
+    const rightIndices: (number | null)[] = [];
+
+    // 2. Fast path for Semi & Anti joins (returns matching left row indices only)
+    if (how === "semi" || how === "anti") {
+        for (let i = 0; i < leftHeight; i++) {
+            const hash = getRowHashAt(leftCols, i);
+            const matches = hash === null ? undefined : rightHash.get(hash);
+            const hasMatch = matches !== undefined && matches.length > 0;
+
+            if ((how === "semi" && hasMatch) || (how === "anti" && !hasMatch)) {
+                leftIndices.push(i);
+                rightIndices.push(null);
+            }
+        }
+        return { leftIndices, rightIndices };
+    }
+
+    // 3. Handle Inner, Left, Right, and Outer index alignment
+    const trackRight = how === "outer" || how === "right";
+    const matchedRightIndices = trackRight ? new Set<number>() : null;
+
+    for (let i = 0; i < leftHeight; i++) {
+        const hash = getRowHashAt(leftCols, i);
+        const matches = hash === null ? undefined : rightHash.get(hash);
+
+        if (matches === undefined) {
+            if (how === "left" || how === "outer") {
+                leftIndices.push(i);
+                rightIndices.push(null);
+            }
+        } else {
+            for (let m = 0; m < matches.length; m++) {
+                const rIdx = matches[m];
+                if (trackRight) matchedRightIndices!.add(rIdx);
+                leftIndices.push(i);
+                rightIndices.push(rIdx);
+            }
+        }
+    }
+
+    // 4. Append unmatched right rows for Right & Outer alignments
+    if (trackRight) {
+        for (let j = 0; j < rightHeight; j++) {
+            if (!matchedRightIndices!.has(j)) {
+                leftIndices.push(UNMATCHED_ROW_INDEX);
+                rightIndices.push(j);
+            }
+        }
+    }
+
+    return { leftIndices, rightIndices };
 }
 

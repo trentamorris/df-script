@@ -1,6 +1,8 @@
 /** @internalfile */
 import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, unboxPrimitiveObj } from "./object";
 import { isTypedArray } from "./array";
+import { KEY_SEPARATOR, KEY_PAIR_SEPARATOR } from "../constants";
+
 
 export function isBlankString(v: unknown): v is string {
     const unwrapped = unboxPrimitiveObj(v);
@@ -286,7 +288,8 @@ export function toCanonicalString(
     }
 
     if (isTypedArray(val)) {
-        return `u:${val.constructor.name}:${val.toString()}`;
+        const s = val.toString();
+        return `u:${val.constructor.name}:${s.length}:${s}`;
     }
 
     if (Array.isArray(val)) {
@@ -296,7 +299,7 @@ export function toCanonicalString(
         for (let i = 0; i < len; i++) {
             parts[i] = toCanonicalString(val[i], nextOpt);
         }
-        return `a:[${parts.join(",")}]`;
+        return `a:[${parts.join(KEY_PAIR_SEPARATOR)}]`;
     }
 
     if (isSet(val)) {
@@ -308,7 +311,7 @@ export function toCanonicalString(
             parts[i] = toCanonicalString(arr[i], nextOpt);
         }
         parts.sort();
-        return `set:[${parts.join(",")}]`;
+        return `set:[${parts.join(KEY_PAIR_SEPARATOR)}]`;
     }
 
     if (isMap(val)) {
@@ -318,10 +321,10 @@ export function toCanonicalString(
         const nextOpt = { depth: depth + 1, maxDepth };
         for (let i = 0; i < len; i++) {
             const k = keys[i];
-            parts[i] = `${toCanonicalString(k, nextOpt)}:${toCanonicalString(val.get(k), nextOpt)}`;
+            parts[i] = `${toCanonicalString(k, nextOpt)}${KEY_SEPARATOR}${toCanonicalString(val.get(k), nextOpt)}`;
         }
         parts.sort();
-        return `map:{${parts.join(",")}}`;
+        return `map:{${parts.join(KEY_PAIR_SEPARATOR)}}`;
     }
 
     if (typeof val === "object" && typeof val.toJSON === "function") {
@@ -331,6 +334,11 @@ export function toCanonicalString(
         }
     }
 
+    if (isRegExp(val)) {
+        const s = val.toString();
+        return `r:${s.length}:${s}`;
+    }
+
     if (isPlainObj(val)) {
         const keys = Object.keys(val).sort();
         const len = keys.length;
@@ -338,28 +346,31 @@ export function toCanonicalString(
         const nextOpt = { depth: depth + 1, maxDepth };
         for (let i = 0; i < len; i++) {
             const k = keys[i];
-            parts[i] = `${k}:${toCanonicalString(val[k], nextOpt)}`;
+            parts[i] = `${toCanonicalString(k, nextOpt)}${KEY_SEPARATOR}${toCanonicalString(val[k], nextOpt)}`;
         }
-        return `o:{${parts.join(",")}}`;
-    }
-
-    if (isRegExp(val)) {
-        return `r:${val.toString()}`;
+        return `o:{${parts.join(KEY_PAIR_SEPARATOR)}}`;
     }
 
     if (typeof val === "function") {
-        return `f:${val.toString()}`;
+        const s = val.toString();
+        return `f:${s.length}:${s}`;
     }
 
     if (typeof val === "string") {
-        return `s:${val}`;
+        return `s:${val.length}:${val}`;
     }
 
     if (typeof val === "symbol") {
-        return `y:${val.toString()}`;
+        const s = val.toString();
+        return `y:${s.length}:${s}`;
     }
 
-    return `${typeof val}:${val}`;
+    if (typeof val === "number" || typeof val === "boolean" || typeof val === "bigint") {
+        return `${typeof val}:${val}`;
+    }
+
+    const s = String(val);
+    return `${typeof val}:${s.length}:${s}`;
 }
 
 export interface ChangeCaseOptions {

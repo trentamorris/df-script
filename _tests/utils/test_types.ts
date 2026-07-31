@@ -442,13 +442,13 @@ try {
     if (toCanonicalString(foreignDate) !== "d:1777000") {
         throw new Error("Expected toCanonicalString to format cross-realm Date");
     }
-    if (toCanonicalString(foreignSet) !== "set:[number:1,number:2]") {
+    if (toCanonicalString(foreignSet) !== "set:[number:1\x01number:2]") {
         throw new Error("Expected toCanonicalString to format cross-realm Set");
     }
-    if (toCanonicalString(foreignMap) !== "map:{s:x:number:1}") {
+    if (toCanonicalString(foreignMap) !== "map:{s:1:x\x00number:1}") {
         throw new Error("Expected toCanonicalString to format cross-realm Map");
     }
-    if (toCanonicalString(foreignRegExp) !== "r:/abc/g") {
+    if (toCanonicalString(foreignRegExp) !== "r:6:/abc/g") {
         throw new Error("Expected toCanonicalString to format cross-realm RegExp");
     }
     if (typeof toCanonicalString(foreignString) !== "string") {

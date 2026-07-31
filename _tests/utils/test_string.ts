@@ -1,5 +1,5 @@
 declare const process: any;
-import { stripChars } from "../../src/utils/string";
+import { stripChars, toCanonicalString } from "../../src/utils/string";
 
 console.log("=========================================");
 console.log("STARTING UTILS STRING TESTS...");
@@ -73,28 +73,27 @@ try {
     if (stripChars("AlOuAlOuD", "alou", { maxScanStart: -1, maxMatchesStart: 2, stringOptions: { literal: true, caseInsensitive: true } }) !== "D") throw new Error("Expected case-insensitive literal multi-match to succeed");
 
     // 12. toCanonicalString tests
-    const { toCanonicalString } = require("../../src/utils/string");
     if (toCanonicalString(null) !== "v:null") throw new Error("toCanonicalString(null) failed");
     if (toCanonicalString(undefined) !== "v:undefined") throw new Error("toCanonicalString(undefined) failed");
-    if (toCanonicalString("hello") !== "s:hello") throw new Error("toCanonicalString('hello') failed");
+    if (toCanonicalString("hello") !== "s:5:hello") throw new Error("toCanonicalString('hello') failed");
     if (toCanonicalString(42) !== "number:42") throw new Error("toCanonicalString(42) failed");
     if (toCanonicalString(true) !== "boolean:true") throw new Error("toCanonicalString(true) failed");
-    if (toCanonicalString(/abc/i) !== "r:/abc/i") throw new Error("toCanonicalString(/abc/i) failed");
+    if (toCanonicalString(/abc/i) !== "r:6:/abc/i") throw new Error("toCanonicalString(/abc/i) failed");
     if (toCanonicalString(new Date(1777000)) !== "d:1777000") throw new Error("toCanonicalString(Date) failed");
-    if (toCanonicalString(new Uint8Array([1, 2, 3])) !== "u:Uint8Array:1,2,3") throw new Error("toCanonicalString(Uint8Array) failed");
-    if (toCanonicalString([1, [2, 3]]) !== "a:[number:1,a:[number:2,number:3]]") throw new Error("toCanonicalString(Array) failed");
-    if (toCanonicalString({ b: 2, a: 1 }) !== "o:{a:number:1,b:number:2}") throw new Error("toCanonicalString(Object) failed");
-    if (toCanonicalString({ b: [ { y: 2, x: 1 } ], a: new Date(100) }) !== "o:{a:d:100,b:a:[o:{x:number:1,y:number:2}]}") throw new Error("toCanonicalString(nested Object) failed");
+    if (toCanonicalString(new Uint8Array([1, 2, 3])) !== "u:Uint8Array:5:1,2,3") throw new Error("toCanonicalString(Uint8Array) failed");
+    if (toCanonicalString([1, [2, 3]]) !== "a:[number:1\x01a:[number:2\x01number:3]]") throw new Error("toCanonicalString(Array) failed");
+    if (toCanonicalString({ b: 2, a: 1 }) !== "o:{s:1:a\x00number:1\x01s:1:b\x00number:2}") throw new Error("toCanonicalString(Object) failed");
+    if (toCanonicalString({ b: [ { y: 2, x: 1 } ], a: new Date(100) }) !== "o:{s:1:a\x00d:100\x01s:1:b\x00a:[o:{s:1:x\x00number:1\x01s:1:y\x00number:2}]}") throw new Error("toCanonicalString(nested Object) failed");
 
     // 13. Map, Set, toJSON, and circular reference tests
     const set1 = new Set([2, 1]);
     const set2 = new Set([1, 2]);
-    if (toCanonicalString(set1) !== "set:[number:1,number:2]") throw new Error("toCanonicalString(Set) failed");
+    if (toCanonicalString(set1) !== "set:[number:1\x01number:2]") throw new Error("toCanonicalString(Set) failed");
     if (toCanonicalString(set1) !== toCanonicalString(set2)) throw new Error("toCanonicalString(Set) canonical sort failed");
 
     const map1 = new Map([["b", 2], ["a", 1]]);
     const map2 = new Map([["a", 1], ["b", 2]]);
-    if (toCanonicalString(map1) !== "map:{s:a:number:1,s:b:number:2}") throw new Error("toCanonicalString(Map) failed");
+    if (toCanonicalString(map1) !== "map:{s:1:a\x00number:1\x01s:1:b\x00number:2}") throw new Error("toCanonicalString(Map) failed");
     if (toCanonicalString(map1) !== toCanonicalString(map2)) throw new Error("toCanonicalString(Map) canonical sort failed");
 
     const customObj = {
@@ -103,20 +102,20 @@ try {
             return { id: 42 };
         }
     };
-    if (toCanonicalString(customObj) !== "j:o:{id:number:42}") throw new Error("toCanonicalString(toJSON) failed");
+    if (toCanonicalString(customObj) !== "j:o:{s:2:id\x00number:42}") throw new Error("toCanonicalString(toJSON) failed");
 
     const circularObj: any = {};
     circularObj.self = circularObj;
-    let expectedCircular = "v:circular";
-    for (let i = 0; i < 51; i++) {
-        expectedCircular = `o:{self:${expectedCircular}}`;
+    let expectedCircular = "o:{v:circular\x00v:circular}";
+    for (let i = 0; i < 50; i++) {
+        expectedCircular = `o:{s:4:self\x00${expectedCircular}}`;
     }
     if (toCanonicalString(circularObj) !== expectedCircular) throw new Error("toCanonicalString(circular) failed");
 
     // Custom maxDepth test
-    let expectedCircularCustom = "v:circular";
-    for (let i = 0; i < 6; i++) {
-        expectedCircularCustom = `o:{self:${expectedCircularCustom}}`;
+    let expectedCircularCustom = "o:{v:circular\x00v:circular}";
+    for (let i = 0; i < 5; i++) {
+        expectedCircularCustom = `o:{s:4:self\x00${expectedCircularCustom}}`;
     }
     if (toCanonicalString(circularObj, { maxDepth: 5 }) !== expectedCircularCustom) {
         throw new Error("toCanonicalString(circular, { maxDepth: 5 }) failed");

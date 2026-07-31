@@ -1,6 +1,6 @@
 import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seq_range, all, evaluateExpression } from "../columnExpressions"
 import { GroupedData } from "./grouped/grouped"
-import { NEWLINE } from "./constants"
+import { NEWLINE, UNMATCHED_ROW_INDEX } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions } from "../types"
 import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
@@ -15,6 +15,7 @@ import {
     gatherColumnsByIndices,
     computeRowHash,
     coerceColumn,
+    alignKeyIndices,
     writeStringToFileOrStream
 } from "./utils"
 
@@ -795,12 +796,21 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     /**
-     * Joins two DataFrames on key columns using inner, left, right, or outer join strategy.
+     * Joins two DataFrames on key columns using a specified join strategy.
      * @param {JoinOptions} config Join configuration object.
-     * @param {DataFrame} config.other Right DataFrame to join with left DataFrame.
-     * @param {string | string[]} config.on Join key column name or array of key column names.
-     * @param {JoinType} [config.how] Join strategy (`"inner"`, `"left"`, `"right"`, or `"outer"`). Default `"inner"`.
-     * @param {[string, string]} [config.suffixes] Custom column name suffix tuple `[leftSuffix, rightSuffix]` for overlapping non-key columns (default `["", "_right"]`).
+     * @param {DataFrame} config.other Right DataFrame to join with.
+     * @param {string | string[]} config.on Join key column name or array of key column names that must exist in both DataFrames.
+     * @param {JoinType} [config.how] Join strategy. Default `"inner"`.
+     *   - `"inner"` — Only rows with matching keys in both DataFrames.
+     *   - `"left"` — All left rows; unmatched right values are `null`.
+     *   - `"right"` — All right rows; unmatched left values are `null`.
+     *   - `"outer"` — All rows from both sides; unmatched values are `null`.
+     *   - `"semi"` — Left rows that have a match in the right DataFrame (only left columns retained).
+     *   - `"anti"` — Left rows that have **no** match in the right DataFrame (only left columns retained).
+     * @param {[string, string]} [config.suffixes] Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping
+     *   non-key column names (default `["", "_right"]`). Ignored for `"semi"` and `"anti"` joins.
+     * @param {boolean} [config.join_nulls] If `true`, null key values are treated as equal and will match each other
+     *   across DataFrames. Default `false` (SQL-standard: `NULL != NULL`).
      * @returns {DataFrame}
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
@@ -823,135 +833,124 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┴─────┴─────┘
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
-        const { other, on, how = "inner", suffixes = ["", "_right"] } = config;
-        const joinKeysStr = toValidStringArray(on);
-        for (let i = 0; i < joinKeysStr.length; i++) {
-            const keyStr = joinKeysStr[i];
-            assertColumnExists(keyStr, this._columns, "Join key", " in the left DataFrame.");
-            assertColumnExists(keyStr, other._columns, "Join key", " in the right DataFrame.");
-        }
-
+        const { other, on, how = "inner", suffixes = ["", "_right"], join_nulls = false } = config;
         const [leftSuffix, rightSuffix] = suffixes;
+        const joinKeysStr = toValidStringArray(on);
 
-        const leftKeys = Object.keys(this._columns);
-        const rightKeys = Object.keys(other._columns);
-        const joinKeySet = new Set(joinKeysStr);
-
-        const leftLen = leftKeys.length;
-        const rightLen = rightKeys.length;
-
-        const getColumnHashAt = (columns: ColumnDict, idx: number): string | null => {
-            const len = joinKeysStr.length;
-            for (let i = 0; i < len; i++) {
-                if (columns[joinKeysStr[i]][idx] == null) return null;
-            }
-            return computeRowHash(columns, joinKeysStr, idx);
-        };
-
-        const rightHash = new Map<string, number[]>();
-        const rightHeight = other._height;
-        const rightCols = other._columns;
-
-        for (let i = 0; i < rightHeight; i++) {
-            const hash = getColumnHashAt(rightCols, i);
-            if (hash === null) continue;
-            let list = rightHash.get(hash);
-            if (list === undefined) {
-                list = [];
-                rightHash.set(hash, list);
-            }
-            list.push(i);
+        // Step 1: Validate join keys
+        if (joinKeysStr.length === 0) {
+            throw new InvalidArgumentError(
+                'join() requires at least one key column in "on". For Cartesian products, use crossJoin() instead.'
+            );
         }
 
-        const leftHeight = this._height;
-        const leftCols = this._columns;
-
-        const leftIndices: number[] = [];
-        const rightIndices: (number | null)[] = [];
-
-        const trackRight = how === "outer" || how === "right";
-        const matchedRightIndices = trackRight ? new Set<number>() : null;
-
-        for (let i = 0; i < leftHeight; i++) {
-            const hash = getColumnHashAt(leftCols, i);
-            const matches = hash === null ? undefined : rightHash.get(hash);
-
-            if (matches === undefined) {
-                if (how === "left" || how === "outer") {
-                    leftIndices.push(i);
-                    rightIndices.push(null);
-                }
-            } else {
-                for (let m = 0; m < matches.length; m++) {
-                    const rIdx = matches[m];
-                    if (trackRight) {
-                        matchedRightIndices!.add(rIdx);
-                    }
-                    leftIndices.push(i);
-                    rightIndices.push(rIdx);
-                }
-            }
+        // Step 1b: Validate column presence
+        for (let i = 0; i < joinKeysStr.length; i++) {
+            const key = joinKeysStr[i];
+            assertColumnExists(key, this._columns, "Join key", " in the left DataFrame.");
+            assertColumnExists(key, other._columns, "Join key", " in the right DataFrame.");
         }
 
-        if (trackRight) {
-            for (let j = 0; j < rightHeight; j++) {
-                if (!matchedRightIndices!.has(j)) {
-                    leftIndices.push(-1);
-                    rightIndices.push(j);
-                }
-            }
-        }
+        const { leftIndices, rightIndices } = alignKeyIndices(
+            this._columns,
+            other._columns,
+            this._height,
+            other._height,
+            joinKeysStr,
+            { how, join_nulls }
+        );
 
         const outHeight = leftIndices.length;
         const newColumns: ColumnDict = {};
         const outSchema: DataFrameSchema = {};
+        const joinKeySet = new Set(joinKeysStr);
 
-        for (let i = 0; i < leftLen; i++) {
+        // Pre-register all non-colliding left column names (join keys + left-unique columns).
+        // These names are claimed directly — no suffix logic should ever touch them.
+        const allocatedNames = new Set<string>();
+        const leftKeys = Object.keys(this._columns);
+        for (let i = 0; i < leftKeys.length; i++) {
             const k = leftKeys[i];
-            const mappedName = (k in other._columns && !joinKeySet.has(k)) ? `${k}${leftSuffix}` : k;
-
-            const leftCol = this._columns[k];
-            const isJoinKey = joinKeySet.has(k);
-
-            const outCol = new Array(outHeight);
-            if (isJoinKey) {
-                const rightCol = other._columns[k];
-                for (let r = 0; r < outHeight; r++) {
-                    const leftIdx = leftIndices[r];
-                    if (leftIdx !== -1) {
-                        outCol[r] = leftCol[leftIdx];
-                    } else {
-                        const rightIdx = rightIndices[r];
-                        outCol[r] = rightIdx !== null ? rightCol[rightIdx] : null;
-                    }
-                }
-            } else {
-                for (let r = 0; r < outHeight; r++) {
-                    const leftIdx = leftIndices[r];
-                    outCol[r] = leftIdx !== -1 ? leftCol[leftIdx] : null;
-                }
-            }
-            newColumns[mappedName] = outCol;
-            if (this._schema[k]) {
-                outSchema[mappedName] = this._schema[k];
-            }
+            if (!(k in other._columns) || joinKeySet.has(k)) allocatedNames.add(k);
         }
 
-        for (let i = 0; i < rightLen; i++) {
-            const k = rightKeys[i];
-            if (!joinKeySet.has(k)) {
-                const mappedName = k in this._columns ? `${k}${rightSuffix}` : k;
-                const rightCol = other._columns[k];
+        // Collision resolver — only called for columns that actually clash with an allocated name.
+        // Applies the preferred suffix first; falls back to a numeric counter if that too is taken.
+        const resolveCollision = (colName: string, suffix: string): string => {
+            const effectiveSuffix = suffix !== "" ? suffix : "_left";
+            let candidate = `${colName}${effectiveSuffix}`;
+            let counter = 1;
+            while (allocatedNames.has(candidate)) {
+                candidate = `${colName}${effectiveSuffix}_${counter++}`;
+            }
+            allocatedNames.add(candidate);
+            return candidate;
+        };
 
+        // Step 3: Materialize Left & Join Key columns
+        for (let i = 0; i < leftKeys.length; i++) {
+            const k = leftKeys[i];
+            const isJoinKey = joinKeySet.has(k);
+
+            let targetName: string;
+            if (k in other._columns && !isJoinKey) {
+                // Overlapping non-key column: claim base name so right side also suffixes.
+                // If caller supplied a non-empty left suffix, apply it.
+                if (leftSuffix !== "") {
+                    allocatedNames.add(k);
+                    targetName = resolveCollision(k, leftSuffix);
+                } else if (!allocatedNames.has(k)) {
+                    targetName = k;
+                    allocatedNames.add(k);
+                } else {
+                    targetName = resolveCollision(k, leftSuffix);
+                }
+            } else {
+                targetName = k; // Join key or left-unique: name was pre-registered, use as-is.
+            }
+
+            const leftCol = this._columns[k];
+            const rightCol = isJoinKey ? other._columns[k] : null;
+            const outCol = new Array(outHeight);
+
+            for (let r = 0; r < outHeight; r++) {
+                const lIdx = leftIndices[r];
+                if (lIdx !== UNMATCHED_ROW_INDEX) {
+                    outCol[r] = leftCol[lIdx];
+                } else {
+                    const rIdx = rightIndices[r];
+                    outCol[r] = (isJoinKey && rIdx !== null) ? rightCol![rIdx] : null;
+                }
+            }
+
+            newColumns[targetName] = outCol;
+            if (this._schema[k]) outSchema[targetName] = this._schema[k];
+        }
+
+        // Step 4: Materialize Right non-key columns (Skipped for Semi and Anti joins)
+        if (how !== "semi" && how !== "anti") {
+            const rightKeys = Object.keys(other._columns);
+            for (let i = 0; i < rightKeys.length; i++) {
+                const k = rightKeys[i];
+                if (joinKeySet.has(k)) continue;
+
+                let targetName: string;
+                if (allocatedNames.has(k)) {
+                    targetName = resolveCollision(k, rightSuffix);
+                } else {
+                    targetName = k;
+                    allocatedNames.add(k);
+                }
+                const rightCol = other._columns[k];
                 const outCol = new Array(outHeight);
+
                 for (let r = 0; r < outHeight; r++) {
-                    const rightIdx = rightIndices[r];
-                    outCol[r] = rightIdx !== null ? rightCol[rightIdx] : null;
+                    const rIdx = rightIndices[r];
+                    outCol[r] = rIdx !== null ? rightCol[rIdx] : null;
                 }
-                newColumns[mappedName] = outCol;
-                if (other._schema[k]) {
-                    outSchema[mappedName] = other._schema[k];
-                }
+
+                newColumns[targetName] = outCol;
+                if (other._schema[k]) outSchema[targetName] = other._schema[k];
             }
         }
 

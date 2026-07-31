@@ -5,7 +5,7 @@ import type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions } fr
 
 export type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions };
 
-export type JoinType = "inner" | "left" | "outer" | "right";
+export type JoinType = "inner" | "left" | "outer" | "right" | "semi" | "anti";
 export type LimitPosition = "start" | "end";
 export type GroupMap = Map<string, number[]>;
 
@@ -28,11 +28,12 @@ export interface PivotOptions<T> {
     agg?: AggFn<any> | string;
 }
 
-export interface JoinOptions<T, U extends RowRecord = any> {
+export interface JoinOptions<T = any, U extends RowRecord = any> {
     other: DataFrame<U>;
     on: (keyof T & keyof U) | (keyof T & keyof U)[];
     how?: JoinType;
     suffixes?: [string, string];
+    join_nulls?: boolean;
 }
 
 export interface UnpivotOptions<T> {
