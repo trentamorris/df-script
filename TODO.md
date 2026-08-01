@@ -40,7 +40,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement Cartesian product join between two DataFrames without requiring join key arguments.
 - [x] **Join Key Coalescing (`coalesce`)**:
   * Provide option to coalesce nulls across join key columns in outer joins.
-- [ ] **Row Order Maintenance (`maintain_order`)**:
+- [x] **Row Order Maintenance (`maintain_order`)**:
   * Implement `maintain_order` parameter in `JoinOptions` (`"none"`, `"left"`, `"right"`, `"left_right"`, `"right_left"`) to explicitly control output row ordering across join strategies.
 - [ ] **Asof Join (`df.join_asof(...)`)**:
   * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).

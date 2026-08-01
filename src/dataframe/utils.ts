@@ -320,9 +320,9 @@ export function alignKeyIndices(
     rightHeight: number,
     leftKeys: string[],
     rightKeys: string[],
-    options: Pick<JoinOptions, "how" | "join_nulls"> = {}
+    options: Pick<JoinOptions, "how" | "join_nulls" | "maintain_order"> = {}
 ): { leftIndices: number[]; rightIndices: (number | null)[] } {
-    const { how = "inner", join_nulls = false } = options;
+    const { how = "inner", join_nulls = false, maintain_order } = options;
 
     const getRowHashAt = (cols: ColumnDict, keys: string[], idx: number): string | null => {
         if (!join_nulls) {
@@ -402,6 +402,37 @@ export function alignKeyIndices(
         }
     }
 
-    return { leftIndices, rightIndices };
+    // 5. Apply maintain_order sorting if requested
+    const orderStrategy = maintain_order || "none";
+
+    // Fast-path: "left" (and "none") are naturally emitted in left-table row order!
+    if (orderStrategy === "none" || orderStrategy === "left") {
+        return { leftIndices, rightIndices };
+    }
+
+    const len = leftIndices.length;
+    // Flat index array to avoid object allocations
+    const perm = new Int32Array(len);
+    for (let idx = 0; idx < len; idx++) perm[idx] = idx;
+
+    const getL = (i: number) => leftIndices[i] === UNMATCHED_ROW_INDEX ? Number.MAX_SAFE_INTEGER : leftIndices[i];
+    const getR = (i: number) => rightIndices[i] ?? Number.MAX_SAFE_INTEGER;
+
+    if (orderStrategy === "right") {
+        perm.sort((a, b) => (getR(a) - getR(b)) || (a - b));
+    } else if (orderStrategy === "left_right") {
+        perm.sort((a, b) => (getL(a) - getL(b)) || (getR(a) - getR(b)) || (a - b));
+    } else if (orderStrategy === "right_left") {
+        perm.sort((a, b) => (getR(a) - getR(b)) || (getL(a) - getL(b)) || (a - b));
+    }
+
+    const sortedLeft = new Array(len);
+    const sortedRight = new Array(len);
+    for (let idx = 0; idx < len; idx++) {
+        const p = perm[idx];
+        sortedLeft[idx] = leftIndices[p];
+        sortedRight[idx] = rightIndices[p];
+    }
+    return { leftIndices: sortedLeft, rightIndices: sortedRight };
 }
 

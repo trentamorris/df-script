@@ -313,6 +313,7 @@ try {
 } catch (e: any) {
     caughtMismatchedLen = e.message.includes('must match "rightOn" length');
 }
+if (!caughtMismatchedLen) throw new Error("Expected mismatched leftOn/rightOn length to throw InvalidArgumentError");
 let caughtBothOnAndLeftOn = false;
 try {
     leftHet.join({ other: rightHet, on: "user_id" as any, leftOn: "user_id", rightOn: "id" });
@@ -354,6 +355,7 @@ const multiOuter = leftMulti.join({
     leftOn: ["tenant", "user_id"],
     rightOn: ["t_id", "u_id"],
     how: "outer",
+    coalesce: true,
 });
 if (multiOuter.height !== 4) throw new Error("Composite multi-key outer join height mismatch");
 const multiOuterDicts = multiOuter.to_dicts() as any[];
@@ -455,8 +457,10 @@ let caughtMissingRightKeyHet = false;
 try {
     leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "nonexistent_right" as any });
 } catch (e: any) {
-    caughtMissingRightKeyHet = e.message.includes('Join key "nonexistent_right"');
+    caughtMissingRightKeyHet = e.message.includes("in the right DataFrame");
 }
+if (!caughtMissingRightKeyHet) throw new Error("Expected missing right key in leftOn/rightOn to throw");
+
 // ─── 31. Cross Join (Cartesian Product) ───────────────────────────────────────
 
 const dfCrossL = new DataFrame([
@@ -510,6 +514,7 @@ try {
 } catch (e: any) {
     caughtKeysInCross = e.message.includes('Cannot specify "on", "leftOn", or "rightOn" when how is "cross"');
 }
+if (!caughtKeysInCross) throw new Error("Expected keys in cross join to throw");
 // Edge case 4: Extreme Cartesian dimensions size guard
 import { computeCartesianProduct } from "../../src/utils/array";
 let caughtOverflow = false;
@@ -531,6 +536,7 @@ const coalesceR = new DataFrame([
     { id: 2, rval: "R2" },
 ]);
 
+// 32a. Explicit coalesce: true on outer join merges keys into single column "id"
 const dfCoalesceOuter = coalesceL.join({
     other: coalesceR,
     on: "id",
@@ -539,20 +545,241 @@ const dfCoalesceOuter = coalesceL.join({
     coalesce: true,
 });
 const outerCoalesceRows = dfCoalesceOuter.to_dicts() as any[];
-// Unmatched right row (id: 2) gets coalesced key id = 2
 const r2Row = outerCoalesceRows.find(r => r.rval === "R2");
-if (!r2Row || r2Row.id !== 2) throw new Error("Expected outer join key coalescing for right unmatched row");
+if (!r2Row || r2Row.id !== 2 || "id_right" in r2Row) {
+    throw new Error("Expected explicit coalesce: true to merge right key into 'id' and omit 'id_right'");
+}
 
-const dfNoCoalesce = coalesceL.join({
+// 32b. Default coalesce (omitted) on how: 'outer' defaults to coalesce: true (Polars standard behavior)
+const dfDefaultOuter = coalesceL.join({
     other: coalesceR,
-    leftOn: "id",
-    rightOn: "id",
+    on: "id",
     how: "outer",
     join_nulls: true,
+});
+const defaultOuterRows = dfDefaultOuter.to_dicts() as any[];
+const r2DefaultRow = defaultOuterRows.find(r => r.rval === "R2");
+if (!r2DefaultRow || r2DefaultRow.id !== 2 || "id_right" in r2DefaultRow) {
+    throw new Error("Expected default outer join (coalesce omitted) to default to coalesce: true, merging keys into 'id' and omitting 'id_right'");
+}
+
+// 32c. Explicit coalesce: false on outer join with heterogeneous keys
+const hetCoalesceL = new DataFrame([{ l_id: 10, val: "A" }, { l_id: 20, val: "B" }]);
+const hetCoalesceR = new DataFrame([{ r_id: 20, score: 99 }, { r_id: 30, score: 88 }]);
+const dfHetNoCoalesce = hetCoalesceL.join({
+    other: hetCoalesceR,
+    leftOn: "l_id",
+    rightOn: "r_id",
+    how: "outer",
     coalesce: false,
 });
-const noCoalesceRows = dfNoCoalesce.to_dicts() as any[];
-const lNullRow = noCoalesceRows.find(r => r.val === "L_Null");
-if (lNullRow && lNullRow.id !== null) throw new Error("Expected coalesce: false to preserve null left key value");
+const hetNoCoalesceRows = dfHetNoCoalesce.to_dicts() as any[];
+const r30Row = hetNoCoalesceRows.find(r => r.r_id === 30);
+if (!r30Row || r30Row.l_id !== null || r30Row.score !== 88) {
+    throw new Error("Expected coalesce: false on heterogeneous outer join to keep l_id=null and r_id=30 for unmatched right row");
+}
+
+// 32d. Default coalesce on how: 'right' defaults to coalesce: true
+const dfDefaultRight = hetCoalesceL.join({
+    other: hetCoalesceR,
+    leftOn: "l_id",
+    rightOn: "r_id",
+    how: "right",
+});
+const defaultRightRows = dfDefaultRight.to_dicts() as any[];
+const r30CoalescedRow = defaultRightRows.find(r => r.l_id === 30);
+if (!r30CoalescedRow || "r_id" in r30CoalescedRow) {
+    throw new Error("Expected default right join to coalesce r_id into l_id (l_id=30) and drop r_id");
+}
+
+// 32e. Heterogeneous outer join with explicit coalesce: true (merges right key into left key and drops right key column)
+const dfHetOuterCoalesce = hetCoalesceL.join({
+    other: hetCoalesceR,
+    leftOn: "l_id",
+    rightOn: "r_id",
+    how: "outer",
+    coalesce: true,
+});
+const hetOuterCoalesceRows = dfHetOuterCoalesce.to_dicts() as any[];
+const r30HetRow = hetOuterCoalesceRows.find(r => r.score === 88);
+if (!r30HetRow || r30HetRow.l_id !== 30 || "r_id" in r30HetRow) {
+    throw new Error("Expected explicit coalesce: true on heterogeneous outer join to merge r_id=30 into l_id=30 and drop r_id column");
+}
+
+// 32f. Composite heterogeneous keys with coalesce: true on outer join
+const compL = new DataFrame([{ k1: "A", k2: 1, valL: "left1" }]);
+const compR = new DataFrame([{ r1: "A", r2: 1, valR: "right1" }, { r1: "B", r2: 2, valR: "right2" }]);
+const dfCompCoalesce = compL.join({
+    other: compR,
+    leftOn: ["k1", "k2"],
+    rightOn: ["r1", "r2"],
+    how: "outer",
+    coalesce: true,
+});
+const compRows = dfCompCoalesce.to_dicts() as any[];
+const b2Row = compRows.find(r => r.valR === "right2");
+if (!b2Row || b2Row.k1 !== "B" || b2Row.k2 !== 2 || "r1" in b2Row || "r2" in b2Row) {
+    throw new Error("Expected composite keys (r1, r2) to be coalesced into (k1, k2) and dropped from output");
+}
+
+// 32g. Explicit coalesce: false on left join (retains right key column with suffix if colliding)
+const dfLeftNoCoalesce = coalesceL.join({
+    other: coalesceR,
+    on: "id",
+    how: "left",
+    coalesce: false,
+});
+const leftNoCoalesceRows = dfLeftNoCoalesce.to_dicts() as any[];
+if (!leftNoCoalesceRows.every(r => "id" in r && "id_right" in r)) {
+    throw new Error("Expected explicit coalesce: false on left join to preserve both 'id' and 'id_right'");
+}
+
+// 32h. Coalesce with join_nulls: true when both sides have null keys
+const nullL = new DataFrame([{ id: null as any, val: "LNull" }]);
+const nullR = new DataFrame([{ id: null as any, valR: "RNull" }, { id: 99, valR: "R99" }]);
+const dfNullCoalesce = nullL.join({
+    other: nullR,
+    on: "id",
+    how: "outer",
+    join_nulls: true,
+    coalesce: true,
+});
+const nullCoalesceRows = dfNullCoalesce.to_dicts() as any[];
+const matchedNullRow = nullCoalesceRows.find(r => r.val === "LNull" && r.valR === "RNull");
+const r99Row = nullCoalesceRows.find(r => r.valR === "R99");
+if (!matchedNullRow || matchedNullRow.id !== null) {
+    throw new Error("Expected join_nulls matched null keys to coalesce to null");
+}
+if (!r99Row || r99Row.id !== 99 || "id_right" in r99Row) {
+    throw new Error("Expected unmatched right row (id: 99) to coalesce key id to 99");
+}
+
+// ─── 33. Row Order Maintenance (maintain_order) ──────────────────────────────────
+
+const ordL = new DataFrame([
+    { id: 3, val: "L3" },
+    { id: 1, val: "L1" },
+    { id: 2, val: "L2" },
+]);
+const ordR = new DataFrame([
+    { id: 1, rval: "R1" },
+    { id: 2, rval: "R2" },
+    { id: 3, rval: "R3" },
+]);
+
+// maintain_order: "left" preserving left table row order
+const dfOrdLeft = ordL.join({ other: ordR, on: "id", maintain_order: "left" });
+const ordLeftIds = dfOrdLeft.to_dict()["id"];
+if (ordLeftIds[0] !== 3 || ordLeftIds[1] !== 1 || ordLeftIds[2] !== 2) {
+    throw new Error("maintain_order: 'left' failed to preserve left table row order");
+}
+
+// maintain_order: true (boolean) equivalent to "left"
+const dfOrdBool = ordL.join({ other: ordR, on: "id", maintain_order: true });
+const ordBoolIds = dfOrdBool.to_dict()["id"];
+if (ordBoolIds[0] !== 3 || ordBoolIds[1] !== 1 || ordBoolIds[2] !== 2) {
+    throw new Error("maintain_order: true (boolean) failed to preserve left table row order");
+}
+
+// maintain_order: "right" preserving right table row order
+const dfOrdRight = ordL.join({ other: ordR, on: "id", maintain_order: "right" });
+const ordRightIds = dfOrdRight.to_dict()["id"];
+if (ordRightIds[0] !== 1 || ordRightIds[1] !== 2 || ordRightIds[2] !== 3) {
+    throw new Error("maintain_order: 'right' failed to preserve right table row order");
+}
+
+// maintain_order: "left_right" and "right_left"
+const dfOrdLeftRight = ordL.join({ other: ordR, on: "id", maintain_order: "left_right" });
+if (dfOrdLeftRight.to_dict()["id"][0] !== 3) {
+    throw new Error("maintain_order: 'left_right' failed");
+}
+
+// ─── 34. Edge Cases: maintain_order with Unmatched & Duplicate Rows ─────────────────────
+
+// 34a. maintain_order: "right" with unmatched left rows in a left join
+const ordLUnmatched = new DataFrame([
+    { id: 10, val: "L10" },
+    { id: 20, val: "L20" }, // unmatched in right
+    { id: 30, val: "L30" },
+]);
+const ordRUnmatched = new DataFrame([
+    { id: 30, rval: "R30" }, // index 0 in right
+    { id: 10, rval: "R10" }, // index 1 in right
+]);
+
+const dfOrdRightUnmatched = ordLUnmatched.join({
+    other: ordRUnmatched,
+    on: "id",
+    how: "left",
+    maintain_order: "right",
+});
+const ordRightUnmatchedIds = dfOrdRightUnmatched.to_dict()["id"];
+// Right order: 30 (index 0), 10 (index 1), then unmatched left 20 (index null) at the end
+if (ordRightUnmatchedIds[0] !== 30 || ordRightUnmatchedIds[1] !== 10 || ordRightUnmatchedIds[2] !== 20) {
+    throw new Error("maintain_order: 'right' failed for left join with unmatched rows");
+}
+
+// 34b. maintain_order: "right_left" with 1-to-many duplicate key matches
+const ordLDup = new DataFrame([
+    { id: 2, val: "L2_a" }, // index 0
+    { id: 1, val: "L1" },   // index 1
+    { id: 2, val: "L2_b" }, // index 2
+]);
+const ordRDup = new DataFrame([
+    { id: 1, rval: "R1" },   // index 0
+    { id: 2, rval: "R2" },   // index 1
+]);
+
+const dfOrdRightLeft = ordLDup.join({
+    other: ordRDup,
+    on: "id",
+    how: "inner",
+    maintain_order: "right_left",
+});
+const ordRightLeftVals = dfOrdRightLeft.to_dict()["val"];
+// Expected: Right index 0 (id 1 -> L1), then Right index 1 (id 2 -> L2_a then L2_b)
+if (ordRightLeftVals[0] !== "L1" || ordRightLeftVals[1] !== "L2_a" || ordRightLeftVals[2] !== "L2_b") {
+    throw new Error("maintain_order: 'right_left' failed for duplicate key matches");
+}
+
+// ─── 35. Edge Cases: Coalesce with Heterogeneous Keys & Multiple Keys ─────────────────────
+
+// 35a. Multi-key coalescing on outer join with nulls
+const multiKeyL = new DataFrame([
+    { k1: 1, k2: "a", val: "L1" },
+    { k1: 2, k2: "b", val: "L2" },
+]);
+const multiKeyR = new DataFrame([
+    { rk1: 2, rk2: "b", rval: "R2" },
+    { rk1: 3, rk2: "c", rval: "R3" },
+]);
+
+const dfMultiCoalesce = multiKeyL.join({
+    other: multiKeyR,
+    leftOn: ["k1", "k2"],
+    rightOn: ["rk1", "rk2"],
+    how: "outer",
+    coalesce: true,
+});
+const multiRows = dfMultiCoalesce.to_dicts() as any[];
+const r3Row = multiRows.find(r => r.rval === "R3");
+if (!r3Row || r3Row.k1 !== 3 || r3Row.k2 !== "c" || "rk1" in r3Row || "rk2" in r3Row) {
+    throw new Error("Multi-key coalesce failed to coalesce rk1/rk2 into k1/k2 or suppress rk1/rk2");
+}
+
+// 35b. Coalesce on empty DataFrames
+const emptyL = new DataFrame({ id: [] as number[], val: [] as string[] });
+const emptyR = new DataFrame({ id: [] as number[], rval: [] as string[] });
+const dfEmptyCoalesce = emptyL.join({ other: emptyR, on: "id", coalesce: true });
+if (dfEmptyCoalesce.height !== 0 || !dfEmptyCoalesce.columns.includes("id")) {
+    throw new Error("Coalesce on empty DataFrame failed");
+}
+
+const dfEmptyNoCoalesce = emptyL.join({ other: emptyR, on: "id", coalesce: false });
+if (dfEmptyNoCoalesce.height !== 0 || !dfEmptyNoCoalesce.columns.includes("id_right")) {
+    throw new Error("Coalesce false on empty DataFrame failed to preserve id_right");
+}
 
 console.log("✓ join tests passed!");
+
+

@@ -3,7 +3,7 @@ import { GroupedData } from "./grouped/grouped"
 import { NEWLINE, UNMATCHED_ROW_INDEX } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions } from "../types"
-import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
+import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, JoinMaintainOrder, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError, InvalidArgumentError, IOStreamError } from "../exceptions"
@@ -814,7 +814,8 @@ export class DataFrame<T extends RowRecord = any> {
      *   non-key column names (default `["", "_right"]`). Ignored for `"semi"` and `"anti"` joins.
      * @param {boolean} [config.join_nulls] If `true`, null key values are treated as equal and will match each other
      *   across DataFrames. Default `false` (SQL-standard: `NULL != NULL`).
-     * @param {boolean} [config.coalesce] If `true`, coalesces null left key values with non-null right key values in outer/right joins. Default `true`.
+     * @param {boolean} [config.coalesce] Coalescing behavior for join key columns. Default `true`. If `true`, coalesces join key values into left key columns and drops right key columns. If `false`, keeps join key columns separate.
+     * @param {JoinMaintainOrder | boolean} [config.maintain_order] Row order preservation strategy. Options: `"none"`, `"left"` (or `true`), `"right"`, `"left_right"`, `"right_left"`. Default `"none"`.
      * @returns {DataFrame}
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
@@ -837,8 +838,9 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┴─────┴─────┘
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
-        const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false, coalesce = true } = config;
+        const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false, coalesce, maintain_order } = config;
         const [leftSuffix, rightSuffix] = suffixes;
+        const shouldCoalesce = coalesce ?? true;
 
         if (how === "cross" && (on !== undefined || leftOn !== undefined || rightOn !== undefined)) {
             throw new InvalidArgumentError('Cannot specify "on", "leftOn", or "rightOn" when how is "cross". Cross joins produce a keyless Cartesian product.');
@@ -882,6 +884,10 @@ export class DataFrame<T extends RowRecord = any> {
             assertColumnExists(rightKeysStr[i], other._columns, "Join key", " in the right DataFrame.");
         }
 
+        const normalizedMaintainOrder: JoinMaintainOrder = typeof maintain_order === "boolean"
+            ? (maintain_order ? "left" : "none")
+            : (maintain_order ?? "none");
+
         const { leftIndices, rightIndices } = alignKeyIndices(
             this._columns,
             other._columns,
@@ -889,7 +895,7 @@ export class DataFrame<T extends RowRecord = any> {
             other._height,
             leftKeysStr,
             rightKeysStr,
-            { how, join_nulls }
+            { how, join_nulls, maintain_order: normalizedMaintainOrder }
         );
 
         const outHeight = leftIndices.length;
@@ -955,14 +961,14 @@ export class DataFrame<T extends RowRecord = any> {
             for (let r = 0; r < outHeight; r++) {
                 const lIdx = leftIndices[r];
                 const rIdx = rightIndices[r];
-                if (isLeftJoinKey && coalesce) {
+                if (isLeftJoinKey && shouldCoalesce) {
                     const leftVal = lIdx !== UNMATCHED_ROW_INDEX ? leftCol[lIdx] : null;
                     const rightVal = (rIdx !== null && rightCol) ? rightCol[rIdx] : null;
                     outCol[r] = leftVal ?? rightVal;
                 } else if (lIdx !== UNMATCHED_ROW_INDEX) {
                     outCol[r] = leftCol[lIdx];
                 } else {
-                    outCol[r] = (isLeftJoinKey && rIdx !== null) ? rightCol![rIdx] : null;
+                    outCol[r] = null;
                 }
             }
 
@@ -976,7 +982,7 @@ export class DataFrame<T extends RowRecord = any> {
             const rightColKeys = Object.keys(other._columns);
             for (let i = 0; i < rightColKeys.length; i++) {
                 const k = rightColKeys[i];
-                if (rightKeysSet.has(k)) continue; // Right join keys are coalesced into leftOn keys
+                if (shouldCoalesce && rightKeysSet.has(k)) continue; // Right join keys are coalesced into leftOn keys
 
                 let targetName: string;
                 if (allocatedNames.has(k)) {

@@ -6,6 +6,7 @@ import type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions } fr
 export type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions };
 
 export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross";
+export type JoinMaintainOrder = "none" | "left" | "right" | "left_right" | "right_left";
 export type LimitPosition = "start" | "end";
 export type GroupMap = Map<string, number[]>;
 
@@ -37,6 +38,7 @@ export interface JoinOptions<T = any, U extends RowRecord = any> {
     suffixes?: [string, string];
     join_nulls?: boolean;
     coalesce?: boolean;
+    maintain_order?: JoinMaintainOrder | boolean;
 }
 
 export interface UnpivotOptions<T> {
