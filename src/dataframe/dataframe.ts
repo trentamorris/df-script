@@ -815,7 +815,12 @@ export class DataFrame<T extends RowRecord = any> {
      * @param {boolean} [config.join_nulls] If `true`, null key values are treated as equal and will match each other
      *   across DataFrames. Default `false` (SQL-standard: `NULL != NULL`).
      * @param {boolean} [config.coalesce] Coalescing behavior for join key columns. Default `true`. If `true`, coalesces join key values into left key columns and drops right key columns. If `false`, keeps join key columns separate.
-     * @param {JoinMaintainOrder | boolean} [config.maintain_order] Row order preservation strategy. Options: `"none"`, `"left"` (or `true`), `"right"`, `"left_right"`, `"right_left"`. Default `"none"`.
+     * @param {JoinMaintainOrder | boolean} [config.maintain_order] Row order preservation strategy. Default `"none"`.
+     *   - `"none"` (or `false`) — No specific ordering is desired.
+     *   - `"left"` (or `true`) — Preserves the order of the left DataFrame.
+     *   - `"right"` — Preserves the order of the right DataFrame.
+     *   - `"left_right"` — Preserves the order of the left DataFrame first, then the right.
+     *   - `"right_left"` — Preserves the order of the right DataFrame first, then the left.
      * @returns {DataFrame}
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
