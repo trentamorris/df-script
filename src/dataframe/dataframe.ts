@@ -836,19 +836,28 @@ export class DataFrame<T extends RowRecord = any> {
         const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false } = config;
         const [leftSuffix, rightSuffix] = suffixes;
 
-        let leftKeysStr: string[] = [];
-        let rightKeysStr: string[] = [];
+        if (how === "cross" && (on !== undefined || leftOn !== undefined || rightOn !== undefined)) {
+            throw new InvalidArgumentError('Cannot specify "on", "leftOn", or "rightOn" when how is "cross". Cross joins produce a keyless Cartesian product.');
+        }
 
         if (on !== undefined && (leftOn !== undefined || rightOn !== undefined)) {
             throw new InvalidArgumentError('Cannot specify both "on" and "leftOn"/"rightOn" in join(). Use either "on" or both "leftOn" and "rightOn".');
         }
 
-        if (leftOn !== undefined || rightOn !== undefined) {
-            if (leftOn === undefined || rightOn === undefined) {
-                throw new InvalidArgumentError('join() requires both "leftOn" and "rightOn" when specifying heterogeneous join keys.');
-            }
-            leftKeysStr = toValidStringArray(leftOn as any);
-            rightKeysStr = toValidStringArray(rightOn as any);
+        if ((leftOn !== undefined && rightOn === undefined) || (leftOn === undefined && rightOn !== undefined)) {
+            throw new InvalidArgumentError('join() requires both "leftOn" and "rightOn" when specifying heterogeneous join keys.');
+        }
+
+        if (how !== "cross" && on === undefined && leftOn === undefined && rightOn === undefined) {
+            throw new InvalidArgumentError('join() requires either "on" or both "leftOn" and "rightOn" parameters.');
+        }
+
+        let leftKeysStr: string[] = [];
+        let rightKeysStr: string[] = [];
+
+        if (leftOn !== undefined && rightOn !== undefined) {
+            leftKeysStr = toValidStringArray(leftOn);
+            rightKeysStr = toValidStringArray(rightOn);
             if (leftKeysStr.length === 0 || rightKeysStr.length === 0) {
                 throw new InvalidArgumentError('join() requires non-empty key arrays in "leftOn" and "rightOn".');
             }
@@ -856,13 +865,11 @@ export class DataFrame<T extends RowRecord = any> {
                 throw new InvalidArgumentError(`join() "leftOn" length (${leftKeysStr.length}) must match "rightOn" length (${rightKeysStr.length}).`);
             }
         } else if (on !== undefined) {
-            leftKeysStr = toValidStringArray(on as any);
+            leftKeysStr = toValidStringArray(on);
             rightKeysStr = leftKeysStr;
             if (leftKeysStr.length === 0) {
-                throw new InvalidArgumentError('join() requires at least one key column in "on". For Cartesian products, use crossJoin() instead.');
+                throw new InvalidArgumentError('join() requires at least one key column in "on".');
             }
-        } else {
-            throw new InvalidArgumentError('join() requires either "on" or both "leftOn" and "rightOn" parameters.');
         }
 
         // Step 1b: Validate column presence

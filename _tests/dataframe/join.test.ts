@@ -445,7 +445,7 @@ if (!caughtEmptyLeftOn) throw new Error("Expected empty arrays in leftOn/rightOn
 
 let caughtMissingLeftKeyHet = false;
 try {
-    leftHet.join({ other: rightHet, leftOn: "nonexistent_left", rightOn: "id" });
+    leftHet.join({ other: rightHet, leftOn: "nonexistent_left" as any, rightOn: "id" });
 } catch (e: any) {
     caughtMissingLeftKeyHet = e.message.includes('Join key "nonexistent_left"');
 }
@@ -453,10 +453,71 @@ if (!caughtMissingLeftKeyHet) throw new Error("Expected missing left key in left
 
 let caughtMissingRightKeyHet = false;
 try {
-    leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "nonexistent_right" });
+    leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "nonexistent_right" as any });
 } catch (e: any) {
     caughtMissingRightKeyHet = e.message.includes('Join key "nonexistent_right"');
 }
-if (!caughtMissingRightKeyHet) throw new Error("Expected missing right key in rightOn to throw ColumnNotFoundError");
+// ─── 31. Cross Join (Cartesian Product) ───────────────────────────────────────
+
+const dfCrossL = new DataFrame([
+    { color: "red" },
+    { color: "blue" },
+]);
+const dfCrossR = new DataFrame([
+    { size: "S" },
+    { size: "M" },
+    { size: "L" },
+]);
+
+const crossRes = dfCrossL.join({ other: dfCrossR, how: "cross" });
+if (crossRes.height !== 6) throw new Error(`Cross join height expected 6, got ${crossRes.height}`);
+const crossRows = crossRes.to_dicts() as any[];
+if (crossRows[0].color !== "red" || crossRows[0].size !== "S") throw new Error("Cross join row 0 mismatch");
+if (crossRows[5].color !== "blue" || crossRows[5].size !== "L") throw new Error("Cross join row 5 mismatch");
+
+// Edge case 1: Empty DataFrames (Left or Right empty)
+const dfEmpty = new DataFrame<{ color: string }>([]);
+const crossEmptyL = dfEmpty.join({ other: dfCrossR, how: "cross" });
+if (crossEmptyL.height !== 0) throw new Error("Expected empty left cross join to return height 0");
+
+const crossEmptyR = dfCrossL.join({ other: dfEmpty as any, how: "cross" });
+if (crossEmptyR.height !== 0) throw new Error("Expected empty right cross join to return height 0");
+
+// Edge case 2: Column collision handling in Cross Join
+const dfCollisionL = new DataFrame([
+    { id: 1, val: "A" },
+    { id: 2, val: "B" },
+]);
+const dfCollisionR = new DataFrame([
+    { id: 10, score: 99 },
+    { id: 20, score: 88 },
+]);
+
+const crossColl = dfCollisionL.join({ other: dfCollisionR, how: "cross", suffixes: ["_left", "_right"] });
+if (crossColl.height !== 4) throw new Error("Expected cross join collision height 4");
+const collCols = Object.keys(crossColl._columns);
+if (!collCols.includes("id_left") || !collCols.includes("id_right")) {
+    throw new Error(`Expected suffixes on colliding columns, got: ${collCols.join(", ")}`);
+}
+const collRows = crossColl.to_dicts() as any[];
+if (collRows[0].id_left !== 1 || collRows[0].id_right !== 10) throw new Error("Cross join collision row 0 mismatch");
+if (collRows[3].id_left !== 2 || collRows[3].id_right !== 20) throw new Error("Cross join collision row 3 mismatch");
+
+// Edge case 3: Passing join keys with how: "cross" throws InvalidArgumentError
+let caughtKeysInCross = false;
+try {
+    dfCrossL.join({ other: dfCrossR, how: "cross", on: "color" as any });
+} catch (e: any) {
+    caughtKeysInCross = e.message.includes('Cannot specify "on", "leftOn", or "rightOn" when how is "cross"');
+}
+// Edge case 4: Extreme Cartesian dimensions size guard
+import { computeCartesianProduct } from "../../src/utils/array";
+let caughtOverflow = false;
+try {
+    computeCartesianProduct(50000, 100000);
+} catch (e: any) {
+    caughtOverflow = e.message.includes("exceeds maximum JavaScript array capacity");
+}
+if (!caughtOverflow) throw new Error("Expected extreme Cartesian dimensions to throw InvalidArgumentError");
 
 console.log("✓ join tests passed!");

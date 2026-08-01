@@ -5,7 +5,7 @@ import type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions } fr
 
 export type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions };
 
-export type JoinType = "inner" | "left" | "outer" | "right" | "semi" | "anti";
+export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross";
 export type LimitPosition = "start" | "end";
 export type GroupMap = Map<string, number[]>;
 

@@ -1,10 +1,9 @@
 /** @internalfile */
 import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
-import { toValidNumber, isValidNumber } from "./number";
+import { toValidNumber, isValidNumber, isValidInt } from "./number";
 import { toCanonicalString } from "./string";
 import type { AnyTypedArray, ColumnData } from "../types";
 import { ComputeError, InvalidArgumentError } from "../exceptions";
-
 /** Array Guards **/
 const typedArrayTagGetter = (() => {
     try {
@@ -1049,4 +1048,29 @@ export function computeWeightedAverage(pairs: ColumnData<[any, any]>): number | 
 
     if (count === 0 || Math.abs(sumWeights) < 1e-12) return null;
     return sumProducts / sumWeights;
+}
+
+/**
+ * Generates Cartesian product pair index arrays for two lengths lenA and lenB.
+ */
+export function computeCartesianProduct(lenA: number, lenB: number): { leftIndices: number[]; rightIndices: number[] } {
+    const safeLenA = Math.max(0, Math.floor(lenA || 0));
+    const safeLenB = Math.max(0, Math.floor(lenB || 0));
+    const total = safeLenA * safeLenB;
+
+    if (!isValidInt(total, { range: "UInt32" })) {
+        throw new InvalidArgumentError(`Cartesian product size (${total} rows) exceeds maximum JavaScript array capacity.`);
+    }
+
+    const leftIndices = new Array<number>(total);
+    const rightIndices = new Array<number>(total);
+    let pos = 0;
+    for (let i = 0; i < safeLenA; i++) {
+        for (let j = 0; j < safeLenB; j++) {
+            leftIndices[pos] = i;
+            rightIndices[pos] = j;
+            pos++;
+        }
+    }
+    return { leftIndices, rightIndices };
 }

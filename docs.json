@@ -4003,11 +4003,11 @@
   },
   "constants.ts": {
     "const": {
-      "desc": "Sentinel value used in join left-index arrays to indicate a right-only (unmatched) row.",
+      "desc": "Maximum allowable length for a single JavaScript array (2^32 - 1).",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).const(...)",
-      "signature": "$df.col(<column_name>).constUNMATCHED_ROW_INDEX = -1",
-      "lineStart": 19
+      "signature": "$df.col(<column_name>).constMAX_JS_ARRAY_LENGTH = 4_294_967_295",
+      "lineStart": 22
     }
   },
   "dataframe/dataframe.ts": {
@@ -4457,7 +4457,7 @@
       "category": "DataFrame",
       "syntax": "df.limit(...)",
       "signature": "df.limit(\n  n: number,\n  {\n    offset = 0,\n    from = \"start\"\n  }: LimitOptions = {}\n): DataFrame<T>",
-      "lineStart": 988
+      "lineStart": 1025
     },
     "pivot": {
       "desc": "Pivots columns from long format to a wide datagrid structure.",
@@ -4495,7 +4495,7 @@
       "category": "DataFrame",
       "syntax": "df.pivot(...)",
       "signature": "df.pivot<U extends RowRecord = any>(\n  config: {\n    index: string | string[],\n    columns: string,\n    values: string,\n    agg?: AggFn | string\n  }\n): DataFrame<U>",
-      "lineStart": 1047
+      "lineStart": 1084
     },
     "rename": {
       "desc": "Renames columns based on a key-value mapping dictionary.",
@@ -4514,7 +4514,7 @@
       "category": "DataFrame",
       "syntax": "df.rename(...)",
       "signature": "df.rename(\n  mapping?: Partial<Record<keyof T, string>>\n): DataFrame<any>",
-      "lineStart": 1131
+      "lineStart": 1168
     },
     "reverse": {
       "desc": "Reverses the row ordering of the DataFrame.",
@@ -4526,7 +4526,7 @@
       "category": "DataFrame",
       "syntax": "df.reverse(...)",
       "signature": "df.reverse(): DataFrame<T>",
-      "lineStart": 1175
+      "lineStart": 1212
     },
     "schema": {
       "desc": "Gets current DataFrameSchema dictionary mapping column names to DataType.",
@@ -4538,7 +4538,7 @@
       "category": "DataFrame",
       "syntax": "df.schema(...)",
       "signature": "df.get schema(): DataFrameSchema",
-      "lineStart": 1205
+      "lineStart": 1242
     },
     "select": {
       "desc": "Selects specific columns or evaluates column expressions.",
@@ -4557,7 +4557,7 @@
       "category": "DataFrame",
       "syntax": "df.select(...)",
       "signature": "df.select<U extends RowRecord = any>(\n  ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]\n): DataFrame<U>",
-      "lineStart": 1232
+      "lineStart": 1269
     },
     "shape": {
       "desc": "Gets DataFrame dimensions as [height, width] tuple.",
@@ -4569,7 +4569,7 @@
       "category": "DataFrame",
       "syntax": "df.shape(...)",
       "signature": "df.get shape(): [number, number]",
-      "lineStart": 1371
+      "lineStart": 1408
     },
     "slice": {
       "desc": "Slices a subset range of rows between start and end index.",
@@ -4593,7 +4593,7 @@
       "category": "DataFrame",
       "syntax": "df.slice(...)",
       "signature": "df.slice(\n  start: number,\n  end?: number\n): DataFrame<T>",
-      "lineStart": 1401
+      "lineStart": 1438
     },
     "sort": {
       "desc": "Sorts DataFrame rows by one or more column expressions or custom sorters.",
@@ -4632,7 +4632,7 @@
       "category": "DataFrame",
       "syntax": "df.sort(...)",
       "signature": "df.sort(\n  config?: {\n    by: keyof T | (keyof T)[] | IExpr | IExpr[],\n    descending?: boolean | boolean[],\n    nullsLast?: boolean,\n    custom?: Partial<Record<keyof T, (a: any, b: any) => number>>\n  }\n): DataFrame<T>",
-      "lineStart": 1443
+      "lineStart": 1480
     },
     "tail": {
       "desc": "Returns the last N rows as a new DataFrame.",
@@ -4650,7 +4650,7 @@
       "category": "DataFrame",
       "syntax": "df.tail(...)",
       "signature": "df.tail(\n  n: number = 10\n): DataFrame<T>",
-      "lineStart": 1538
+      "lineStart": 1575
     },
     "to_dict": {
       "desc": "Converts columns into a JavaScript dictionary mapping column keys to raw arrays.",
@@ -4662,7 +4662,7 @@
       "category": "DataFrame",
       "syntax": "df.to_dict(...)",
       "signature": "df.to_dict(): DataFrameColumns<T>",
-      "lineStart": 1558
+      "lineStart": 1595
     },
     "to_dicts": {
       "desc": "Converts rows into an array of JavaScript objects.",
@@ -4674,7 +4674,7 @@
       "category": "DataFrame",
       "syntax": "df.to_dicts(...)",
       "signature": "df.to_dicts(): T[]",
-      "lineStart": 1577
+      "lineStart": 1614
     },
     "to_array": {
       "desc": "Evaluates a column expression or retrieves column values as a raw JavaScript array.",
@@ -4693,7 +4693,7 @@
       "category": "DataFrame",
       "syntax": "df.to_array(...)",
       "signature": "df.to_array<K extends keyof T>(\n  nameOrExpr: K | IExpr\n): any[]",
-      "lineStart": 1598
+      "lineStart": 1635
     },
     "transpose": {
       "desc": "Transposes rows into columns and columns into rows.",
@@ -4727,7 +4727,7 @@
       "category": "DataFrame",
       "syntax": "df.transpose(...)",
       "signature": "df.transpose(\n  {\n    include_header: includeHeader = false,\n    header_name: headerName = \"column\",\n    column_names: colNamesOpt\n  }: TransposeOptions = {}\n): DataFrame<any>",
-      "lineStart": 1635
+      "lineStart": 1672
     },
     "unique": {
       "desc": "Filters distinct unique rows matching target key columns.",
@@ -4746,7 +4746,7 @@
       "category": "DataFrame",
       "syntax": "df.unique(...)",
       "signature": "df.unique<K extends keyof T>(\n  columns?: K | K[]\n): DataFrame<T>",
-      "lineStart": 1743
+      "lineStart": 1780
     },
     "unpivot": {
       "desc": "Unpivots a wide DataFrame into a long format structure.",
@@ -4785,7 +4785,7 @@
       "category": "DataFrame",
       "syntax": "df.unpivot(...)",
       "signature": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars: keyof T | (keyof T)[],\n    valueVars: keyof T | (keyof T)[],\n    varName?: string,\n    valueName?: string\n  }\n): DataFrame<U>",
-      "lineStart": 1800
+      "lineStart": 1837
     },
     "vstack": {
       "desc": "Concatenates DataFrames vertically. Alias for concat({ how: \"vertical\" }).",
@@ -4804,7 +4804,7 @@
       "category": "DataFrame",
       "syntax": "df.vstack(...)",
       "signature": "df.vstack<U extends RowRecord = any>(\n  other: ConcatItem | ConcatItem[]\n): DataFrame<U>",
-      "lineStart": 1872
+      "lineStart": 1909
     },
     "width": {
       "desc": "Gets width (total column count) of the DataFrame.",
@@ -4816,7 +4816,7 @@
       "category": "DataFrame",
       "syntax": "df.width(...)",
       "signature": "df.get width(): number",
-      "lineStart": 1893
+      "lineStart": 1930
     },
     "with_columns": {
       "desc": "Adds new columns or updates existing ones using column expressions.",
@@ -4835,7 +4835,7 @@
       "category": "DataFrame",
       "syntax": "df.with_columns(...)",
       "signature": "df.with_columns(\n  ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]\n): DataFrame<any>",
-      "lineStart": 1947
+      "lineStart": 1984
     },
     "with_row_index": {
       "desc": "Appends an incremental index column.",
@@ -4859,7 +4859,7 @@
       "category": "DataFrame",
       "syntax": "df.with_row_index(...)",
       "signature": "df.with_row_index(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
-      "lineStart": 2004
+      "lineStart": 2041
     },
     "write_json": {
       "desc": "Writes DataFrame rows to JSON format string or file/stream target.",
@@ -4993,7 +4993,7 @@
       "category": "DataFrame",
       "syntax": "df.write_json(...)",
       "signature": "df.write_json(\n  file?: string | { write: (str: string) => void },\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string",
-      "lineStart": 2055
+      "lineStart": 2092
     },
     "write_csv": {
       "desc": "Writes DataFrame to CSV format string or file/stream target.",
@@ -5032,7 +5032,7 @@
       "category": "DataFrame",
       "syntax": "df.write_csv(...)",
       "signature": "df.write_csv(\n  file?: string | { write: (str: string) => void },\n  options?: {\n    delimiter?: string,\n    header?: boolean,\n    quoteChar?: string\n  }\n): string",
-      "lineStart": 2104
+      "lineStart": 2141
     }
   },
   "dataframe/grouped/grouped.ts": {

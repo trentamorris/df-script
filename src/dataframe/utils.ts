@@ -3,7 +3,7 @@ import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types
 import type { JoinOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
-import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj } from "../utils"
+import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct } from "../utils"
 import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
 
 function partition_by_columns(
@@ -332,6 +332,11 @@ export function alignKeyIndices(
         }
         return computeRowHash(cols, keys, idx);
     };
+
+    // 1b. Fast path for Cross join (Cartesian product)
+    if (how === "cross") {
+        return computeCartesianProduct(leftHeight, rightHeight);
+    }
 
     // 1. Build hash table for right DataFrame
     const rightHash = new Map<string, number[]>();

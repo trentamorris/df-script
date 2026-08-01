@@ -36,7 +36,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Ensure they only select columns from the left DataFrame and do not join right-side columns, utilizing the existing hash matching logic.
 - [x] **Heterogeneous Key Names (`leftOn` & `rightOn`)**:
   * Allow specifying different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
-- [ ] **Cross Join (`how: "cross"`)**:
+- [x] **Cross Join (`how: "cross"`)**:
   * Implement Cartesian product join between two DataFrames without requiring join key arguments.
 - [ ] **Asof Join (`df.join_asof(...)`)**:
   * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).

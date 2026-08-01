@@ -1,5 +1,6 @@
 /** @internalfile */
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
+import { MAX_JS_ARRAY_LENGTH } from "../constants";
 
 const STRICT_SCIENTIFIC_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
 const NON_BASE10_INJECTION_REGEX = /0[xobXOB]/;
@@ -20,15 +21,15 @@ export function isValidNumber(
     options?: NumericValidationOptions
 ): v is number {
     if (typeof v !== "number") return false;
-    
+
     if (Number.isNaN(v)) {
         return options?.allowNaN ?? options?.allowNonFiniteNumbers ?? false;
     }
-    
+
     if (!Number.isFinite(v)) {
         return options?.allowNonFiniteNumbers ?? false;
     }
-    
+
     return true;
 }
 
@@ -274,7 +275,7 @@ export const INT_RANGES = {
     Int32: { min: -2147483648, max: 2147483647 },
     UInt8: { min: 0, max: 255 },
     UInt16: { min: 0, max: 65535 },
-    UInt32: { min: 0, max: 4294967295 }
+    UInt32: { min: 0, max: MAX_JS_ARRAY_LENGTH }
 } as const;
 
 export type IntRangeType = keyof typeof INT_RANGES;
