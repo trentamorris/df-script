@@ -799,7 +799,9 @@ export class DataFrame<T extends RowRecord = any> {
      * Joins two DataFrames on key columns using a specified join strategy.
      * @param {JoinOptions} config Join configuration object.
      * @param {DataFrame} config.other Right DataFrame to join with.
-     * @param {string | string[]} config.on Join key column name or array of key column names that must exist in both DataFrames.
+     * @param {string | string[]} [config.on] Join key column name or array of key column names that exist in both DataFrames.
+     * @param {string | string[]} [config.leftOn] Join key column(s) in the left DataFrame when key names differ.
+     * @param {string | string[]} [config.rightOn] Join key column(s) in the right DataFrame when key names differ.
      * @param {JoinType} [config.how] Join strategy. Default `"inner"`.
      *   - `"inner"` — Only rows with matching keys in both DataFrames.
      *   - `"left"` — All left rows; unmatched right values are `null`.
@@ -807,10 +809,12 @@ export class DataFrame<T extends RowRecord = any> {
      *   - `"outer"` — All rows from both sides; unmatched values are `null`.
      *   - `"semi"` — Left rows that have a match in the right DataFrame (only left columns retained).
      *   - `"anti"` — Left rows that have **no** match in the right DataFrame (only left columns retained).
+     *   - `"cross"` — Cartesian product pairing every left row with every right row (keyless).
      * @param {[string, string]} [config.suffixes] Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping
      *   non-key column names (default `["", "_right"]`). Ignored for `"semi"` and `"anti"` joins.
      * @param {boolean} [config.join_nulls] If `true`, null key values are treated as equal and will match each other
      *   across DataFrames. Default `false` (SQL-standard: `NULL != NULL`).
+     * @param {boolean} [config.coalesce] If `true`, coalesces null left key values with non-null right key values in outer/right joins. Default `true`.
      * @returns {DataFrame}
      * @example
      * >>> const df1 = $df.data({ id: [1, 2], val: ["a", "b"] })
