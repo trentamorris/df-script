@@ -34,6 +34,14 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [x] **Semi-Join & Anti-Join Support**:
   * Add `"semi"` and `"anti"` join options to the `join` method inside `DataFrame.ts`.
   * Ensure they only select columns from the left DataFrame and do not join right-side columns, utilizing the existing hash matching logic.
+- [x] **Heterogeneous Key Names (`leftOn` & `rightOn`)**:
+  * Allow specifying different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
+- [ ] **Cross Join (`how: "cross"`)**:
+  * Implement Cartesian product join between two DataFrames without requiring join key arguments.
+- [ ] **Asof Join (`df.join_asof(...)`)**:
+  * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).
+- [ ] **Join Key Coalescing (`coalesce`)**:
+  * Provide option to coalesce nulls across join key columns in outer joins.
 
 ### ⏰ Timezone & Temporal Extensions
 - [x] **Timezone-Aware Datetime Columns (`.dt.convert_time_zone()`)**:
@@ -109,16 +117,6 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [ ] **Query Execution & Inspection (`.collect()`, `.explain()`)**:
   * **`.collect()`**: Execute the optimized logical/physical query plan DAG and return a concrete `DataFrame`.
   * **`.explain({ optimized?: boolean })`**: Format and return a text/tree string representation of the unoptimized or optimized query plan DAG, allowing developers to inspect predicate pushdown, projection pushdown, and join order optimizations.
-### 🤝 Advanced DataFrame Join Extensions
-- [x] **Heterogeneous Key Names (`leftOn` & `rightOn`)**:
-  * Allow specifying different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
-- [ ] **Cross Join (`how: "cross"`)**:
-  * Implement Cartesian product join between two DataFrames without requiring join key arguments.
-- [ ] **Asof Join (`df.join_asof(...)`)**:
-  * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).
-- [ ] **Join Key Coalescing (`coalesce`)**:
-  * Provide option to coalesce nulls across join key columns in outer joins.
-
 ### ⚡ Performance & Interoperability
 - [ ] **Primitive Fast-Path Row Hashing**:
   * Optimize `computeRowHash` and `toCanonicalString` to use numeric hashing algorithms (e.g., FNV-1a or 64-bit integer mixing) when keys consist strictly of primitive types (integers, strings, booleans), bypassing string allocations during large `DataFrame.join()` and `.groupby()` operations.
