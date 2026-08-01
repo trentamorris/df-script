@@ -125,6 +125,10 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [ ] **Apache Arrow & IPC Interoperability**:
   * Provide lightweight serialization adapters for Apache Arrow IPC memory format, facilitating zero-copy data exchange with Python Polars, PyArrow, and browser WebAssembly runtimes.
 ### 🗂️ Recommended DataFrame Operations
+- [ ] **Dynamic Time-Series Grouping (`df.group_by_dynamic()`)**:
+  * Implement `.group_by_dynamic(index_column, { every, period, offset, label, closed })` for time-series windowing (e.g. tumbling & sliding temporal aggregation buckets).
+- [ ] **Rolling Window Grouping (`df.group_by_rolling()`)**:
+  * Implement `.group_by_rolling(index_column, { period, offset, closed })` for continuous rolling window aggregations on sorted time/numeric series.
 - [ ] **Random Sampling (`df.sample()`)**:
   * Implement `.sample(nOrFraction, options)` to randomly select $N$ rows or a fractional percentage of rows (with optional seed and replacement), useful for ML train/test splitting and dataset exploration.
 - [ ] **DataFrame Partitioning (`df.partition_by()`)**:
@@ -133,6 +137,17 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement explicit deep/shallow cloning of a `DataFrame` instance and its underlying data arrays.
 - [ ] **Convenience Inspection Methods (`df.head()`, `df.tail()`)**:
   * Provide `.head(n)` and `.tail(n)` convenience wrappers for quick inspection of top and bottom rows.
+
+### 🔢 Expressions & Transformations Missing Matrix
+- [ ] **Lead/Lag & Difference (`col.shift()`, `col.diff()`)**:
+  * Implement `.shift(n, fill_value)` for lead/lag calculations and `.diff(n)` for step differences across rows.
+- [ ] **Ranking (`col.rank()`)**:
+  * Implement `.rank(method, descending)` supporting dense, ordinal, min, max, and average rank methods.
+- [ ] **Cumulative Aggregations (`.cum_sum()`, `.cum_prod()`, `.cum_min()`, `.cum_max()`)**:
+  * Implement running cumulative totals, products, minimums, and maximums across column expressions.
+- [ ] **Datatype & Pattern Selectors (`cs.numeric()`, `cs.string()`, `cs.matches()`)**:
+  * Add column selector helpers to allow selecting columns dynamically by data type or regex matching in `select()` and `with_columns()`.
+
 
 
 
