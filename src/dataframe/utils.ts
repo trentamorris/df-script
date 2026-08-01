@@ -1,9 +1,10 @@
 /** @internalfile */
-import type { IExpr, ColumnData, ColumnDict, RegisteredDataType } from "../types"
-import type { JoinOptions } from "./types"
+import type { IExpr, ColumnData, ColumnDict, RegisteredDataType, DataFrameSchema, RowRecord } from "../types"
+import type { JoinOptions, AsofJoinOptions } from "./types"
+import { DataFrame } from "./dataframe"
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
-import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct } from "../utils"
+import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct, toValidNumber, isValidNumber, binarySearch } from "../utils"
 import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
 
 function partition_by_columns(
@@ -320,7 +321,7 @@ export function alignKeyIndices(
     rightHeight: number,
     leftKeys: string[],
     rightKeys: string[],
-    options: Pick<JoinOptions, "how" | "join_nulls" | "maintain_order"> = {}
+    options: Partial<JoinOptions> = {}
 ): { leftIndices: number[]; rightIndices: (number | null)[] } {
     const { how = "inner", join_nulls = false, maintain_order } = options;
 
@@ -436,3 +437,253 @@ export function alignKeyIndices(
     return { leftIndices: sortedLeft, rightIndices: sortedRight };
 }
 
+export function alignAsofIndices(
+    leftCols: ColumnDict,
+    rightCols: ColumnDict,
+    leftHeight: number,
+    rightHeight: number,
+    leftOnKey: string,
+    rightOnKey: string,
+    leftByKeys: string[],
+    rightByKeys: string[],
+    options: AsofJoinOptions = {} as AsofJoinOptions
+): { leftIndices: number[]; rightIndices: (number | null)[] } {
+    const strategy = options.strategy ?? "backward";
+    const allowExactMatches = options.allow_exact_matches ?? true;
+    const checkSorted = options.check_sorted ?? true;
+
+    assertColumnExists(leftOnKey, leftCols, "Join on key", " in the left DataFrame.");
+    assertColumnExists(rightOnKey, rightCols, "Join on key", " in the right DataFrame.");
+
+    const leftOnCol = leftCols[leftOnKey];
+    const rightOnCol = rightCols[rightOnKey];
+
+    if (checkSorted) {
+        const assertSorted = (col: ColumnData, height: number, colName: string, side: string) => {
+            for (let i = 1; i < height; i++) {
+                const prev = toValidNumber(col[i - 1]);
+                const curr = toValidNumber(col[i]);
+                if (isValidNumber(prev) && isValidNumber(curr) && curr < prev) {
+                    throw new InvalidArgumentError(`${side} DataFrame key column "${colName}" is not sorted in ascending order at row ${i}.`);
+                }
+            }
+        };
+        assertSorted(leftOnCol, leftHeight, leftOnKey, "left");
+        assertSorted(rightOnCol, rightHeight, rightOnKey, "right");
+    }
+
+    const hasBy = leftByKeys.length > 0;
+    const rightByMap = new Map<string, number[]>();
+    if (hasBy) {
+        for (let j = 0; j < rightHeight; j++) {
+            const hash = computeRowHash(rightCols, rightByKeys, j);
+            let group = rightByMap.get(hash);
+            if (!group) {
+                group = [];
+                rightByMap.set(hash, group);
+            }
+            group.push(j);
+        }
+    }
+
+    const allRightCandidates: number[] = new Array(rightHeight);
+    if (!hasBy) {
+        for (let c = 0; c < rightHeight; c++) allRightCandidates[c] = c;
+    }
+
+    const leftIndices: number[] = new Array(leftHeight);
+    const rightIndices: (number | null)[] = new Array(leftHeight);
+
+    const matchCandidate = (leftVal: number, candidates: number[]): number | null => {
+        const len = candidates.length;
+        if (len === 0) return null;
+
+        const getVal = (_: number, c: number) => toValidNumber(rightOnCol[c]) ?? NaN;
+
+        if (strategy === "backward") {
+            const pos = binarySearch(candidates, leftVal, { side: allowExactMatches ? "right" : "left", getValue: getVal }) - 1;
+            return pos >= 0 ? candidates[pos] : null;
+        }
+        if (strategy === "forward") {
+            const pos = binarySearch(candidates, leftVal, { side: allowExactMatches ? "left" : "right", getValue: getVal });
+            return pos < len ? candidates[pos] : null;
+        }
+        
+        // strategy === "nearest"
+        const pos = binarySearch(candidates, leftVal, { side: "right", getValue: getVal });
+        let bIdx = pos - 1, fIdx = pos;
+        if (!allowExactMatches) {
+            if (bIdx >= 0 && getVal(bIdx, candidates[bIdx]) === leftVal) bIdx--;
+            if (fIdx < len && getVal(fIdx, candidates[fIdx]) === leftVal) fIdx++;
+        }
+        if (bIdx < 0) return fIdx < len ? candidates[fIdx] : null;
+        if (fIdx >= len) return bIdx >= 0 ? candidates[bIdx] : null;
+        const bVal = getVal(bIdx, candidates[bIdx]);
+        const fVal = getVal(fIdx, candidates[fIdx]);
+        return Math.abs(leftVal - bVal) <= Math.abs(leftVal - fVal) ? candidates[bIdx] : candidates[fIdx];
+    };
+
+    const tol = options.tolerance !== undefined ? toValidNumber(options.tolerance) : null;
+
+    for (let i = 0; i < leftHeight; i++) {
+        leftIndices[i] = i;
+        const leftVal = toValidNumber(leftOnCol[i]);
+
+        if (!isValidNumber(leftVal)) {
+            rightIndices[i] = null;
+            continue;
+        }
+
+        const candidates = hasBy
+            ? (rightByMap.get(computeRowHash(leftCols, leftByKeys, i)) || [])
+            : allRightCandidates;
+
+        if (candidates.length === 0) {
+            rightIndices[i] = null;
+            continue;
+        }
+
+        let matchedRIdx = matchCandidate(leftVal, candidates);
+
+        if (matchedRIdx !== null && tol !== null) {
+            const rVal = toValidNumber(rightOnCol[matchedRIdx]);
+            if (!isValidNumber(tol) || !isValidNumber(rVal) || Math.abs(leftVal - rVal) > tol) {
+                matchedRIdx = null;
+            }
+        }
+
+        rightIndices[i] = matchedRIdx;
+    }
+
+    return { leftIndices, rightIndices };
+}
+
+export function materializeJoinedDataFrame<R extends RowRecord = any>(
+    leftCols: ColumnDict,
+    rightCols: ColumnDict,
+    leftSchema: DataFrameSchema,
+    rightSchema: DataFrameSchema,
+    leftIndices: number[],
+    rightIndices: (number | null)[],
+    leftKeysStr: string[],
+    rightKeysStr: string[],
+    options: {
+        suffixes?: [string, string];
+        coalesce?: boolean;
+        how?: string;
+    } = {}
+): DataFrame<R> {
+    const [leftSuffix = "", rightSuffix = "_right"] = options.suffixes || [];
+    const shouldCoalesce = options.coalesce ?? true;
+    const how = options.how || "inner";
+
+    const outHeight = leftIndices.length;
+    const newColumns: ColumnDict = {};
+    const outSchema: DataFrameSchema = {};
+    const leftKeysSet = new Set(leftKeysStr);
+    const rightKeysSet = new Set(rightKeysStr);
+
+    const resolveUniqueColumnName = (colName: string, suffix: string): string => {
+        const effectiveSuffix = suffix !== "" ? suffix : "_left";
+        let candidate = `${colName}${effectiveSuffix}`;
+        let counter = 1;
+        while (allocatedNames.has(candidate)) {
+            candidate = `${colName}${effectiveSuffix}_${counter++}`;
+        }
+        allocatedNames.add(candidate);
+        return candidate;
+    };
+
+    const gatherColumnByIndices = (
+        col: ColumnData,
+        indices: (number | null)[],
+        unmatchedSentinel: number = UNMATCHED_ROW_INDEX
+    ): ColumnData => {
+        const len = indices.length;
+        const out = new Array(len);
+        for (let r = 0; r < len; r++) {
+            const idx = indices[r];
+            out[r] = idx !== null && idx !== unmatchedSentinel ? col[idx] : null;
+        }
+        return out;
+    };
+
+    const leftToRightKeyMap = new Map<string, string>();
+    for (let i = 0; i < leftKeysStr.length; i++) {
+        if (!leftToRightKeyMap.has(leftKeysStr[i])) {
+            leftToRightKeyMap.set(leftKeysStr[i], rightKeysStr[i]);
+        }
+    }
+
+    const allocatedNames = new Set<string>();
+    const leftColKeys = Object.keys(leftCols);
+    const rightColKeys = Object.keys(rightCols);
+
+    for (let i = 0; i < leftColKeys.length; i++) {
+        const k = leftColKeys[i];
+        if (!(k in rightCols) || leftKeysSet.has(k) || rightKeysSet.has(k)) {
+            allocatedNames.add(k);
+        }
+    }
+
+    for (let i = 0; i < leftColKeys.length; i++) {
+        const k = leftColKeys[i];
+        const isLeftJoinKey = leftKeysSet.has(k);
+
+        let targetName: string;
+        if (k in rightCols && !isLeftJoinKey && !rightKeysSet.has(k)) {
+            if (leftSuffix !== "") {
+                allocatedNames.add(k);
+                targetName = resolveUniqueColumnName(k, leftSuffix);
+            } else if (!allocatedNames.has(k)) {
+                targetName = k;
+                allocatedNames.add(k);
+            } else {
+                targetName = resolveUniqueColumnName(k, leftSuffix);
+            }
+        } else {
+            targetName = k;
+        }
+
+        const leftCol = leftCols[k];
+        const rightK = isLeftJoinKey ? leftToRightKeyMap.get(k) : null;
+        const rightCol = rightK ? rightCols[rightK] : null;
+
+        if (isLeftJoinKey && shouldCoalesce) {
+            const outCol = new Array(outHeight);
+            for (let r = 0; r < outHeight; r++) {
+                const lIdx = leftIndices[r];
+                const rIdx = rightIndices[r];
+                const leftVal = lIdx !== UNMATCHED_ROW_INDEX ? leftCol[lIdx] : null;
+                const rightVal = (rIdx !== null && rightCol) ? rightCol[rIdx] : null;
+                outCol[r] = leftVal ?? rightVal;
+            }
+            newColumns[targetName] = outCol;
+        } else {
+            newColumns[targetName] = gatherColumnByIndices(leftCol, leftIndices);
+        }
+
+        if (leftSchema[k]) outSchema[targetName] = leftSchema[k];
+        else if (rightK && rightSchema[rightK]) outSchema[targetName] = rightSchema[rightK];
+    }
+
+    if (how !== "semi" && how !== "anti") {
+        for (let i = 0; i < rightColKeys.length; i++) {
+            const k = rightColKeys[i];
+            if (shouldCoalesce && rightKeysSet.has(k)) continue;
+
+            let targetName: string;
+            if (allocatedNames.has(k)) {
+                targetName = resolveUniqueColumnName(k, rightSuffix);
+            } else {
+                targetName = k;
+                allocatedNames.add(k);
+            }
+
+            newColumns[targetName] = gatherColumnByIndices(rightCols[k], rightIndices);
+            if (rightSchema[k]) outSchema[targetName] = rightSchema[k];
+        }
+    }
+
+    return DataFrame._createDirect<R>(newColumns, outSchema, outHeight);
+}

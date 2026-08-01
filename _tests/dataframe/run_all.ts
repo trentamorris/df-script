@@ -26,10 +26,11 @@ import "./item.test";
 import "./transpose.test";
 import "./drop_nulls.test";
 import "./fill_null.test";
+import "./clone.test";
 
 
 console.log("=========================================");
-console.log("🎉 ALL 24 DATAFRAME TESTS PASSED SUCCESSFULLY!");
+console.log("🎉 ALL 25 DATAFRAME TESTS PASSED SUCCESSFULLY!");
 console.log("=========================================");
 
 

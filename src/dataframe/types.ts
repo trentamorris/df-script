@@ -41,6 +41,24 @@ export interface JoinOptions<T = any, U extends RowRecord = any> {
     maintain_order?: JoinMaintainOrder | boolean;
 }
 
+export type AsofJoinStrategy = "backward" | "forward" | "nearest";
+
+export interface AsofJoinOptions<T = any, U extends RowRecord = any> {
+    other: DataFrame<U>;
+    on?: (keyof T & keyof U);
+    leftOn?: (keyof T);
+    rightOn?: (keyof U);
+    by?: (keyof T & keyof U) | (keyof T & keyof U)[];
+    leftBy?: (keyof T) | (keyof T)[];
+    rightBy?: (keyof U) | (keyof U)[];
+    strategy?: AsofJoinStrategy;
+    tolerance?: number | string;
+    allow_exact_matches?: boolean;
+    suffixes?: [string, string];
+    coalesce?: boolean;
+    check_sorted?: boolean;
+}
+
 export interface UnpivotOptions<T> {
     idVars: (keyof T) | (keyof T)[];
     valueVars: (keyof T) | (keyof T)[];

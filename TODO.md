@@ -42,9 +42,18 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Provide option to coalesce nulls across join key columns in outer joins.
 - [x] **Row Order Maintenance (`maintain_order`)**:
   * Implement `maintain_order` parameter in `JoinOptions` (`"none"`, `"left"`, `"right"`, `"left_right"`, `"right_left"`) to explicitly control output row ordering across join strategies.
-- [ ] **Asof Join (`df.join_asof(...)`)**:
-  * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).
-
+  
+### ⏱️ Inexact Asof Join (`df.join_asof`)
+- [x] **Asof Join (`df.join_asof(...)`)**:
+  * [x] Add `AsofJoinOptions` types interface in `src/dataframe/types.ts`.
+  * [x] Add `join_asof` method declaration & signature to `DataFrame.ts` in `src/dataframe/dataframe.ts`.
+  * [x] Add `alignAsofIndices` helper function in `src/dataframe/utils.ts` for index matching.
+  * [x] Support `on`, `leftOn`, and `rightOn` key parameters.
+  * [x] Support `by`, `leftBy`, and `rightBy` grouping/partition parameters.
+  * [x] Support matching strategies: `"backward"` (default), `"forward"`, and `"nearest"`.
+  * [x] Support `tolerance` threshold filtering (numeric & temporal duration).
+  * [x] Support `allow_exact_matches` (boolean flag).
+  * [x] Validate sorted key order preconditions and handle edge cases (nulls, out-of-bounds).
 
 ### ⏰ Timezone & Temporal Extensions
 - [x] **Timezone-Aware Datetime Columns (`.dt.convert_time_zone()`)**:
@@ -59,6 +68,10 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement `.dt.replace(options)` allowing replacement of year, month, day, hour, timeZone, etc. components.
 - [x] **Truncating temporal values (`.dt.truncate()`)**:
   * Implement `.dt.truncate(every)` to floor datetimes to interval boundaries.
+
+### 📋 DataFrame Copying (`df.clone()`)
+- [x] **DataFrame Copying (`df.clone()`)**:
+  * Implement explicit deep copy of a `DataFrame` instance, copying all underlying column arrays and schema metadata.
 
 ---
 
@@ -120,11 +133,13 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [ ] **Query Execution & Inspection (`.collect()`, `.explain()`)**:
   * **`.collect()`**: Execute the optimized logical/physical query plan DAG and return a concrete `DataFrame`.
   * **`.explain({ optimized?: boolean })`**: Format and return a text/tree string representation of the unoptimized or optimized query plan DAG, allowing developers to inspect predicate pushdown, projection pushdown, and join order optimizations.
+
 ### ⚡ Performance & Interoperability
 - [ ] **Primitive Fast-Path Row Hashing**:
   * Optimize `computeRowHash` and `toCanonicalString` to use numeric hashing algorithms (e.g., FNV-1a or 64-bit integer mixing) when keys consist strictly of primitive types (integers, strings, booleans), bypassing string allocations during large `DataFrame.join()` and `.groupby()` operations.
 - [ ] **Apache Arrow & IPC Interoperability**:
   * Provide lightweight serialization adapters for Apache Arrow IPC memory format, facilitating zero-copy data exchange with Python Polars, PyArrow, and browser WebAssembly runtimes.
+
 ### 🗂️ Recommended DataFrame Operations
 - [ ] **Dynamic Time-Series Grouping (`df.group_by_dynamic()`)**:
   * Implement `.group_by_dynamic(index_column, { every, period, offset, label, closed })` for time-series windowing (e.g. tumbling & sliding temporal aggregation buckets).
@@ -132,20 +147,12 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement `.group_by_rolling(index_column, { period, offset, closed })` for continuous rolling window aggregations on sorted time/numeric series.
 - [ ] **Random Sampling (`df.sample()`)**:
   * Implement `.sample(nOrFraction, options)` to randomly select $N$ rows or a fractional percentage of rows (with optional seed and replacement), useful for ML train/test splitting and dataset exploration.
-- [ ] **DataFrame Partitioning (`df.partition_by()`)**:
-  * Implement `.partition_by(columns)` to split a DataFrame into a Map of distinct `DataFrame` chunks grouped by key column combinations.
-- [ ] **DataFrame Copying (`df.clone()`)**:
-  * Implement explicit deep/shallow cloning of a `DataFrame` instance and its underlying data arrays.
-- [ ] **Convenience Inspection Methods (`df.head()`, `df.tail()`)**:
-  * Provide `.head(n)` and `.tail(n)` convenience wrappers for quick inspection of top and bottom rows.
 
 ### 🔢 Expressions & Transformations Missing Matrix
 - [ ] **Lead/Lag & Difference (`col.shift()`, `col.diff()`)**:
   * Implement `.shift(n, fill_value)` for lead/lag calculations and `.diff(n)` for step differences across rows.
 - [ ] **Ranking (`col.rank()`)**:
   * Implement `.rank(method, descending)` supporting dense, ordinal, min, max, and average rank methods.
-- [ ] **Cumulative Aggregations (`.cum_sum()`, `.cum_prod()`, `.cum_min()`, `.cum_max()`)**:
-  * Implement running cumulative totals, products, minimums, and maximums across column expressions.
 - [ ] **Datatype & Pattern Selectors (`cs.numeric()`, `cs.string()`, `cs.matches()`)**:
   * Add column selector helpers to allow selecting columns dynamically by data type or regex matching in `select()` and `with_columns()`.
 

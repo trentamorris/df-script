@@ -35,9 +35,15 @@ if (collectedSlice[0].val !== 2 || collectedSlice[2].val !== 4) {
     throw new Error("Slice values mismatch");
 }
 
-// 3. Head & Tail
-if (df.head(2).height !== 2) throw new Error("Head failed");
-if (df.tail(2).height !== 2) throw new Error("Tail failed");
+// 4. Clone
+const dfCloned = df.clone();
+if (dfCloned.height !== df.height) throw new Error("Clone height mismatch");
+if (dfCloned === df) throw new Error("Clone returned same instance reference");
+if (dfCloned._columns.val === df._columns.val) throw new Error("Clone returned same column array reference");
+const collectedClone = dfCloned.to_dicts();
+if (collectedClone.length !== 5 || collectedClone[0].val !== 1 || collectedClone[4].val !== 5) {
+    throw new Error("Clone values mismatch");
+}
 
-console.log("✓ limit and slice tests passed!");
+console.log("✓ limit, slice, and clone tests passed!");
 

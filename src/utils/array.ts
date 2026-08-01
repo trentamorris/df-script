@@ -1074,3 +1074,43 @@ export function computeCartesianProduct(lenA: number, lenB: number): { leftIndic
     }
     return { leftIndices, rightIndices };
 }
+
+export type BinarySearchSide = "left" | "right";
+export interface BinarySearchOptions<T = any> {
+    side?: BinarySearchSide;
+    getValue?: (index: number, item: T) => number;
+}
+
+/**
+ * Performs a binary search on a sorted numeric array or ArrayLike structure.
+ * Supports an optional `getValue` accessor for indirect index searching without array allocations.
+ * @param arr Sorted array or ArrayLike structure to search within.
+ * @param target Target numeric value to search for.
+ * @param options Binary search options.
+ * @param options.side Search side: `"left"` (bisect_left, first index >= target) or `"right"` (bisect_right, first index > target). Default `"left"`.
+ * @param options.getValue Optional accessor function `(index, item) => number` for indirect searching.
+ * @returns Index insertion point.
+ */
+export function binarySearch<T = any>(
+    arr: ArrayLike<T>,
+    target: number,
+    options: BinarySearchOptions<T> = {}
+): number {
+    const isRight = options.side === "right";
+    const getValue = options.getValue;
+    let low = 0;
+    let high = arr.length;
+
+    while (low < high) {
+        const mid = (low + high) >>> 1;
+        const val = getValue ? getValue(mid, arr[mid]) : (arr[mid] as unknown as number);
+        if (isRight ? val <= target : val < target) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+
+    return low;
+}
+

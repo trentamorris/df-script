@@ -1,9 +1,9 @@
 import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seq_range, all, evaluateExpression } from "../columnExpressions"
 import { GroupedData } from "./grouped/grouped"
-import { NEWLINE, UNMATCHED_ROW_INDEX } from "../constants"
+import { NEWLINE } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions } from "../types"
-import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, JoinMaintainOrder, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
+import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, JoinMaintainOrder, AsofJoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError, InvalidArgumentError, IOStreamError } from "../exceptions"
@@ -16,6 +16,8 @@ import {
     computeRowHash,
     coerceColumn,
     alignKeyIndices,
+    alignAsofIndices,
+    materializeJoinedDataFrame,
     writeStringToFileOrStream
 } from "./utils"
 
@@ -570,6 +572,49 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     /**
+     * Creates a deep copy of the current DataFrame instance, duplicating all underlying column data arrays and schema metadata.
+     * Modifying columns or values in the cloned DataFrame will not mutate the original.
+     * @returns {DataFrame<T>}
+     * @example
+     * >>> // Example 1: Basic cloning and independence
+     * >>> const df1 = $df.data({ a: [10, 20], b: ["x", "y"] })
+     * >>> const copy1 = df1.clone()
+     * >>> copy1
+     * shape: (2, 2)
+     * ┌────┬───┐
+     * │ a  │ b │
+     * ├────┼───┤
+     * │ 10 │ x │
+     * │ 20 │ y │
+     * └────┴───┘
+     * 
+     * >>> // Example 2: Verifying mutation isolation
+     * >>> copy1._columns.a[0] = 999
+     * >>> df1.to_dicts()[0].a
+     * 10
+     * 
+     * >>> // Example 3: Cloning empty DataFrames
+     * >>> const emptyDf = $df.data({ x: [], y: [] })
+     * >>> const emptyCopy = emptyDf.clone()
+     * >>> emptyCopy.height
+     * 0
+     */
+    clone(): DataFrame<T> {
+        const clonedColumns: ColumnDict = {};
+        for (const colName of Object.keys(this._columns)) {
+            const col = this._columns[colName];
+            if (Array.isArray(col)) {
+                clonedColumns[colName] = col.slice();
+            } else if (isTypedArray(col)) {
+                clonedColumns[colName] = col.slice();
+            } else {
+                clonedColumns[colName] = Array.prototype.slice.call(col);
+            }
+        }
+        return DataFrame._createDirect(clonedColumns, { ...this._schema }, this._height);
+    }
+
+    /**
      * Gets height (total row count) of the DataFrame.
      * @returns Number of rows.
      * @example
@@ -843,9 +888,17 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┴─────┴─────┘
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
-        const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false, coalesce, maintain_order } = config;
-        const [leftSuffix, rightSuffix] = suffixes;
-        const shouldCoalesce = coalesce ?? true;
+        const {
+            other,
+            on,
+            leftOn,
+            rightOn,
+            how = "inner",
+            suffixes = ["", "_right"],
+            join_nulls = false,
+            coalesce = true,
+            maintain_order = "none"
+        } = config;
 
         if (how === "cross" && (on !== undefined || leftOn !== undefined || rightOn !== undefined)) {
             throw new InvalidArgumentError('Cannot specify "on", "leftOn", or "rightOn" when how is "cross". Cross joins produce a keyless Cartesian product.');
@@ -893,6 +946,15 @@ export class DataFrame<T extends RowRecord = any> {
             ? (maintain_order ? "left" : "none")
             : (maintain_order ?? "none");
 
+        const resolvedConfig: JoinOptions<T, U> = {
+            ...config,
+            how,
+            suffixes,
+            join_nulls,
+            coalesce,
+            maintain_order: normalizedMaintainOrder
+        };
+
         const { leftIndices, rightIndices } = alignKeyIndices(
             this._columns,
             other._columns,
@@ -900,117 +962,174 @@ export class DataFrame<T extends RowRecord = any> {
             other._height,
             leftKeysStr,
             rightKeysStr,
-            { how, join_nulls, maintain_order: normalizedMaintainOrder }
+            resolvedConfig
         );
 
-        const outHeight = leftIndices.length;
-        const newColumns: ColumnDict = {};
-        const outSchema: DataFrameSchema = {};
-        const leftKeysSet = new Set(leftKeysStr);
-        const rightKeysSet = new Set(rightKeysStr);
+        return materializeJoinedDataFrame<R>(
+            this._columns,
+            other._columns,
+            this._schema,
+            other._schema,
+            leftIndices,
+            rightIndices,
+            leftKeysStr,
+            rightKeysStr,
+            { suffixes, coalesce, how }
+        );
+    }
 
-        const leftToRightKeyMap = new Map<string, string>();
-        for (let i = 0; i < leftKeysStr.length; i++) {
-            if (!leftToRightKeyMap.has(leftKeysStr[i])) {
-                leftToRightKeyMap.set(leftKeysStr[i], rightKeysStr[i]);
-            }
+    /**
+     * Performs an asof (as-of) join for inexact matching on ordered numeric or temporal key columns.
+     * 
+     * Similar to a left join, but instead of exact key equality, matches the nearest key row from the right
+     * DataFrame according to the selected `strategy` ("backward", "forward", or "nearest") and optional `tolerance`.
+     * Both DataFrames must be sorted in ascending order on their respective `on` / `leftOn` / `rightOn` join keys.
+     *
+     * @param {AsofJoinOptions} options Asof join configuration options.
+     * @param {DataFrame} options.other The right DataFrame to join with.
+     * @param {string} [options.on] Column name to join on (must exist in both DataFrames and be sorted ascending).
+     * @param {string} [options.leftOn] Left DataFrame join key column name.
+     * @param {string} [options.rightOn] Right DataFrame join key column name.
+     * @param {string | string[]} [options.by] Optional exact-match group column(s) present in both DataFrames.
+     * @param {string | string[]} [options.leftBy] Group column(s) for exact key matching in left DataFrame.
+     * @param {string | string[]} [options.rightBy] Group column(s) for exact key matching in right DataFrame.
+     * @param {AsofJoinStrategy} [options.strategy] Match search strategy. Default `"backward"`.
+     *   - `"backward"` — Matches the latest right row where `rightKey <= leftKey`.
+     *   - `"forward"` — Matches the earliest right row where `rightKey >= leftKey`.
+     *   - `"nearest"` — Matches the right row with the absolute nearest key value to `leftKey`.
+     * @param {number | string} [options.tolerance] Maximum allowed distance between left key and right key.
+     * @param {boolean} [options.allow_exact_matches] Whether exact key matches are permitted. Default `true`.
+     * @param {[string, string]} [options.suffixes] Column name suffixes `[leftSuffix, rightSuffix]` to resolve name collisions. Default `["", "_right"]`.
+     * @param {boolean} [options.coalesce] Coalescing behavior for join key columns. Default `true`.
+     * @param {boolean} [options.check_sorted] Whether to verify that join keys are sorted ascending prior to matching. Default `true`.
+     * @returns A new DataFrame containing the joined results.
+     * 
+     * @namespace df
+     * @category DataFrame
+     * @syntax
+     * df.join_asof({
+     *   other,
+     *   on,
+     *   leftOn,
+     *   rightOn,
+     *   by,
+     *   leftBy,
+     *   rightBy,
+     *   strategy,
+     *   tolerance,
+     *   allow_exact_matches,
+     *   suffixes,
+     *   coalesce,
+     *   check_sorted
+     * })
+     * @example
+     * >>> const trades = new DataFrame([
+     * ...   { time: 1000, ticker: "AAPL", price: 150.0 },
+     * ...   { time: 1005, ticker: "AAPL", price: 150.5 },
+     * ...   { time: 1015, ticker: "AAPL", price: 151.0 }
+     * ... ]);
+     * >>> const quotes = new DataFrame([
+     * ...   { time: 998, ticker: "AAPL", bid: 149.9 },
+     * ...   { time: 1004, ticker: "AAPL", bid: 150.4 },
+     * ...   { time: 1010, ticker: "AAPL", bid: 150.8 }
+     * ... ]);
+     * >>> const joined = trades.join_asof({
+     * ...   other: quotes,
+     * ...   on: "time",
+     * ...   by: "ticker",
+     * ...   strategy: "backward"
+     * ... });
+     * >>> joined
+     * shape: (3, 4)
+     * ┌──────┬────────┬───────┬──────┐
+     * │ time │ ticker │ price │ bid  │
+     * ├──────┼────────┼───────┼──────┤
+     * │ 1000 │ AAPL   │ 150.0 │ 149.9│
+     * │ 1005 │ AAPL   │ 150.5 │ 150.4│
+     * │ 1015 │ AAPL   │ 151.0 │ 150.8│
+     * └──────┴────────┴───────┴──────┘
+     */
+    join_asof<U extends RowRecord = any, R extends RowRecord = any>(options: AsofJoinOptions<T, U>): DataFrame<R> {
+        const {
+            other,
+            on,
+            leftOn,
+            rightOn,
+            by,
+            leftBy,
+            rightBy,
+            strategy = "backward",
+            tolerance,
+            allow_exact_matches = true,
+            suffixes = ["", "_right"],
+            coalesce = true,
+            check_sorted = true
+        } = options;
+
+        if (!other || !(other instanceof DataFrame)) {
+            throw new InvalidArgumentError("join_asof() requires a valid right DataFrame in the 'other' parameter.");
         }
 
-        // Pre-register all non-colliding left column names (join keys + left-unique columns).
-        const allocatedNames = new Set<string>();
-        const leftColKeys = Object.keys(this._columns);
-        for (let i = 0; i < leftColKeys.length; i++) {
-            const k = leftColKeys[i];
-            if (!(k in other._columns) || leftKeysSet.has(k) || rightKeysSet.has(k)) {
-                allocatedNames.add(k);
-            }
+        const leftOnKey = String(leftOn ?? on ?? "");
+        const rightOnKey = String(rightOn ?? on ?? "");
+
+        if (!leftOnKey || !rightOnKey) {
+            throw new InvalidArgumentError('join_asof() requires join key specified via "on", or "leftOn" and "rightOn".');
         }
 
-        // Collision resolver — only called for columns that actually clash with an allocated name.
-        const resolveCollision = (colName: string, suffix: string): string => {
-            const effectiveSuffix = suffix !== "" ? suffix : "_left";
-            let candidate = `${colName}${effectiveSuffix}`;
-            let counter = 1;
-            while (allocatedNames.has(candidate)) {
-                candidate = `${colName}${effectiveSuffix}_${counter++}`;
-            }
-            allocatedNames.add(candidate);
-            return candidate;
+        const normalizeKeys = (keys?: any): string[] => {
+            if (!keys) return [];
+            return Array.isArray(keys) ? keys.map(String) : [String(keys)];
         };
 
-        // Step 3: Materialize Left & Join Key columns
-        for (let i = 0; i < leftColKeys.length; i++) {
-            const k = leftColKeys[i];
-            const isLeftJoinKey = leftKeysSet.has(k);
+        const leftByKeys = normalizeKeys(leftBy ?? by);
+        const rightByKeys = normalizeKeys(rightBy ?? by);
 
-            let targetName: string;
-            if (k in other._columns && !isLeftJoinKey && !rightKeysSet.has(k)) {
-                if (leftSuffix !== "") {
-                    allocatedNames.add(k);
-                    targetName = resolveCollision(k, leftSuffix);
-                } else if (!allocatedNames.has(k)) {
-                    targetName = k;
-                    allocatedNames.add(k);
-                } else {
-                    targetName = resolveCollision(k, leftSuffix);
-                }
-            } else {
-                targetName = k;
-            }
-
-            const leftCol = this._columns[k];
-            const rightK = isLeftJoinKey ? leftToRightKeyMap.get(k) : null;
-            const rightCol = rightK ? other._columns[rightK] : null;
-            const outCol = new Array(outHeight);
-
-            for (let r = 0; r < outHeight; r++) {
-                const lIdx = leftIndices[r];
-                const rIdx = rightIndices[r];
-                if (isLeftJoinKey && shouldCoalesce) {
-                    const leftVal = lIdx !== UNMATCHED_ROW_INDEX ? leftCol[lIdx] : null;
-                    const rightVal = (rIdx !== null && rightCol) ? rightCol[rIdx] : null;
-                    outCol[r] = leftVal ?? rightVal;
-                } else if (lIdx !== UNMATCHED_ROW_INDEX) {
-                    outCol[r] = leftCol[lIdx];
-                } else {
-                    outCol[r] = null;
-                }
-            }
-
-            newColumns[targetName] = outCol;
-            if (this._schema[k]) outSchema[targetName] = this._schema[k];
-            else if (rightK && other._schema[rightK]) outSchema[targetName] = other._schema[rightK];
+        if (leftByKeys.length !== rightByKeys.length) {
+            throw new InvalidArgumentError('join_asof() "by" (or "leftBy" / "rightBy") key lists must have equal lengths.');
         }
 
-        // Step 4: Materialize Right non-key columns (Skipped for Semi and Anti joins)
-        if (how !== "semi" && how !== "anti") {
-            const rightColKeys = Object.keys(other._columns);
-            for (let i = 0; i < rightColKeys.length; i++) {
-                const k = rightColKeys[i];
-                if (shouldCoalesce && rightKeysSet.has(k)) continue; // Right join keys are coalesced into leftOn keys
-
-                let targetName: string;
-                if (allocatedNames.has(k)) {
-                    targetName = resolveCollision(k, rightSuffix);
-                } else {
-                    targetName = k;
-                    allocatedNames.add(k);
-                }
-
-                const rightCol = other._columns[k];
-                const outCol = new Array(outHeight);
-
-                for (let r = 0; r < outHeight; r++) {
-                    const rIdx = rightIndices[r];
-                    outCol[r] = rIdx !== null ? rightCol[rIdx] : null;
-                }
-
-                newColumns[targetName] = outCol;
-                if (other._schema[k]) outSchema[targetName] = other._schema[k];
-            }
+        for (let i = 0; i < leftByKeys.length; i++) {
+            assertColumnExists(leftByKeys[i], this._columns, "Partition key", " in the left DataFrame.");
+            assertColumnExists(rightByKeys[i], other._columns, "Partition key", " in the right DataFrame.");
         }
 
-        return DataFrame._createDirect<R>(newColumns, outSchema, outHeight);
+        const resolvedOptions: AsofJoinOptions<T, U> = {
+            ...options,
+            strategy,
+            tolerance,
+            allow_exact_matches,
+            suffixes,
+            coalesce,
+            check_sorted
+        };
+
+        const { leftIndices, rightIndices } = alignAsofIndices(
+            this._columns,
+            other._columns,
+            this._height,
+            other._height,
+            leftOnKey,
+            rightOnKey,
+            leftByKeys,
+            rightByKeys,
+            resolvedOptions
+        );
+
+        const leftKeysStr = [leftOnKey, ...leftByKeys];
+        const rightKeysStr = [rightOnKey, ...rightByKeys];
+
+        return materializeJoinedDataFrame<R>(
+            this._columns,
+            other._columns,
+            this._schema,
+            other._schema,
+            leftIndices,
+            rightIndices,
+            leftKeysStr,
+            rightKeysStr,
+            { suffixes, coalesce, how: "left" }
+        );
     }
 
     /**

@@ -1,4 +1,5 @@
 import { DataFrame } from "../../src/dataframe";
+import { $df } from "../../src/api";
 
 console.log("Running join tests...");
 
@@ -780,6 +781,84 @@ if (dfEmptyNoCoalesce.height !== 0 || !dfEmptyNoCoalesce.columns.includes("id_ri
     throw new Error("Coalesce false on empty DataFrame failed to preserve id_right");
 }
 
+// ─── 36. Asof Join Tests ───────────────────────────────────────────────────────
+
+const trades = new DataFrame([
+    { time: 10, symbol: "AAPL", price: 100 },
+    { time: 25, symbol: "AAPL", price: 101 },
+    { time: 30, symbol: "AAPL", price: 102 },
+]);
+
+const quotes = new DataFrame([
+    { time: 9, symbol: "AAPL", bid: 99.5 },
+    { time: 20, symbol: "AAPL", bid: 100.5 },
+    { time: 30, symbol: "AAPL", bid: 102.0 },
+]);
+
+// Backward strategy (default)
+const dfAsofBackward = trades.join_asof({ other: quotes, on: "time", by: "symbol", strategy: "backward" });
+const asofBackwardRows = dfAsofBackward.to_dicts() as any[];
+if (asofBackwardRows[0].bid !== 99.5 || asofBackwardRows[1].bid !== 100.5 || asofBackwardRows[2].bid !== 102.0) {
+    throw new Error("join_asof backward strategy failed");
+}
+
+// Forward strategy
+const dfAsofForward = trades.join_asof({ other: quotes, on: "time", by: "symbol", strategy: "forward" });
+const asofForwardRows = dfAsofForward.to_dicts() as any[];
+if (asofForwardRows[0].bid !== 100.5 || asofForwardRows[1].bid !== 102.0 || asofForwardRows[2].bid !== 102.0) {
+    throw new Error("join_asof forward strategy failed");
+}
+
+// Nearest strategy with tie-breaker (prefer backward on equal distance)
+const dfAsofNearest = trades.join_asof({ other: quotes, on: "time", by: "symbol", strategy: "nearest" });
+const asofNearestRows = dfAsofNearest.to_dicts() as any[];
+if (asofNearestRows[0].bid !== 99.5 || asofNearestRows[1].bid !== 100.5 || asofNearestRows[2].bid !== 102.0) {
+    throw new Error("join_asof nearest strategy failed");
+}
+
+// allow_exact_matches: false
+const dfAsofNoExact = trades.join_asof({ other: quotes, on: "time", by: "symbol", strategy: "backward", allow_exact_matches: false });
+const asofNoExactRows = dfAsofNoExact.to_dicts() as any[];
+if (asofNoExactRows[0].bid !== 99.5 || asofNoExactRows[1].bid !== 100.5 || asofNoExactRows[2].bid !== 100.5) {
+    throw new Error("join_asof allow_exact_matches:false failed");
+}
+
+// Heterogeneous key names: leftOn / rightOn & leftBy / rightBy
+const leftDF = new DataFrame([
+    { t_left: 10, ticker: "AAPL", val: 1 },
+    { t_left: 20, ticker: "GOOG", val: 2 }
+]);
+const rightDF = new DataFrame([
+    { t_right: 8, symbol: "AAPL", rval: 100 },
+    { t_right: 15, symbol: "GOOG", rval: 200 }
+]);
+const dfAsofHetero = leftDF.join_asof({
+    other: rightDF,
+    leftOn: "t_left",
+    rightOn: "t_right",
+    leftBy: "ticker",
+    rightBy: "symbol",
+    strategy: "backward"
+});
+const heteroRows = dfAsofHetero.to_dicts() as any[];
+if (heteroRows[0].rval !== 100 || heteroRows[1].rval !== 200) {
+    throw new Error("join_asof heterogeneous leftOn/rightOn/leftBy/rightBy failed");
+}
+
+// Unsorted check error validation
+const unsortedRight = new DataFrame([
+    { time: 30, symbol: "AAPL", bid: 102.0 },
+    { time: 10, symbol: "AAPL", bid: 99.5 }
+]);
+let unsortedErrorCaught = false;
+try {
+    trades.join_asof({ other: unsortedRight, on: "time", by: "symbol", check_sorted: true });
+} catch (e: any) {
+    unsortedErrorCaught = true;
+}
+if (!unsortedErrorCaught) throw new Error("join_asof failed to throw InvalidArgumentError when right keys are unsorted");
+
 console.log("✓ join tests passed!");
+
 
 
