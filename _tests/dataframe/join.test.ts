@@ -520,4 +520,39 @@ try {
 }
 if (!caughtOverflow) throw new Error("Expected extreme Cartesian dimensions to throw InvalidArgumentError");
 
+// ─── 32. Join Key Coalescing Tests ───────────────────────────────────────────
+
+const coalesceL = new DataFrame([
+    { id: 1, val: "L1" },
+    { id: null, val: "L_Null" },
+]);
+const coalesceR = new DataFrame([
+    { id: 1, rval: "R1" },
+    { id: 2, rval: "R2" },
+]);
+
+const dfCoalesceOuter = coalesceL.join({
+    other: coalesceR,
+    on: "id",
+    how: "outer",
+    join_nulls: true,
+    coalesce: true,
+});
+const outerCoalesceRows = dfCoalesceOuter.to_dicts() as any[];
+// Unmatched right row (id: 2) gets coalesced key id = 2
+const r2Row = outerCoalesceRows.find(r => r.rval === "R2");
+if (!r2Row || r2Row.id !== 2) throw new Error("Expected outer join key coalescing for right unmatched row");
+
+const dfNoCoalesce = coalesceL.join({
+    other: coalesceR,
+    leftOn: "id",
+    rightOn: "id",
+    how: "outer",
+    join_nulls: true,
+    coalesce: false,
+});
+const noCoalesceRows = dfNoCoalesce.to_dicts() as any[];
+const lNullRow = noCoalesceRows.find(r => r.val === "L_Null");
+if (lNullRow && lNullRow.id !== null) throw new Error("Expected coalesce: false to preserve null left key value");
+
 console.log("✓ join tests passed!");

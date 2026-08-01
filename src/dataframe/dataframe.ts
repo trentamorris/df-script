@@ -833,7 +833,7 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┴─────┴─────┘
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
-        const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false } = config;
+        const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false, coalesce = true } = config;
         const [leftSuffix, rightSuffix] = suffixes;
 
         if (how === "cross" && (on !== undefined || leftOn !== undefined || rightOn !== undefined)) {
@@ -950,10 +950,14 @@ export class DataFrame<T extends RowRecord = any> {
 
             for (let r = 0; r < outHeight; r++) {
                 const lIdx = leftIndices[r];
-                if (lIdx !== UNMATCHED_ROW_INDEX) {
+                const rIdx = rightIndices[r];
+                if (isLeftJoinKey && coalesce) {
+                    const leftVal = lIdx !== UNMATCHED_ROW_INDEX ? leftCol[lIdx] : null;
+                    const rightVal = (rIdx !== null && rightCol) ? rightCol[rIdx] : null;
+                    outCol[r] = leftVal ?? rightVal;
+                } else if (lIdx !== UNMATCHED_ROW_INDEX) {
                     outCol[r] = leftCol[lIdx];
                 } else {
-                    const rIdx = rightIndices[r];
                     outCol[r] = (isLeftJoinKey && rIdx !== null) ? rightCol![rIdx] : null;
                 }
             }

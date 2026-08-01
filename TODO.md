@@ -38,10 +38,11 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Allow specifying different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
 - [x] **Cross Join (`how: "cross"`)**:
   * Implement Cartesian product join between two DataFrames without requiring join key arguments.
+- [x] **Join Key Coalescing (`coalesce`)**:
+  * Provide option to coalesce nulls across join key columns in outer joins.
 - [ ] **Asof Join (`df.join_asof(...)`)**:
   * Implement inexact matching joins on sorted keys (e.g. nearest timestamp matching for time series data).
-- [ ] **Join Key Coalescing (`coalesce`)**:
-  * Provide option to coalesce nulls across join key columns in outer joins.
+
 
 ### ⏰ Timezone & Temporal Extensions
 - [x] **Timezone-Aware Datetime Columns (`.dt.convert_time_zone()`)**:

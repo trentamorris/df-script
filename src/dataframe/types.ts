@@ -36,6 +36,7 @@ export interface JoinOptions<T = any, U extends RowRecord = any> {
     how?: JoinType;
     suffixes?: [string, string];
     join_nulls?: boolean;
+    coalesce?: boolean;
 }
 
 export interface UnpivotOptions<T> {
