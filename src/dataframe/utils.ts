@@ -318,12 +318,13 @@ export function alignKeyIndices(
     rightCols: ColumnDict,
     leftHeight: number,
     rightHeight: number,
-    keys: string[],
+    leftKeys: string[],
+    rightKeys: string[],
     options: Pick<JoinOptions, "how" | "join_nulls"> = {}
 ): { leftIndices: number[]; rightIndices: (number | null)[] } {
     const { how = "inner", join_nulls = false } = options;
 
-    const getRowHashAt = (cols: ColumnDict, idx: number): string | null => {
+    const getRowHashAt = (cols: ColumnDict, keys: string[], idx: number): string | null => {
         if (!join_nulls) {
             for (let i = 0; i < keys.length; i++) {
                 if (cols[keys[i]][idx] == null) return null;
@@ -335,7 +336,7 @@ export function alignKeyIndices(
     // 1. Build hash table for right DataFrame
     const rightHash = new Map<string, number[]>();
     for (let i = 0; i < rightHeight; i++) {
-        const hash = getRowHashAt(rightCols, i);
+        const hash = getRowHashAt(rightCols, rightKeys, i);
         if (hash === null) continue;
         let list = rightHash.get(hash);
         if (list === undefined) {
@@ -351,7 +352,7 @@ export function alignKeyIndices(
     // 2. Fast path for Semi & Anti joins (returns matching left row indices only)
     if (how === "semi" || how === "anti") {
         for (let i = 0; i < leftHeight; i++) {
-            const hash = getRowHashAt(leftCols, i);
+            const hash = getRowHashAt(leftCols, leftKeys, i);
             const matches = hash === null ? undefined : rightHash.get(hash);
             const hasMatch = matches !== undefined && matches.length > 0;
 
@@ -368,7 +369,7 @@ export function alignKeyIndices(
     const matchedRightIndices = trackRight ? new Set<number>() : null;
 
     for (let i = 0; i < leftHeight; i++) {
-        const hash = getRowHashAt(leftCols, i);
+        const hash = getRowHashAt(leftCols, leftKeys, i);
         const matches = hash === null ? undefined : rightHash.get(hash);
 
         if (matches === undefined) {

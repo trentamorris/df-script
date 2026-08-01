@@ -110,8 +110,8 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * **`.collect()`**: Execute the optimized logical/physical query plan DAG and return a concrete `DataFrame`.
   * **`.explain({ optimized?: boolean })`**: Format and return a text/tree string representation of the unoptimized or optimized query plan DAG, allowing developers to inspect predicate pushdown, projection pushdown, and join order optimizations.
 ### 🤝 Advanced DataFrame Join Extensions
-- [ ] **Heterogeneous Key Names (`leftOn` & `rightOn`)**:
-  * Allow specify different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
+- [x] **Heterogeneous Key Names (`leftOn` & `rightOn`)**:
+  * Allow specifying different join key column names for left vs right DataFrame (`leftOn` and `rightOn` parameters in `JoinOptions`), enabling joins when key column names do not match.
 - [ ] **Cross Join (`how: "cross"`)**:
   * Implement Cartesian product join between two DataFrames without requiring join key arguments.
 - [ ] **Asof Join (`df.join_asof(...)`)**:

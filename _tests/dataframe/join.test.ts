@@ -244,4 +244,219 @@ if (dualDict.val_left !== "left_val" || dualDict.val_right !== "right_val") {
     throw new Error("Explicit dual suffix values incorrect");
 }
 
+// ─── 25. Heterogeneous Key Joins (leftOn & rightOn) ───────────────────────────
+
+const leftHet = new DataFrame([
+    { user_id: 101, name: "Alice" },
+    { user_id: 102, name: "Bob" },
+    { user_id: 103, name: "Charlie" },
+]);
+
+const rightHet = new DataFrame([
+    { id: 101, score: 95 },
+    { id: 102, score: 88 },
+    { id: 104, score: 72 },
+]);
+
+// 25a. Heterogeneous Inner Join
+const hetInner = leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "id", how: "inner" });
+if (hetInner.height !== 2) throw new Error("Heterogeneous inner join height mismatch");
+const hetInnerDicts = hetInner.to_dicts() as any[];
+if (hetInnerDicts[0].user_id !== 101 || hetInnerDicts[0].score !== 95 || "id" in hetInnerDicts[0]) {
+    throw new Error("Heterogeneous inner join values or coalesced column mismatch");
+}
+
+// 25b. Heterogeneous Left Join
+const hetLeft = leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "id", how: "left" });
+if (hetLeft.height !== 3) throw new Error("Heterogeneous left join height mismatch");
+const hetLeftDicts = hetLeft.to_dicts() as any[];
+if (hetLeftDicts[2].user_id !== 103 || hetLeftDicts[2].score !== null) {
+    throw new Error("Heterogeneous left join null handling mismatch");
+}
+
+// 25c. Heterogeneous Right Join (Key Coalescing into leftOn column)
+const hetRight = leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "id", how: "right" });
+if (hetRight.height !== 3) throw new Error("Heterogeneous right join height mismatch");
+const hetRightDicts = hetRight.to_dicts() as any[];
+const row104 = hetRightDicts.find((r: any) => r.user_id === 104);
+if (!row104 || row104.score !== 72 || row104.name !== null) {
+    throw new Error("Heterogeneous right join key coalescing failed for user_id 104");
+}
+
+// 25d. Heterogeneous Semi Join
+const hetSemi = leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "id", how: "semi" });
+if (hetSemi.height !== 2) throw new Error("Heterogeneous semi join height mismatch");
+const hetSemiDicts = hetSemi.to_dicts() as any[];
+if (hetSemiDicts[0].user_id !== 101 || "score" in hetSemiDicts[0]) {
+    throw new Error("Heterogeneous semi join column mismatch");
+}
+
+// 25e. Heterogeneous Anti Join
+const hetAnti = leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "id", how: "anti" });
+if (hetAnti.height !== 1) throw new Error("Heterogeneous anti join height mismatch");
+if (hetAnti.to_dicts()[0].user_id !== 103) {
+    throw new Error("Heterogeneous anti join result mismatch");
+}
+
+// 25f. Heterogeneous Key Validation Errors
+let caughtOnlyLeftOn = false;
+try {
+    leftHet.join({ other: rightHet, leftOn: "user_id" as any });
+} catch (e: any) {
+    caughtOnlyLeftOn = e.message.includes('requires both "leftOn" and "rightOn"');
+}
+if (!caughtOnlyLeftOn) throw new Error("Expected specifying only leftOn to throw InvalidArgumentError");
+
+let caughtMismatchedLen = false;
+try {
+    leftHet.join({ other: rightHet, leftOn: ["user_id"], rightOn: ["id", "score" as any] });
+} catch (e: any) {
+    caughtMismatchedLen = e.message.includes('must match "rightOn" length');
+}
+let caughtBothOnAndLeftOn = false;
+try {
+    leftHet.join({ other: rightHet, on: "user_id" as any, leftOn: "user_id", rightOn: "id" });
+} catch (e: any) {
+    caughtBothOnAndLeftOn = e.message.includes('Cannot specify both "on" and "leftOn"/"rightOn"');
+}
+if (!caughtBothOnAndLeftOn) throw new Error("Expected specifying both 'on' and 'leftOn' to throw InvalidArgumentError");
+
+// ─── 26. Heterogeneous Composite Multi-Keys ───────────────────────────────────
+
+const leftMulti = new DataFrame([
+    { tenant: "A", user_id: 1, val: "L1" },
+    { tenant: "A", user_id: 2, val: "L2" },
+    { tenant: "B", user_id: 1, val: "L3" },
+]);
+
+const rightMulti = new DataFrame([
+    { t_id: "A", u_id: 1, rval: "R1" },
+    { t_id: "B", u_id: 1, rval: "R3" },
+    { t_id: "B", u_id: 2, rval: "R4" },
+]);
+
+// 26a. Multi-key Inner Join
+const multiInner = leftMulti.join({
+    other: rightMulti,
+    leftOn: ["tenant", "user_id"],
+    rightOn: ["t_id", "u_id"],
+    how: "inner",
+});
+if (multiInner.height !== 2) throw new Error("Composite multi-key inner join height mismatch");
+const multiInnerDicts = multiInner.to_dicts() as any[];
+if (multiInnerDicts[0].tenant !== "A" || multiInnerDicts[0].user_id !== 1 || multiInnerDicts[0].rval !== "R1") {
+    throw new Error("Composite multi-key inner join values mismatch");
+}
+
+// 26b. Multi-key Outer Join (Key Coalescing on multiple key columns)
+const multiOuter = leftMulti.join({
+    other: rightMulti,
+    leftOn: ["tenant", "user_id"],
+    rightOn: ["t_id", "u_id"],
+    how: "outer",
+});
+if (multiOuter.height !== 4) throw new Error("Composite multi-key outer join height mismatch");
+const multiOuterDicts = multiOuter.to_dicts() as any[];
+const unmappedRightRow = multiOuterDicts.find((r: any) => r.rval === "R4");
+if (!unmappedRightRow || unmappedRightRow.tenant !== "B" || unmappedRightRow.user_id !== 2 || unmappedRightRow.val !== null) {
+    throw new Error("Composite multi-key outer join coalescing failed for unmatched right row");
+}
+
+// ─── 27. Zero-Height (Empty DataFrames) Edge Cases ────────────────────────────
+
+const emptyLeft = (DataFrame as any)._createDirect({ id: [], val: [] }, {}, 0);
+const popRight = new DataFrame([{ id: 1, rval: "R1" }, { id: 2, rval: "R2" }]);
+
+// 27a. Empty Left + Populated Right (Inner, Left, Right, Outer)
+const emptyLeftInner = emptyLeft.join({ other: popRight, on: "id", how: "inner" });
+if (emptyLeftInner.height !== 0) throw new Error("Empty left inner join height should be 0");
+
+const emptyLeftLeft = emptyLeft.join({ other: popRight, on: "id", how: "left" });
+if (emptyLeftLeft.height !== 0) throw new Error("Empty left left join height should be 0");
+
+const emptyLeftRight = emptyLeft.join({ other: popRight, on: "id", how: "right" });
+if (emptyLeftRight.height !== 2) throw new Error("Empty left right join height should match right DF height");
+if (emptyLeftRight.to_dicts()[0].rval !== "R1" || emptyLeftRight.to_dicts()[0].val !== null) {
+    throw new Error("Empty left right join values mismatch");
+}
+
+const emptyLeftOuter = emptyLeft.join({ other: popRight, on: "id", how: "outer" });
+if (emptyLeftOuter.height !== 2) throw new Error("Empty left outer join height should match right DF height");
+
+const emptyLeftSemi = emptyLeft.join({ other: popRight, on: "id", how: "semi" });
+if (emptyLeftSemi.height !== 0) throw new Error("Empty left semi join height should be 0");
+
+const emptyLeftAnti = emptyLeft.join({ other: popRight, on: "id", how: "anti" });
+if (emptyLeftAnti.height !== 0) throw new Error("Empty left anti join height should be 0");
+
+// 27b. Populated Left + Empty Right
+const emptyRightLeft = popRight.join({ other: emptyLeft, on: "id", how: "left" });
+if (emptyRightLeft.height !== 2) throw new Error("Populated left + empty right left join height mismatch");
+
+const emptyRightInner = popRight.join({ other: emptyLeft, on: "id", how: "inner" });
+if (emptyRightInner.height !== 0) throw new Error("Populated left + empty right inner join height should be 0");
+
+// 27c. Both Left and Right Empty
+const emptyBothInner = emptyLeft.join({ other: emptyLeft, on: "id", how: "inner" });
+if (emptyBothInner.height !== 0) throw new Error("Empty both inner join height should be 0");
+
+// ─── 28. join_nulls with Heterogeneous Keys ───────────────────────────────────
+
+const nullHetL = new DataFrame([{ k_left: null, val: "L_null" }, { k_left: 1, val: "L_1" }]);
+const nullHetR = new DataFrame([{ k_right: null, rval: "R_null" }, { k_right: 1, rval: "R_1" }]);
+
+// 28a. join_nulls: false (default)
+const nullHetFalse = nullHetL.join({ other: nullHetR, leftOn: "k_left", rightOn: "k_right", join_nulls: false });
+if (nullHetFalse.height !== 1) throw new Error("Heterogeneous join_nulls:false should exclude null key matches");
+if (nullHetFalse.to_dicts()[0].val !== "L_1") throw new Error("Heterogeneous join_nulls:false row mismatch");
+
+// 28b. join_nulls: true
+const nullHetTrue = nullHetL.join({ other: nullHetR, leftOn: "k_left", rightOn: "k_right", join_nulls: true });
+if (nullHetTrue.height !== 2) throw new Error("Heterogeneous join_nulls:true should include null key matches");
+
+// ─── 29. Heterogeneous Joins Overlapping Payload Names & Custom Suffixes ──────
+
+const overlapL = new DataFrame([{ user_id: 1, name: "Alice", category: "VIP" }]);
+const overlapR = new DataFrame([{ id: 1, name: "Bob", category: "Standard" }]);
+
+const suffixedHet = overlapL.join({
+    other: overlapR,
+    leftOn: "user_id",
+    rightOn: "id",
+    suffixes: ["_left", "_right"],
+});
+const suffixedHetDict = suffixedHet.to_dicts()[0] as any;
+if (!("name_left" in suffixedHetDict) || !("name_right" in suffixedHetDict) || !("category_left" in suffixedHetDict) || !("category_right" in suffixedHetDict)) {
+    throw new Error("Heterogeneous join suffix resolution failed for overlapping payload columns");
+}
+if (suffixedHetDict.name_left !== "Alice" || suffixedHetDict.name_right !== "Bob") {
+    throw new Error("Heterogeneous join suffix values corrupt");
+}
+
+// ─── 30. Additional Validation Error Checks for leftOn & rightOn ──────────────
+
+let caughtEmptyLeftOn = false;
+try {
+    leftHet.join({ other: rightHet, leftOn: [], rightOn: [] });
+} catch (e: any) {
+    caughtEmptyLeftOn = e.message.includes("requires non-empty key arrays");
+}
+if (!caughtEmptyLeftOn) throw new Error("Expected empty arrays in leftOn/rightOn to throw InvalidArgumentError");
+
+let caughtMissingLeftKeyHet = false;
+try {
+    leftHet.join({ other: rightHet, leftOn: "nonexistent_left", rightOn: "id" });
+} catch (e: any) {
+    caughtMissingLeftKeyHet = e.message.includes('Join key "nonexistent_left"');
+}
+if (!caughtMissingLeftKeyHet) throw new Error("Expected missing left key in leftOn to throw ColumnNotFoundError");
+
+let caughtMissingRightKeyHet = false;
+try {
+    leftHet.join({ other: rightHet, leftOn: "user_id", rightOn: "nonexistent_right" });
+} catch (e: any) {
+    caughtMissingRightKeyHet = e.message.includes('Join key "nonexistent_right"');
+}
+if (!caughtMissingRightKeyHet) throw new Error("Expected missing right key in rightOn to throw ColumnNotFoundError");
+
 console.log("✓ join tests passed!");

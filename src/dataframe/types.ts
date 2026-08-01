@@ -30,7 +30,9 @@ export interface PivotOptions<T> {
 
 export interface JoinOptions<T = any, U extends RowRecord = any> {
     other: DataFrame<U>;
-    on: (keyof T & keyof U) | (keyof T & keyof U)[];
+    on?: (keyof T & keyof U) | (keyof T & keyof U)[];
+    leftOn?: (keyof T) | (keyof T)[];
+    rightOn?: (keyof U) | (keyof U)[];
     how?: JoinType;
     suffixes?: [string, string];
     join_nulls?: boolean;

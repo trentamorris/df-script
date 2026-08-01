@@ -833,22 +833,42 @@ export class DataFrame<T extends RowRecord = any> {
      * └────┴─────┴─────┘
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(config: JoinOptions<T, U>): DataFrame<R> {
-        const { other, on, how = "inner", suffixes = ["", "_right"], join_nulls = false } = config;
+        const { other, on, leftOn, rightOn, how = "inner", suffixes = ["", "_right"], join_nulls = false } = config;
         const [leftSuffix, rightSuffix] = suffixes;
-        const joinKeysStr = toValidStringArray(on);
 
-        // Step 1: Validate join keys
-        if (joinKeysStr.length === 0) {
-            throw new InvalidArgumentError(
-                'join() requires at least one key column in "on". For Cartesian products, use crossJoin() instead.'
-            );
+        let leftKeysStr: string[] = [];
+        let rightKeysStr: string[] = [];
+
+        if (on !== undefined && (leftOn !== undefined || rightOn !== undefined)) {
+            throw new InvalidArgumentError('Cannot specify both "on" and "leftOn"/"rightOn" in join(). Use either "on" or both "leftOn" and "rightOn".');
+        }
+
+        if (leftOn !== undefined || rightOn !== undefined) {
+            if (leftOn === undefined || rightOn === undefined) {
+                throw new InvalidArgumentError('join() requires both "leftOn" and "rightOn" when specifying heterogeneous join keys.');
+            }
+            leftKeysStr = toValidStringArray(leftOn as any);
+            rightKeysStr = toValidStringArray(rightOn as any);
+            if (leftKeysStr.length === 0 || rightKeysStr.length === 0) {
+                throw new InvalidArgumentError('join() requires non-empty key arrays in "leftOn" and "rightOn".');
+            }
+            if (leftKeysStr.length !== rightKeysStr.length) {
+                throw new InvalidArgumentError(`join() "leftOn" length (${leftKeysStr.length}) must match "rightOn" length (${rightKeysStr.length}).`);
+            }
+        } else if (on !== undefined) {
+            leftKeysStr = toValidStringArray(on as any);
+            rightKeysStr = leftKeysStr;
+            if (leftKeysStr.length === 0) {
+                throw new InvalidArgumentError('join() requires at least one key column in "on". For Cartesian products, use crossJoin() instead.');
+            }
+        } else {
+            throw new InvalidArgumentError('join() requires either "on" or both "leftOn" and "rightOn" parameters.');
         }
 
         // Step 1b: Validate column presence
-        for (let i = 0; i < joinKeysStr.length; i++) {
-            const key = joinKeysStr[i];
-            assertColumnExists(key, this._columns, "Join key", " in the left DataFrame.");
-            assertColumnExists(key, other._columns, "Join key", " in the right DataFrame.");
+        for (let i = 0; i < leftKeysStr.length; i++) {
+            assertColumnExists(leftKeysStr[i], this._columns, "Join key", " in the left DataFrame.");
+            assertColumnExists(rightKeysStr[i], other._columns, "Join key", " in the right DataFrame.");
         }
 
         const { leftIndices, rightIndices } = alignKeyIndices(
@@ -856,26 +876,35 @@ export class DataFrame<T extends RowRecord = any> {
             other._columns,
             this._height,
             other._height,
-            joinKeysStr,
+            leftKeysStr,
+            rightKeysStr,
             { how, join_nulls }
         );
 
         const outHeight = leftIndices.length;
         const newColumns: ColumnDict = {};
         const outSchema: DataFrameSchema = {};
-        const joinKeySet = new Set(joinKeysStr);
+        const leftKeysSet = new Set(leftKeysStr);
+        const rightKeysSet = new Set(rightKeysStr);
+
+        const leftToRightKeyMap = new Map<string, string>();
+        for (let i = 0; i < leftKeysStr.length; i++) {
+            if (!leftToRightKeyMap.has(leftKeysStr[i])) {
+                leftToRightKeyMap.set(leftKeysStr[i], rightKeysStr[i]);
+            }
+        }
 
         // Pre-register all non-colliding left column names (join keys + left-unique columns).
-        // These names are claimed directly — no suffix logic should ever touch them.
         const allocatedNames = new Set<string>();
-        const leftKeys = Object.keys(this._columns);
-        for (let i = 0; i < leftKeys.length; i++) {
-            const k = leftKeys[i];
-            if (!(k in other._columns) || joinKeySet.has(k)) allocatedNames.add(k);
+        const leftColKeys = Object.keys(this._columns);
+        for (let i = 0; i < leftColKeys.length; i++) {
+            const k = leftColKeys[i];
+            if (!(k in other._columns) || leftKeysSet.has(k) || rightKeysSet.has(k)) {
+                allocatedNames.add(k);
+            }
         }
 
         // Collision resolver — only called for columns that actually clash with an allocated name.
-        // Applies the preferred suffix first; falls back to a numeric counter if that too is taken.
         const resolveCollision = (colName: string, suffix: string): string => {
             const effectiveSuffix = suffix !== "" ? suffix : "_left";
             let candidate = `${colName}${effectiveSuffix}`;
@@ -888,14 +917,12 @@ export class DataFrame<T extends RowRecord = any> {
         };
 
         // Step 3: Materialize Left & Join Key columns
-        for (let i = 0; i < leftKeys.length; i++) {
-            const k = leftKeys[i];
-            const isJoinKey = joinKeySet.has(k);
+        for (let i = 0; i < leftColKeys.length; i++) {
+            const k = leftColKeys[i];
+            const isLeftJoinKey = leftKeysSet.has(k);
 
             let targetName: string;
-            if (k in other._columns && !isJoinKey) {
-                // Overlapping non-key column: claim base name so right side also suffixes.
-                // If caller supplied a non-empty left suffix, apply it.
+            if (k in other._columns && !isLeftJoinKey && !rightKeysSet.has(k)) {
                 if (leftSuffix !== "") {
                     allocatedNames.add(k);
                     targetName = resolveCollision(k, leftSuffix);
@@ -906,11 +933,12 @@ export class DataFrame<T extends RowRecord = any> {
                     targetName = resolveCollision(k, leftSuffix);
                 }
             } else {
-                targetName = k; // Join key or left-unique: name was pre-registered, use as-is.
+                targetName = k;
             }
 
             const leftCol = this._columns[k];
-            const rightCol = isJoinKey ? other._columns[k] : null;
+            const rightK = isLeftJoinKey ? leftToRightKeyMap.get(k) : null;
+            const rightCol = rightK ? other._columns[rightK] : null;
             const outCol = new Array(outHeight);
 
             for (let r = 0; r < outHeight; r++) {
@@ -919,20 +947,21 @@ export class DataFrame<T extends RowRecord = any> {
                     outCol[r] = leftCol[lIdx];
                 } else {
                     const rIdx = rightIndices[r];
-                    outCol[r] = (isJoinKey && rIdx !== null) ? rightCol![rIdx] : null;
+                    outCol[r] = (isLeftJoinKey && rIdx !== null) ? rightCol![rIdx] : null;
                 }
             }
 
             newColumns[targetName] = outCol;
             if (this._schema[k]) outSchema[targetName] = this._schema[k];
+            else if (rightK && other._schema[rightK]) outSchema[targetName] = other._schema[rightK];
         }
 
         // Step 4: Materialize Right non-key columns (Skipped for Semi and Anti joins)
         if (how !== "semi" && how !== "anti") {
-            const rightKeys = Object.keys(other._columns);
-            for (let i = 0; i < rightKeys.length; i++) {
-                const k = rightKeys[i];
-                if (joinKeySet.has(k)) continue;
+            const rightColKeys = Object.keys(other._columns);
+            for (let i = 0; i < rightColKeys.length; i++) {
+                const k = rightColKeys[i];
+                if (rightKeysSet.has(k)) continue; // Right join keys are coalesced into leftOn keys
 
                 let targetName: string;
                 if (allocatedNames.has(k)) {
@@ -941,6 +970,7 @@ export class DataFrame<T extends RowRecord = any> {
                     targetName = k;
                     allocatedNames.add(k);
                 }
+
                 const rightCol = other._columns[k];
                 const outCol = new Array(outHeight);
 
