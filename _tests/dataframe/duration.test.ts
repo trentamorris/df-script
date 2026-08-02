@@ -107,8 +107,64 @@ console.log("Negative & Expression Arithmetic Results:", dictNeg);
 
 if (dictNeg[0].neg_hour !== -3600000) throw new Error("Negative duration failed");
 if (dictNeg[0].add_10s !== 110000) throw new Error("Add duration failed");
+if (dictNeg[0].neg_hour !== -3600000) throw new Error("Negative duration failed");
+if (dictNeg[0].add_10s !== 110000) throw new Error("Add duration failed");
 if (dictNeg[0].sub_10s !== 90000) throw new Error("Sub duration failed");
 
+// ----------------------------------------------------------------------------
+// 6. .dt.offset_day() Edge Case Tests
+// ----------------------------------------------------------------------------
+const dfOffsetDay = $df.data({
+    dt: ["2026-05-20", "2026-05-20", null],
+    shift: [5, -2, 10]
+});
+
+const resOffsetDay = dfOffsetDay.select([
+    $df.col("dt").cast($df.DataType.Datetime).dt.offset_day(5).alias("pos_const"),
+    $df.col("dt").cast($df.DataType.Datetime).dt.offset_day(-2).alias("neg_const"),
+    $df.col("dt").cast($df.DataType.Datetime).dt.offset_day($df.col("shift")).alias("dyn_col"),
+]);
+
+const dictOffsetDay = resOffsetDay.to_dicts();
+console.log(".dt.offset_day() Results:", dictOffsetDay);
+
+const toISO = (val: any) => val instanceof Date ? val.toISOString() : (val != null ? new Date(val).toISOString() : null);
+
+if (toISO(dictOffsetDay[0].pos_const) !== "2026-05-25T00:00:00.000Z") throw new Error("Positive offset_day failed");
+if (toISO(dictOffsetDay[0].neg_const) !== "2026-05-18T00:00:00.000Z") throw new Error("Negative offset_day failed");
+if (toISO(dictOffsetDay[0].dyn_col) !== "2026-05-25T00:00:00.000Z") throw new Error("Dynamic offset_day row 0 failed");
+if (toISO(dictOffsetDay[1].dyn_col) !== "2026-05-18T00:00:00.000Z") throw new Error("Dynamic offset_day row 1 failed");
+if (dictOffsetDay[2].dyn_col !== null) throw new Error("Null offset_day should return null");
+
+// ----------------------------------------------------------------------------
+// 7. Edge Cases: Empty Options, Booleans, Null Propagation & Array Mismatches
+// ----------------------------------------------------------------------------
+// Edge Case 7a: Empty options error handling
+let emptyOptionsErrorThrown = false;
+try {
+    $df.duration({});
+} catch (e) {
+    emptyOptionsErrorThrown = true;
+}
+if (!emptyOptionsErrorThrown) throw new Error("Empty $df.duration({}) should throw InvalidArgumentError");
+
+// Edge Case 7b: Boolean coercion (true = 1, false = 0)
+const dfBool = $df.data({ flag: [true, false] });
+const resBool = dfBool.select([
+    $df.duration({ days: $df.col("flag") }).alias("bool_days")
+]).to_dicts();
+if (resBool[0].bool_days !== 86400000) throw new Error("Boolean true in duration failed");
+if (resBool[1].bool_days !== 0) throw new Error("Boolean false in duration failed");
+
+// Edge Case 7c: Null propagation in multi-component duration
+const dfMultiNull = $df.data({ days_val: [5, null] });
+const resMultiNull = dfMultiNull.select([
+    $df.duration({ weeks: 1, days: $df.col("days_val") }).alias("multi_null")
+]).to_dicts();
+if (resMultiNull[0].multi_null !== 604800000 + 432000000) throw new Error("Multi-component duration row 0 failed");
+if (resMultiNull[1].multi_null !== null) throw new Error("Multi-component duration null row 1 failed");
+
 console.log("=========================================");
-console.log("🎉 ALL EXTENSIVE DURATION EXAMPLES & TESTS PASSED!");
+console.log("🎉 ALL DURATION & TEMPORAL TESTS PASSED!");
 console.log("=========================================");
+

@@ -1,5 +1,5 @@
-import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
-import { DatetimeType, Float64 } from "../../datatypes/types";
+import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, DayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
+import { DatetimeType } from "../../datatypes/types";
 import { InvalidArgumentError } from "../../exceptions";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
@@ -70,11 +70,6 @@ export class DateTimeExprNamespace {
         }));
     }
 
-    _deriveDuration(fn: (v: number) => number) {
-        return derive(this.expr, kleeneUnary((v) => {
-            return typeof v === "number" ? fn(v) : null;
-        })).cast(Float64);
-    }
 
     /**
      * Casts the schema time unit of a Datetime column (`"ms"`, `"us"`, `"ns"`).
@@ -322,7 +317,7 @@ export class DateTimeExprNamespace {
      * └──────────────────────────┴────────┘
      */
     microsecond() {
-        return this._deriveDate((d) => d.getUTCMilliseconds() * US_PER_MS);
+        return this.millisecond().mul(US_PER_MS);
     }
 
     /**
@@ -445,36 +440,14 @@ export class DateTimeExprNamespace {
      * └──────────────────────────┴─────────┘
      */
     nanosecond() {
-        return this._deriveDate((d) => d.getUTCMilliseconds() * NS_PER_MS);
+        return this.millisecond().mul(NS_PER_MS);
     }
 
     /**
-     * Offsets a Datetime column by N business days, skipping weekends and custom holiday dates.
-     * @param n Number of business days to offset (positive or negative).
-     * @param options Business day rules, custom weekend exclusions, and holiday configuration options.
-     * @returns ColumnExpression
-     * @example
-     * >>> const df = $df.data({ d: ["2026-05-15"] })
-     * >>> df.with_columns($df.col("d").dt.offset_business_day(2).alias("next_bday"))
-     * shape: (1, 2)
-     * ┌────────────┬──────────────────────────┐
-     * │ d          │ next_bday                │
-     * ├────────────┼──────────────────────────┤
-     * │ 2026-05-15 │ 2026-05-19T00:00:00.000Z │
-     * └────────────┴──────────────────────────┘
-     */
-    offset_business_day(n: number | any, { excludeWeekdays = [0, 6], ...options }: BusinessDayOffsetOptions = {}) {
-        const fullOptions = { excludeWeekdays, ...options };
-        return derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
-            const d = toValidDate(v);
-            return d ? offsetDay(d, nVal, fullOptions) : null;
-        }));
-    }
-
-    /**
-     * Offsets a Datetime column by N calendar days.
+     * Offsets a Datetime column by N calendar days (numeric constant, column reference, or expression).
+     * Reuses $df.duration({ days: n }) and expression addition math under the hood.
      * @param n Number of calendar days to offset (positive or negative).
-     * @param options Optional business day roll or holiday configuration.
+     * @param options Day offset configuration options.
      * @returns ColumnExpression
      * @example
      * >>> const df = $df.data({ d: ["2026-05-20"] })
@@ -486,11 +459,16 @@ export class DateTimeExprNamespace {
      * │ 2026-05-20 │ 2026-05-25T00:00:00.000Z │
      * └────────────┴──────────────────────────┘
      */
-    offset_day(n: number | any, options: BusinessDayOffsetOptions = {}) {
-        return derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
-            const d = toValidDate(v);
-            return d ? offsetDay(d, nVal, options) : null;
-        }));
+    offset_day(n: number | any, options: DayOffsetOptions = {}) {
+        const hasExclusionOptions = options?.excludeWeekdays?.length || options?.holidays || options?.roll;
+        const normalizedDays = hasExclusionOptions
+            ? derive(this.expr, kleeneBinary(this.expr, n, (v, nVal) => {
+                const d = toValidDate(v);
+                return d ? offsetDay(d, nVal, options) : null;
+            }))
+            : n;
+        const { duration: createDuration } = require("../functions/duration");
+        return this.expr.add(createDuration({ days: normalizedDays }));
     }
 
     /**
@@ -626,23 +604,6 @@ export class DateTimeExprNamespace {
         return this.epoch(unit);
     }
 
-    /**
-     * Formats dates to custom strings. Alias for strftime.
-     * @param options Formatting configuration.
-     * @returns ColumnExpression
-     * @example
-     * >>> const df = $df.data({ d: ["2026-05-20"] })
-     * >>> df.with_columns($df.col("d").dt.to_string("%Y-%m-%d").alias("str"))
-     * shape: (1, 2)
-     * ┌────────────┬────────────┐
-     * │ d          │ str        │
-     * ├────────────┼────────────┤
-     * │ 2026-05-20 │ 2026-05-20 │
-     * └────────────┴────────────┘
-     */
-    to_string(options: StrftimeOptions) {
-        return this.strftime(options);
-    }
 
     /**
      * Converts a Duration value (in milliseconds) to total days count.
@@ -658,7 +619,7 @@ export class DateTimeExprNamespace {
      * └──────────┴──────┘
      */
     total_days() {
-        return this._deriveDuration((v) => v / MS_PER_DAY);
+        return this.expr.div(MS_PER_DAY);
     }
 
     /**
@@ -675,7 +636,7 @@ export class DateTimeExprNamespace {
      * └─────────┴─────┘
      */
     total_hours() {
-        return this._deriveDuration((v) => v / MS_PER_HOUR);
+        return this.expr.div(MS_PER_HOUR);
     }
 
     /**
@@ -692,7 +653,7 @@ export class DateTimeExprNamespace {
      * └─────┴───────┘
      */
     total_microseconds() {
-        return this._deriveDuration((v) => v * US_PER_MS);
+        return this.expr.mul(US_PER_MS);
     }
 
     /**
@@ -709,7 +670,7 @@ export class DateTimeExprNamespace {
      * └─────┴─────┘
      */
     total_milliseconds() {
-        return this._deriveDuration((v) => v);
+        return this.expr;
     }
 
     /**
@@ -726,7 +687,7 @@ export class DateTimeExprNamespace {
      * └───────┴──────┘
      */
     total_minutes() {
-        return this._deriveDuration((v) => v / MS_PER_MINUTE);
+        return this.expr.div(MS_PER_MINUTE);
     }
 
     /**
@@ -743,7 +704,7 @@ export class DateTimeExprNamespace {
      * └─────┴─────────┘
      */
     total_nanoseconds() {
-        return this._deriveDuration((v) => v * NS_PER_MS);
+        return this.expr.mul(NS_PER_MS);
     }
 
     /**
@@ -760,7 +721,7 @@ export class DateTimeExprNamespace {
      * └──────┴──────┘
      */
     total_seconds() {
-        return this._deriveDuration((v) => v / MS_PER_SECOND);
+        return this.expr.div(MS_PER_SECOND);
     }
 
     /**

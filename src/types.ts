@@ -100,7 +100,7 @@ export interface IsBusinessDayOptions {
     excludeWeekdays?: number[];
 }
 
-export interface BusinessDayOffsetOptions extends IsBusinessDayOptions {
+export interface DayOffsetOptions extends IsBusinessDayOptions {
     roll?: BusinessDayRollType;
 }
 

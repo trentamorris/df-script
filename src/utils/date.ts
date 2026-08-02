@@ -1,6 +1,6 @@
 /** @internalfile */
 import { isBlankString, escapeRegExp } from "./string";
-import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat, ReplaceDateOptions, DateTimeParts } from "../types";
+import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, DayOffsetOptions, DateDiffUnit, DateDiffOptions, UtcOffsetOptions, UtcOffsetFormat, ReplaceDateOptions, DateTimeParts } from "../types";
 import { ComputeError } from "../exceptions";
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidNumber, isValidInt } from "./number";
@@ -627,10 +627,14 @@ export function offsetDay(
         excludeWeekdays = [],
         holidays = [],
         roll
-    }: BusinessDayOffsetOptions = {}
-): Date {
+    }: DayOffsetOptions = {}
+): number {
     if (!isValidInt(n)) {
         throw new ComputeError(`The offset parameter 'n' must be a whole integer. Received: ${n}`);
+    }
+
+    if (excludeWeekdays.length === 0 && (!holidays || (Array.isArray(holidays) && holidays.length === 0) || (holidays instanceof Set && holidays.size === 0)) && !roll) {
+        return n;
     }
 
     const activeDaysPerWeek = 7 - excludeWeekdays.length;
@@ -661,7 +665,9 @@ export function offsetDay(
         return holidayTimestamps.has(date.getTime());
     };
 
-    let currentDate = _createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    const initialDate = _createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    let currentDate = new Date(initialDate.getTime());
+
     if (roll && isExcluded(currentDate)) {
         if (roll === "raise") {
             throw new ComputeError("Start date falls on an excluded day or holiday.");
@@ -672,20 +678,21 @@ export function offsetDay(
         }
     }
 
-    if (n === 0) return currentDate;
+    if (n !== 0) {
+        const stepDir = n > 0 ? 1 : -1;
+        let businessDaysCount = 0;
+        const targetOffset = Math.abs(n);
 
-    const stepDir = n > 0 ? 1 : -1;
-    let businessDaysCount = 0;
-    const targetOffset = Math.abs(n);
-
-    while (businessDaysCount < targetOffset) {
-        currentDate.setUTCDate(currentDate.getUTCDate() + stepDir);
-        if (!isExcluded(currentDate)) {
-            businessDaysCount++;
+        while (businessDaysCount < targetOffset) {
+            currentDate.setUTCDate(currentDate.getUTCDate() + stepDir);
+            if (!isExcluded(currentDate)) {
+                businessDaysCount++;
+            }
         }
     }
 
-    return currentDate;
+    const diffMs = currentDate.getTime() - initialDate.getTime();
+    return Math.round(diffMs / MS_PER_DAY);
 }
 
 export function getTimeZoneOffset(
@@ -774,4 +781,4 @@ export function replaceDateComponents(
 }
 
 
-
+

@@ -86,7 +86,7 @@ try {
         $df.col("datetime_str").dt.strftime({ format: "%F %T %% %A %B %j %I:%M %p", locale: "en-US" }).alias("formatted_shorthands"),
         $df.col("datetime_str").dt.strftime({ format: "%A %B", locale: "fr-FR" }).alias("formatted_fr"),
         $df.col("datetime_str").dt.strftime({ format: "%A %B", locale: "de-DE" }).alias("formatted_de"),
-        $df.col("datetime_str").dt.to_string({ format: "%Y-%m-%d" }).alias("to_str_formatted"),
+        $df.col("datetime_str").dt.strftime({ format: "%Y-%m-%d" }).alias("to_str_formatted"),
         $df.col("date_str").dt.iso_year().alias("iso_yr"),
         $df.col("date_str").dt.is_business_day().alias("is_biz"),
         $df.col("date_str").dt.is_business_day({ holidays: ["2024-02-29"] }).alias("is_biz_holiday")
@@ -189,8 +189,8 @@ try {
     if (r1.formatted_de !== "Donnerstag Dezember") throw new Error(`Expected r1.formatted_de to be "Donnerstag Dezember", got ${r1.formatted_de}`);
     if (r1.to_str_formatted !== "2026-12-31") throw new Error(`Expected r1.to_str_formatted to be "2026-12-31", got ${r1.to_str_formatted}`);
 
-    // Test offset_business_day
-    console.log("Testing Expr.dt.offset_business_day...");
+    // Test offset_day
+    console.log("Testing Expr.dt.offset_day...");
 
     const bizData = [
         { date: "2026-05-21", offset: 3 }, // Thursday
@@ -201,74 +201,110 @@ try {
         offset: $df.DataType.Int32
     };
     const dfBiz = $df.data(bizData, bizSchema);
-    const dfWeekend = $df.data([{ date: "2026-05-23", offset: 0 }], bizSchema);
 
     // Test 1: Basic addition and column-based offset
     const projectedBiz1 = dfBiz.select([
-        $df.col("date").dt.offset_business_day(3, {}).alias("add_scalar"),
-        $df.col("date").dt.offset_business_day($df.col("offset")).alias("add_col"),
-        $df.col("date").dt.offset_business_day($df.lit(3)).alias("add_lit")
+        $df.col("date").dt.offset_day(3, {}).alias("add_scalar"),
+        $df.col("date").dt.offset_day($df.col("offset")).alias("add_col"),
+        $df.col("date").dt.offset_day($df.lit(3)).alias("add_lit")
     ]).to_dicts() as any[];
 
-    // Thursday + 3 biz days = Tuesday 26th
+    // Thursday 21st + 3 calendar days = Sunday 24th
     const rBiz0 = projectedBiz1[0];
-    if (rBiz0.add_scalar.getUTCDate() !== 26) {
-        throw new Error(`Expected Thursday + 3 biz days to be Tuesday 26th, got ${rBiz0.add_scalar.toISOString()}`);
+    const getDay = (val: any) => val instanceof Date ? val.getUTCDate() : new Date(val).getUTCDate();
+    const getISOStr = (val: any) => (val instanceof Date ? val : new Date(val)).toISOString().split("T")[0];
+
+    if (getDay(rBiz0.add_scalar) !== 24) {
+        throw new Error(`Expected Thursday + 3 days to be Sunday 24th, got ${rBiz0.add_scalar}`);
     }
-    if (rBiz0.add_col.getUTCDate() !== 26) {
-        throw new Error(`Expected Thursday + col(3) biz days to be Tuesday 26th, got ${rBiz0.add_col.toISOString()}`);
+    if (getDay(rBiz0.add_col) !== 24) {
+        throw new Error(`Expected Thursday + col(3) days to be Sunday 24th, got ${rBiz0.add_col}`);
     }
-    if (rBiz0.add_lit.getUTCDate() !== 26) {
-        throw new Error(`Expected Thursday + lit(3) biz days to be Tuesday 26th, got ${rBiz0.add_lit.toISOString()}`);
+    if (getDay(rBiz0.add_lit) !== 24) {
+        throw new Error(`Expected Thursday + lit(3) days to be Sunday 24th, got ${rBiz0.add_lit}`);
     }
 
-    // Friday + 1 biz day = Monday 25th
-    const rBiz1 = projectedBiz1[1];
-    if (rBiz1.add_scalar.getUTCDate() !== 27) { // Friday + 3 biz days = Wednesday 27th
-        throw new Error(`Expected Friday + 3 biz days to be Wednesday 27th, got ${rBiz1.add_scalar.toISOString()}`);
-    }
-    if (rBiz1.add_col.getUTCDate() !== 25) { // Friday + 1 biz day = Monday 25th
-        throw new Error(`Expected Friday + col(1) biz day to be Monday 25th, got ${rBiz1.add_col.toISOString()}`);
-    }
-    if (rBiz1.add_lit.getUTCDate() !== 27) { // Friday + lit(3) biz days = Wednesday 27th
-        throw new Error(`Expected Friday + lit(3) biz days to be Wednesday 27th, got ${rBiz1.add_lit.toISOString()}`);
-    }
-
-    // Test 2: Saturday 23rd + 1 business day should skip weekend and yield Monday 25th
-    const projectedWeekend = dfWeekend.select([
-        $df.col("date").dt.offset_business_day(1).alias("add_one")
+    // Edge Case 2: Business Day Exclusions (excludeWeekdays: [0, 6])
+    // Thursday 2026-05-21 + 3 biz days -> Friday (1), Sat/Sun skipped, Mon (2), Tue (3) -> 2026-05-26
+    const dfEdgeBiz = $df.data([{ date: "2026-05-21" }, { date: "2026-05-22" }], { date: $df.DataType.Date });
+    const resBizEx = dfEdgeBiz.select([
+        $df.col("date").dt.offset_day(3, { excludeWeekdays: [0, 6] }).alias("biz_plus3"),
+        $df.col("date").dt.offset_day(1, { excludeWeekdays: [0, 6] }).alias("biz_plus1")
     ]).to_dicts() as any[];
-    if (projectedWeekend[0].add_one.getUTCDate() !== 25) {
-        throw new Error(`Expected Saturday + 1 business day to yield Monday 25th, got ${projectedWeekend[0].add_one.toISOString()}`);
+
+    if (getISOStr(resBizEx[0].biz_plus3) !== "2026-05-26") {
+        throw new Error(`Edge Case Fail: Expected Thursday + 3 biz days = 2026-05-26, got ${getISOStr(resBizEx[0].biz_plus3)}`);
+    }
+    if (getISOStr(resBizEx[1].biz_plus1) !== "2026-05-25") {
+        throw new Error(`Edge Case Fail: Expected Friday + 1 biz day = 2026-05-25, got ${getISOStr(resBizEx[1].biz_plus1)}`);
     }
 
-    // Test 3: Holidays
-    // Thursday + 3 biz days with Friday 22nd as holiday.
-    // Friday is skipped -> Monday is +1, Tuesday is +2, Wednesday is +3 (2026-05-27)
-    const projectedHolidays = dfBiz.filter($df.col("offset").eq(3)).select([
-        $df.col("date").dt.offset_business_day(3, { holidays: ["2026-05-22"] }).alias("with_holiday")
+    // Edge Case 3: Weekend Roll Strategies (roll: "forward", "backward", "raise")
+    const dfWeekend = $df.data([{ date: "2026-05-23" }], { date: $df.DataType.Date }); // Saturday
+    const resRollForward = dfWeekend.select([
+        $df.col("date").dt.offset_day(0, { excludeWeekdays: [0, 6], roll: "forward" }).alias("roll_fwd"),
+        $df.col("date").dt.offset_day(0, { excludeWeekdays: [0, 6], roll: "backward" }).alias("roll_bwd")
     ]).to_dicts() as any[];
-    if (projectedHolidays[0].with_holiday.getUTCDate() !== 27) {
-        throw new Error(`Expected Thursday + 3 biz days with Friday holiday to be Wednesday 27th, got ${projectedHolidays[0].with_holiday.toISOString()}`);
+
+    if (getISOStr(resRollForward[0].roll_fwd) !== "2026-05-25") {
+        throw new Error(`Edge Case Fail: Expected Saturday roll forward = 2026-05-25 (Monday), got ${getISOStr(resRollForward[0].roll_fwd)}`);
+    }
+    if (getISOStr(resRollForward[0].roll_bwd) !== "2026-05-22") {
+        throw new Error(`Edge Case Fail: Expected Saturday roll backward = 2026-05-22 (Friday), got ${getISOStr(resRollForward[0].roll_bwd)}`);
     }
 
-    // Test 4: offset_day calendar addition (no exclusions)
-    // Thursday 21st + 3 days = Sunday 24th
-    const projectedCal = dfBiz.filter($df.col("offset").eq(3)).select([
-        $df.col("date").dt.offset_day(3).alias("cal_add_three")
+    // Edge Case 4: Holidays (Array vs Set)
+    const dfHoliday = $df.data([{ date: "2026-05-21" }], { date: $df.DataType.Date }); // Thursday
+    const resHolidays = dfHoliday.select([
+        $df.col("date").dt.offset_day(3, { excludeWeekdays: [0, 6], holidays: ["2026-05-22"] }).alias("arr_hol"),
+        $df.col("date").dt.offset_day(3, { excludeWeekdays: [0, 6], holidays: new Set([new Date("2026-05-22T00:00:00.000Z").getTime()]) }).alias("set_hol")
     ]).to_dicts() as any[];
-    if (projectedCal[0].cal_add_three.getUTCDate() !== 24) {
-        throw new Error(`Expected Thursday + 3 calendar days to be Sunday 24th, got ${projectedCal[0].cal_add_three.toISOString()}`);
+
+    if (getISOStr(resHolidays[0].arr_hol) !== "2026-05-27") {
+        throw new Error(`Edge Case Fail: Expected Thursday + 3 biz days (Fri holiday) = Wednesday 2026-05-27, got ${getISOStr(resHolidays[0].arr_hol)}`);
+    }
+    if (getISOStr(resHolidays[0].set_hol) !== "2026-05-27") {
+        throw new Error(`Edge Case Fail: Expected Thursday + 3 biz days (Set holiday) = Wednesday 2026-05-27, got ${getISOStr(resHolidays[0].set_hol)}`);
     }
 
-    // Test 5: offset_day with custom excludeWeekdays
-    // Thursday 21st + 3 business days, excluding only Friday (5)
-    // Friday is skipped -> Saturday (6) is +1, Sunday (0) is +2, Monday (1) is +3 (2026-05-25)
-    const projectedCustomWeekdays = dfBiz.filter($df.col("offset").eq(3)).select([
-        $df.col("date").dt.offset_day(3, { excludeWeekdays: [5] }).alias("custom_exclude")
+    // Edge Case 5: Negative Offsets (n < 0)
+    const dfNeg = $df.data([{ date: "2026-05-25" }], { date: $df.DataType.Date }); // Monday
+    const resNeg = dfNeg.select([
+        $df.col("date").dt.offset_day(-1, { excludeWeekdays: [0, 6] }).alias("neg_biz"),
+        $df.col("date").dt.offset_day(-3).alias("neg_cal")
     ]).to_dicts() as any[];
-    if (projectedCustomWeekdays[0].custom_exclude.getUTCDate() !== 25) {
-        throw new Error(`Expected Thursday + 3 days with custom exclude to be Monday 25th, got ${projectedCustomWeekdays[0].custom_exclude.toISOString()}`);
+
+    if (getISOStr(resNeg[0].neg_biz) !== "2026-05-22") {
+        throw new Error(`Edge Case Fail: Expected Monday - 1 biz day = Friday 2026-05-22, got ${getISOStr(resNeg[0].neg_biz)}`);
+    }
+    if (getISOStr(resNeg[0].neg_cal) !== "2026-05-22") {
+        throw new Error(`Edge Case Fail: Expected Monday - 3 calendar days = Friday 2026-05-22, got ${getISOStr(resNeg[0].neg_cal)}`);
+    }
+
+    // Edge Case 6: Leap Year and Year Boundary Crossings
+    const dfLeap = $df.data([{ date: "2024-02-28" }, { date: "2023-02-28" }, { date: "2026-12-31" }], { date: $df.DataType.Date });
+    const resLeap = dfLeap.select([
+        $df.col("date").dt.offset_day(1).alias("plus1")
+    ]).to_dicts() as any[];
+
+    if (getISOStr(resLeap[0].plus1) !== "2024-02-29") {
+        throw new Error(`Edge Case Fail: Expected 2024-02-28 + 1 day = 2024-02-29 (leap year), got ${getISOStr(resLeap[0].plus1)}`);
+    }
+    if (getISOStr(resLeap[1].plus1) !== "2023-03-01") {
+        throw new Error(`Edge Case Fail: Expected 2023-02-28 + 1 day = 2023-03-01 (non leap year), got ${getISOStr(resLeap[1].plus1)}`);
+    }
+    if (getISOStr(resLeap[2].plus1) !== "2027-01-01") {
+        throw new Error(`Edge Case Fail: Expected 2026-12-31 + 1 day = 2027-01-01 (year end), got ${getISOStr(resLeap[2].plus1)}`);
+    }
+
+    // Edge Case 7: Null Values in Date or Offset Column
+    const dfNull = $df.data([{ date: null, offset: 3 }, { date: "2026-05-20", offset: null }], { date: $df.DataType.Date, offset: $df.DataType.Int32 });
+    const resNull = dfNull.select([
+        $df.col("date").dt.offset_day($df.col("offset"), { excludeWeekdays: [0, 6] }).alias("res_null")
+    ]).to_dicts() as any[];
+
+    if (resNull[0].res_null !== null || resNull[1].res_null !== null) {
+        throw new Error(`Edge Case Fail: Expected null input to produce null output, got ${resNull[0].res_null}, ${resNull[1].res_null}`);
     }
 
     // Test 6: utc_offset
@@ -346,7 +382,107 @@ try {
         throw new Error(`Expected NY July DST hours to be -4, got ${projectedTz[2].ny_dst_hr}`);
     }
 
-    console.log("Expr.dt.offset_business_day, offset_day, and utc_offset tests passed!");
+    console.log("Expr.dt.offset_day and utc_offset tests passed!");
+
+    // =========================================
+    // EDGE CASE TESTS FOR REFACTORED DT METHODS
+    // =========================================
+    console.log("Testing edge cases for microsecond, nanosecond, offset_day, and total_*...");
+
+    // 1. microsecond & nanosecond edge cases
+    const dfSubSec = $df.data([
+        { ts: "2026-05-20T10:00:00.123Z" },
+        { ts: "2026-05-20T10:00:00.000Z" },
+        { ts: "2026-05-20T10:00:00.999Z" },
+        { ts: null }
+    ], { ts: $df.DataType.Datetime });
+
+    const resSubSec = dfSubSec.select([
+        $df.col("ts").dt.microsecond().alias("us"),
+        $df.col("ts").dt.nanosecond().alias("ns")
+    ]).to_dicts() as any[];
+
+    if (resSubSec[0].us !== 123000 || resSubSec[0].ns !== 123000000) {
+        throw new Error(`SubSec Edge Case 1 Fail: Expected 123000us/123000000ns, got us=${resSubSec[0].us}, ns=${resSubSec[0].ns}`);
+    }
+    if (resSubSec[1].us !== 0 || resSubSec[1].ns !== 0) {
+        throw new Error(`SubSec Edge Case 2 Fail: Expected 0us/0ns, got us=${resSubSec[1].us}, ns=${resSubSec[1].ns}`);
+    }
+    if (resSubSec[2].us !== 999000 || resSubSec[2].ns !== 999000000) {
+        throw new Error(`SubSec Edge Case 3 Fail: Expected 999000us/999000000ns, got us=${resSubSec[2].us}, ns=${resSubSec[2].ns}`);
+    }
+    if (resSubSec[3].us !== null || resSubSec[3].ns !== null) {
+        throw new Error(`SubSec Edge Case 4 Fail: Expected null output for null input, got us=${resSubSec[3].us}, ns=${resSubSec[3].ns}`);
+    }
+
+    // 2. offset_day edge cases (standard vs business/exclusion rules)
+    const dfOffset = $df.data([
+        { date: "2026-05-20", n: 5 },   // Wednesday + 5 days
+        { date: "2026-05-22", n: 1 },   // Friday + 1 bday (should skip weekend to Monday May 25)
+        { date: "2026-05-20", n: 0 },   // 0 offset
+        { date: "2026-05-20", n: -3 },  // Negative offset
+        { date: null, n: 2 },           // Null date
+        { date: "2026-05-20", n: null }  // Null n
+    ], { date: $df.DataType.Date, n: $df.DataType.Int32 });
+
+    const resOffset = dfOffset.select([
+        $df.col("date").dt.offset_day($df.col("n")).alias("std_offset"),
+        $df.col("date").dt.offset_day($df.col("n"), { excludeWeekdays: [0, 6] }).alias("biz_offset")
+    ]).to_dicts() as any[];
+
+    // Wednesday May 20 + 5 calendar days = Monday May 25
+    if (new Date(resOffset[0].std_offset).toISOString() !== "2026-05-25T00:00:00.000Z") {
+        throw new Error(`Offset Edge Case 1 Fail: Expected 2026-05-25, got ${resOffset[0].std_offset}`);
+    }
+    // Friday May 22 + 1 biz day (skipping weekend) = Monday May 25
+    if (new Date(resOffset[1].biz_offset).toISOString() !== "2026-05-25T00:00:00.000Z") {
+        throw new Error(`Offset Edge Case 2 Fail: Expected 2026-05-25, got ${resOffset[1].biz_offset}`);
+    }
+    // 0 offset = same date May 20
+    if (new Date(resOffset[2].std_offset).toISOString() !== "2026-05-20T00:00:00.000Z") {
+        throw new Error(`Offset Edge Case 3 Fail: Expected 2026-05-20, got ${resOffset[2].std_offset}`);
+    }
+    // Negative -3 calendar days from May 20 = May 17
+    if (new Date(resOffset[3].std_offset).toISOString() !== "2026-05-17T00:00:00.000Z") {
+        throw new Error(`Offset Edge Case 4 Fail: Expected 2026-05-17, got ${resOffset[3].std_offset}`);
+    }
+    // Null checks
+    if (resOffset[4].std_offset !== null || resOffset[5].std_offset !== null) {
+        throw new Error(`Offset Edge Case 5 Fail: Expected null output for null inputs`);
+    }
+
+    // 3. total_* methods edge cases (positive, negative, zero, null)
+    const dfDur = $df.data([
+        { dur: 86400000 },    // 1 day in ms
+        { dur: -3600000 },    // -1 hour in ms
+        { dur: 0 },           // 0 ms
+        { dur: null }         // null
+    ], { dur: $df.DataType.Float64 });
+
+    const resDur = dfDur.select([
+        $df.col("dur").dt.total_days().alias("d"),
+        $df.col("dur").dt.total_hours().alias("h"),
+        $df.col("dur").dt.total_minutes().alias("m"),
+        $df.col("dur").dt.total_seconds().alias("s"),
+        $df.col("dur").dt.total_milliseconds().alias("ms"),
+        $df.col("dur").dt.total_microseconds().alias("us"),
+        $df.col("dur").dt.total_nanoseconds().alias("ns")
+    ]).to_dicts() as any[];
+
+    if (resDur[0].d !== 1 || resDur[0].h !== 24 || resDur[0].m !== 1440 || resDur[0].s !== 86400) {
+        throw new Error(`Total Edge Case 1 Fail: Expected 1d/24h/1440m/86400s, got ${resDur[0].d}d ${resDur[0].h}h`);
+    }
+    if (resDur[1].h !== -1 || resDur[1].m !== -60 || resDur[1].s !== -3600) {
+        throw new Error(`Total Edge Case 2 Fail: Expected -1h/-60m/-3600s, got ${resDur[1].h}h ${resDur[1].m}m`);
+    }
+    if (resDur[2].d !== 0 || resDur[2].h !== 0 || resDur[2].ms !== 0 || resDur[2].us !== 0 || resDur[2].ns !== 0) {
+        throw new Error(`Total Edge Case 3 Fail: Expected 0 across all units, got d=${resDur[2].d}`);
+    }
+    if (resDur[3].d !== null || resDur[3].h !== null || resDur[3].ms !== null) {
+        throw new Error(`Total Edge Case 4 Fail: Expected null output for null duration input`);
+    }
+
+    console.log("All refactored dt method edge cases passed successfully!");
 
     console.log("\n🎉 ALL Expr.dt COLUMN EXPRESSION TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

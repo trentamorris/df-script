@@ -73,9 +73,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [x] **`DurationType` & `.dt` Duration Methods**:
   * [x] Core `DurationType` and `Duration` export in `src/datatypes/types.ts` with time unit precision metadata (`timeUnit: "ms" | "us" | "ns"`).
   * [x] **`$df.duration(...)` Expression Constructor**: Implement `$df.duration({ days, hours, minutes, seconds, milliseconds, weeks, timeUnit })` matching `polars.duration()`.
-  * [x] **Date & Duration Arithmetic**: Support arithmetic between Date/Datetime/Time/Duration columns and scalars (unwrap valid `Date` objects, preserve `ms` timestamp evaluation, and cast schema outputs).
-  * [ ] Support duration string parsing (`"1y 2mo 3d"`, `"10d 5h 30m"`), unit conversions (`.dt.total_hours()`, `.dt.total_days()`).
-  * [ ] Implement `.dt.offset_by(by)` and duration rounding/offsetting using duration expressions.
+  * [x] **Date & Duration Arithmetic & `.dt` Duration Methods**: Support arithmetic between Date/Datetime/Time/Duration columns and duration unit conversion methods (`.dt.total_hours()`, `.dt.total_days()`, etc.).
 
 ### 📋 DataFrame Copying (`df.clone()`)
 - [x] **DataFrame Copying (`df.clone()`)**:
@@ -121,8 +119,8 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 ### ⏰ Advanced Temporal Extensions & Storage Infrastructure
 - [ ] **`replace_time_zone(timeZone)` Method**:
   * Implement `.dt.replace_time_zone(timeZone: string | null)` to re-interpret local wall-clock values in a new timezone (shifting the underlying UTC instant/epoch time) or unset timezone awareness (`timeZone = null`), distinct from `.convert_time_zone(tz)` which preserves the UTC instant.
-- [ ] **High-Precision Sub-Millisecond Datetime Storage (`us`, `ns`)**:
-  * Transition from standard JS `Date` objects (which are limited to millisecond resolution) to raw 64-bit integer / `BigInt` array representations for true sub-millisecond (`us` microsecond and `ns` nanosecond) storage and calculations.
+- [ ] **High-Precision Sub-Millisecond Datetime & Duration Storage (`us`, `ns`)**:
+  * Transition from standard JS `Date` objects (which are limited to millisecond resolution) to raw 64-bit integer / `BigInt` array representations for true sub-millisecond (`us` microsecond and `ns` nanosecond) datetime storage, duration storage, and `.dt.total_*()` unscaling.
 - [ ] **Evaluation-Time Timezone Guard Checks**:
   * Add evaluation-time schema verification in DataFrame operations (`with_columns`/`select`) to enforce that `convert_time_zone()` is only called on timezone-aware input columns even when expressions are built stand-alone without explicit `.cast_time_unit()` chains.
 - [ ] **Row-Dynamic Timezone Conversions (`convert_time_zone(col("tz"))`)**:
