@@ -6,7 +6,7 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).alias(...)",
       "signature": "$df.col(<column_name>).alias(\n  name: string\n): this",
-      "lineStart": 77
+      "lineStart": 79
     },
     "cast": {
       "desc": "Coerces the column data type to another type.",
@@ -14,7 +14,7 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cast(...)",
       "signature": "$df.col(<column_name>).cast(\n  dataType: RegisteredDataType\n): this",
-      "lineStart": 86
+      "lineStart": 88
     },
     "debug": {
       "desc": "Prints the current evaluation intermediate array to console for debugging.",
@@ -22,7 +22,7 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).debug(...)",
       "signature": "$df.col(<column_name>).debug(\n  label?: string\n): this",
-      "lineStart": 95
+      "lineStart": 97
     }
   },
   "columnExpressions/functions/all.ts": {
@@ -58,6 +58,27 @@
       "syntax": "$df.coalesce(...)",
       "signature": "$df.coalesce(\n  ...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]\n): ColumnExpr<any>",
       "lineStart": 36
+    }
+  },
+  "columnExpressions/functions/duration.ts": {
+    "duration": {
+      "desc": "Constructs a Duration expression column from numeric values, column references, or expressions.",
+      "examples": [
+        ">>> const df = $df.data({ dt: [\"2026-01-01\"], add: [1, 2] })\n>>> df.select($df.col(\"dt\").cast($df.DataType.Datetime).add($df.duration({ days: \"add\" })).alias(\"add_days\"))\nshape: (2, 1)\n┌──────────────────────────┐\n│ add_days                 │\n├──────────────────────────┤\n│ 2026-01-02T00:00:00.000Z │\n│ 2026-01-03T00:00:00.000Z │\n└──────────────────────────┘"
+      ],
+      "params": [
+        {
+          "name": "[options]",
+          "type": "DurationOptions",
+          "desc": "Duration component options (weeks, days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds, timeUnit)."
+        }
+      ],
+      "returns": "{ColumnExpr<any>} A column expression with the calculated duration values.",
+      "namespace": "$df",
+      "category": "ColumnExpression",
+      "syntax": "$df.duration(options)",
+      "signature": "$df.duration(\n  options: DurationOptions = {}\n): ColumnExpr<any>",
+      "lineStart": 51
     }
   },
   "columnExpressions/functions/element.ts": {
@@ -1067,7 +1088,7 @@
       ],
       "params": [
         {
-          "name": "sig_figs",
+          "name": "digits",
           "desc": "Number of significant figures."
         }
       ],
@@ -4001,13 +4022,29 @@
       "lineStart": 494
     }
   },
+  "columnExpressions/utils.ts": {
+    "evalUnaryOp": {
+      "desc": "Normalizes a single unary value (coercing Date instances to getTime if valid) and executes the operation callback.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).evalUnaryOp(...)",
+      "signature": "$df.col(<column_name>).evalUnaryOp(\n  v: any,\n  fn: (a: any) => any\n): any",
+      "lineStart": 10
+    },
+    "evalBinaryOp": {
+      "desc": "Normalizes binary values (coercing Date instances to getTime if valid) and executes the operation callback.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).evalBinaryOp(...)",
+      "signature": "$df.col(<column_name>).evalBinaryOp(\n  v: any,\n  r: any,\n  fn: (a: any, b: any) => any\n): any",
+      "lineStart": 20
+    }
+  },
   "constants.ts": {
     "const": {
       "desc": "Maximum allowable length for a single JavaScript array (2^32 - 1).",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).const(...)",
       "signature": "$df.col(<column_name>).constMAX_JS_ARRAY_LENGTH = 4_294_967_295",
-      "lineStart": 22
+      "lineStart": 26
     }
   },
   "dataframe/dataframe.ts": {

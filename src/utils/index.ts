@@ -6,3 +6,4 @@ export * from "./string";
 export * from "./json";
 export * from "./csv";
 export * from "./binary";
+export * from "./duration";

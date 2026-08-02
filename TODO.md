@@ -69,19 +69,29 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [x] **Truncating temporal values (`.dt.truncate()`)**:
   * Implement `.dt.truncate(every)` to floor datetimes to interval boundaries.
 
+### ⏱️ Dedicated Duration Data Type & `.dt` Expressions
+- [ ] **`DurationType` & `.dt` Duration Methods**:
+  * [x] Core `DurationType` and `Duration` export in `src/datatypes/types.ts` with time unit precision metadata (`timeUnit: "ms" | "us" | "ns"`).
+  * [x] **`$df.duration(...)` Expression Constructor**: Implement `$df.duration({ days, hours, minutes, seconds, milliseconds, weeks, timeUnit })` matching `polars.duration()`.
+  * [ ] Support duration string parsing (`"1y 2mo 3d"`, `"10d 5h 30m"`), unit conversions (`.dt.total_hours()`, `.dt.total_days()`), and datetime arithmetic (`dt - dt`).
+  * [ ] Implement `.dt.offset_by(by)` and duration rounding/offsetting using duration expressions.
+
 ### 📋 DataFrame Copying (`df.clone()`)
 - [x] **DataFrame Copying (`df.clone()`)**:
   * Implement explicit deep copy of a `DataFrame` instance, copying all underlying column arrays and schema metadata.
 
+### 📦 Build & Tree-Shaking (ESM Support)
+- [x] **Dual CommonJS & ES Module (ESM) Build**:
+  * Configure the build script to output both CommonJS (`dist/index.js`) and ESM (`dist/index.mjs`) bundles.
+  * Update `package.json` with `"exports"` map supporting both `"require"` and `"import"` to enable tree-shaking for modern bundlers (Vite/Webpack).
+
+### 🛠️ Refactoring & Infrastructure
+- [x] **Standardize Exception Assertions**:
+  * Centralize check-and-throw assertion helper functions and ensure all inline exceptions throw specialized classes from `src/exceptions/`.
+
 ---
 
 ## ⌛ V1.9.0 Release Scope
-
-### ⏱️ Dedicated Duration Data Type (`.duration`)
-- [ ] **Dedicated `DurationType` & `.duration` Namespace**:
-  * Separate `Duration` into a dedicated data type and expression namespace matching Polars `polars.datatypes.Duration`.
-  * Support duration string parsing (`"1y 2mo 3d"`), unit conversions (`.duration.total_hours()`), and datetime arithmetic (`dt - dt`).
-  * Implement `.dt.offset_by(by)` and duration rounding/offsetting when Duration namespace is added.
 
 ### 📊 Statistical Aggregations
 - [ ] **Mathematical & Distribution Statistics**:
@@ -94,15 +104,6 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Generate a summary table displaying row counts, mean, standard deviation, min, percentiles (25%, 50%, 75%), and max metrics for all numeric columns.
 - [ ] **Pretty Printing Tabular Layouts (`df.to_markdown()`, `df.to_html()`)**:
   * Implement custom table stringifying writers to output beautiful Markdown or HTML tables for logs, terminal outputs, and reports.
-
-### 📦 Build & Tree-Shaking (ESM Support)
-- [x] **Dual CommonJS & ES Module (ESM) Build**:
-  * Configure the build script to output both CommonJS (`dist/index.js`) and ESM (`dist/index.mjs`) bundles.
-  * Update `package.json` with `"exports"` map supporting both `"require"` and `"import"` to enable tree-shaking for modern bundlers (Vite/Webpack).
-
-### 🛠️ Refactoring & Infrastructure
-- [x] **Standardize Exception Assertions**:
-  * Centralize check-and-throw assertion helper functions and ensure all inline exceptions throw specialized classes from `src/exceptions/`.
 
 ### 🗂️ DataFrame Operations
 - [ ] **DataFrame Find Method (`df.find()`)**:

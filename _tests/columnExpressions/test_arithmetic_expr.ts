@@ -1,4 +1,5 @@
-import { $df } from "../../src/index";
+declare const process: any;
+import { $df, DataFrame } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION ARITHMETIC TESTS...");

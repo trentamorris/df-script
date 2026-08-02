@@ -262,8 +262,22 @@ export const Time = new TimeType();
 
 export class DurationType extends TemporalDataType<number | null> {
     readonly name = "Duration";
+    readonly timeUnit: DatetimeTimeUnit;
+
+    constructor(timeUnit: DatetimeTimeUnit = "ms") {
+        super();
+        this.timeUnit = timeUnit;
+    }
+
     coerce(val: unknown): number | null { return toValidNumber(val); }
-    equals(other: DataType): boolean { return other.name === "Duration"; }
+
+    equals(other: DataType): boolean {
+        return (
+            other instanceof DurationType &&
+            other.timeUnit === this.timeUnit
+        );
+    }
+
     allocate(size: number): (number | null)[] { return new Array(size).fill(null); }
 }
 export const Duration = new DurationType();

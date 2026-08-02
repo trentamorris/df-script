@@ -1,5 +1,4 @@
 import { DataFrame } from "../../src/dataframe";
-import { $df } from "../../src/api";
 
 console.log("Running join tests...");
 

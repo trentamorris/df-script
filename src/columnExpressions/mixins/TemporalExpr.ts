@@ -1,5 +1,5 @@
 import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, BusinessDayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
-import { DatetimeType } from "../../datatypes/types";
+import { DatetimeType, Float64 } from "../../datatypes/types";
 import { InvalidArgumentError } from "../../exceptions";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
@@ -73,7 +73,7 @@ export class DateTimeExprNamespace {
     _deriveDuration(fn: (v: number) => number) {
         return derive(this.expr, kleeneUnary((v) => {
             return typeof v === "number" ? fn(v) : null;
-        }));
+        })).cast(Float64);
     }
 
     /**
