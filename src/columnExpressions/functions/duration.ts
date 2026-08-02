@@ -92,7 +92,6 @@ export function duration(options: DurationOptions = {}): ColumnExpr<any> {
 
         const totalMs = new Float64Array(height);
         const isNull = new Uint8Array(height);
-        let hasNull = false;
 
         for (let p = 0; p < parts.length; p++) {
             const { expr: subExpr, multiplier } = parts[p];
@@ -109,7 +108,6 @@ export function duration(options: DurationOptions = {}): ColumnExpr<any> {
                     } else {
                         isNull[i] = 1;
                         totalMs[i] = 0;
-                        hasNull = true;
                     }
                 }
             } else {
@@ -121,7 +119,6 @@ export function duration(options: DurationOptions = {}): ColumnExpr<any> {
                         totalMs[i] += addVal;
                     }
                 } else {
-                    hasNull = true;
                     isNull.fill(1);
                     totalMs.fill(0);
                     break;
