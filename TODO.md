@@ -70,10 +70,11 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement `.dt.truncate(every)` to floor datetimes to interval boundaries.
 
 ### ⏱️ Dedicated Duration Data Type & `.dt` Expressions
-- [ ] **`DurationType` & `.dt` Duration Methods**:
+- [x] **`DurationType` & `.dt` Duration Methods**:
   * [x] Core `DurationType` and `Duration` export in `src/datatypes/types.ts` with time unit precision metadata (`timeUnit: "ms" | "us" | "ns"`).
   * [x] **`$df.duration(...)` Expression Constructor**: Implement `$df.duration({ days, hours, minutes, seconds, milliseconds, weeks, timeUnit })` matching `polars.duration()`.
-  * [ ] Support duration string parsing (`"1y 2mo 3d"`, `"10d 5h 30m"`), unit conversions (`.dt.total_hours()`, `.dt.total_days()`), and datetime arithmetic (`dt - dt`).
+  * [x] **Date & Duration Arithmetic**: Support arithmetic between Date/Datetime/Time/Duration columns and scalars (unwrap valid `Date` objects, preserve `ms` timestamp evaluation, and cast schema outputs).
+  * [ ] Support duration string parsing (`"1y 2mo 3d"`, `"10d 5h 30m"`), unit conversions (`.dt.total_hours()`, `.dt.total_days()`).
   * [ ] Implement `.dt.offset_by(by)` and duration rounding/offsetting using duration expressions.
 
 ### 📋 DataFrame Copying (`df.clone()`)
@@ -92,6 +93,10 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 ---
 
 ## ⌛ V1.9.0 Release Scope
+
+### ⚙️ Schema Engine & Expression Type Inference
+- [ ] **Post-Operation Schema Type Deduction**:
+  * Implement central post-operation type inference to automatically deduce target schema DataTypes for chained binary operations (`Datetime - Datetime => Duration`, `Datetime + Duration => Datetime`) without requiring explicit `.cast()` calls.
 
 ### 📊 Statistical Aggregations
 - [ ] **Mathematical & Distribution Statistics**:
