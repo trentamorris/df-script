@@ -26,7 +26,6 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [x] **`read_json` / `write_json`**:
   * [x] Parse standard JSON arrays and newline-delimited JSON (NDJSON) records.
 
----
 
 ## 🎯 V1.8.0 Release Scope
 
@@ -101,6 +100,12 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * [x] Implement **Shannon Entropy** (`.entropy()`) to compute the information density of a column.
   * [x] Implement **Skewness** (`.skew()`) to measure the asymmetry of numeric columns.
   * [x] Implement **Kurtosis** (`.kurtosis()`) to measure the peakedness/tailedness of distributions.
+  * [x] Implement **Product** (`.product()`) to compute the multiplicative product of elements in a group.
+  * [x] Implement **Variance** (`.variance()`) to compute sample variance.
+  * [x] Implement **Min By / Max By** (`.min_by()`, `.max_by()`) to find target column value corresponding to min/max in by column.
+  * [x] Implement **NaN Max / NaN Min** (`.nan_max()`, `.nan_min()`) to compute max and min taking floating-point `NaN` propagation into account.
+  * [x] Implement **Arg Min / Arg Max** (`.arg_min()`, `.arg_max()`) to find 0-indexed position of min/max values.
+  * [x] Implement **Bitwise Aggregations** (`.bitwise_and()`, `.bitwise_or()`, `.bitwise_xor()`) across group elements.
 
 ### 🔎 Inspection & Reporting Utilities
 - [ ] **Pretty Printing Tabular Layouts (`df.to_markdown()`, `df.to_html()`)**:

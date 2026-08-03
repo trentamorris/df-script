@@ -3,9 +3,26 @@ import type { AggFn, UniqueArrayStatsOptions, SkewOptions, KurtosisOptions, Entr
 import { ExprBase, derive } from "../ExprBase"
 import { kleeneBinary } from "../utils"
 import { ComputeError } from "../../exceptions"
-import { getArrayStats, computeMedian, computeQuantile, getUniqueArrayStats, computeMode, isArrayOfType, computeStatisticalMatrix, computeDotProduct, computeSpearmanCorrelation, computeWeightedAverage, computeSkewness, computeKurtosis, computeEntropy } from "../../utils"
-
-
+import {
+    getArrayStats,
+    computeMedian,
+    computeQuantile,
+    getUniqueArrayStats,
+    computeMode,
+    isArrayOfType,
+    computeStatisticalMatrix,
+    computeDotProduct,
+    computeSpearmanCorrelation,
+    computeWeightedAverage,
+    computeSkewness,
+    computeKurtosis,
+    computeEntropy,
+    computeBitwiseAnd,
+    computeBitwiseOr,
+    computeBitwiseXor,
+    computeMaxBy,
+    computeMinBy
+} from "../../utils"
 
 
 /**
@@ -98,6 +115,40 @@ export class AggregationExpr extends ExprBase {
     }
 
     /**
+     * Aggregation: Finds the index of the maximum value in the group.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 50, 20] })
+     * >>> df.select($df.col("val").arg_max().alias("max_idx"))
+     * shape: (1, 1)
+     * ┌─────────┐
+     * │ max_idx │
+     * ├─────────┤
+     * │ 1       │
+     * └─────────┘
+     */
+    arg_max() {
+        return this._deriveAgg(v => getArrayStats(v).maxIdx);
+    }
+
+    /**
+     * Aggregation: Finds the index of the minimum value in the group.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [10, 50, 20] })
+     * >>> df.select($df.col("val").arg_min().alias("min_idx"))
+     * shape: (1, 1)
+     * ┌─────────┐
+     * │ min_idx │
+     * ├─────────┤
+     * │ 0       │
+     * └─────────┘
+     */
+    arg_min() {
+        return this._deriveAgg(v => getArrayStats(v).minIdx);
+    }
+
+    /**
      * Aggregation: Computes the arithmetic mean of the group.
      * @returns ColumnExpression
      * @example
@@ -112,6 +163,57 @@ export class AggregationExpr extends ExprBase {
      */
     avg() {
         return this._deriveAgg(v => getArrayStats(v).mean);
+    }
+
+    /**
+     * Aggregation: Computes bitwise AND across all elements in the group.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [0b11, 0b10] })
+     * >>> df.select($df.col("val").bitwise_and().alias("res"))
+     * shape: (1, 1)
+     * ┌─────┐
+     * │ res │
+     * ├─────┤
+     * │ 2   │
+     * └─────┘
+     */
+    bitwise_and() {
+        return this._deriveAgg(v => computeBitwiseAnd(v));
+    }
+
+    /**
+     * Aggregation: Computes bitwise OR across all elements in the group.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [0b01, 0b10] })
+     * >>> df.select($df.col("val").bitwise_or().alias("res"))
+     * shape: (1, 1)
+     * ┌─────┐
+     * │ res │
+     * ├─────┤
+     * │ 3   │
+     * └─────┘
+     */
+    bitwise_or() {
+        return this._deriveAgg(v => computeBitwiseOr(v));
+    }
+
+    /**
+     * Aggregation: Computes bitwise XOR across all elements in the group.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [0b11, 0b10] })
+     * >>> df.select($df.col("val").bitwise_xor().alias("res"))
+     * shape: (1, 1)
+     * ┌─────┐
+     * │ res │
+     * ├─────┤
+     * │ 1   │
+     * └─────┘
+     */
+    bitwise_xor() {
+        return this._deriveAgg(v => computeBitwiseXor(v));
     }
 
     /**
@@ -292,6 +394,24 @@ export class AggregationExpr extends ExprBase {
     }
 
     /**
+     * Aggregation: Finds the value in this column corresponding to the maximum value in the `by` expression.
+     * @param by Column or expression to order by.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ name: ["a", "b", "c"], score: [10, 50, 20] })
+     * >>> df.select($df.col("name").max_by($df.col("score")).alias("top_scorer"))
+     * shape: (1, 1)
+     * ┌────────────┐
+     * │ top_scorer │
+     * ├────────────┤
+     * │ "b"        │
+     * └────────────┘
+     */
+    max_by(by: any) {
+        return this._deriveAggBinary(by, computeMaxBy);
+    }
+
+    /**
      * Aggregation: Computes the arithmetic mean of elements in the group.
      * @returns ColumnExpression
      * @example
@@ -343,6 +463,24 @@ export class AggregationExpr extends ExprBase {
     }
 
     /**
+     * Aggregation: Finds the value in this column corresponding to the minimum value in the `by` expression.
+     * @param by Column or expression to order by.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ name: ["a", "b", "c"], score: [10, 50, 20] })
+     * >>> df.select($df.col("name").min_by($df.col("score")).alias("lowest_scorer"))
+     * shape: (1, 1)
+     * ┌──────────────┐
+     * │ lowest_scorer│
+     * ├──────────────┤
+     * │ "a"          │
+     * └──────────────┘
+     */
+    min_by(by: any) {
+        return this._deriveAggBinary(by, computeMinBy);
+    }
+
+    /**
      * Aggregation: Finds the statistical mode (most frequent value).
      * @returns ColumnExpression
      * @example
@@ -374,9 +512,41 @@ export class AggregationExpr extends ExprBase {
      * └───────┴────────────┘
      */
     n_unique(options: UniqueArrayStatsOptions = {}) {
-        return this._deriveAgg(v => {
-            return getUniqueArrayStats(v, options).count;
-        });
+        return this._deriveAgg(v => getUniqueArrayStats(v, options).count);
+    }
+
+    /**
+     * Aggregation: Finds the maximum value in the group, taking NaN values into account (NaN propagates).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ group: ["A", "A"], val: [10, NaN] })
+     * >>> df.group_by("group").agg($df.col("val").nan_max().alias("nan_max_val"))
+     * shape: (1, 2)
+     * ┌───────┬─────────────┐
+     * │ group │ nan_max_val │
+     * ├───────┼─────────────┤
+     * │ "A"   │ NaN         │
+     * └───────┴─────────────┘
+     */
+    nan_max() {
+        return this._deriveAgg(v => getArrayStats(v).nanMax);
+    }
+
+    /**
+     * Aggregation: Finds the minimum value in the group, taking NaN values into account (NaN propagates).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ group: ["A", "A"], val: [10, NaN] })
+     * >>> df.group_by("group").agg($df.col("val").nan_min().alias("nan_min_val"))
+     * shape: (1, 2)
+     * ┌───────┬─────────────┐
+     * │ group │ nan_min_val │
+     * ├───────┼─────────────┤
+     * │ "A"   │ NaN         │
+     * └───────┴─────────────┘
+     */
+    nan_min() {
+        return this._deriveAgg(v => getArrayStats(v).nanMin);
     }
 
     /**
@@ -413,6 +583,23 @@ export class AggregationExpr extends ExprBase {
     quantile(q: number) {
         if (q < 0 || q > 1) throw new ComputeError("Quantile q must be between 0 and 1");
         return this._deriveAgg(v => computeQuantile(v, q));
+    }
+
+    /**
+     * Aggregation: Computes the product of all elements in the group.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ group: ["A", "A"], val: [2, 5] })
+     * >>> df.group_by("group").agg($df.col("val").product().alias("p"))
+     * shape: (1, 2)
+     * ┌───────┬────┐
+     * │ group │ p  │
+     * ├───────┼────┤
+     * │ "A"   │ 10 │
+     * └───────┴────┘
+     */
+    product() {
+        return this._deriveAgg(v => getArrayStats(v).product);
     }
 
     /**
@@ -485,6 +672,23 @@ export class AggregationExpr extends ExprBase {
      */
     sum() {
         return this._deriveAgg(v => getArrayStats(v).sum);
+    }
+
+    /**
+     * Aggregation: Computes sample variance.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ group: ["A", "A", "A"], val: [10, 20, 30] })
+     * >>> df.group_by("group").agg($df.col("val").variance().alias("v"))
+     * shape: (1, 2)
+     * ┌───────┬─────┐
+     * │ group │ v   │
+     * ├───────┼─────┤
+     * │ "A"   │ 100 │
+     * └───────┴─────┘
+     */
+    variance() {
+        return this._deriveAgg(v => getArrayStats(v).variance);
     }
 
     /**

@@ -1,6 +1,6 @@
 /** @internalfile */
 import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
-import { toValidNumber, isValidNumber, isValidInt } from "./number";
+import { toValidNumber, isValidNumber, isValidInt, toValidBigInt } from "./number";
 import { toCanonicalString } from "./string";
 import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, EntropyOptions } from "../types";
 
@@ -224,19 +224,23 @@ export function sortArray(
     return nullsLast ? valid.concat(nulls) : nulls.concat(valid);
 }
 
-const DEFAULT_STATS = { sum: null, count: 0, min: null, max: null, minIdx: null, maxIdx: null, mean: null, variance: 0, std: 0, nullCount: 0, len: 0, hasNulls: false, isNumeric: false };
+const DEFAULT_STATS = { sum: null, product: null, count: 0, min: null, max: null, nanMin: null, nanMax: null, minIdx: null, maxIdx: null, mean: null, variance: 0, std: 0, nullCount: 0, nanCount: 0, len: 0, hasNulls: false, isNumeric: false };
 
 export function getArrayStats(arr: unknown): {
     sum: number | null;
+    product: number | null;
     count: number;
     min: any;
     max: any;
+    nanMin: any;
+    nanMax: any;
     minIdx: number | null;
     maxIdx: number | null;
     mean: number | null;
     variance: number;
     std: number;
     nullCount: number;
+    nanCount: number;
     len: number;
     hasNulls: boolean;
     isNumeric: boolean;
@@ -255,14 +259,21 @@ export function getArrayStats(arr: unknown): {
     let maxIdx: number | null = null;
     let count = 0;
     let nullCount = 0;
+    let nanCount = 0;
     let total = 0;
     let sumCompensation = 0;
+    let product = 1;
     let mean = 0;
     let M2 = 0;
 
     for (let i = 0; i < len; i++) {
         const val = (arr as any)[i];
-        if (val == null || (typeof val === "number" && !isValidNumber(val, { allowNonFiniteNumbers: true, allowNaN: false }))) {
+        if (val == null) {
+            nullCount++;
+            continue;
+        }
+        if (typeof val === "number" && Number.isNaN(val)) {
+            nanCount++;
             nullCount++;
             continue;
         }
@@ -286,6 +297,7 @@ export function getArrayStats(arr: unknown): {
                 sumCompensation += (n - t) + total;
             }
             total = t;
+            product *= n;
 
             count++;
             const delta = n - mean;
@@ -296,23 +308,29 @@ export function getArrayStats(arr: unknown): {
     }
 
     const variance = count > 1 ? M2 / (count - 1) : 0;
+    const hasNaN = nanCount > 0;
 
     return {
         sum: count > 0 ? total + sumCompensation : null,
+        product: count > 0 ? product : null,
         count,
         min: minVal,
         max: maxVal,
+        nanMin: hasNaN ? NaN : minVal,
+        nanMax: hasNaN ? NaN : maxVal,
         minIdx,
         maxIdx,
         mean: count > 0 ? (total + sumCompensation) / count : null,
         variance,
         std: Math.sqrt(variance),
         nullCount,
+        nanCount,
         len,
         hasNulls: nullCount > 0,
         isNumeric: count > 0 && count === (len - nullCount)
     };
 }
+
 
 /**
  * Options configuration for the `getUniqueArrayStats` utility.
@@ -1275,4 +1293,57 @@ export function computeEntropy(
         if (entropy < 0 || Object.is(entropy, -0)) entropy = 0;
         return entropy;
     }
+}
+
+function reduceBitwise(
+    arr: ArrayLike<any>,
+    op: (acc: bigint, val: bigint) => bigint
+): number | bigint | null {
+    if (!arr || arr.length === 0) return null;
+    let res: bigint | null = null;
+    const len = arr.length;
+    for (let i = 0; i < len; i++) {
+        const bigVal = toValidBigInt(arr[i], { range: "Int64" });
+        if (bigVal !== null) {
+            res = res === null ? bigVal : op(res, bigVal);
+        }
+    }
+    if (res === null) return null;
+
+    return res >= Number.MIN_SAFE_INTEGER && res <= Number.MAX_SAFE_INTEGER
+        ? Number(res)
+        : res;
+}
+
+/** Computes bitwise AND across all valid numeric elements in an array. */
+export const computeBitwiseAnd = (arr: ArrayLike<any>) => reduceBitwise(arr, (a, b) => a & b);
+
+/** Computes bitwise OR across all valid numeric elements in an array. */
+export const computeBitwiseOr = (arr: ArrayLike<any>) => reduceBitwise(arr, (a, b) => a | b);
+
+/** Computes bitwise XOR across all valid numeric elements in an array. */
+export const computeBitwiseXor = (arr: ArrayLike<any>) => reduceBitwise(arr, (a, b) => a ^ b);
+
+function computeByHelper(pairs: Array<[any, any]> | null | undefined, statKey: "minIdx" | "maxIdx"): any {
+    if (!pairs || pairs.length === 0) return null;
+    const len = pairs.length;
+    const targets = new Array(len);
+    const bys = new Array(len);
+    for (let i = 0; i < len; i++) {
+        const p = pairs[i];
+        targets[i] = p?.[0];
+        bys[i] = p?.[1];
+    }
+    const idx = getArrayStats(bys)[statKey];
+    return idx !== null ? targets[idx] : null;
+}
+
+/** Finds the value in target column corresponding to the maximum value in `by` column. */
+export function computeMaxBy(pairs: Array<[any, any]> | null | undefined): any {
+    return computeByHelper(pairs, "maxIdx");
+}
+
+/** Finds the value in target column corresponding to the minimum value in `by` column. */
+export function computeMinBy(pairs: Array<[any, any]> | null | undefined): any {
+    return computeByHelper(pairs, "minIdx");
 }

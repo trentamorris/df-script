@@ -262,10 +262,11 @@ Chained mathematical functions execute cleanly with built-in null-safety (Kleene
 - `.is_in(arrayOrExpr)`, `.not_in(arrayOrExpr)`
 
 ### ⚡ Aggregations
-- `.sum()`, `.avg()` / `.mean()`, `.median()`, `.mode()`, `.std()`, `.min()`, `.max()`
+- `.sum()`, `.avg()` / `.mean()`, `.median()`, `.mode()`, `.std()`, `.min()`, `.max()`, `.nan_min()`, `.nan_max()`, `.min_by(by)`, `.max_by(by)`
 - `.count(options?)` — Option `{ includeNulls: boolean }`.
 - `.first()`, `.last()`
-- `.any()`, `.all()`, `.any_null()`, `.all_null()`, `.n_unique()`
+- `.any()`, `.all()`, `.any_null()`, `.all_null()`, `.n_unique()`, `.null_count()`, `.arg_min()`, `.arg_max()`
+
 
 ### 🔀 Control Flow & Conditionals
 Construct dynamic `CASE WHEN` branches using the `$df.when` API:
