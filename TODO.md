@@ -97,24 +97,22 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Implement central post-operation type inference to automatically deduce target schema DataTypes for chained binary operations (`Datetime - Datetime => Duration`, `Datetime + Duration => Datetime`) without requiring explicit `.cast()` calls.
 
 ### 📊 Statistical Aggregations
-- [ ] **Mathematical & Distribution Statistics**:
-  * Implement **Shannon Entropy** (`.entropy()`) to compute the information density of a column.
-  * Implement **Skewness** (`.skew()`) to measure the asymmetry of numeric columns.
-  * Implement **Kurtosis** (`.kurtosis()`) to measure the peakedness/tailedness of distributions.
+- [x] **Mathematical & Distribution Statistics**:
+  * [x] Implement **Shannon Entropy** (`.entropy()`) to compute the information density of a column.
+  * [x] Implement **Skewness** (`.skew()`) to measure the asymmetry of numeric columns.
+  * [x] Implement **Kurtosis** (`.kurtosis()`) to measure the peakedness/tailedness of distributions.
 
 ### 🔎 Inspection & Reporting Utilities
-- [ ] **DataFrame Summary Statistics (`df.describe()`)**:
-  * Generate a summary table displaying row counts, mean, standard deviation, min, percentiles (25%, 50%, 75%), and max metrics for all numeric columns.
 - [ ] **Pretty Printing Tabular Layouts (`df.to_markdown()`, `df.to_html()`)**:
   * Implement custom table stringifying writers to output beautiful Markdown or HTML tables for logs, terminal outputs, and reports.
-
-### 🗂️ DataFrame Operations
-- [ ] **DataFrame Find Method (`df.find()`)**:
-  * Implement `.find(predicate)` convenience method on `DataFrame` class (similar to `Array.prototype.find()`) to evaluate a predicate expression/filter and return the first matching record/row object (or `undefined` if no match is found).
 
 ---
 
 ## 🔮 Future / Backlog Scope (V2.0+)
+
+### 🔎 Inspection & Reporting Utilities
+- [ ] **DataFrame Summary Statistics (`df.describe()`)**:
+  * Generate a summary table displaying row counts, mean, standard deviation, min, percentiles (25%, 50%, 75%), and max metrics for all numeric columns.
 
 ### ⏰ Advanced Temporal Extensions & Storage Infrastructure
 - [ ] **`replace_time_zone(timeZone)` Method**:
@@ -136,7 +134,8 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * **Projection Pushdown**: Inspect final `select()` columns and prune unused columns early in the DAG to minimize memory allocations.
 - [ ] **Query Execution & Inspection (`.collect()`, `.explain()`)**:
   * **`.collect()`**: Execute the optimized logical/physical query plan DAG and return a concrete `DataFrame`.
-  * **`.explain({ optimized?: boolean })`**: Format and return a text/tree string representation of the unoptimized or optimized query plan DAG, allowing developers to inspect predicate pushdown, projection pushdown, and join order optimizations.
+  * **`df.explain({ optimized?: boolean })`**: Format and return a text/tree string representation of the unoptimized or optimized query plan DAG, allowing developers to inspect predicate pushdown, projection pushdown, and join order optimizations.
+  * **`expr.explain()`**: Format and output a detailed tree representation of `ColumnExpression` ASTs, allowing developers to inspect complex nested operations, alias bindings, and expression DAGs.
 
 ### ⚡ Performance & Interoperability
 - [ ] **Primitive Fast-Path Row Hashing**:

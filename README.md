@@ -142,6 +142,8 @@ DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, bui
 - `$df.exclude(columns)`: Creates an expression matching all columns except the specified ones.
 - `$df.coalesce(...exprs)`: Returns the first non-null value among columns or literal expressions.
 - `$df.lit(val)`: Explicitly wraps a raw value into a literal expression.
+- `$df.duration(options)`: Constructs a `Duration` expression supporting days, hours, minutes, seconds, milliseconds, weeks, and timeUnit precision.
+- `$df.struct(fields)`: Constructs a nested `Struct` object column expression from an object of named expressions or sibling columns.
 - `$df.when(predicate).then(value)...otherwise(value)`: Constructs a conditional expression (when-then-otherwise chain).
 - `$df.implode(column)`: Aggregates a column's rows (or grouped values) into a list.
 - `$df.seq_range(value, options?)`: Generates a sequence range of values.
@@ -158,28 +160,38 @@ DFScript uses the `$df` namespace to bootstrap DataFrames, refer to columns, bui
 ## 🛠️ DataFrame API Reference
 
 ### 1. Transformations & Projection
-- **`select(...exprs)`**: Projects columns. Supports strings, raw column names, `$df.col(...)` expressions, and `$df.all()`.
+- **`select(...exprs)`**: Projects columns. Supports strings, raw column names, `$df.col(...)` expressions, `$df.all()`, and `$df.col("struct").struct.unnest()`.
 - **`with_columns(...exprs)`**: Adds or overrides columns. Accepts expressions, strings, or options objects mapping keys to values/expressions.
 - **`drop(...names)`**: Drops one or more columns from the DataFrame.
 - **`rename(mapping)`**: Renames columns using a `{ oldName: newName }` object.
+- **`explode(columns)`**: Unnests list-like columns into multiple rows, replicating other columns per list element.
+- **`implode(columns)`**: Groups values in specified columns back into a single list element per column.
 
 ### 2. Filtering & Row Selection
 - **`filter(...predicates)`**: Filters rows where all predicate expressions evaluate to `true` (or non-null truthy values).
+- **`find(predicate)`**: Evaluates a predicate expression and returns the first matching row record object (or `undefined` if no match is found).
 - **`unique(columns?)`**: Returns unique rows. If a subset of columns is provided, deduplicates based on those columns.
 - **`limit(n, options?)`**: Returns the first `n` rows. Options include `offset` and direction `from: "start" | "end"`.
 - **`head(n)`** / **`tail(n)`**: Shortcuts for `limit` from the start or end of the DataFrame.
 - **`slice(start, end?)`**: Extract a subset of rows using standard index slicing.
-- **`gather(indices, options?)`**: Gathers rows at specified indices. Supports single index, arrays of indices, and negative indexing. Options include `{ null_on_oob?: boolean }` (default: `false` which throws an error on out-of-bounds indices; if `true`, out-of-bounds indices result in `null` values).
+- **`gather(indices, options?)`**: Gathers rows at specified indices. Supports single index, arrays of indices, and negative indexing. Options include `{ null_on_oob?: boolean }`.
 
-### 3. Sorting
+### 3. Sorting & Structural Operations
 - **`sort({ by, descending?, nullsLast?, custom? })`**: Sorts rows. Supports single or multiple columns/expressions, custom descending configurations per column, custom null sorting rules, and custom comparator functions.
+- **`clone()`**: Performs a complete deep copy of the `DataFrame`, replicating all underlying column arrays and schema metadata.
 
 ### 4. Grouping & Aggregations
 - **`groupby(keys)`**: Groups the data by one or more columns, returning a `GroupedData` object.
 - **`GroupedData.agg(...exprs)`**: Run aggregations on grouped data (e.g. `$df.col("sales").sum()`).
 
 ### 5. Reshaping & Joining
-- **`join(other, on, how, suffixes?)`**: Merges two DataFrames on join keys. Supported join types: `"inner" | "left" | "right" | "outer"`.
+- **`join(other, onOrOptions, how?, suffixes?)`**: Merges two DataFrames. Supports:
+  - Join modes (`how`): `"inner" | "left" | "right" | "outer" | "semi" | "anti" | "cross"`.
+  - Heterogeneous key names (`leftOn`, `rightOn`).
+  - Key coalescing (`coalesce: boolean`).
+  - Row order preservation (`maintain_order: "none" | "left" | "right" | "left_right" | "right_left"`).
+- **`join_asof(other, options)`**: Performs inexact time-series or nearest-neighbor joins on sorted key columns.
+  - Parameters: `on`, `leftOn`, `rightOn`, grouping parameters (`by`, `leftBy`, `rightBy`), matching `strategy` (`"backward" | "forward" | "nearest"`), numeric/duration `tolerance`, and `allow_exact_matches`.
 - **`pivot(index, columns, values)`**: Pivots the table, converting unique values in `columns` into column headers.
 - **`unpivot(idVars, valueVars, varName?, valueName?)`**: Melts/unpivots the table, converting wide columns into long format name-value pairs.
 - **`concat(items, options?)`**: Concatenates multiple DataFrames. Supported concat strategies: `"vertical" | "horizontal" | "diagonal"`.
@@ -291,10 +303,10 @@ $df.col("description").str.replace(/foo/i, "bar")
 Available on datetime or duration values via `.dt`:
 ```typescript
 $df.col("timestamp").dt.year()
-$df.col("timestamp").dt.strftime("%Y-%m-%d %H:%M:%S")
+$df.col("timestamp").dt.convert_time_zone("America/New_York")
 $df.col("duration").dt.total_seconds()
 ```
-- **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinal_day()`, `is_leap_year()`, `month_start()`, `month_end()`, `date()`, `time()`, `offset_day(n, options?)`, `offset_business_day(n, options?)`, `utc_offset(timeZone?, options?)`, `epoch(unit)`, `timestamp(unit)`, `strftime(format, locale?)`.
+- **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinal_day()`, `is_leap_year()`, `month_start()`, `month_end()`, `date()`, `time()`, `offset_day(n, options?)`, `offset_business_day(n, options?)`, `convert_time_zone(tz)`, `cast_time_unit(unit)`, `with_time_unit(unit)`, `replace(options)`, `truncate(every)`, `utc_offset(timeZone?, options?)`, `epoch(unit)`, `timestamp(unit)`, `strftime(format, locale?)`.
 - **Duration Methods**: `total_days()`, `total_hours()`, `total_minutes()`, `total_seconds()`, `total_milliseconds()`, `total_microseconds()`, `total_nanoseconds()`.
 
 ### 📊 Array/List Operations (`.arr`)
@@ -315,8 +327,8 @@ Available on any struct or nested object column expression via `.struct`. You ca
 // Sibling fields access via Proxy
 $df.col("address").struct.city.alias("city")
 
-// Or using the explicit field method
-$df.col("address").struct.field("city")
+// Explicit struct field access or struct creation
+$df.struct({ city: $df.col("city"), state: $df.col("state") })
 ```
 - **Methods**:
   - `field(name)`: Accesses a field within the struct.

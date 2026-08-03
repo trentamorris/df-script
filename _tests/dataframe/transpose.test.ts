@@ -124,7 +124,7 @@ const mixDf = new DataFrame({
     b: ["three", "four"]
 });
 const mixT = mixDf.transpose();
-const schema = mixT.get_schema();
+const schema = mixT.schema;
 if (schema["column_0"].name !== "Utf8") {
     throw new Error(`Expected column_0 to be Utf8, got ${schema["column_0"].name}`);
 }

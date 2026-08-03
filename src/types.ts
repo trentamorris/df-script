@@ -180,3 +180,20 @@ export interface ToStructOptions {
     upper_bound?: number;
 }
 
+export interface SkewOptions {
+    bias?: boolean;
+}
+
+export interface KurtosisOptions {
+    fisher?: boolean;
+    bias?: boolean;
+}
+
+export interface EntropyOptions {
+    base?: number;
+    normalize?: boolean;
+}
+
+
+
+

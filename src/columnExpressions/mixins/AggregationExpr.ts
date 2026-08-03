@@ -1,8 +1,10 @@
-import type { AggFn, UniqueArrayStatsOptions } from "../../types"
+import type { AggFn, UniqueArrayStatsOptions, SkewOptions, KurtosisOptions, EntropyOptions } from "../../types"
+
 import { ExprBase, derive } from "../ExprBase"
 import { kleeneBinary } from "../utils"
 import { ComputeError } from "../../exceptions"
-import { getArrayStats, computeMedian, computeQuantile, getUniqueArrayStats, computeMode, isArrayOfType, computeStatisticalMatrix, computeDotProduct, computeSpearmanCorrelation, computeWeightedAverage } from "../../utils"
+import { getArrayStats, computeMedian, computeQuantile, getUniqueArrayStats, computeMode, isArrayOfType, computeStatisticalMatrix, computeDotProduct, computeSpearmanCorrelation, computeWeightedAverage, computeSkewness, computeKurtosis, computeEntropy } from "../../utils"
+
 
 
 
@@ -186,6 +188,24 @@ export class AggregationExpr extends ExprBase {
     }
 
     /**
+     * Aggregation: Computes the Shannon entropy of a column or group.
+     * @param options Entropy options ({ base?: number, normalize?: boolean }, default base=Math.E, normalize=true).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: ["a", "b", "a", "c"] })
+     * >>> df.select($df.col("val").entropy().alias("h"))
+     * shape: (1, 1)
+     * ┌──────────┐
+     * │ h        │
+     * ├──────────┤
+     * │ 1.039721 │
+     * └──────────┘
+     */
+    entropy(options: EntropyOptions = { base: Math.E, normalize: true }) {
+        return this._deriveAgg(v => computeEntropy(v, options));
+    }
+
+    /**
      * Aggregation: Finds the first value in the group.
      * @returns ColumnExpression
      * @example
@@ -217,6 +237,24 @@ export class AggregationExpr extends ExprBase {
      */
     implode() {
         return this._deriveAgg(v => v);
+    }
+
+    /**
+     * Aggregation: Computes the kurtosis (peakedness/tailedness) of a numeric column.
+     * @param options Kurtosis calculation options ({ fisher?: boolean, bias?: boolean }, default fisher=true, bias=true).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [1, 2, 3, 4, 5] })
+     * >>> df.select($df.col("val").kurtosis().alias("kurt"))
+     * shape: (1, 1)
+     * ┌───────┐
+     * │ kurt  │
+     * ├───────┤
+     * │ -1.3  │
+     * └───────┘
+     */
+    kurtosis(options: KurtosisOptions = {}) {
+        return this._deriveAgg(v => computeKurtosis(v, options));
     }
 
     /**
@@ -378,7 +416,27 @@ export class AggregationExpr extends ExprBase {
     }
 
     /**
+     * Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of skewness.
+     * @param options Skew calculation options ({ bias?: boolean }, default bias=true).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ val: [1, 2, 5, 10, 20] })
+     * >>> df.select($df.col("val").skew().alias("skewness"))
+     * shape: (1, 1)
+     * ┌──────────┐
+     * │ skewness │
+     * ├──────────┤
+     * │ 0.859427 │
+     * └──────────┘
+     */
+    skew(options: SkewOptions = {}) {
+
+        return this._deriveAgg(v => computeSkewness(v, options));
+    }
+
+    /**
      * Aggregation: Computes the Spearman rank correlation coefficient.
+
      * @param other The other column expression to correlate with.
      * @returns ColumnExpression
      * @example
@@ -446,5 +504,7 @@ export class AggregationExpr extends ExprBase {
     w_avg(weights: any) {
         return this._deriveAggBinary(weights, pairs => computeWeightedAverage(pairs));
     }
-
 }
+
+
+

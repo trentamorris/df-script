@@ -13,7 +13,7 @@ console.table(data);
 try {
     // 1. Test automatic schema inference
     const df = $df.data(data);
-    const schema = df.get_schema();
+    const schema = df.schema;
     
     console.log("\nInferred Schema:");
     for (const [col, type] of Object.entries(schema)) {
@@ -87,7 +87,7 @@ try {
         age: [30, 25, 40],
         price: [10.5, 20.3, 30.1]
     });
-    const inferredSchema = inferredDf.get_schema();
+    const inferredSchema = inferredDf.schema;
     if (inferredSchema.age.name !== "Int32") throw new Error(`Expected age schema to be Int32, got ${inferredSchema.age.name}`);
     if (inferredSchema.price.name !== "Float64") throw new Error(`Expected price schema to be Float64, got ${inferredSchema.price.name}`);
     
@@ -104,7 +104,7 @@ try {
         ]
     };
     const listTypedArrayDf = $df.data(listTypedArrayData);
-    const listTypedArraySchema = listTypedArrayDf.get_schema();
+    const listTypedArraySchema = listTypedArrayDf.schema;
     if (listTypedArraySchema.nested_lists.name !== "Array") throw new Error(`Expected nested_lists schema to be Array, got ${listTypedArraySchema.nested_lists.name}`);
     if ((listTypedArraySchema.nested_lists as any).innerType.name !== "Int32") throw new Error(`Expected nested array inner type to be Int32, got ${(listTypedArraySchema.nested_lists as any).innerType.name}`);
 

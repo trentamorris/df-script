@@ -13,7 +13,7 @@ if (dfUnpivoted.height !== 4) {
     throw new Error(`Expected height 4, got ${dfUnpivoted.height}`);
 }
 
-const schema = dfUnpivoted.get_schema();
+const schema = dfUnpivoted.schema;
 if (schema.id === undefined || schema.subject === undefined || schema.score === undefined) {
     throw new Error("Schema keys missing on unpivot");
 }

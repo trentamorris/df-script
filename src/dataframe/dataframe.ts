@@ -476,25 +476,6 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     /**
-     * Returns the mapping dictionary of column names to DataType.
-     * @returns DataFrameSchema
-     * @example
-     * >>> const df = $df.data({ a: [1], b: ["text"] })
-     * >>> df
-     * shape: (1, 2)
-     * ┌───┬──────┐
-     * │ a │ b    │
-     * ├───┼──────┤
-     * │ 1 │ text │
-     * └───┴──────┘
-     * >>> df.get_schema()
-     * { a: Float64, b: Utf8 }
-     */
-    get_schema(): DataFrameSchema {
-        return this._schema;
-    }
-
-    /**
      * Groups rows by key columns to prepare for aggregations.
      * @param {K | K[]} keys Column name or array of key column names.
      * @returns {GroupedData}
@@ -607,8 +588,6 @@ export class DataFrame<T extends RowRecord = any> {
                 clonedColumns[colName] = col.slice();
             } else if (isTypedArray(col)) {
                 clonedColumns[colName] = col.slice();
-            } else {
-                clonedColumns[colName] = Array.prototype.slice.call(col);
             }
         }
         return DataFrame._createDirect(clonedColumns, { ...this._schema }, this._height);

@@ -8,10 +8,10 @@ const df = new DataFrame([
 
 const dfRenamed = df.rename({ first_name: "firstName" });
 
-if (dfRenamed.get_schema().firstName === undefined) {
+if (dfRenamed.schema.firstName === undefined) {
     throw new Error("Renamed column firstName schema missing");
 }
-if (dfRenamed.get_schema().first_name !== undefined) {
+if (dfRenamed.schema.first_name !== undefined) {
     throw new Error("Old column first_name schema still exists");
 }
 

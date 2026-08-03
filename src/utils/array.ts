@@ -2,7 +2,8 @@
 import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
 import { toValidNumber, isValidNumber, isValidInt } from "./number";
 import { toCanonicalString } from "./string";
-import type { AnyTypedArray, ColumnData } from "../types";
+import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, EntropyOptions } from "../types";
+
 import { ComputeError, InvalidArgumentError } from "../exceptions";
 /** Array Guards **/
 const typedArrayTagGetter = (() => {
@@ -1114,3 +1115,164 @@ export function binarySearch<T = any>(
     return low;
 }
 
+/**
+ * Helper to compute count, mean, and central moment sums (m2Sum, m3Sum, m4Sum).
+ * @internal
+ */
+function getCentralMoments(
+    arr: ArrayLike<any>
+): { count: number; mean: number; m2Sum: number; m3Sum: number; m4Sum: number } | null {
+    if (!isArrayOrTypedArray(arr)) return null;
+
+    const { mean, count } = getArrayStats(arr);
+    if (count < 2 || mean === null) return null;
+
+    let m2Sum = 0;
+    let m3Sum = 0;
+    let m4Sum = 0;
+    const len = arr.length;
+
+    for (let i = 0; i < len; i++) {
+        const val = toValidNumber(arr[i]);
+        if (val === null) continue;
+        const diff = val - mean;
+        const diff2 = diff * diff;
+        m2Sum += diff2;
+        m3Sum += diff2 * diff;
+        m4Sum += diff2 * diff2;
+    }
+
+    if (m2Sum <= 0) return null;
+
+    return { count, mean, m2Sum, m3Sum, m4Sum };
+}
+
+/**
+ * Computes the sample skewness of a numeric dataset as the Fisher-Pearson coefficient of skewness.
+ * @param arr ArrayLike dataset
+ * @param options Skewness calculation options ({ bias?: boolean }, default bias=true)
+ */
+export function computeSkewness(arr: ArrayLike<any>, options: SkewOptions = {}): number | null {
+    const stats = getCentralMoments(arr);
+    if (!stats) return null;
+
+    const { count, m2Sum, m3Sum } = stats;
+    const m2 = m2Sum / count;
+    const m3 = m3Sum / count;
+    const g1 = m3 / Math.pow(m2, 1.5);
+
+    const bias = options?.bias ?? true;
+    if (bias) {
+        return isValidNumber(g1) ? g1 : null;
+    }
+
+    if (count < 3) return null;
+
+    const G1 = (Math.sqrt(count * (count - 1)) / (count - 2)) * g1;
+    return isValidNumber(G1) ? G1 : null;
+}
+
+/**
+ * Computes the kurtosis of a numeric dataset.
+ * @param arr ArrayLike dataset
+ * @param options Kurtosis calculation options ({ fisher?: boolean, bias?: boolean }, default fisher=true, bias=true)
+ */
+export function computeKurtosis(arr: ArrayLike<any>, options: KurtosisOptions = {}): number | null {
+    const stats = getCentralMoments(arr);
+    if (!stats) return null;
+
+    const { count, m2Sum, m4Sum } = stats;
+    const m2 = m2Sum / count;
+    const m4 = m4Sum / count;
+    const a4 = m4 / (m2 * m2);
+    const g2 = a4 - 3;
+
+    const fisher = options?.fisher ?? true;
+    const bias = options?.bias ?? true;
+
+    if (bias) {
+        const val = fisher ? g2 : a4;
+        return isValidNumber(val) ? val : null;
+    }
+
+    if (count < 4) return null;
+
+    const G2 = ((count - 1) / ((count - 2) * (count - 3))) * ((count + 1) * g2 + 6);
+    const val = fisher ? G2 : G2 + 3;
+    return isValidNumber(val) ? val : null;
+}
+
+/**
+ * Computes the Shannon entropy of a dataset.
+ * @param arr ArrayLike dataset
+ * @param options Entropy options ({ base?: number, normalize?: boolean }, default base=Math.E, normalize=true)
+ */
+export function computeEntropy(
+    arr: ArrayLike<any>,
+    options: EntropyOptions = {}
+): number | null {
+    if (!arr || arr.length === 0) return null;
+
+    const { base = Math.E, normalize = true } = options;
+    if (base <= 0 || base === 1) return null;
+
+    const len = arr.length;
+    const logBase = Math.log(base);
+
+    if (normalize) {
+        // Frequency-based categorical entropy (normalize frequencies to sum to 1)
+        const counts = new Map<string, number>();
+        let validCount = 0;
+
+        for (let i = 0; i < len; i++) {
+            const v = arr[i];
+            if (v == null || Number.isNaN(v)) continue;
+            const key = toCanonicalString(v);
+            counts.set(key, (counts.get(key) || 0) + 1);
+            validCount++;
+        }
+
+        if (validCount === 0) return null;
+
+        let entropy = 0;
+        for (const count of counts.values()) {
+            const p = count / validCount;
+            if (p > 0) {
+                entropy -= p * (Math.log(p) / logBase);
+            }
+        }
+        if (!isValidNumber(entropy)) return null;
+        if (entropy < 0 || Object.is(entropy, -0)) entropy = 0;
+        return entropy;
+    } else {
+        // Input values treated directly as discrete probabilities p_k
+        const validProbs: number[] = [];
+        let totalSum = 0;
+
+        for (let i = 0; i < len; i++) {
+            const v = arr[i];
+            if (v == null || Number.isNaN(v)) continue;
+            const p = Number(v);
+            if (!isValidNumber(p) || p < 0) return null;
+            if (p > 0) {
+                validProbs.push(p);
+                totalSum += p;
+            }
+        }
+
+        if (validProbs.length === 0 || totalSum <= 0) return null;
+
+        let entropy = 0;
+        const numProbs = validProbs.length;
+        for (let i = 0; i < numProbs; i++) {
+            const p = validProbs[i] / totalSum;
+            if (p > 0) {
+                entropy -= p * (Math.log(p) / logBase);
+            }
+        }
+
+        if (!isValidNumber(entropy)) return null;
+        if (entropy < 0 || Object.is(entropy, -0)) entropy = 0;
+        return entropy;
+    }
+}

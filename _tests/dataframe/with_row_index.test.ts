@@ -11,7 +11,7 @@ const df = new DataFrame([
 // 1. Basic usage: defaults to "index" and offset 0
 const dfIndex = df.with_row_index();
 if (dfIndex.height !== 3) throw new Error("Expected height 3");
-const schemaIndex = dfIndex.get_schema();
+const schemaIndex = dfIndex.schema;
 if (schemaIndex.index === undefined) throw new Error("Expected index column in schema");
 const colsIndex = dfIndex.columns;
 if (colsIndex[0] !== "index" || colsIndex[1] !== "name" || colsIndex[2] !== "age") {
