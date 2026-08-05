@@ -1,10 +1,12 @@
 declare const process: any;
 declare const require: any;
-import { isArrayOfType, toValidArray, toValidStringArray, getUniqueArrayStats, joinArray, sortArray, computeMedian, computeQuantile, computeMode } from "../../src/utils/array";
-import { toValidNumber, toValidFloat, formatNumber, isValidFloat, toValidBigInt, clamp, roundToScale } from "../../src/utils/number";
+import { isArrayOfType, toValidArray, toArrayOfType, getUniqueArrayStats, joinArray, sortArray, computeMedian, computeQuantile, computeMode } from "../../src/utils/array";
+
+import { toValidNumber, toValidFloat, formatNumber, isValidFloat, toValidBigInt, isValidBigInt, clamp, roundToScale } from "../../src/utils/number";
 import { isValidDateObj, isObj, isRegExp, isSet, isMap, unboxPrimitiveObj } from "../../src/utils/object";
 import { toCanonicalString } from "../../src/utils/string";
 import { createSafeJsonReplacer } from "../../src/utils/json";
+import { ComputeError } from "../../src/exceptions";
 import { $df } from "../../src/index";
 
 
@@ -108,14 +110,99 @@ try {
         throw new Error("Expected scalar to be wrapped in a single-element array");
     }
 
-    // toValidStringArray tests
-    const strArr1 = toValidStringArray(null);
-    if (!Array.isArray(strArr1) || strArr1.length !== 0) throw new Error("Expected toValidStringArray(null) to return []");
+    // toArrayOfType tests
+    const strArr1 = toArrayOfType<string>(null, "string");
+    if (!Array.isArray(strArr1) || strArr1.length !== 0) throw new Error("Expected toArrayOfType(null, 'string') to return []");
 
-    const strArr2 = toValidStringArray([1, "hello", null, undefined]);
+    const strArr2 = toArrayOfType<string>([1, "hello", null, undefined], "string");
     if (strArr2.length !== 4 || strArr2[0] !== "1" || strArr2[1] !== "hello" || strArr2[2] !== "null" || strArr2[3] !== "undefined") {
         throw new Error("Expected elements to be converted to strings");
     }
+
+    const numArr = toArrayOfType<number>(["10", 20, "30"], "number");
+    if (numArr.length !== 3 || numArr[0] !== 10 || numArr[1] !== 20 || numArr[2] !== 30) {
+        throw new Error("Expected elements to be converted to numbers");
+    }
+
+    const boolArr = toArrayOfType<boolean>([1, 0, ""], "boolean");
+    if (boolArr.length !== 3 || boolArr[0] !== true || boolArr[1] !== false || boolArr[2] !== false) {
+        throw new Error("Expected elements to be converted to booleans");
+    }
+
+    const nullPreserved = toArrayOfType<string | null>([10, null, 20], "string", { allowNulls: true });
+    if (nullPreserved.length !== 3 || nullPreserved[0] !== "10" || nullPreserved[1] !== null || nullPreserved[2] !== "20") {
+        throw new Error("Expected null to be preserved when allowNulls is true");
+    }
+
+    const dateArr = toArrayOfType<Date>(["2025-01-01"], "date");
+    if (dateArr.length !== 1 || !(dateArr[0] instanceof Date)) {
+        throw new Error("Expected string date to be coerced to Date instance");
+    }
+
+    // Edge case test: custom predicate function with toArrayOfType
+    const evenNums = toArrayOfType<number>([2, 4, 6], isEven);
+    if (evenNums.length !== 3 || evenNums[0] !== 2 || evenNums[1] !== 4 || evenNums[2] !== 6) {
+        throw new Error("Expected toArrayOfType with custom predicate function to preserve matching elements");
+    }
+
+    const customFnArr = toArrayOfType<number>([1, 2, 3], (v) => (v as number) * 2);
+    if (customFnArr.length !== 3 || customFnArr[0] !== 2 || customFnArr[1] !== 4 || customFnArr[2] !== 6) {
+        throw new Error("Expected custom transform function to be applied");
+    }
+
+    // Additional robust checks for isArrayOfType and toArrayOfType
+    if (!isArrayOfType([10n, 20n], "bigint")) throw new Error("isArrayOfType: bigint failed");
+    if (isArrayOfType([10n, "abc"], "bigint")) throw new Error("isArrayOfType: mixed bigint string failed");
+    const coercedBigInts = toArrayOfType<bigint>(["100", 200n], "bigint");
+    if (coercedBigInts[0] !== 100n || coercedBigInts[1] !== 200n) throw new Error("toArrayOfType: bigint coercion failed");
+
+    try {
+        toArrayOfType(["hello"], "object", { mode: "every" });
+        throw new Error("toArrayOfType: string to object should throw in mode 'every'");
+    } catch (e: any) {
+        if (!(e instanceof ComputeError)) throw e;
+    }
+
+    const filteredObjs = toArrayOfType<Record<string, any>>(["hello", { a: 1 }], "object", { mode: "some" });
+    if (filteredObjs.length !== 1 || filteredObjs[0].a !== 1) throw new Error("toArrayOfType: object filtering in mode 'some' failed");
+
+    const int32Arr = new Int32Array([10, 20, 30]);
+    if (!isArrayOfType(int32Arr, "number")) throw new Error("isArrayOfType: Int32Array failed");
+    const coercedFromTyped = toArrayOfType<number>(int32Arr, "number");
+    if (coercedFromTyped.length !== 3 || coercedFromTyped[1] !== 20) throw new Error("toArrayOfType: Int32Array failed");
+
+    try {
+        toArrayOfType(["abc", "def"], "number", { mode: "some" });
+        throw new Error("toArrayOfType: mode 'some' with 0 matches should throw");
+    } catch (e: any) {
+        if (!(e instanceof ComputeError)) throw e;
+    }
+
+    // Additional Edge Cases: nullish, plainObject, scalar wrapping, and allowEmpty: false
+    if (!isArrayOfType([null, undefined], "nullish")) throw new Error("isArrayOfType: nullish failed");
+    if (isArrayOfType([null, 123], "nullish")) throw new Error("isArrayOfType: mixed nullish failed");
+    const nullishArr = toArrayOfType([null, undefined], "nullish");
+    if (nullishArr.length !== 2 || nullishArr[0] !== null || nullishArr[1] !== null) throw new Error("toArrayOfType: nullish failed");
+
+    if (!isArrayOfType([{ a: 1 }, { b: 2 }], "plainObject")) throw new Error("isArrayOfType: plainObject failed");
+    if (isArrayOfType([new Date()], "plainObject")) throw new Error("isArrayOfType: Date instance should not be plainObject");
+
+    if (!isArrayOfType([undefined], "undefined")) throw new Error("isArrayOfType: undefined failed");
+    const undefArr = toArrayOfType([undefined], "undefined");
+    if (undefArr.length !== 1 || undefArr[0] !== undefined) throw new Error("toArrayOfType: undefined failed");
+
+    const scalarWrapped = toArrayOfType(42, "number");
+    if (scalarWrapped.length !== 1 || scalarWrapped[0] !== 42) throw new Error("toArrayOfType: scalar wrapping failed");
+
+    try {
+        toArrayOfType([], "number", { allowEmpty: false });
+        throw new Error("toArrayOfType: allowEmpty: false should throw on empty array");
+    } catch (e: any) {
+        if (!(e instanceof ComputeError)) throw e;
+    }
+
+
+
 
     // Test getUniqueArrayStats
 
@@ -384,17 +471,246 @@ try {
     if (toValidBigInt("1.234,00", { truncate: false }) !== 1234n) throw new Error("BigInt: European mixed trailing zero float check failed");
     if (toValidBigInt("(1,234.00)") !== -1234n) throw new Error("BigInt: accounting layout parsing failed");
     if (toValidBigInt("1_000_000") !== 1000000n) throw new Error("BigInt: underscores failed");
-    if (toValidBigInt("1.23e+4") !== 12300n) throw new Error("BigInt: scientific notation conversion failed");
+    // ==========================================
+    // 1. SCIENTIFIC NOTATION & PRECISION LOSS
+    // ==========================================
+    if (toValidBigInt("1.234567890123456789e18", { truncate: true }) !== 1234567890123456789n) {
+        throw new Error("Edge Case: Precision lost in scientific notation parsing");
+    }
+    if (toValidBigInt("1e21", { range: { min: 0n, max: 10n ** 30n } }) !== 1000000000000000000000n) {
+        throw new Error("Edge Case: Large valid scientific notation failed");
+    }
+    if (toValidBigInt("1.2345e2") !== null) {
+        throw new Error("Edge Case: Scientific notation with decimal remainder failed (should require truncate: true)");
+    }
+    if (toValidBigInt("1.2345e2", { truncate: true }) !== 123n) {
+        throw new Error("Edge Case: Scientific notation truncation failed");
+    }
+    if (toValidBigInt("1e-2") !== null) {
+        throw new Error("Edge Case: Negative exponent without truncate should return null");
+    }
+    if (toValidBigInt("1e-2", { truncate: true }) !== 0n) {
+        throw new Error("Edge Case: Negative exponent with truncate should yield 0n");
+    }
+    if (toValidBigInt("1e+100000") !== null) {
+        throw new Error("Edge Case: Extreme exponent causing Infinity/Overflow should return null");
+    }
 
-    // BigInt single dot tests
-    if (toValidBigInt("1.234", { truncate: false }) !== null) throw new Error("BigInt: single dot '1.234' strict check failed");
-    if (toValidBigInt("1.234", { truncate: true }) !== 1n) throw new Error("BigInt: single dot '1.234' truncate failed");
+    // Negative mantissa & leading zero scientific notation tests
+    if (toValidBigInt("-0.5e2") !== -50n) {
+        throw new Error("Edge Case: Negative mantissa '-0.5e2' failed");
+    }
+    if (toValidBigInt("-0.005e5") !== -500n) {
+        throw new Error("Edge Case: Negative mantissa with leading zeros '-0.005e5' failed");
+    }
+    if (toValidBigInt("-1.2e-1") !== null) {
+        throw new Error("Edge Case: Negative scientific '-1.2e-1' without truncate should return null");
+    }
+    if (toValidBigInt("-1.2e-1", { truncate: true }) !== 0n) {
+        throw new Error("Edge Case: Negative scientific '-1.2e-1' with truncate should return 0n");
+    }
 
-    // toValidBigInt loophole/edge case tests
-    if (toValidBigInt("1.2.3") !== null) throw new Error("BigInt loophole: version string should return null");
-    if (toValidBigInt("1.2.3", { truncate: true }) !== null) throw new Error("BigInt loophole: version string with truncate should return null");
-    if (toValidBigInt("1.invalid_stuff", { truncate: true }) !== null) throw new Error("BigInt loophole: invalid suffix with truncate should return null");
-    if (toValidBigInt("1234.56.78", { truncate: true }) !== null) throw new Error("BigInt loophole: multiple dots with truncate should return null");
+    // ==========================================
+    // 2. MALFORMED STRINGS & SYMBOL SUFFIXES
+    // ==========================================
+    if (toValidBigInt("10n") !== null) {
+        throw new Error("Edge Case: BigInt literal suffix 'n' in string should be invalid");
+    }
+    if (toValidBigInt(".") !== null || toValidBigInt(".", { truncate: true }) !== null) {
+        throw new Error("Edge Case: Lone dot should return null");
+    }
+    if (toValidBigInt("-.") !== null || toValidBigInt("-.", { truncate: true }) !== null) {
+        throw new Error("Edge Case: Negative lone dot should return null");
+    }
+    if (toValidBigInt("10.") !== 10n) {
+        throw new Error("Edge Case: Trailing dot '10.' should parse correctly as 10n");
+    }
+    if (toValidBigInt(".5", { truncate: true }) !== 0n) {
+        throw new Error("Edge Case: Leading dot '.5' with truncate should yield 0n");
+    }
+    if (toValidBigInt("0x10") !== null) {
+        throw new Error("Edge Case: Hexadecimal string should return null (if strict decimal required)");
+    }
+
+    // ==========================================
+    // 3. NUMERIC TYPE TRAPS
+    // ==========================================
+    if (toValidBigInt(NaN) !== null) throw new Error("Edge Case: NaN should return null");
+    if (toValidBigInt(Infinity) !== null) throw new Error("Edge Case: Infinity should return null");
+    if (toValidBigInt(-Infinity) !== null) throw new Error("Edge Case: -Infinity should return null");
+    if (toValidBigInt(10.5) !== null) throw new Error("Edge Case: Float number without truncate should return null");
+    if (toValidBigInt(10.5, { truncate: true }) !== 10n) throw new Error("Edge Case: Float number with truncate failed");
+
+    // ==========================================
+    // 4. BOUNDARY & RANGE TESTS
+    // ==========================================
+    const INT64_MIN_TEST = -9223372036854775808n;
+    const INT64_MAX_TEST = 9223372036854775807n;
+
+    if (toValidBigInt(INT64_MAX_TEST, { range: "Int64" }) !== INT64_MAX_TEST) {
+        throw new Error("Boundary: Int64 MAX exact match failed");
+    }
+    if (toValidBigInt(INT64_MIN_TEST, { range: "Int64" }) !== INT64_MIN_TEST) {
+        throw new Error("Boundary: Int64 MIN exact match failed");
+    }
+    if (toValidBigInt(50n, { range: { min: 0n, max: 100n } }) !== 50n) {
+        throw new Error("Boundary: Custom range object failed");
+    }
+
+    // ==========================================
+    // 5. OBJECT & UNBOXING SIDE EFFECTS
+    // ==========================================
+    if (toValidBigInt(Symbol("10")) !== null) {
+        throw new Error("Type: Symbol input should safely return null without throwing");
+    }
+    const poisonObject = {
+        toString() { throw new Error("Poisoned object"); },
+        valueOf() { throw new Error("Poisoned object"); }
+    };
+    if (toValidBigInt(poisonObject) !== null) {
+        throw new Error("Edge Case: Unsafe object unboxing did not return null");
+    }
+
+    // ==========================================
+    // 6. ISVALIDBIGINT EXHAUSTIVE EDGE CASES
+    // ==========================================
+    // Basic primitives & types
+    if (!isValidBigInt(0n)) throw new Error("isValidBigInt: 0n failed");
+    if (!isValidBigInt(-0n)) throw new Error("isValidBigInt: -0n failed");
+    if (!isValidBigInt(10n)) throw new Error("isValidBigInt: primitive bigint failed");
+    if (!isValidBigInt(-9223372036854775808n)) throw new Error("isValidBigInt: Int64 MIN failed");
+    if (!isValidBigInt(9223372036854775807n)) throw new Error("isValidBigInt: Int64 MAX failed");
+    
+    // Non-bigint primitives
+    if (isValidBigInt(0)) throw new Error("isValidBigInt: 0 should return false");
+    if (isValidBigInt(10)) throw new Error("isValidBigInt: primitive number should return false");
+    if (isValidBigInt(NaN)) throw new Error("isValidBigInt: NaN should return false");
+    if (isValidBigInt(Infinity)) throw new Error("isValidBigInt: Infinity should return false");
+    if (isValidBigInt(-Infinity)) throw new Error("isValidBigInt: -Infinity should return false");
+    if (isValidBigInt("10")) throw new Error("isValidBigInt: string should return false");
+    if (isValidBigInt("10n")) throw new Error("isValidBigInt: string with 'n' should return false");
+    if (isValidBigInt(true)) throw new Error("isValidBigInt: boolean true should return false");
+    if (isValidBigInt(false)) throw new Error("isValidBigInt: boolean false should return false");
+    if (isValidBigInt(null)) throw new Error("isValidBigInt: null should return false");
+    if (isValidBigInt(undefined)) throw new Error("isValidBigInt: undefined should return false");
+    if (isValidBigInt(Symbol("10"))) throw new Error("isValidBigInt: Symbol should return false");
+    if (isValidBigInt(() => 10n)) throw new Error("isValidBigInt: function should return false");
+    
+    // Object wrappers & Proxy objects
+    if (!isValidBigInt(Object(10n))) throw new Error("isValidBigInt: BigInt object wrapper failed");
+    if (!isValidBigInt(Object(0n))) throw new Error("isValidBigInt: Object(0n) failed");
+    if (isValidBigInt(Object(10))) throw new Error("isValidBigInt: Number object wrapper should return false");
+    if (isValidBigInt(Object("10"))) throw new Error("isValidBigInt: String object wrapper should return false");
+    if (isValidBigInt(Object(true))) throw new Error("isValidBigInt: Boolean object wrapper should return false");
+    if (isValidBigInt({ [Symbol.toPrimitive]: () => 10n })) throw new Error("isValidBigInt: object with toPrimitive returning bigint should return false");
+    if (!isValidBigInt({ valueOf: () => 10n })) throw new Error("isValidBigInt: object with valueOf returning bigint failed to unbox to bigint");
+    if (isValidBigInt(new Proxy(Object(10n), {}))) throw new Error("isValidBigInt: Proxy wrapped BigInt object fails native slot check and should return false");
+    if (isValidBigInt(poisonObject)) throw new Error("isValidBigInt: poisoned object throwing in valueOf should return false");
+
+    // Int64 boundaries & off-by-one checks
+    if (isValidBigInt(9223372036854775808n, { range: "Int64" })) throw new Error("isValidBigInt: Int64 MAX + 1 should return false");
+    if (isValidBigInt(-9223372036854775809n, { range: "Int64" })) throw new Error("isValidBigInt: Int64 MIN - 1 should return false");
+    
+    // UInt64 boundaries & off-by-one checks
+    if (!isValidBigInt(0n, { range: "UInt64" })) throw new Error("isValidBigInt: UInt64 MIN (0n) failed");
+    if (!isValidBigInt(18446744073709551615n, { range: "UInt64" })) throw new Error("isValidBigInt: UInt64 MAX failed");
+    if (isValidBigInt(-1n, { range: "UInt64" })) throw new Error("isValidBigInt: UInt64 -1n should return false");
+    if (isValidBigInt(18446744073709551616n, { range: "UInt64" })) throw new Error("isValidBigInt: UInt64 MAX + 1 should return false");
+    
+    // Custom range objects (narrow, wide, negative, single-point)
+    if (!isValidBigInt(5n, { range: { min: 0n, max: 10n } })) throw new Error("isValidBigInt: custom range inside bounds failed");
+    if (isValidBigInt(-1n, { range: { min: 0n, max: 10n } })) throw new Error("isValidBigInt: custom range below min failed");
+    if (isValidBigInt(11n, { range: { min: 0n, max: 10n } })) throw new Error("isValidBigInt: custom range above max failed");
+    if (!isValidBigInt(7n, { range: { min: 7n, max: 7n } })) throw new Error("isValidBigInt: custom single-point range exact match failed");
+    if (isValidBigInt(6n, { range: { min: 7n, max: 7n } })) throw new Error("isValidBigInt: custom single-point range mismatch failed");
+    if (!isValidBigInt(-500n, { range: { min: -1000n, max: -100n } })) throw new Error("isValidBigInt: custom negative range failed");
+
+    // ==========================================
+    // 7. TOVALIDBIGINT EXHAUSTIVE EDGE CASES
+    // ==========================================
+    // Primitives & Type Conversions
+    if (toValidBigInt(0n) !== 0n) throw new Error("toValidBigInt: 0n failed");
+    if (toValidBigInt(-0n) !== 0n) throw new Error("toValidBigInt: -0n failed");
+    if (toValidBigInt(true) !== 1n) throw new Error("toValidBigInt: boolean true failed");
+    if (toValidBigInt(false) !== 0n) throw new Error("toValidBigInt: boolean false failed");
+    if (toValidBigInt(null) !== null) throw new Error("toValidBigInt: null should return null");
+    if (toValidBigInt(undefined) !== null) throw new Error("toValidBigInt: undefined should return null");
+    if (toValidBigInt(Symbol("10")) !== null) throw new Error("toValidBigInt: Symbol should return null");
+
+    // Number Inputs & Truncation Semantics
+    if (toValidBigInt(0) !== 0n) throw new Error("toValidBigInt: 0 failed");
+    if (toValidBigInt(42) !== 42n) throw new Error("toValidBigInt: integer number failed");
+    if (toValidBigInt(-42) !== -42n) throw new Error("toValidBigInt: negative integer number failed");
+    if (toValidBigInt(42.0) !== 42n) throw new Error("toValidBigInt: float with zero decimal failed");
+    if (toValidBigInt(42.99) !== null) throw new Error("toValidBigInt: float without truncate should return null");
+    if (toValidBigInt(42.99, { truncate: true }) !== 42n) throw new Error("toValidBigInt: positive float truncation failed");
+    if (toValidBigInt(-42.99, { truncate: true }) !== -42n) throw new Error("toValidBigInt: negative float truncation failed");
+    if (toValidBigInt(NaN) !== null) throw new Error("toValidBigInt: NaN should return null");
+    if (toValidBigInt(Infinity) !== null) throw new Error("toValidBigInt: Infinity should return null");
+    if (toValidBigInt(-Infinity) !== null) throw new Error("toValidBigInt: -Infinity should return null");
+
+    // String Parsing Edge Cases & Formatting
+    if (toValidBigInt("0") !== 0n) throw new Error("toValidBigInt: '0' string failed");
+    if (toValidBigInt("-0") !== 0n) throw new Error("toValidBigInt: '-0' string failed");
+    if (toValidBigInt("+42") !== 42n) throw new Error("toValidBigInt: '+42' string failed");
+    if (toValidBigInt("0000042") !== 42n) throw new Error("toValidBigInt: string with leading zeros failed");
+    if (toValidBigInt("-0000042") !== -42n) throw new Error("toValidBigInt: negative string with leading zeros failed");
+    if (toValidBigInt("1,234,567") !== 1234567n) throw new Error("toValidBigInt: grouped comma string failed");
+    if (toValidBigInt("1.234.567") !== 1234567n) throw new Error("toValidBigInt: European grouped dot string failed");
+    if (toValidBigInt("1.234,56", { truncate: true }) !== 1234n) throw new Error("toValidBigInt: European decimal comma truncation failed");
+    if (toValidBigInt("1.234,56", { truncate: false }) !== null) throw new Error("toValidBigInt: European decimal comma without truncate should return null");
+    if (toValidBigInt("1.234,00", { truncate: false }) !== 1234n) throw new Error("toValidBigInt: European decimal comma trailing zero float check failed");
+    if (toValidBigInt("(1,234)") !== -1234n) throw new Error("toValidBigInt: accounting layout parsing failed");
+    if (toValidBigInt("( 1,234.50 )", { truncate: true }) !== -1234n) throw new Error("toValidBigInt: accounting decimal float truncation failed");
+    if (toValidBigInt("123.45-", { truncate: true }) !== -123n) throw new Error("toValidBigInt: trailing minus sign float truncation failed");
+    if (toValidBigInt("1_000_000") !== 1000000n) throw new Error("toValidBigInt: underscores failed");
+
+    // Invalid String Syntax Rejections
+    if (toValidBigInt("") !== null) throw new Error("toValidBigInt: empty string should return null");
+    if (toValidBigInt("   ") !== null) throw new Error("toValidBigInt: whitespace string should return null");
+    if (toValidBigInt("10n") !== null) throw new Error("toValidBigInt: BigInt suffix 'n' should return null");
+    if (toValidBigInt("0x10") !== null) throw new Error("toValidBigInt: hex string should return null");
+    if (toValidBigInt("0b10") !== null) throw new Error("toValidBigInt: binary string should return null");
+    if (toValidBigInt("0o10") !== null) throw new Error("toValidBigInt: octal string should return null");
+    if (toValidBigInt("abc") !== null) throw new Error("toValidBigInt: non-numeric string should return null");
+    if (toValidBigInt("1.2.3") !== null) throw new Error("toValidBigInt: version string should return null");
+    if (toValidBigInt(".") !== null) throw new Error("toValidBigInt: lone dot should return null");
+    if (toValidBigInt("-.") !== null) throw new Error("toValidBigInt: lone negative dot should return null");
+
+    // Scientific Notation & Extreme Powers
+    if (toValidBigInt("1e3") !== 1000n) throw new Error("toValidBigInt: simple scientific '1e3' failed");
+    if (toValidBigInt("-1.5e3") !== -1500n) throw new Error("toValidBigInt: negative scientific '-1.5e3' failed");
+    if (toValidBigInt("1.234567890123456789e18") !== 1234567890123456789n) throw new Error("toValidBigInt: scientific notation precision loss prevention failed");
+    if (toValidBigInt("1.2345e2") !== null) throw new Error("toValidBigInt: scientific notation fractional remainder without truncate should return null");
+    if (toValidBigInt("1.2345e2", { truncate: true }) !== 123n) throw new Error("toValidBigInt: scientific notation fractional remainder truncation failed");
+    if (toValidBigInt("1e-2") !== null) throw new Error("toValidBigInt: negative scientific exponent without truncate should return null");
+    if (toValidBigInt("1e-2", { truncate: true }) !== 0n) throw new Error("toValidBigInt: negative scientific exponent truncation failed");
+    if (toValidBigInt("-1.2e-1", { truncate: true }) !== 0n) throw new Error("toValidBigInt: negative mantissa negative exponent truncation failed");
+    if (toValidBigInt("1e+100001") !== null) throw new Error("toValidBigInt: extreme exponent (>100000) should return null");
+    if (toValidBigInt("1e-100001") !== null) throw new Error("toValidBigInt: extreme negative exponent (<-100000) should return null");
+
+    // Object Unboxing & Custom Objects
+    if (toValidBigInt(Object(100n)) !== 100n) throw new Error("toValidBigInt: BigInt object wrapper failed");
+    if (toValidBigInt(Object("100")) !== 100n) throw new Error("toValidBigInt: String object wrapper failed");
+    if (toValidBigInt(Object(42.5), { truncate: true }) !== 42n) throw new Error("toValidBigInt: Number object wrapper float truncation failed");
+    if (toValidBigInt({ valueOf: () => "999" }) !== 999n) throw new Error("toValidBigInt: custom object valueOf string unboxing failed");
+    if (toValidBigInt(poisonObject) !== null) throw new Error("toValidBigInt: poisoned object throwing in valueOf should return null");
+
+    // Int64, UInt64 & Custom Ranges
+    if (toValidBigInt(9223372036854775807n, { range: "Int64" }) !== 9223372036854775807n) throw new Error("toValidBigInt: Int64 MAX failed");
+    if (toValidBigInt(-9223372036854775808n, { range: "Int64" }) !== -9223372036854775808n) throw new Error("toValidBigInt: Int64 MIN failed");
+    if (toValidBigInt(9223372036854775808n, { range: "Int64" }) !== null) throw new Error("toValidBigInt: Int64 MAX + 1 out of bounds should return null");
+    if (toValidBigInt(-9223372036854775809n, { range: "Int64" }) !== null) throw new Error("toValidBigInt: Int64 MIN - 1 out of bounds should return null");
+    if (toValidBigInt(18446744073709551615n, { range: "UInt64" }) !== 18446744073709551615n) throw new Error("toValidBigInt: UInt64 MAX failed");
+    if (toValidBigInt(-1n, { range: "UInt64" }) !== null) throw new Error("toValidBigInt: UInt64 negative rejection failed");
+    if (toValidBigInt(50n, { range: { min: 0n, max: 100n } }) !== 50n) throw new Error("toValidBigInt: custom range within bounds failed");
+    if (toValidBigInt(150n, { range: { min: 0n, max: 100n } }) !== null) throw new Error("toValidBigInt: custom range upper bound exceeded should return null");
+
+    // Additional BigInt Edge Case Tests
+    if (toValidBigInt("1.25e1", { truncate: false }) !== null) throw new Error("toValidBigInt: fractional scientific without truncate failed");
+    if (toValidBigInt("1.25e1", { truncate: true }) !== 12n) throw new Error("toValidBigInt: fractional scientific with truncate failed");
+    if (toValidBigInt("-129", { range: { min: -128n, max: 127n } }) !== null) throw new Error("toValidBigInt: custom min exceeded should return null");
+    if (toValidBigInt("128", { range: { min: -128n, max: 127n } }) !== null) throw new Error("toValidBigInt: custom max exceeded should return null");
 
     // Clamp tests
     if (clamp(5, { min: 1, max: 10 }) !== 5) throw new Error("Clamp: basic clamp in-bounds failed");

@@ -19,6 +19,9 @@ import type { UniqueArrayStatsOptions, JoinArrayOptions, ExplodeOptions, IExpr, 
 import { ELEMENT_MARKER } from "../constants";
 import { ComputeError } from "../../exceptions";
 
+
+
+
 /**
  * @namespace $df.col.arr
  * @category ColumnExpression
@@ -31,6 +34,41 @@ export class ArrayExprNamespace {
         return derive(this.expr, kleeneUnary((v) => {
             return isArrayOrTypedArray(v) ? fn(v as any) : null;
         }));
+    }
+
+    /**
+     * Applies an aggregation expression or element-wise calculation over each array cell.
+     * @param expr Aggregation expression (e.g. $df.element().sum() or $df.element().max())
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })
+     * >>> df.with_columns($df.col("a").arr.agg($df.element().sum()).alias("sum_a"))
+     * shape: (2, 2)
+     * ┌───────────┬───────┐
+     * │ a         │ sum_a │
+     * ├───────────┼───────┤
+     * │ [1, 2, 3] │ 6     │
+     * │ [4, 5]    │ 9     │
+     * └───────────┴───────┘
+     */
+    agg(expr: IExpr) {
+        return derive(this.expr, (vArray, columns) => {
+            const height = vArray.length;
+            const result = new Array(height);
+            const subColumns = Object.create(columns);
+            for (let i = 0; i < height; i++) {
+                const val = vArray[i];
+                if (!isArrayOrTypedArray(val)) {
+                    result[i] = null;
+                    continue;
+                }
+                const subHeight = val.length;
+                subColumns[ELEMENT_MARKER] = val;
+                const evaluated = evaluateExpression(expr, subColumns, subHeight);
+                result[i] = isArrayOrTypedArray(evaluated) ? evaluated[0] ?? null : evaluated;
+            }
+            return result;
+        });
     }
 
     /**
@@ -70,6 +108,42 @@ export class ArrayExprNamespace {
     }
 
     /**
+     * Finds the index of the maximum value in each array.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ a: [[1, 5, 2], [10, 4]] })
+     * >>> df.with_columns($df.col("a").arr.arg_max().alias("max_idx"))
+     * shape: (2, 2)
+     * ┌───────────┬─────────┐
+     * │ a         │ max_idx │
+     * ├───────────┼─────────┤
+     * │ [1, 5, 2] │ 1       │
+     * │ [10, 4]   │ 0       │
+     * └───────────┴─────────┘
+     */
+    arg_max() {
+        return this._deriveArray((arr) => getArrayStats(arr).maxIdx);
+    }
+
+    /**
+     * Finds the index of the minimum value in each array.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ a: [[5, 1, 2], [10, 4]] })
+     * >>> df.with_columns($df.col("a").arr.arg_min().alias("min_idx"))
+     * shape: (2, 2)
+     * ┌───────────┬─────────┐
+     * │ a         │ min_idx │
+     * ├───────────┼─────────┤
+     * │ [5, 1, 2] │ 1       │
+     * │ [10, 4]   │ 1       │
+     * └───────────┴─────────┘
+     */
+    arg_min() {
+        return this._deriveArray((arr) => getArrayStats(arr).minIdx);
+    }
+
+    /**
      * Checks if nested lists contain item.
      * @param item The element to search for.
      * @returns ColumnExpression
@@ -85,7 +159,7 @@ export class ArrayExprNamespace {
      * └───────────┴───────────┘
      */
     contains(item: any) {
-        return this._deriveArray((arr) => arr.includes(item));
+        return this._deriveArray((arr) => Array.prototype.includes.call(arr, item));
     }
 
     /**
@@ -104,7 +178,7 @@ export class ArrayExprNamespace {
      * └───────────┴─────────┘
      */
     contains_all(items: ArrayLike<any>) {
-        return this._deriveArray((arr) => isArrayOfType(items, (x) => arr.includes(x), { mode: "every" }));
+        return this._deriveArray((arr) => isArrayOfType(items, (x) => Array.prototype.includes.call(arr, x), { mode: "every" }));
     }
 
     /**
@@ -123,7 +197,7 @@ export class ArrayExprNamespace {
      * └────────┴─────────┘
      */
     contains_any(items: ArrayLike<any>) {
-        return this._deriveArray((arr) => isArrayOfType(items, (x) => arr.includes(x), { mode: "some" }));
+        return this._deriveArray((arr) => isArrayOfType(items, (x) => Array.prototype.includes.call(arr, x), { mode: "some" }));
     }
 
     /**
@@ -195,20 +269,20 @@ export class ArrayExprNamespace {
     }
 
     /**
-     * Expands lists into row-wise records.
+     * Expands lists into row-wise elements and produces an index mapping for DataFrame unnesting.
      * @param options Config options including handling of empty arrays and nulls.
      * @returns ColumnExpression
      * @example
-     * >>> const df = $df.data({ a: [[1, 2], [3]] })
-     * >>> df.explode($df.col("a").arr.explode())
-     * shape: (3, 1)
-     * ┌───┐
-     * │ a │
-     * ├───┤
-     * │ 1 │
-     * │ 2 │
-     * │ 3 │
-     * └───┘
+     * >>> const df = $df.data({ id: [1, 2], values: [[10, 20], [30]] })
+     * >>> df.select([$df.col("id"), $df.col("values").arr.explode()])
+     * shape: (3, 2)
+     * ┌─────┬────────┐
+     * │ id  │ values │
+     * ├─────┼────────┤
+     * │ 1   │ 10     │
+     * │ 1   │ 20     │
+     * │ 2   │ 30     │
+     * └─────┴────────┘
      */
     explode({ empty_as_null = true, keep_nulls = true }: ExplodeOptions = {}) {
         return derive(this.expr, (vArray) => {
@@ -440,24 +514,6 @@ export class ArrayExprNamespace {
     }
 
     /**
-     * Returns the index of maximum value.
-     * @returns ColumnExpression
-     * @example
-     * >>> const df = $df.data({ a: [[1, 5, 2], [10, 4]] })
-     * >>> df.with_columns($df.col("a").arr.max_index().alias("max_idx"))
-     * shape: (2, 2)
-     * ┌───────────┬─────────┐
-     * │ a         │ max_idx │
-     * ├───────────┼─────────┤
-     * │ [1, 5, 2] │ 1       │
-     * │ [10, 4]   │ 0       │
-     * └───────────┴─────────┘
-     */
-    max_index() {
-        return this._deriveArray((arr) => getArrayStats(arr).maxIdx);
-    }
-
-    /**
      * Returns average of elements inside each list.
      * @returns ColumnExpression
      * @example
@@ -509,24 +565,6 @@ export class ArrayExprNamespace {
      */
     min() {
         return this._deriveArray((arr) => getArrayStats(arr).min);
-    }
-
-    /**
-     * Returns the index of minimum value.
-     * @returns ColumnExpression
-     * @example
-     * >>> const df = $df.data({ a: [[5, 1, 2], [10, 4]] })
-     * >>> df.with_columns($df.col("a").arr.min_index().alias("min_idx"))
-     * shape: (2, 2)
-     * ┌───────────┬─────────┐
-     * │ a         │ min_idx │
-     * ├───────────┼─────────┤
-     * │ [5, 1, 2] │ 1       │
-     * │ [10, 4]   │ 1       │
-     * └───────────┴─────────┘
-     */
-    min_index() {
-        return this._deriveArray((arr) => getArrayStats(arr).minIdx);
     }
 
     /**

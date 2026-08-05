@@ -24,3 +24,25 @@ export const UNMATCHED_ROW_INDEX = -1;
 
 /** Maximum allowable length for a single JavaScript array (2^32 - 1). */
 export const MAX_JS_ARRAY_LENGTH = 4_294_967_295;
+
+/** 64-bit Integer Boundaries */
+export const INT64_MIN = -9_223_372_036_854_775_808n;
+export const INT64_MAX = 9_223_372_036_854_775_807n;
+export const UINT64_MIN = 0n;
+export const UINT64_MAX = 18_446_744_073_709_551_615n;
+
+/** 32-bit & Standard Integer Boundaries */
+export const INT32_MIN = -2_147_483_648;
+export const INT32_MAX = 2_147_483_647;
+export const UINT32_MIN = 0;
+export const UINT32_MAX = MAX_JS_ARRAY_LENGTH;
+
+export const INT16_MIN = -32_768;
+export const INT16_MAX = 32_767;
+export const UINT16_MIN = 0;
+export const UINT16_MAX = 65_535;
+
+export const INT8_MIN = -128;
+export const INT8_MAX = 127;
+export const UINT8_MIN = 0;
+export const UINT8_MAX = 255;

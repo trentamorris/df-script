@@ -5,7 +5,7 @@ import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, HorizontalConcatOptions, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions } from "../types"
 import type { GroupMap, LimitOptions, SortOptions, PivotOptions, JoinOptions, JoinMaintainOrder, AsofJoinOptions, UnpivotOptions, TransposeOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry } from "../datatypes"
-import { isArrayOrTypedArray, toValidArray, toValidStringArray, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
+import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, clamp, isTypedArray, stringifyCSV } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError, InvalidArgumentError, IOStreamError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
@@ -310,13 +310,21 @@ export class DataFrame<T extends RowRecord = any> {
         columns: IntoExpr | IntoExpr[],
         options?: ExplodeOptions
     ): DataFrame<any> {
-        const expr = ColumnExpr.toColExpr(columns);
-        const colNames = expr._colNames || [expr._colName || expr._outputName];
+        const rawArgs = Array.isArray(columns) ? columns : [columns];
+        const normalized = this._normalizeArgs(rawArgs);
+        const expandedExprs = resolveColumnSelectors(
+            normalized,
+            Object.keys(this._columns),
+            undefined,
+            this._schema,
+            this._columns
+        );
         const colsToExplode = new Set<string>();
-        const numCols = colNames.length;
+        const numCols = expandedExprs.length;
         for (let i = 0; i < numCols; i++) {
-            const name = colNames[i];
-            if (!name) {
+            const expr = expandedExprs[i];
+            const name = expr._colName || expr._outputName;
+            if (!name || name === ALL_COLUMNS_MARKER) {
                 throw new DataFrameError("Expression passed to explode must have a column name.");
             }
             assertColumnExists(name, this._columns, "Explode column");
@@ -503,7 +511,7 @@ export class DataFrame<T extends RowRecord = any> {
         const keysArr = toValidArray(keys);
         const groups: GroupMap = new Map();
         const len = this._height;
-        const keysStr = toValidStringArray(keys);
+        const keysStr = toArrayOfType<string>(keys, "string");
 
         for (let j = 0; j < keysStr.length; j++) {
             assertColumnExists(keysStr[j], this._columns, "Grouping key");
@@ -899,8 +907,8 @@ export class DataFrame<T extends RowRecord = any> {
         let rightKeysStr: string[] = [];
 
         if (leftOn !== undefined && rightOn !== undefined) {
-            leftKeysStr = toValidStringArray(leftOn);
-            rightKeysStr = toValidStringArray(rightOn);
+            leftKeysStr = toArrayOfType<string>(leftOn, "string");
+            rightKeysStr = toArrayOfType<string>(rightOn, "string");
             if (leftKeysStr.length === 0 || rightKeysStr.length === 0) {
                 throw new InvalidArgumentError('join() requires non-empty key arrays in "leftOn" and "rightOn".');
             }
@@ -908,7 +916,7 @@ export class DataFrame<T extends RowRecord = any> {
                 throw new InvalidArgumentError(`join() "leftOn" length (${leftKeysStr.length}) must match "rightOn" length (${rightKeysStr.length}).`);
             }
         } else if (on !== undefined) {
-            leftKeysStr = toValidStringArray(on);
+            leftKeysStr = toArrayOfType<string>(on, "string");
             rightKeysStr = leftKeysStr;
             if (leftKeysStr.length === 0) {
                 throw new InvalidArgumentError('join() requires at least one key column in "on".');
@@ -1202,7 +1210,7 @@ export class DataFrame<T extends RowRecord = any> {
         if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0);
 
         const { index, columns, values } = config;
-        const indexStr = toValidStringArray(index);
+        const indexStr = toArrayOfType<string>(index, "string");
         const indexLen = indexStr.length;
         for (let j = 0; j < indexLen; j++) {
             assertColumnExists(indexStr[j], this._columns, "Pivot index key");
@@ -1953,8 +1961,8 @@ export class DataFrame<T extends RowRecord = any> {
      */
     unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> {
         const { idVars, valueVars, varName = "variable", valueName = "value" } = config;
-        const idVarsStr = toValidStringArray(idVars);
-        const valueVarsStr = toValidStringArray(valueVars);
+        const idVarsStr = toArrayOfType<string>(idVars, "string");
+        const valueVarsStr = toArrayOfType<string>(valueVars, "string");
         const idVarsLen = idVarsStr.length;
         const valueVarsLen = valueVarsStr.length;
 

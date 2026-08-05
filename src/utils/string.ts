@@ -1,7 +1,10 @@
 /** @internalfile */
 import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, unboxPrimitiveObj } from "./object";
 import { isTypedArray } from "./array";
+import { createSafeJsonReplacer } from "./json";
+import { toValidBinary } from "./binary";
 import { KEY_SEPARATOR, KEY_PAIR_SEPARATOR } from "../constants";
+import type { StringEncoding } from "../types";
 
 
 export function isBlankString(v: unknown): v is string {
@@ -374,7 +377,7 @@ export function toCanonicalString(
 }
 
 export interface ChangeCaseOptions {
-    format: "camel" | "kebab" | "pascal" | "snake";
+    format: "camel" | "kebab" | "pascal" | "snake" | "title";
 }
 
 const CONTRACTION_REGEX = /(\p{L})['’](\p{L})/gu;
@@ -435,15 +438,16 @@ export function changeCase(str: any, options: ChangeCaseOptions): string {
 
     const { format } = options;
 
-    if (format === "camel" || format === "pascal") {
-        let res = "";
+    if (format === "camel" || format === "pascal" || format === "title") {
+        const joinChar = format === "title" ? " " : "";
+        const formattedWords = new Array(len);
         for (let i = 0; i < len; i++) {
             const w = words[i];
-            res += (i === 0 && format === "camel")
+            formattedWords[i] = (i === 0 && format === "camel")
                 ? w.toLowerCase()
                 : w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
         }
-        return res;
+        return formattedWords.join(joinChar);
     }
 
     if (format === "kebab" || format === "snake") {
@@ -456,4 +460,263 @@ export function changeCase(str: any, options: ChangeCaseOptions): string {
     }
 
     return String(str);
+}
+
+
+const BUFFER_REF = typeof globalThis !== "undefined" ? (globalThis as any).Buffer : undefined;
+const HAS_BUFFER = typeof BUFFER_REF !== "undefined";
+
+const HAS_NATIVE_HEX = typeof Uint8Array !== "undefined" && typeof (Uint8Array as any).fromHex === "function";
+const HAS_NATIVE_BASE64 = typeof Uint8Array !== "undefined" && typeof (Uint8Array as any).fromBase64 === "function";
+const MAX_BYTE_CHUNK_SIZE = 8192;
+const HEX_TABLE: string[] = new Array(256);
+for (let i = 0; i < 256; i++) {
+    HEX_TABLE[i] = i.toString(16).padStart(2, "0");
+}
+
+const TEXT_ENCODER = new TextEncoder();
+
+const B64_TO_B64URL_MAP: Record<string, string> = { "+": "-", "/": "_", "=": "" };
+const B64URL_TO_B64_MAP: Record<string, string> = { "-": "+", "_": "/" };
+const B64_URL_ENCODE_REGEX = /[+/=]/g;
+const B64_URL_DECODE_REGEX = /[-_]/g;
+const STRICT_B64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+const HEX_REGEX = /^[0-9a-fA-F]*$/;
+
+// ============================================================================
+// ENCODING FUNCTIONS
+// ============================================================================
+
+const DEFAULT_SAFE_JSON_REPLACER = createSafeJsonReplacer({ handleCircular: true });
+
+/**
+ * Serializes a value to a JSON string with BigInt support using createSafeJsonReplacer.
+ */
+export function encodeObjectToJson(value: unknown): string {
+    const topUnboxed = unboxPrimitiveObj(value);
+    if (typeof topUnboxed === "bigint") {
+        return topUnboxed.toString();
+    }
+    try {
+        return JSON.stringify(value, DEFAULT_SAFE_JSON_REPLACER);
+    } catch {
+        return String(value);
+    }
+}
+
+/**
+ * Encodes a JSON string into a UTF-8 Uint8Array byte array.
+ */
+export function encodeJsonToBytes(json: string): Uint8Array {
+    if (typeof json !== "string") json = String(json);
+    return TEXT_ENCODER.encode(json);
+}
+
+/**
+ * Encodes a byte array or binary-coercible input into a standard Base64 string representation.
+ * Uses 8192-byte chunking or native methods to prevent stack overflow errors.
+ */
+export function encodeBytesToBase64(bytes: unknown): string {
+    const validBytes = toValidBinary(bytes);
+    if (!validBytes) return "";
+
+    if (HAS_NATIVE_BASE64 && typeof (Uint8Array as any).prototype.toBase64 === "function") {
+        return (validBytes as any).toBase64();
+    }
+    if (HAS_BUFFER) {
+        return BUFFER_REF.from(validBytes).toString("base64");
+    }
+
+    let bin = "";
+    const len = validBytes.length;
+    for (let i = 0; i < len; i += MAX_BYTE_CHUNK_SIZE) {
+        const chunk = validBytes.subarray(i, i + MAX_BYTE_CHUNK_SIZE);
+        bin += String.fromCharCode.apply(null, chunk as unknown as number[]);
+    }
+    return btoa(bin);
+}
+
+/**
+ * Converts a standard Base64 string into a URL-safe Base64URL string.
+ * Replaces '+' with '-', '/' with '_', and strips trailing '=' padding in a single pass.
+ */
+export function encodeBase64ToBase64URL(b64: string): string {
+    if (typeof b64 !== "string") b64 = String(b64);
+    return b64.replace(B64_URL_ENCODE_REGEX, (char) => B64_TO_B64URL_MAP[char]);
+}
+
+/**
+ * Encodes a string into a hexadecimal string representation.
+ */
+export function encodeHex(str: string): string {
+    if (typeof str !== "string") str = String(str);
+    if (HAS_BUFFER) return BUFFER_REF.from(str, "utf-8").toString("hex");
+
+    const bytes = encodeJsonToBytes(str);
+    const len = bytes.length;
+    let hex = "";
+    for (let i = 0; i < len; i++) {
+        hex += HEX_TABLE[bytes[i]];
+    }
+    return hex;
+}
+
+/**
+ * Encodes a string into a Base64 string representation.
+ */
+export function encodeBase64(str: string): string {
+    if (typeof str !== "string") str = String(str);
+    const bytes = encodeJsonToBytes(str);
+    return encodeBytesToBase64(bytes);
+}
+
+const ENCODERS: Record<StringEncoding, (str: string) => string> = {
+    hex: encodeHex,
+    base64: encodeBase64
+};
+
+/**
+ * Encodes string to hex or base64 based on specified encoding option.
+ */
+export function encodeString(str: string | null | undefined, encoding: StringEncoding): string | null {
+    if (str == null) return null;
+    const encoder = ENCODERS[encoding];
+    if (!encoder) {
+        throw new Error(`Unsupported encoding: '${encoding}'. Supported encodings are 'hex' and 'base64'.`);
+    }
+    return encoder(String(str));
+}
+
+// ============================================================================
+// DECODING FUNCTIONS
+// ============================================================================
+
+/**
+ * Converts a Base64URL string back into standard Base64 format.
+ * Restores URL-safe characters ('-' to '+', '_' to '/') in a single pass and appends '=' padding.
+ */
+export function decodeBase64URLToBase64(b64Url: string): string {
+    if (typeof b64Url !== "string") b64Url = String(b64Url);
+    const clean = b64Url.replace(B64_URL_DECODE_REGEX, (char) => B64URL_TO_B64_MAP[char]);
+    const mod = clean.length % 4;
+    return mod === 0 ? clean : clean.padEnd(clean.length + (4 - mod), "=");
+}
+
+/**
+ * Decodes a standard Base64 string directly into a Uint8Array byte array.
+ */
+export function decodeBase64ToBytes(b64: string, strict: boolean = true): Uint8Array {
+    if (typeof b64 !== "string") b64 = String(b64);
+
+    if (b64 !== "") {
+        if (b64.length % 4 !== 0 || !STRICT_B64_REGEX.test(b64)) {
+            throw new Error("Invalid base64 encoding format");
+        }
+    }
+
+    if (HAS_NATIVE_BASE64) {
+        return (Uint8Array as any).fromBase64(b64, { strict });
+    }
+    if (HAS_BUFFER) {
+        return new Uint8Array(BUFFER_REF.from(b64, "base64"));
+    }
+    const bin = atob(b64);
+    const len = bin.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        bytes[i] = bin.charCodeAt(i);
+    }
+    return bytes;
+}
+
+/**
+ * Decodes a Uint8Array byte array back into a parsed JSON object.
+ */
+export function decodeBytesToJson(bytes: Uint8Array): unknown {
+    const jsonStr = new TextDecoder("utf-8").decode(bytes);
+    return JSON.parse(jsonStr);
+}
+
+/**
+ * Decodes a Hex-encoded string directly into a Uint8Array byte array.
+ */
+export function decodeHexToBytes(hex: string): Uint8Array {
+    if (typeof hex !== "string") hex = String(hex);
+    const cleanHex = hex.trim();
+
+    if (cleanHex.length % 2 !== 0 || !HEX_REGEX.test(cleanHex)) {
+        throw new Error("Invalid hex string format");
+    }
+
+    if (HAS_NATIVE_HEX) {
+        return (Uint8Array as any).fromHex(cleanHex);
+    }
+    if (HAS_BUFFER) {
+        const buf = BUFFER_REF.from(cleanHex, "hex");
+        if (buf.length !== cleanHex.length / 2) {
+            throw new Error("Invalid hex string format");
+        }
+        return new Uint8Array(buf);
+    }
+
+    const bytes = new Uint8Array(cleanHex.length / 2);
+    for (let i = 0; i < bytes.length; i++) {
+        const byte = parseInt(cleanHex.substring(i * 2, i * 2 + 2), 16);
+        if (Number.isNaN(byte)) {
+            throw new Error("Invalid hex string format");
+        }
+        bytes[i] = byte;
+    }
+    return bytes;
+}
+
+/**
+ * Decodes a Hex-encoded string into a standard UTF-8 string.
+ */
+export function decodeHex(str: string, strict: boolean = true): string | null {
+    try {
+        const bytes = decodeHexToBytes(str);
+        return new TextDecoder("utf-8", { fatal: strict }).decode(bytes);
+    } catch (err) {
+        if (strict) throw err;
+        return null;
+    }
+}
+
+/**
+ * Decodes a Base64 or Base64URL-encoded string into a standard UTF-8 string.
+ */
+export function decodeBase64(str: string, strict: boolean = true): string | null {
+    try {
+        if (typeof str !== "string") str = String(str);
+        const cleanStr = str.trim();
+        const stdB64 = decodeBase64URLToBase64(cleanStr);
+        const bytes = decodeBase64ToBytes(stdB64, strict);
+        return new TextDecoder("utf-8", { fatal: strict }).decode(bytes);
+    } catch (err) {
+        if (strict) throw err;
+        return null;
+    }
+}
+
+const DECODERS: Record<StringEncoding, (str: string, strict: boolean) => string | null> = {
+    hex: decodeHex,
+    base64: decodeBase64
+};
+
+/**
+ * Decodes hex or base64 encoded string back to standard UTF-8 string.
+ */
+export function decodeString(
+    str: string | null | undefined,
+    encoding: StringEncoding,
+    options: { strict?: boolean } | boolean = {}
+): string | null {
+    if (str == null) return null;
+    const decoder = DECODERS[encoding];
+    if (!decoder) {
+        throw new Error(`Unsupported encoding: '${encoding}'. Supported encodings are 'hex' and 'base64'.`);
+    }
+    const strict = typeof options === "boolean" ? options : (options.strict ?? true);
+    return decoder(String(str), strict);
 }

@@ -105,7 +105,23 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * [x] Implement **Min By / Max By** (`.min_by()`, `.max_by()`) to find target column value corresponding to min/max in by column.
   * [x] Implement **NaN Max / NaN Min** (`.nan_max()`, `.nan_min()`) to compute max and min taking floating-point `NaN` propagation into account.
   * [x] Implement **Arg Min / Arg Max** (`.arg_min()`, `.arg_max()`) to find 0-indexed position of min/max values.
+  * [x] Implement **Array Arg Min / Arg Max** (`.arr.arg_min()`, `.arr.arg_max()`) for list cell min/max index lookup.
+  * [x] Implement **Array Aggregation** (`.arr.agg()`) to apply expressions over list elements.
   * [x] Implement **Bitwise Aggregations** (`.bitwise_and()`, `.bitwise_or()`, `.bitwise_xor()`) across group elements.
+
+### 🔤 String Column Expressions (`.str`)
+- [ ] **Unimplemented String Expressions**:
+  * [x] **`contains_any`**: Check if string contains any pattern from a collection.
+  * [ ] **`count_matches`**: Count total occurrences of regex or sub-string pattern matches.
+  * [x] **`decode` / `encode`**: Binary encoding/decoding (Hex, Base64, etc.).
+  * [ ] **`escape_regex`**: Escape literal characters for safe regex usage.
+  * [ ] **`extract_all` / `extract_groups` / `extract_many`**: Advanced multi-match and structured group extractions.
+  * [ ] **`find` / `find_many`**: Find pattern match indices within string elements.
+  * [ ] **`join`**: Join list of string elements using a delimiter.
+  * [ ] **`json_decode` / `json_path_match`**: Parse JSON strings and extract fields using JSONPath syntax.
+  * [ ] **`normalize`**: Unicode normalization (NFC, NFD, NFKC, NFKD).
+  * [ ] **`replace_many`**: Batch replace multiple string patterns simultaneously.
+  * [ ] **`split_exact` / `split_n`**: Split strings into fixed-width struct fields or n-sized arrays.
 
 ### 🔎 Inspection & Reporting Utilities
 - [ ] **Pretty Printing Tabular Layouts (`df.to_markdown()`, `df.to_html()`)**:

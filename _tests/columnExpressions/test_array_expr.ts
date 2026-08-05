@@ -103,8 +103,8 @@ try {
         $df.col("numbers").arr.gather(new Int32Array([0, 2, -2])).alias("gather_typed_indices"),
         $df.col("typed_array").arr.contains_all(new Int32Array([10, 30])).alias("typed_contains_all"),
         $df.col("typed_array").arr.contains_any(new Int32Array([10, 40])).alias("typed_contains_any"),
-        $df.col("numbers").arr.max_index().alias("max_index_nums"),
-        $df.col("numbers").arr.min_index().alias("min_index_nums"),
+        $df.col("numbers").arr.arg_max().alias("max_index_nums"),
+        $df.col("numbers").arr.arg_min().alias("min_index_nums"),
         $df.col("numbers").arr.shift(2).alias("shifted_nums_2"),
         $df.col("numbers").arr.shift(-1).alias("shifted_nums_neg_1"),
         $df.col("numbers").arr.std().alias("std_nums"),
@@ -442,9 +442,37 @@ try {
     }
     console.log("✓ to_struct width === 0 error guard passed");
 
-    console.log("✓ Complex element operations tests passed successfully!");
     // ----------------------------------------------------
-    // END COMPLEX ELEMENT OPERATIONS TESTS
+    // START COMPREHENSIVE .arr.agg() TESTS
+    // ----------------------------------------------------
+    const aggDf = $df.data({
+        nums: [[1, 2, 3], [10, 20], [], null, [-5, 5, 0]],
+        words: [["apple", "banana"], ["cat"], [], null, ["dog"]]
+    });
+
+    const aggResults = aggDf.select([
+        $df.col("nums").arr.agg($df.element().sum()).alias("sum_nums"),
+        $df.col("nums").arr.agg($df.element().max()).alias("max_nums"),
+        $df.col("nums").arr.agg($df.element().min()).alias("min_nums"),
+        $df.col("nums").arr.agg($df.element().mean()).alias("mean_nums"),
+        $df.col("nums").arr.agg($df.element().count()).alias("len_nums"),
+        $df.col("words").arr.agg($df.element().first()).alias("first_word")
+    ]).to_dicts();
+
+    if (aggResults[0].sum_nums !== 6) throw new Error(`Expected agg sum 6, got ${aggResults[0].sum_nums}`);
+    if (aggResults[1].sum_nums !== 30) throw new Error(`Expected agg sum 30, got ${aggResults[1].sum_nums}`);
+    if (aggResults[2].sum_nums !== null) throw new Error(`Expected empty list agg sum null, got ${aggResults[2].sum_nums}`);
+    if (aggResults[3].sum_nums !== null) throw new Error(`Expected null row agg sum null, got ${aggResults[3].sum_nums}`);
+    if (aggResults[4].sum_nums !== 0) throw new Error(`Expected negative/zero agg sum 0, got ${aggResults[4].sum_nums}`);
+
+    if (aggResults[0].max_nums !== 3) throw new Error(`Expected agg max 3, got ${aggResults[0].max_nums}`);
+    if (aggResults[1].min_nums !== 10) throw new Error(`Expected agg min 10, got ${aggResults[1].min_nums}`);
+    if (aggResults[0].mean_nums !== 2) throw new Error(`Expected agg mean 2, got ${aggResults[0].mean_nums}`);
+    if (aggResults[0].len_nums !== 3) throw new Error(`Expected agg len 3, got ${aggResults[0].len_nums}`);
+    if (aggResults[0].first_word !== "apple") throw new Error(`Expected agg first_word 'apple', got ${aggResults[0].first_word}`);
+    console.log("✓ Comprehensive .arr.agg() tests passed successfully!");
+    // ----------------------------------------------------
+    // END COMPREHENSIVE .arr.agg() TESTS
     // ----------------------------------------------------
 
     console.log("\n🎉 ALL Expr.arr COLUMN EXPRESSION TESTS PASSED SUCCESSFULLY!");

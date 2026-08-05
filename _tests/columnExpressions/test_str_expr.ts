@@ -46,9 +46,13 @@ try {
         $df.col("digits").str.pad_start(5, "*").alias("padded_start"),
         $df.col("digits").str.pad_end(5, "-").alias("padded_end"),
 
-        // Slice & Split & Explode
+        // Slice & Split & Explode & Head/Tail
         $df.col("phrase").str.slice(0, 8).alias("sliced"),
         $df.col("phrase").str.slice(-8, 7).alias("sliced_neg"),
+        $df.col("phrase").str.head(8).alias("head_8"),
+        $df.col("phrase").str.tail(8).alias("tail_8"),
+        $df.col("phrase").str.head().alias("head_default"),
+        $df.col("phrase").str.tail().alias("tail_default"),
         $df.col("phrase").str.split(" ").alias("split_arr"),
         $df.col("digits").str.explode().alias("exploded_arr"),
 
@@ -68,6 +72,8 @@ try {
 
         // Regex / Matches
         $df.col("phrase").str.contains("awesome").alias("contains_str"),
+        $df.col("phrase").str.contains_any(["missing", "awesome"]).alias("contains_any_match"),
+        $df.col("phrase").str.contains_any(["foo", "bar"]).alias("contains_any_none"),
         $df.col("phrase").str.contains(/is/i).alias("contains_regex"),
         $df.col("phrase").str.ends_with("!").alias("ends_with_excl"),
         $df.col("phrase").str.starts_with("DF").alias("starts_with_df"),
@@ -85,7 +91,7 @@ try {
     const r0 = projected[0];
     if (r0.lower !== "dfscript is awesome!") throw new Error(`Expected r0.lower to be "dfscript is awesome!", got ${r0.lower}`);
     if (r0.upper !== "DFSCRIPT IS AWESOME!") throw new Error(`Expected r0.upper to be "DFSCRIPT IS AWESOME!", got ${r0.upper}`);
-    if (r0.title !== "DFScript Is Awesome!") throw new Error(`Expected r0.title to be "DFScript Is Awesome!", got ${r0.title}`);
+    if (r0.title !== "Df Script Is Awesome") throw new Error(`Expected r0.title to be "Df Script Is Awesome", got ${r0.title}`);
     if (r0.reversed !== "!emosewa si tpircSFD") throw new Error(`Expected r0.reversed to be "!emosewa si tpircSFD", got ${r0.reversed}`);
 
     if (r0.len_c !== 20) throw new Error(`Expected r0.len_c to be 20, got ${r0.len_c}`);
@@ -97,6 +103,10 @@ try {
 
     if (r0.sliced !== "DFScript") throw new Error(`Expected r0.sliced to be "DFScript", got ${r0.sliced}`);
     if (r0.sliced_neg !== "awesome") throw new Error(`Expected r0.sliced_neg to be "awesome", got ${r0.sliced_neg}`); // "-8" is "awesome!", length 7 is "awesome"
+    if (r0.head_8 !== "DFScript") throw new Error(`Expected r0.head_8 to be "DFScript", got ${r0.head_8}`);
+    if (r0.tail_8 !== "awesome!") throw new Error(`Expected r0.tail_8 to be "awesome!", got ${r0.tail_8}`);
+    if (r0.head_default !== "D") throw new Error(`Expected r0.head_default to be "D", got ${r0.head_default}`);
+    if (r0.tail_default !== "!") throw new Error(`Expected r0.tail_default to be "!", got ${r0.tail_default}`);
     if (JSON.stringify(r0.split_arr) !== JSON.stringify(["DFScript", "is", "awesome!"])) {
         throw new Error(`Expected r0.split_arr to be ["DFScript", "is", "awesome!"], got ${JSON.stringify(r0.split_arr)}`);
     }
@@ -117,6 +127,8 @@ try {
     if (r0.stripped_suffix !== "pre-middle") throw new Error(`Expected r0.stripped_suffix to be "pre-middle", got ${r0.stripped_suffix}`);
 
     if (r0.contains_str !== true) throw new Error(`Expected r0.contains_str to be true, got ${r0.contains_str}`);
+    if (r0.contains_any_match !== true) throw new Error(`Expected r0.contains_any_match to be true, got ${r0.contains_any_match}`);
+    if (r0.contains_any_none !== false) throw new Error(`Expected r0.contains_any_none to be false, got ${r0.contains_any_none}`);
     if (r0.contains_regex !== true) throw new Error(`Expected r0.contains_regex to be true, got ${r0.contains_regex}`);
     if (r0.ends_with_excl !== true) throw new Error(`Expected r0.ends_with_excl to be true, got ${r0.ends_with_excl}`);
     if (r0.starts_with_df !== true) throw new Error(`Expected r0.starts_with_df to be true, got ${r0.starts_with_df}`);
@@ -411,6 +423,145 @@ try {
     // numbers (loose coercion) should case convert without crash
     if (pollutionRes[3].camel !== "12345") throw new Error(`coerced number camel failed: got ${pollutionRes[3].camel}`);
     if (pollutionRes[3].snake !== "12345") throw new Error(`coerced number snake failed: got ${pollutionRes[3].snake}`);
+
+    // Tests for contains_any robustness and stateful regexes
+    const containsEdgeDf = $df.data([
+        { text: "apple pie" },
+        { text: "apple tart" }
+    ], { text: $df.DataType.Utf8 });
+    const globalRegex = /apple/g;
+    const containsEdgeRes = containsEdgeDf.select([
+        $df.col("text").str.contains_any([globalRegex]).alias("global_regex_match"),
+        $df.col("text").str.contains_any("apple" as any).alias("non_array_match"),
+        $df.col("text").str.contains_any([null as any, "pie"]).alias("null_element_match")
+    ]).to_dicts() as any[];
+
+    if (containsEdgeRes[0].global_regex_match !== true || containsEdgeRes[1].global_regex_match !== true) {
+        throw new Error(`Stateful regex contains_any failed across rows: got ${JSON.stringify(containsEdgeRes)}`);
+    }
+    if (containsEdgeRes[0].non_array_match !== true) {
+        throw new Error(`Non-array contains_any failed: expected true, got ${containsEdgeRes[0].non_array_match}`);
+    }
+    if (containsEdgeRes[0].null_element_match !== true || containsEdgeRes[1].null_element_match !== false) {
+        throw new Error(`Null element contains_any failed: got ${JSON.stringify(containsEdgeRes)}`);
+    }
+
+    // =========================================
+    // ENCODE / DECODE TESTS
+    // =========================================
+    console.log("\n-----------------------------------------");
+    console.log("RUNNING ENCODE & DECODE TESTS...");
+    console.log("-----------------------------------------");
+
+    const encDecDf = $df.data([
+        { text: "hello world", invalid_hex: "123", invalid_b64: "invalid_b64!" },
+        { text: "DFScript 🚀", invalid_hex: "gggg", invalid_b64: "bad===" },
+        { text: null, invalid_hex: null, invalid_b64: null }
+    ], {
+        text: $df.DataType.Utf8,
+        invalid_hex: $df.DataType.Utf8,
+        invalid_b64: $df.DataType.Utf8
+    });
+
+    const encDecRes = encDecDf.select([
+        $df.col("text").str.encode({ encoding: "hex" }).alias("hex_enc"),
+        $df.col("text").str.encode({ encoding: "base64" }).alias("b64_enc"),
+        $df.col("text").str.encode({ encoding: "hex" }).str.decode({ encoding: "hex" }).alias("hex_roundtrip"),
+        $df.col("text").str.encode({ encoding: "base64" }).str.decode({ encoding: "base64" }).alias("b64_roundtrip"),
+        $df.col("invalid_hex").str.decode({ encoding: "hex", strict: false }).alias("hex_non_strict"),
+        $df.col("invalid_b64").str.decode({ encoding: "base64", strict: false }).alias("b64_non_strict")
+    ]).to_dicts() as any[];
+
+    console.log("Encode/Decode results:");
+    console.dir(encDecRes, { depth: null });
+
+    // Assert Hex & Base64 encodings
+    if (encDecRes[0].hex_enc !== "68656c6c6f20776f726c64") throw new Error(`Hex encode failed: ${encDecRes[0].hex_enc}`);
+    if (encDecRes[0].b64_enc !== "aGVsbG8gd29ybGQ=") throw new Error(`Base64 encode failed: ${encDecRes[0].b64_enc}`);
+    if (encDecRes[0].hex_roundtrip !== "hello world") throw new Error(`Hex roundtrip failed: ${encDecRes[0].hex_roundtrip}`);
+    if (encDecRes[0].b64_roundtrip !== "hello world") throw new Error(`Base64 roundtrip failed: ${encDecRes[0].b64_roundtrip}`);
+
+    // Assert Unicode roundtrip
+    if (encDecRes[1].hex_roundtrip !== "DFScript 🚀") throw new Error(`Unicode Hex roundtrip failed: ${encDecRes[1].hex_roundtrip}`);
+    if (encDecRes[1].b64_roundtrip !== "DFScript 🚀") throw new Error(`Unicode Base64 roundtrip failed: ${encDecRes[1].b64_roundtrip}`);
+
+    // Assert Null handling
+    if (encDecRes[2].hex_enc !== null || encDecRes[2].b64_enc !== null || encDecRes[2].hex_roundtrip !== null || encDecRes[2].b64_roundtrip !== null) {
+        throw new Error(`Null handling failed in encode/decode: ${JSON.stringify(encDecRes[2])}`);
+    }
+
+    // Assert Non-strict error handling returns null for invalid inputs
+    if (encDecRes[0].hex_non_strict !== null || encDecRes[1].hex_non_strict !== null) {
+        throw new Error(`Non-strict hex decode failed to return null: ${JSON.stringify(encDecRes)}`);
+    }
+    if (encDecRes[0].b64_non_strict !== null || encDecRes[1].b64_non_strict !== null) {
+        throw new Error(`Non-strict base64 decode failed to return null: ${JSON.stringify(encDecRes)}`);
+    }
+
+    // Assert Strict mode throws error on invalid hex/b64
+    let strictHexThrew = false;
+    try {
+        encDecDf.select([$df.col("invalid_hex").str.decode({ encoding: "hex", strict: true })]).to_dicts();
+    } catch {
+        strictHexThrew = true;
+    }
+    if (!strictHexThrew) throw new Error("Strict mode hex decode failed to throw on invalid hex!");
+
+    let strictB64Threw = false;
+    try {
+        encDecDf.select([$df.col("invalid_b64").str.decode({ encoding: "base64", strict: true })]).to_dicts();
+    } catch {
+        strictB64Threw = true;
+    }
+    if (!strictB64Threw) throw new Error("Strict mode base64 decode failed to throw on invalid base64!");
+
+    // =========================================
+    // ADVANCED EDGE CASE ENCODE / DECODE TESTS
+    // =========================================
+    console.log("\n-----------------------------------------");
+    console.log("RUNNING ADVANCED HEX & BASE64 EDGE CASE TESTS...");
+    console.log("-----------------------------------------");
+
+    const edgeDf = $df.data([
+        { uppercase_hex: "68656C6C6F", padded_b64: "aGVsbG8gd29ybGQ=", unpadded_b64: "aGVsbG8gd29ybGQ", whitespace_hex: "  68656c6c6f  " },
+        { uppercase_hex: "4446536372697074", padded_b64: "Y2Fmw6k=", unpadded_b64: "Y2Fmw6k", whitespace_hex: "\n68656c6c6f\t" },
+        { uppercase_hex: "", padded_b64: "", unpadded_b64: "", whitespace_hex: "" }
+    ]);
+
+    const edgeRes = edgeDf.select([
+        $df.col("uppercase_hex").str.decode({ encoding: "hex" }).alias("dec_upper_hex"),
+        $df.col("padded_b64").str.decode({ encoding: "base64" }).alias("dec_padded_b64"),
+        $df.col("unpadded_b64").str.decode({ encoding: "base64" }).alias("dec_unpadded_b64"),
+        $df.col("whitespace_hex").str.decode({ encoding: "hex" }).alias("dec_ws_hex")
+    ]).to_dicts() as any[];
+
+    console.log("Advanced Edge Case Results:");
+    console.dir(edgeRes, { depth: null });
+
+    // Assert uppercase hex decoding
+    if (edgeRes[0].dec_upper_hex !== "hello" || edgeRes[1].dec_upper_hex !== "DFScript") {
+        throw new Error(`Uppercase hex decode failed: ${JSON.stringify(edgeRes)}`);
+    }
+
+    // Assert unpadded base64 vs padded base64 equivalence
+    if (edgeRes[0].dec_padded_b64 !== "hello world" || edgeRes[0].dec_unpadded_b64 !== "hello world") {
+        throw new Error(`Base64 padding normalization failed: ${JSON.stringify(edgeRes[0])}`);
+    }
+
+    // Assert accented UTF-8 base64
+    if (edgeRes[1].dec_padded_b64 !== "café" || edgeRes[1].dec_unpadded_b64 !== "café") {
+        throw new Error(`Accented base64 decode failed: ${JSON.stringify(edgeRes[1])}`);
+    }
+
+    // Assert whitespace trimming on hex decode
+    if (edgeRes[0].dec_ws_hex !== "hello" || edgeRes[1].dec_ws_hex !== "hello") {
+        throw new Error(`Whitespace hex decode failed: ${JSON.stringify(edgeRes)}`);
+    }
+
+    // Assert empty string roundtrips
+    if (edgeRes[2].dec_upper_hex !== "" || edgeRes[2].dec_padded_b64 !== "" || edgeRes[2].dec_unpadded_b64 !== "") {
+        throw new Error(`Empty string decode failed: ${JSON.stringify(edgeRes[2])}`);
+    }
 
     console.log("\n🎉 ALL Expr.str COLUMN EXPRESSION & CASTING TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

@@ -1,10 +1,12 @@
 /** @internalfile */
 import { isClass, isObj, isPlainObj, isValidDateObj } from "./object";
-import { toValidNumber, isValidNumber, isValidInt, toValidBigInt } from "./number";
+import { toValidNumber, isValidNumber, isValidInt, toValidBigInt, isValidBigInt } from "./number";
+import { toValidDate } from "./date";
 import { toCanonicalString } from "./string";
 import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, EntropyOptions } from "../types";
 
 import { ComputeError, InvalidArgumentError } from "../exceptions";
+
 /** Array Guards **/
 const typedArrayTagGetter = (() => {
     try {
@@ -30,6 +32,22 @@ export function isArrayOrTypedArray(v: unknown): v is any[] | AnyTypedArray {
     return Array.isArray(v) || isTypedArray(v);
 }
 
+export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
+    if (val == null) return [];
+    if (Array.isArray(val)) return [...val];
+    if (isTypedArray(val)) return Array.from(val as any);
+    return [val];
+}
+
+export function getArrayElement(arr: any[] | AnyTypedArray, index: number, null_on_oob: boolean): any {
+    const len = arr.length;
+    const isOob = index < -len || index >= len;
+    if (isOob && !null_on_oob) {
+        throw new ComputeError(`Index ${index} is out of bounds for array of length ${len}`);
+    }
+    return isOob ? null : (arr.at(index) ?? null);
+}
+
 export type ArrayItemType =
     | "string"
     | "number"
@@ -43,7 +61,8 @@ export type ArrayItemType =
     | "undefined"
     | "nullish"
     | (new (...args: any[]) => any)
-    | ((v: unknown) => boolean);
+    | ((v: unknown) => any);
+
 export type ArrayCheckMode = "every" | "some";
 export type IsArrayOfTypeOptionsParams = {
     mode?: ArrayCheckMode;
@@ -51,104 +70,135 @@ export type IsArrayOfTypeOptionsParams = {
     allowEmpty?: boolean;
 };
 
-export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
-    if (val == null) return [];
-    if (Array.isArray(val)) return [...val];
-    if (isTypedArray(val)) return Array.from(val as any);
-    return [val];
-}
-
-export function toValidStringArray(val: unknown): string[] {
-    const arr = toValidArray(val);
-    const len = arr.length;
-    const res = new Array(len);
-    for (let i = 0; i < len; i++) {
-        res[i] = String(arr[i]);
+/**
+ * Shared Type Validator & Coercer Factory
+ */
+function getTypeValidators(type: ArrayItemType): {
+    check: (v: unknown) => boolean;
+    coerce: (v: unknown) => any;
+} {
+    if (typeof type === "function") {
+        const isC = isClass(type);
+        return {
+            check: isC ? (v) => v instanceof type : (v) => Boolean((type as any)(v)),
+            coerce: (v) => {
+                if (isC) return v instanceof (type as any) ? v : null;
+                const res = (type as any)(v);
+                return typeof res === "boolean" ? (res ? v : null) : res;
+            },
+        };
     }
-    return res;
-}
 
-export function getArrayElement(arr: any[] | AnyTypedArray, index: number, null_on_oob: boolean): any {
-    const len = arr.length;
-    const isOob = index < -len || index >= len;
-    if (isOob && !null_on_oob) {
-        throw new ComputeError(`Index ${index} is out of bounds for array of length ${len}`);
+    switch (type) {
+        case "string":
+            return { check: (v) => typeof v === "string", coerce: (v) => String(v) };
+        case "number":
+            return { check: isValidNumber, coerce: (v) => toValidNumber(v) ?? NaN };
+        case "boolean":
+            return { check: (v) => typeof v === "boolean", coerce: Boolean };
+        case "bigint":
+            return { check: isValidBigInt, coerce: (v) => toValidBigInt(v) };
+        case "date":
+            return { check: isValidDateObj, coerce: (v) => toValidDate(v) };
+        case "object":
+            return { check: isObj, coerce: (v) => (isObj(v) ? v : null) };
+        case "plainObject":
+            return { check: isPlainObj, coerce: (v) => (isPlainObj(v) ? v : null) };
+        case "null":
+            return { check: (v) => v === null, coerce: () => null };
+        case "undefined":
+            return { check: (v) => v === undefined, coerce: () => undefined };
+        case "nullish":
+            return { check: (v) => v == null, coerce: () => null };
+        case "any":
+        default:
+            return { check: () => true, coerce: (v) => v };
     }
-    return isOob ? null : (arr.at(index) ?? null);
 }
 
+/**
+ * Checks if an array matches a specific item type contract.
+ */
 export function isArrayOfType(
     arr: unknown,
     type: ArrayItemType,
     {
         mode = "every",
         allowNulls = false,
-        allowEmpty = true
+        allowEmpty = true,
     }: IsArrayOfTypeOptionsParams = {}
 ): boolean {
     if (!isArrayOrTypedArray(arr)) return false;
-    const len = (arr as any).length;
-    if (len === 0) {
-        if (!allowEmpty) return false;
-        return mode === "every";
-    }
+    const list = arr as ArrayLike<unknown>;
+    const len = list.length;
 
-    const list = arr as any;
-    let check: (v: unknown) => boolean;
+    if (len === 0) return allowEmpty ? mode === "every" : false;
 
-    if (typeof type === "function") {
-        const isC = isClass(type);
-        check = isC
-            ? (v) => v instanceof type
-            : (type as (v: unknown) => boolean);
-    } else {
-        switch (type) {
-            case "null":
-                check = (v) => v === null;
-                break;
-            case "undefined":
-                check = (v) => v === undefined;
-                break;
-            case "nullish":
-                check = (v) => v == null;
-                break;
-            case "any":
-                check = () => true;
-                break;
-            case "date":
-                check = isValidDateObj;
-                break;
-            case "object":
-                check = isObj;
-                break;
-            case "plainObject":
-                check = isPlainObj;
-                break;
-            case "number":
-                check = isValidNumber;
-                break;
-            default:
-                check = (v) => typeof v === type;
-                break;
-        }
-    }
-
-    if (allowNulls) {
-        const baseCheck = check;
-        check = (v) => v == null || baseCheck(v);
-    }
+    const { check } = getTypeValidators(type);
 
     if (mode === "every") {
         for (let i = 0; i < len; i++) {
-            if (!check(list[i])) return false;
+            const item = list[i];
+            if (allowNulls && item == null) continue;
+            if (!check(item)) return false;
         }
         return true;
-    } else {
-        for (let i = 0; i < len; i++) {
-            if (check(list[i])) return true;
-        }
-        return false;
     }
+
+    for (let i = 0; i < len; i++) {
+        const item = list[i];
+        if ((allowNulls && item == null) || check(item)) return true;
+    }
+    return false;
+}
+
+/**
+ * Coerces array items to a target type contract in a single optimized pass.
+ */
+export function toArrayOfType<T = any>(
+    val: unknown,
+    type: ArrayItemType = "any",
+    {
+        mode = "every",
+        allowNulls = false,
+        allowEmpty = true,
+    }: IsArrayOfTypeOptionsParams = {}
+): T[] {
+    const arr = toValidArray(val);
+    const len = arr.length;
+
+    if (len === 0) {
+        if (!allowEmpty) throw new ComputeError("Expected non-empty array");
+        return [];
+    }
+
+    const { check, coerce } = getTypeValidators(type);
+    const res: T[] = new Array(len);
+    let matchCount = 0;
+
+    for (let i = 0; i < len; i++) {
+        const item = arr[i];
+
+        if (allowNulls && item == null) {
+            res[matchCount++] = item as any;
+            continue;
+        }
+
+        const coerced = coerce(item);
+
+        if (check(coerced)) {
+            res[matchCount++] = coerced as T;
+        } else if (mode === "every") {
+            throw new ComputeError(`Failed to convert array item at index ${i} ('${item}') to target type '${type}'`);
+        }
+    }
+
+    if (mode === "some") {
+        if (matchCount === 0) throw new ComputeError(`No items in array could be converted to target type '${type}'`);
+        if (matchCount < len) res.length = matchCount;
+    }
+
+    return res;
 }
 
 export interface SortArrayOptions {

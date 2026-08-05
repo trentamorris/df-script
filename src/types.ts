@@ -93,6 +93,16 @@ export interface StrftimeOptions {
     timeZone?: string;
 }
 
+export type StringEncoding = "hex" | "base64";
+
+export interface StringEncodeOptions {
+    encoding: StringEncoding;
+}
+
+export interface StringDecodeOptions extends StringEncodeOptions {
+    strict?: boolean;
+}
+
 export type BusinessDayRollType = "raise" | "forward" | "backward";
 
 export interface IsBusinessDayOptions {

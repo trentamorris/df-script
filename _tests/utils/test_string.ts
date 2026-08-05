@@ -1,11 +1,32 @@
 declare const process: any;
-import { stripChars, toCanonicalString } from "../../src/utils/string";
+import {
+    stripChars,
+    toCanonicalString,
+    encodeHex,
+    decodeHex,
+    encodeBase64,
+    decodeBase64,
+    encodeString,
+    decodeString,
+    isBlankString,
+    escapeRegExp,
+    toWords,
+    changeCase,
+    decodeBase64URLToBase64,
+    decodeBase64ToBytes,
+    decodeBytesToJson,
+    encodeObjectToJson,
+    encodeJsonToBytes,
+    encodeBytesToBase64,
+    encodeBase64ToBase64URL
+} from "../../src/utils/string";
 
 console.log("=========================================");
 console.log("STARTING UTILS STRING TESTS...");
 console.log("=========================================");
 
 try {
+
     // 2. stripChars with null/undefined inputs
     if (stripChars(null) !== null) throw new Error("Expected stripChars(null) to be null");
     if (stripChars(undefined) !== null) throw new Error("Expected stripChars(undefined) to be null");
@@ -120,6 +141,193 @@ try {
     if (toCanonicalString(circularObj, { maxDepth: 5 }) !== expectedCircularCustom) {
         throw new Error("toCanonicalString(circular, { maxDepth: 5 }) failed");
     }
+
+    // 14. Encode & Decode string tests
+    // Standard roundtrip
+    if (encodeHex("hello") !== "68656c6c6f") throw new Error("encodeHex('hello') failed");
+    if (decodeHex("68656c6c6f") !== "hello") throw new Error("decodeHex('68656c6c6f') failed");
+    if (encodeBase64("hello") !== "aGVsbG8=") throw new Error("encodeBase64('hello') failed");
+    if (decodeBase64("aGVsbG8=") !== "hello") throw new Error("decodeBase64('aGVsbG8=') failed");
+
+    // Null and undefined
+    if (encodeString(null, "hex") !== null) throw new Error("encodeString(null, 'hex') failed");
+    if (encodeString(undefined, "base64") !== null) throw new Error("encodeString(undefined, 'base64') failed");
+    if (decodeString(null, "hex") !== null) throw new Error("decodeString(null, 'hex') failed");
+    if (decodeString(undefined, "base64") !== null) throw new Error("decodeString(undefined, 'base64') failed");
+
+    // Edge cases: Hex validation & strict mode
+    if (decodeHex("", false) !== "") throw new Error("decodeHex('', false) failed");
+    if (decodeHex("   68656c6c6f   ") !== "hello") throw new Error("decodeHex whitespace trim failed");
+    if (decodeHex("abc", false) !== null) throw new Error("decodeHex odd length should return null in non-strict mode");
+    if (decodeHex("zz", false) !== null) throw new Error("decodeHex invalid hex char should return null in non-strict mode");
+
+    let hexStrictFailed = false;
+    try {
+        decodeHex("invalid_hex", true);
+    } catch {
+        hexStrictFailed = true;
+    }
+    if (!hexStrictFailed) throw new Error("decodeHex in strict mode should throw on invalid hex");
+
+    // Edge cases: Base64 validation & strict mode
+    if (decodeBase64("", false) !== "") throw new Error("decodeBase64('', false) failed");
+    if (decodeBase64("   aGVsbG8=   ") !== "hello") throw new Error("decodeBase64 whitespace trim failed");
+    if (decodeBase64("invalid_base64!!!", false) !== null) throw new Error("decodeBase64 invalid format should return null in non-strict mode");
+
+    let b64StrictFailed = false;
+    try {
+        decodeBase64("invalid_base64!!!", true);
+    } catch {
+        b64StrictFailed = true;
+    }
+    if (!b64StrictFailed) throw new Error("decodeBase64 in strict mode should throw on invalid base64");
+
+    // Test mid-string '=' padding rejection
+    if (decodeBase64("aGVs=bG8=", false) !== null) throw new Error("decodeBase64 with mid-string '=' should return null in non-strict mode");
+    let midEqualStrictFailed = false;
+    try {
+        decodeBase64("aGVs=bG8=", true);
+    } catch {
+        midEqualStrictFailed = true;
+    }
+    if (!midEqualStrictFailed) throw new Error("decodeBase64 with mid-string '=' should throw in strict mode");
+
+    // Non-string coercion
+    if (encodeString(12345 as any, "hex") !== "3132333435") throw new Error("encodeString non-string coercion failed");
+    if (decodeString("3132333435", "hex") !== "12345") throw new Error("decodeString non-string coercion failed");
+
+    // Additional Edge Cases: Uppercase/Mixed Hex, Unicode/Emoji, Unsupported Encoding, Options object & Invalid UTF-8
+    if (decodeHex("68656C6C6F") !== "hello") throw new Error("decodeHex uppercase hex failed");
+    if (decodeHex("68656C6c6F") !== "hello") throw new Error("decodeHex mixed-case hex failed");
+
+    const emojiStr = "Hello 🚀 World 🌍!";
+    if (decodeHex(encodeHex(emojiStr)) !== emojiStr) throw new Error("Emoji unicode roundtrip failed for Hex");
+    if (decodeBase64(encodeBase64(emojiStr)) !== emojiStr) throw new Error("Emoji unicode roundtrip failed for Base64");
+
+    if (decodeString("invalid_hex", "hex", { strict: false }) !== null) throw new Error("decodeString options object { strict: false } failed");
+    let optionsStrictFailed = false;
+    try {
+        decodeString("invalid_hex", "hex", { strict: true });
+    } catch {
+        optionsStrictFailed = true;
+    }
+    if (!optionsStrictFailed) throw new Error("decodeString options object { strict: true } failed");
+
+    let unsupportedEncFailed = false;
+    try {
+        encodeString("test", "binary" as any);
+    } catch {
+        unsupportedEncFailed = true;
+    }
+    if (!unsupportedEncFailed) throw new Error("encodeString unsupported encoding check failed");
+
+    let invalidUtf8HexFailed = false;
+    try {
+        decodeHex("ff", true);
+    } catch {
+        invalidUtf8HexFailed = true;
+    }
+    if (!invalidUtf8HexFailed) throw new Error("decodeHex strict mode invalid UTF-8 byte failed");
+
+    let invalidUtf8B64Failed = false;
+    try {
+        decodeBase64("/w==", true);
+    } catch {
+        invalidUtf8B64Failed = true;
+    }
+    if (!invalidUtf8B64Failed) throw new Error("decodeBase64 strict mode invalid UTF-8 byte failed");
+
+    // 15. URL-safe Base64 & Unpadded Base64 decoding
+    if (decodeBase64("aGVsbG8", false) !== "hello") throw new Error("Unpadded base64 decoding failed");
+    if (decodeBase64("aGVsbG8", true) !== "hello") throw new Error("Unpadded base64 strict decoding failed");
+    const urlSafeB64 = encodeBase64("hello?world>").replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+    if (decodeBase64(urlSafeB64, true) !== "hello?world>") throw new Error("URL-safe base64 decoding failed");
+
+    // 16. Large string Base64 chunking test (> 8192 bytes)
+    const largeStr = "A".repeat(25000);
+    const encodedLarge = encodeBase64(largeStr);
+    const decodedLarge = decodeBase64(encodedLarge);
+    if (decodedLarge !== largeStr) throw new Error("Large string (>8192 bytes) base64 encode/decode failed");
+
+    // 17. isBlankString tests
+    if (!isBlankString("")) throw new Error("isBlankString('') failed");
+    if (!isBlankString("   \t\n\r")) throw new Error("isBlankString whitespace failed");
+    if (isBlankString("  a  ")) throw new Error("isBlankString('  a  ') failed");
+    if (isBlankString(123)) throw new Error("isBlankString(123) failed");
+    if (isBlankString(null)) throw new Error("isBlankString(null) failed");
+    if (!isBlankString(new String("   "))) throw new Error("isBlankString boxed String failed");
+
+    // 18. escapeRegExp tests
+    const escapedSpecial = escapeRegExp(".*+?^${}()|[]\\/-");
+    if (typeof (RegExp as any).escape === "function") {
+        if (escapedSpecial !== (RegExp as any).escape(".*+?^${}()|[]\\/-")) throw new Error("escapeRegExp native mismatch");
+    } else {
+        if (escapedSpecial !== "\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\\\/\\-") throw new Error("escapeRegExp fallback mismatch: " + escapedSpecial);
+    }
+    if (escapeRegExp(null) !== "") throw new Error("escapeRegExp(null) failed");
+    if (escapeRegExp(new String("a.b")) !== "a\\.b") throw new Error("escapeRegExp unboxed String failed");
+
+    // 19. toWords & changeCase edge cases
+    if (toWords(null).length !== 0) throw new Error("toWords(null) failed");
+    if (toWords("__proto__ constructor prototype").length !== 0) throw new Error("toWords prototype pollution guard failed");
+    if (changeCase("don't break APIs", { format: "camel" }) !== "dontBreakApis") throw new Error("changeCase contraction + acronym plural failed");
+    if (changeCase("coopération_api", { format: "pascal" }) !== "CoopérationApi") throw new Error("changeCase Unicode failed");
+    if (changeCase("hello_world", { format: "title" }) !== "Hello World") throw new Error("changeCase title format failed");
+    if (changeCase("HELLO WORLD", { format: "title" }) !== "Hello World") throw new Error("changeCase title uppercase normalization failed");
+    if (changeCase("don't stop", { format: "title" }) !== "Dont Stop") throw new Error("changeCase title contraction failed");
+    if (changeCase("coopération_api", { format: "title" }) !== "Coopération Api") throw new Error("changeCase title Unicode failed");
+    if (decodeBase64URLToBase64("aGVsbG8_d29ybGQ") !== "aGVsbG8/d29ybGQ=") throw new Error("decodeBase64URLToBase64 failed");
+    if (decodeString(undefined, "base64") !== null) throw new Error("decodeString(undefined, 'base64') failed");
+
+    // 20. Atomic Base64URL, Base64ToBytes, and BytesToJson tests
+    if (decodeBase64URLToBase64("aGVsbG8_d29ybGQ") !== "aGVsbG8/d29ybGQ=") throw new Error("decodeBase64URLToBase64 failed");
+    const bytes = decodeBase64ToBytes("aGVsbG8=");
+    if (!(bytes instanceof Uint8Array) || bytes.length !== 5) throw new Error("decodeBase64ToBytes failed");
+    const jsonPayload = decodeBytesToJson(new TextEncoder().encode(JSON.stringify({ key: "value" }))) as any;
+    if (jsonPayload?.key !== "value") throw new Error("decodeBytesToJson failed");
+
+    // 21. Atomic Encoding tests
+    if (encodeObjectToJson({ num: 10n }) !== '{"num":"10"}') throw new Error("encodeObjectToJson BigInt failed");
+    if (encodeObjectToJson(Object(123n)) !== "123") throw new Error("encodeObjectToJson boxed BigInt failed");
+    if (encodeObjectToJson(99999999999999999999999999999999n) !== "99999999999999999999999999999999") throw new Error("encodeObjectToJson out of range BigInt failed");
+    
+    const encodedJsonBytes = encodeJsonToBytes("hello");
+    if (!(encodedJsonBytes instanceof Uint8Array) || encodedJsonBytes.length !== 5) throw new Error("encodeJsonToBytes failed");
+    
+    const nonStrBytes = encodeJsonToBytes(123 as any);
+    if (!(nonStrBytes instanceof Uint8Array) || nonStrBytes.length !== 3) throw new Error("encodeJsonToBytes non-string coercion failed");
+
+    if (encodeBytesToBase64(encodedJsonBytes) !== "aGVsbG8=") throw new Error("encodeBytesToBase64 failed");
+    if (encodeBytesToBase64(null as any) !== "") throw new Error("encodeBytesToBase64 null check failed");
+    if (encodeBytesToBase64([104, 101, 108, 108, 111] as any) !== "aGVsbG8=") throw new Error("encodeBytesToBase64 array coercion failed");
+
+    // Test large byte array chunking (> 8192 bytes)
+    const largeBytes = new Uint8Array(10000);
+    largeBytes.fill(65); // 'A'
+    const largeB64 = encodeBytesToBase64(largeBytes);
+    if (typeof largeB64 !== "string" || largeB64.length === 0) throw new Error("encodeBytesToBase64 large chunking failed");
+
+    if (encodeBase64ToBase64URL("aGVsbG8/d29ybGQ=") !== "aGVsbG8_d29ybGQ") throw new Error("encodeBase64ToBase64URL failed");
+
+    // 22. Additional Encoding/Decoding Edge Cases & Boundary Tests
+    // 22a. Boolean and BigInt primitive input handling
+    if (encodeString(true as any, "hex") !== "74727565") throw new Error("encodeString(true, 'hex') failed");
+    if (encodeString(100n as any, "base64") !== "MTAw") throw new Error("encodeString(100n, 'base64') failed");
+    if (decodeString("74727565", "hex") !== "true") throw new Error("decodeString('74727565', 'hex') failed");
+
+    // 22b. Control characters and null bytes in string encoding
+    const ctrlStr = "\0\n\r\t";
+    if (decodeHex(encodeHex(ctrlStr)) !== ctrlStr) throw new Error("Control characters hex roundtrip failed");
+    if (decodeBase64(encodeBase64(ctrlStr)) !== ctrlStr) throw new Error("Control characters base64 roundtrip failed");
+
+    // 22c. Non-strict decode failure returning null for invalid hex format
+    if (decodeHex("invalid_hex!", false) !== null) throw new Error("decodeHex invalid hex string should return null in non-strict mode");
+    if (decodeBase64("invalid_b64!", false) !== null) throw new Error("decodeBase64 invalid base64 string should return null in non-strict mode");
+    if (decodeHex("ffff", false) !== "\uFFFD\uFFFD") throw new Error("decodeHex non-strict mode should use replacement chars for invalid UTF-8");
+
+    // 22d. Base64URL decoding with various missing padding lengths
+    if (decodeBase64(encodeBase64ToBase64URL("aGVsbG8="), true) !== "hello") throw new Error("Base64URL decoding with missing '=' failed");
+    if (decodeBase64("aGVsbG93b3JsZA", true) !== "helloworld") throw new Error("Base64URL decoding with missing double padding failed");
 
     console.log("🎉 ALL UTILS STRING TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

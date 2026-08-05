@@ -1,4 +1,4 @@
-import type { IExpr, StrptimeOptions } from "../../types";
+import type { IExpr, StrptimeOptions, StringDecodeOptions, StringEncodeOptions } from "../../types";
 import { ExprBase, derive } from "../ExprBase";
 import { kleeneUnary, kleeneBinary } from "../utils";
 import {
@@ -10,7 +10,9 @@ import {
     stripChars,
     StripCharsOptions,
     isRegExp,
-    changeCase
+    changeCase,
+    encodeString,
+    decodeString
 } from "../../utils";
 
 /**
@@ -30,6 +32,15 @@ export class StringExprNamespace {
             return derive(this.expr, (vArray) => new Array(vArray.length).fill(null));
         }
         return fn();
+    }
+
+    _matchPattern(str: string, pattern: string | RegExp): boolean {
+        if (pattern == null) return false;
+        if (isRegExp(pattern)) {
+            pattern.lastIndex = 0;
+            return pattern.test(str);
+        }
+        return str.includes(pattern);
     }
 
     /**
@@ -67,8 +78,36 @@ export class StringExprNamespace {
      */
     contains(pattern: string | RegExp) {
         return this._patternGuard(pattern, () =>
-            this._deriveString((str) => isRegExp(pattern) ? pattern.test(str) : str.includes(pattern))
+            this._deriveString((str) => this._matchPattern(str, pattern))
         );
+    }
+
+    /**
+     * Checks if a string contains any of the search patterns.
+     * @param patterns Array of substring or regular expression search patterns.
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ email: ["user@example.com", "admin@test.org"] })
+     * >>> df.with_columns($df.col("email").str.contains_any(["@example.com", "@test.org"]).alias("is_target"))
+     * shape: (2, 2)
+     * ┌──────────────────┬───────────┐
+     * │ email            │ is_target │
+     * ├──────────────────┼───────────┤
+     * │ user@example.com │ true      │
+     * │ admin@test.org   │ true      │
+     * └──────────────────┴───────────┘
+     */
+    contains_any(patterns: (string | RegExp)[]) {
+        return this._patternGuard(patterns, () => {
+            const list = Array.isArray(patterns) ? patterns : [patterns];
+            return this._deriveString((str) => {
+                const len = list.length;
+                for (let i = 0; i < len; i++) {
+                    if (this._matchPattern(str, list[i])) return true;
+                }
+                return false;
+            });
+        });
     }
 
     /**
@@ -107,6 +146,44 @@ export class StringExprNamespace {
             })
         );
     }
+
+    /**
+     * Decodes hex or base64 encoded string column values into string.
+     * @param options Object containing encoding ("hex" | "base64") and optional strict flag
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ encoded: ["68656c6c6f"] })
+     * >>> df.with_columns($df.col("encoded").str.decode({ encoding: "hex" }).alias("decoded"))
+     * shape: (1, 2)
+     * ┌────────────┬─────────┐
+     * │ encoded    │ decoded │
+     * ├────────────┼─────────┤
+     * │ 68656c6c6f │ hello   │
+     * └────────────┴─────────┘
+     */
+    decode(options: StringDecodeOptions) {
+        return this._deriveString((str) => decodeString(str, options.encoding, options));
+    }
+
+    /**
+     * Encodes string column values into hex or base64.
+     * @param options Object containing encoding ("hex" | "base64")
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ text: ["hello"] })
+     * >>> df.with_columns($df.col("text").str.encode({ encoding: "hex" }).alias("encoded"))
+     * shape: (1, 2)
+     * ┌───────┬────────────┐
+     * │ text  │ encoded    │
+     * ├───────┼────────────┤
+     * │ hello │ 68656c6c6f │
+     * └───────┴────────────┘
+     */
+    encode(options: StringEncodeOptions) {
+        return this._deriveString((str) => encodeString(str, options.encoding));
+    }
+
+
 
     /**
      * Decodes Uniform Resource Identifier (URI) components.
@@ -213,6 +290,25 @@ export class StringExprNamespace {
                 return match[group] !== undefined ? match[group] : null;
             })
         );
+    }
+
+    /**
+     * Extracts the first n characters of each string element.
+     * @param n Number of characters to extract from the start of the string (default 1).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ name: ["polars", "javascript"] })
+     * >>> df.with_columns($df.col("name").str.head(3).alias("prefix"))
+     * shape: (2, 2)
+     * ┌────────────┬────────┐
+     * │ name       │ prefix │
+     * ├────────────┼────────┤
+     * │ polars     │ pol    │
+     * │ javascript │ jav    │
+     * └────────────┴────────┘
+     */
+    head(n: number = 1) {
+        return this.slice(0, n);
     }
 
     /**
@@ -594,6 +690,25 @@ export class StringExprNamespace {
     }
 
     /**
+     * Extracts the last n characters of each string element.
+     * @param n Number of characters to extract from the end of the string (default 1).
+     * @returns ColumnExpression
+     * @example
+     * >>> const df = $df.data({ name: ["polars", "javascript"] })
+     * >>> df.with_columns($df.col("name").str.tail(3).alias("suffix"))
+     * shape: (2, 2)
+     * ┌────────────┬────────┐
+     * │ name       │ suffix │
+     * ├────────────┼────────┤
+     * │ polars     │ ars    │
+     * │ javascript │ ipt    │
+     * └────────────┴────────┘
+     */
+    tail(n: number = 1) {
+        return this.slice(-n);
+    }
+
+    /**
      * Parses date/time string into Datetime.
      * @param options Parsing configuration options.
      * @returns ColumnExpression
@@ -810,7 +925,7 @@ export class StringExprNamespace {
      * └─────────────┴─────────────┘
      */
     to_titlecase() {
-        return this._deriveString((str) => str.replace(/\b\w/g, c => c.toUpperCase()));
+        return this._deriveString((str) => changeCase(str, { format: "title" }));
     }
 
     /**

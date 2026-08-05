@@ -1,6 +1,11 @@
 /** @internalfile */
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
-import { MAX_JS_ARRAY_LENGTH } from "../constants";
+import {
+    INT8_MIN, INT8_MAX, UINT8_MIN, UINT8_MAX,
+    INT16_MIN, INT16_MAX, UINT16_MIN, UINT16_MAX,
+    INT32_MIN, INT32_MAX, UINT32_MIN, UINT32_MAX,
+    INT64_MIN, INT64_MAX, UINT64_MIN, UINT64_MAX
+} from "../constants";
 
 const STRICT_SCIENTIFIC_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
 const NON_BASE10_INJECTION_REGEX = /0[xobXOB]/;
@@ -270,12 +275,12 @@ export function toValidFloat(
 // ============================================================================
 
 export const INT_RANGES = {
-    Int8: { min: -128, max: 127 },
-    Int16: { min: -32768, max: 32767 },
-    Int32: { min: -2147483648, max: 2147483647 },
-    UInt8: { min: 0, max: 255 },
-    UInt16: { min: 0, max: 65535 },
-    UInt32: { min: 0, max: MAX_JS_ARRAY_LENGTH }
+    Int8: { min: INT8_MIN, max: INT8_MAX },
+    Int16: { min: INT16_MIN, max: INT16_MAX },
+    Int32: { min: INT32_MIN, max: INT32_MAX },
+    UInt8: { min: UINT8_MIN, max: UINT8_MAX },
+    UInt16: { min: UINT16_MIN, max: UINT16_MAX },
+    UInt32: { min: UINT32_MIN, max: UINT32_MAX }
 } as const;
 
 export type IntRangeType = keyof typeof INT_RANGES;
@@ -325,24 +330,42 @@ export function toValidInt(
 // ============================================================================
 
 export const BIGINT_RANGES = {
-    Int64: { min: -9223372036854775808n, max: 9223372036854775807n },
-    UInt64: { min: 0n, max: 18446744073709551615n }
+    Int64: { min: INT64_MIN, max: INT64_MAX },
+    UInt64: { min: UINT64_MIN, max: UINT64_MAX }
 } as const;
 
 export type BigIntRangeType = keyof typeof BIGINT_RANGES;
 export type BigIntRange = { min: bigint; max: bigint } | BigIntRangeType;
 
-export interface BigIntOptions {
+export interface IsValidBigIntOptions {
     range?: BigIntRange;
+}
+
+export interface toValidBigIntOptions extends IsValidBigIntOptions {
     truncate?: boolean;
+}
+
+export function isValidBigInt(
+    v: unknown,
+    { range = "Int64" }: IsValidBigIntOptions = {}
+): v is bigint {
+    const unboxed = unboxPrimitiveObj(v);
+    if (typeof unboxed !== "bigint") return false;
+
+    const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
+    return unboxed >= limits.min && unboxed <= limits.max;
 }
 
 export function toValidBigInt(
     v: unknown,
-    { range = "Int64", truncate = false }: BigIntOptions = {}
+    { range = "Int64", truncate = false }: toValidBigIntOptions = {}
 ): bigint | null {
     if (v == null || typeof v === "symbol") return null;
-    v = unboxPrimitiveObj(v);
+    try {
+        v = unboxPrimitiveObj(v);
+    } catch {
+        return null;
+    }
 
     let bigintVal: bigint | null = null;
 
@@ -353,10 +376,47 @@ export function toValidBigInt(
         if (clean === null || !STRICT_SCIENTIFIC_REGEX.test(clean)) return null;
 
         if (EXPONENT_INDICATOR_REGEX.test(clean)) {
-            const num = Number(clean);
-            if (!Number.isFinite(num)) return null;
-            if (!truncate && !Number.isInteger(num)) return null;
-            bigintVal = BigInt(Math.trunc(num));
+            const eIdx = clean.search(/[eE]/);
+            let mantissaStr = clean.slice(0, eIdx);
+            const expStr = clean.slice(eIdx + 1);
+
+            const exp = parseInt(expStr, 10);
+            if (Number.isNaN(exp) || exp > 100000 || exp < -100000) return null;
+
+            const isNegative = mantissaStr.startsWith("-");
+            if (isNegative || mantissaStr.startsWith("+")) {
+                mantissaStr = mantissaStr.slice(1);
+            }
+
+            const dotIdx = mantissaStr.indexOf(".");
+            let baseIntStr = mantissaStr;
+            let decPlaces = 0;
+
+            if (dotIdx !== -1) {
+                decPlaces = mantissaStr.length - dotIdx - 1;
+                baseIntStr = mantissaStr.slice(0, dotIdx) + mantissaStr.slice(dotIdx + 1);
+            }
+
+            // Strip leading zeros to avoid BigInt("005") SyntaxError
+            baseIntStr = baseIntStr.replace(/^0+/, "") || "0";
+
+            try {
+                let baseBI = BigInt(baseIntStr);
+                if (isNegative) baseBI = -baseBI;
+
+                const shift = exp - decPlaces;
+
+                if (shift >= 0) {
+                    bigintVal = baseBI * (10n ** BigInt(shift));
+                } else {
+                    const divisor = 10n ** BigInt(-shift);
+                    const remainder = baseBI % divisor;
+                    if (!truncate && remainder !== 0n) return null;
+                    bigintVal = baseBI / divisor;
+                }
+            } catch {
+                return null;
+            }
         } else {
             const dotIdx = clean.indexOf(".");
             if (dotIdx !== -1) {
@@ -377,7 +437,8 @@ export function toValidBigInt(
     }
 
     const limits = typeof range === "string" ? BIGINT_RANGES[range] : range;
-    return clamp(bigintVal, { min: limits.min, max: limits.max });
+    if (bigintVal < limits.min || bigintVal > limits.max) return null;
+    return bigintVal;
 }
 
 // ============================================================================
