@@ -200,6 +200,15 @@ function _canonicalizeKeyed(
     return `${prefix}{${parts.sort().join(KEY_PAIR_SEPARATOR)}}`;
 }
 
+function _canonicalizeList(items: unknown[], nextOpt: { depth: number; maxDepth: number }): string[] {
+    const len = items.length;
+    const parts = new Array(len);
+    for (let i = 0; i < len; i++) {
+        parts[i] = toCanonicalString(items[i], nextOpt);
+    }
+    return parts;
+}
+
 export function toCanonicalString(
     val: any,
     { depth = 0, maxDepth = 50 }: { depth?: number; maxDepth?: number } = {}
@@ -209,47 +218,31 @@ export function toCanonicalString(
     if (val === undefined) return "v:undefined";
 
     val = unboxPrimitiveObj(val);
+    const type = typeof val;
+
+    if (type === "number" || type === "boolean" || type === "bigint") return `${type}:${val}`;
+    if (type === "string") return `s:${val.length}:${val}`;
+    if (type === "symbol" || type === "function") {
+        const s = val.toString();
+        return `${type === "symbol" ? "y" : "f"}:${s.length}:${s}`;
+    }
 
     if (isValidDateObj(val)) return `d:${val.getTime()}`;
-
     if (isTypedArray(val)) {
         const s = val.toString();
         return `u:${val.constructor.name}:${s.length}:${s}`;
     }
 
-    if (Array.isArray(val)) {
-        const len = val.length;
-        const parts = new Array(len);
-        const nextOpt = { depth: depth + 1, maxDepth };
-        for (let i = 0; i < len; i++) {
-            parts[i] = toCanonicalString(val[i], nextOpt);
-        }
-        return `a:[${parts.join(KEY_PAIR_SEPARATOR)}]`;
-    }
+    const nextOpt = { depth: depth + 1, maxDepth };
 
-    if (isSet(val)) {
-        const arr = Array.from(val);
-        const len = arr.length;
-        const parts = new Array(len);
-        const nextOpt = { depth: depth + 1, maxDepth };
-        for (let i = 0; i < len; i++) {
-            parts[i] = toCanonicalString(arr[i], nextOpt);
-        }
-        parts.sort();
-        return `set:[${parts.join(KEY_PAIR_SEPARATOR)}]`;
-    }
+    if (Array.isArray(val)) return `a:[${_canonicalizeList(val, nextOpt).join(KEY_PAIR_SEPARATOR)}]`;
+    if (isSet(val)) return `set:[${_canonicalizeList(Array.from(val), nextOpt).sort().join(KEY_PAIR_SEPARATOR)}]`;
+    if (isMap(val)) return _canonicalizeKeyed(Array.from(val.keys()), (k) => val.get(k), nextOpt, "map:");
 
-    if (isMap(val)) {
-        const nextOpt = { depth: depth + 1, maxDepth };
-        return _canonicalizeKeyed(Array.from(val.keys()), (k) => val.get(k), nextOpt, "map:");
-    }
-
-    if (typeof val === "object" && typeof val.toJSON === "function") {
+    if (typeof val.toJSON === "function") {
         try {
             const jsonVal = val.toJSON();
-            if (jsonVal !== val) {
-                return `j:${toCanonicalString(jsonVal, { depth: depth + 1, maxDepth })}`;
-            }
+            if (jsonVal !== val) return `j:${toCanonicalString(jsonVal, nextOpt)}`;
         } catch {
             // Fall through
         }
@@ -261,30 +254,11 @@ export function toCanonicalString(
     }
 
     if (isPlainObj(val)) {
-        const nextOpt = { depth: depth + 1, maxDepth };
         return _canonicalizeKeyed(Object.keys(val).sort(), (k) => val[k as string], nextOpt, "o:");
     }
 
-    if (typeof val === "function") {
-        const s = val.toString();
-        return `f:${s.length}:${s}`;
-    }
-
-    if (typeof val === "string") {
-        return `s:${val.length}:${val}`;
-    }
-
-    if (typeof val === "symbol") {
-        const s = val.toString();
-        return `y:${s.length}:${s}`;
-    }
-
-    if (typeof val === "number" || typeof val === "boolean" || typeof val === "bigint") {
-        return `${typeof val}:${val}`;
-    }
-
     const s = String(val);
-    return `${typeof val}:${s.length}:${s}`;
+    return `${type}:${s.length}:${s}`;
 }
 
 export interface ChangeCaseOptions {
@@ -344,9 +318,6 @@ function _getCodePointStep(str: string, index: number = 0): number {
     return cp != null && cp > 0xffff ? 2 : 1;
 }
 
-/**
- * High-performance, predictable case converter
- */
 export function changeCase(str: any, options: ChangeCaseOptions): string {
     const words = toWords(str);
     const len = words.length;
@@ -355,17 +326,12 @@ export function changeCase(str: any, options: ChangeCaseOptions): string {
     const { format } = options ?? {};
     if (!format) return words.join(" ");
 
-    const delimiter =
-        format === "kebab" ? "-" :
-            format === "snake" ? "_" :
-                format === "title" ? " " : "";
-
+    const delimiter = format === "kebab" ? "-" : format === "snake" ? "_" : format === "title" ? " " : "";
     const isLower = format === "kebab" || format === "snake";
     const result = new Array(len);
 
     for (let i = 0; i < len; i++) {
         const w = words[i];
-
         if (isLower || (i === 0 && format === "camel")) {
             result[i] = w.toLowerCase();
         } else {
@@ -421,7 +387,7 @@ export function encodeString(str: string | null | undefined, encoding: StringEnc
         return btoa(bin);
     }
 
-    throw new Error(`Unsupported encoding: '${encoding}'`);
+    throw new Error(`Unsupported encoding: ${encoding}`);
 }
 
 /**
@@ -434,20 +400,20 @@ export function decodeString(
 ): string | null {
     if (str == null) return null;
     const strict = typeof options === "boolean" ? options : (options.strict ?? true);
+    const decoder = strict ? TEXT_DECODER_FATAL : TEXT_DECODER;
     const s = String(str).trim();
 
     try {
         if (encoding === "hex") {
             if (s.length % 2 !== 0 || !_HEX_REGEX.test(s)) {
-                throw new Error("Invalid hex string format");
+                throw new Error("Invalid hex format");
             }
-            if (_HAS_BUFFER) return _BUFFER_REF.from(s, "hex").toString("utf-8");
-            const decoder = strict ? TEXT_DECODER_FATAL : TEXT_DECODER;
+            if (_HAS_BUFFER) return decoder.decode(_BUFFER_REF.from(s, "hex"));
             if (_HAS_NATIVE_HEX) return decoder.decode((Uint8Array as any).fromHex(s));
             const bytes = new Uint8Array(s.length / 2);
             for (let i = 0; i < bytes.length; i++) {
                 const byte = parseInt(s.substring(i * 2, i * 2 + 2), 16);
-                if (Number.isNaN(byte)) throw new Error("Invalid hex string format");
+                if (Number.isNaN(byte)) throw new Error("Invalid hex format");
                 bytes[i] = byte;
             }
             return decoder.decode(bytes);
@@ -455,9 +421,8 @@ export function decodeString(
 
         if (encoding === "base64") {
             if (s !== "" && (s.length % 4 !== 0 || !_STRICT_B64_REGEX.test(s))) {
-                throw new Error("Invalid base64 encoding format");
+                throw new Error("Invalid base64 format");
             }
-            const decoder = strict ? TEXT_DECODER_FATAL : TEXT_DECODER;
             if (_HAS_NATIVE_BASE64) {
                 return decoder.decode((Uint8Array as any).fromBase64(s, { strict }));
             }
@@ -465,14 +430,15 @@ export function decodeString(
                 return decoder.decode(_BUFFER_REF.from(s, "base64"));
             }
             const bin = atob(s);
-            const bytes = new Uint8Array(bin.length);
-            for (let i = 0; i < bin.length; i++) {
+            const len = bin.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
                 bytes[i] = bin.charCodeAt(i);
             }
             return decoder.decode(bytes);
         }
 
-        throw new Error(`Unsupported encoding: '${encoding}'`);
+        throw new Error(`Unsupported encoding: ${encoding}`);
     } catch (err) {
         if (strict) throw err;
         return null;
@@ -592,19 +558,9 @@ export function toCleanRegExp(
 function _matchToRecord(match: RegExpMatchArray | RegExpExecArray): Record<string, string | null> {
     const result: Record<string, string | null> = Object.create(null);
     if (match.index !== undefined) {
-        Object.defineProperty(result, "_index", {
-            value: String(match.index),
-            writable: true,
-            enumerable: false,
-            configurable: true
-        });
+        Object.defineProperty(result, "_index", { value: String(match.index), writable: true, configurable: true });
     }
-    Object.defineProperty(result, "_length", {
-        value: match.length,
-        writable: true,
-        enumerable: false,
-        configurable: true
-    });
+    Object.defineProperty(result, "_length", { value: match.length, writable: true, configurable: true });
     for (let i = 0; i < match.length; i++) {
         result[String(i)] = match[i] !== undefined ? match[i] : null;
     }
@@ -621,7 +577,7 @@ function _resolveGroupRecord(
     record: Record<string, string | null>,
     groupIndex: number | string
 ): string | null {
-    if (typeof groupIndex === "string") return groupIndex in record ? record[groupIndex] : null;
+    if (typeof groupIndex === "string") return record[groupIndex] ?? null;
 
     const num = Number(groupIndex);
     if (Number.isNaN(num)) return null;
@@ -629,8 +585,7 @@ function _resolveGroupRecord(
     const index = Math.trunc(num);
     if (index >= 0) return record[String(index)] ?? null;
 
-    const count = (record as any)._length ?? 0;
-    const targetIndex = count + index;
+    const targetIndex = ((record as any)._length ?? 0) + index;
     return targetIndex >= 1 ? (record[String(targetIndex)] ?? null) : null;
 }
 
@@ -698,7 +653,7 @@ function _matchManyCore<T>(
     const isLeftmost = leftmost ?? true;
 
     if (overlapping && leftmost) {
-        throw new InvalidArgumentError("Cannot specify both 'overlapping' and 'leftmost' as true.");
+        throw new InvalidArgumentError("Cannot specify both 'overlapping' and 'leftmost'");
     }
     if (str == null || patterns == null) return null;
     const list = toValidArray(patterns);
@@ -733,46 +688,33 @@ function _matchManyCore<T>(
     const result = new Array<T | null>(len).fill(null);
     if (candidates.length === 0) return result;
 
-    if (isLeftmost) {
-        const selected = _selectLeftmostCandidates(candidates);
-        for (let i = 0; i < selected.length; i++) {
-            const c = selected[i];
-            result[c.i] = c.payload;
-        }
-    } else {
-        const accepted: Candidate[] = [];
+    const selected = isLeftmost ? _selectLeftmostCandidates(candidates) : [];
+    if (!isLeftmost) {
         candidates.sort((a, b) => a.i - b.i);
         const candLen = candidates.length;
         for (let i = 0; i < candLen; i++) {
             const c = candidates[i];
             let overlaps = false;
-            const accLen = accepted.length;
-            for (let j = 0; j < accLen; j++) {
-                const a = accepted[j];
+            const selLen = selected.length;
+            for (let j = 0; j < selLen; j++) {
+                const a = selected[j];
                 let isOverlapping = false;
-                if (c.start === c.end && a.start === a.end) {
-                    isOverlapping = c.start === a.start;
-                } else if (a.start === a.end) {
-                    isOverlapping = a.start >= c.start && a.start < c.end;
-                } else if (c.start === c.end) {
-                    isOverlapping = c.start >= a.start && c.start < a.end;
-                } else {
-                    isOverlapping = c.start < a.end && c.end > a.start;
-                }
+                if (c.start === c.end && a.start === a.end) isOverlapping = c.start === a.start;
+                else if (a.start === a.end) isOverlapping = a.start >= c.start && a.start < c.end;
+                else if (c.start === c.end) isOverlapping = c.start >= a.start && c.start < a.end;
+                else isOverlapping = c.start < a.end && c.end > a.start;
                 if (isOverlapping) {
                     overlaps = true;
                     break;
                 }
             }
-            if (!overlaps) {
-                accepted.push(c);
-            }
+            if (!overlaps) selected.push(c);
         }
-        const accLen = accepted.length;
-        for (let i = 0; i < accLen; i++) {
-            const c = accepted[i];
-            result[c.i] = c.payload;
-        }
+    }
+
+    for (let i = 0; i < selected.length; i++) {
+        const c = selected[i];
+        result[c.i] = c.payload;
     }
 
     return result;
@@ -953,13 +895,11 @@ export function splitString(
     const targetCount = limit + 1;
 
     if (strict && parts.length < targetCount) {
-        throw new InvalidArgumentError(`Expected at least ${targetCount} parts, got ${parts.length}`);
+        throw new InvalidArgumentError(`Expected ${targetCount} parts, got ${parts.length}`);
     }
 
-    if (exact) {
-        while (parts.length < targetCount) {
-            parts.push(null);
-        }
+    if (exact && parts.length < targetCount) {
+        while (parts.length < targetCount) parts.push(null);
     }
 
     return parts;
@@ -986,10 +926,8 @@ function _expandReplacementString(
         if (idx > 0 && idx <= captures.length) return captures[idx - 1] ?? "";
 
         if (token.length === 2) {
-            const firstDigit = Number(token[0]);
-            if (firstDigit > 0 && firstDigit <= captures.length) {
-                return (captures[firstDigit - 1] ?? "") + token[1];
-            }
+            const first = Number(token[0]);
+            if (first > 0 && first <= captures.length) return (captures[first - 1] ?? "") + token[1];
         }
         return m;
     });
@@ -1013,25 +951,24 @@ export function replaceString(
     const pat = literal ? _toLiteralPattern(pattern, mode) : pattern;
     const cleanObj = toCleanRegExp(input, pat, { ...engineOpts, global: engineOpts?.global ?? (effectiveN !== 1) });
     if (!cleanObj) return input;
-    const { reg } = cleanObj;
 
     const isFn = typeof replacement === "function";
+    const repStr = isFn ? "" : String(replacement);
 
-    if (effectiveN === 1 || effectiveN < 0 || effectiveN === Infinity) {
-        if (literal && !isFn) {
-            const literalRepStr = String(replacement);
-            return input.replace(reg, () => literalRepStr);
+    if (literal && !isFn) {
+        if (effectiveN === 1 || effectiveN < 0 || effectiveN === Infinity) {
+            return input.replace(cleanObj.reg, () => repStr);
         }
-        return input.replace(reg, replacement as any);
+        let count = 0;
+        return input.replace(cleanObj.reg, (m) => (count++ < effectiveN ? repStr : m));
     }
 
     let count = 0;
-    const repStr = isFn ? "" : String(replacement);
+    const isLimited = effectiveN > 0 && effectiveN !== Infinity;
 
-    return input.replace(reg, (...args: any[]) => {
-        if (count++ >= effectiveN) return args[0];
+    return input.replace(cleanObj.reg, (...args: any[]) => {
+        if (isLimited && count++ >= effectiveN) return args[0];
         if (isFn) return String((replacement as Function)(...args));
-        if (literal) return repStr;
 
         const len = args.length;
         const hasGroups = typeof args[len - 1] === "object" && args[len - 1] !== null;
@@ -1052,28 +989,22 @@ export function replaceManyString(
     if (str == null || patterns == null) return null;
     const input = typeof str === "string" ? str : String(str);
 
-    const isObjPatterns = isPlainObj(patterns);
-    if (!isObjPatterns && !Array.isArray(patterns)) return input;
+    const isObj = isPlainObj(patterns);
+    if (!isObj && !Array.isArray(patterns)) return input;
 
-    const patList = isObjPatterns ? Object.keys(patterns) : patterns;
+    const patList = isObj ? Object.keys(patterns) : patterns;
     const len = patList.length;
     if (len === 0) return input;
 
     let repList: (string | ((match: string, ...args: any[]) => string))[] | null = null;
     let scalarRep: string | ((match: string, ...args: any[]) => string) | null = null;
 
-    if (isObjPatterns) {
+    if (isObj) {
         repList = Object.values(patterns);
     } else if (Array.isArray(replaceWith)) {
-        if (replaceWith.length === 1 && len > 1) {
-            scalarRep = replaceWith[0];
-        } else if (replaceWith.length !== len) {
-            throw new InvalidArgumentError(
-                `replaceMany length mismatch: expected ${len} replacement strings, got ${replaceWith.length}`
-            );
-        } else {
-            repList = replaceWith;
-        }
+        if (replaceWith.length === 1 && len > 1) scalarRep = replaceWith[0];
+        else if (replaceWith.length !== len) throw new InvalidArgumentError(`replaceMany length mismatch: expected ${len}, got ${replaceWith.length}`);
+        else repList = replaceWith;
     } else if (replaceWith != null) {
         scalarRep = replaceWith;
     } else {
@@ -1088,17 +1019,18 @@ export function replaceManyString(
         const rawRep = repList ? repList[i] : scalarRep;
         if (pat == null || rawRep == null) continue;
 
+        const isFn = typeof rawRep === "function";
+        const repStr = isFn ? "" : String(rawRep);
+
         const items = _collectPatternCandidates(input, pat, i, options, (match, start) => {
-            const captures: (string | undefined)[] = Array.prototype.slice.call(match, 1);
-            if (typeof rawRep === "function") {
-                const fnArgs: any[] = [match[0], ...captures, start, input];
+            if (options?.literal && !isFn) return repStr;
+            const captures = Array.prototype.slice.call(match, 1);
+            if (isFn) {
+                const fnArgs = [match[0], ...captures, start, input];
                 if (match.groups !== undefined) fnArgs.push(match.groups);
                 return String((rawRep as Function)(...fnArgs));
             }
-            const repStr = String(rawRep);
-            return options?.literal
-                ? repStr
-                : _expandReplacementString(repStr, match[0], start, input, captures, match.groups);
+            return _expandReplacementString(repStr, match[0], start, input, captures, match.groups);
         });
 
         for (let j = 0; j < items.length; j++) candidates.push(items[j]);
@@ -1117,6 +1049,5 @@ export function replaceManyString(
         lastIndex = c.end;
     }
 
-    result += input.slice(lastIndex);
-    return result;
+    return result + input.slice(lastIndex);
 }
