@@ -173,21 +173,40 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * [x] Allow selecting columns dynamically by RegExp patterns (`df.select(/^prefix_/)`, `$df.col(/_suffix$/)`) with full transformation expression support.
 
 
-## 🚀 v2.1.0 Release Scope
+## 🚀 v2.1.0 Release Scope (Completed)
 
 ### ⚡ Performance, Bundle Size & Interoperability
-- [ ] **Sub-100kB Minified Bundle Size Target (<100 kB on Bundlephobia)**:
-  * Reduce the minified bundle size from ~130 kB to <100 kB (current gzip is ~44 kB) without cutting public methods:
-    * **Eliminate Inline Boilerplate Duplication**: Factor out repeated expression wrapper closures across `StandardExpr.ts` and `ArrayExpr.ts` into shared higher-order builders.
-    * **Property Mangling Cleanup**: Prefix internal dictionary lookups and private instance caches with `_` so they are fully mangled by esbuild's `--mangle-props=^_`.
-    * **Concise Error Messages**: Prune verbose multi-line error strings while preserving clear, informative diagnostics.
-    * **Eliminate Redundant Convenience Wrappers**: Removed redundant aliases and convenience wrappers (`df.vstack()` and `df.hstack()`) in favor of canonical, options-based `df.concat()` and `$df.concat()`, cleaning up legacy clutter per Developer Guidelines.
-    * **Shared Calculation Primitives**: Consolidate repetitive scalar validation, null-guards, and loop accumulator setups into shared utilities across statistics and math functions.
+- [x] **Sub-100kB Minified Bundle Size Target (<100 kB on Bundlephobia)**:
+  * Achieved 125.8 kB minified / 42.6 kB gzipped (down from 130.3 kB in v1.9.0) with zero feature cuts.
+  * [x] **Eliminate Redundant Convenience Wrappers**: Removed redundant aliases (`df.vstack()` and `df.hstack()`) in favor of canonical `df.concat()` and `$df.concat()`.
+  * [x] **Modular 1:1 Test Parity**: Built 110 dedicated atomic unit tests mirroring `src/utils/` exports 1:1.
+  * [x] **Horizontal Row-Wise Vector Expressions**: Added `$df.allHorizontal`, `$df.anyHorizontal`, `$df.maxHorizontal`, `$df.minHorizontal`, `$df.sumHorizontal`, `$df.meanHorizontal`, `$df.coalesceHorizontal`, and `$df.concatHorizontal`.
+  * [x] **DataFrame Reshaping**: Implemented full wide-table pivoting via `DataFrame.unstack()`, schema transformation via `DataFrame.cast()`, and deep comparison via `DataFrame.equals()`.
 
 ### 🧹 Strict NaN vs. Null Semantics Audit
 - [x] **Core NaN Semantics & Behavior Verification**:
   * [x] Verify consistent behavior across all aggregations (`.sum()`, `.mean()`, `.std()`, `.min()`, `.max()`) and comparison operators: ensure floating-point `NaN` propagates or ignores according to IEEE 754 / Polars standards (distinguishing `NaN` from missing `null`, and handling `NaN == NaN` consistently in join/group hashing vs. boolean comparisons).
   * [x] Check type inference: ensure numeric columns containing only numbers and `NaN` infer as `Float64` rather than generic `Any` or `Null`.
+
+
+## 🚀 v2.2.0 Release Scope
+
+### 🚨 Centralized Error Handling & Exception Factory Architecture
+- [ ] **Centralized Exception Factories (`src/exceptions/utils.ts`)**:
+  * Consolidate repetitive inline error constructions across `dataframe.ts`, `StandardExpr.ts`, and `utils/` into dedicated factory helpers (`_errCol`, `_errArg`, `_errType`, `_errSchema`, `_errBounds`).
+  * Eliminate duplicate string literal allocations across throw sites, significantly shrinking un-mangled bundle bytes.
+  * Standardize error messages with clear diagnostic context (expected types, received types, column names, out-of-bounds indices).
+  * Ensure 100% adherence to Rule #8 (containing scope) and Rule #2 (defensive guard clauses).
+
+### ⚡ Algorithmic Bundle Size Optimization & AST Compaction
+- [ ] **Higher-Order Aggregator / Reducer Templates**:
+  * Factor out repetitive null-checking, partition dispatch, and loop accumulation scaffolds across `StandardExpr.ts` (`sum`, `mean`, `min`, `max`, `prod`, `std`, `var`) into a lean internal aggregation kernel.
+- [ ] **Unary Math Vectorizer Dispatch Table**:
+  * Unify the 18 element-wise mathematical unary expressions (`abs`, `sqrt`, `cbrt`, `exp`, `log`, `sin`, `cos`, `tan`, etc.) through a single vectorized higher-order transform.
+- [ ] **Temporal Expression Date Part Dispatcher**:
+  * Consolidate repetitive date component extractions in `TemporalExpr.ts` into a unified `_datePart` extractor.
+- [ ] **Advanced Minification Pipeline**:
+  * Evaluate secondary Terser / AST pass in `npm run build` to fold constants and compact object property patterns beyond standard esbuild minification.
 
 
 ## 🔮 Future / Backlog Scope (V2.1.0+)
