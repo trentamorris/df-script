@@ -173,15 +173,13 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * [x] Allow selecting columns dynamically by RegExp patterns (`df.select(/^prefix_/)`, `$df.col(/_suffix$/)`) with full transformation expression support.
 
 
-## 🚀 v2.1.0 Release Scope (Completed)
+## 🚀 v2.1.0 Release Scope
 
 ### ⚡ Performance, Bundle Size & Interoperability
-- [x] **Sub-100kB Minified Bundle Size Target (<100 kB on Bundlephobia)**:
-  * Achieved 125.8 kB minified / 42.6 kB gzipped (down from 130.3 kB in v1.9.0) with zero feature cuts.
-  * [x] **Eliminate Redundant Convenience Wrappers**: Removed redundant aliases (`df.vstack()` and `df.hstack()`) in favor of canonical `df.concat()` and `$df.concat()`.
-  * [x] **Modular 1:1 Test Parity**: Built 110 dedicated atomic unit tests mirroring `src/utils/` exports 1:1.
-  * [x] **Horizontal Row-Wise Vector Expressions**: Added `$df.allHorizontal`, `$df.anyHorizontal`, `$df.maxHorizontal`, `$df.minHorizontal`, `$df.sumHorizontal`, `$df.meanHorizontal`, `$df.coalesceHorizontal`, and `$df.concatHorizontal`.
-  * [x] **DataFrame Reshaping**: Implemented full wide-table pivoting via `DataFrame.unstack()`, schema transformation via `DataFrame.cast()`, and deep comparison via `DataFrame.equals()`.
+- [x] **Eliminate Redundant Convenience Wrappers**: Removed redundant aliases (`df.vstack()` and `df.hstack()`) in favor of canonical `df.concat()` and `$df.concat()`.
+- [x] **Modular 1:1 Test Parity**: Built 110 dedicated atomic unit tests mirroring `src/utils/` exports 1:1.
+- [x] **Horizontal Row-Wise Vector Expressions**: Added `$df.allHorizontal`, `$df.anyHorizontal`, `$df.maxHorizontal`, `$df.minHorizontal`, `$df.sumHorizontal`, `$df.meanHorizontal`, `$df.coalesceHorizontal`, and `$df.concatHorizontal`.
+- [x] **DataFrame Reshaping**: Implemented full wide-table pivoting via `DataFrame.unstack()`, schema transformation via `DataFrame.cast()`, and deep comparison via `DataFrame.equals()`.
 
 ### 🧹 Strict NaN vs. Null Semantics Audit
 - [x] **Core NaN Semantics & Behavior Verification**:
