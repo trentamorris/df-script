@@ -29,6 +29,7 @@ export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
 export function lit(value: any, options: LitOptions = {}): ColumnExpr<any> {
     const expr = seqRange(value, { ...options, mode: "constant" });
     expr._isLiteral = true;
+    expr._literalValue = value;
     return expr;
 }
 

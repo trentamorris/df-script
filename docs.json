@@ -198,7 +198,7 @@
       "syntax": "$df.lit(...)",
       "signature": "$df.lit(\n  value: any,\n  options?: {\n    dtype?,\n    name?\n  }\n): ColumnExpr<any>",
       "lineStart": 29,
-      "lineEnd": 33
+      "lineEnd": 34
     }
   },
   "columnExpressions/functions/seqRange.ts": {

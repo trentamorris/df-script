@@ -88,7 +88,7 @@ export class ExprBase implements IExpr {
 
     _resolve(val: any, columns: ColumnDict, height: number) {
         if (val instanceof ExprBase) {
-            if (val._isLiteral && val._ops.length === 1) {
+            if (val._isLiteral) {
                 return val._literalValue;
             }
             return evaluateExpression(val, columns, height);
