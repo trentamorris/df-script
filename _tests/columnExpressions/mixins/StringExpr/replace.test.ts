@@ -18,4 +18,12 @@ if (res[0].r1 !== "DFScript was awesome!" || res[0].r2 !== "DFScript was awesome
 if (res[1].r1 !== null) throw new Error("replace null failed");
 
 
+const resNullPat = df.select([
+    $df.col("phrase").str.replace(null as any, "bar").alias("null_pat")
+]).toDicts() as any[];
+
+if (resNullPat[0].null_pat !== null || resNullPat[1].null_pat !== null) {
+    throw new Error("replace with null pattern should return all nulls");
+}
+
 console.log("✓ StringExpr.replace tests passed!");

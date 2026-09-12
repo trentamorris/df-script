@@ -56,6 +56,72 @@ try {
         throw new Error("Scientific notation Float64 inference failed");
     }
 
+    // 10. Empty array input
+    const emptyColumn = inferAndCoerceCSVColumn([]);
+    if (emptyColumn.type.name !== "Utf8" || emptyColumn.values.length !== 0) {
+        throw new Error("Empty array inference failed");
+    }
+
+    // 11. Large integers that exceed Number.MAX_SAFE_INTEGER (must stay Int64 bigint)
+    const bigIntInfer = inferAndCoerceCSVColumn(["9007199254740993", "9007199254740994"]);
+    if (bigIntInfer.type.name !== "Int64" || bigIntInfer.values[0] !== 9007199254740993n) {
+        throw new Error("Int64 exceeding MAX_SAFE_INTEGER inference failed");
+    }
+
+    // 12. Negative zero integer and float (-0, -0.0 parsed cleanly as Int64 0n)
+    const negZeroInfer = inferAndCoerceCSVColumn(["-0", "-0.0"]);
+    if (negZeroInfer.type.name !== "Int64" || negZeroInfer.values[0] !== 0n || negZeroInfer.values[1] !== 0n) {
+        throw new Error("Negative zero inference failed: " + JSON.stringify(negZeroInfer));
+    }
+
+    // 13. Boolean edge cases with casing ("TRUE", "False", "0", "1")
+    const casingBool = inferAndCoerceCSVColumn(["TRUE", "False", "1", "0"]);
+    if (casingBool.type.name !== "Boolean" || casingBool.values[0] !== true || casingBool.values[1] !== false) {
+        throw new Error("Boolean casing inference failed");
+    }
+
+    // 14. Non-boolean strings that start with true/false should fallback to Utf8
+    const pseudoBool = inferAndCoerceCSVColumn(["true", "truthy", "false"]);
+    if (pseudoBool.type.name !== "Utf8" || pseudoBool.values[1] !== "truthy") {
+        throw new Error("Pseudo-boolean fallback failed");
+    }
+
+    // 15. Datetime with ISO fractional seconds, timezone offsets, and Z
+    const isoDates = inferAndCoerceCSVColumn(["2026-09-12T11:45:00.123Z", "2026-01-01T00:00:00+02:00"]);
+    if (isoDates.type.name !== "Datetime" || !(isoDates.values[0] instanceof Date)) {
+        throw new Error("ISO Datetime with timezone inference failed");
+    }
+
+    // 16. Date-like invalid syntax falling back to Utf8
+    const invalidDateStr = inferAndCoerceCSVColumn(["2026-01-01", "not-a-date", "2026-02-02"]);
+    if (invalidDateStr.type.name !== "Utf8" || invalidDateStr.values[1] !== "not-a-date") {
+        throw new Error("Invalid date fallback to Utf8 failed");
+    }
+
+    // 17. Extreme floats (Infinity, -Infinity, NaN if allowed or fallback)
+    const infInfer = inferAndCoerceCSVColumn(["1.23", "Infinity", "-Infinity"]);
+    if (infInfer.type.name !== "Float64" || infInfer.values[1] !== Infinity || infInfer.values[2] !== -Infinity) {
+        throw new Error("Infinity Float64 inference failed");
+    }
+
+    // 18. Values with leading plus signs ("+123", "+45.6")
+    const plusSigned = inferAndCoerceCSVColumn(["+123", "+45.6"]);
+    if (plusSigned.type.name !== "Float64" || plusSigned.values[0] !== 123 || plusSigned.values[1] !== 45.6) {
+        throw new Error("Plus signed numeric inference failed");
+    }
+
+    // 19. All values are null except one valid value
+    const singleDataPoint = inferAndCoerceCSVColumn(["NA", "null", "42", ""]);
+    if (singleDataPoint.type.name !== "Int64" || singleDataPoint.values[2] !== 42n || singleDataPoint.values[0] !== null) {
+        throw new Error("Single valid data point among nulls failed");
+    }
+
+    // 20. Trimming around boolean values
+    const paddedBool = inferAndCoerceCSVColumn(["  true  ", "  false  "]);
+    if (paddedBool.type.name !== "Boolean" || paddedBool.values[0] !== true || paddedBool.values[1] !== false) {
+        throw new Error("Whitespace padded boolean inference failed");
+    }
+
     console.log("✓ inferAndCoerceCSVColumn tests passed!");
 } catch (err: any) {
     console.error(`❌ inferAndCoerceCSVColumn test failed: ${err.message}`);

@@ -1,4 +1,5 @@
 /** @internalfile */
+import { DANGEROUS_OBJ_PROPERTIES } from "../constants";
 const _TAG_DATE = "[object Date]";
 const _TAG_REGEXP = "[object RegExp]";
 const _TAG_SET = "[object Set]";
@@ -63,6 +64,10 @@ const _objectCtorString = Function.prototype.toString.call(Object);
 
 export function isObj(v: unknown): v is Record<PropertyKey, unknown> {
     return v !== null && typeof v === "object" && !Array.isArray(v);
+}
+
+export function isSafeObjPropertyKey(key: unknown): key is string {
+    return typeof key === "string" && !DANGEROUS_OBJ_PROPERTIES.includes(key as any);
 }
 
 export function isPlainObj(v: unknown): v is Record<PropertyKey, unknown> {

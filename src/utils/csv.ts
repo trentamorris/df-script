@@ -84,55 +84,53 @@ export interface WriteCSVOptions extends FormatCSVValueOptions {
     includeBom?: boolean;
 }
 
-export function formatCsvValue(options: FormatCSVValueOptions = {}) {
-    const nullValue = options.nullValue !== undefined ? options.nullValue : "";
-    const formatNum = formatNumber(options.numericFormatOptions);
-    const replacerOptions = options.replacerOptions || {};
+function _formatCsvValue(options: FormatCSVValueOptions = {}) {
+    const {
+        nullValue = "",
+        numericFormatOptions,
+        datetimeFormat,
+        dateFormat,
+        timeFormat,
+        replacerOptions
+    } = options;
+    const formatNum = formatNumber(numericFormatOptions);
+    const format = datetimeFormat ?? dateFormat ?? timeFormat;
+    const formatDate = (v: Date): string => isValidDateObj(v) ? (format ? strftime(v, { format }) : v.toISOString()) : nullValue;
 
-    const format = options.datetimeFormat ?? options.dateFormat ?? options.timeFormat;
-    const formatDate = format
-        ? (v: Date): string => (isValidDateObj(v) ? strftime(v, { format }) : nullValue)
-        : (v: Date): string => (isValidDateObj(v) ? v.toISOString() : nullValue);
-
-    const mergedReplacerOptions: SafeJsonReplacerOptions = {
+    const replacer = createSafeJsonReplacer({
         formatDate,
         onBigInt: formatNum,
         ...replacerOptions
-    };
+    });
 
-    const replacer = createSafeJsonReplacer(mergedReplacerOptions);
+    const onBigInt = replacerOptions?.onBigInt;
 
     return (val: any): { str: string; isNumeric: boolean } => {
-        if (val === null || val === undefined || typeof val === "symbol" || typeof val === "function" || (val instanceof Date && !isValidDateObj(val))) {
+        if (val == null || typeof val === "symbol" || typeof val === "function" || (val instanceof Date && !isValidDateObj(val))) {
             return { str: nullValue, isNumeric: false };
         }
 
-        const raw = replacer.call(null, "", val);
-        const res = unboxPrimitiveObj(raw);
+        const raw = unboxPrimitiveObj(val);
+        const t = typeof raw;
+        if (t === "number") {
+            return { str: formatNum(raw), isNumeric: true };
+        }
+        if (t === "bigint") {
+            const custom = onBigInt ? onBigInt(raw as bigint) : formatNum(raw);
+            return { str: String(custom), isNumeric: true };
+        }
+        if (t === "boolean" || t === "string") {
+            return { str: String(raw), isNumeric: false };
+        }
 
-        if (res === null || res === undefined || typeof res === "symbol" || typeof res === "function") {
+        const res = unboxPrimitiveObj(replacer.call(null, "", val));
+        if (res == null || typeof res === "symbol" || typeof res === "function") {
             return { str: nullValue, isNumeric: false };
         }
-        if (typeof val === "bigint" || typeof val === "number") {
-            return { str: typeof res === "string" ? res : formatNum(res), isNumeric: true };
-        }
-        if (typeof res === "number" || typeof res === "bigint") {
-            return { str: formatNum(res), isNumeric: true };
-        }
-        if (typeof res === "string") {
-            return { str: res, isNumeric: false };
-        }
-        if (typeof res === "boolean") {
-            return { str: res ? "true" : "false", isNumeric: false };
-        }
-        if (typeof res === "object") {
-            return {
-                str: JSON.stringify(res, replacer),
-                isNumeric: false
-            };
-        }
-
-        return { str: String(res), isNumeric: false };
+        return {
+            str: typeof res === "object" ? JSON.stringify(res, replacer) : String(res),
+            isNumeric: false
+        };
     };
 }
 
@@ -157,7 +155,7 @@ export function stringifyCSV(
     const lines: string[] = [];
     let isFirstRow = true;
 
-    const formatValue = formatCsvValue(formatOptions);
+    const formatValue = _formatCsvValue(formatOptions);
 
     const escapeAndQuote = (val: any, isHeader = false): string => {
         const formatted = isHeader ? { str: String(val), isNumeric: false } : formatValue(val);
@@ -202,15 +200,12 @@ const _parseBool = (v: string): boolean | null => {
     const l = v.toLowerCase();
     return (l === "true" || l === "1") ? true : (l === "false" || l === "0") ? false : null;
 };
-const _parseInt64 = (v: string) => toValidBigInt(v, { truncate: false });
-const _parseFloat64 = (v: string) => toValidNumber(v, { allowNonFiniteNumbers: true });
-const _parseDatetime = (v: string) => toValidDate(v);
 
 const CSV_CANDIDATES = [
     { type: BoolType, parse: _parseBool },
-    { type: Int64, parse: _parseInt64 },
-    { type: Float64, parse: _parseFloat64 },
-    { type: Datetime, parse: _parseDatetime }
+    { type: Int64, parse: (v: string) => toValidBigInt(v, { truncate: false }) },
+    { type: Float64, parse: (v: string) => toValidNumber(v, { allowNonFiniteNumbers: true }) },
+    { type: Datetime, parse: (v: string) => toValidDate(v) }
 ] as const;
 
 export function parseCSV(content: string, options: ReadCSVOptions = {}): string[][] {
@@ -254,9 +249,9 @@ export function parseCSV(content: string, options: ReadCSVOptions = {}): string[
         }
 
         if (char === separator) {
-            hasRowData = true;
             currentRow.push(currentCell);
             currentCell = "";
+            hasRowData = true;
             continue;
         }
 
@@ -304,10 +299,11 @@ export function inferAndCoerceCSVColumn(
 
         hasValidData = true;
         if (activeMask !== 0) {
-            if ((activeMask & 1) && _parseBool(trimmed) === null) activeMask &= ~1;
-            if ((activeMask & 2) && _parseInt64(trimmed) === null) activeMask &= ~2;
-            if ((activeMask & 4) && _parseFloat64(trimmed) === null) activeMask &= ~4;
-            if ((activeMask & 8) && _parseDatetime(trimmed) === null) activeMask &= ~8;
+            for (let bit = 0; bit < 4; bit++) {
+                if ((activeMask & (1 << bit)) && CSV_CANDIDATES[bit].parse(trimmed) === null) {
+                    activeMask &= ~(1 << bit);
+                }
+            }
         }
     }
 

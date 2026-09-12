@@ -41,6 +41,14 @@ export const KEY_PAIR_SEPARATOR = "\x01";
 /** Sentinel value used in join left-index arrays to indicate a right-only (unmatched) row. */
 export const UNMATCHED_ROW_INDEX = -1;
 
+/** JavaScript language-level reserved object property keys to guard against prototype pollution attacks. */
+export const DANGEROUS_OBJ_PROPERTIES = Object.freeze([
+    "__proto__",
+    "proto",
+    "constructor",
+    "prototype"
+] as const);
+
 /** Maximum allowable length for a single JavaScript array (2^32 - 1). */
 export const MAX_JS_ARRAY_LENGTH = 4_294_967_295;
 

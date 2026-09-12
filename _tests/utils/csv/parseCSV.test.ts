@@ -102,6 +102,60 @@ try {
         throw new Error("Only delimiters failed");
     }
 
+    // 18. Line with trailing spaces after closing quote
+    const trailingSpaceAfterQuote = parseCSV('a,b\n"quoted" ,val');
+    if (trailingSpaceAfterQuote.length !== 2 || trailingSpaceAfterQuote[1][0] !== "quoted " || trailingSpaceAfterQuote[1][1] !== "val") {
+        throw new Error("Trailing space after quote failed");
+    }
+
+    // 19. Multi-line CSV ending with CR instead of LF
+    const endingCR = parseCSV("a,b\n1,2\r");
+    if (endingCR.length !== 2 || endingCR[1][0] !== "1" || endingCR[1][1] !== "2") {
+        throw new Error("Ending with carriage return failed");
+    }
+
+    // 20. Quote within unquoted content surrounded by separators
+    const midQuotes = parseCSV("a,b,c\nhello,world \"test\",123");
+    if (midQuotes.length !== 2 || midQuotes[1][1] !== 'world "test"') {
+        throw new Error("Mid unquoted content quote failed");
+    }
+
+    // 21. Triple quotes inside quoted field ("""a""" -> "a")
+    const tripleQuotes = parseCSV('col\n"""a"""');
+    if (tripleQuotes.length !== 2 || tripleQuotes[1][0] !== '"a"') {
+        throw new Error('Triple quotes failed: expected \'"a"\', got ' + JSON.stringify(tripleQuotes[1][0]));
+    }
+
+    // 22. Quoted field containing separator and CR LF
+    const complexField = parseCSV('h1,h2\n"line1\r\npart1,part2\nline3",end');
+    if (complexField.length !== 2 || complexField[1][0] !== "line1\r\npart1,part2\nline3" || complexField[1][1] !== "end") {
+        throw new Error("Complex quoted field containing separators and newlines failed");
+    }
+
+    // 23. Empty lines interspersed in content
+    const emptyLinesInterspersed = parseCSV("a,b\n\n1,2\n\n3,4\n\n");
+    if (emptyLinesInterspersed.length !== 3 || emptyLinesInterspersed[1][0] !== "1" || emptyLinesInterspersed[2][0] !== "3") {
+        throw new Error("Empty lines interspersed failed: length=" + emptyLinesInterspersed.length);
+    }
+
+    // 24. Multi-character cells with Unicode surrogate pairs and emojis
+    const unicodeCSV = parseCSV('emoji,text\n"🚀,🎉","Hello 🌍"');
+    if (unicodeCSV.length !== 2 || unicodeCSV[1][0] !== "🚀,🎉" || unicodeCSV[1][1] !== "Hello 🌍") {
+        throw new Error("Unicode / emoji CSV parsing failed");
+    }
+
+    // 25. Custom multi-char separator or regex-special separator (e.g., pipe '|')
+    const pipeCSV = parseCSV("a|b|c\n1|2|3\n4|5|6", { separator: "|" });
+    if (pipeCSV.length !== 3 || pipeCSV[0][1] !== "b" || pipeCSV[2][2] !== "6") {
+        throw new Error("Pipe separator failed");
+    }
+
+    // 26. Quoted empty strings followed immediately by newline
+    const quotedEmptyAtEOL = parseCSV('a,b\n1,""\n2,""');
+    if (quotedEmptyAtEOL.length !== 3 || quotedEmptyAtEOL[1][1] !== "" || quotedEmptyAtEOL[2][1] !== "") {
+        throw new Error("Quoted empty string at EOL failed");
+    }
+
     console.log("✓ parseCSV tests passed!");
 } catch (err: any) {
     console.error(`❌ parseCSV test failed: ${err.message}`);

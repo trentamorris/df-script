@@ -37,7 +37,7 @@ import {
     replaceManyString,
     extractRegexEngine,
     toCleanRegExp,
-    toValidArray,
+    isArrayOrTypedArray,
     joinArray,
     JoinArrayOptions,
     safeJsonParse,
@@ -57,20 +57,18 @@ export class StringExprNamespace {
         return this._expr._deriveUnary((v: any) => fn(String(v)));
     }
 
-    _patternGuard(pattern: any, fn: () => any) {
+    _derivePattern(pattern: any, fn: (v: string) => any) {
         if (pattern == null) {
             return this._expr._derive((vArray: any[]) => new Array(vArray.length).fill(null));
         }
-        return fn();
+        return this._deriveString(fn);
     }
 
     _matchPattern(str: string, pattern: string | RegExp): boolean {
         if (pattern == null) return false;
-        if (isRegExp(pattern)) {
-            pattern.lastIndex = 0;
-            return pattern.test(str);
-        }
-        return str.includes(pattern);
+        if (!isRegExp(pattern)) return str.includes(pattern);
+        pattern.lastIndex = 0;
+        return pattern.test(str);
     }
 
     /**
@@ -109,9 +107,7 @@ export class StringExprNamespace {
      * └──────────────────┴────────────┘
      */
     contains(pattern: string | RegExp) {
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => this._matchPattern(str, pattern))
-        );
+        return this._derivePattern(pattern, (str) => this._matchPattern(str, pattern));
     }
 
     /**
@@ -130,15 +126,11 @@ export class StringExprNamespace {
      * └──────────────────┴───────────┘
      */
     containsAny(patterns: (string | RegExp)[]) {
-        return this._patternGuard(patterns, () => {
-            const list = toValidArray(patterns);
-            const len = list.length;
-            return this._deriveString((str) => {
-                for (let i = 0; i < len; i++) {
-                    if (this._matchPattern(str, list[i])) return true;
-                }
-                return false;
-            });
+        return this._derivePattern(patterns, (str) => {
+            for (let i = 0; i < patterns.length; i++) {
+                if (this._matchPattern(str, patterns[i])) return true;
+            }
+            return false;
         });
     }
 
@@ -160,17 +152,15 @@ export class StringExprNamespace {
      */
     countMatches(pattern: string | RegExp | any, options: { literal?: boolean } | boolean = {}) {
         const literal = typeof options === "boolean" ? options : (options?.literal ?? false);
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => {
-                const patStr = literal ? escapeRegExp(pattern) : pattern;
+        return this._derivePattern(pattern, (str) => {
+            const patStr = literal ? escapeRegExp(pattern) : pattern;
 
-                const cleanObj = toCleanRegExp(str, patStr, { global: true });
-                if (!cleanObj) return 0;
+            const cleanObj = toCleanRegExp(str, patStr, { global: true });
+            if (!cleanObj) return 0;
 
-                const matches = cleanObj.input.match(cleanObj.reg);
-                return matches ? matches.length : 0;
-            })
-        );
+            const matches = cleanObj.input.match(cleanObj.reg);
+            return matches ? matches.length : 0;
+        });
     }
 
     /**
@@ -331,9 +321,7 @@ export class StringExprNamespace {
      * └──────────────────┴─────────┘
      */
     extract(pattern: RegExp | string, options?: ExtractRegexEngineOptions) {
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => extractRegex(str, pattern, options))
-        );
+        return this._derivePattern(pattern, (str) => extractRegex(str, pattern, options));
     }
 
     /**
@@ -354,9 +342,7 @@ export class StringExprNamespace {
      * └──────────┴─────────────────┘
      */
     extractAll(pattern: string | RegExp, options?: ExtractRegexEngineOptions) {
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => extractRegexAll(str, pattern, options) ?? [])
-        );
+        return this._derivePattern(pattern, (str) => extractRegexAll(str, pattern, options) ?? []);
     }
 
     /**
@@ -375,9 +361,7 @@ export class StringExprNamespace {
      * └──────────────────┴────────────────────────────────────┘
      */
     extractGroups(pattern: string | RegExp, options: ExtractRegexEngineOptions = {}) {
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => extractRegexEngine(str, pattern, options)?.[0] ?? null)
-        );
+        return this._derivePattern(pattern, (str) => extractRegexEngine(str, pattern, options)?.[0] ?? null);
     }
 
     /**
@@ -398,9 +382,7 @@ export class StringExprNamespace {
      * └──────────┴─────────────┘
      */
     extractMany(patterns: (string | RegExp)[], options: ExtractManyOptions = {}) {
-        return this._patternGuard(patterns, () =>
-            this._deriveString((str) => extractRegexMany(str, patterns, options))
-        );
+        return this._derivePattern(patterns, (str) => extractRegexMany(str, patterns, options));
     }
 
     /**
@@ -422,9 +404,7 @@ export class StringExprNamespace {
      * └──────────┴──────┘
      */
     find(value: string | RegExp, options: FindOptions = {}) {
-        return this._patternGuard(value, () =>
-            this._deriveString((str) => findRegex(str, value, options))
-        );
+        return this._derivePattern(value, (str) => findRegex(str, value, options));
     }
 
     /**
@@ -445,9 +425,7 @@ export class StringExprNamespace {
      * └──────────┴───────────┘
      */
     findMany(patterns: (string | RegExp)[], options: FindManyOptions = {}) {
-        return this._patternGuard(patterns, () =>
-            this._deriveString((str) => findManyRegex(str, patterns, options))
-        );
+        return this._derivePattern(patterns, (str) => findManyRegex(str, patterns, options));
     }
 
     /**
@@ -488,11 +466,9 @@ export class StringExprNamespace {
      * └────────────┴────────┘
      */
     join(delimiter: string = "", options: JoinArrayOptions = {}) {
-        return this._expr._deriveUnary((v: any) => {
-            const arr = toValidArray(v);
-            if (arr == null) return null;
-            return joinArray(arr, delimiter, options);
-        });
+        return this._expr._deriveUnary((v: any) =>
+            isArrayOrTypedArray(v) ? joinArray(v, delimiter, options) : null
+        );
     }
 
     /**
@@ -716,9 +692,7 @@ export class StringExprNamespace {
         replacement: string | ((match: string, ...args: any[]) => string),
         options?: ReplaceOptions
     ) {
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => replaceString(str, pattern, replacement, { n: 1, ...options }) ?? str)
-        );
+        return this._derivePattern(pattern, (str) => replaceString(str, pattern, replacement, { n: 1, ...options }) ?? str);
     }
 
     /**
@@ -744,9 +718,7 @@ export class StringExprNamespace {
         replacement: string | ((match: string, ...args: any[]) => string),
         options?: Omit<ReplaceOptions, "n">
     ) {
-        return this._patternGuard(pattern, () =>
-            this._deriveString((str) => replaceString(str, pattern, replacement, { ...options, n: -1 }) ?? str)
-        );
+        return this._derivePattern(pattern, (str) => replaceString(str, pattern, replacement, { ...options, n: -1 }) ?? str);
     }
 
     /**
@@ -773,9 +745,7 @@ export class StringExprNamespace {
         replacements?: (string | ((match: string, ...args: any[]) => string))[],
         options?: ReplaceManyOptions
     ) {
-        return this._patternGuard(patterns, () =>
-            this._deriveString((str) => replaceManyString(str, patterns, replacements, options) ?? str)
-        );
+        return this._derivePattern(patterns, (str) => replaceManyString(str, patterns, replacements, options) ?? str);
     }
 
     /**
@@ -1354,7 +1324,7 @@ export class StringExprNamespace {
      * └──────────┴──────────┘
      */
     zfill(width: number) {
-        return this._deriveString((str) => str.padStart(width, "0"));
+        return this.lpad(width, "0");
     }
 }
 

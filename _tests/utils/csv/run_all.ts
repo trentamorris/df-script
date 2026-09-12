@@ -2,7 +2,6 @@ console.log("=========================================");
 console.log("STARTING CSV UTILS TESTS...");
 console.log("=========================================");
 
-import "./formatCsvValue.test";
 import "./stringifyCSV.test";
 import "./parseCSV.test";
 import "./inferAndCoerceCSVColumn.test";

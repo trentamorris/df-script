@@ -577,6 +577,334 @@ try {
     assertEqual(guardedNull, null, "guard receives null value correctly on literal null parse with allowPrimitives=true");
     assert(guardReceivedNull, "guard was executed with null argument");
 
+    // 41. Comprehensive Edge Cases for NDJSON & Option Combinations
+    // a. maxLines = 0 with skipLines > 0
+    assertEqual(
+        safeJsonParse('{"a":1}\n{"a":2}\n{"a":3}', { format: "ndjson", ndjson: { skipLines: 1, maxLines: 0 } }),
+        [],
+        "NDJSON with maxLines=0 and skipLines=1 returns empty array"
+    );
+
+    // b. maxLines larger than available lines
+    assertEqual(
+        safeJsonParse('{"a":1}\n{"a":2}', { format: "ndjson", ndjson: { maxLines: 100 } }),
+        [{ a: 1 }, { a: 2 }],
+        "NDJSON with maxLines exceeding available line count returns all parsed lines"
+    );
+
+    // c. skipLines exactly equal to total line count
+    assertEqual(
+        safeJsonParse('{"a":1}\n{"a":2}', { format: "ndjson", ndjson: { skipLines: 2 } }),
+        [],
+        "NDJSON with skipLines equal to total lines returns empty array"
+    );
+
+    // d. skipLines larger than total line count with skipInvalidLines
+    assertEqual(
+        safeJsonParse('{"a":1}\n{"a":2}', { format: "ndjson", ndjson: { skipLines: 10, skipInvalidLines: true } }),
+        [],
+        "NDJSON with skipLines > total lines and skipInvalidLines=true returns empty array"
+    );
+
+    // e. Single line NDJSON with no trailing newline
+    assertEqual(
+        safeJsonParse('{"single": true}', { format: "ndjson" }),
+        [{ single: true }],
+        "single-line NDJSON without trailing newline parses correctly"
+    );
+
+    // f. Single line NDJSON with maxLines = 1
+    assertEqual(
+        safeJsonParse('{"first": 1}\n{"second": 2}', { format: "ndjson", ndjson: { maxLines: 1 } }),
+        [{ first: 1 }],
+        "NDJSON with maxLines=1 stops after first line without parsing subsequent lines"
+    );
+
+    // g. Multi-line NDJSON where first line is invalid and skipInvalidLines = false throws
+    assertEqual(
+        safeJsonParse('INVALID_JSON\n{"a": 1}', { format: "ndjson", ndjson: { skipInvalidLines: false }, fallback: "FAILED" }),
+        "FAILED",
+        "NDJSON with skipInvalidLines=false returns fallback on first invalid line"
+    );
+
+    // h. Multi-line NDJSON where intermediate line is invalid and skipInvalidLines = false throws
+    assertEqual(
+        safeJsonParse('{"a": 1}\nINVALID_JSON\n{"a": 2}', { format: "ndjson", ndjson: { skipInvalidLines: false }, fallback: "FAILED" }),
+        "FAILED",
+        "NDJSON with skipInvalidLines=false returns fallback on intermediate invalid line"
+    );
+
+    // i. Multi-line NDJSON where last line has no newline and is invalid
+    assertEqual(
+        safeJsonParse('{"a": 1}\n{"a": 2}\nINVALID_TAIL', {
+            format: "ndjson",
+            ndjson: { skipInvalidLines: true }
+        }),
+        [{ a: 1 }, { a: 2 }],
+        "NDJSON with skipInvalidLines=true skips invalid final line with no trailing newline"
+    );
+
+    // j. NDJSON where every line is an empty or whitespace-only line
+    assertEqual(
+        safeJsonParse('\n   \n\t\n  \r\n', { format: "ndjson" }),
+        [],
+        "NDJSON with various empty whitespace lines returns empty array"
+    );
+
+    // k. NDJSON with reviver modifying values and skipLines/maxLines
+    const revivedNdjson = safeJsonParse('{"count": 10}\n{"count": 20}\n{"count": 30}', {
+        format: "ndjson",
+        reviver: (k, v) => (k === "count" ? v * 2 : v),
+        ndjson: { skipLines: 1, maxLines: 1 }
+    });
+    assertEqual(revivedNdjson, [{ count: 40 }], "NDJSON reviver modifies parsed objects with skipLines and maxLines");
+
+    // l. NDJSON allowPrimitives=true with diverse primitives across lines
+    const mixedPrimitivesNdjson = '42\n"string_val"\nfalse\ntrue\nnull\n[1, 2]\n{"x": 99}';
+    assertEqual(
+        safeJsonParse(mixedPrimitivesNdjson, { format: "ndjson", allowPrimitives: true }),
+        [42, "string_val", false, true, null, [1, 2], { x: 99 }],
+        "NDJSON with allowPrimitives=true parses all primitives alongside composites"
+    );
+
+    // m. NDJSON allowPrimitives=false with primitive at the end with no newline
+    assertEqual(
+        safeJsonParse('{"ok": 1}\n123', {
+            format: "ndjson",
+            allowPrimitives: false,
+            ndjson: { skipInvalidLines: true }
+        }),
+        [{ ok: 1 }],
+        "NDJSON with allowPrimitives=false skips terminal primitive when skipInvalidLines=true"
+    );
+
+    // n. NDJSON allowPrimitives=false with primitive at end causing failure when skipInvalidLines=false
+    assertEqual(
+        safeJsonParse('{"ok": 1}\n123', {
+            format: "ndjson",
+            allowPrimitives: false,
+            ndjson: { skipInvalidLines: false },
+            fallback: "PRIMITIVE_REJECTED"
+        }),
+        "PRIMITIVE_REJECTED",
+        "NDJSON with allowPrimitives=false fails on terminal primitive when skipInvalidLines=false"
+    );
+
+    // o. NDJSON empty lines should NOT count towards skipLines count
+    // Line 1: empty, Line 2: empty, Line 3: {"a": 1} (1st non-empty), Line 4: {"a": 2} (2nd non-empty)
+    const emptySpacedNdjson = '\n\n{"a": 1}\n\n{"a": 2}';
+    assertEqual(
+        safeJsonParse(emptySpacedNdjson, { format: "ndjson", ndjson: { skipLines: 1 } }),
+        [{ a: 2 }],
+        "NDJSON non-empty count properly skips only non-empty lines"
+    );
+
+    // p. NDJSON empty lines should NOT count towards maxLines limit
+    assertEqual(
+        safeJsonParse('\n\n{"a": 1}\n\n\n{"a": 2}\n\n', { format: "ndjson", ndjson: { maxLines: 1 } }),
+        [{ a: 1 }],
+        "NDJSON maxLines terminates only after reaching maxLines of non-empty content"
+    );
+
+    // q. NDJSON all non-empty lines are invalid and skipped -> IOStreamError triggered
+    let ndjsonIoErrorCaptured: any = null;
+    assertEqual(
+        safeJsonParse('INVALID_1\nINVALID_2\nINVALID_3', {
+            format: "ndjson",
+            ndjson: { skipInvalidLines: true },
+            fallback: "IO_FALLBACK",
+            onError: (err) => { ndjsonIoErrorCaptured = err; }
+        }),
+        "IO_FALLBACK",
+        "NDJSON where all lines were invalid triggers fallback and IOStreamError"
+    );
+    assert(ndjsonIoErrorCaptured instanceof IOStreamError, "onError received IOStreamError when 0 valid lines were processed");
+
+    // r. NDJSON all non-empty lines are skipped by skipLines -> should NOT throw IOStreamError, returns []
+    let ndjsonSkipErrorCaptured: any = null;
+    assertEqual(
+        safeJsonParse('{"a": 1}\n{"a": 2}', {
+            format: "ndjson",
+            ndjson: { skipLines: 5 },
+            fallback: "SHOULD_NOT_USE_FB",
+            onError: (err) => { ndjsonSkipErrorCaptured = err; }
+        }),
+        [],
+        "NDJSON where all lines are skipped by skipLines returns empty array without error"
+    );
+    assert(ndjsonSkipErrorCaptured === null, "no error logged when skipLines > lines");
+
+    // s. Standard JSON: trimBeforeParse with allowPrimitives=true
+    assertEqual(
+        safeJsonParse("   12345   ", { trimBeforeParse: true, allowPrimitives: true }),
+        12345,
+        "standard JSON trims whitespace and parses primitive number"
+    );
+    assertEqual(
+        safeJsonParse('   "hello world"   ', { trimBeforeParse: true, allowPrimitives: true }),
+        "hello world",
+        "standard JSON trims whitespace and parses primitive string"
+    );
+    assertEqual(
+        safeJsonParse("   true   ", { trimBeforeParse: true, allowPrimitives: true }),
+        true,
+        "standard JSON trims whitespace and parses primitive boolean"
+    );
+    assertEqual(
+        safeJsonParse("   null   ", { trimBeforeParse: true, allowPrimitives: true }),
+        null,
+        "standard JSON trims whitespace and parses primitive null"
+    );
+
+    // t. Standard JSON: trimBeforeParse=false with leading/trailing whitespace on primitive with allowPrimitives=true
+    assertEqual(
+        safeJsonParse("   999   ", { trimBeforeParse: false, allowPrimitives: true }),
+        999,
+        "standard JSON parses primitive number even when trimBeforeParse=false"
+    );
+
+    // u. Standard JSON: composite validation when trimBeforeParse is false vs true
+    assertEqual(
+        safeJsonParse("  [1, 2, 3]  ", { trimBeforeParse: false }),
+        [1, 2, 3],
+        "composite array with outer spaces parses when trimBeforeParse=false"
+    );
+    assertEqual(
+        safeJsonParse("  { \"key\": 10 }  ", { trimBeforeParse: false }),
+        { key: 10 },
+        "composite object with outer spaces parses when trimBeforeParse=false"
+    );
+
+    // v. Guard function on NDJSON results with empty array
+    let emptyGuardCalled = false;
+    const guardedEmpty = safeJsonParse("", {
+        format: "ndjson",
+        guard: (arr: any) => {
+            emptyGuardCalled = true;
+            return Array.isArray(arr) && arr.length === 0;
+        }
+    });
+    assertEqual(guardedEmpty, [], "guard validates empty NDJSON result");
+    assert(emptyGuardCalled, "guard was called for empty NDJSON array");
+
+    // w. Guard function rejecting NDJSON result invokes onError and returns fallback
+    let ndjsonGuardError: any = null;
+    const rejectedNdjson = safeJsonParse('{"a": 1}\n{"a": 2}', {
+        format: "ndjson",
+        guard: (arr: any) => arr.length > 5,
+        fallback: "GUARD_FAILED",
+        onError: (err) => { ndjsonGuardError = err; }
+    });
+    assertEqual(rejectedNdjson, "GUARD_FAILED", "NDJSON failing guard returns fallback");
+    assert(ndjsonGuardError instanceof InvalidArgumentError, "onError captured InvalidArgumentError for failed NDJSON guard");
+
+    // x. Non-string inputs with different types when fallback is specified vs unspecified
+    assertEqual(safeJsonParse(true as any, { fallback: "BOOL_FB" }), "BOOL_FB", "non-string boolean returns fallback");
+    assertEqual(safeJsonParse(false as any), false, "non-string boolean false returns false directly");
+    assertEqual(safeJsonParse(0 as any, { fallback: 999 }), 999, "non-string 0 returns fallback");
+    assertEqual(safeJsonParse(0 as any), 0, "non-string 0 returns 0 directly");
+
+    // y. isJsonString validation across the options matrix
+    assert(isJsonString('{"valid": 1}'), "isJsonString returns true for valid JSON object");
+    assert(isJsonString('[1, 2, 3]'), "isJsonString returns true for valid JSON array");
+    assert(!isJsonString('123'), "isJsonString returns false for primitive number when allowPrimitives=false");
+    assert(isJsonString('123', { allowPrimitives: true }), "isJsonString returns true for primitive number when allowPrimitives=true");
+    assert(isJsonString('{"a": 1}\n{"b": 2}', { format: "ndjson" }), "isJsonString returns true for NDJSON");
+    assert(!isJsonString('{"a": 1}\nINVALID', { format: "ndjson" }), "isJsonString returns false for NDJSON with invalid line");
+    assert(isJsonString('{"a": 1}\nINVALID', { format: "ndjson", ndjson: { skipInvalidLines: true } }), "isJsonString returns true for NDJSON with skipped invalid line");
+    assert(!isJsonString(12345 as any), "isJsonString returns false for non-string input");
+    assert(!isJsonString(null as any), "isJsonString returns false for null");
+    // z. 10/10 Comprehensive Edge Case Tests for NDJSON & safeJsonParse Flattening
+    // 1. Mixed CRLF (\r\n), LF (\n), and CR (\r) with trailing and leading newlines
+    const edgeMixedNewlines = "\r\n\r\n{\"id\":1}\r\n{\"id\":2}\r{\"id\":3}\n{\"id\":4}\r\n\r\n";
+    assertEqual(
+        safeJsonParse(edgeMixedNewlines, { format: "ndjson" }),
+        [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }],
+        "Edge 1: handles arbitrary mixture of \\r\\n, \\r, and \\n with leading/trailing newlines"
+    );
+
+    // 2. maxLines = 0 stops immediately without processing lines
+    assertEqual(
+        safeJsonParse('{"a":1}\n{"a":2}', { format: "ndjson", ndjson: { maxLines: 0 } }),
+        [],
+        "Edge 2: maxLines = 0 returns empty array without throwing IOStreamError"
+    );
+
+    // 3. skipLines exceeding non-empty lines with no valid parsed items returns empty array
+    assertEqual(
+        safeJsonParse('{"a":1}\n\n{"a":2}\n', { format: "ndjson", ndjson: { skipLines: 5 } }),
+        [],
+        "Edge 3: skipLines greater than available non-empty lines yields empty array"
+    );
+
+    // 4. skipInvalidLines with trailing unparseable junk and whitespace
+    const trailingJunk = '{"a":1}\n{"b":2}\n   corrupt line   \n';
+    assertEqual(
+        safeJsonParse(trailingJunk, { format: "ndjson", ndjson: { skipInvalidLines: true } }),
+        [{ a: 1 }, { b: 2 }],
+        "Edge 4: skipInvalidLines properly isolates and drops corrupt line"
+    );
+
+    // 5. maxLines reached before encountering an invalid line does not throw even if skipInvalidLines is false
+    const invalidAfterLimit = '{"a":1}\n{"a":2}\nINVALID_JSON_HERE';
+    assertEqual(
+        safeJsonParse(invalidAfterLimit, { format: "ndjson", ndjson: { maxLines: 2, skipInvalidLines: false } }),
+        [{ a: 1 }, { a: 2 }],
+        "Edge 5: maxLines terminates parse loop before processing subsequent invalid lines"
+    );
+
+    // 6. allowPrimitives with mixed arrays, objects, numbers, booleans, strings, and null
+    const edgeMixedPrimitives = '{"a":1}\n[1, 2]\n12345\n"quoted string"\ntrue\nnull';
+    assertEqual(
+        safeJsonParse(edgeMixedPrimitives, { format: "ndjson", allowPrimitives: true }),
+        [{ a: 1 }, [1, 2], 12345, "quoted string", true, null],
+        "Edge 6: allowPrimitives handles all primitive and compound JSON data types"
+    );
+
+    // 7. reviver transforming values line-by-line across NDJSON entries
+    const reviverNdjson = '{"val":1}\n{"val":2}\n{"val":3}';
+    const revivedResult = safeJsonParse(reviverNdjson, {
+        format: "ndjson",
+        reviver: (k, v) => (k === "val" ? (v as number) * 10 : v)
+    });
+    assertEqual(
+        revivedResult,
+        [{ val: 10 }, { val: 20 }, { val: 30 }],
+        "Edge 7: reviver function correctly maps keys/values in NDJSON mode"
+    );
+
+    // 8. All lines invalid with skipInvalidLines=true raises IOStreamError and returns fallback
+    let allInvalidCaughtError: any = null;
+    const allInvalidFallback = safeJsonParse("bad1\nbad2\nbad3", {
+        format: "ndjson",
+        ndjson: { skipInvalidLines: true },
+        fallback: "ALL_INVALID_FALLBACK",
+        onError: (err) => { allInvalidCaughtError = err; }
+    });
+    assertEqual(allInvalidFallback, "ALL_INVALID_FALLBACK", "Edge 8: all invalid lines triggers fallback");
+    assert(allInvalidCaughtError instanceof IOStreamError, "Edge 8: IOStreamError dispatched when 0 valid lines parsed");
+
+    // 9. whitespace-only lines intertwined between valid lines do not increment nonEmptyCount
+    const spacedLines = '   \n\t  \n{"step":1}\n    \n{"step":2}\n\r\n';
+    assertEqual(
+        safeJsonParse(spacedLines, { format: "ndjson", ndjson: { skipLines: 1 } }),
+        [{ step: 2 }],
+        "Edge 9: whitespace-only lines are ignored and do not count towards skipLines"
+    );
+
+    // 10. Combination of trimBeforeParse, skipLines, maxLines, and reviver
+    const comboNdjson = '   \r\n  {"x": 10}  \r\n  {"x": 20}  \r\n  {"x": 30}  \r\n  {"x": 40}  \r\n  ';
+    const comboResult = safeJsonParse(comboNdjson, {
+        format: "ndjson",
+        trimBeforeParse: true,
+        ndjson: { skipLines: 1, maxLines: 2 },
+        reviver: (k, v) => (k === "x" ? (v as number) + 1 : v)
+    });
+    assertEqual(
+        comboResult,
+        [{ x: 21 }, { x: 31 }],
+        "Edge 10: combined trimBeforeParse + skipLines + maxLines + reviver executes accurately"
+    );
 
     console.log(`SUCCESS: All safeJsonParse tests passed! (${testsPassed} assertions)`);
 } catch (err) {

@@ -1,5 +1,5 @@
 /** @internalfile */
-import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, unboxPrimitiveObj } from "./object";
+import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, isSafeObjPropertyKey, unboxPrimitiveObj } from "./object";
 import { isTypedArray, toValidArray } from "./array";
 import { isValidNumber, isValidInt } from "./number";
 import {
@@ -284,9 +284,6 @@ const _WORDS_REGEX = new RegExp(
     "gu"
 );
 
-// JavaScript language-level reserved keywords to block prototype pollution attacks
-const _DANGEROUS_PROPERTIES = new Set(["__proto__", "proto", "constructor", "prototype"]);
-
 /**
  * Fully robust, Unicode-aware string tokenization engine.
  * Guarded against prototype pollution, type errors, and NFD text formatting.
@@ -305,7 +302,7 @@ export function toWords(str: any): string[] {
     const safeTokens: string[] = [];
     for (let i = 0; i < matches.length; i++) {
         const token = matches[i];
-        if (!_DANGEROUS_PROPERTIES.has(token)) {
+        if (isSafeObjPropertyKey(token)) {
             safeTokens.push(token);
         }
     }

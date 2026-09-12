@@ -1,13 +1,14 @@
 /** @internalfile */
 import type { JSONFormat } from "../types";
 import { isTypedArray, stepSliceArray } from "./array";
-import { isObj, isSet, isMap, isRegExp, isError, isURLSearchParams, isValidDateObj, unboxPrimitiveObj } from "./object";
+import { isObj, isSafeObjPropertyKey, isSet, isMap, isRegExp, isError, isURLSearchParams, isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidBigInt, toValidInt, SAFE_BIGINT_RANGE } from "./number";
 import { isBlankString, stripChars } from "./string";
 import { InvalidArgumentError, IOStreamError } from "../exceptions";
-import { CONTROL_UNESCAPE_MAP, NEWLINE_PATTERN } from "../constants";
+import { CONTROL_UNESCAPE_MAP, NEWLINE_REGEX } from "../constants";
 
-const INVALID_SYMBOL = Symbol("invalid");
+const _INVALID_SYMBOL = Symbol("invalid");
+const _WILDCARD = "*";
 
 function _isWrappedJsonComposite(str: string, options: { trim?: boolean } = {}): boolean {
     const s = options?.trim ? (stripChars(str) ?? "") : str;
@@ -103,9 +104,9 @@ export function isJsonString<T = unknown>(
 
     return safeJsonParse(input, {
         ...options,
-        fallback: INVALID_SYMBOL,
+        fallback: _INVALID_SYMBOL,
         onError: undefined
-    }) !== INVALID_SYMBOL;
+    }) !== _INVALID_SYMBOL;
 }
 
 /**
@@ -117,12 +118,12 @@ export function isJsonString<T = unknown>(
  * @param options - Configuration options for parsing and validation.
  * @returns The parsed value, the fallback, or the original input.
  */
-export function safeJsonParse<T = unknown, I = unknown, F = T, Opts extends SafeJsonParseOptions<T, F> = SafeJsonParseOptions<T, F>>(
-    input: I,
-    options: Opts = {} as Opts
-): Opts extends { format: "ndjson" } ? (T[] | I | F) : (T | I | F) {
-    const fallbackVal = "fallback" in options ? (options.fallback as F) : (input as unknown as F);
-    if (typeof input !== "string") return fallbackVal as any;
+export function safeJsonParse<T = unknown, F = unknown>(
+    input: unknown,
+    options: SafeJsonParseOptions<T, F> = {}
+): T | F {
+    const fallbackVal = "fallback" in options ? options.fallback : input;
+    if (typeof input !== "string") return fallbackVal as F;
 
     const {
         format = "json",
@@ -142,43 +143,27 @@ export function safeJsonParse<T = unknown, I = unknown, F = T, Opts extends Safe
         if (format === "ndjson") {
             const { skipInvalidLines = false, maxLines, skipLines = 0 } = ndjson;
             const parsedData: any[] = [];
-            const newlineRegex = new RegExp(NEWLINE_PATTERN, "g");
-            let lastIndex = 0;
-            let nonEmptyCount = 0;
+            const rawLines = s.split(NEWLINE_REGEX);
+            const limit = maxLines ?? Infinity;
+            let skipped = 0;
+            let nonBlankCount = 0;
 
-            while (maxLines === undefined || parsedData.length < maxLines) {
-                const match = newlineRegex.exec(s);
-                const line = (match ? s.substring(lastIndex, match.index) : s.substring(lastIndex)).trim();
-                if (match) lastIndex = newlineRegex.lastIndex;
-
-                if (line === "") {
-                    if (!match) break;
-                    continue;
-                }
-
-                nonEmptyCount++;
-                if (nonEmptyCount <= skipLines) {
-                    if (!match) break;
-                    continue;
-                }
-
-                if (!allowPrimitives && !_isWrappedJsonComposite(line)) {
-                    if (!skipInvalidLines) throw new InvalidArgumentError("NDJSON line is not wrapped and primitives are disallowed");
-                    if (!match) break;
-                    continue;
-                }
+            for (let i = 0; i < rawLines.length && parsedData.length < limit; i++) {
+                const line = rawLines[i].trim();
+                if (line.length === 0 || skipped++ < skipLines) continue;
+                nonBlankCount++;
 
                 try {
+                    if (!allowPrimitives && !_isWrappedJsonComposite(line)) {
+                        throw new InvalidArgumentError("NDJSON line is not wrapped and primitives are disallowed");
+                    }
                     parsedData.push(JSON.parse(line, reviver));
                 } catch (err) {
                     if (!skipInvalidLines) throw err;
                 }
-
-                if (!match) break;
             }
 
-            const hadProcessableLines = nonEmptyCount > skipLines;
-            if (parsedData.length === 0 && hadProcessableLines && maxLines !== 0) {
+            if (parsedData.length === 0 && nonBlankCount > 0) {
                 throw new IOStreamError("No valid NDJSON lines processed");
             }
 
@@ -311,13 +296,13 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
             return unboxed.toString();
         }
 
-        if (isTypedArray(unboxed))       return options.voidTypedArrayReplacement ? val : (options.onTypedArray?.(unboxed) ?? Array.from(unboxed as any));
-        if (isSet(unboxed))              return options.voidSetReplacement        ? val : (options.onSet?.(unboxed) ?? Array.from(unboxed));
-        if (isMap(unboxed))              return options.voidMapReplacement        ? val : (options.onMap?.(unboxed) ?? Array.from(unboxed.entries()));
-        if (isRegExp(unboxed))           return options.voidRegExpReplacement     ? val : (options.onRegExp?.(unboxed) ?? unboxed.toString());
-        if (isValidDateObj(unboxed))     return options.voidDateReplacement       ? val : (options.onDate?.(unboxed) ?? options.formatDate?.(unboxed) ?? unboxed.toISOString());
-        if (isError(unboxed))            return options.onError?.(unboxed)        ?? { name: unboxed.name, message: unboxed.message, stack: unboxed.stack };
-        if (isURLSearchParams(unboxed))  return options.onURLSearchParams?.(unboxed) ?? unboxed.toString();
+        if (isTypedArray(unboxed)) return options.voidTypedArrayReplacement ? val : (options.onTypedArray?.(unboxed) ?? Array.from(unboxed as any));
+        if (isSet(unboxed)) return options.voidSetReplacement ? val : (options.onSet?.(unboxed) ?? Array.from(unboxed));
+        if (isMap(unboxed)) return options.voidMapReplacement ? val : (options.onMap?.(unboxed) ?? Array.from(unboxed.entries()));
+        if (isRegExp(unboxed)) return options.voidRegExpReplacement ? val : (options.onRegExp?.(unboxed) ?? unboxed.toString());
+        if (isValidDateObj(unboxed)) return options.voidDateReplacement ? val : (options.onDate?.(unboxed) ?? options.formatDate?.(unboxed) ?? unboxed.toISOString());
+        if (isError(unboxed)) return options.onError?.(unboxed) ?? { name: unboxed.name, message: unboxed.message, stack: unboxed.stack };
+        if (isURLSearchParams(unboxed)) return options.onURLSearchParams?.(unboxed) ?? unboxed.toString();
 
         return val;
     };
@@ -326,7 +311,7 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
 /**
  * Represents the type of operation a JSONPath token performs.
  */
-export type JsonTokenType =
+type JsonTokenType =
     /**
      * Selects an object property by name (e.g., .foo or ['foo']) 
      */
@@ -351,7 +336,7 @@ export type JsonTokenType =
 /**
  * Parsed AST token representing a single evaluation step in a JSONPath expression.
  */
-export interface JsonToken {
+interface JsonToken {
     /** The evaluation operation type. */
     type: JsonTokenType;
 
@@ -371,25 +356,22 @@ export interface JsonToken {
     step?: number;
 }
 
-const WILDCARD = "*";
+
 
 const _unescapeQuotes = (str: string): string =>
     str.replace(/\\(.)/g, (_, c) => CONTROL_UNESCAPE_MAP[c] ?? c);
-
-const _isSafeKey = (key?: string): key is string =>
-    key !== undefined && key !== "__proto__" && key !== "constructor" && key !== "prototype";
 
 /**
  * Tokenizes a JSONPath query string (e.g. "$.user.items[0]") into an array 
  * of executable query tokens without polluting global regex state.
  * Returns null if path contains unparsed/invalid syntax fragments.
  */
-export function tokenizeJsonPath(path: string): JsonToken[] | null {
+function _tokenizeJsonPath(path: string): JsonToken[] | null {
     const cleanPath = path.trim().replace(/^\$/, "");
     if (!cleanPath) return [];
 
     const tokens: JsonToken[] = [];
-    const tokenRegex = /\.\.\[\s*(?:'((?:\\.|[^'])*)'|"((?:\\.|[^"])*)"|(\*))\s*\]|\.\.([^\.\[]+)|\.([\w$-]+|\*)|\[\s*(?:'((?:\\.|[^'])*)'|"((?:\\.|[^"])*)"|(\*)|(-?\d*(?::-?\d*){0,2}))\s*\]/g;
+    const tokenRegex = /(\.\.|\.)?(?:\[\s*(?:'((?:\\.|[^'])*)'|"((?:\\.|[^"])*)"|(\*)|(-?\d*(?::-?\d*){0,2}))\s*\]|([^\.\[]+))/g;
     let match: RegExpExecArray | null;
     let lastIndex = 0;
 
@@ -397,24 +379,22 @@ export function tokenizeJsonPath(path: string): JsonToken[] | null {
         if (match.index !== lastIndex) return null;
         lastIndex = tokenRegex.lastIndex;
 
-        const [, recSqProp, recDqProp, recStar, recKey, dotProp, sqProp, dqProp, wildcard, numOrSlice] = match;
-        const recProp = recSqProp ?? recDqProp;
-        const prop = sqProp ?? dqProp;
+        const [, dot, sq, dq, star, numOrSlice, key] = match;
+        const isRec = dot === "..";
+        const str = sq ?? dq;
+        const prop = str !== undefined ? _unescapeQuotes(str) : (star ?? key);
 
-        if (recProp !== undefined) {
-            tokens.push({ type: "rec", key: _unescapeQuotes(recProp) });
-        } else if (recStar !== undefined) {
-            tokens.push({ type: "rec", key: WILDCARD });
-        } else if (recKey !== undefined) {
-            tokens.push({ type: "rec", key: recKey });
-        } else if (dotProp !== undefined) {
-            tokens.push(dotProp === WILDCARD ? { type: "wildcard" } : { type: "prop", key: dotProp });
-        } else if (prop !== undefined) {
-            tokens.push({ type: "prop", key: _unescapeQuotes(prop) });
-        } else if (wildcard !== undefined) {
-            tokens.push({ type: "wildcard" });
-        } else if (numOrSlice !== undefined) {
-            if (numOrSlice.includes(":")) {
+        if (prop !== undefined) {
+            tokens.push(prop === _WILDCARD && !isRec ? { type: "wildcard" } : { type: isRec ? "rec" : "prop", key: prop });
+            continue;
+        }
+
+        if (numOrSlice !== undefined) {
+            if (!numOrSlice.includes(":")) {
+                const idx = toValidInt(numOrSlice);
+                if (idx === null) return null;
+                tokens.push({ type: "idx", idx });
+            } else {
                 const [s0, s1, s2] = numOrSlice.split(":");
                 tokens.push({
                     type: "slice",
@@ -422,10 +402,6 @@ export function tokenizeJsonPath(path: string): JsonToken[] | null {
                     end: toValidInt(s1) ?? undefined,
                     step: toValidInt(s2) ?? 1
                 });
-            } else {
-                const idx = toValidInt(numOrSlice);
-                if (idx === null) return null;
-                tokens.push({ type: "idx", idx });
             }
         }
     }
@@ -434,31 +410,32 @@ export function tokenizeJsonPath(path: string): JsonToken[] | null {
 }
 
 function _collectJsonRecursive(val: any, tok: JsonToken, results: any[], visited = new Set<object>()): void {
-    if (val == null || !_isSafeKey(tok.key) || typeof val !== "object" || visited.has(val)) return;
+    if (val == null || !isSafeObjPropertyKey(tok.key) || typeof val !== "object" || visited.has(val)) return;
 
     visited.add(val);
 
     const isArr = Array.isArray(val);
     if (!isArr && !isObj(val)) return;
 
-    if (tok.key === WILDCARD) {
-        evaluateJsonToken(val, { type: "wildcard" }, results);
-    } else if (!isArr && Object.prototype.hasOwnProperty.call(val, tok.key)) {
+    const children = isArr ? val : Object.values(val);
+
+    if (tok.key === _WILDCARD) {
+        for (let i = 0; i < children.length; i++) results.push(children[i]);
+    } else if (!isArr && Object.hasOwn(val, tok.key)) {
         results.push(val[tok.key]);
     }
 
-    const children = isArr ? val : Object.values(val);
     for (let i = 0; i < children.length; i++) {
         _collectJsonRecursive(children[i], tok, results, visited);
     }
 }
 
-export function evaluateJsonToken(item: any, tok: JsonToken, next: any[]): void {
+function _resolveJsonPathStep(item: any, tok: JsonToken, next: any[]): void {
     if (item == null) return;
 
     switch (tok.type) {
         case "prop":
-            if (isObj(item) && _isSafeKey(tok.key) && Object.prototype.hasOwnProperty.call(item, tok.key!)) {
+            if (isObj(item) && isSafeObjPropertyKey(tok.key) && Object.hasOwn(item, tok.key!)) {
                 next.push(item[tok.key!]);
             }
             break;
@@ -471,10 +448,9 @@ export function evaluateJsonToken(item: any, tok: JsonToken, next: any[]): void 
         case "slice": {
             if (!Array.isArray(item) || tok.step === 0) break;
             const step = tok.step ?? 1;
-            const start = tok.start ?? (step > 0 ? 0 : item.length - 1);
             const sliced = stepSliceArray(item, {
                 step,
-                offsetStart: start,
+                offsetStart: tok.start ?? (step > 0 ? 0 : item.length - 1),
                 offsetEnd: tok.end,
                 nullOnOob: true
             });
@@ -507,26 +483,20 @@ export function jsonPathMatch(jsonInput: unknown, path: string): string | null {
         const trimmed = jsonInput.trim();
         if (trimmed === "") return null;
 
-        const parsed = safeJsonParse(trimmed, {
-            allowPrimitives: true,
-            fallback: INVALID_SYMBOL
-        });
-
-        if (parsed === INVALID_SYMBOL) {
+        root = safeJsonParse(trimmed, { allowPrimitives: true, fallback: _INVALID_SYMBOL });
+        if (root === _INVALID_SYMBOL) {
             throw new InvalidArgumentError(`Invalid JSON string encountered in jsonPathMatch: "${jsonInput}"`);
         }
-        root = parsed;
     }
 
-    const tokens = tokenizeJsonPath(path);
+    const tokens = _tokenizeJsonPath(path);
     if (tokens === null) return null;
 
     let curr: any[] = [root];
-    for (let t = 0; t < tokens.length; t++) {
-        if (curr.length === 0) return null;
+    for (let t = 0; t < tokens.length && curr.length > 0; t++) {
         const next: any[] = [];
         for (let c = 0; c < curr.length; c++) {
-            evaluateJsonToken(curr[c], tokens[t], next);
+            _resolveJsonPathStep(curr[c], tokens[t], next);
         }
         curr = next;
     }

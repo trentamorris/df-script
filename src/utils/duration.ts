@@ -197,13 +197,8 @@ export function parseDurationString(str: string, options: ParseDurationStringOpt
         throw new Error(`Cannot convert calendar duration without anchor date: "${str}"`);
     }
 
-    if (interval.isIndex) {
-        const out = interval.indexUnits / toFactor;
-        return Object.is(out, -0) ? 0 : out;
-    }
-
-    const totalMs = interval.ms + (interval.days * MS_PER_DAY);
-    const out = totalMs / toFactor;
+    const total = interval.isIndex ? interval.indexUnits : (interval.ms + (interval.days * MS_PER_DAY));
+    const out = total / toFactor;
     return Object.is(out, -0) ? 0 : out;
 }
 

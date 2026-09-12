@@ -3072,8 +3072,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.concat(...)",
       "signature": "$df.col(<column_name>).str.concat(\n  other: string | IExpr\n)",
-      "lineStart": 92,
-      "lineEnd": 94
+      "lineStart": 90,
+      "lineEnd": 92
     },
     "contains": {
       "desc": "Checks if a string contains the search substring pattern (supports Regex).",
@@ -3091,8 +3091,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.contains(...)",
       "signature": "$df.col(<column_name>).str.contains(\n  pattern: string | RegExp\n)",
-      "lineStart": 111,
-      "lineEnd": 115
+      "lineStart": 109,
+      "lineEnd": 111
     },
     "containsAny": {
       "desc": "Checks if a string contains any of the search patterns.",
@@ -3110,8 +3110,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.containsAny(...)",
       "signature": "$df.col(<column_name>).str.containsAny(\n  patterns: (string | RegExp)[]\n)",
-      "lineStart": 132,
-      "lineEnd": 143
+      "lineStart": 128,
+      "lineEnd": 135
     },
     "countMatches": {
       "desc": "Counts occurrences of a substring or regular expression match in each string element.",
@@ -3129,8 +3129,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.countMatches(...)",
       "signature": "$df.col(<column_name>).str.countMatches(\n  pattern: string | RegExp | any,\n  options: { literal?: boolean } | boolean = {}\n)",
-      "lineStart": 161,
-      "lineEnd": 174
+      "lineStart": 153,
+      "lineEnd": 164
     },
     "escapeRegex": {
       "desc": "Escapes special regular expression characters in string elements.",
@@ -3142,8 +3142,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.escapeRegex(...)",
       "signature": "$df.col(<column_name>).str.escapeRegex(\n  options: EscapeRegexOptions = {}\n)",
-      "lineStart": 191,
-      "lineEnd": 193
+      "lineStart": 181,
+      "lineEnd": 183
     },
     "decode": {
       "desc": "Decodes hex or base64 encoded string column values into string.",
@@ -3164,8 +3164,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.decode(...)",
       "signature": "$df.col(<column_name>).str.decode(\n  options: StringDecodeOptions\n)",
-      "lineStart": 213,
-      "lineEnd": 215
+      "lineStart": 203,
+      "lineEnd": 205
     },
     "encode": {
       "desc": "Encodes string column values into hex or base64.",
@@ -3186,8 +3186,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.encode(...)",
       "signature": "$df.col(<column_name>).str.encode(\n  options: StringEncodeOptions\n)",
-      "lineStart": 235,
-      "lineEnd": 237
+      "lineStart": 225,
+      "lineEnd": 227
     },
     "decodeUriComponent": {
       "desc": "Decodes Uniform Resource Identifier (URI) components.",
@@ -3199,8 +3199,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.decodeUriComponent(...)",
       "signature": "$df.col(<column_name>).str.decodeUriComponent()",
-      "lineStart": 253,
-      "lineEnd": 257
+      "lineStart": 243,
+      "lineEnd": 247
     },
     "encodeUriComponent": {
       "desc": "Encodes Uniform Resource Identifier (URI) components.",
@@ -3212,8 +3212,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.encodeUriComponent(...)",
       "signature": "$df.col(<column_name>).str.encodeUriComponent()",
-      "lineStart": 273,
-      "lineEnd": 277
+      "lineStart": 263,
+      "lineEnd": 267
     },
     "endsWith": {
       "desc": "Checks if string ends with a suffix.",
@@ -3231,8 +3231,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.endsWith(...)",
       "signature": "$df.col(<column_name>).str.endsWith(\n  suffix: string\n)",
-      "lineStart": 294,
-      "lineEnd": 296
+      "lineStart": 284,
+      "lineEnd": 286
     },
     "explode": {
       "desc": "Splits strings into lists of single characters.",
@@ -3244,8 +3244,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.explode(...)",
       "signature": "$df.col(<column_name>).str.explode()",
-      "lineStart": 313,
-      "lineEnd": 315
+      "lineStart": 303,
+      "lineEnd": 305
     },
     "extract": {
       "desc": "Extracts a captured group from the first regex match.",
@@ -3267,8 +3267,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.extract(...)",
       "signature": "$df.col(<column_name>).str.extract(\n  pattern: RegExp | string,\n  options?: ExtractRegexEngineOptions\n)",
-      "lineStart": 333,
-      "lineEnd": 337
+      "lineStart": 323,
+      "lineEnd": 325
     },
     "extractAll": {
       "desc": "Extracts all occurrences matching a regular expression pattern.",
@@ -3290,8 +3290,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.extractAll(...)",
       "signature": "$df.col(<column_name>).str.extractAll(\n  pattern: string | RegExp,\n  options?: ExtractRegexEngineOptions\n)",
-      "lineStart": 356,
-      "lineEnd": 360
+      "lineStart": 344,
+      "lineEnd": 346
     },
     "extractGroups": {
       "desc": "Extracts all captured groups from the first regex match into a structured object (struct).",
@@ -3309,8 +3309,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.extractGroups(...)",
       "signature": "$df.col(<column_name>).str.extractGroups(\n  pattern: string | RegExp,\n  options: ExtractRegexEngineOptions = {}\n)",
-      "lineStart": 377,
-      "lineEnd": 381
+      "lineStart": 363,
+      "lineEnd": 365
     },
     "extractMany": {
       "desc": "Extracts the first regex match for each pattern in a list of patterns.",
@@ -3332,8 +3332,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.extractMany(...)",
       "signature": "$df.col(<column_name>).str.extractMany(\n  patterns: (string | RegExp)[],\n  options: ExtractManyOptions = {}\n)",
-      "lineStart": 400,
-      "lineEnd": 404
+      "lineStart": 384,
+      "lineEnd": 386
     },
     "find": {
       "desc": "Return the byte offset of the first substring matching a pattern. Returns null if pattern is not found.",
@@ -3355,8 +3355,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.find(...)",
       "signature": "$df.col(<column_name>).str.find(\n  value: string | RegExp,\n  options: FindOptions = {}\n)",
-      "lineStart": 424,
-      "lineEnd": 428
+      "lineStart": 406,
+      "lineEnd": 408
     },
     "findMany": {
       "desc": "Return the starting byte offset of each match for multiple patterns.",
@@ -3378,8 +3378,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.findMany(...)",
       "signature": "$df.col(<column_name>).str.findMany(\n  patterns: (string | RegExp)[],\n  options: FindManyOptions = {}\n)",
-      "lineStart": 447,
-      "lineEnd": 451
+      "lineStart": 427,
+      "lineEnd": 429
     },
     "head": {
       "desc": "Extracts the first n characters of each string element.",
@@ -3397,8 +3397,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.head(...)",
       "signature": "$df.col(<column_name>).str.head(\n  n: number = 1\n)",
-      "lineStart": 469,
-      "lineEnd": 471
+      "lineStart": 447,
+      "lineEnd": 449
     },
     "join": {
       "desc": "Joins a list of string elements into a single string using a delimiter. Accepts `JoinArrayOptions` (`{ ignoreNulls, nullValue, prefix, suffix, limit, truncationMarker, valueFormatter }`).",
@@ -3420,8 +3420,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.join(...)",
       "signature": "$df.col(<column_name>).str.join(\n  delimiter: string = \"\",\n  options: JoinArrayOptions = {}\n)",
-      "lineStart": 490,
-      "lineEnd": 496
+      "lineStart": 468,
+      "lineEnd": 472
     },
     "jsonDecode": {
       "desc": "Decodes JSON string elements into parsed objects or arrays. Reuses safeJsonParse utility.",
@@ -3439,8 +3439,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.jsonDecode(...)",
       "signature": "$df.col(<column_name>).str.jsonDecode(\n  options: SafeJsonParseOptions = {}\n)",
-      "lineStart": 514,
-      "lineEnd": 516
+      "lineStart": 490,
+      "lineEnd": 492
     },
     "jsonPathMatch": {
       "desc": "Extracts fields or array elements from JSON strings using JSONPath syntax.",
@@ -3458,8 +3458,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.jsonPathMatch(...)",
       "signature": "$df.col(<column_name>).str.jsonPathMatch(\n  jsonPath: string\n)",
-      "lineStart": 533,
-      "lineEnd": 535
+      "lineStart": 509,
+      "lineEnd": 511
     },
     "len": {
       "desc": "Returns string length in UTF-16 code units. Alias for lenChars.",
@@ -3471,8 +3471,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.len(...)",
       "signature": "$df.col(<column_name>).str.len()",
-      "lineStart": 552,
-      "lineEnd": 554
+      "lineStart": 528,
+      "lineEnd": 530
     },
     "lenBytes": {
       "desc": "Returns string length in UTF-8 encoded bytes.",
@@ -3484,8 +3484,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.lenBytes(...)",
       "signature": "$df.col(<column_name>).str.lenBytes()",
-      "lineStart": 571,
-      "lineEnd": 573
+      "lineStart": 547,
+      "lineEnd": 549
     },
     "lenChars": {
       "desc": "Returns string length in character count.",
@@ -3497,8 +3497,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.lenChars(...)",
       "signature": "$df.col(<column_name>).str.lenChars()",
-      "lineStart": 590,
-      "lineEnd": 592
+      "lineStart": 566,
+      "lineEnd": 568
     },
     "lower": {
       "desc": "Converts strings to lowercase.",
@@ -3510,8 +3510,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.lower(...)",
       "signature": "$df.col(<column_name>).str.lower()",
-      "lineStart": 609,
-      "lineEnd": 611
+      "lineStart": 585,
+      "lineEnd": 587
     },
     "lpad": {
       "desc": "Pads start of strings to specified width.",
@@ -3533,8 +3533,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.lpad(...)",
       "signature": "$df.col(<column_name>).str.lpad(\n  width: number,\n  fill: string = \" \"\n)",
-      "lineStart": 630,
-      "lineEnd": 632
+      "lineStart": 606,
+      "lineEnd": 608
     },
     "normalize": {
       "desc": "Normalizes Unicode strings using standard normalization forms (NFC, NFD, NFKC, NFKD).",
@@ -3552,8 +3552,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.normalize(...)",
       "signature": "$df.col(<column_name>).str.normalize(\n  form?: Parameters<typeof String.prototype.normalize>[0]\n)",
-      "lineStart": 651,
-      "lineEnd": 653
+      "lineStart": 627,
+      "lineEnd": 629
     },
     "padEnd": {
       "desc": "Pads end of strings to specified width. Alias for rpad.",
@@ -3575,8 +3575,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.padEnd(...)",
       "signature": "$df.col(<column_name>).str.padEnd(\n  width: number,\n  fill: string = \" \"\n)",
-      "lineStart": 672,
-      "lineEnd": 674
+      "lineStart": 648,
+      "lineEnd": 650
     },
     "padStart": {
       "desc": "Pads start of strings to specified width. Alias for lpad.",
@@ -3598,8 +3598,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.padStart(...)",
       "signature": "$df.col(<column_name>).str.padStart(\n  width: number,\n  fill: string = \" \"\n)",
-      "lineStart": 693,
-      "lineEnd": 695
+      "lineStart": 669,
+      "lineEnd": 671
     },
     "replace": {
       "desc": "Replaces the first occurrence matching a string pattern.",
@@ -3625,8 +3625,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.replace(...)",
       "signature": "$df.col(<column_name>).str.replace(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string),\n  options?: ReplaceOptions\n)",
-      "lineStart": 714,
-      "lineEnd": 722
+      "lineStart": 690,
+      "lineEnd": 696
     },
     "replaceAll": {
       "desc": "Replaces all occurrences matching a string pattern or global regular expression.",
@@ -3652,8 +3652,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.replaceAll(...)",
       "signature": "$df.col(<column_name>).str.replaceAll(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string),\n  options?: Omit<ReplaceOptions, \"n\">\n)",
-      "lineStart": 742,
-      "lineEnd": 750
+      "lineStart": 716,
+      "lineEnd": 722
     },
     "replaceMany": {
       "desc": "Replaces multiple string patterns simultaneously or sequentially with their respective replacements. Matches Polars `.str.replaceMany()` behavior, accepting pattern/replacement arrays or a pattern-to-replacement map dictionary.",
@@ -3679,8 +3679,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.replaceMany(...)",
       "signature": "$df.col(<column_name>).str.replaceMany(\n  patterns: (string | RegExp)[] | Record<string, string>,\n  replacements?: (string | ((match: string, ...args: any[]) => string))[],\n  options?: ReplaceManyOptions\n)",
-      "lineStart": 771,
-      "lineEnd": 779
+      "lineStart": 743,
+      "lineEnd": 749
     },
     "reverse": {
       "desc": "Reverses characters in each string element.",
@@ -3692,8 +3692,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.reverse(...)",
       "signature": "$df.col(<column_name>).str.reverse()",
-      "lineStart": 796,
-      "lineEnd": 798
+      "lineStart": 766,
+      "lineEnd": 768
     },
     "rpad": {
       "desc": "Pads end of strings to specified width.",
@@ -3715,8 +3715,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.rpad(...)",
       "signature": "$df.col(<column_name>).str.rpad(\n  width: number,\n  fill: string = \" \"\n)",
-      "lineStart": 817,
-      "lineEnd": 819
+      "lineStart": 787,
+      "lineEnd": 789
     },
     "slice": {
       "desc": "Extracts a substring slice using start offset and length.",
@@ -3738,8 +3738,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.slice(...)",
       "signature": "$df.col(<column_name>).str.slice(\n  offset: number,\n  length?: number\n)",
-      "lineStart": 838,
-      "lineEnd": 844
+      "lineStart": 808,
+      "lineEnd": 814
     },
     "split": {
       "desc": "Splits strings into lists by delimiter with optional limit and exact padding.",
@@ -3761,8 +3761,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.split(...)",
       "signature": "$df.col(<column_name>).str.split(\n  delimiter: string,\n  options?: SplitOptions\n)",
-      "lineStart": 862,
-      "lineEnd": 864
+      "lineStart": 832,
+      "lineEnd": 834
     },
     "startsWith": {
       "desc": "Checks if string starts with a prefix.",
@@ -3780,8 +3780,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.startsWith(...)",
       "signature": "$df.col(<column_name>).str.startsWith(\n  prefix: string\n)",
-      "lineStart": 882,
-      "lineEnd": 884
+      "lineStart": 852,
+      "lineEnd": 854
     },
     "stripChars": {
       "desc": "Strips matching characters from start and end of string.",
@@ -3803,8 +3803,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.stripChars(...)",
       "signature": "$df.col(<column_name>).str.stripChars(\n  characters?: string | RegExp,\n  options?: StripCharsOptions\n)",
-      "lineStart": 902,
-      "lineEnd": 904
+      "lineStart": 872,
+      "lineEnd": 874
     },
     "stripCharsEnd": {
       "desc": "Strips matching characters from end of string.",
@@ -3826,8 +3826,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.stripCharsEnd(...)",
       "signature": "$df.col(<column_name>).str.stripCharsEnd(\n  characters?: string | RegExp,\n  options?: StripCharsOptions\n)",
-      "lineStart": 922,
-      "lineEnd": 924
+      "lineStart": 892,
+      "lineEnd": 894
     },
     "stripCharsStart": {
       "desc": "Strips matching characters from start of string.",
@@ -3849,8 +3849,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.stripCharsStart(...)",
       "signature": "$df.col(<column_name>).str.stripCharsStart(\n  characters?: string | RegExp,\n  options?: StripCharsOptions\n)",
-      "lineStart": 942,
-      "lineEnd": 944
+      "lineStart": 912,
+      "lineEnd": 914
     },
     "stripPrefix": {
       "desc": "Strips matching prefix substring from start of string.",
@@ -3868,8 +3868,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.stripPrefix(...)",
       "signature": "$df.col(<column_name>).str.stripPrefix(\n  prefix: string\n)",
-      "lineStart": 962,
-      "lineEnd": 972
+      "lineStart": 932,
+      "lineEnd": 942
     },
     "stripSuffix": {
       "desc": "Strips matching suffix substring from end of string.",
@@ -3887,8 +3887,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.stripSuffix(...)",
       "signature": "$df.col(<column_name>).str.stripSuffix(\n  suffix: string\n)",
-      "lineStart": 989,
-      "lineEnd": 999
+      "lineStart": 959,
+      "lineEnd": 969
     },
     "tail": {
       "desc": "Extracts the last n characters of each string element.",
@@ -3906,8 +3906,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.tail(...)",
       "signature": "$df.col(<column_name>).str.tail(\n  n: number = 1\n)",
-      "lineStart": 1017,
-      "lineEnd": 1019
+      "lineStart": 987,
+      "lineEnd": 989
     },
     "strptime": {
       "desc": "Parses date/time string into Datetime.",
@@ -3928,8 +3928,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.strptime(...)",
       "signature": "$df.col(<column_name>).str.strptime(\n  options: StrptimeOptions\n)",
-      "lineStart": 1037,
-      "lineEnd": 1039
+      "lineStart": 1007,
+      "lineEnd": 1009
     },
     "toCamelCase": {
       "desc": "Converts string casing to camelCase.",
@@ -3941,8 +3941,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toCamelCase(...)",
       "signature": "$df.col(<column_name>).str.toCamelCase()",
-      "lineStart": 1056,
-      "lineEnd": 1058
+      "lineStart": 1026,
+      "lineEnd": 1028
     },
     "toDate": {
       "desc": "Parses string into Date object.",
@@ -3954,8 +3954,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toDate(...)",
       "signature": "$df.col(<column_name>).str.toDate()",
-      "lineStart": 1073,
-      "lineEnd": 1075
+      "lineStart": 1043,
+      "lineEnd": 1045
     },
     "toDatetime": {
       "desc": "Parses string into Datetime value.",
@@ -3967,8 +3967,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toDatetime(...)",
       "signature": "$df.col(<column_name>).str.toDatetime()",
-      "lineStart": 1090,
-      "lineEnd": 1092
+      "lineStart": 1060,
+      "lineEnd": 1062
     },
     "toDecimal": {
       "desc": "Converts string into numeric decimal representation.",
@@ -3990,8 +3990,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toDecimal(...)",
       "signature": "$df.col(<column_name>).str.toDecimal(\n  precision?: number,\n  scale?: number\n)",
-      "lineStart": 1111,
-      "lineEnd": 1113
+      "lineStart": 1081,
+      "lineEnd": 1083
     },
     "toInteger": {
       "desc": "Parses string into integer number.",
@@ -4003,8 +4003,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toInteger(...)",
       "signature": "$df.col(<column_name>).str.toInteger()",
-      "lineStart": 1130,
-      "lineEnd": 1132
+      "lineStart": 1100,
+      "lineEnd": 1102
     },
     "toKebabCase": {
       "desc": "Converts string casing to kebab-case.",
@@ -4016,8 +4016,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toKebabCase(...)",
       "signature": "$df.col(<column_name>).str.toKebabCase()",
-      "lineStart": 1149,
-      "lineEnd": 1151
+      "lineStart": 1119,
+      "lineEnd": 1121
     },
     "toLowerCase": {
       "desc": "Converts all string elements in the column to lowercase.",
@@ -4029,8 +4029,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toLowerCase(...)",
       "signature": "$df.col(<column_name>).str.toLowerCase()",
-      "lineStart": 1168,
-      "lineEnd": 1170
+      "lineStart": 1138,
+      "lineEnd": 1140
     },
     "toPascalCase": {
       "desc": "Converts string casing to PascalCase.",
@@ -4042,8 +4042,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toPascalCase(...)",
       "signature": "$df.col(<column_name>).str.toPascalCase()",
-      "lineStart": 1187,
-      "lineEnd": 1189
+      "lineStart": 1157,
+      "lineEnd": 1159
     },
     "toSnakeCase": {
       "desc": "Converts string casing to snake_case.",
@@ -4055,8 +4055,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toSnakeCase(...)",
       "signature": "$df.col(<column_name>).str.toSnakeCase()",
-      "lineStart": 1206,
-      "lineEnd": 1208
+      "lineStart": 1176,
+      "lineEnd": 1178
     },
     "toTime": {
       "desc": "Parses string into time component representation.",
@@ -4068,8 +4068,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toTime(...)",
       "signature": "$df.col(<column_name>).str.toTime()",
-      "lineStart": 1225,
-      "lineEnd": 1227
+      "lineStart": 1195,
+      "lineEnd": 1197
     },
     "toTitleCase": {
       "desc": "Converts string casing to Title Case.",
@@ -4081,8 +4081,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toTitleCase(...)",
       "signature": "$df.col(<column_name>).str.toTitleCase()",
-      "lineStart": 1244,
-      "lineEnd": 1246
+      "lineStart": 1214,
+      "lineEnd": 1216
     },
     "toUpperCase": {
       "desc": "Converts all string elements in the column to uppercase.",
@@ -4094,8 +4094,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.toUpperCase(...)",
       "signature": "$df.col(<column_name>).str.toUpperCase()",
-      "lineStart": 1263,
-      "lineEnd": 1265
+      "lineStart": 1233,
+      "lineEnd": 1235
     },
     "trim": {
       "desc": "Trims leading and trailing whitespace characters from each string element.",
@@ -4107,8 +4107,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.trim(...)",
       "signature": "$df.col(<column_name>).str.trim()",
-      "lineStart": 1281,
-      "lineEnd": 1283
+      "lineStart": 1251,
+      "lineEnd": 1253
     },
     "trimEnd": {
       "desc": "Trims trailing whitespace characters from each string element.",
@@ -4120,8 +4120,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.trimEnd(...)",
       "signature": "$df.col(<column_name>).str.trimEnd()",
-      "lineStart": 1299,
-      "lineEnd": 1301
+      "lineStart": 1269,
+      "lineEnd": 1271
     },
     "trimStart": {
       "desc": "Trims leading whitespace characters from each string element.",
@@ -4133,8 +4133,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.trimStart(...)",
       "signature": "$df.col(<column_name>).str.trimStart()",
-      "lineStart": 1317,
-      "lineEnd": 1319
+      "lineStart": 1287,
+      "lineEnd": 1289
     },
     "upper": {
       "desc": "Converts string to uppercase.",
@@ -4146,8 +4146,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.upper(...)",
       "signature": "$df.col(<column_name>).str.upper()",
-      "lineStart": 1336,
-      "lineEnd": 1338
+      "lineStart": 1306,
+      "lineEnd": 1308
     },
     "zfill": {
       "desc": "Pads start of string with zeros to target width.",
@@ -4165,8 +4165,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.zfill(...)",
       "signature": "$df.col(<column_name>).str.zfill(\n  width: number\n)",
-      "lineStart": 1356,
-      "lineEnd": 1358
+      "lineStart": 1326,
+      "lineEnd": 1328
     },
     "str": {
       "desc": "String namespace accessor for text operations.",
@@ -4178,8 +4178,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str",
       "signature": "$df.col(<column_name>).get str()",
-      "lineStart": 1380,
-      "lineEnd": 1382
+      "lineStart": 1350,
+      "lineEnd": 1352
     }
   },
   "columnExpressions/mixins/StructExpr.ts": {
@@ -5036,8 +5036,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).const(...)",
       "signature": "$df.col(<column_name>).constCONTROL_UNESCAPE_MAP: Readonly<Record<string, string>> = Object.freeze(\n  { b: \"\\b\", 0: \"\\0\", ...Object.fromEntries( Object.entries(NAMED_CONTROL_ESCAPES).map(([code, esc]) => [ esc.slice(1), String.fromCharCode(Number(code)) ]) ) }\n)",
-      "lineStart": 87,
-      "lineEnd": 96
+      "lineStart": 95,
+      "lineEnd": 104
     }
   },
   "dataframe/dataframe.ts": {

@@ -207,7 +207,7 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Evaluate secondary Terser / AST pass in `npm run build` to fold constants and compact object property patterns beyond standard esbuild minification.
 
 
-## 🔮 Future / Backlog Scope (V2.1.0+)
+## 🔮 Future / Backlog Scope (V2.2.0+)
 
 ### 🏹 Interoperability & High-Precision Storage
 - [ ] **Lightweight Zero-Dependency Binary Serialization (`serialize` / `deserialize`)**:

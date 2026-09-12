@@ -23,4 +23,12 @@ if (res[2].count_digits !== 2) throw new Error("countMatches digits failed");
 if (res[3].count_a !== null) throw new Error("countMatches null failed");
 
 
+const resNullPat = df.select([
+    $df.col("text").str.countMatches(null as any).alias("null_pat")
+]).toDicts() as any[];
+
+if (resNullPat[0].null_pat !== null || resNullPat[3].null_pat !== null) {
+    throw new Error("countMatches with null pattern should return nulls");
+}
+
 console.log("✓ StringExpr.countMatches tests passed!");

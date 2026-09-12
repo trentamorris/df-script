@@ -161,6 +161,168 @@ try {
         "handles 5 levels of deeply nested array indexing"
     );
 
+    // 8. JSONPath Syntax & Tokenization Variations (indirectly testing _tokenizeJsonPath)
+    assertEqual(jsonPathMatch({ user: { name: "Alice" } }, ""), null, "empty path returns null");
+    assertEqual(jsonPathMatch({ user: { name: "Alice" } }, "$"), '{"user":{"name":"Alice"}}', "single $ returns root object");
+    assertEqual(jsonPathMatch({ user: { name: "Alice" } }, "   $   "), '{"user":{"name":"Alice"}}', "padded $ returns root object");
+    assertEqual(jsonPathMatch({ user: { name: "Alice" } }, "$.user.name"), "Alice", "parses dot properties");
+    assertEqual(jsonPathMatch({ user: { name: "Alice" } }, "$['user'][\"name\"]"), "Alice", "parses bracket quoted properties");
+    assertEqual(jsonPathMatch({ "escaped'quote": "found" }, "$['escaped\\'quote']"), "found", "parses escaped quotes inside brackets");
+    assertEqual(jsonPathMatch({ items: ["first", "second"] }, "$.items[0]"), "first", "parses array index [0]");
+    assertEqual(jsonPathMatch({ items: ["first", "second"] }, "$.items[-1]"), "second", "parses negative array index [-1]");
+    assertEqual(jsonPathMatch({ items: [10, 20] }, "$.items[*]"), "10", "bracket wildcard returns first item");
+    assertEqual(jsonPathMatch({ items: [10, 20] }, "$.items.*"), "10", "dot wildcard returns first item");
+    assertEqual(jsonPathMatch({ a: { name: "match" } }, "$..name"), "match", "recursive dot key finds match");
+    assertEqual(jsonPathMatch({ a: { val: 42 } }, "$..*"), '{"val":42}', "recursive star wildcard finds first value");
+    assertEqual(jsonPathMatch({ a: { deep: "nested_val" } }, "$..['deep']"), "nested_val", "recursive bracket single quote");
+    assertEqual(jsonPathMatch({ a: { deep: "nested_val" } }, "$..[\"deep\"]"), "nested_val", "recursive bracket double quote");
+    assertEqual(jsonPathMatch({ items: [0, 10, 20, 30, 40, 50] }, "$.items[1:5:2]"), "10", "slice with start, end, and step");
+    assertEqual(jsonPathMatch({ items: [100, 200, 300] }, "$.items[:2]"), "100", "slice with omitted start");
+    assertEqual(jsonPathMatch({ items: [100, 200, 300] }, "$.items[1:]"), "200", "slice with omitted end");
+    assertEqual(jsonPathMatch({ items: [100, 200, 300] }, "$.items[::-1]"), "300", "reverse slice [::-1]");
+
+    // Invalid syntax handling (returns null)
+    assertEqual(jsonPathMatch({ user: "Alice" }, "$.user..[invalid"), null, "invalid bracket syntax returns null");
+    assertEqual(jsonPathMatch({ user: "Alice" }, "$.user[abc]"), null, "unquoted identifier in brackets returns null");
+    assertEqual(jsonPathMatch({ user: "Alice" }, "$.user.@#$!"), null, "illegal characters in path return null");
+
+    // 9. Evaluation details (indirectly testing _evaluateJsonToken)
+    // Out-of-bounds indexing
+    assertEqual(jsonPathMatch({ items: [1, 2, 3] }, "$.items[99]"), null, "out-of-bounds positive array index returns null");
+    assertEqual(jsonPathMatch({ items: [1, 2, 3] }, "$.items[-99]"), null, "out-of-bounds negative array index returns null");
+
+    // Wildcard across objects vs arrays
+    assertEqual(jsonPathMatch(["x", "y"], "$[*]"), "x", "array wildcard returns first item");
+    assertEqual(jsonPathMatch({ k1: "v1", k2: "v2" }, "$.*"), "v1", "object wildcard returns first value");
+
+    // Cyclic objects traversed with recursive token
+    const recCyclicObj: any = { tag: "root", child: { tag: "nested" } };
+    recCyclicObj.self = recCyclicObj;
+    assertEqual(jsonPathMatch(recCyclicObj, "$..tag"), "root", "recursive path traversal safely handles cyclic object references without infinite recursion");
+
+    // 10. Comprehensive Tokenizer & Combinatorial Edge Cases
+    const complexObj = {
+        users: [
+            { id: 101, details: { "first name": "John", "last.name": "Doe", nested: { val: "alpha" } } },
+            { id: 102, details: { "first name": "Jane", "last.name": "Smith", nested: { val: "beta" } } }
+        ],
+        special: {
+            "key-with-dash": "dash-val",
+            "key_with_underscore": "underscore-val",
+            "$dollarKey": "dollar-val",
+            "escaped\"dq": "dq-val",
+            "matrix": [[1, 2], [3, 4]]
+        }
+    };
+
+    // Identifiers with dashes, underscores, and dollar signs
+    assertEqual(jsonPathMatch(complexObj, "$.special.key-with-dash"), "dash-val", "matches identifier with dash");
+    assertEqual(jsonPathMatch(complexObj, "$.special.key_with_underscore"), "underscore-val", "matches identifier with underscore");
+    assertEqual(jsonPathMatch(complexObj, "$.special.$dollarKey"), "dollar-val", "matches identifier with dollar sign");
+    assertEqual(jsonPathMatch(complexObj, "$['special']['key-with-dash']"), "dash-val", "matches single quote bracket with dash");
+    assertEqual(jsonPathMatch(complexObj, "$.special['escaped\\\"dq']"), "dq-val", "matches escaped double quote inside bracket");
+
+    // Recursive search with bracketed property names containing dots, spaces, or special characters
+    assertEqual(jsonPathMatch(complexObj, "$..['first name']"), "John", "recursive bracket search with spaces");
+    assertEqual(jsonPathMatch(complexObj, "$..['last.name']"), "Doe", "recursive bracket search with dot in property name");
+    assertEqual(jsonPathMatch(complexObj, "$..[\"val\"]"), "alpha", "recursive double quoted bracket search");
+
+    // Multiple slices and matrix indexing
+    assertEqual(jsonPathMatch(complexObj, "$.special.matrix[1][0]"), "3", "nested 2D matrix indexing");
+    assertEqual(jsonPathMatch(complexObj, "$.users[:1]"), JSON.stringify(complexObj.users[0]), "slice with omitted start [:1]");
+    assertEqual(jsonPathMatch(complexObj, "$.users[1:2]"), JSON.stringify(complexObj.users[1]), "slice with start and end [1:2]");
+    assertEqual(jsonPathMatch(complexObj, "$.users[::2]"), JSON.stringify(complexObj.users[0]), "slice with step only [::2]");
+    assertEqual(jsonPathMatch(complexObj, "$.special.matrix[ * ]"), JSON.stringify([1, 2]), "tolerates whitespace in wildcard bracket");
+
+    // Whitespace variations inside brackets
+    assertEqual(jsonPathMatch(complexObj, "$[ 'special' ][ 'key-with-dash' ]"), "dash-val", "tolerates whitespace in brackets");
+    assertEqual(jsonPathMatch(complexObj, "$.special.matrix[ 0 ][ 1 ]"), "2", "tolerates whitespace in array index brackets");
+    assertEqual(jsonPathMatch(complexObj, "$.special.matrix[ * ]"), JSON.stringify([1, 2]), "tolerates whitespace in wildcard bracket");
+
+    // Trailing / leading dots and invalid tokens return null
+    assertEqual(jsonPathMatch(complexObj, "$.special."), null, "trailing dot is invalid and returns null");
+    assertEqual(jsonPathMatch(complexObj, "$.special.."), null, "trailing double dot is invalid and returns null");
+    assertEqual(jsonPathMatch(complexObj, "$.special["), null, "unclosed bracket is invalid and returns null");
+    assertEqual(jsonPathMatch(complexObj, "$.special[]"), null, "empty bracket is invalid and returns null");
+    assertEqual(jsonPathMatch(complexObj, "$.special[0:1:2:3]"), null, "too many slice colons is invalid and returns null");
+    assertEqual(jsonPathMatch(complexObj, "$.special[invalid_token]"), null, "unquoted non-numeric identifier in brackets returns null");
+    assertEqual(jsonPathMatch(complexObj, "$.users[0].details.nonexistent.val"), null, "deep nonexistent property path safely returns null");
+
+    // Primitives at root and JSON matching
+    assertEqual(jsonPathMatch(false, "$"), "false", "boolean false returns 'false'");
+    assertEqual(jsonPathMatch(0, "$"), "0", "number 0 returns '0'");
+    assertEqual(jsonPathMatch("", "$"), null, "empty string input returns null");
+    assertEqual(jsonPathMatch('""', "$"), "", "JSON string with empty string returns empty string");
+
+    // 11. 10/10 Ultra-Hardcore Tokenizer & Traversal Edge Cases
+    const extremeData = {
+        "": { "": "empty-in-empty" },
+        "0": ["item0", "item1"],
+        "true": { "false": "boolean-keys" },
+        "null": { "undefined": "null-undef-keys" },
+        "arr": [10, 20, 30, 40, 50],
+        "nested": {
+            "a.b.c": "dotted-prop",
+            "['brackets']": "bracket-named-prop",
+            "spaced key": { "*": "literal-star" }
+        },
+        "escapes": {
+            "tab\there": "tab-val",
+            "back\\slash": "slash-val",
+            "quote\"in\"prop": "quote-val",
+            "single'quote": "sq-val"
+        },
+        "deep": [
+            { id: 1, sub: [{ val: "d1" }, { val: "d2" }] },
+            { id: 2, sub: [{ val: "d3" }] }
+        ]
+    };
+
+    // Extreme quote unescaping inside brackets
+    assertEqual(jsonPathMatch(extremeData, "$['nested']['a.b.c']"), "dotted-prop", "matches literal dots inside brackets");
+    assertEqual(jsonPathMatch(extremeData, "$['nested']['[\\'brackets\\']']"), "bracket-named-prop", "matches literal brackets and quotes in key");
+    assertEqual(jsonPathMatch(extremeData, "$['nested']['spaced key']['*']"), "literal-star", "matches quoted literal star key rather than wildcard");
+    assertEqual(jsonPathMatch(extremeData, "$['escapes']['tab\\there']"), "tab-val", "matches escaped control char in brackets");
+    assertEqual(jsonPathMatch(extremeData, "$['escapes']['back\\\\slash']"), "slash-val", "matches escaped backslash in brackets");
+    assertEqual(jsonPathMatch(extremeData, "$['escapes'][\"quote\\\"in\\\"prop\"]"), "quote-val", "matches escaped double quote in double quote brackets");
+    assertEqual(jsonPathMatch(extremeData, "$['escapes']['single\\'quote']"), "sq-val", "matches escaped single quote in single quote brackets");
+
+    // Root edge cases & empty keys
+    assertEqual(jsonPathMatch(extremeData, "$['']['']"), "empty-in-empty", "matches empty string keys nested in brackets");
+    assertEqual(jsonPathMatch(extremeData, "$['0'][1]"), "item1", "matches numeric string property followed by array index");
+    assertEqual(jsonPathMatch(extremeData, "$['true']['false']"), "boolean-keys", "matches boolean string keys in brackets");
+    assertEqual(jsonPathMatch(extremeData, "$['null']['undefined']"), "null-undef-keys", "matches null and undefined string keys");
+
+    // Extreme Slice Edge Cases
+    assertEqual(jsonPathMatch(extremeData, "$.arr[-3:-1]"), "30", "negative start and negative end slice returns first match");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[-1:-4:-1]"), "50", "negative step reverse slice with negative indices");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[10:20]"), null, "slice out of bounds positive returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[-20:-10]"), null, "slice out of bounds negative returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[3:1]"), null, "slice with start > end on positive step returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[1:3:-1]"), null, "slice with start < end on negative step returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[::999]"), "10", "huge step returns first element");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[::-999]"), "50", "huge negative step returns last element");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[0:5:0]"), null, "zero step slice is invalid and returns null");
+
+    // Recursive traversal with deep combinations
+    assertEqual(jsonPathMatch(extremeData, "$..sub[1].val"), "d2", "recursive descent with trailing index and prop");
+    assertEqual(jsonPathMatch(extremeData, "$..sub[*].val"), "d1", "recursive descent into array wildcard");
+    assertEqual(jsonPathMatch(extremeData, "$..['tab\\there']"), "tab-val", "recursive descent with escaped bracket key");
+    assertEqual(jsonPathMatch(extremeData, "$..['a.b.c']"), "dotted-prop", "recursive descent matching property with dots");
+
+    // Malformed syntax variations (must strictly return null without crashing)
+    assertEqual(jsonPathMatch(extremeData, "$."), null, "path with only dot returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.."), null, "path with only double dot returns null");
+    assertEqual(jsonPathMatch(extremeData, "$["), null, "unclosed root bracket returns null");
+    assertEqual(jsonPathMatch(extremeData, "$]"), null, "unopened bracket returns null");
+    assertEqual(jsonPathMatch(extremeData, "$['unclosed"), null, "unclosed quote inside bracket returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[1 2]"), null, "space separated numbers in bracket returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[1,2]"), null, "comma separated numbers in bracket returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[1:2:3:4]"), null, "three colons in slice returns null");
+    assertEqual(jsonPathMatch(extremeData, "$...arr"), null, "triple dot returns null");
+    assertEqual(jsonPathMatch(extremeData, "$.arr.0"), null, "dot property on array does not index into array");
+    assertEqual(jsonPathMatch(extremeData, "$.arr[0]"), "10", "bracket indexing retrieves array element");
+    assertEqual(jsonPathMatch(extremeData, "$..*.*"), "item0", "chained wildcards return first match");
 
     console.log(`SUCCESS: All jsonPathMatch tests passed! (${testsPassed} assertions)`);
 } catch (err) {

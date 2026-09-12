@@ -27,6 +27,7 @@ try {
     assertEqual(toWords("hello_world"), ["hello", "world"], "splits snake_case");
     assertEqual(toWords("hello-world"), ["hello", "world"], "splits kebab-case");
     assertEqual(toWords(""), [], "empty string returns empty array");
+    assertEqual(toWords("__proto__ constructor prototype safe_word"), ["safe", "word"], "filters dangerous prototype pollution property keys");
 
 
     console.log(`SUCCESS: All toWords tests passed! (${testsPassed} assertions)`);

@@ -1,5 +1,6 @@
 import "./typedArrayTagGetter.test";
 import "./isObj.test";
+import "./isSafeObjPropertyKey.test";
 import "./isPlainObj.test";
 import "./isClass.test";
 import "./isValidDateObj.test";

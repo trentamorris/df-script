@@ -21,4 +21,12 @@ if (res[1].full !== "200") throw new Error("extract row 1 failed");
 if (res[2].num !== null) throw new Error("extract null failed");
 
 
+const resNullPat = df.select([
+    $df.col("code").str.extract(null as any).alias("null_pat")
+]).toDicts() as any[];
+
+if (resNullPat[0].null_pat !== null || resNullPat[1].null_pat !== null || resNullPat[2].null_pat !== null) {
+    throw new Error("extract with null pattern should return all nulls");
+}
+
 console.log("✓ StringExpr.extract tests passed!");
