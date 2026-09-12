@@ -66,6 +66,42 @@ try {
         throw new Error("Unclosed quote at EOF failed");
     }
 
+    // 12. Empty quoted field
+    const emptyQuoted = parseCSV('a,b\n"",foo\nbar,""');
+    if (emptyQuoted.length !== 3 || emptyQuoted[1][0] !== "" || emptyQuoted[1][1] !== "foo" || emptyQuoted[2][1] !== "") {
+        throw new Error("Empty quoted field failed");
+    }
+
+    // 13. Single cell without newlines or separators
+    const singleCell = parseCSV("standalone");
+    if (singleCell.length !== 1 || singleCell[0].length !== 1 || singleCell[0][0] !== "standalone") {
+        throw new Error("Single cell without newlines failed");
+    }
+
+    // 14. Single quoted cell
+    const singleQuotedCell = parseCSV('"standalone quoted"');
+    if (singleQuotedCell.length !== 1 || singleQuotedCell[0][0] !== "standalone quoted") {
+        throw new Error("Single quoted cell failed");
+    }
+
+    // 15. Custom quote character
+    const customQuote = parseCSV("a|'hello|world'|c", { separator: "|", quoteChar: "'" });
+    if (customQuote.length !== 1 || customQuote[0].length !== 3 || customQuote[0][1] !== "hello|world") {
+        throw new Error("Custom quote character failed");
+    }
+
+    // 16. Consecutive escaped quotes inside quotes ("""" -> "")
+    const consecutiveEscaped = parseCSV('col\n""""');
+    if (consecutiveEscaped.length !== 2 || consecutiveEscaped[1][0] !== '"') {
+        throw new Error("Consecutive escaped quotes failed");
+    }
+
+    // 17. Only delimiters
+    const onlyDelimiters = parseCSV(",,\n,,");
+    if (onlyDelimiters.length !== 2 || onlyDelimiters[0].length !== 3 || onlyDelimiters[1].length !== 3) {
+        throw new Error("Only delimiters failed");
+    }
+
     console.log("✓ parseCSV tests passed!");
 } catch (err: any) {
     console.error(`❌ parseCSV test failed: ${err.message}`);

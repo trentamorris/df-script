@@ -49,23 +49,16 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
             groupPreValues[k] = prePartitionArray[indices[k]];
         }
 
-        if (expr._evaluateWindow) {
-            for (let k = 0; k < groupLen; k++) {
-                results[indices[k]] = expr._evaluateWindow(groupPreValues, indices, k);
-            }
-            continue;
-        }
-
-        if (expr._aggFn) {
-            const aggregatedVal = expr._aggFn(groupPreValues);
-            for (let k = 0; k < groupLen; k++) {
-                results[indices[k]] = aggregatedVal;
-            }
-            continue;
-        }
-
+        const aggVal = expr._aggFn ? expr._aggFn(groupPreValues) : null;
         for (let k = 0; k < groupLen; k++) {
-            results[indices[k]] = prePartitionArray[indices[k]];
+            const idx = indices[k];
+            if (expr._evaluateWindow) {
+                results[idx] = expr._evaluateWindow(groupPreValues, indices, k);
+            } else if (expr._aggFn) {
+                results[idx] = aggVal;
+            } else {
+                results[idx] = prePartitionArray[idx];
+            }
         }
     }
 
@@ -77,30 +70,23 @@ export function rowsToColumns(rows: any[]): { columns: ColumnDict; height: numbe
         return { columns: {}, height: 0 };
     }
     const height = rows.length;
-    const keysSet = new Set<string>();
+    const columns: Record<string, any[]> = {};
+
     for (let r = 0; r < height; r++) {
         const row = rows[r];
         if (!isObj(row)) continue;
+
         const rowKeys = Object.keys(row);
-        const numRowKeys = rowKeys.length;
-        for (let i = 0; i < numRowKeys; i++) {
-            keysSet.add(rowKeys[i]);
-        }
-    }
-
-    const keys = Array.from(keysSet);
-    const numKeys = keys.length;
-    const columns: ColumnDict = {};
-
-    for (let i = 0; i < numKeys; i++) {
-        const k = keys[i];
-        const col = new Array(height);
-        for (let r = 0; r < height; r++) {
-            const row = rows[r];
-            const val = row != null ? row[k] : null;
+        const numKeys = rowKeys.length;
+        for (let i = 0; i < numKeys; i++) {
+            const k = rowKeys[i];
+            let col = columns[k];
+            if (col === undefined) {
+                col = columns[k] = new Array(height).fill(null);
+            }
+            const val = row[k];
             col[r] = val === undefined ? null : val;
         }
-        columns[k] = col;
     }
 
     return { columns, height };
@@ -128,6 +114,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     if (col.length === 0) return DataTypeRegistry.Utf8;
     let isBoolean = true;
     let isInteger = true;
+    let fitsInInt32 = true;
     let isNumeric = true;
     let isBigInt = true;
     let isDate = true;
@@ -147,9 +134,9 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
             isBinary = false;
         }
 
-        if (!isArrayOrTypedArray(val) || val instanceof Uint8Array) {
+        if (val instanceof Uint8Array || !isArrayOrTypedArray(val)) {
             isArrayVal = false;
-        } else {
+        } else if (isArrayVal) {
             const valArr = val as any;
             const subLen = valArr.length;
             for (let j = 0; j < subLen; j++) {
@@ -164,6 +151,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
             isInteger = false;
         } else {
             if (!Number.isInteger(val)) isInteger = false;
+            if (fitsInInt32 && !isValidInt(val, { range: "Int32" })) fitsInInt32 = false;
         }
         if (!isValidDateObj(val) && (typeof val !== "string" || isNaN(Date.parse(val)))) {
             isDate = false;
@@ -183,14 +171,6 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     if (isBigInt) return DataTypeRegistry.Int64;
     if (isNumeric && !isInteger) return DataTypeRegistry.Float64;
     if (isNumeric && isInteger) {
-        let fitsInInt32 = true;
-        for (let i = 0; i < col.length; i++) {
-            const val = col[i];
-            if (val != null && !isValidInt(val, { range: "Int32" })) {
-                fitsInInt32 = false;
-                break;
-            }
-        }
         return fitsInInt32 ? DataTypeRegistry.Int32 : DataTypeRegistry.Float64;
     }
     if (isDate && hasDateObj) return DataTypeRegistry.Datetime;
@@ -289,17 +269,22 @@ export function writeStringToFileOrStream(
     content: string
 ): void {
     if (!file) return;
+
     if (typeof file === "string") {
         if (typeof require !== "function") {
             throw new IOStreamError("File writing is not supported in this environment (missing require('fs')).");
         }
         const fs = require("fs");
         fs.writeFileSync(file, content, "utf8");
-    } else if (isObj(file) && typeof (file as any).write === "function") {
-        (file as any).write(content);
-    } else {
-        throw new InvalidArgumentError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
+        return;
     }
+
+    if (isObj(file) && typeof (file as any).write === "function") {
+        (file as any).write(content);
+        return;
+    }
+
+    throw new InvalidArgumentError("Invalid file argument. Expected a file path string or a writable stream/object with a write method.");
 }
 
 function _alignEmptySideIndices(
@@ -448,13 +433,13 @@ export function alignKeyIndices(
     const getL = (i: number) => leftIndices[i] === UNMATCHED_ROW_INDEX ? Number.MAX_SAFE_INTEGER : leftIndices[i];
     const getR = (i: number) => rightIndices[i] ?? Number.MAX_SAFE_INTEGER;
 
-    if (orderStrategy === "right") {
-        perm.sort((a, b) => (getR(a) - getR(b)) || (a - b));
-    } else if (orderStrategy === "left_right") {
-        perm.sort((a, b) => (getL(a) - getL(b)) || (getR(a) - getR(b)) || (a - b));
-    } else if (orderStrategy === "right_left") {
-        perm.sort((a, b) => (getR(a) - getR(b)) || (getL(a) - getL(b)) || (a - b));
-    }
+    perm.sort((a, b) => {
+        const diffR = getR(a) - getR(b);
+        const diffL = getL(a) - getL(b);
+        if (orderStrategy === "right") return diffR || (a - b);
+        if (orderStrategy === "left_right") return diffL || diffR || (a - b);
+        return diffR || diffL || (a - b);
+    });
 
     const sortedLeft = new Array(len);
     const sortedRight = new Array(len);
@@ -713,7 +698,6 @@ export function materializeJoinedDataFrame<R extends RowRecord = any>(
     for (let i = 0; i < leftColKeys.length; i++) {
         const k = leftColKeys[i];
         const isLeftJoinKey = leftKeysSet.has(k);
-
         let targetName: string;
         if (k in rightCols && !isLeftJoinKey && !rightKeysSet.has(k)) {
             if (leftSuffix !== "") {

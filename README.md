@@ -14,6 +14,19 @@ With cache-optimized columnar storage and flat memory layout under the hood, `df
 
 ---
 
+### 📌 Platform & Scope
+
+| Attribute | Specification |
+| :--- | :--- |
+| **Target Platform** | **Universal JavaScript & TypeScript** (Node.js 16+, Modern Browsers, Bun, Deno, Cloudflare Workers, Vercel Edge, AWS Lambda) |
+| **Operational Scope** | **In-memory columnar DataFrame & vectorized expression engine** with automatic type inference, joins, grouping, windowing, and zero intermediate allocations |
+| **I/O & Formats** | High-throughput RFC-compliant **CSV parsing & streaming**, **JSON / JSONLines**, and row/column records |
+| **Runtime Footprint** | **Pure TypeScript/JavaScript** (0 external dependencies, 0 native C++/Rust bindings, 0 WebAssembly overhead) |
+| **Bundle Size** | **~44 KB gzipped** (~127 KB minified) for the complete engine; **~21 KB gzipped** for standalone utils |
+| **Distribution** | Dual **ESM** (`dist/index.mjs`) & **CommonJS** (`dist/index.js`) with comprehensive `.d.ts` declaration maps |
+
+---
+
 ## 🌐 Universal Language & Environment Support
 
 `df-script` is built with **zero native dependencies** and ships with dual **ESM** (`dist/index.mjs`) and **CommonJS** (`dist/index.js`) modules alongside comprehensive `.d.ts` type declarations. It runs natively everywhere JavaScript or TypeScript runs:
@@ -41,16 +54,15 @@ In modern web apps and Node.js backend services, data transformation code often 
 
 ## 🗺️ Table of Contents
 
+- [📌 Platform & Scope](#-platform--scope)
 - [✨ Key Features](#-key-features)
 - [🌐 Universal Language & Environment Support](#-universal-language--environment-support)
 - [📦 Installation](#-installation)
 - [🚀 Quick Start](#-quick-start)
 - [📖 Core Concepts](#-core-concepts)
 - [🛠️ DataFrame API Reference](#️-dataframe-api-reference)
-- [📂 File / Data I/O](#-file--data-io)
-- [🧮 Expressions API Reference](#-expressions-api-reference)
-- [📂 Namespaces](#-namespaces)
-- [🪟 Window & Rolling Expressions](#-window--rolling-expressions)
+- [🧮 Column Expressions API Reference](#-column-expressions-api-reference)
+- [📂 Namespaces API Reference](#-namespaces-api-reference)
 - [🛡️ Typing and Schema Registry](#️-typing-and-schema-registry)
 - [🧑‍💻 Contributing & Development](#-contributing--development)
 - [📄 License](#-license)
@@ -87,6 +99,18 @@ Or with Yarn, PNPM, or Bun:
 yarn add df-script
 pnpm add df-script
 bun add df-script
+```
+
+Import and configure in TypeScript or JavaScript:
+
+```typescript
+// ES Module / TypeScript
+import { $df, DataFrame, ColumnExpr, DataType } from "df-script";
+```
+
+```javascript
+// CommonJS / Node.js
+const { $df, DataFrame, ColumnExpr, DataType } = require("df-script");
 ```
 
 ---
@@ -152,196 +176,357 @@ console.log(processedDf.toDicts());
 
 ## 🛠️ DataFrame API Reference
 
-### 1. Transformations & Projection
-- **`select(...exprs)`**: Projects columns. Supports strings, `$df.col(...)` expressions, `$df.all()`, RegExp patterns (`/^prefix_/`), DataType selectors (`$df.Numeric`), and `$df.col("struct").struct.unnest()`.
-- **`withColumns(...exprs)`**: Adds or overrides columns. Accepts expressions, options mapping keys, RegExp patterns, or DataType selectors.
-- **`drop(...names)`**: Drops one or more columns from the DataFrame.
-- **`rename(mapping)`**: Renames columns using a `{ oldName: newName }` object.
-- **`explode(columns)`**: Unnests list-like columns into multiple rows, replicating other columns per list element.
-- **`implode(columns)`**: Groups values in specified columns back into a list element per column.
+All methods and getters on `DataFrame` in alphabetical order:
 
-### 2. Filtering & Row Selection
-- **`filter(...predicates)`**: Filters rows where all predicate expressions evaluate to `true`.
-- **`find(predicate)`**: Returns the first matching row record object (or `undefined`).
-- **`unique(columns?)`**: Returns unique rows, optionally deduplicating based on a subset of columns.
-- **`limit(n, options?)`**: Returns the first `n` rows. Options include `offset` and direction `from: "start" | "end"`.
-- **`head(n)`** / **`tail(n)`**: Shortcuts for `limit` from the start or end of the DataFrame.
-- **`slice(start, end?)`**: Extracts a subset of rows using standard index slicing.
-- **`gather(indices, options?)`**: Gathers rows at specified indices (supports negative indexing and `{ nullOnOob?: boolean }`).
-
-### 3. Sorting & Structural Operations
-- **`sort({ by, descending?, nullsLast?, custom? })`**: Sorts rows by single/multiple columns, custom null ordering, or comparator functions.
-- **`clone()`**: Performs a deep copy of the `DataFrame`, replicating all underlying column arrays and schema metadata.
-- **`transpose(options?)`**: Transposes the DataFrame (swapping rows and columns).
-
-### 4. Grouping & Aggregations
-- **`groupBy(keys)`**: Groups data by one or more columns, returning a `GroupedData` object.
-- **`groupByDynamic(indexColumn, options)`**: Dynamic time-series / numeric window grouping over tumbling, sliding, or rolling temporal aggregation intervals (`every`, `period`, `offset`, `closed`, `label`, `startBy`, `includeBoundaries`, `by`).
-- **`GroupedData.agg(...exprs)`**: Computes aggregations on grouped data (e.g. `$df.col("sales").sum()`).
-
-### 5. Reshaping & Joining
-- **`join(other, onOrOptions, how?, suffixes?)`**: Merges two DataFrames. Supports:
-  - Join modes (`how`): `"inner" | "left" | "right" | "outer" | "semi" | "anti" | "cross"`.
-  - Keys: `leftOn`, `rightOn`, `coalesce`, and order preservation options.
-- **`joinAsof(other, options)`**: Inexact time-series / nearest-neighbor joins on sorted key columns.
-  - Parameters: `on`, `leftOn`, `rightOn`, `by`, `strategy` (`"backward" | "forward" | "nearest"`), and `tolerance`.
-- **`pivot(index, columns, values)`**: Pivots the table, converting unique values in `columns` into column headers.
-- **`unpivot(idVars, valueVars, varName?, valueName?)`**: Melts/unpivots wide columns into long format name-value pairs.
-- **`concat(items, options?)`**: Concatenates multiple DataFrames (`"vertical" | "horizontal" | "diagonal"`).
-
----
-
-## 📂 File / Data I/O
-
-`df-script` provides built-in parsers and serializers for JSON and CSV formats.
-
-### Reading Data
-- **`$df.readJson(content, options?)`**: Reads standard JSON or Newline Delimited JSON (NDJSON) string.
-  ```typescript
-  import { $df } from "df-script";
-
-  // Read standard JSON
-  const df = $df.readJson('[{"id": 1, "name": "Alice"}]');
-
-  // Read NDJSON
-  const dfNdjson = $df.readJson('{"id": 1}\n{"id": 2}', { format: "ndjson" });
-  ```
-- **`$df.readCsv(content, options?)`**: Reads a CSV string with automatic type inference.
-  ```typescript
-  import { $df } from "df-script";
-
-  const csvContent = "id,name,active\n1,Alice,true\n2,Bob,false";
-  const df = $df.readCsv(csvContent, {
-    separator: ",",
-    hasHeader: true,
-    inferSchema: true
-  });
-  ```
-
-### Writing Data
-- **`df.writeJson(file?, options?)`**: Serializes a DataFrame into a JSON or NDJSON string.
-  ```typescript
-  const jsonStr = df.writeJson();
-  df.writeJson("output.json");
-  ```
-- **`df.writeCsv(file?, options?)`**: Serializes a DataFrame into a CSV string.
-  ```typescript
-  const csvStr = df.writeCsv();
-  df.writeCsv("output.csv", { separator: ";" });
-  ```
+| Method / Property | Description |
+| :--- | :--- |
+| **`cast(schema, options?)`** | Casts DataFrame columns to target data types using a schema mapping. |
+| **`clone()`** | Deep-copies the DataFrame, duplicating all underlying columnar memory buffers and schema. |
+| **`columns`** | Getter returning an array of all column names in the DataFrame. |
+| **`concat(items, options?)`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
+| **`drop(...names)`** | Drops one or more specified columns from the DataFrame. |
+| **`dropNulls(subset?)`** | Drops rows containing null or undefined values across all or specified columns. |
+| **`dtypes`** | Getter returning a dictionary of column names to their registered `DataType` instances. |
+| **`equals(other, options?)`** | Deep equality comparison with tolerance support for float columns. |
+| **`explode(columns)`** | Unnests list-like columns into multiple rows, replicating other columns per list element. |
+| **`fillNull(ruleOrOptions)`** | Fills null values with strategies (`"forward"`, `"backward"`, `"mean"`, `"min"`, `"max"`, or literal values). |
+| **`filter(...predicates)`** | Filters rows where all predicate expressions evaluate to `true`. |
+| **`groupBy(keys)`** | Groups data by one or more columns, returning a `GroupedData` object for aggregations. |
+| **`groupByDynamic(indexCol, options)`** | Dynamic time-series/numeric window grouping over tumbling, sliding, or rolling temporal intervals. |
+| **`head(n?)`** | Returns the first `n` rows of the DataFrame (defaults to 5). |
+| **`height`** | Getter returning the total number of rows in the DataFrame. |
+| **`insertColumn(index, name, values)`** | Inserts a new column at a specific zero-based index. |
+| **`item(row?, col?)`** | Returns an individual scalar cell value at the specified row and column coordinate. |
+| **`iterColumns()`** | Generator iterating over `{ name, values }` pairs for each column. |
+| **`iterRows()`** | Generator iterating over row record objects `{ [column]: value }`. |
+| **`join(other, onOrOptions, how?, suffixes?)`** | Relational joins (`"inner"`, `"left"`, `"right"`, `"outer"`, `"semi"`, `"anti"`, `"cross"`). |
+| **`joinAsof(other, options)`** | Inexact time-series / nearest-neighbor joins on sorted key columns. |
+| **`joinWhere(other, predicate, options?)`** | Arbitrary non-equi joins evaluated over candidate cartesian pairs. |
+| **`limit(n, options?)`** | Returns a subset of rows with optional `offset` and direction (`"start"` or `"end"`). |
+| **`pivot(index, columns, values)`** | Reshapes tabular data from long to wide format based on unique column keys. |
+| **`rename(mapping)`** | Renames columns using a `{ oldName: newName }` dictionary. |
+| **`reverse()`** | Reverses the row ordering of the DataFrame. |
+| **`schema`** | Getter returning the current column-to-`DataType` schema specification. |
+| **`select(...exprs)`** | Projects and evaluates column expressions, selectors, regex patterns, or struct unnesting. |
+| **`shape`** | Getter returning the `[height, width]` dimensions tuple. |
+| **`slice(start, end?)`** | Slices a continuous range of rows by start and end indices. |
+| **`sort(options)`** | Multi-column sorting with `descending`, `nullsLast`, and custom comparator functions. |
+| **`tail(n?)`** | Returns the last `n` rows of the DataFrame (defaults to 5). |
+| **`toArray()`** | Serializes the DataFrame into a two-dimensional row array (`any[][]`). |
+| **`toDict()`** | Serializes the DataFrame into a column-oriented dictionary `{ [col]: any[] }`. |
+| **`toDicts()`** | Serializes the DataFrame into an array of row objects `RowRecord[]`. |
+| **`transpose(options?)`** | Swaps rows and columns into a transposed DataFrame. |
+| **`unique(columns?)`** | Returns distinct rows, optionally deduplicating based on a subset of columns. |
+| **`unpivot(idVars, valueVars, varName?, valName?)`** | Melts wide columns into long format name-value pairs. |
+| **`unstack(step, options?)`** | Unstacks multi-level grouped columns. |
+| **`width`** | Getter returning the total number of columns in the DataFrame. |
+| **`withColumns(...exprs)`** | Adds or updates columns in-place using expression evaluations. |
+| **`withRowIndex(name?, offset?)`** | Inserts a zero-based or offset row index column into the DataFrame. |
+| **`writeCsv(file?, options?)`** | Serializes the DataFrame into RFC-4180 CSV string or writes to disk/stream. |
+| **`writeJson(file?, options?)`** | Serializes the DataFrame into JSON or NDJSON string or writes to disk/stream. |
 
 ---
 
-## 🧮 Expressions API Reference
+## 🧮 Column Expressions API Reference
 
-All column expressions inherit from `ExprBase` and support chaining.
+All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent chaining.
 
-### ➕ Arithmetic Expressions
-- `.add(val)`, `.sub(val)`, `.mul(val)`, `.div(val)`, `.floordiv(val)`, `.mod(val)`, `.pow(val)`
-- `.abs()`, `.sqrt()`, `.cbrt()`, `.exp()`, `.expm1()`, `.log(base?)`, `.log1p()`
-- `.ceil()`, `.floor()`, `.trunc()`, `.round(decimals)`, `.clip(lower, upper)`, `.sign()`, `.negate()`
-- `.sin()`, `.cos()`, `.tan()`, `.cot()`, `.sinh()`, `.cosh()`, `.tanh()`, `.arcsin()`, `.arccos()`, `.arctan()`, `.arctan2(val)`, `.arcsinh()`, `.arccosh()`, `.arctanh()`, `.degrees()`, `.radians()`, `.hypot(val)`
+### 1. Core & Math Expressions (Alphabetical)
 
-### 🔍 Comparison Expressions
-- `.eq(val)`, `.ne(val)` — Strict value equivalence (Kleene null-propagation).
-- `.eqMissing(val)`, `.neMissing(val)` — Null-safe equality treating null/undefined as equal.
-- `.gt(val)`, `.ge(val)`, `.lt(val)`, `.le(val)`
-- `.isNull()`, `.isNotNull()`
-- `.isFinite()`, `.isInfinite()`, `.isNan()`, `.isNotNan()`
-- `.isNDistinct(index, nullOnOob?)` — Matches the N-th distinct value by positive/negative index position.
-- `.isIn(arrayOrExpr)`, `.notIn(arrayOrExpr)`
-
-### ⚡ Aggregations
-- `.sum()`, `.product()`, `.avg()` / `.mean()`, `.median()`, `.mode()`, `.variance()`, `.std()`, `.skew()`, `.kurtosis()`, `.entropy(base?, normalize?)`
-- `.min()`, `.max()`, `.nanMin()`, `.nanMax()`, `.minBy(by)`, `.maxBy(by)`, `.argMin()`, `.argMax()`
-- `.count(options?)` — Options: `{ includeNulls: boolean }`.
-- `.first()`, `.last()`
-- `.any()`, `.all()`, `.anyNull()`, `.allNull()`, `.nUnique()`, `.nullCount()`
-- `.bitwiseAnd()`, `.bitwiseOr()`, `.bitwiseXor()`
-
-### 🔀 Control Flow & Conditionals
-Construct dynamic `CASE WHEN` branches using the `$df.when` API:
-```typescript
-import { $df } from "df-script";
-
-df.select(
-  $df.col("sales"),
-  $df.when($df.col("sales").gt(2000)).then("High Performance")
-     .when($df.col("sales").gt(1000)).then("Standard Performance")
-     .otherwise("Low Performance")
-     .alias("salesCategory")
-);
-```
+| Method | Description |
+| :--- | :--- |
+| **`abs`** | Computes element-wise absolute value. |
+| **`add`** | Element-wise addition with value or expression. |
+| **`all`** | Returns true if all elements evaluate to true (Kleene logic). |
+| **`allNull`** | Returns true if all elements in the expression are null or undefined. |
+| **`and`** | Logical AND with Kleene three-valued null logic. |
+| **`any`** | Returns true if at least one element evaluates to true. |
+| **`anyNull`** | Returns true if any element is null or undefined. |
+| **`arccos`** | Element-wise inverse cosine in radians. |
+| **`arccosh`** | Element-wise inverse hyperbolic cosine. |
+| **`arcsin`** | Element-wise inverse sine in radians. |
+| **`arcsinh`** | Element-wise inverse hyperbolic sine. |
+| **`arctan`** | Element-wise inverse tangent in radians. |
+| **`arctan2`** | Element-wise four-quadrant inverse tangent with second argument. |
+| **`arctanh`** | Element-wise inverse hyperbolic tangent. |
+| **`argMax`** | Returns the index of the first maximum value. |
+| **`argMin`** | Returns the index of the first minimum value. |
+| **`avg`** | Alias for mean(); computes the arithmetic mean. |
+| **`between`** | Evaluates if elements are within an inclusive or exclusive numeric/date range. |
+| **`bitwiseAnd`** | Bitwise AND (&) operation on integers. |
+| **`bitwiseOr`** | Bitwise OR (|) operation on integers. |
+| **`bitwiseXor`** | Bitwise XOR (^) operation on integers. |
+| **`cbrt`** | Computes element-wise cube root. |
+| **`ceil`** | Rounds numbers upward to the nearest integer. |
+| **`clip`** | Clamps values between a lower and upper boundary. |
+| **`copysign`** | Copies the sign of the magnitude argument to the target numbers. |
+| **`corr`** | Computes Pearson correlation coefficient with another column or expression. |
+| **`cos`** | Element-wise cosine in radians. |
+| **`cosh`** | Element-wise hyperbolic cosine. |
+| **`cot`** | Element-wise cotangent in radians. |
+| **`count`** | Counts non-null elements (or all elements with { includeNulls: true }). |
+| **`cov`** | Computes covariance with another column or expression. |
+| **`cumCount`** | Cumulative count of elements along the column. |
+| **`cumMax`** | Cumulative maximum value along the column. |
+| **`cumMin`** | Cumulative minimum value along the column. |
+| **`cumProd`** | Cumulative product of values along the column. |
+| **`cumSum`** | Cumulative running sum along the column. |
+| **`degrees`** | Converts angles from radians to degrees. |
+| **`denseRank`** | Computes dense rank window order without rank gaps. |
+| **`div`** | Element-wise division. |
+| **`dot`** | Computes dot product vector multiplication with another expression. |
+| **`entropy`** | Computes Shannon entropy (supports optional base and normalization). |
+| **`eq`** | Strict equality (==) with Kleene null propagation. |
+| **`eqMissing`** | Null-safe equality treating null and undefined as equivalent. |
+| **`exp`** | Computes natural exponential (e^x). |
+| **`expm1`** | Computes e^x - 1 with high precision for values near zero. |
+| **`fillNull`** | Fills null values with scalar values or forward/backward fill strategies. |
+| **`filter`** | Filters expression elements by a boolean predicate mask. |
+| **`first`** | Returns the first element of the expression or group. |
+| **`floor`** | Rounds numbers downward to the nearest integer. |
+| **`floordiv`** | Integer/floor division. |
+| **`ge`** | Greater than or equal to (>=) comparison. |
+| **`gt`** | Greater than (>) comparison. |
+| **`hasNulls`** | Returns true if column contains at least one null or undefined value. |
+| **`hypot`** | Computes hypotenuse sqrt(a^2 + b^2). |
+| **`implode`** | Aggregates elements into a single list/array column. |
+| **`isClose`** | Evaluates if numeric values are approximately equal within tolerances. |
+| **`isDuplicated`** | Returns boolean mask where true marks duplicated values. |
+| **`isFinite`** | Checks if number is finite (neither NaN, Infinity, nor -Infinity). |
+| **`isIn`** | Checks if value is present in a set or array of values. |
+| **`isInfinite`** | Checks if number is Infinity or -Infinity. |
+| **`isNDistinct`** | Matches the N-th distinct value in order (supports negative index). |
+| **`isNan`** | Checks if numeric value is NaN. |
+| **`isNotNan`** | Checks if numeric value is not NaN. |
+| **`isNotNull`** | Checks if value is neither null nor undefined. |
+| **`isNull`** | Checks if value is null or undefined. |
+| **`isUnique`** | Returns boolean mask where true marks unique (non-duplicated) values. |
+| **`kurtosis`** | Computes fourth standardized moment (peakedness/kurtosis). |
+| **`lag`** | Shifts values backward by offset within partition window. |
+| **`last`** | Returns the last element of the expression or group. |
+| **`le`** | Less than or equal to (<=) comparison. |
+| **`lead`** | Shifts values forward by offset within partition window. |
+| **`log`** | Computes logarithm with optional base (defaults to natural log). |
+| **`log1p`** | Computes natural log of (1 + x) for values near zero. |
+| **`lt`** | Less than (<) comparison. |
+| **`max`** | Returns the maximum non-null value. |
+| **`maxBy`** | Returns the value of this expression where another expression achieves maximum. |
+| **`mean`** | Computes the arithmetic average of non-null numbers. |
+| **`median`** | Computes the 50th percentile median value. |
+| **`min`** | Returns the minimum non-null value. |
+| **`minBy`** | Returns the value of this expression where another expression achieves minimum. |
+| **`mod`** | Modulo division remainder. |
+| **`mode`** | Computes the most frequently occurring value(s). |
+| **`mul`** | Element-wise multiplication. |
+| **`nUnique`** | Returns the count of distinct non-null values. |
+| **`nanMax`** | Returns maximum treating NaN values according to IEEE 754 rules. |
+| **`nanMin`** | Returns minimum treating NaN values according to IEEE 754 rules. |
+| **`ne`** | Strict inequality (!=) with Kleene null propagation. |
+| **`neMissing`** | Null-safe inequality. |
+| **`negate`** | Negates numeric values (-x). |
+| **`not`** | Logical NOT operator. |
+| **`notIn`** | Checks if value is not present in a set or array. |
+| **`nullCount`** | Returns the total count of null and undefined values. |
+| **`or`** | Logical OR with Kleene three-valued null logic. |
+| **`over`** | Evaluates the expression over an analytical partition window (grouping keys). |
+| **`pow`** | Computes exponentiation (x^y). |
+| **`product`** | Computes product of all non-null values. |
+| **`quantile`** | Computes quantile value at probability p (0 <= p <= 1). |
+| **`radians`** | Converts angles from degrees to radians. |
+| **`rand`** | Generates uniform pseudo-random values between 0 and 1. |
+| **`rank`** | Computes competition rank order (1, 2, 2, 4). |
+| **`reverse`** | Reverses the element order of the column. |
+| **`rolling`** | Evaluates custom function or expression over a sliding window. |
+| **`rollingMax`** | Computes rolling maximum over a sliding window. |
+| **`rollingMean`** | Computes rolling moving average over a sliding window. |
+| **`rollingMedian`** | Computes rolling median over a sliding window. |
+| **`rollingMin`** | Computes rolling minimum over a sliding window. |
+| **`rollingQuantile`** | Computes rolling quantile over a sliding window. |
+| **`rollingRank`** | Computes rolling rank over a sliding window. |
+| **`rollingStd`** | Computes rolling standard deviation over a sliding window. |
+| **`rollingSum`** | Computes rolling sum over a sliding window. |
+| **`round`** | Rounds numbers to specified decimal places. |
+| **`roundSigFigs`** | Rounds numbers to a specified number of significant figures. |
+| **`rowNumber`** | Computes sequential 1-based row index within partition window. |
+| **`shift`** | Shifts column values by a signed offset (filling empty cells with null). |
+| **`sign`** | Extracts sign of number (-1, 0, 1). |
+| **`sin`** | Element-wise sine in radians. |
+| **`sinh`** | Element-wise hyperbolic sine. |
+| **`skew`** | Computes third standardized moment (skewness asymmetry). |
+| **`spearmanCorr`** | Computes Spearman rank correlation coefficient. |
+| **`sqrt`** | Computes square root. |
+| **`std`** | Computes sample standard deviation. |
+| **`sub`** | Element-wise subtraction. |
+| **`sum`** | Computes sum of all non-null numeric values. |
+| **`tan`** | Element-wise tangent in radians. |
+| **`tanh`** | Element-wise hyperbolic tangent. |
+| **`trunc`** | Truncates fractional parts toward zero. |
+| **`variance`** | Computes sample variance. |
+| **`wAvg`** | Computes weighted average using weight expression. |
+| **`xor`** | Logical exclusive OR (XOR). |
 
 ---
 
-## 📂 Namespaces
+## 📂 Namespaces API Reference
 
-Specific domain transforms are grouped under dedicated namespaces:
+Specific domain transforms are grouped under dedicated, clean namespaces with full IDE autocomplete:
 
-### 🔤 String Operations (`.str`)
-Available on any expression via `.str`:
-```typescript
-$df.col("name").str.lower()
-$df.col("code").str.startsWith("A")
-$df.col("description").str.replace(/foo/i, "bar")
-```
-- **Methods**: `lower()`, `upper()`, `toTitlecase()`, `len()`, `lenBytes()`, `lenChars()`, `trim()`, `trimStart()`, `trimEnd()`, `startsWith(pfx)`, `endsWith(sfx)`, `contains(pat)`, `containsAny(pats)`, `countMatches(pat)`, `find(pat)`, `findMany(pats)`, `replace(pat, repl)`, `replaceAll(pat, repl)`, `replaceMany(pats, repls)`, `slice(offset, len?)`, `split(delim, options?)`, `explode()`, `reverse()`, `lpad(w, f)`, `rpad(w, f)`, `zfill(w)`, `stripChars(chars?)`, `stripCharsStart(chars?)`, `stripCharsEnd(chars?)`, `stripPrefix(pfx)`, `stripSuffix(sfx)`, `escapeRegex()`, `extract(pat, group?)`, `extractAll(pat)`, `extractGroups(pat)`, `extractMany(pats)`, `encode(enc)`, `decode(enc, strict?)`, `jsonDecode(options?)`, `jsonPathMatch(path)`, `normalize(form?)`, `join(sep)`, `strptime(fmt, strict?)`, `toInteger()`, `toDecimal(p, s)`, `toDate()`, `toDatetime()`, `toTime()`.
+### 🔤 String Namespace (`.str`)
 
-### 📅 Temporal Operations (`.dt`)
-Available on datetime or duration values via `.dt`:
-```typescript
-$df.col("timestamp").dt.year()
-$df.col("timestamp").dt.convertTimeZone("America/New_York")
-$df.col("duration").dt.totalSeconds()
-```
-- **Datetime Methods**: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `millisecond()`, `microsecond()`, `nanosecond()`, `weekday()`, `week()`, `quarter()`, `century()`, `millennium()`, `ordinalDay()`, `isLeapYear()`, `monthStart()`, `monthEnd()`, `date()`, `time()`, `offsetDay(n, options?)`, `offsetBusinessDay(n, options?)`, `convertTimeZone(tz)`, `castTimeUnit(unit)`, `withTimeUnit(unit)`, `replace(options)`, `truncate(every)`, `utcOffset(tz?, options?)`, `epoch(unit)`, `timestamp(unit)`, `strftime(fmt, locale?)`.
-- **Duration Methods**: `totalDays()`, `totalHours()`, `totalMinutes()`, `totalSeconds()`, `totalMilliseconds()`, `totalMicroseconds()`, `totalNanoseconds()`.
+| Method | Description |
+| :--- | :--- |
+| **`.str.concat`** | Concatenates strings across columns or literal arguments. |
+| **`.str.contains`** | Checks if string contains substring or matches RegExp pattern. |
+| **`.str.containsAny`** | Checks if string contains any substring from a list. |
+| **`.str.countMatches`** | Counts non-overlapping occurrences of pattern or substring. |
+| **`.str.decode`** | Decodes binary bytes/strings using specified encoding (hex, base64, etc.). |
+| **`.str.decodeUriComponent`** | Decodes URI-encoded characters. |
+| **`.str.encode`** | Encodes strings to binary formats (hex, base64, utf8). |
+| **`.str.encodeUriComponent`** | Encodes string components for safe URI transmission. |
+| **`.str.endsWith`** | Checks if string ends with specified suffix. |
+| **`.str.escapeRegex`** | Escapes regex metacharacters in string for literal matching. |
+| **`.str.explode`** | Splits string by delimiter and explodes into multiple rows. |
+| **`.str.extract`** | Extracts first matching regex capture group (supports group index or name). |
+| **`.str.extractAll`** | Extracts all regex match occurrences as an array of strings. |
+| **`.str.extractGroups`** | Extracts all named and numbered capture groups as a struct record. |
+| **`.str.extractMany`** | Extracts matches from multiple regex patterns with leftmost tie-breaking. |
+| **`.str.find`** | Finds zero-based character index of first match (or null if not found). |
+| **`.str.findMany`** | Finds character indices of multiple patterns simultaneously. |
+| **`.str.head`** | Extracts the first n characters of the string. |
+| **`.str.join`** | Joins string values across rows or groups using a delimiter. |
+| **`.str.jsonDecode`** | Parses JSON string into typed struct/object or list column. |
+| **`.str.jsonPathMatch`** | Extracts values matching a JSONPath query expression. |
+| **`.str.len`** | Returns string character count. |
+| **`.str.lenBytes`** | Returns UTF-8 encoded byte count of the string. |
+| **`.str.lenChars`** | Returns Unicode code point count (surrogate-pair aware). |
+| **`.str.lower`** | Converts ASCII/Unicode characters to lowercase. |
+| **`.str.lpad`** | Pads string on the left up to specified width. |
+| **`.str.normalize`** | Applies Unicode normalization form (NFC, NFD, NFKC, NFKD). |
+| **`.str.padEnd`** | Alias for rpad(); pads string on the right. |
+| **`.str.padStart`** | Alias for lpad(); pads string on the left. |
+| **`.str.replace`** | Replaces first pattern match with replacement string or function. |
+| **`.str.replaceAll`** | Replaces all pattern matches across the string. |
+| **`.str.replaceMany`** | Replaces multiple patterns in a single pass with conflict resolution. |
+| **`.str.reverse`** | Reverses characters in the string. |
+| **`.str.rpad`** | Pads string on the right up to specified width. |
+| **`.str.slice`** | Extracts a substring slice by offset and length. |
+| **`.str.split`** | Splits string by delimiter into a list/array of substrings. |
+| **`.str.startsWith`** | Checks if string starts with specified prefix. |
+| **`.str.stripChars`** | Strips specified leading and trailing characters (defaults to whitespace). |
+| **`.str.stripCharsEnd`** | Strips specified trailing characters from the end of the string. |
+| **`.str.stripCharsStart`** | Strips specified leading characters from the start of the string. |
+| **`.str.stripPrefix`** | Removes prefix from start of string if present. |
+| **`.str.stripSuffix`** | Removes suffix from end of string if present. |
+| **`.str.strptime`** | Parses string to Datetime or Date using format specifiers. |
+| **`.str.tail`** | Extracts the last n characters of the string. |
+| **`.str.toCamelCase`** | Converts string to camelCase. |
+| **`.str.toDate`** | Parses ISO 8601 date string to Date. |
+| **`.str.toDatetime`** | Parses ISO 8601 datetime string to Datetime. |
+| **`.str.toDecimal`** | Parses numeric string to fixed-point Decimal(precision, scale). |
+| **`.str.toInteger`** | Parses numeric string to integer (Int8..Int64, UInt8..UInt64). |
+| **`.str.toKebabCase`** | Converts string to kebab-case. |
+| **`.str.toLowerCase`** | Alias for lower(). |
+| **`.str.toPascalCase`** | Converts string to PascalCase. |
+| **`.str.toSnakeCase`** | Converts string to snake_case. |
+| **`.str.toTime`** | Parses time string (HH:MM:SS) to Time. |
+| **`.str.toTitleCase`** | Converts string to Title Case. |
+| **`.str.toUpperCase`** | Alias for upper(). |
+| **`.str.upper`** | Converts ASCII/Unicode characters to uppercase. |
+| **`.str.zfill`** | Pads string on the left with zeros up to specified width. |
 
-### 📊 Array/List Operations (`.arr`)
-Available on array/list column expressions via `.arr`:
-```typescript
-$df.col("tags").arr.contains("vip")
-$df.col("numbers").arr.eval($df.element().mul(2)).alias("numbersDoubled")
-```
-- **Methods**: `lengths()`, `len()`, `get(idx, nullOnOob?)`, `first(nullOnOob?)`, `last(nullOnOob?)`, `gather(indices, nullOnOob?)`, `gatherEvery(n, offset?)`, `slice(offset, len?)`, `contains(item)`, `countMatches(item)`, `join(sep)`, `sort(descending?)`, `reverse()`, `unique()`, `sum()`, `mean()`, `median()`, `mode()`, `min()`, `max()`, `argMin()`, `argMax()`, `agg(expr)`, `eval(expr)`.
+### 📅 Temporal Namespace (`.dt`)
 
-### 🗃️ Struct/Object Operations (`.struct`)
-Available on nested struct/object column expressions via `.struct`:
-```typescript
-// Sibling fields access via Proxy
-$df.col("address").struct.city.alias("city")
+| Method | Description |
+| :--- | :--- |
+| **`.dt.castTimeUnit`** | Casts duration/timestamp to target time unit precision. |
+| **`.dt.century`** | Extracts 1-based Gregorian century. |
+| **`.dt.convertTimeZone`** | Converts datetime to target IANA timezone. |
+| **`.dt.date`** | Extracts Date component (zeroing time component). |
+| **`.dt.day`** | Extracts 1-based day of month (1-31). |
+| **`.dt.daysInMonth`** | Returns number of days in the current month (28-31). |
+| **`.dt.epoch`** | Returns elapsed units since Unix Epoch (1970-01-01T00:00:00Z). |
+| **`.dt.hour`** | Extracts hour of day (0-23). |
+| **`.dt.isBusinessDay`** | Returns true if date falls on Monday through Friday. |
+| **`.dt.isLeapYear`** | Returns true if calendar year is a leap year. |
+| **`.dt.isoWeek`** | Extracts ISO 8601 week number (1-53). |
+| **`.dt.isoYear`** | Extracts ISO 8601 week-numbering year. |
+| **`.dt.microsecond`** | Extracts microsecond component (0-999). |
+| **`.dt.millennium`** | Extracts 1-based Gregorian millennium. |
+| **`.dt.millisecond`** | Extracts millisecond component (0-999). |
+| **`.dt.minute`** | Extracts minute of hour (0-59). |
+| **`.dt.month`** | Extracts 1-based month of year (1-12). |
+| **`.dt.monthEnd`** | Snaps date to the final calendar day of the current month. |
+| **`.dt.monthStart`** | Snaps date to the first calendar day of the current month. |
+| **`.dt.nanosecond`** | Extracts nanosecond component (0-999). |
+| **`.dt.offsetDay`** | Adds or subtracts signed integer calendar days. |
+| **`.dt.ordinalDay`** | Extracts 1-based day of year (1-366). |
+| **`.dt.quarter`** | Extracts calendar quarter (1-4). |
+| **`.dt.replace`** | Replaces specific datetime components (year, month, day, etc.). |
+| **`.dt.second`** | Extracts second of minute (0-59). |
+| **`.dt.strftime`** | Formats datetime as a string using strftime-style format specifiers. |
+| **`.dt.time`** | Extracts Time component (microseconds since midnight). |
+| **`.dt.timestamp`** | Returns Unix timestamp in specified time unit. |
+| **`.dt.totalDays`** | Computes total fractional duration in days. |
+| **`.dt.totalHours`** | Computes total fractional duration in hours. |
+| **`.dt.totalMicroseconds`** | Computes total duration in integer/fractional microseconds. |
+| **`.dt.totalMilliseconds`** | Computes total fractional duration in milliseconds. |
+| **`.dt.totalMinutes`** | Computes total fractional duration in minutes. |
+| **`.dt.totalNanoseconds`** | Computes total duration in integer/fractional nanoseconds. |
+| **`.dt.totalSeconds`** | Computes total fractional duration in seconds. |
+| **`.dt.utcOffset`** | Returns timezone UTC offset in minutes or milliseconds. |
+| **`.dt.week`** | Extracts calendar week number. |
+| **`.dt.weekday`** | Extracts day of week (1 = Monday, 7 = Sunday). |
+| **`.dt.year`** | Extracts calendar year. |
 
-// Struct unnesting (flattens fields to top-level columns in select)
-df.select($df.col("address").struct.unnest())
-```
-- **Methods**: `field(name)`, `renameFields(mapping)`, `withFields(fields)`, `unnest()`.
+### 📊 Array/List Namespace (`.arr`)
 
----
+| Method | Description |
+| :--- | :--- |
+| **`.arr.agg`** | Aggregates elements of each list row using an aggregation expression. |
+| **`.arr.all`** | Returns true if all elements in the list row are truthy (Kleene logic). |
+| **`.arr.any`** | Returns true if at least one element in the list row is truthy. |
+| **`.arr.argMax`** | Returns the index of the first maximum element in each list row. |
+| **`.arr.argMin`** | Returns the index of the first minimum element in each list row. |
+| **`.arr.contains`** | Checks if list row contains the specified literal item. |
+| **`.arr.containsAll`** | Checks if list row contains all items in the candidate set. |
+| **`.arr.containsAny`** | Checks if list row contains any item in the candidate set. |
+| **`.arr.countMatches`** | Counts occurrences of the target item in each list row. |
+| **`.arr.eval`** | Evaluates an expression element-wise over each list item using $df.element(). |
+| **`.arr.explode`** | Explodes/unnests list rows into individual scalar rows. |
+| **`.arr.filter`** | Filters list row elements using an element-wise predicate expression. |
+| **`.arr.first`** | Extracts the first element of each list row (supports nullOnOob). |
+| **`.arr.gather`** | Gathers elements at specified indices (supports negative indexing). |
+| **`.arr.gatherEvery`** | Gathers elements at periodic interval steps with optional offset. |
+| **`.arr.get`** | Extracts element at zero-based index (supports negative indexing). |
+| **`.arr.join`** | Joins array elements into a string separated by delimiter. |
+| **`.arr.last`** | Extracts the last element of each list row (supports nullOnOob). |
+| **`.arr.len`** | Returns the element count of each list row. |
+| **`.arr.lengths`** | Alias for len(); returns length of each list row. |
+| **`.arr.max`** | Computes maximum element in each list row. |
+| **`.arr.mean`** | Computes arithmetic mean of numeric elements in each list row. |
+| **`.arr.median`** | Computes median value of numeric elements in each list row. |
+| **`.arr.min`** | Computes minimum element in each list row. |
+| **`.arr.mode`** | Computes most frequent element(s) in each list row. |
+| **`.arr.nUnique`** | Returns count of distinct elements in each list row. |
+| **`.arr.reverse`** | Reverses element ordering in each list row. |
+| **`.arr.shift`** | Shifts list elements by offset, filling vacated slots with null. |
+| **`.arr.slice`** | Slices a sub-array from offset with optional length. |
+| **`.arr.sort`** | Sorts elements of each list row with optional descending flag. |
+| **`.arr.splice`** | Deletes and/or inserts elements at an index in each list row. |
+| **`.arr.std`** | Computes sample standard deviation of elements in each list row. |
+| **`.arr.sum`** | Computes sum of numeric elements in each list row. |
+| **`.arr.toStruct`** | Converts array elements into a struct object with indexed/custom field names. |
+| **`.arr.unique`** | Deduplicates elements within each list row. |
+| **`.arr.variance`** | Computes sample variance of elements in each list row. |
 
-## 🪟 Window & Rolling Expressions
+### 🗃️ Struct/Object Namespace (`.struct`)
 
-Analytical partition window operations using `.over()` and moving calculations:
-
-```typescript
-df.select(
-  $df.col("department"),
-  $df.col("sales"),
-  $df.col("sales").sum().over("department").alias("deptTotalSales"),
-  $df.col("sales").cumSum().over("department").alias("deptRunningSales"),
-  $df.all().rowNumber().over("department").alias("deptRank")
-);
-```
-
-### 1. Cumulative Windows
-- `.cumSum(reverse?)`, `.cumProd(reverse?)`, `.cumMin(reverse?)`, `.cumMax(reverse?)`, `.cumCount(reverse?)`
-
-### 2. Rolling Metrics (Moving Window)
-- **Generic Rolling Reducer**: `.rolling(sizeOrOptions, exprOrFn)` (evaluates custom functions or `$df` column expressions over each sliding window).
-- **Specialized Rolling Reducers**: `.rollingSum(size)`, `.rollingMean(size)`, `.rollingMedian(size)`, `.rollingMin(size)`, `.rollingMax(size)`, `.rollingStd(size)`, `.rollingRank(size)`, `.rollingQuantile(quantile, size)`
-
-### 3. Positional & Rank Windows
-- `.lead(offset, defaultVal?)`, `.lag(offset, defaultVal?)`, `.rank()`, `.denseRank()`, `.rowNumber()`
+| Method | Description |
+| :--- | :--- |
+| **`.struct.field`** | Extracts a specific nested field from the struct column. |
+| **`.struct.renameFields`** | Renames nested struct fields using a dictionary mapping. |
+| **`.struct.unnest`** | Unnests/flattens all struct fields into individual top-level columns in select(). |
+| **`.struct.withFields`** | Adds or overrides fields within the struct column. |
 
 ---
 

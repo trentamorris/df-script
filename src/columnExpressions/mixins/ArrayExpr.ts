@@ -691,7 +691,7 @@ export class ArrayExprNamespace {
      */
     splice(start: number, deleteCount?: number, ...items: any[]) {
         return this._deriveArray((arr) => {
-            const copy = [...arr];
+            const copy = Array.from(arr);
             copy.splice(start, deleteCount ?? copy.length, ...items);
             return copy;
         });

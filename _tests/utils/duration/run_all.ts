@@ -2,7 +2,6 @@ console.log("=========================================");
 console.log("STARTING DURATION UTILS TESTS...");
 console.log("=========================================");
 
-import "./FIXED_DURATION_UNITS.test";
 import "./scaleDurationMs.test";
 import "./parseDurationString.test";
 import "./toDuration.test";

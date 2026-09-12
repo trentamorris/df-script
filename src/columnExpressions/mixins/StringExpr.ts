@@ -35,8 +35,8 @@ import {
     splitString,
     replaceString,
     replaceManyString,
+    extractRegexEngine,
     toCleanRegExp,
-    extractRegexGroups,
     toValidArray,
     joinArray,
     JoinArrayOptions,
@@ -374,9 +374,9 @@ export class StringExprNamespace {
      * │ admin@test.org   │ { user: "admin", domain: "test" }  │
      * └──────────────────┴────────────────────────────────────┘
      */
-    extractGroups(pattern: string | RegExp, options: ExtractManyOptions = {}) {
+    extractGroups(pattern: string | RegExp, options: ExtractRegexEngineOptions = {}) {
         return this._patternGuard(pattern, () =>
-            this._deriveString((str) => extractRegexGroups(str, pattern, options))
+            this._deriveString((str) => extractRegexEngine(str, pattern, options)?.[0] ?? null)
         );
     }
 

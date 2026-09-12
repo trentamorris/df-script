@@ -151,7 +151,7 @@ export function stripChars(
 
         for (let i = startIdx; i !== endIdx; i += step) {
             const m = matches[i];
-            const skipped = isStart ? (m.start - lastPos) : (lastPos - m.end);
+            const skipped = isStart ? (m._start - lastPos) : (lastPos - m._end);
 
             if (skipped > 0) {
                 totalSkipped += skipped;
@@ -161,9 +161,9 @@ export function stripChars(
             if (skipped > 0 || literal || blockCount === 0) blockCount++;
             if (maxMatches !== null && maxMatches >= 0 && blockCount > maxMatches) break;
 
-            stripped.fill(1, m.start, m.end);
+            stripped.fill(1, m._start, m._end);
             hasStripped = true;
-            lastPos = isStart ? m.end : m.start;
+            lastPos = isStart ? m._end : m._start;
         }
     };
 
@@ -589,20 +589,27 @@ function _resolveGroupRecord(
     return targetIndex >= 1 ? (record[String(targetIndex)] ?? null) : null;
 }
 
+type CandidateMatch<T = unknown> = {
+    _i: number;
+    _start: number;
+    _end: number;
+    _payload: T;
+};
+
 function _collectPatternCandidates<T>(
     input: string,
     pattern: string | RegExp,
     patternIndex: number,
     options: { literal?: boolean; mode?: EscapeRegexOptions["mode"]; asciiCaseInsensitive?: boolean } | undefined,
     createPayload: (match: RegExpExecArray, start: number, end: number) => T
-): { start: number; end: number; patternIndex: number; payload: T }[] {
+): CandidateMatch<T>[] {
     const { literal = false, mode, asciiCaseInsensitive = false } = options ?? {};
     const escapedPat = literal ? escapeRegExp(pattern, { mode }) : pattern;
     const cleanObj = toCleanRegExp(input, escapedPat, { global: true, asciiCaseInsensitive });
     const reg = cleanObj?.reg ?? null;
     if (!reg) return [];
 
-    const candidates: { start: number; end: number; patternIndex: number; payload: T }[] = [];
+    const candidates: CandidateMatch<T>[] = [];
     reg.lastIndex = 0;
     let match: RegExpExecArray | null;
 
@@ -611,7 +618,7 @@ function _collectPatternCandidates<T>(
         const end = reg.lastIndex;
         const payload = createPayload(match, start, end);
 
-        candidates.push({ start, end, patternIndex, payload });
+        candidates.push({ _i: patternIndex, _start: start, _end: end, _payload: payload });
 
         if (start === end) {
             if (start === input.length) break;
@@ -621,22 +628,20 @@ function _collectPatternCandidates<T>(
     return candidates;
 }
 
-function _selectLeftmostCandidates<T extends { start: number; end: number; patternIndex?: number; i?: number }>(candidates: T[]): T[] {
+function _selectLeftmostCandidates<T>(candidates: CandidateMatch<T>[]): CandidateMatch<T>[] {
     if (candidates.length <= 1) return candidates;
     candidates.sort((a, b) => {
-        if (a.start !== b.start) return a.start - b.start;
-        const idxA = a.patternIndex ?? a.i ?? 0;
-        const idxB = b.patternIndex ?? b.i ?? 0;
-        return idxA - idxB;
+        if (a._start !== b._start) return a._start - b._start;
+        return a._i - b._i;
     });
-    const selected: T[] = [];
+    const selected: CandidateMatch<T>[] = [];
     let lastPos = 0;
     const len = candidates.length;
     for (let i = 0; i < len; i++) {
         const c = candidates[i];
-        if (c.start >= lastPos) {
+        if (c._start >= lastPos) {
             selected.push(c);
-            lastPos = c.end;
+            lastPos = c._end;
         }
     }
     return selected;
@@ -668,8 +673,7 @@ function _matchManyCore<T>(
         return result;
     }
 
-    type Candidate = { i: number; start: number; end: number; payload: T };
-    const candidates: Candidate[] = [];
+    const candidates: CandidateMatch<T>[] = [];
 
     for (let i = 0; i < len; i++) {
         const res = extractRegexEngine(str, list[i], { ...engineOpts, global: false });
@@ -677,10 +681,10 @@ function _matchManyCore<T>(
             const start = Number(res[0]._index);
             const matchLen = res[0]["0"]?.length ?? 0;
             candidates.push({
-                i,
-                start,
-                end: start + matchLen,
-                payload: resolvePayload(res[0], start)
+                _i: i,
+                _start: start,
+                _end: start + matchLen,
+                _payload: resolvePayload(res[0], start)
             });
         }
     }
@@ -690,7 +694,7 @@ function _matchManyCore<T>(
 
     const selected = isLeftmost ? _selectLeftmostCandidates(candidates) : [];
     if (!isLeftmost) {
-        candidates.sort((a, b) => a.i - b.i);
+        candidates.sort((a, b) => a._i - b._i);
         const candLen = candidates.length;
         for (let i = 0; i < candLen; i++) {
             const c = candidates[i];
@@ -699,10 +703,10 @@ function _matchManyCore<T>(
             for (let j = 0; j < selLen; j++) {
                 const a = selected[j];
                 let isOverlapping = false;
-                if (c.start === c.end && a.start === a.end) isOverlapping = c.start === a.start;
-                else if (a.start === a.end) isOverlapping = a.start >= c.start && a.start < c.end;
-                else if (c.start === c.end) isOverlapping = c.start >= a.start && c.start < a.end;
-                else isOverlapping = c.start < a.end && c.end > a.start;
+                if (c._start === c._end && a._start === a._end) isOverlapping = c._start === a._start;
+                else if (a._start === a._end) isOverlapping = a._start >= c._start && a._start < c._end;
+                else if (c._start === c._end) isOverlapping = c._start >= a._start && c._start < a._end;
+                else isOverlapping = c._start < a._end && c._end > a._start;
                 if (isOverlapping) {
                     overlaps = true;
                     break;
@@ -714,7 +718,7 @@ function _matchManyCore<T>(
 
     for (let i = 0; i < selected.length; i++) {
         const c = selected[i];
-        result[c.i] = c.payload;
+        result[c._i] = c._payload;
     }
 
     return result;
@@ -765,14 +769,6 @@ export function extractRegexAll(
     const result = new Array<string | null>(res.length);
     for (let i = 0; i < res.length; i++) result[i] = _resolveGroupRecord(res[i], groupIndex);
     return result;
-}
-
-export function extractRegexGroups(
-    str: string | null | undefined,
-    pattern: string | RegExp,
-    options?: ExtractManyOptions
-): Record<string, string | null> | null {
-    return extractRegexEngine(str, pattern, options)?.[0] ?? null;
 }
 
 export function extractRegexMany(
@@ -859,7 +855,7 @@ export function splitString(
 
     pattern.lastIndex = 0;
 
-    let parts: (string | null)[] = [];
+    const parts: (string | null)[] = [];
     let lastIndex = 0;
     let matchCount = 0;
     const maxSplits = limit != null && limit >= 0 ? limit : Infinity;
@@ -871,16 +867,8 @@ export function splitString(
 
         if (matchStart === matchEnd) {
             if (matchStart === str.length) break;
-
-            if (matchStart > 0 && matchStart >= lastIndex) {
-                parts.push(str.slice(lastIndex, matchStart));
-                matchCount++;
-                lastIndex = matchStart;
-                if (matchCount >= maxSplits) break;
-            }
-
             pattern.lastIndex = matchStart + _getCodePointStep(str, matchStart);
-            continue;
+            if (matchStart === 0) continue;
         }
 
         parts.push(str.slice(lastIndex, inclusive ? matchEnd : matchStart));
@@ -893,12 +881,10 @@ export function splitString(
     if (limit == null || limit < 0) return parts;
 
     const targetCount = limit + 1;
-
     if (strict && parts.length < targetCount) {
         throw new InvalidArgumentError(`Expected ${targetCount} parts, got ${parts.length}`);
     }
-
-    if (exact && parts.length < targetCount) {
+    if (exact) {
         while (parts.length < targetCount) parts.push(null);
     }
 
@@ -996,27 +982,21 @@ export function replaceManyString(
     const len = patList.length;
     if (len === 0) return input;
 
-    let repList: (string | ((match: string, ...args: any[]) => string))[] | null = null;
-    let scalarRep: string | ((match: string, ...args: any[]) => string) | null = null;
+    if (!isObj && replaceWith == null) return input;
 
-    if (isObj) {
-        repList = Object.values(patterns);
-    } else if (Array.isArray(replaceWith)) {
-        if (replaceWith.length === 1 && len > 1) scalarRep = replaceWith[0];
-        else if (replaceWith.length !== len) throw new InvalidArgumentError(`replaceMany length mismatch: expected ${len}, got ${replaceWith.length}`);
-        else repList = replaceWith;
-    } else if (replaceWith != null) {
-        scalarRep = replaceWith;
-    } else {
-        return input;
+    if (Array.isArray(replaceWith) && replaceWith.length !== len) {
+        if (replaceWith.length !== 1) throw new InvalidArgumentError(`replaceMany length mismatch: expected ${len}, got ${replaceWith.length}`);
+        replaceWith = replaceWith[0];
     }
 
-    type Candidate = { start: number; end: number; patternIndex: number; payload: string };
-    const candidates: Candidate[] = [];
+    const isList = isObj || Array.isArray(replaceWith);
+    const repList = isObj ? Object.values(patterns) : (replaceWith as any[]);
+
+    const candidates: CandidateMatch<string>[] = [];
 
     for (let i = 0; i < len; i++) {
         const pat = patList[i];
-        const rawRep = repList ? repList[i] : scalarRep;
+        const rawRep = isList ? repList[i] : replaceWith;
         if (pat == null || rawRep == null) continue;
 
         const isFn = typeof rawRep === "function";
@@ -1045,8 +1025,8 @@ export function replaceManyString(
 
     for (let i = 0; i < selLen; i++) {
         const c = selected[i];
-        result += input.slice(lastIndex, c.start) + c.payload;
-        lastIndex = c.end;
+        result += input.slice(lastIndex, c._start) + c._payload;
+        lastIndex = c._end;
     }
 
     return result + input.slice(lastIndex);

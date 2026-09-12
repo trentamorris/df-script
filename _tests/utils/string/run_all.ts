@@ -10,7 +10,6 @@ import "./toCleanRegExp.test";
 import "./extractRegexEngine.test";
 import "./extractRegex.test";
 import "./extractRegexAll.test";
-import "./extractRegexGroups.test";
 import "./extractRegexMany.test";
 import "./findRegex.test";
 import "./findManyRegex.test";

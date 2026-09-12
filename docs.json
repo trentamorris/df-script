@@ -1681,7 +1681,7 @@
       "syntax": "$df.col(<column_name>).fillNull(...)",
       "signature": "$df.col(<column_name>).fillNull(\n  {\n    value = undefined,\n    strategy = undefined,\n    limit = undefined\n  }: FillNullOptions = {}\n): this",
       "lineStart": 986,
-      "lineEnd": 1042
+      "lineEnd": 1036
     },
     "filter": {
       "desc": "Filters elements of the column expression where the predicate evaluates to truthy.",
@@ -1699,8 +1699,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).filter(...)",
       "signature": "$df.col(<column_name>).filter(\n  predicate: IExpr\n)",
-      "lineStart": 1059,
-      "lineEnd": 1064
+      "lineStart": 1053,
+      "lineEnd": 1058
     },
     "first": {
       "desc": "Aggregation: Finds the first value in the group.",
@@ -1712,8 +1712,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).first(...)",
       "signature": "$df.col(<column_name>).first()",
-      "lineStart": 1080,
-      "lineEnd": 1082
+      "lineStart": 1074,
+      "lineEnd": 1076
     },
     "floor": {
       "desc": "Rounds column values down to the nearest integer.",
@@ -1725,8 +1725,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).floor(...)",
       "signature": "$df.col(<column_name>).floor()",
-      "lineStart": 1099,
-      "lineEnd": 1101
+      "lineStart": 1093,
+      "lineEnd": 1095
     },
     "floordiv": {
       "desc": "Performs integer division floor(x / y) on column values.",
@@ -1744,8 +1744,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).floordiv(...)",
       "signature": "$df.col(<column_name>).floordiv(\n  val: NumericArg\n)",
-      "lineStart": 1119,
-      "lineEnd": 1121
+      "lineStart": 1113,
+      "lineEnd": 1115
     },
     "ge": {
       "desc": "Boolean comparison: Returns true if greater than or equal to argument.",
@@ -1763,8 +1763,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ge(...)",
       "signature": "$df.col(<column_name>).ge(\n  val: any\n)",
-      "lineStart": 1139,
-      "lineEnd": 1141
+      "lineStart": 1133,
+      "lineEnd": 1135
     },
     "gt": {
       "desc": "Boolean comparison: Returns true if column value is greater than argument.",
@@ -1782,8 +1782,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).gt(...)",
       "signature": "$df.col(<column_name>).gt(\n  val: any\n)",
-      "lineStart": 1159,
-      "lineEnd": 1161
+      "lineStart": 1153,
+      "lineEnd": 1155
     },
     "hasNulls": {
       "desc": "Aggregation: Checks if any value in the group is null.",
@@ -1795,8 +1795,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).hasNulls(...)",
       "signature": "$df.col(<column_name>).hasNulls()",
-      "lineStart": 1176,
-      "lineEnd": 1178
+      "lineStart": 1170,
+      "lineEnd": 1172
     },
     "hypot": {
       "desc": "Computes the hypotenuse sqrt(x^2 + y^2) of two values.",
@@ -1814,8 +1814,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).hypot(...)",
       "signature": "$df.col(<column_name>).hypot(\n  val: NumericArg\n)",
-      "lineStart": 1196,
-      "lineEnd": 1198
+      "lineStart": 1190,
+      "lineEnd": 1192
     },
     "implode": {
       "desc": "Aggregation: Combines all values in the group into a single array/list cell.",
@@ -1827,8 +1827,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).implode(...)",
       "signature": "$df.col(<column_name>).implode()",
-      "lineStart": 1214,
-      "lineEnd": 1216
+      "lineStart": 1208,
+      "lineEnd": 1210
     },
     "isClose": {
       "desc": "Determines if floating-point values are approximately equal within tolerances.",
@@ -1850,8 +1850,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isClose(...)",
       "signature": "$df.col(<column_name>).isClose(\n  other: any,\n  {\n    absTol = 1e-8,\n    relTol = 1e-8,\n    nansEqual = false\n  }: IsCloseOptions = {}\n)",
-      "lineStart": 1235,
-      "lineEnd": 1252
+      "lineStart": 1229,
+      "lineEnd": 1246
     },
     "isDuplicated": {
       "desc": "Checks if values occur more than once in the column.",
@@ -1863,8 +1863,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isDuplicated(...)",
       "signature": "$df.col(<column_name>).isDuplicated()",
-      "lineStart": 1269,
-      "lineEnd": 1279
+      "lineStart": 1263,
+      "lineEnd": 1273
     },
     "isFinite": {
       "desc": "Checks if values are finite numbers (not NaN or Infinity).",
@@ -1876,8 +1876,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isFinite(...)",
       "signature": "$df.col(<column_name>).isFinite()",
-      "lineStart": 1297,
-      "lineEnd": 1299
+      "lineStart": 1291,
+      "lineEnd": 1293
     },
     "isIn": {
       "desc": "Checks if column values are members of a specified array or list.",
@@ -1895,8 +1895,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isIn(...)",
       "signature": "$df.col(<column_name>).isIn(\n  values: any[] | any\n)",
-      "lineStart": 1317,
-      "lineEnd": 1319
+      "lineStart": 1311,
+      "lineEnd": 1313
     },
     "isInfinite": {
       "desc": "Checks if values are positive or negative Infinity.",
@@ -1908,8 +1908,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isInfinite(...)",
       "signature": "$df.col(<column_name>).isInfinite()",
-      "lineStart": 1336,
-      "lineEnd": 1338
+      "lineStart": 1330,
+      "lineEnd": 1332
     },
     "isNan": {
       "desc": "Checks if values are NaN.",
@@ -1921,8 +1921,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNan(...)",
       "signature": "$df.col(<column_name>).isNan()",
-      "lineStart": 1355,
-      "lineEnd": 1357
+      "lineStart": 1349,
+      "lineEnd": 1351
     },
     "isNDistinct": {
       "desc": "Checks if column values match the N-th distinct value by positive or negative index position.",
@@ -1944,8 +1944,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNDistinct(...)",
       "signature": "$df.col(<column_name>).isNDistinct(\n  index: number,\n  nullOnOob: boolean = true\n)",
-      "lineStart": 1376,
-      "lineEnd": 1382
+      "lineStart": 1370,
+      "lineEnd": 1376
     },
     "isNotNan": {
       "desc": "Checks if values are not NaN.",
@@ -1957,8 +1957,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNotNan(...)",
       "signature": "$df.col(<column_name>).isNotNan()",
-      "lineStart": 1399,
-      "lineEnd": 1401
+      "lineStart": 1393,
+      "lineEnd": 1395
     },
     "isNotNull": {
       "desc": "Checks if column values are non-null and valid (not null, undefined, or missing).",
@@ -1970,8 +1970,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNotNull(...)",
       "signature": "$df.col(<column_name>).isNotNull()",
-      "lineStart": 1418,
-      "lineEnd": 1420
+      "lineStart": 1412,
+      "lineEnd": 1414
     },
     "isNull": {
       "desc": "Checks if column values are null, undefined, or missing.",
@@ -1983,8 +1983,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNull(...)",
       "signature": "$df.col(<column_name>).isNull()",
-      "lineStart": 1437,
-      "lineEnd": 1439
+      "lineStart": 1431,
+      "lineEnd": 1433
     },
     "isUnique": {
       "desc": "Checks if values occur exactly once in the column.",
@@ -1996,8 +1996,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isUnique(...)",
       "signature": "$df.col(<column_name>).isUnique()",
-      "lineStart": 1456,
-      "lineEnd": 1458
+      "lineStart": 1450,
+      "lineEnd": 1452
     },
     "kurtosis": {
       "desc": "Aggregation: Computes the kurtosis (peakedness/tailedness) of a numeric column.",
@@ -2015,8 +2015,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).kurtosis(...)",
       "signature": "$df.col(<column_name>).kurtosis(\n  options: KurtosisOptions = {}\n)",
-      "lineStart": 1474,
-      "lineEnd": 1476
+      "lineStart": 1468,
+      "lineEnd": 1470
     },
     "lag": {
       "desc": "Window: Shifts values down by offset, filling missing slots with default value.",
@@ -2038,8 +2038,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).lag(...)",
       "signature": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 1495,
-      "lineEnd": 1506
+      "lineStart": 1489,
+      "lineEnd": 1500
     },
     "last": {
       "desc": "Aggregation: Finds the last value in the group.",
@@ -2051,8 +2051,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).last(...)",
       "signature": "$df.col(<column_name>).last()",
-      "lineStart": 1522,
-      "lineEnd": 1524
+      "lineStart": 1516,
+      "lineEnd": 1518
     },
     "le": {
       "desc": "Boolean comparison: Returns true if less than or equal to argument.",
@@ -2070,8 +2070,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).le(...)",
       "signature": "$df.col(<column_name>).le(\n  val: any\n)",
-      "lineStart": 1542,
-      "lineEnd": 1544
+      "lineStart": 1536,
+      "lineEnd": 1538
     },
     "lead": {
       "desc": "Window: Shifts values up by offset, filling missing slots with default value.",
@@ -2093,8 +2093,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).lead(...)",
       "signature": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 1563,
-      "lineEnd": 1565
+      "lineStart": 1557,
+      "lineEnd": 1559
     },
     "log": {
       "desc": "Computes the logarithm of positive values with a specified base.",
@@ -2112,8 +2112,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).log(...)",
       "signature": "$df.col(<column_name>).log(\n  base: number = Math.E\n)",
-      "lineStart": 1583,
-      "lineEnd": 1585
+      "lineStart": 1577,
+      "lineEnd": 1579
     },
     "log1p": {
       "desc": "Computes natural logarithm of 1 + x.",
@@ -2125,8 +2125,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).log1p(...)",
       "signature": "$df.col(<column_name>).log1p()",
-      "lineStart": 1602,
-      "lineEnd": 1604
+      "lineStart": 1596,
+      "lineEnd": 1598
     },
     "lt": {
       "desc": "Boolean comparison: Returns true if less than argument.",
@@ -2144,8 +2144,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).lt(...)",
       "signature": "$df.col(<column_name>).lt(\n  val: any\n)",
-      "lineStart": 1622,
-      "lineEnd": 1624
+      "lineStart": 1616,
+      "lineEnd": 1618
     },
     "max": {
       "desc": "Aggregation: Finds the maximum value in the group.",
@@ -2157,8 +2157,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).max(...)",
       "signature": "$df.col(<column_name>).max()",
-      "lineStart": 1640,
-      "lineEnd": 1642
+      "lineStart": 1634,
+      "lineEnd": 1636
     },
     "maxBy": {
       "desc": "Aggregation: Finds the value in this column corresponding to the maximum value in the `by` expression.",
@@ -2176,8 +2176,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).maxBy(...)",
       "signature": "$df.col(<column_name>).maxBy(\n  by: any\n)",
-      "lineStart": 1658,
-      "lineEnd": 1660
+      "lineStart": 1652,
+      "lineEnd": 1654
     },
     "mean": {
       "desc": "Aggregation: Computes the arithmetic mean of elements in the group.",
@@ -2189,8 +2189,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mean(...)",
       "signature": "$df.col(<column_name>).mean()",
-      "lineStart": 1676,
-      "lineEnd": 1678
+      "lineStart": 1670,
+      "lineEnd": 1672
     },
     "median": {
       "desc": "Aggregation: Computes the 50th percentile median.",
@@ -2202,8 +2202,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).median(...)",
       "signature": "$df.col(<column_name>).median()",
-      "lineStart": 1694,
-      "lineEnd": 1696
+      "lineStart": 1688,
+      "lineEnd": 1690
     },
     "min": {
       "desc": "Aggregation: Finds the minimum value in the group.",
@@ -2215,8 +2215,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).min(...)",
       "signature": "$df.col(<column_name>).min()",
-      "lineStart": 1712,
-      "lineEnd": 1714
+      "lineStart": 1706,
+      "lineEnd": 1708
     },
     "minBy": {
       "desc": "Aggregation: Finds the value in this column corresponding to the minimum value in the `by` expression.",
@@ -2234,8 +2234,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).minBy(...)",
       "signature": "$df.col(<column_name>).minBy(\n  by: any\n)",
-      "lineStart": 1730,
-      "lineEnd": 1732
+      "lineStart": 1724,
+      "lineEnd": 1726
     },
     "mod": {
       "desc": "Computes modulo remainder (x % y) of column values.",
@@ -2253,8 +2253,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mod(...)",
       "signature": "$df.col(<column_name>).mod(\n  val: NumericArg\n)",
-      "lineStart": 1750,
-      "lineEnd": 1752
+      "lineStart": 1744,
+      "lineEnd": 1746
     },
     "mode": {
       "desc": "Aggregation: Finds the statistical mode (most frequent value).",
@@ -2266,8 +2266,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mode(...)",
       "signature": "$df.col(<column_name>).mode()",
-      "lineStart": 1767,
-      "lineEnd": 1769
+      "lineStart": 1761,
+      "lineEnd": 1763
     },
     "mul": {
       "desc": "Multiplies column values by a scalar or another column expression.",
@@ -2285,8 +2285,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mul(...)",
       "signature": "$df.col(<column_name>).mul(\n  val: NumericArg\n)",
-      "lineStart": 1787,
-      "lineEnd": 1789
+      "lineStart": 1781,
+      "lineEnd": 1783
     },
     "nanMax": {
       "desc": "Aggregation: Finds the maximum value in the group, taking NaN values into account (NaN propagates).",
@@ -2298,8 +2298,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nanMax(...)",
       "signature": "$df.col(<column_name>).nanMax()",
-      "lineStart": 1804,
-      "lineEnd": 1806
+      "lineStart": 1798,
+      "lineEnd": 1800
     },
     "nanMin": {
       "desc": "Aggregation: Finds the minimum value in the group, taking NaN values into account (NaN propagates).",
@@ -2311,8 +2311,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nanMin(...)",
       "signature": "$df.col(<column_name>).nanMin()",
-      "lineStart": 1821,
-      "lineEnd": 1823
+      "lineStart": 1815,
+      "lineEnd": 1817
     },
     "ne": {
       "desc": "Boolean comparison: Returns true if values do not match.",
@@ -2330,8 +2330,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ne(...)",
       "signature": "$df.col(<column_name>).ne(\n  val: any\n)",
-      "lineStart": 1841,
-      "lineEnd": 1843
+      "lineStart": 1835,
+      "lineEnd": 1837
     },
     "negate": {
       "desc": "Negates column values (-x).",
@@ -2343,8 +2343,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).negate(...)",
       "signature": "$df.col(<column_name>).negate()",
-      "lineStart": 1860,
-      "lineEnd": 1862
+      "lineStart": 1854,
+      "lineEnd": 1856
     },
     "neMissing": {
       "desc": "Difference check that treats null values as equal to each other.",
@@ -2362,8 +2362,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).neMissing(...)",
       "signature": "$df.col(<column_name>).neMissing(\n  val: any\n)",
-      "lineStart": 1880,
-      "lineEnd": 1882
+      "lineStart": 1874,
+      "lineEnd": 1876
     },
     "not": {
       "desc": "Logical negation.",
@@ -2375,8 +2375,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).not(...)",
       "signature": "$df.col(<column_name>).not()",
-      "lineStart": 1900,
-      "lineEnd": 1902
+      "lineStart": 1894,
+      "lineEnd": 1896
     },
     "notIn": {
       "desc": "Checks if values are not elements of a specific array or set list.",
@@ -2394,8 +2394,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).notIn(...)",
       "signature": "$df.col(<column_name>).notIn(\n  values: any[] | any\n)",
-      "lineStart": 1920,
-      "lineEnd": 1922
+      "lineStart": 1914,
+      "lineEnd": 1916
     },
     "nullCount": {
       "desc": "Aggregation: Counts the number of null or missing records.",
@@ -2407,8 +2407,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nullCount(...)",
       "signature": "$df.col(<column_name>).nullCount()",
-      "lineStart": 1937,
-      "lineEnd": 1939
+      "lineStart": 1931,
+      "lineEnd": 1933
     },
     "nUnique": {
       "desc": "Aggregation: Computes number of unique elements.",
@@ -2426,8 +2426,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nUnique(...)",
       "signature": "$df.col(<column_name>).nUnique(\n  options: UniqueArrayStatsOptions = {}\n)",
-      "lineStart": 1955,
-      "lineEnd": 1957
+      "lineStart": 1949,
+      "lineEnd": 1951
     },
     "or": {
       "desc": "Logical OR check supporting Kleene logic.",
@@ -2445,8 +2445,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).or(...)",
       "signature": "$df.col(<column_name>).or(\n  other: any\n)",
-      "lineStart": 1976,
-      "lineEnd": 1991
+      "lineStart": 1970,
+      "lineEnd": 1985
     },
     "over": {
       "desc": "Executes a window aggregation partitioned by column keys.",
@@ -2464,8 +2464,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).over(...)",
       "signature": "$df.col(<column_name>).over(\n  columns: string | IExpr | (string | IExpr)[]\n)",
-      "lineStart": 2009,
-      "lineEnd": 2014
+      "lineStart": 2003,
+      "lineEnd": 2008
     },
     "pow": {
       "desc": "Raises column values to the specified power.",
@@ -2483,8 +2483,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).pow(...)",
       "signature": "$df.col(<column_name>).pow(\n  val: NumericArg\n)",
-      "lineStart": 2032,
-      "lineEnd": 2034
+      "lineStart": 2026,
+      "lineEnd": 2028
     },
     "product": {
       "desc": "Aggregation: Computes the product of all elements in the group.",
@@ -2496,8 +2496,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).product(...)",
       "signature": "$df.col(<column_name>).product()",
-      "lineStart": 2050,
-      "lineEnd": 2052
+      "lineStart": 2044,
+      "lineEnd": 2046
     },
     "quantile": {
       "desc": "Aggregation: Computes the specific quantile values (0.0 to 1.0).",
@@ -2515,8 +2515,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).quantile(...)",
       "signature": "$df.col(<column_name>).quantile(\n  q: number\n)",
-      "lineStart": 2068,
-      "lineEnd": 2071
+      "lineStart": 2062,
+      "lineEnd": 2065
     },
     "radians": {
       "desc": "Converts angles from degrees to radians.",
@@ -2528,8 +2528,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).radians(...)",
       "signature": "$df.col(<column_name>).radians()",
-      "lineStart": 2088,
-      "lineEnd": 2090
+      "lineStart": 2082,
+      "lineEnd": 2084
     },
     "rand": {
       "desc": "Fills sequence with pseudo-random generated floats or integers.",
@@ -2551,8 +2551,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rand(...)",
       "signature": "$df.col(<column_name>).rand(\n  seed?: number,\n  {\n    min = 0,\n    max = 1,\n    integer = false\n  }: RandomOptions = {}\n)",
-      "lineStart": 2109,
-      "lineEnd": 2122
+      "lineStart": 2103,
+      "lineEnd": 2116
     },
     "rank": {
       "desc": "Window: Computes rank within group partition.",
@@ -2564,8 +2564,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rank(...)",
       "signature": "$df.col(<column_name>).rank(\n  options: { dense?: boolean } = {}\n)",
-      "lineStart": 2138,
-      "lineEnd": 2142
+      "lineStart": 2132,
+      "lineEnd": 2134
     },
     "reverse": {
       "desc": "Reverses the order of values in the column.",
@@ -2577,8 +2577,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).reverse(...)",
       "signature": "$df.col(<column_name>).reverse(): this",
-      "lineStart": 2159,
-      "lineEnd": 2161
+      "lineStart": 2151,
+      "lineEnd": 2153
     },
     "rolling": {
       "desc": "Window: Computes a rolling window reduction using a ColumnExpression or a custom callback function.",
@@ -2600,8 +2600,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rolling(...)",
       "signature": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: number | RollingOptions,\n  exprOrFn: IExpr | ((vals: any[]) => any)\n)",
-      "lineStart": 2180,
-      "lineEnd": 2206
+      "lineStart": 2172,
+      "lineEnd": 2193
     },
     "rollingMax": {
       "desc": "Window: Computes rolling window maximum value.",
@@ -2619,8 +2619,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMax(...)",
       "signature": "$df.col(<column_name>).rollingMax(\n  windowSize: number\n)",
-      "lineStart": 2224,
-      "lineEnd": 2226
+      "lineStart": 2211,
+      "lineEnd": 2213
     },
     "rollingMean": {
       "desc": "Window: Computes rolling window mean average.",
@@ -2638,8 +2638,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMean(...)",
       "signature": "$df.col(<column_name>).rollingMean(\n  windowSize: number\n)",
-      "lineStart": 2244,
-      "lineEnd": 2246
+      "lineStart": 2231,
+      "lineEnd": 2233
     },
     "rollingMedian": {
       "desc": "Window: Computes rolling window median value.",
@@ -2657,8 +2657,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMedian(...)",
       "signature": "$df.col(<column_name>).rollingMedian(\n  windowSize: number\n)",
-      "lineStart": 2264,
-      "lineEnd": 2266
+      "lineStart": 2251,
+      "lineEnd": 2253
     },
     "rollingMin": {
       "desc": "Window: Computes rolling window minimum value.",
@@ -2676,8 +2676,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMin(...)",
       "signature": "$df.col(<column_name>).rollingMin(\n  windowSize: number\n)",
-      "lineStart": 2284,
-      "lineEnd": 2286
+      "lineStart": 2271,
+      "lineEnd": 2273
     },
     "rollingQuantile": {
       "desc": "Window: Computes rolling window quantile value.",
@@ -2699,8 +2699,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingQuantile(...)",
       "signature": "$df.col(<column_name>).rollingQuantile(\n  quantile: number,\n  windowSize: number\n)",
-      "lineStart": 2305,
-      "lineEnd": 2307
+      "lineStart": 2292,
+      "lineEnd": 2294
     },
     "rollingRank": {
       "desc": "Window: Computes rolling window rank.",
@@ -2718,8 +2718,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingRank(...)",
       "signature": "$df.col(<column_name>).rollingRank(\n  windowSize: number\n)",
-      "lineStart": 2325,
-      "lineEnd": 2329
+      "lineStart": 2312,
+      "lineEnd": 2316
     },
     "rollingStd": {
       "desc": "Window: Computes rolling window standard deviation.",
@@ -2737,8 +2737,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingStd(...)",
       "signature": "$df.col(<column_name>).rollingStd(\n  windowSize: number\n)",
-      "lineStart": 2347,
-      "lineEnd": 2349
+      "lineStart": 2334,
+      "lineEnd": 2336
     },
     "rollingSum": {
       "desc": "Window: Computes rolling window sum.",
@@ -2756,8 +2756,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingSum(...)",
       "signature": "$df.col(<column_name>).rollingSum(\n  windowSize: number\n)",
-      "lineStart": 2367,
-      "lineEnd": 2369
+      "lineStart": 2354,
+      "lineEnd": 2356
     },
     "round": {
       "desc": "Rounds values to a specific scale of decimal digits.",
@@ -2775,8 +2775,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).round(...)",
       "signature": "$df.col(<column_name>).round(\n  decimals: number = 0\n)",
-      "lineStart": 2387,
-      "lineEnd": 2389
+      "lineStart": 2374,
+      "lineEnd": 2376
     },
     "roundSigFigs": {
       "desc": "Rounds values to a specific number of significant figures.",
@@ -2794,8 +2794,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).roundSigFigs(...)",
       "signature": "$df.col(<column_name>).roundSigFigs(\n  sigFigs: number\n)",
-      "lineStart": 2407,
-      "lineEnd": 2409
+      "lineStart": 2394,
+      "lineEnd": 2396
     },
     "rowNumber": {
       "desc": "Window: Computes 1-indexed row number count within group partitions.",
@@ -2807,8 +2807,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rowNumber(...)",
       "signature": "$df.col(<column_name>).rowNumber()",
-      "lineStart": 2426,
-      "lineEnd": 2432
+      "lineStart": 2413,
+      "lineEnd": 2417
     },
     "shift": {
       "desc": "Shifts values by the given number of rows, filling newly introduced slots with null. Positive offsets shift values down (lag); negative offsets shift values up (lead).\n\nSupports windowing and partition grouping via `.over(...)`.",
@@ -2826,8 +2826,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).shift(...)",
       "signature": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 2454,
-      "lineEnd": 2456
+      "lineStart": 2439,
+      "lineEnd": 2441
     },
     "sign": {
       "desc": "Returns sign indicator of column values (-1, 0, or 1).",
@@ -2839,8 +2839,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sign(...)",
       "signature": "$df.col(<column_name>).sign()",
-      "lineStart": 2473,
-      "lineEnd": 2475
+      "lineStart": 2458,
+      "lineEnd": 2460
     },
     "sin": {
       "desc": "Computes the sine of the column values.",
@@ -2852,8 +2852,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sin(...)",
       "signature": "$df.col(<column_name>).sin()",
-      "lineStart": 2492,
-      "lineEnd": 2494
+      "lineStart": 2477,
+      "lineEnd": 2479
     },
     "sinh": {
       "desc": "Computes the hyperbolic sine of the column values.",
@@ -2865,8 +2865,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sinh(...)",
       "signature": "$df.col(<column_name>).sinh()",
-      "lineStart": 2511,
-      "lineEnd": 2513
+      "lineStart": 2496,
+      "lineEnd": 2498
     },
     "skew": {
       "desc": "Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of skewness.",
@@ -2884,8 +2884,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).skew(...)",
       "signature": "$df.col(<column_name>).skew(\n  options: SkewOptions = {}\n)",
-      "lineStart": 2529,
-      "lineEnd": 2531
+      "lineStart": 2514,
+      "lineEnd": 2516
     },
     "spearmanCorr": {
       "desc": "Aggregation: Computes the Spearman rank correlation coefficient.",
@@ -2903,8 +2903,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).spearmanCorr(...)",
       "signature": "$df.col(<column_name>).spearmanCorr(\n  other: any\n)",
-      "lineStart": 2547,
-      "lineEnd": 2549
+      "lineStart": 2532,
+      "lineEnd": 2534
     },
     "sqrt": {
       "desc": "Computes the square root of non-negative column values.",
@@ -2916,8 +2916,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sqrt(...)",
       "signature": "$df.col(<column_name>).sqrt()",
-      "lineStart": 2566,
-      "lineEnd": 2568
+      "lineStart": 2551,
+      "lineEnd": 2553
     },
     "std": {
       "desc": "Aggregation: Computes sample standard deviation.",
@@ -2929,8 +2929,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).std(...)",
       "signature": "$df.col(<column_name>).std()",
-      "lineStart": 2583,
-      "lineEnd": 2585
+      "lineStart": 2568,
+      "lineEnd": 2570
     },
     "sub": {
       "desc": "Subtracts a scalar or another column expression.",
@@ -2948,8 +2948,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sub(...)",
       "signature": "$df.col(<column_name>).sub(\n  val: NumericArg\n)",
-      "lineStart": 2603,
-      "lineEnd": 2605
+      "lineStart": 2588,
+      "lineEnd": 2590
     },
     "sum": {
       "desc": "Aggregation: Computes the sum of elements in the group.",
@@ -2961,8 +2961,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sum(...)",
       "signature": "$df.col(<column_name>).sum()",
-      "lineStart": 2621,
-      "lineEnd": 2623
+      "lineStart": 2606,
+      "lineEnd": 2608
     },
     "tan": {
       "desc": "Computes the tangent of the column values.",
@@ -2974,8 +2974,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).tan(...)",
       "signature": "$df.col(<column_name>).tan()",
-      "lineStart": 2640,
-      "lineEnd": 2642
+      "lineStart": 2625,
+      "lineEnd": 2627
     },
     "tanh": {
       "desc": "Computes the hyperbolic tangent of the column values.",
@@ -2987,8 +2987,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).tanh(...)",
       "signature": "$df.col(<column_name>).tanh()",
-      "lineStart": 2659,
-      "lineEnd": 2661
+      "lineStart": 2644,
+      "lineEnd": 2646
     },
     "trunc": {
       "desc": "Truncates fractional digits of column values.",
@@ -3000,8 +3000,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).trunc(...)",
       "signature": "$df.col(<column_name>).trunc()",
-      "lineStart": 2678,
-      "lineEnd": 2680
+      "lineStart": 2663,
+      "lineEnd": 2665
     },
     "variance": {
       "desc": "Aggregation: Computes sample variance.",
@@ -3013,8 +3013,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).variance(...)",
       "signature": "$df.col(<column_name>).variance()",
-      "lineStart": 2695,
-      "lineEnd": 2697
+      "lineStart": 2680,
+      "lineEnd": 2682
     },
     "wAvg": {
       "desc": "Aggregation: Computes weighted average.",
@@ -3032,8 +3032,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).wAvg(...)",
       "signature": "$df.col(<column_name>).wAvg(\n  weights: any\n)",
-      "lineStart": 2713,
-      "lineEnd": 2715
+      "lineStart": 2698,
+      "lineEnd": 2700
     },
     "xor": {
       "desc": "Logical XOR check.",
@@ -3051,8 +3051,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).xor(...)",
       "signature": "$df.col(<column_name>).xor(\n  other: any\n)",
-      "lineStart": 2734,
-      "lineEnd": 2736
+      "lineStart": 2719,
+      "lineEnd": 2721
     }
   },
   "columnExpressions/mixins/StringExpr.ts": {
@@ -3308,7 +3308,7 @@
       "namespace": "$df.col.str",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.extractGroups(...)",
-      "signature": "$df.col(<column_name>).str.extractGroups(\n  pattern: string | RegExp,\n  options: ExtractManyOptions = {}\n)",
+      "signature": "$df.col(<column_name>).str.extractGroups(\n  pattern: string | RegExp,\n  options: ExtractRegexEngineOptions = {}\n)",
       "lineStart": 377,
       "lineEnd": 381
     },

@@ -211,9 +211,8 @@ function _normalizeEpochToMs(n: number | bigint): number {
 
 function _getOrdinalDay(d: Date): number | null {
     if (!isValidDateObj(d)) return null;
-    const utcDate = createUTCDate(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()).getTime();
     const start = createUTCDate(d.getUTCFullYear(), 0, 1).getTime();
-    return Math.floor((utcDate - start) / MS_PER_DAY) + 1;
+    return Math.floor((d.getTime() - start) / MS_PER_DAY) + 1;
 }
 
 function _getISO(y: number, m: number, d: number, field: "week" | "year" = "week"): number | null {
@@ -225,74 +224,72 @@ function _getISO(y: number, m: number, d: number, field: "week" | "year" = "week
 }
 
 interface DateDirective {
-    _key: string;
     _format: (d: Date, locale: string, timeZone: string, parts: DateTimeParts) => string;
     _parseRegex?: string;
     _parseField?: "year" | "month" | "day" | "hour" | "minute" | "second" | "ms" | "ampm" | "offset";
     _parseNormalize?: (valStr: string) => number | string;
 }
 
+const _normalizeSubsecond = (s: string): number => parseInt(s.padEnd(3, "0").slice(0, 3), 10);
+const _pad2 = (n: number): string => String(n).padStart(2, "0");
+
+const _D2_PATTERN = "\\d{2}";
+const _YEAR_PATTERN = "[+-]?\\d{4,}";
+
 const _DIRECTIVES: Record<string, DateDirective> = {
     "Y": {
-        _key: "Y",
         _format: (_d, _locale, _tz, parts) => {
             const y = parts.year;
             return y >= 0 ? String(y).padStart(4, "0") : "-" + String(Math.abs(y)).padStart(4, "0");
         },
-        _parseRegex: "[+-]?\\d{4,}",
+        _parseRegex: _YEAR_PATTERN,
         _parseField: "year"
     },
     "y": {
-        _key: "y",
-        _format: (_d, _locale, _tz, parts) => String(Math.abs(parts.year) % 100).padStart(2, "0"),
-        _parseRegex: "\\d{2}",
+        _format: (_d, _locale, _tz, parts) => _pad2(Math.abs(parts.year) % 100),
+        _parseRegex: _D2_PATTERN,
         _parseField: "year",
         _parseNormalize: (s) => {
             const val = parseInt(s, 10);
             return val + (val >= 69 ? 1900 : 2000);
         }
     },
-    "m": { _key: "m", _format: (_d, _locale, _tz, parts) => String(parts.month).padStart(2, "0"), _parseRegex: "\\d{2}", _parseField: "month" },
-    "d": { _key: "d", _format: (_d, _locale, _tz, parts) => String(parts.day).padStart(2, "0"), _parseRegex: "\\d{2}", _parseField: "day" },
-    "e": { _key: "e", _format: (_d, _locale, _tz, parts) => String(parts.day).padStart(2, " "), _parseRegex: "\\s?\\d{1,2}", _parseField: "day" },
-    "H": { _key: "H", _format: (_d, _locale, _tz, parts) => String(parts.hour).padStart(2, "0"), _parseRegex: "\\d{2}", _parseField: "hour" },
-    "I": { _key: "I", _format: (_d, _locale, _tz, parts) => String(parts.hour % 12 || 12).padStart(2, "0"), _parseRegex: "\\d{2}", _parseField: "hour" },
+    "m": { _format: (_d, _locale, _tz, parts) => _pad2(parts.month), _parseRegex: _D2_PATTERN, _parseField: "month" },
+    "d": { _format: (_d, _locale, _tz, parts) => _pad2(parts.day), _parseRegex: _D2_PATTERN, _parseField: "day" },
+    "e": { _format: (_d, _locale, _tz, parts) => String(parts.day).padStart(2, " "), _parseRegex: "\\s?\\d{1,2}", _parseField: "day" },
+    "H": { _format: (_d, _locale, _tz, parts) => _pad2(parts.hour), _parseRegex: _D2_PATTERN, _parseField: "hour" },
+    "I": { _format: (_d, _locale, _tz, parts) => _pad2(parts.hour % 12 || 12), _parseRegex: _D2_PATTERN, _parseField: "hour" },
     "p": {
-        _key: "p",
         _format: (_d, _locale, _tz, parts) => parts.hour >= 12 ? "PM" : "AM",
         _parseRegex: "AM|PM|am|pm",
         _parseField: "ampm",
         _parseNormalize: (s) => s.toUpperCase()
     },
-    "M": { _key: "M", _format: (_d, _locale, _tz, parts) => String(parts.minute).padStart(2, "0"), _parseRegex: "\\d{2}", _parseField: "minute" },
-    "S": { _key: "S", _format: (_d, _locale, _tz, parts) => String(parts.second).padStart(2, "0"), _parseRegex: "\\d{2}", _parseField: "second" },
-    "A": { _key: "A", _format: (d, locale, tz) => d.toLocaleDateString(locale, { weekday: "long", timeZone: tz }) },
-    "a": { _key: "a", _format: (d, locale, tz) => d.toLocaleDateString(locale, { weekday: "short", timeZone: tz }) },
-    "B": { _key: "B", _format: (d, locale, tz) => d.toLocaleDateString(locale, { month: "long", timeZone: tz }) },
-    "b": { _key: "b", _format: (d, locale, tz) => d.toLocaleDateString(locale, { month: "short", timeZone: tz }) },
+    "M": { _format: (_d, _locale, _tz, parts) => _pad2(parts.minute), _parseRegex: _D2_PATTERN, _parseField: "minute" },
+    "S": { _format: (_d, _locale, _tz, parts) => _pad2(parts.second), _parseRegex: _D2_PATTERN, _parseField: "second" },
+    "A": { _format: (d, locale, tz) => d.toLocaleDateString(locale, { weekday: "long", timeZone: tz }) },
+    "a": { _format: (d, locale, tz) => d.toLocaleDateString(locale, { weekday: "short", timeZone: tz }) },
+    "B": { _format: (d, locale, tz) => d.toLocaleDateString(locale, { month: "long", timeZone: tz }) },
+    "b": { _format: (d, locale, tz) => d.toLocaleDateString(locale, { month: "short", timeZone: tz }) },
     "j": {
-        _key: "j",
         _format: (_d, _locale, _tz, parts) => String(_getOrdinalDay(createUTCDate(parts.year, parts.month - 1, parts.day)) ?? 1).padStart(3, "0"),
         _parseRegex: "\\d{3}",
         _parseField: "day",
         _parseNormalize: (s) => parseInt(s, 10)
     },
-    "u": { _key: "u", _format: (_d, _locale, _tz, parts) => String(parts.dayOfWeek || 7) },
-    "w": { _key: "w", _format: (_d, _locale, _tz, parts) => String(parts.dayOfWeek) },
+    "u": { _format: (_d, _locale, _tz, parts) => String(parts.dayOfWeek || 7) },
+    "w": { _format: (_d, _locale, _tz, parts) => String(parts.dayOfWeek) },
     "V": {
-        _key: "V",
-        _format: (_d, _locale, _tz, parts) => String(_getISO(parts.year, parts.month, parts.day, "week") ?? 1).padStart(2, "0"),
-        _parseRegex: "\\d{2}",
+        _format: (_d, _locale, _tz, parts) => _pad2(_getISO(parts.year, parts.month, parts.day, "week") ?? 1),
+        _parseRegex: _D2_PATTERN,
         _parseNormalize: (s) => parseInt(s, 10)
     },
     "G": {
-        _key: "G",
         _format: (_d, _locale, _tz, parts) => String(_getISO(parts.year, parts.month, parts.day, "year") ?? parts.year).padStart(4, "0"),
-        _parseRegex: "[+-]?\\d{4,}",
+        _parseRegex: _YEAR_PATTERN,
         _parseNormalize: (s) => parseInt(s, 10)
     },
     "Z": {
-        _key: "Z",
         _format: (d, locale, tz) => {
             if (tz.toUpperCase() === "UTC") return "UTC";
             const parts = _getCachedTimeZoneNameDtf(locale, tz).formatToParts(d);
@@ -305,25 +302,22 @@ const _DIRECTIVES: Record<string, DateDirective> = {
         }
     },
     "z": {
-        _key: "z",
         _format: (d, _locale, tz) => getTimeZoneOffset(d, tz, { format: "basic" }) as string,
-        _parseRegex: "[+-]\\d{2}(?::?\\d{2})?",
+        _parseRegex: `[+-]${_D2_PATTERN}(?::?${_D2_PATTERN})?`,
         _parseField: "offset",
         _parseNormalize: (s) => s.replace(":", "")
     },
     "ms": {
-        _key: "ms",
         _format: (_d, _locale, _tz, parts) => String(parts.ms).padStart(3, "0"),
         _parseRegex: "\\d{1,3}",
         _parseField: "ms",
-        _parseNormalize: (s) => parseInt(s.padEnd(3, "0").slice(0, 3), 10)
+        _parseNormalize: _normalizeSubsecond
     },
     "f": {
-        _key: "f",
         _format: (_d, _locale, _tz, parts) => String(parts.ms).padStart(3, "0").padEnd(6, "0"),
         _parseRegex: "\\d{1,9}",
         _parseField: "ms",
-        _parseNormalize: (s) => parseInt(s.padEnd(6, "0").slice(0, 3), 10)
+        _parseNormalize: _normalizeSubsecond
     }
 };
 
@@ -423,7 +417,7 @@ export function strptime(
         const dir = placeholders[i];
         const parsedVal = dir._parseNormalize ? dir._parseNormalize(valStr) : parseInt(valStr, 10);
 
-        if (dir._key === "j") hasOrdinalDay = true;
+        if (dir === _DIRECTIVES.j) hasOrdinalDay = true;
         if (dir._parseField === "ampm") ampm = parsedVal as string;
         else if (dir._parseField === "offset") parts.offset = parsedVal as string;
         else if (dir._parseField) parts[dir._parseField] = parsedVal as number;
@@ -571,8 +565,8 @@ export function getTimeZoneOffset(
 
     const sign = offsetMinutes >= 0 ? "+" : "-";
     const absMin = Math.abs(offsetMinutes);
-    const hours = String(Math.floor(absMin / 60)).padStart(2, "0");
-    const mins = String(absMin % 60).padStart(2, "0");
+    const hours = _pad2(Math.floor(absMin / 60));
+    const mins = _pad2(absMin % 60);
     return fmt === "iso" ? `${sign}${hours}:${mins}` : `${sign}${hours}${mins}`;
 }
 
