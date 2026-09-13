@@ -1662,6 +1662,150 @@ try {
         throw new Error(`Expected arr_count to be Int32, got ${arrCountDf86.schema["arr_count"].name}`);
     }
 
+    // 87. Edge case: Mixed Integer Width & Signedness Resolution (UInt8 + Int8, UInt16 + Int16, UInt32 + Int32)
+    const intEdgeDf87 = $df.data({
+        u8: [10],
+        i8: [20],
+        u16: [1000],
+        i16: [2000],
+        u32: [50000],
+        i32: [60000]
+    }, {
+        u8: $df.UInt8,
+        i8: $df.Int8,
+        u16: $df.UInt16,
+        i16: $df.Int16,
+        u32: $df.UInt32,
+        i32: $df.Int32
+    }).select([
+        $df.col("u8").add($df.col("i8")).alias("mixed8"),
+        $df.col("u16").add($df.col("i16")).alias("mixed16"),
+        $df.col("u32").add($df.col("i32")).alias("mixed32"),
+        $df.col("u8").add($df.col("u8")).alias("same_u8"),
+        $df.col("u16").add($df.col("u16")).alias("same_u16"),
+        $df.col("u32").add($df.col("u32")).alias("same_u32")
+    ]);
+    if (intEdgeDf87.schema["mixed8"].name !== "Int8") {
+        throw new Error(`Expected mixed8 to be Int8, got ${intEdgeDf87.schema["mixed8"].name}`);
+    }
+    if (intEdgeDf87.schema["mixed16"].name !== "Int16") {
+        throw new Error(`Expected mixed16 to be Int16, got ${intEdgeDf87.schema["mixed16"].name}`);
+    }
+    if (intEdgeDf87.schema["mixed32"].name !== "Int32") {
+        throw new Error(`Expected mixed32 to be Int32, got ${intEdgeDf87.schema["mixed32"].name}`);
+    }
+    if (intEdgeDf87.schema["same_u8"].name !== "UInt8") {
+        throw new Error(`Expected same_u8 to be UInt8, got ${intEdgeDf87.schema["same_u8"].name}`);
+    }
+    if (intEdgeDf87.schema["same_u16"].name !== "UInt16") {
+        throw new Error(`Expected same_u16 to be UInt16, got ${intEdgeDf87.schema["same_u16"].name}`);
+    }
+    if (intEdgeDf87.schema["same_u32"].name !== "UInt32") {
+        throw new Error(`Expected same_u32 to be UInt32, got ${intEdgeDf87.schema["same_u32"].name}`);
+    }
+
+    // 88. Edge case: resolveOperandType with nested empty/null array elements fallback to Utf8
+    const emptyArrDf88 = $df.data({
+        empty_lit: [1]
+    }).select([
+        $df.lit([]).alias("empty_arr"),
+        $df.lit([null, undefined]).alias("null_arr")
+    ]);
+    if (emptyArrDf88.schema["empty_arr"].name !== "Array" || (emptyArrDf88.schema["empty_arr"] as any).innerType.name !== "Utf8") {
+        throw new Error(`Expected empty_arr to default to Array(Utf8), got ${emptyArrDf88.schema["empty_arr"].name}`);
+    }
+    if (emptyArrDf88.schema["null_arr"].name !== "Array" || (emptyArrDf88.schema["null_arr"] as any).innerType.name !== "Utf8") {
+        throw new Error(`Expected null_arr to default to Array(Utf8), got ${emptyArrDf88.schema["null_arr"].name}`);
+    }
+
+    // 89. Complex resolveExprOutputType: Nested Struct field access through expressions
+    const nestedStructDf89 = $df.data({
+        user: [
+            { profile: { stats: { score: 99.5, level: 5 } } }
+        ]
+    }, {
+        user: $df.Struct({
+            profile: $df.Struct({
+                stats: $df.Struct({
+                    score: $df.Float64,
+                    level: $df.Int32
+                })
+            })
+        })
+    }).select([
+        $df.col("user").struct.field("profile").struct.field("stats").struct.field("score").alias("score_val"),
+        $df.col("user").struct.field("profile").struct.field("stats").struct.field("level").alias("level_val")
+    ]);
+    if (nestedStructDf89.schema["score_val"].name !== "Float64") {
+        throw new Error(`Expected score_val to be Float64, got ${nestedStructDf89.schema["score_val"].name}`);
+    }
+    if (nestedStructDf89.schema["level_val"].name !== "Int32") {
+        throw new Error(`Expected level_val to be Int32, got ${nestedStructDf89.schema["level_val"].name}`);
+    }
+
+    // 90. Complex resolveExprOutputType: Multi-branch when/then promotion (Int8 + Int32 + Float32 + Float64)
+    const multiBranchDf90 = $df.data({
+        cond1: [true, false, false],
+        cond2: [false, true, false],
+        v_i8: [1, 2, 3],
+        v_i32: [100, 200, 300],
+        v_f32: [1.5, 2.5, 3.5]
+    }, {
+        cond1: $df.Boolean,
+        cond2: $df.Boolean,
+        v_i8: $df.Int8,
+        v_i32: $df.Int32,
+        v_f32: $df.Float32
+    }).select([
+        $df.when($df.col("cond1")).then($df.col("v_i8"))
+           .when($df.col("cond2")).then($df.col("v_i32"))
+           .otherwise($df.col("v_f32"))
+           .alias("when_promoted")
+    ]);
+    if (multiBranchDf90.schema["when_promoted"].name !== "Float64") {
+        throw new Error(`Expected when_promoted to be Float64, got ${multiBranchDf90.schema["when_promoted"].name}`);
+    }
+
+    // 91. Complex resolveExprOutputType: Array unnesting vs array wrapping on non-array column
+    const arrayTransformDf91 = $df.data({
+        tags: [["tag1", "tag2"], ["tag3"]],
+        score: [10, 20]
+    }, {
+        tags: $df.Array($df.Utf8),
+        score: $df.Int32
+    }).select([
+        // Array unnesting inner type resolution
+        $df.col("tags").arr.explode().alias("unnested_tag"),
+        // Wrapping scalar column in array via expression ops
+        $df.col("score").implode().alias("imploded_score")
+    ]);
+    if (arrayTransformDf91.schema["unnested_tag"].name !== "Utf8") {
+        throw new Error(`Expected unnested_tag to be Utf8, got ${arrayTransformDf91.schema["unnested_tag"].name}`);
+    }
+    if (arrayTransformDf91.schema["imploded_score"].name !== "Array" || (arrayTransformDf91.schema["imploded_score"] as any).innerType.name !== "Int32") {
+        throw new Error(`Expected imploded_score to be Array(Int32), got ${arrayTransformDf91.schema["imploded_score"].name}`);
+    }
+
+    // 92. Complex resolveExprOutputType: Binary operation involving Duration + Datetime and Duration * Duration
+    const durExprDf92 = $df.data({
+        base_time: ["2026-03-01T12:00:00.000Z"],
+        dur_a: [3600000],
+        dur_b: [1800000]
+    }, {
+        base_time: new DatetimeType("ms"),
+        dur_a: new DurationType("ms"),
+        dur_b: new DurationType("ms")
+    }).select([
+        $df.col("base_time").add($df.col("dur_a")).alias("time_plus_dur"),
+        $df.col("dur_a").sub($df.col("dur_b")).alias("dur_diff")
+    ]);
+    if (durExprDf92.schema["time_plus_dur"].name !== "Datetime") {
+        throw new Error(`Expected time_plus_dur to be Datetime, got ${durExprDf92.schema["time_plus_dur"].name}`);
+    }
+    if (durExprDf92.schema["dur_diff"].name !== "Duration") {
+        throw new Error(`Expected dur_diff to be Duration, got ${durExprDf92.schema["dur_diff"].name}`);
+    }
+
     console.log("✓ All Post-Operation Type Inference tests passed!");
     console.log("🎉 ALL POST-OPERATION TYPE INFERENCE TESTS PASSED SUCCESSFULLY!");
 } catch (err) {

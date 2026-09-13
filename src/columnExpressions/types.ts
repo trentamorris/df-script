@@ -16,3 +16,5 @@ export interface IsCloseOptions {
     relTol?: number;
     nansEqual?: boolean;
 }
+
+export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => any;

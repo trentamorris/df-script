@@ -1,35 +1,18 @@
 import { ExprBase } from "../ExprBase";
 import type { IntoExpr } from "../../types";
-import { assertNotNull, InvalidArgumentError } from "../../exceptions";
+import { InvalidArgumentError } from "../../exceptions";
 import { LITERAL_MARKER } from "../constants";
-
-let _ColumnExprClass: any = null;
-function _toColExpr(col: any): any {
-    assertNotNull(col, "Column reference cannot be null or undefined.");
-    if (!_ColumnExprClass) {
-        _ColumnExprClass = require("../ColumnExpr").ColumnExpr;
-    }
-    return _ColumnExprClass.isColExpr(col) ? col : new _ColumnExprClass(col);
-}
+import { createDelegatingProxy } from "../utils";
 
 /**
  * @namespace $df.col.struct
  * @category ColumnExpression
  * @syntax $df.col(<column_name>).struct.{symbol}(...)
  */
+
 export class StructExprNamespace {
     constructor(public _expr: any) {
-        return new Proxy(this, {
-            get(target, prop, receiver) {
-                if (prop in target) {
-                    return Reflect.get(target, prop, receiver);
-                }
-                if (typeof prop === "string") {
-                    return target.field(prop);
-                }
-                return Reflect.get(target, prop, receiver);
-            }
-        });
+        return createDelegatingProxy(this, (prop, target) => prop in target ? undefined : target.field(prop));
     }
 
     /**
@@ -47,7 +30,7 @@ export class StructExprNamespace {
      * └───────────────────────────┴───────────┘
      */
     field(name: string) {
-        const derived = this._expr._deriveUnary((v: any) => (typeof v === "object" ? v[name] : null));
+        const derived = this._expr._deriveUnary((v: any) => (v != null && typeof v === "object" ? v[name] : null));
         derived._baseExpr = this._expr;
         derived._fieldName = name;
         return derived.alias(name);
@@ -68,23 +51,15 @@ export class StructExprNamespace {
      * └───────────────────────────┴────────────────────────────────┘
      */
     renameFields(mapping: Record<string, string>) {
-        const keys = Object.keys(mapping);
-        const keysLen = keys.length;
         return this._expr._deriveUnary((v: any) => {
-            if (typeof v !== "object") return null;
+            if (v == null || typeof v !== "object") return null;
             const newObj: any = {};
             const origKeys = Object.keys(v);
             const origLen = origKeys.length;
             for (let k = 0; k < origLen; k++) {
                 const key = origKeys[k];
-                newObj[key] = (v as any)[key];
-            }
-            for (let j = 0; j < keysLen; j++) {
-                const oldKey = keys[j];
-                if (oldKey in newObj) {
-                    newObj[mapping[oldKey]] = newObj[oldKey];
-                    delete newObj[oldKey];
-                }
+                const newKey = mapping[key] !== undefined ? mapping[key] : key;
+                newObj[newKey] = (v as any)[key];
             }
             return newObj;
         });
@@ -109,14 +84,11 @@ export class StructExprNamespace {
         return this._expr._derive((vArray: any[], columns: any) => {
             const height = vArray.length;
             const result = new Array(height);
-            const isArr = Array.isArray(fields);
-            const keys = isArr ? fields : Object.keys(fields || {});
-            const len = keys.length;
             const resolved: { name: string; expr: any }[] = [];
 
             if (Array.isArray(fields)) {
-                for (let j = 0; j < len; j++) {
-                    const expr = _toColExpr(fields[j]);
+                for (let j = 0; j < fields.length; j++) {
+                    const expr = this._expr._toColExpr(fields[j]);
                     const name = (expr._outputName && expr._outputName !== LITERAL_MARKER)
                         ? expr._outputName
                         : (expr._colName !== LITERAL_MARKER ? expr._colName : "");
@@ -125,15 +97,14 @@ export class StructExprNamespace {
                     }
                     resolved.push({ name, expr });
                 }
-            } else if (fields && typeof fields === "object") {
-                const record = fields as Record<string, IntoExpr>;
-                for (let j = 0; j < len; j++) {
-                    const name = keys[j] as string;
-                    const expr = _toColExpr(record[name]);
-                    resolved.push({ name, expr });
+            } else {
+                const keys = Object.keys(fields);
+                for (let j = 0; j < keys.length; j++) {
+                    resolved.push({ name: keys[j], expr: this._expr._toColExpr(fields[keys[j]]) });
                 }
             }
 
+            const len = resolved.length;
             const fieldValues = new Array(len);
             for (let j = 0; j < len; j++) {
                 fieldValues[j] = resolved[j].expr.evaluate(columns, height);

@@ -1,4 +1,4 @@
-import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seqRange, all, exclude, evaluateExpression, resolveExprOutputType } from "../columnExpressions"
+import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seqRange, all, exclude, evaluateExpression, resolveExprOutputType, isColExpr, toColExpr } from "../columnExpressions"
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
@@ -115,7 +115,7 @@ export class DataFrame<T extends RowRecord = any> {
             const arg = flatArgs[i];
             if (typeof arg === "string") {
                 exprs.push(new ColumnExpr(arg));
-            } else if (ColumnExpr.isColExpr(arg)) {
+            } else if (isColExpr(arg)) {
                 exprs.push(arg);
             } else if (arg instanceof DataType || typeof arg === "function" || isRegExp(arg)) {
                 exprs.push(new ColumnExpr(arg));
@@ -124,8 +124,8 @@ export class DataFrame<T extends RowRecord = any> {
                 const numKeys = keys.length;
                 for (let j = 0; j < numKeys; j++) {
                     const key = keys[j];
-                    const val = arg[key];
-                    if (ColumnExpr.isColExpr(val)) {
+                    const val = (arg as Record<string, any>)[key];
+                    if (isColExpr(val)) {
                         exprs.push(val.alias(key));
                     } else {
                         const staticExpr = new ColumnExpr(key);
@@ -627,8 +627,8 @@ export class DataFrame<T extends RowRecord = any> {
 
         const indexColName = typeof indexColumn === "string"
             ? indexColumn
-            : ColumnExpr.isColExpr(indexColumn)
-                ? indexColumn._colName ?? String(indexColumn)
+            : isColExpr(indexColumn)
+                ? (indexColumn as any)._colName ?? String(indexColumn)
                 : String(indexColumn);
         assertColumnExists(indexColName, this._columns, "Index column");
 
@@ -854,7 +854,7 @@ export class DataFrame<T extends RowRecord = any> {
      * └───┴────┴───┘
      */
     insertColumn(index: number, name: string, expr: IntoExpr): DataFrame<any> {
-        const colExpr = ColumnExpr.toColExpr(expr).alias(name);
+        const colExpr = (toColExpr(expr, ColumnExpr) as ColumnExpr<any>).alias(name);
         const keys = Object.keys(this._columns);
         const keysLen = keys.length;
 
@@ -1262,16 +1262,16 @@ export class DataFrame<T extends RowRecord = any> {
             const arg = args[i];
 
             if (Array.isArray(arg)) {
-                for (let j = 0; j < arg.length; j++) predicates.push(ColumnExpr.toColExpr(arg[j]));
+                for (let j = 0; j < arg.length; j++) predicates.push(toColExpr(arg[j], ColumnExpr) as ColumnExpr<any>);
                 continue;
             }
 
-            if (isObj(arg) && !ColumnExpr.isColExpr(arg)) {
+            if (isObj(arg) && !isColExpr(arg)) {
                 options = { ...options, ...(arg as JoinWhereOptions) };
                 continue;
             }
 
-            predicates.push(ColumnExpr.toColExpr(arg as IntoExpr));
+            predicates.push(toColExpr(arg as IntoExpr, ColumnExpr) as ColumnExpr<any>);
         }
 
         const { how = "inner", suffixes = ["", "_right"] } = options;

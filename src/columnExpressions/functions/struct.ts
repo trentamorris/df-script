@@ -1,4 +1,5 @@
 import { ColumnExpr } from "../ColumnExpr";
+import { isColExpr } from "../ExprBase";
 import { lit } from "./lit";
 import type { IntoExpr } from "../../types";
 import { STRUCT_MARKER } from "../constants";
@@ -31,10 +32,10 @@ export function struct(
 
     if (Array.isArray(fields)) {
         resolvedFields = fields;
-    } else if (fields && typeof fields === "object" && !ColumnExpr.isColExpr(fields)) {
+    } else if (fields && typeof fields === "object" && !isColExpr(fields)) {
         resolvedFields = fields as Record<string, IntoExpr>;
     } else {
-        resolvedFields = [fields, ...moreFields];
+        resolvedFields = [fields as IntoExpr, ...moreFields];
     }
 
     const expr = lit({}).struct.withFields(resolvedFields) as ColumnExpr<any>;

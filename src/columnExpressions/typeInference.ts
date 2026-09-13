@@ -39,16 +39,13 @@ const _TYPED_ARRAY_MAP: Record<string, RegisteredDataType> = {
 /**
  * Resolves the DataType for an expression operand, whether it is an IExpr, a DataType, a literal value, or a column name.
  */
-export function resolveOperandType(
+function _resolveOperandType(
     operand: unknown,
     schema: DataFrameSchema
 ): RegisteredDataType | undefined {
     if (operand == null) return undefined;
     if (operand instanceof DataType) return operand as RegisteredDataType;
-
-    if (isExpr(operand)) {
-        return resolveExprOutputType(operand, schema);
-    }
+    if (isExpr(operand)) return resolveExprOutputType(operand, schema);
 
     const unboxed = unboxPrimitiveObj(operand);
 
@@ -71,7 +68,7 @@ export function resolveOperandType(
         const len = unboxed.length;
         for (let i = 0; i < len; i++) {
             const item = unboxed[i];
-            if (item != null && (innerType = resolveOperandType(item, schema))) break;
+            if (item != null && (innerType = _resolveOperandType(item, schema))) break;
         }
         return DataTypeRegistry.Array(innerType ?? DataTypeRegistry.Utf8);
     }
@@ -87,10 +84,12 @@ export function resolveOperandType(
     return undefined;
 }
 
+const _INT_PRECEDENCE = ["64", "32", "16", "8"] as const;
+
 /**
  * Deduces the output DataType of a binary arithmetic operation between two DataTypes.
  */
-export function deduceBinaryType(
+function _deduceBinaryType(
     leftType: RegisteredDataType | undefined,
     rightType: RegisteredDataType | undefined,
     colSample?: ColumnData | any[]
@@ -131,7 +130,7 @@ export function deduceBinaryType(
         return DataTypeRegistry.Utf8;
     }
 
-    // 5. Complete Numeric Promotion Matrix across all Integer / Float / Decimal types
+    // 3. Numeric Promotion Matrix across all Integer / Float / Decimal types
     if (leftType.isNumeric && rightType.isNumeric) {
         const hasFloat64 = leftType instanceof Float64Type || rightType instanceof Float64Type;
         const hasFloat32 = leftType instanceof Float32Type || rightType instanceof Float32Type;
@@ -156,10 +155,14 @@ export function deduceBinaryType(
         const l = leftType.name;
         const r = rightType.name;
 
-        if (l.endsWith("64") || r.endsWith("64")) return DataTypeRegistry.Int64;
-        if (l.endsWith("32") || r.endsWith("32")) return (l === "UInt32" && r === "UInt32") ? DataTypeRegistry.UInt32 : DataTypeRegistry.Int32;
-        if (l.endsWith("16") || r.endsWith("16")) return (l === "UInt16" && r === "UInt16") ? DataTypeRegistry.UInt16 : DataTypeRegistry.Int16;
-        return (l === "UInt8" && r === "UInt8") ? DataTypeRegistry.UInt8 : DataTypeRegistry.Int8;
+        for (let i = 0; i < 4; i++) {
+            const width = _INT_PRECEDENCE[i];
+            if (l.endsWith(width) || r.endsWith(width)) {
+                return (width !== "64" && l === `UInt${width}` && r === `UInt${width}`)
+                    ? (DataTypeRegistry as any)[`UInt${width}`]
+                    : (DataTypeRegistry as any)[`Int${width}`];
+            }
+        }
     }
 
     return undefined;
@@ -178,13 +181,13 @@ export function resolveExprOutputType(
     // 1. Direct explicit overrides & literals
     if (expr._castType) return expr._castType;
     if ((expr as any)._targetType instanceof DataType) return (expr as any)._targetType;
-    if (expr._isLiteral && expr._literalValue !== undefined) return resolveOperandType(expr._literalValue, schema);
+    if (expr._isLiteral && expr._literalValue !== undefined) return _resolveOperandType(expr._literalValue, schema);
 
     // 2. Expression AST branches (binary, coalesce/when-then, struct field)
     if (expr._binaryMeta) {
-        return deduceBinaryType(
-            resolveOperandType(expr._binaryMeta._left, schema),
-            resolveOperandType(expr._binaryMeta._right, schema),
+        return _deduceBinaryType(
+            _resolveOperandType(expr._binaryMeta._left, schema),
+            _resolveOperandType(expr._binaryMeta._right, schema),
             colSample
         );
     }
@@ -192,19 +195,19 @@ export function resolveExprOutputType(
         let inferred: RegisteredDataType | undefined;
         const len = expr._branchOperands.length;
         for (let i = 0; i < len; i++) {
-            const t = resolveOperandType(expr._branchOperands[i], schema);
+            const t = _resolveOperandType(expr._branchOperands[i], schema);
             if (!t) continue;
             if (!inferred) inferred = t;
             else if (inferred !== t) {
                 if (inferred.isNumeric && t.isNumeric) {
-                    inferred = deduceBinaryType(inferred, t, colSample) ?? inferred;
+                    inferred = _deduceBinaryType(inferred, t, colSample) ?? inferred;
                 }
             }
         }
         if (inferred) return inferred;
     }
     if (expr._baseExpr && expr._fieldName) {
-        const parent = resolveOperandType(expr._baseExpr, schema);
+        const parent = _resolveOperandType(expr._baseExpr, schema);
         if (parent instanceof StructType) return parent.fields?.[expr._fieldName];
     }
 

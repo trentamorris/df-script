@@ -1,4 +1,5 @@
 import { ColumnExpr } from "../ColumnExpr";
+import { toColExpr } from "../ExprBase"
 import { lit } from "./lit";
 import { DurationType } from "../../datatypes/types";
 import { InvalidArgumentError } from "../../exceptions";
@@ -49,7 +50,7 @@ export function duration(options: DurationOptions | string = {}): ColumnExpr<any
             continue;
         }
 
-        const part = ColumnExpr.toColExpr(val as IntoExpr).mul(mult);
+        const part = toColExpr<ColumnExpr<any>>(val as IntoExpr, ColumnExpr).mul(mult);
         exprTotal = exprTotal ? exprTotal.add(part) : part;
     }
 

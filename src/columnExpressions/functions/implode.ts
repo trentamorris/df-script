@@ -1,4 +1,5 @@
 import { ColumnExpr } from "../ColumnExpr";
+import { toColExpr } from "../ExprBase";
 import type { IntoExpr } from "../../types";
 
 /**
@@ -21,5 +22,5 @@ import type { IntoExpr } from "../../types";
  * └───────┴──────────┘
  */
 export function implode(column: IntoExpr | IntoExpr[]): ColumnExpr<any> {
-    return ColumnExpr.toColExpr(column).implode();
+    return (toColExpr(column, ColumnExpr) as ColumnExpr<any>).implode();
 }

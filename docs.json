@@ -6,8 +6,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).alias(...)",
       "signature": "$df.col(<column_name>).alias(\n  name: string\n): this",
-      "lineStart": 102,
-      "lineEnd": 106
+      "lineStart": 124,
+      "lineEnd": 128
     },
     "cast": {
       "desc": "Coerces the column data type to another type.",
@@ -15,8 +15,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cast(...)",
       "signature": "$df.col(<column_name>).cast(\n  dataType: RegisteredDataType,\n  options: CastOptions = {}\n): this",
-      "lineStart": 111,
-      "lineEnd": 118
+      "lineStart": 133,
+      "lineEnd": 140
     },
     "debug": {
       "desc": "Prints the current evaluation intermediate array to console for debugging.",
@@ -24,8 +24,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).debug(...)",
       "signature": "$df.col(<column_name>).debug(\n  label?: string\n): this",
-      "lineStart": 123,
-      "lineEnd": 128
+      "lineStart": 145,
+      "lineEnd": 150
     }
   },
   "columnExpressions/functions/all.ts": {
@@ -83,8 +83,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.duration(options)",
       "signature": "$df.duration(\n  options: DurationOptions | string = {}\n): ColumnExpr<any>",
-      "lineStart": 26,
-      "lineEnd": 68
+      "lineStart": 27,
+      "lineEnd": 69
     }
   },
   "columnExpressions/functions/element.ts": {
@@ -142,8 +142,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.horizontal(...)",
       "signature": "$df.horizontal(\n  ...exprs: (IntoExpr | IntoExpr[])[]\n): HorizontalExpr",
-      "lineStart": 30,
-      "lineEnd": 82
+      "lineStart": 31,
+      "lineEnd": 77
     }
   },
   "columnExpressions/functions/implode.ts": {
@@ -164,8 +164,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.implode(...)",
       "signature": "$df.implode(\n  column: IntoExpr | IntoExpr[]\n): ColumnExpr<any>",
-      "lineStart": 23,
-      "lineEnd": 25
+      "lineStart": 24,
+      "lineEnd": 26
     }
   },
   "columnExpressions/functions/lit.ts": {
@@ -293,8 +293,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.struct(...)",
       "signature": "$df.struct(\n  fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
-      "lineStart": 26,
-      "lineEnd": 46
+      "lineStart": 27,
+      "lineEnd": 47
     }
   },
   "columnExpressions/functions/when.ts": {
@@ -4199,8 +4199,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.field(...)",
       "signature": "$df.col(<column_name>).struct.field(\n  name: string\n)",
-      "lineStart": 49,
-      "lineEnd": 54
+      "lineStart": 32,
+      "lineEnd": 37
     },
     "renameFields": {
       "desc": "Renames existing field keys inside structured object columns.",
@@ -4218,8 +4218,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.renameFields(...)",
       "signature": "$df.col(<column_name>).struct.renameFields(\n  mapping: Record<string, string>\n)",
-      "lineStart": 70,
-      "lineEnd": 91
+      "lineStart": 53,
+      "lineEnd": 66
     },
     "withFields": {
       "desc": "Inserts or updates fields inside structured object columns.",
@@ -4237,8 +4237,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.withFields(...)",
       "signature": "$df.col(<column_name>).struct.withFields(\n  fields: IntoExpr[] | Record<string, IntoExpr>\n)",
-      "lineStart": 108,
-      "lineEnd": 157
+      "lineStart": 83,
+      "lineEnd": 128
     },
     "unnest": {
       "desc": "Expands nested struct attributes into distinct columns in the DataFrame schema.",
@@ -4250,8 +4250,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.unnest(...)",
       "signature": "$df.col(<column_name>).struct.unnest()",
-      "lineStart": 172,
-      "lineEnd": 177
+      "lineStart": 143,
+      "lineEnd": 148
     },
     "struct": {
       "desc": "Struct namespace accessor for operating on nested object/struct columns.",
@@ -4263,8 +4263,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct",
       "signature": "$df.col(<column_name>).get struct()",
-      "lineStart": 201,
-      "lineEnd": 203
+      "lineStart": 172,
+      "lineEnd": 174
     }
   },
   "columnExpressions/mixins/TemporalExpr.ts": {
@@ -4963,71 +4963,63 @@
     }
   },
   "columnExpressions/typeInference.ts": {
-    "resolveOperandType": {
-      "desc": "Resolves the DataType for an expression operand, whether it is an IExpr, a DataType, a literal value, or a column name.",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).resolveOperandType(...)",
-      "signature": "$df.col(<column_name>).resolveOperandType(\n  operand: unknown,\n  schema: DataFrameSchema\n): RegisteredDataType | undefined",
-      "lineStart": 42,
-      "lineEnd": 88
-    },
-    "deduceBinaryType": {
-      "desc": "Deduces the output DataType of a binary arithmetic operation between two DataTypes.",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).deduceBinaryType(...)",
-      "signature": "$df.col(<column_name>).deduceBinaryType(\n  leftType: RegisteredDataType | undefined,\n  rightType: RegisteredDataType | undefined,\n  colSample?: ColumnData | any[]\n): RegisteredDataType | undefined",
-      "lineStart": 93,
-      "lineEnd": 166
-    },
     "resolveExprOutputType": {
       "desc": "Resolves the output DataType of an expression given the input DataFrame schema and evaluated column.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).resolveExprOutputType(...)",
       "signature": "$df.col(<column_name>).resolveExprOutputType(\n  expr: IExpr,\n  schema: DataFrameSchema,\n  colSample?: ColumnData | any[]\n): RegisteredDataType | undefined",
-      "lineStart": 171,
-      "lineEnd": 233
+      "lineStart": 174,
+      "lineEnd": 236
     }
   },
   "columnExpressions/utils.ts": {
+    "createDelegatingProxy": {
+      "desc": "Creates a delegating proxy that intercepts property accesses and delegates them via a custom property resolver when not directly handled.",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).createDelegatingProxy(...)",
+      "signature": "$df.col(<column_name>).createDelegatingProxy<T extends object>(\n  target: T,\n  resolve: ProxyPropertyResolver<T>\n): T",
+      "lineStart": 12,
+      "lineEnd": 26
+    },
     "evalUnaryOp": {
       "desc": "Normalizes a single unary value (coercing Date instances to getTime if valid) and executes the operation callback.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).evalUnaryOp(...)",
       "signature": "$df.col(<column_name>).evalUnaryOp(\n  v: any,\n  fn: (a: any) => any\n): any",
-      "lineStart": 11,
-      "lineEnd": 15
+      "lineStart": 32,
+      "lineEnd": 36
     },
     "evalBinaryOp": {
       "desc": "Normalizes binary values (coercing Date instances to getTime if valid) and executes the operation callback.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).evalBinaryOp(...)",
       "signature": "$df.col(<column_name>).evalBinaryOp(\n  v: any,\n  r: any,\n  fn: (a: any, b: any) => any\n): any",
-      "lineStart": 21,
-      "lineEnd": 26
+      "lineStart": 42,
+      "lineEnd": 47
     },
     "evaluateArg": {
       "desc": "Evaluates a column expression, column string lookup, or returns a scalar literal value.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).evaluateArg(...)",
       "signature": "$df.col(<column_name>).evaluateArg(\n  arg: unknown,\n  columns: ColumnDict | null | undefined,\n  height: number\n): any",
-      "lineStart": 68,
-      "lineEnd": 80
+      "lineStart": 89,
+      "lineEnd": 101
     },
     "isEvaluatedColumn": {
       "desc": "Determines whether an evaluated argument is an actual DataFrame column array rather than a scalar or literal array/buffer cell value.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isEvaluatedColumn(...)",
       "signature": "$df.col(<column_name>).isEvaluatedColumn(\n  arg: unknown,\n  evaluatedVal: unknown,\n  columns: ColumnDict | null | undefined,\n  height: number\n): boolean",
-      "lineStart": 86,
-      "lineEnd": 102
+      "lineStart": 107,
+      "lineEnd": 123
     },
     "evaluateArgsMatrix": {
       "desc": "Evaluates multiple arguments against columns and height, returning the evaluated arrays and whether each argument resolved to a full column array.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).evaluateArgsMatrix(...)",
       "signature": "$df.col(<column_name>).evaluateArgsMatrix(\n  args: unknown[],\n  columns: ColumnDict | null | undefined,\n  height: number\n):",
-      "lineStart": 108,
-      "lineEnd": 112
+      "lineStart": 129,
+      "lineEnd": 133
     }
   },
   "constants.ts": {

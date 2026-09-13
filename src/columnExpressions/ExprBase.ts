@@ -1,7 +1,8 @@
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict, RegisteredDataType, CastOptions } from "../types"
 import { ALL_COLUMNS_MARKER } from "./constants"
-import { ColumnNotFoundError } from "../exceptions"
+import { ColumnNotFoundError, assertNotNull } from "../exceptions"
 import { evaluateExpression, kleeneUnary, kleeneBinary } from "./utils"
+import { isObj } from "../utils"
 
 const _derive = <T extends IExpr>(
     instance: T,
@@ -19,6 +20,19 @@ const _derive = <T extends IExpr>(
 };
 
 export function isExpr(v: unknown): v is IExpr { return v instanceof ExprBase; };
+
+export function isColExpr(v: unknown): v is IExpr {
+    return v instanceof ExprBase || (isObj(v) && typeof (v as any).evaluate === "function");
+}
+
+export function toColExpr<T extends IExpr = IExpr>(col: any, contextExpr?: any): T {
+    assertNotNull(col, "Column reference can't be null or undefined.");
+    if (isColExpr(col)) {
+        return col as T;
+    }
+    const Constructor = (contextExpr && contextExpr.constructor) || ExprBase;
+    return new Constructor(col);
+}
 
 /**
  * @namespace $df.col
@@ -82,6 +96,10 @@ export class ExprBase implements IExpr {
         return val || new Array(height).fill(null);
     }
 
+    _isColExpr(v: unknown): v is IExpr {
+        return isColExpr(v);
+    }
+
     _isGlobalAgg(): boolean {
         return this._aggFn != null && (!this._partitionBy || this._partitionBy.length === 0);
     }
@@ -94,6 +112,10 @@ export class ExprBase implements IExpr {
             return evaluateExpression(val, columns, height);
         }
         return val;
+    }
+
+    _toColExpr(col: any): any {
+        return toColExpr(col, this);
     }
 
     /**

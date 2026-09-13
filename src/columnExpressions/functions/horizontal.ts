@@ -1,7 +1,8 @@
 import { ColumnExpr, resolveColumnSelectors } from "../ColumnExpr";
+import { toColExpr } from "../ExprBase";
 import type { IntoExpr } from "../../types";
 import { ArrayExprNamespace } from "../mixins/ArrayExpr";
-import { evaluateArgsMatrix } from "../utils";
+import { evaluateArgsMatrix, createDelegatingProxy } from "../utils";
 import { HORIZONTAL_MARKER } from "../constants";
 
 export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
@@ -43,7 +44,7 @@ export function horizontal(
         const flatLen = flat.length;
         const resolvedExprs = new Array(flatLen);
         for (let j = 0; j < flatLen; j++) {
-            resolvedExprs[j] = ColumnExpr.toColExpr(flat[j]);
+            resolvedExprs[j] = toColExpr(flat[j], ColumnExpr);
         }
 
         const expanded = resolveColumnSelectors(resolvedExprs, allKeys, undefined, undefined, columns);
@@ -63,20 +64,14 @@ export function horizontal(
         return result;
     });
 
-    return new Proxy(expr, {
-        get(target, prop) {
-            if (prop === "constructor") return (target as any).constructor;
-            if (prop === "eval") {
-                return (subExpr: any) => {
-                    const arrNamespace = (target as any).arr;
-                    return subExpr?._isGlobalAgg?.() ? arrNamespace.agg(subExpr) : arrNamespace.eval(subExpr);
-                };
-            }
-            const arrNamespace = (target as any).arr;
-            if (arrNamespace && typeof arrNamespace[prop] === "function") {
-                return (...args: any[]) => arrNamespace[prop](...args);
-            }
-            return Reflect.get(target, prop, target);
+    return createDelegatingProxy(expr, (prop, target) => {
+        const arrNamespace = target.arr as any;
+        if (prop === "eval") {
+            return (subExpr: any) => subExpr?._isGlobalAgg?.() ? arrNamespace.agg(subExpr) : arrNamespace.eval(subExpr);
         }
+        if (arrNamespace && typeof arrNamespace[prop] === "function") {
+            return (...args: any[]) => arrNamespace[prop](...args);
+        }
+        return undefined;
     }) as any;
 }

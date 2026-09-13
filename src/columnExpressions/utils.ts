@@ -1,8 +1,29 @@
 import type { IExpr, ColumnData, ColumnDict } from "../types";
+import type { ProxyPropertyResolver } from "./types";
 import { isExpr } from "./ExprBase";
 import { isArrayOrTypedArray, sortArray, toCanonicalString } from "../utils";
 import { isValidDateObj } from "../utils/object";
 import { resolveWindowExpr } from "../dataframe/utils";
+
+/**
+ * Creates a delegating proxy that intercepts property accesses and delegates them
+ * via a custom property resolver when not directly handled.
+ */
+export function createDelegatingProxy<T extends object>(
+    target: T,
+    resolve: ProxyPropertyResolver<T>
+): T {
+    return new Proxy(target, {
+        get(t, prop, receiver) {
+            if (prop === "constructor") return (t as any).constructor;
+            if (typeof prop === "string") {
+                const delegated = resolve(prop, t);
+                if (delegated !== undefined) return delegated;
+            }
+            return Reflect.get(t, prop, receiver);
+        }
+    });
+}
 
 /**
  * Normalizes a single unary value (coercing Date instances to getTime if valid)

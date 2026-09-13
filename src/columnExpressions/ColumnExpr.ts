@@ -6,8 +6,8 @@ import { ArrayExpr } from "./mixins/ArrayExpr"
 import { StructExpr } from "./mixins/StructExpr"
 import { isObj, isRegExp, isArrayOfType } from "../utils"
 import { DataType } from "../datatypes"
-import type { IntoExpr, IExpr, DataFrameSchema, ColumnDict } from "../types"
-import { assertNotNull, SchemaError } from "../exceptions"
+import type { IExpr, DataFrameSchema, ColumnDict } from "../types"
+import { SchemaError } from "../exceptions"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
 export class ColumnExpr<T> extends ExprBase {
@@ -19,14 +19,6 @@ export class ColumnExpr<T> extends ExprBase {
     _pattern?: RegExp;
     _patterns?: RegExp[];
 
-    static isColExpr(v: unknown): v is ColumnExpr<any> {
-        return v instanceof ColumnExpr || (isObj(v) && typeof (v as any).evaluate === "function");
-    }
-
-    static toColExpr(col: IntoExpr | IntoExpr[]): ColumnExpr<any> {
-        assertNotNull(col, "Column reference cannot be null or undefined.");
-        return ColumnExpr.isColExpr(col) ? col : new ColumnExpr(col as string | string[]);
-    }
 
     /**
      * Creates a column expression representing a column or a raw expression value.
@@ -132,7 +124,7 @@ function _getTargetKeys(
         };
     } else if (expr._targetTypes?.length) {
         if (!schema) {
-            throw new SchemaError("Cannot resolve DataType column selector without DataFrame schema.");
+            throw new SchemaError("Cannot resolve DataType without DataFrame schema.");
         }
         const types = expr._targetTypes;
         const numTypes = types.length;
@@ -188,7 +180,8 @@ export function resolveColumnSelectors(
             const baseExpr = expr._baseExpr as IExpr;
             let fields: string[] = [];
             const colName = expr._colName;
-            if (typeof colName === "string" && schema && schema[colName] && schema[colName].name === "Struct") {
+            const baseHasOps = (baseExpr as any)._ops?.length > 0;
+            if (!baseHasOps && typeof colName === "string" && schema && schema[colName] && schema[colName].name === "Struct") {
                 fields = Object.keys((schema[colName] as any).fields);
             }
             if (fields.length === 0 && columns) {

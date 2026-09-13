@@ -1098,7 +1098,7 @@ export class StringExprNamespace {
      * └──────────┴─────┘
      */
     toInteger() {
-        return this._deriveString((str) => toValidInt(str));
+        return this._deriveString(toValidInt);
     }
 
     /**
