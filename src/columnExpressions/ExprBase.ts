@@ -30,7 +30,7 @@ export function toColExpr<T extends IExpr = IExpr>(col: any, contextExpr?: any):
     if (isColExpr(col)) {
         return col as T;
     }
-    const Constructor = (contextExpr && contextExpr.constructor) || ExprBase;
+    const Constructor = typeof contextExpr === "function" ? contextExpr : (contextExpr && contextExpr.constructor) || ExprBase;
     return new Constructor(col);
 }
 

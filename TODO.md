@@ -13,12 +13,6 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 - [x] **`list.eval()` & `.element`**:
   * Implement element-wise operations on lists/arrays using a sub-expression scope.
   * Replicate Polars `.list.eval()` behavior by exposing `.element` inside the eval blocks to represent the inner elements of each list.
-- [ ] **`horizontal.test` Bug Fix**:
-  * `$df.horizontal(...).eval($df.element().sum())` and forwarded aggregations return `null` due to proxy delegation and sub-expression window evaluation.
-  * Fix horizontal expression row-wise evaluation so direct methods (`.sum()`, `.mean()`, etc.) and `.eval(...)` resolve properly.
-- [ ] **`implode.test` Bug Fix**:
-  * `$df.implode(...)` fails with `toColExpr(...).implode is not a function`.
-  * Fix `toColExpr` invocation in `src/columnExpressions/functions/implode.ts` so that it instantiates `ColumnExpr` correctly instead of resolving constructor to `Function`.
 
 ### 🧱 Struct Column Operations (`.struct`)
 - [x] **`struct` & `.struct.field()`**:
