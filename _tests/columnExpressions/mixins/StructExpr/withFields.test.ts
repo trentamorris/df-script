@@ -36,4 +36,35 @@ if (r5[0].updated.c !== 200 || r5[0].updated.a !== 20 || r5[0].updated.b !== "fo
 }
 if (r5[2].updated !== null) throw new Error("r5 row 2 mismatch");
 
+// 3. Error when expression in array lacks alias/name
+let threw = false;
+try {
+    df.select([
+        $df.col("s").struct.withFields([$df.lit(42)])
+    ]).toDicts();
+} catch (e: any) {
+    threw = true;
+}
+if (!threw) throw new Error("Expected withFields to throw when expression lacks alias");
+
+// 4. Empty fields object or array keeps object unchanged
+const rEmpty = df.select([
+    $df.col("s").struct.withFields({}).alias("updated")
+]).toDicts() as any[];
+if (rEmpty[0].updated.a !== 1 || rEmpty[0].updated.b !== "foo") {
+    throw new Error("Expected object preserved when withFields({}) is called");
+}
+
+// 5. Primitive / non-object column values evaluate to null
+const dfPrimitives = $df.data([
+    { s: 123 },
+    { s: "string_val" }
+], { s: $df.Object });
+const rPrim = dfPrimitives.select([
+    $df.col("s").struct.withFields({ x: $df.lit(1) }).alias("updated")
+]).toDicts() as any[];
+if (rPrim[0].updated !== null || rPrim[1].updated !== null) {
+    throw new Error("Expected null for primitives");
+}
+
 console.log("✓ StructExpr.withFields tests passed!");

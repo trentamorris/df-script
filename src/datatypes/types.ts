@@ -198,7 +198,7 @@ export class NullType extends DataType<null> {
 }
 export const Null = new NullType();
 
-export class ObjectType extends DataType {
+export class ObjectType extends DataType<any> {
     readonly name = "Object";
     override get isObject(): boolean { return true; }
     coerce(val: unknown): any { return val === undefined ? null : val; }

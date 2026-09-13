@@ -4199,8 +4199,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.field(...)",
       "signature": "$df.col(<column_name>).struct.field(\n  name: string\n)",
-      "lineStart": 48,
-      "lineEnd": 61
+      "lineStart": 49,
+      "lineEnd": 54
     },
     "renameFields": {
       "desc": "Renames existing field keys inside structured object columns.",
@@ -4218,8 +4218,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.renameFields(...)",
       "signature": "$df.col(<column_name>).struct.renameFields(\n  mapping: Record<string, string>\n)",
-      "lineStart": 77,
-      "lineEnd": 111
+      "lineStart": 70,
+      "lineEnd": 91
     },
     "withFields": {
       "desc": "Inserts or updates fields inside structured object columns.",
@@ -4237,8 +4237,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.withFields(...)",
       "signature": "$df.col(<column_name>).struct.withFields(\n  fields: IntoExpr[] | Record<string, IntoExpr>\n)",
-      "lineStart": 128,
-      "lineEnd": 183
+      "lineStart": 108,
+      "lineEnd": 157
     },
     "unnest": {
       "desc": "Expands nested struct attributes into distinct columns in the DataFrame schema.",
@@ -4250,8 +4250,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct.unnest(...)",
       "signature": "$df.col(<column_name>).struct.unnest()",
-      "lineStart": 198,
-      "lineEnd": 203
+      "lineStart": 172,
+      "lineEnd": 177
     },
     "struct": {
       "desc": "Struct namespace accessor for operating on nested object/struct columns.",
@@ -4263,8 +4263,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).struct",
       "signature": "$df.col(<column_name>).get struct()",
-      "lineStart": 227,
-      "lineEnd": 229
+      "lineStart": 201,
+      "lineEnd": 203
     }
   },
   "columnExpressions/mixins/TemporalExpr.ts": {

@@ -1,6 +1,7 @@
 import { ExprBase } from "../ExprBase";
 import type { IntoExpr } from "../../types";
 import { assertNotNull, InvalidArgumentError } from "../../exceptions";
+import { LITERAL_MARKER } from "../constants";
 
 let _ColumnExprClass: any = null;
 function _toColExpr(col: any): any {
@@ -46,15 +47,7 @@ export class StructExprNamespace {
      * └───────────────────────────┴───────────┘
      */
     field(name: string) {
-        const derived = this._expr._derive((vArray: any[]) => {
-            const height = vArray.length;
-            const result = new Array(height);
-            for (let i = 0; i < height; i++) {
-                const v = vArray[i];
-                result[i] = (v != null && typeof v === "object") ? (v as any)[name] : null;
-            }
-            return result;
-        });
+        const derived = this._expr._deriveUnary((v: any) => (typeof v === "object" ? v[name] : null));
         derived._baseExpr = this._expr;
         derived._fieldName = name;
         return derived.alias(name);
@@ -75,38 +68,25 @@ export class StructExprNamespace {
      * └───────────────────────────┴────────────────────────────────┘
      */
     renameFields(mapping: Record<string, string>) {
-        return this._expr._derive((vArray: any[]) => {
-            const height = vArray.length;
-            const result = new Array(height);
-            const keys = Object.keys(mapping);
-            const keysLen = keys.length;
-
-            for (let i = 0; i < height; i++) {
-                const v = vArray[i];
-                if (v == null || typeof v !== "object") {
-                    result[i] = null;
-                    continue;
-                }
-
-                const newObj: any = {};
-                const origKeys = Object.keys(v);
-                const origLen = origKeys.length;
-                for (let k = 0; k < origLen; k++) {
-                    const key = origKeys[k];
-                    newObj[key] = (v as any)[key];
-                }
-
-                for (let j = 0; j < keysLen; j++) {
-                    const oldKey = keys[j];
-                    if (oldKey in newObj) {
-                        const newKey = mapping[oldKey];
-                        newObj[newKey] = newObj[oldKey];
-                        delete newObj[oldKey];
-                    }
-                }
-                result[i] = newObj;
+        const keys = Object.keys(mapping);
+        const keysLen = keys.length;
+        return this._expr._deriveUnary((v: any) => {
+            if (typeof v !== "object") return null;
+            const newObj: any = {};
+            const origKeys = Object.keys(v);
+            const origLen = origKeys.length;
+            for (let k = 0; k < origLen; k++) {
+                const key = origKeys[k];
+                newObj[key] = (v as any)[key];
             }
-            return result;
+            for (let j = 0; j < keysLen; j++) {
+                const oldKey = keys[j];
+                if (oldKey in newObj) {
+                    newObj[mapping[oldKey]] = newObj[oldKey];
+                    delete newObj[oldKey];
+                }
+            }
+            return newObj;
         });
     }
 
@@ -129,32 +109,33 @@ export class StructExprNamespace {
         return this._expr._derive((vArray: any[], columns: any) => {
             const height = vArray.length;
             const result = new Array(height);
+            const isArr = Array.isArray(fields);
+            const keys = isArr ? fields : Object.keys(fields || {});
+            const len = keys.length;
+            const resolved: { name: string; expr: any }[] = [];
 
-            const resolved: { name: string, expr: any }[] = [];
             if (Array.isArray(fields)) {
-                const fieldsLen = fields.length;
-                for (let j = 0; j < fieldsLen; j++) {
-                    const f = fields[j];
-                    const expr = _toColExpr(f);
-                    const name = expr._outputName || expr._colName;
+                for (let j = 0; j < len; j++) {
+                    const expr = _toColExpr(fields[j]);
+                    const name = (expr._outputName && expr._outputName !== LITERAL_MARKER)
+                        ? expr._outputName
+                        : (expr._colName !== LITERAL_MARKER ? expr._colName : "");
                     if (!name) {
                         throw new InvalidArgumentError("Expressions passed to struct.withFields must have a name/alias.");
                     }
                     resolved.push({ name, expr });
                 }
             } else if (fields && typeof fields === "object") {
-                const keys = Object.keys(fields);
-                const keysLen = keys.length;
-                for (let j = 0; j < keysLen; j++) {
-                    const name = keys[j];
-                    const expr = _toColExpr(fields[name]);
+                const record = fields as Record<string, IntoExpr>;
+                for (let j = 0; j < len; j++) {
+                    const name = keys[j] as string;
+                    const expr = _toColExpr(record[name]);
                     resolved.push({ name, expr });
                 }
             }
 
-            const resolvedLen = resolved.length;
-            const fieldValues = new Array(resolvedLen);
-            for (let j = 0; j < resolvedLen; j++) {
+            const fieldValues = new Array(len);
+            for (let j = 0; j < len; j++) {
                 fieldValues[j] = resolved[j].expr.evaluate(columns, height);
             }
 
@@ -165,15 +146,8 @@ export class StructExprNamespace {
                     continue;
                 }
 
-                const newObj: any = {};
-                const origKeys = Object.keys(v);
-                const origLen = origKeys.length;
-                for (let k = 0; k < origLen; k++) {
-                    const key = origKeys[k];
-                    newObj[key] = (v as any)[key];
-                }
-
-                for (let j = 0; j < resolvedLen; j++) {
+                const newObj: any = { ...v };
+                for (let j = 0; j < len; j++) {
                     newObj[resolved[j].name] = fieldValues[j][i];
                 }
                 result[i] = newObj;
