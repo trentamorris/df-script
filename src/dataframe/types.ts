@@ -1,7 +1,30 @@
 import type { AggFn, RowRecord, DataFrameSchema, JSONFormat, SortArrayOptions, SortOptions } from "../types";
 import type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions } from "../utils";
+import type { DataFrame } from "./dataframe";
+import type { ColumnExpr } from "../columnExpressions";
 
 export type { JSONParseOptions, SafeJsonReplacerOptions, NDJSONParseOptions, SortArrayOptions, SortOptions };
+
+export type GroupedAggDelegatedMethodNames =
+    | "all"
+    | "avg"
+    | "count"
+    | "first"
+    | "kurtosis"
+    | "last"
+    | "max"
+    | "mean"
+    | "median"
+    | "min"
+    | "nUnique"
+    | "skew"
+    | "std"
+    | "sum"
+    | "variance";
+
+export type GroupedAggDelegatedOps<T extends RowRecord = any> = {
+    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>;
+};
 
 export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross";
 export type JoinMaintainOrder = "none" | "left" | "right" | "left_right" | "right_left";
@@ -89,6 +112,20 @@ export interface GroupByDynamicOptions<T = any> {
     startBy?: DynamicStartBy;
     /** Verify whether index column is sorted in ascending order. Default: true */
     checkSorted?: boolean;
+}
+
+export interface PartitionByOptions {
+    /**
+     * If true, returns a Record/dictionary mapping each partition key string to its DataFrame.
+     * If false (default), returns an array of DataFrames.
+     * @default false
+     */
+    asDict?: boolean;
+    /**
+     * If true (default), maintain original encounter order of partitions.
+     * @default true
+     */
+    maintainOrder?: boolean;
 }
 
 export interface UnpivotOptions<T> {

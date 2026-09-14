@@ -203,8 +203,18 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Unify the 18 element-wise mathematical unary expressions (`abs`, `sqrt`, `cbrt`, `exp`, `log`, `sin`, `cos`, `tan`, etc.) through a single vectorized higher-order transform.
 - [ ] **Temporal Expression Date Part Dispatcher**:
   * Consolidate repetitive date component extractions in `TemporalExpr.ts` into a unified `_datePart` extractor.
-- [ ] **Advanced Minification Pipeline**:
-  * Evaluate secondary Terser / AST pass in `npm run build` to fold constants and compact object property patterns beyond standard esbuild minification.
+- [ ] **Dedicated Parallel Build Script (`scripts/build.mjs`)**:
+  * Extract the long inline CLI build command from `package.json` into a dedicated ES-module script using `esbuild.build()` directly.
+  * Run all 6 bundle targets (`dist/index.js`, `dist/index.mjs`, `dist/utils.js`, `dist/utils.mjs`, `dist/expressions.js`, `dist/expressions.mjs`) in parallel with `Promise.all`.
+  * Run TypeScript declaration emit (`tsc --emitDeclarationOnly`) concurrently to drastically cut build times.
+  * Clean up `package.json` scripts to maintain cross-platform shell compatibility and readability.
+### 🛠️ Unified Missing & NaN Filling Architecture
+- [ ] **Unified `fillNull` & `fillNan` with Target Selection (`FillNullOptions.target`)**:
+  * Extend `FillNullOptions` with `target?: "null" | "nan" | "all"` (defaulting to `"null"` for complete backward compatibility).
+  * Enable all existing strategies (`"forward"`, `"backward"`, `"min"`, `"max"`, `"mean"`, `"zero"`, `"one"`) and `limit` to work seamlessly when targeting `NaN`s or both `null`s and `NaN`s in a single pass.
+  * Update DataFrame-level `df.fillNull({ target })` to forward options cleanly across all columns.
+  * Add `.fillNan(valueOrOptions)` as a clean convenience alias delegating to `.fillNull({ ..., target: "nan" })`.
+  * Add dedicated unit tests in `_tests/columnExpressions/mixins/StandardExpr/fillNull.test.ts` (and `fillNan.test.ts`).
 
 
 ## 🔮 Future / Backlog Scope (V2.2.0+)
@@ -224,270 +234,770 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 ### 🐻 Complete Polars Functionality Parity & Migration Backlog
 The following list tracks the complete surface of Polars functionality to achieve 100% parity where applicable to JS/TS.
 
-- [x] `/allHorizontal`            (`$df.horizontal(<cols>).all()`)
+- [ ] `/align_frames`
+- [ ] `/all`
+- [x] `/all_horizontal`            (`$df.horizontal(<cols>).all()`)
 - [ ] `/any`
-- [x] `/anyHorizontal`            (`$df.horizontal(<cols>).any()`)
-- [ ] `/approxNUnique`
+- [x] `/any_horizontal`            (`$df.horizontal(<cols>).any()`)
+- [ ] `/approx_n_unique`
 - [ ] `/arange`
 - [ ] `/arctan2`
 - [ ] `/arctan2d`
-- [ ] `/argSortBy`
-- [ ] `/argWhere`
-- [ ] `/businessDayCount`
-- [ ] `/concatArr`
-- [ ] `/concatStr`
+- [ ] `/arg_sort_by`
+- [ ] `/arg_where`
+- [ ] `/business_day_count`
+- [x] `/coalesce`                    (`$df.coalesce(...)`)
+- [ ] `/collect_all`
+- [ ] `/collect_all_async`
+- [ ] `/concat`
+- [ ] `/concat_arr`
+- [ ] `/concat_list`
+- [ ] `/concat_str`
 - [ ] `/corr`
 - [ ] `/count`
 - [ ] `/cov`
-- [ ] `/cumCount`
-- [ ] `/cumFold`
-- [ ] `/cumReduce`
-- [ ] `/cumSum`
-- [x] `/cumSumHorizontal`           (`$df.horizontal(<cols>).arr.cumSum()`)
-- [ ] `/DataFrame.__getitem__`      (Deferred: requires standalone `Series` type)
-- [ ] `/DataFrame.__setitem__`      (Deferred: requires standalone `Series` type)
+- [ ] `/cum_count`
+- [ ] `/cum_fold`
+- [ ] `/cum_reduce`
+- [ ] `/cum_sum`
+- [x] `/cum_sum_horizontal`           (`$df.horizontal(<cols>).arr.cumSum()`)
+- [ ] `/DataFrame/__array__`
+- [ ] `/DataFrame/__arrow_c_stream__`
+- [ ] `/DataFrame/__dataframe__`
+- [ ] `/DataFrame/__getitem__`      (Deferred: requires standalone `Series` type)
+- [ ] `/DataFrame/__setitem__`      (Deferred: requires standalone `Series` type)
+- [ ] `/DataFrame/approx_n_unique`
 - [x] `/DataFrame/bottom_k`         (`$df.data(...).sort({ by: <col>, descending: false }).head(k)`)
-- [x] `/DataFrame.cast`             (`$df.data(...).cast(dtype)` or `$df.data(...).cast({ col: dtype })`)
+- [x] `/DataFrame/cast`             (`$df.data(...).cast(dtype)` or `$df.data(...).cast({ col: dtype })`)
 - [x] `/DataFrame/clear`            (`$df.data(...).slice(0, 0)`)
+- [x] `/DataFrame/clone`            (`$df.data(...).clone()`)
 - [x] `/DataFrame/collect_schema`   (`$df.data(...).schema`)
+- [x] `/DataFrame/columns`          (`$df.data(...).columns`)
 - [ ] `/DataFrame/corr`
 - [x] `/DataFrame/count`            (`$df.data(...).height` [total rows] or `$df.data(...).select($df.all().count())` [non-null per column])
+- [ ] `/DataFrame/describe`
 - [ ] `/DataFrame/deserialize`      (JSON format available via `$df.readJson()`; binary buffer format tracked in Future Scope)
+- [x] `/DataFrame/drop`             (`$df.data(...).drop(cols)`)
 - [ ] `/DataFrame/drop_in_place`    (Deferred: requires standalone `Series` type)
 - [x] `/DataFrame/drop_nans`        (`$df.data(...).filter($df.all().isNotNan())`)
 - [x] `/DataFrame/drop_nulls`       (`$df.data(...).dropNulls(<subset>)`)
+- [x] `/DataFrame/dtypes`           (`$df.data(...).dtypes`)
 - [x] `/DataFrame/equals`           (`$df.data(...).equals(other, { nullsEqual })`)
+- [ ] `/DataFrame/estimated_size`
+- [x] `/DataFrame/explode`          (`$df.data(...).explode(cols, options?)`)
 - [x] `/DataFrame/extend`           (`$df.concat([df1, df2], { how: "vertical" })` — in Polars this is in-place Arrow chunk reallocation; DFScript's immutable vertical concat already builds contiguous arrays directly)
 - [ ] `/DataFrame/fill_nan`
+- [x] `/DataFrame/fill_null`        (`$df.data(...).fillNull(options?)`)
+- [x] `/DataFrame/filter`           (`$df.data(...).filter(predicate)`)
 - [ ] `/DataFrame/flags`            (Polars internal engine metadata exposing chunk-level optimization flags like SORTED_ASC / FAST_EXPLODE)
 - [ ] `/DataFrame/fold`
 - [ ] `/DataFrame/gather`
 - [ ] `/DataFrame/gather_every`
-- [ ] `/DataFrame/get_column`       (Deferred: requires standalone `Series` type)
-- [x] `/DataFrame/get_column_index` (`$df.data(...).columns.indexOf(<col>)`)
-- [ ] `/DataFrame/get_columns`      (Deferred: requires standalone `Series` type; currently `$df.data(...).toDict()`)
-- [x] `/DataFrame/group_by_dynamic` (`$df.data(...).groupByDynamic(<index_col>, { every, period, ... })`)
+- [ ] `/DataFrame/get_column`            (Deferred: requires standalone `Series` type)
+- [x] `/DataFrame/get_column_index`      (`$df.data(...).columns.indexOf(<col>)`)
+- [x] `/DataFrame/get_columns`           (`$df.data(...).columns.map(c => $df.data(...)._columns[c])` / `.toDict()`)
+- [ ] `/DataFrame/glimpse`
+- [x] `/DataFrame/group_by`              (`$df.data(...).groupBy(keys)`)
+- [ ] `/DataFrame/group_by/__iter__`
+- [x] `/DataFrame/group_by/agg`          (`$df.data(...).groupBy(keys).agg(...)`)
+- [x] `/DataFrame/group_by/all`          (`$df.data(...).groupBy(keys).all()`   / `.agg($df.all().all())`)
+- [x] `/DataFrame/group_by/count`        (`$df.data(...).groupBy(keys).count()` / `.agg($df.all().count())` / `.agg($df.len().alias("count"))`)
+- [x] `/DataFrame/group_by/first`        (`$df.data(...).groupBy(keys).first()` / `.agg($df.all().first())`)
+- [ ] `/DataFrame/group_by/having`       
+- [x] `/DataFrame/group_by/head`         (`$df.data(...).groupBy(keys).head(n)`)
+- [x] `/DataFrame/group_by/last`         (`$df.data(...).groupBy(keys).last()`  / `.agg($df.all().last())`)
+- [x] `/DataFrame/group_by/len`          (`$df.data(...).groupBy(keys).len()`   / `.agg($df.len())`)
+- [ ] `/DataFrame/group_by/map_groups`   
+- [x] `/DataFrame/group_by/max`          (`$df.data(...).groupBy(keys).max()`   / `.agg($df.all().max())`)
+- [x] `/DataFrame/group_by/mean`         (`$df.data(...).groupBy(keys).mean()`  / `.agg($df.all().mean())`)
+- [x] `/DataFrame/group_by/median`       (`$df.data(...).groupBy(keys).median()`/ `.agg($df.all().median())`)
+- [x] `/DataFrame/group_by/min`          (`$df.data(...).groupBy(keys).min()` / `.agg($df.all().min())`)
+- [x] `/DataFrame/group_by/n_unique`     (`$df.data(...).groupBy(keys).nUnique()` / `.agg($df.all().nUnique())`)
+- [x] `/DataFrame/group_by/quantile`     (`$df.data(...).groupBy(keys).quantile(q)` / `.agg($df.all().quantile(q))`)
+- [x] `/DataFrame/group_by/sum`          (`$df.data(...).groupBy(keys).sum()` / `.agg($df.all().sum())`)
+- [x] `/DataFrame/group_by/tail`         (`$df.data(...).groupBy(keys).tail(n)`)
+- [x] `/DataFrame/group_by_dynamic`      (`$df.data(...).groupByDynamic(<index_col>, { every, period, ... })`)
 - [ ] `/DataFrame/hash_rows`        (Deferred: requires standalone `Series` type; internal row hashing used in groupBy/join)
+- [x] `/DataFrame/head`                  (`$df.data(...).head(n)`)
+- [x] `/DataFrame/height`                (`$df.data(...).height`)
+- [x] `/DataFrame/hstack`                (`$df.concat([df1, df2], { how: "horizontal" })`)
+- [x] `/DataFrame/insert_column`         (`$df.data(...).insertColumn(index, name, expr)`)
 - [ ] `/DataFrame/interpolate`
+- [ ] `/DataFrame/is_duplicated`
+- [x] `/DataFrame/is_empty`            (`$df.data(...).height === 0`)
+- [ ] `/DataFrame/is_sorted`
+- [ ] `/DataFrame/is_unique`
+- [x] `/DataFrame/item`                  (`$df.data(...).item(row?, col?)`)
+- [x] `/DataFrame/iter_columns`         (`$df.data(...).iterColumns()`)
+- [x] `/DataFrame/iter_rows`            (`$df.data(...).iterRows()`)
 - [ ] `/DataFrame/iter_slices`
-- [x] `/DataFrame/join_where`       (`$df.data(...).joinWhere(other, $df.col("a").gt($df.col("b")), { how: "inner" })`)
+- [x] `/DataFrame/join`                  (`$df.data(...).join(other, { on, how, ... })`)
+- [x] `/DataFrame/join_asof`             (`$df.data(...).joinAsof(other, { on, by, strategy, ... })`)
+- [x] `/DataFrame/join_where`            (`$df.data(...).joinWhere(other, $df.col("a").gt($df.col("b")), { how: "inner" })`)
+- [ ] `/DataFrame/lazy`
+- [x] `/DataFrame/limit`                 (`$df.data(...).limit(n)`)
 - [ ] `/DataFrame/map_columns`
 - [ ] `/DataFrame/map_rows`
 - [ ] `/DataFrame/match_to_schema`
-- [x] `/DataFrame/max`              (`$df.data(...).select($df.all().max())`)
-- [x] `/DataFrame/max_horizontal`   (`$df.data(...).select($df.horizontal(<cols>).max())`)
-- [x] `/DataFrame/mean`             (`$df.data(...).select($df.all().mean())`)
-- [x] `/DataFrame/mean_horizontal`  (`$df.data(...).select($df.horizontal(<cols>).mean())`)
-- [x] `/DataFrame/median`           (`$df.data(...).select($df.all().median())`)
+- [x] `/DataFrame/max`                   (`$df.data(...).select($df.all().max())`)
+- [x] `/DataFrame/max_horizontal`        (`$df.data(...).select($df.horizontal(<cols>).max())`)
+- [x] `/DataFrame/mean`                  (`$df.data(...).select($df.all().mean())`)
+- [x] `/DataFrame/mean_horizontal`       (`$df.data(...).select($df.horizontal(<cols>).mean())`)
+- [x] `/DataFrame/median`                (`$df.data(...).select($df.all().median())`)
+- [x] `/DataFrame/melt`                  (`$df.data(...).unpivot(options)`)
 - [ ] `/DataFrame/merge_sorted`
-- [x] `/DataFrame/min`              (`$df.data(...).select($df.all().min())`)
-- [x] `/DataFrame/min_horizontal`   (`$df.data(...).select($df.horizontal(<cols>).min())`)
-- [ ] `/DataFrame/partition_by`
+- [x] `/DataFrame/min`                   (`$df.data(...).select($df.all().min())`)
+- [x] `/DataFrame/min_horizontal`        (`$df.data(...).select($df.horizontal(<cols>).min())`)
+- [ ] `/DataFrame/n_chunks`
+- [x] `/DataFrame/n_unique`              (`$df.data(...).select($df.all().nUnique())`)
+- [x] `/DataFrame/null_count`            (`$df.data(...).select($df.all().nullCount())`)
+- [x] `/DataFrame/partition_by`          (`$df.data(...).partitionBy(keys, { asDict? })`)
 - [ ] `/DataFrame/pipe`
-- [x] `/DataFrame/product`          (`$df.data(...).select($df.all().product())`)
-- [x] `/DataFrame/quantile`         (`$df.data(...).select($df.all().quantile(q))`)
+- [x] `/DataFrame/pivot`                 (`$df.data(...).pivot(options)`)
+- [x] `/DataFrame/product`               (`$df.data(...).select($df.all().product())`)
+- [x] `/DataFrame/quantile`              (`$df.data(...).select($df.all().quantile(q))`)
 - [ ] `/DataFrame/rechunk`
-- [x] `/DataFrame/remove`           (`$df.data(...).filter(<predicate>.not())`)
+- [x] `/DataFrame/remove`                (`$df.data(...).filter(<predicate>.not())`)
+- [x] `/DataFrame/rename`                (`$df.data(...).rename(mapping)`)
 - [ ] `/DataFrame/replace_column`   (Deferred: requires standalone `Series` type; currently `$df.data(...).withColumns(...)`)
+- [x] `/DataFrame/reverse`               (`$df.data(...).reverse()`)
 - [ ] `/DataFrame/rolling`
-- [ ] `/DataFrame/row`
-- [ ] `/DataFrame/rows`
+- [x] `/DataFrame/row`                   (`$df.data(...).row(index)`)
+- [x] `/DataFrame/rows`                  (`$df.data(...).rows()`)
 - [ ] `/DataFrame/rows_by_key`
 - [ ] `/DataFrame/sample`
-- [x] `/DataFrame/select_seq`       (`$df.data(...).select(...)` — in Polars this executes sequentially rather than multi-threaded; in JS/TS the event loop engine is already strictly sequential and deterministic by default)
+- [x] `/DataFrame/schema`                (`$df.data(...).schema`)
+- [x] `/DataFrame/select`                (`$df.data(...).select(...)`)
+- [x] `/DataFrame/select_seq`       ( `$df.data(...).select(...)` — in Polars this executes sequentially rather than multi-threaded; in JS/TS the event loop engine is already strictly sequential and deterministic by default)
 - [ ] `/DataFrame/serialize`        (JSON format available via `$df.data(...).writeJson()`; binary buffer format tracked in Future Scope)
 - [ ] `/DataFrame/set_sorted`       (Future candidate: internal metadata flag asserting pre-sorted column order to bypass sorting checks)
+- [x] `/DataFrame/shape`                 (`$df.data(...).shape`)
 - [x] `/DataFrame/shift`            (`$df.data(...).select($df.all().shift(n, { fillValue }))`)
+- [ ] `/DataFrame/show`
 - [ ] `/DataFrame/shrink_to_fit`    (N/A in JS: Rust/Arrow uses this to release excess heap `capacity` down to `len`; in JS/V8, array backing stores and memory compaction are handled automatically by the engine GC)
-- [ ] `/DataFrame/sql`              (Planned as tree-shakeable standalone function or separate subpath plugin `df-script/sql` to avoid bloating the core bundle with SQL parser/grammar overhead. Use a separate parser / plugin for now)
-- [x] `/DataFrame/std`              (`$df.data(...).select($df.all().std())`)
-- [x] `/DataFrame/sum`              (`$df.data(...).select($df.all().sum())`)
-- [x] `/DataFrame/sum_horizontal`   (`$df.data(...).select($df.horizontal(<cols>).sum())`)
+- [x] `/DataFrame/slice`                 (`$df.data(...).slice(offset, length?)`)
+- [x] `/DataFrame/sort`                  (`$df.data(...).sort(options)`)
+- [ ] `/DataFrame/sql`                   (Planned as tree-shakeable standalone function or separate subpath plugin `df-script/sql` to avoid bloating the core bundle with SQL parser/grammar overhead. Use a separate parser / plugin for now)
+- [x] `/DataFrame/std`                   (`$df.data(...).select($df.all().std())`)
+- [x] `/DataFrame/sum`                   (`$df.data(...).select($df.all().sum())`)
+- [x] `/DataFrame/sum_horizontal`        (`$df.data(...).select($df.horizontal(<cols>).sum())`)
+- [x] `/DataFrame/tail`                  (`$df.data(...).tail(n)`)
+- [ ] `/DataFrame/to_arrow`
+- [x] `/DataFrame/to_dict`               (`$df.data(...).toDict()`)
+- [x] `/DataFrame/to_dicts`              (`$df.data(...).toDicts()`)
 - [ ] `/DataFrame/to_dummies`
-- [ ] `/DataFrame/to_series`
-- [x] `/DataFrame/top_k`            (`$df.data(...).sort({ by: <col>, descending: true }).head(k)`)
+- [ ] `/DataFrame/to_init_repr`
+- [ ] `/DataFrame/to_jax`
+- [ ] `/DataFrame/to_numpy`
+- [ ] `/DataFrame/to_pandas`
+- [ ] `/DataFrame/to_series`             (Deferred: requires standalone `Series` type)
+- [ ] `/DataFrame/to_struct`
+- [ ] `/DataFrame/to_torch`
+- [x] `/DataFrame/top_k`                 (`$df.data(...).sort({ by: <col>, descending: true }).head(k)`)
+- [x] `/DataFrame/transpose`             (`$df.data(...).transpose(options?)`)
+- [x] `/DataFrame/unique`                (`$df.data(...).unique(subset?, options?)`)
 - [ ] `/DataFrame/unnest`
-- [x] `/DataFrame/unstack`          (`$df.data(...).unstack(<cols>, { step, how, fillValues })`)
+- [x] `/DataFrame/unpivot`               (`$df.data(...).unpivot(options)`)
+- [x] `/DataFrame/unstack`               (`$df.data(...).unstack(<cols>, { step, how, fillValues })`)
 - [ ] `/DataFrame/update`
 - [ ] `/DataFrame/upsample`
-- [x] `/DataFrame/var`              (`$df.data(...).select($df.all().variance())`)
+- [x] `/DataFrame/var`                   (`$df.data(...).select($df.all().variance())`)
+- [x] `/DataFrame/vstack`                (`$df.concat([df1, df2], { how: "vertical" })`)
+- [x] `/DataFrame/width`                 (`$df.data(...).width`)
+- [x] `/DataFrame/with_columns`          (`$df.data(...).withColumns(...)`)
+- [x] `/DataFrame/with_columns_seq`      (`$df.data(...).withColumns(...)` — deterministic & sequential by default in JS)
+- [x] `/DataFrame/with_row_count`        (`$df.data(...).withRowIndex(name?, offset?)` — alias for `with_row_index`)
+- [x] `/DataFrame/with_row_index`        (`$df.data(...).withRowIndex(name?, offset?)`)
+- [ ] `/DataFrame/write_avro`
+- [ ] `/DataFrame/write_clipboard`
+- [x] `/DataFrame/write_csv`             (`$df.data(...).writeCsv(path, options?)`)
+- [ ] `/DataFrame/write_database`
+- [ ] `/DataFrame/write_delta`
+- [ ] `/DataFrame/write_excel`
+- [ ] `/DataFrame/write_iceberg`
+- [ ] `/DataFrame/write_ipc`
+- [ ] `/DataFrame/write_ipc_stream`
+- [x] `/DataFrame/write_json`            (`$df.data(...).writeJson(path, options?)`)
+- [ ] `/DataFrame/write_ndjson`
+- [ ] `/DataFrame/write_parquet`
+- [ ] `/DataType/to_dtype_expr`
+- [ ] `/DataTypeExpr/arr/inner_dtype`
+- [ ] `/DataTypeExpr/arr/shape`
+- [ ] `/DataTypeExpr/arr/width`
+- [ ] `/DataTypeExpr/list/inner_dtype`
+- [ ] `/DataTypeExpr/struct/field_dtype`
+- [ ] `/DataTypeExpr/struct/field_names`
 - [ ] `/date`
-- [ ] `/dateRange`
-- [ ] `/dateRanges`
+- [ ] `/date_range`
+- [ ] `/date_ranges`
 - [ ] `/datetime`
-- [ ] `/datetimeRange`
-- [ ] `/datetimeRanges`
-- [x] `/Expr/and_` (`.and()`)
+- [ ] `/datetime_range`
+- [ ] `/datetime_ranges`
+- [ ] `/defer`
+- [ ] `/disable_string_cache`
+- [ ] `/dtype_of`
+- [ ] `/duration`
+- [ ] `/element`
+- [ ] `/enable_string_cache`
+- [ ] `/escape_regex`
+- [ ] `/exceptions/CategoricalRemappingWarning`
+- [ ] `/exceptions/ChronoFormatWarning`
+- [ ] `/exceptions/ColumnNotFoundError`
+- [ ] `/exceptions/ComputeError`
+- [ ] `/exceptions/CustomUFuncWarning`
+- [ ] `/exceptions/DataOrientationWarning`
+- [ ] `/exceptions/DuplicateError`
+- [ ] `/exceptions/InvalidOperationError`
+- [ ] `/exceptions/MapWithoutReturnDtypeWarning`
+- [ ] `/exceptions/ModuleUpgradeRequiredError`
+- [ ] `/exceptions/NoDataError`
+- [ ] `/exceptions/NoRowsReturnedError`
+- [ ] `/exceptions/OutOfBoundsError`
+- [ ] `/exceptions/PanicException`
+- [ ] `/exceptions/ParameterCollisionError`
+- [ ] `/exceptions/PerformanceWarning`
+- [ ] `/exceptions/PolarsError`
+- [ ] `/exceptions/PolarsInefficientMapWarning`
+- [ ] `/exceptions/PolarsWarning`
+- [ ] `/exceptions/RowsError`
+- [ ] `/exceptions/SchemaError`
+- [ ] `/exceptions/SchemaFieldNotFoundError`
+- [ ] `/exceptions/ShapeError`
+- [ ] `/exceptions/SQLInterfaceError`
+- [ ] `/exceptions/SQLSyntaxError`
+- [ ] `/exceptions/StringCacheMismatchError`
+- [ ] `/exceptions/StructFieldNotFoundError`
+- [ ] `/exceptions/TooManyRowsReturnedError`
+- [ ] `/exceptions/UnstableWarning`
+- [ ] `/exceptions/UnsuitableSQLError`
+- [ ] `/exclude`
+- [ ] `/explain_all`
+- [x] `/Expr/abs`                   (`.abs()`)
+- [x] `/Expr/add`                   (`.add()`)
+- [ ] `/Expr/agg_groups`
+- [x] `/Expr/alias`                 (`.alias(name)`)
+- [x] `/Expr/all`                   (`.all()`)
+- [x] `/Expr/and_`                  (`.and()`)
+- [x] `/Expr/any`                   (`.any()`)
 - [ ] `/Expr/append`
-- [ ] `/Expr/approxNUnique`
-- [x] `/Expr/arccos`
-- [x] `/Expr/arccosh`
-- [x] `/Expr/arcsin`
-- [x] `/Expr/arcsinh`
-- [x] `/Expr/arctan`
-- [x] `/Expr/arctanh`
-- [ ] `/Expr/argSort`
-- [ ] `/Expr/argTrue`
-- [ ] `/Expr/argUnique`
+- [ ] `/Expr/approx_n_unique`
+- [x] `/Expr/arccos`                (`.arccos()`)
+- [x] `/Expr/arccosh`               (`.arccosh()`)
+- [x] `/Expr/arcsin`                (`.arcsin()`)
+- [x] `/Expr/arcsinh`               (`.arcsinh()`)
+- [x] `/Expr/arctan`                (`.arctan()`)
+- [x] `/Expr/arctanh`               (`.arctanh()`)
+- [x] `/Expr/arg_max`               (`.argMax()`)
+- [x] `/Expr/arg_min`               (`.argMin()`)
+- [ ] `/Expr/arg_sort`
+- [ ] `/Expr/arg_true`
+- [ ] `/Expr/arg_unique`
+- [x] `/Expr/arr/agg`           (`.arr.agg(expr)`)
+- [x] `/Expr/arr/all`           (`.arr.all()`)
+- [x] `/Expr/arr/any`           (`.arr.any()`)
+- [x] `/Expr/arr/arg_max`       (`.arr.argMax()`)
+- [x] `/Expr/arr/arg_min`       (`.arr.argMin()`)
+- [x] `/Expr/arr/contains`      (`.arr.contains(item)`)
+- [x] `/Expr/arr/count_matches` (`.arr.countMatches(item, options?)`)
 - [ ] `/Expr/arr/dot`
-- [x] `/Expr/backwardFill`          (`.fillNull({ strategy: "backward" })`)
+- [x] `/Expr/arr/eval`          (`.arr.eval(expr)`)
+- [x] `/Expr/arr/explode`       (`.arr.explode(options?)`)
+- [x] `/Expr/arr/first`         (`.arr.first(nullOnOob?)`)
+- [x] `/Expr/arr/get`           (`.arr.get(index, nullOnOob?)`)
+- [x] `/Expr/arr/join`          (`.arr.join(separator?, options?)`)
+- [x] `/Expr/arr/last`          (`.arr.last(nullOnOob?)`)
+- [x] `/Expr/arr/len`           (`.arr.len()` / `.arr.lengths()`)
+- [x] `/Expr/arr/max`           (`.arr.max()`)
+- [x] `/Expr/arr/mean`          (`.arr.mean()`)
+- [x] `/Expr/arr/median`        (`.arr.median()`)
+- [x] `/Expr/arr/min`           (`.arr.min()`)
+- [x] `/Expr/arr/n_unique`      (`.arr.nUnique(options?)`)
+- [x] `/Expr/arr/reverse`       (`.arr.reverse()`)
+- [x] `/Expr/arr/shift`         (`.arr.shift(n?, options?)`)
+- [x] `/Expr/arr/sort`          (`.arr.sort(options?)`)
+- [x] `/Expr/arr/std`           (`.arr.std()`)
+- [x] `/Expr/arr/sum`           (`.arr.sum()`)
+- [ ] `/Expr/arr/to_list`
+- [x] `/Expr/arr/to_struct`     (`.arr.toStruct(options?)`)
+- [x] `/Expr/arr/unique`        (`.arr.unique(options?)`)
+- [x] `/Expr/arr/var`           (`.arr.variance()`)
+- [x] `/Expr/backward_fill`     (`.fillNull({ strategy: "backward" })`)
 - [ ] `/Expr/bin/contains`
 - [ ] `/Expr/bin/decode`
 - [ ] `/Expr/bin/encode`
-- [ ] `/Expr/bin/endsWith`
+- [ ] `/Expr/bin/ends_with`
 - [ ] `/Expr/bin/get`
 - [ ] `/Expr/bin/head`
+- [ ] `/Expr/bin/reinterpret`
 - [ ] `/Expr/bin/size`
 - [ ] `/Expr/bin/slice`
-- [ ] `/Expr/bin/startsWith`
+- [ ] `/Expr/bin/starts_with`
 - [ ] `/Expr/bin/tail`
-- [ ] `/Expr/bitwiseCountOnes`
-- [ ] `/Expr/bitwiseCountZeros`
-- [ ] `/Expr/bitwiseLeadingOnes`
-- [ ] `/Expr/bitwiseLeadingZeros`
-- [ ] `/Expr/bitwiseTrailingOnes`
-- [ ] `/Expr/bitwiseTrailingZeros`
-- [x] `/Expr/bottomK`               (`.sort({ descending: false }).slice(0, k)`)
-- [x] `/Expr/bottomKBy` (`.sortBy(by, { descending: false }).slice(0, k)`)
-- [x] `/Expr/cot`
-- [ ] `/Expr/CumulativeEval`
+- [x] `/Expr/bitwise_and`           (`.bitwiseAnd()`)
+- [ ] `/Expr/bitwise_count_ones`
+- [ ] `/Expr/bitwise_count_zeros`
+- [ ] `/Expr/bitwise_leading_ones`
+- [ ] `/Expr/bitwise_leading_zeros`
+- [x] `/Expr/bitwise_or`            (`.bitwiseOr()`)
+- [ ] `/Expr/bitwise_trailing_ones`
+- [ ] `/Expr/bitwise_trailing_zeros`
+- [x] `/Expr/bitwise_xor`           (`.bitwiseXor()`)
+- [x] `/Expr/bottom_k`               (`.sort({ descending: false }).slice(0, k)`)
+- [x] `/Expr/bottom_k_by`            (`.sortBy(by, { descending: false }).slice(0, k)`)
+- [x] `/Expr/cast`                  (`.cast(dataType, options?)`)
+- [ ] `/Expr/cat/ends_with`
+- [ ] `/Expr/cat/get_categories`
+- [ ] `/Expr/cat/len_bytes`
+- [ ] `/Expr/cat/len_chars`
+- [ ] `/Expr/cat/physical`
+- [ ] `/Expr/cat/starts_with`
+- [ ] `/Expr/cat/to`
+- [x] `/Expr/cbrt`                  (`.cbrt()`)
+- [x] `/Expr/ceil`                  (`.ceil()`)
+- [x] `/Expr/clip`                  (`.clip(lower?, upper?)`)
+- [x] `/Expr/cos`                   (`.cos()`)
+- [x] `/Expr/cosh`                  (`.cosh()`)
+- [x] `/Expr/cot`                   (`.cot()`)
+- [x] `/Expr/count`                 (`.count()`)
+- [x] `/Expr/cum_count`             (`.cumCount()`)
+- [x] `/Expr/cum_max`               (`.cumMax()`)
+- [x] `/Expr/cum_min`               (`.cumMin()`)
+- [x] `/Expr/cum_prod`              (`.cumProd()`)
+- [x] `/Expr/cum_sum`               (`.cumSum()`)
+- [ ] `/Expr/cumulative_eval`
 - [ ] `/Expr/cut`
+- [x] `/Expr/degrees`               (`.degrees()`)
 - [ ] `/Expr/deserialize`
-- [x] `/Expr/diff` (`.sub($df.col(...).lag(n))`)
-- [x] `/Expr/dropNans` (`.filter($df.col(...).isNotNan())`)
-- [x] `/Expr/dropNulls` (`.filter($df.col(...).isNotNull())`)
-- [x] `/Expr/dt/addBusinessDay` (`.dt.offsetDay(n, { excludeWeekdays: [0, 6], holidays, roll })`)
-- [x] `/Expr/dt/baseUtcOffset` (`.dt.utcOffset(tz, { type: "base" })`)
+- [x] `/Expr/diff`                 (`.sub($df.col(...).lag(n))`)
+- [x] `/Expr/dot`                  (`.dot(other)`)
+- [x] `/Expr/drop_nans`            (`.filter($df.col(...).isNotNan())`)
+- [x] `/Expr/drop_nulls`           (`.filter($df.col(...).isNotNull())`)
+- [x] `/Expr/dt/add_business_days` (`.dt.offsetDay(n, { excludeWeekdays: [0, 6], holidays, roll })`)
+- [x] `/Expr/dt/base_utc_offset`   (`.dt.utcOffset(tz, { type: "base" })`)
+- [x] `/Expr/dt/cast_time_unit`    (`.dt.castTimeUnit(unit)`)
+- [x] `/Expr/dt/century`           (`.dt.century(timeZone?)`)
 - [ ] `/Expr/dt/combine`
-- [x] `/Expr/dt/dstOffset` (`.dt.utcOffset(tz, { type: "daylightSavingTime" })`)
-- [x] `/Expr/dt/offset` (`.dt.utcOffset(tz, { type: "total" })`)
-- [ ] `/Expr/dt/replaceTimeZone`
+- [x] `/Expr/dt/convert_time_zone` (`.dt.convertTimeZone(timeZone)`)
+- [x] `/Expr/dt/date`              (`.dt.date()`)
+- [x] `/Expr/dt/datetime`          (`.dt.strftime("%Y-%m-%d %H:%M:%S")`)
+- [x] `/Expr/dt/day`               (`.dt.day(timeZone?)`)
+- [x] `/Expr/dt/days_in_month`     (`.dt.daysInMonth(timeZone?)`)
+- [x] `/Expr/dt/dst_offset`        (`.dt.utcOffset(tz, { type: "daylightSavingTime" })`)
+- [x] `/Expr/dt/epoch`             (`.dt.epoch(unit?)`)
+- [x] `/Expr/dt/hour`              (`.dt.hour(timeZone?)`)
+- [x] `/Expr/dt/is_business_day`   (`.dt.isBusinessDay(options?)`)
+- [x] `/Expr/dt/is_leap_year`      (`.dt.isLeapYear(timeZone?)`)
+- [x] `/Expr/dt/iso_year`          (`.dt.isoYear(timeZone?)`)
+- [x] `/Expr/dt/microsecond`       (`.dt.microsecond(timeZone?)`)
+- [x] `/Expr/dt/millennium`        (`.dt.millennium(timeZone?)`)
+- [x] `/Expr/dt/millisecond`       (`.dt.millisecond(timeZone?)`)
+- [x] `/Expr/dt/minute`            (`.dt.minute(timeZone?)`)
+- [x] `/Expr/dt/month`             (`.dt.month(timeZone?)`)
+- [x] `/Expr/dt/month_end`         (`.dt.monthEnd()`)
+- [x] `/Expr/dt/month_start`       (`.dt.monthStart()`)
+- [x] `/Expr/dt/nanosecond`        (`.dt.nanosecond(timeZone?)`)
+- [x] `/Expr/dt/offset`            (`.dt.utcOffset(tz, { type: "total" })`)
+- [ ] `/Expr/dt/offset_by`
+- [x] `/Expr/dt/ordinal_day`       (`.dt.ordinalDay(timeZone?)`)
+- [x] `/Expr/dt/quarter`           (`.dt.quarter(timeZone?)`)
+- [x] `/Expr/dt/replace`           (`.dt.replace(options)`)
+- [x] `/Expr/dt/replace_time_zone` (`.dt.replace({ timeZone })`)
 - [ ] `/Expr/dt/round`
-- [x] `/Expr/dt/tostring` (`.dt.strftime(format)`)
+- [x] `/Expr/dt/second`            (`.dt.second()`)
+- [x] `/Expr/dt/strftime`          (`.dt.strftime(format)`)
+- [x] `/Expr/dt/time`              (`.dt.time()`)
+- [x] `/Expr/dt/timestamp`         (`.dt.timestamp(unit?)`)
+- [x] `/Expr/dt/to_string`         (`.dt.strftime(format)`)
+- [x] `/Expr/dt/total_days`        (`.dt.totalDays()`)
+- [x] `/Expr/dt/total_hours`       (`.dt.totalHours()`)
+- [x] `/Expr/dt/total_microseconds`(`.dt.totalMicroseconds()`)
+- [x] `/Expr/dt/total_milliseconds`(`.dt.totalMilliseconds()`)
+- [x] `/Expr/dt/total_minutes`     (`.dt.totalMinutes()`)
+- [x] `/Expr/dt/total_nanoseconds` (`.dt.totalNanoseconds()`)
+- [x] `/Expr/dt/total_seconds`     (`.dt.totalSeconds()`)
 - [ ] `/Expr/dt/truncate`
-- [ ] `/Expr/dt/withTimeUnit`
-- [ ] `/Expr/emwSumBy`
-- [ ] `/Expr/ewmMean`
-- [ ] `/Expr/ewmMeanBy`
-- [ ] `/Expr/ewmStd`
-- [ ] `/Expr/ewmSum`
-- [x] `/Expr/exclude` (`$df.exclude(...)`)
+- [x] `/Expr/dt/week`              (`.dt.week(timeZone?)`)
+- [x] `/Expr/dt/weekday`           (`.dt.weekday(timeZone?)`)
+- [x] `/Expr/dt/with_time_unit`    (`.dt.castTimeUnit(unit)`)
+- [x] `/Expr/dt/year`              (`.dt.year(timeZone?)`)
+- [ ] `/Expr/emw_sum_by`
+- [x] `/Expr/entropy`              (`.entropy()`)
+- [x] `/Expr/eq`                   (`.eq(other)`)
+- [x] `/Expr/eq_missing`           (`.eqMissing(other)`)
+- [ ] `/Expr/ewm_mean`
+- [ ] `/Expr/ewm_mean_by`
+- [ ] `/Expr/ewm_std`
+- [ ] `/Expr/ewm_sum`
+- [ ] `/Expr/ewm_sum_by`
+- [ ] `/Expr/ewm_var`
+- [x] `/Expr/exclude`              (`$df.exclude(...)`)
+- [x] `/Expr/exp`                  (`.exp()`)
 - [ ] `/Expr/explode`
-- [ ] `/Expr/extendConstants`
-- [x] `/Expr/fillNan` (`$df.when($df.col(...).isNan()).then(val).otherwise($df.col(...))`)
-- [x] `/Expr/filter`
-- [x] `/Expr/forwardFill` (`.fillNull({ strategy: "forward" })`)
-- [ ] `/Expr/fromJson`
+- [ ] `/Expr/ext/storage`
+- [ ] `/Expr/ext/to`
+- [ ] `/Expr/extend_constant`
+- [ ] `/Expr/fill_nan`
+- [x] `/Expr/fill_null`            (`.fillNull(optionsOrValue)`)
+- [x] `/Expr/filter`               (`.filter(predicate)`)
+- [x] `/Expr/first`                (`.first()`)
+- [ ] `/Expr/flatten`
+- [x] `/Expr/floor`                (`.floor()`)
+- [x] `/Expr/floordiv`             (`.floordiv(other)`)
+- [x] `/Expr/forward_fill`         (`.fillNull({ strategy: "forward" })`)
+- [ ] `/Expr/from_json`
 - [ ] `/Expr/gather`
-- [ ] `/Expr/gatherEvery`
+- [ ] `/Expr/gather_every`
+- [x] `/Expr/ge`                   (`.ge(other)`)
 - [ ] `/Expr/get`
+- [x] `/Expr/gt`                   (`.gt(other)`)
+- [x] `/Expr/has_nulls`            (`.hasNulls()`)
 - [ ] `/Expr/hash`
-- [x] `/Expr/head` (`.slice(0, n)`)
-- [ ] `/Expr/IndexOf`
+- [x] `/Expr/head`                 (`.slice(0, n)`)
+- [ ] `/Expr/hist`
+- [x] `/Expr/implode`              (`.implode()`)
+- [ ] `/Expr/index_of`
 - [ ] `/Expr/inspect`
 - [ ] `/Expr/interpolate`
-- [ ] `/Expr/interpolateBy`
-- [x] `/Expr/isBetween` (`.between(lower, upper)`)
-- [x] `/Expr/isEmpty` (`.count().eq(0)`)
-- [x] `/Expr/isFirstDistinct` (`.isNDistinct(0)`)
-- [x] `/Expr/isLastDistinct` (`.isNDistinct(-1)`)
+- [ ] `/Expr/interpolate_by`
+- [x] `/Expr/is_between`              (`.between(lower, upper, closed?)`)
+- [x] `/Expr/is_close`                (`.isClose(other, options?)`)
+- [x] `/Expr/is_duplicated`           (`.isDuplicated()`)
+- [ ] `/Expr/is_empty`
+- [x] `/Expr/is_finite`               (`.isFinite()`)
+- [x] `/Expr/is_first_distinct`       (`.isNDistinct(0)`)
+- [x] `/Expr/is_in`                   (`.isIn(values)`)
+- [x] `/Expr/is_infinite`             (`.isInfinite()`)
+- [x] `/Expr/is_last_distinct`        (`.isNDistinct(-1)`)
+- [x] `/Expr/is_nan`                  (`.isNan()`)
+- [x] `/Expr/is_not_nan`              (`.isNotNan()`)
+- [x] `/Expr/is_not_null`             (`.isNotNull()`)
+- [x] `/Expr/is_null`                 (`.isNull()`)
+- [x] `/Expr/is_unique`               (`.isUnique()`)
 - [ ] `/Expr/item`
-- [x] `/Expr/limit` (`.slice(0, n)`)
-- [x] `/Expr/log10` (`.log(10)`)
-- [ ] `/Expr/lowerBound`
-- [ ] `/Expr/mapBatches`
-- [ ] `/Expr/mapElements`
-- [x] `/Expr/neg` (`.negate()`)
-- [x] `/Expr/or_` (`.or()`)
-- [x] `/Expr/pctChange` (`.sub($df.col(...).lag(n)).div($df.col(...).lag(n))`)
-- [x] `/Expr/peakMax` (`.eq($df.col(...).cumMax())`)
-- [x] `/Expr/peakMin` (`.eq($df.col(...).cumMin())`)
+- [x] `/Expr/kurtosis`                (`.kurtosis()`)
+- [x] `/Expr/last`                    (`.last()`)
+- [x] `/Expr/le`                      (`.le(other)`)
+- [x] `/Expr/len`                     (`.count()`)
+- [x] `/Expr/lt`                      (`.lt(other)`)
+- [x] `/Expr/limit`                   (`.slice(0, n)`)
+- [x] `/Expr/list/__getitem__`        (`.arr.get(index)`)
+- [x] `/Expr/list/agg`                (`.arr.agg(expr)`)
+- [x] `/Expr/list/all`                (`.arr.all()`)
+- [x] `/Expr/list/any`                (`.arr.any()`)
+- [x] `/Expr/list/arg_max`            (`.arr.argMax()`)
+- [x] `/Expr/list/arg_min`            (`.arr.argMin()`)
+- [ ] `/Expr/list/concat`
+- [x] `/Expr/list/contains`           (`.arr.contains(item)`)
+- [x] `/Expr/list/count_matches`      (`.arr.countMatches(item, options?)`)
+- [ ] `/Expr/list/diff`
+- [x] `/Expr/list/drop_nulls`         (`.arr.eval($df.element().filter($df.element().isNotNull()))`)
+- [x] `/Expr/list/eval`               (`.arr.eval(expr)`)
+- [x] `/Expr/list/explode`            (`.arr.explode(options?)`)
+- [x] `/Expr/list/filter`             (`.arr.filter(expr)`)
+- [x] `/Expr/list/first`              (`.arr.first(nullOnOob?)`)
+- [x] `/Expr/list/gather`             (`.arr.gather(indices, nullOnOob?)`)
+- [x] `/Expr/list/gather_every`       (`.arr.gatherEvery(options?)`)
+- [x] `/Expr/list/get`                (`.arr.get(index, nullOnOob?)`)
+- [x] `/Expr/list/head`               (`.arr.slice(0, n)`)
+- [ ] `/Expr/list/item`
+- [x] `/Expr/list/join`               (`.arr.join(separator?, options?)`)
+- [x] `/Expr/list/last`               (`.arr.last(nullOnOob?)`)
+- [x] `/Expr/list/len`                (`.arr.len()` / `.arr.lengths()`)
+- [x] `/Expr/list/max`                (`.arr.max()`)
+- [x] `/Expr/list/mean`               (`.arr.mean()`)
+- [x] `/Expr/list/median`             (`.arr.median()`)
+- [x] `/Expr/list/min`                (`.arr.min()`)
+- [x] `/Expr/list/n_unique`           (`.arr.nUnique(options?)`)
+- [x] `/Expr/list/reverse`            (`.arr.reverse()`)
+- [ ] `/Expr/list/sample`
+- [ ] `/Expr/list/set_difference`
+- [ ] `/Expr/list/set_intersection`
+- [ ] `/Expr/list/set_symmetric_difference`
+- [ ] `/Expr/list/set_union`
+- [x] `/Expr/list/shift`              (`.arr.shift(n?, options?)`)
+- [x] `/Expr/list/slice`              (`.arr.slice(start?, end?)`)
+- [x] `/Expr/list/sort`               (`.arr.sort(options?)`)
+- [x] `/Expr/list/std`                (`.arr.std()`)
+- [x] `/Expr/list/sum`                (`.arr.sum()`)
+- [x] `/Expr/list/tail`               (`.arr.slice(-n)`)
+- [ ] `/Expr/list/to_array`
+- [x] `/Expr/list/to_struct`          (`.arr.toStruct(options?)`)
+- [x] `/Expr/list/unique`             (`.arr.unique(options?)`)
+- [x] `/Expr/list/var`                (`.arr.variance()`)
+- [x] `/Expr/log`                     (`.log(base?)`)
+- [x] `/Expr/log10`                   (`.log(10)`)
+- [x] `/Expr/log1p`                   (`.log1p()`)
+- [ ] `/Expr/lower_bound`
+- [ ] `/Expr/map_batches`
+- [ ] `/Expr/map_elements`
+- [x] `/Expr/max`                     (`.max()`)
+- [x] `/Expr/max_by`                  (`.maxBy(by)`)
+- [x] `/Expr/mean`                    (`.mean()`)
+- [x] `/Expr/median`                  (`.median()`)
+- [ ] `/Expr/meta/as_expression`
+- [ ] `/Expr/meta/eq`
+- [ ] `/Expr/meta/has_multiple_outputs`
+- [ ] `/Expr/meta/is_column`
+- [ ] `/Expr/meta/is_column_selection`
+- [ ] `/Expr/meta/is_literal`
+- [ ] `/Expr/meta/is_regex_projection`
+- [ ] `/Expr/meta/ne`
+- [ ] `/Expr/meta/output_name`
+- [ ] `/Expr/meta/pop`
+- [ ] `/Expr/meta/root_names`
+- [ ] `/Expr/meta/serialize`
+- [ ] `/Expr/meta/show_graph`
+- [ ] `/Expr/meta/tree_format`
+- [ ] `/Expr/meta/undo_aliases`
+- [ ] `/Expr/meta/write_json`
+- [x] `/Expr/min`                  (`.min()`)
+- [x] `/Expr/min_by`               (`.minBy(by)`)
+- [x] `/Expr/mod`                  (`.mod(other)`)
+- [x] `/Expr/mode`                 (`.mode()`)
+- [x] `/Expr/mul`                  (`.mul(other)`)
+- [x] `/Expr/n_unique`             (`.nUnique()`)
+- [ ] `/Expr/name/keep`
+- [ ] `/Expr/name/map`
+- [ ] `/Expr/name/map_fields`
+- [ ] `/Expr/name/prefix`
+- [ ] `/Expr/name/prefix_fields`
+- [ ] `/Expr/name/replace`
+- [ ] `/Expr/name/suffix`
+- [ ] `/Expr/name/suffix_fields`
+- [ ] `/Expr/name/to_lowercase`
+- [ ] `/Expr/name/to_uppercase`
+- [x] `/Expr/nan_max`              (`.nanMax()`)
+- [x] `/Expr/nan_min`              (`.nanMin()`)
+- [x] `/Expr/ne`                   (`.ne(other)`)
+- [x] `/Expr/ne_missing`           (`.neMissing(other)`)
+- [x] `/Expr/neg`                  (`.negate()`)
+- [x] `/Expr/not_`                 (`.not()`)
+- [x] `/Expr/null_count`           (`.nullCount()`)
+- [x] `/Expr/or_`                  (`.or()`)
+- [x] `/Expr/over`                 (`.over(partitionBy)`)
+- [x] `/Expr/pct_change`           (`.sub($df.col(...).lag(n)).div($df.col(...).lag(n))`)
+- [x] `/Expr/peak_max`             (`.eq($df.col(...).cumMax())`)
+- [x] `/Expr/peak_min`             (`.eq($df.col(...).cumMin())`)
 - [ ] `/Expr/pipe`
-- [ ] `/Expr/qCut`
-- [ ] `/Expr/repeatBy`
+- [x] `/Expr/pow`                  (`.pow(exponent)`)
+- [x] `/Expr/product`              (`.product()`)
+- [ ] `/Expr/qcut`
+- [x] `/Expr/quantile`             (`.quantile(q, options?)`)
+- [x] `/Expr/radians`              (`.radians()`)
+- [x] `/Expr/rank`                 (`.rank(options?)`)
+- [ ] `/Expr/rechunk`
+- [ ] `/Expr/reinterpret`
+- [ ] `/Expr/repeat_by`
 - [ ] `/Expr/replace`
+- [ ] `/Expr/replace_strict`
 - [ ] `/Expr/reshape`
+- [x] `/Expr/reverse`              (`.reverse()`)
 - [ ] `/Expr/rle`
-- [x] `/Expr/rleId` (`.ne($df.col(...).lag(1)).cumSum()`)
-- [x] `/Expr/rolling` (`.rolling(w, exprOrFn)`)
-- [x] `/Expr/rollingKurtosis` (`.rolling(w, $df.col(...).kurtosis())`)
-- [x] `/Expr/rollingMap` (`.rolling(w, fn)`)
-- [x] `/Expr/rollingMaxBy` (`.rolling(w, $df.col("by").max())`)
-- [x] `/Expr/rollingMeanBy` (`.rolling(w, $df.col("by").mean())`)
-- [x] `/Expr/rollingMedianBy` (`.rolling(w, $df.col("by").median())`)
-- [x] `/Expr/rollingMinBy` (`.rolling(w, $df.col("by").min())`)
-- [x] `/Expr/rollingQuantileBy` (`.rolling(w, $df.col("by").quantile(q))`)
-- [x] `/Expr/rollingRankBy` (`.rolling(w, $df.col("by").rank())`)
-- [x] `/Expr/rollingSkew` (`.rolling(w, $df.col(...).skewness())`)
-- [x] `/Expr/rollingStdBy` (`.rolling(w, $df.col("by").std())`)
-- [x] `/Expr/rollingSumBy` (`.rolling(w, $df.col("by").sum())`)
-- [x] `/Expr/rollingVar` (`.rolling(w, $df.col(...).variance())` / `.rollingStd(w).pow(2)`)
-- [x] `/Expr/rollingVarBy` (`.rolling(w, $df.col("by").variance())`)
-- [x] `/Expr/rank` (`.rank({ dense })`)
+- [x] `/Expr/rle_id`              (`.ne($df.col(...).lag(1)).cumSum()`)
+- [x] `/Expr/rolling`             (`.rolling(w, exprOrFn)`)
+- [ ] `/Expr/rolling_kurtosis`
+- [ ] `/Expr/rolling_map`
+- [x] `/Expr/rolling_max`         (`.rollingMax(w, options?)`)
+- [ ] `/Expr/rolling_max_by`
+- [x] `/Expr/rolling_mean`        (`.rollingMean(w, options?)`)
+- [ ] `/Expr/rolling_mean_by`
+- [x] `/Expr/rolling_median`      (`.rollingMedian(w, options?)`)
+- [ ] `/Expr/rolling_median_by`
+- [x] `/Expr/rolling_min`         (`.rollingMin(w, options?)`)
+- [ ] `/Expr/rolling_min_by`
+- [x] `/Expr/rolling_quantile`    (`.rollingQuantile(w, q, options?)`)
+- [ ] `/Expr/rolling_quantile_by`
+- [x] `/Expr/rolling_rank`        (`.rollingRank(w, options?)`)
+- [ ] `/Expr/rolling_rank_by`
+- [ ] `/Expr/rolling_skew`
+- [x] `/Expr/rolling_std`         (`.rollingStd(w, options?)`)
+- [ ] `/Expr/rolling_std_by`
+- [x] `/Expr/rolling_sum`         (`.rollingSum(w, options?)`)
+- [ ] `/Expr/rolling_sum_by`
+- [ ] `/Expr/rolling_var`
+- [ ] `/Expr/rolling_var_by`
+- [x] `/Expr/round`               (`.round(decimals?)`)
+- [x] `/Expr/round_sig_figs`      (`.roundSigFigs(digits)`)
 - [ ] `/Expr/sample`
-- [ ] `/Expr/searchSorted`
-- [ ] `/Expr/setSorted`
+- [ ] `/Expr/search_sorted`
+- [ ] `/Expr/set_sorted`
 - [x] `/Expr/shift`                (`.shift(n, { fillValue })`)
+- [ ] `/Expr/shrink_dtype`
 - [ ] `/Expr/shuffle`
-- [ ] `/Expr/slice`
-- [ ] `/Expr/sort`
-- [ ] `/Expr/sortBy`
-- [x] `/Expr/std` (`.std()`)
-- [x] `/Expr/str/splitExact` (`.str.split(delim, { exact: true, limit: n })`)
-- [x] `/Expr/str/splitN` (`.str.split(delim, { limit: n })`)
-- [ ] `/Expr/struct/__getItem__`
+- [x] `/Expr/sign`                (`.sign()`)
+- [x] `/Expr/sin`                 (`.sin()`)
+- [x] `/Expr/sinh`                (`.sinh()`)
+- [x] `/Expr/skew`                (`.skew()`)
+- [x] `/Expr/slice`               (`.slice(offset, length?)`)
+- [x] `/Expr/sort`                (`.sort(options?)`)
+- [x] `/Expr/sort_by`             (`.sortBy(by, options?)`)
+- [x] `/Expr/sqrt`                (`.sqrt()`)
+- [x] `/Expr/std`                 (`.std()`)
+- [x] `/Expr/sub`                 (`.sub(other)`)
+- [x] `/Expr/sum`                 (`.sum()`)
+- [x] `/Expr/str/concat`          (`.str.concat(other)`)
+- [x] `/Expr/str/contains`        (`.str.contains(pattern)`)
+- [x] `/Expr/str/contains_any`    (`.str.containsAny(patterns)`)
+- [x] `/Expr/str/count_matches`   (`.str.countMatches(pattern)`)
+- [x] `/Expr/str/decode`          (`.str.decode(encoding?)`)
+- [x] `/Expr/str/encode`          (`.str.encode(encoding?)`)
+- [x] `/Expr/str/ends_with`       (`.str.endsWith(suffix)`)
+- [x] `/Expr/str/escape_regex`    (`.str.escapeRegex()`)
+- [x] `/Expr/str/explode`         (`.str.explode()`)
+- [x] `/Expr/str/extract`         (`.str.extract(pattern, groupIndex?)`)
+- [x] `/Expr/str/extract_all`     (`.str.extractAll(pattern)`)
+- [x] `/Expr/str/extract_groups`  (`.str.extractGroups(pattern)`)
+- [x] `/Expr/str/extract_many`    (`.str.extractMany(patterns)`)
+- [x] `/Expr/str/find`            (`.str.find(pattern)`)
+- [x] `/Expr/str/find_many`       (`.str.findMany(patterns)`)
+- [x] `/Expr/str/head`            (`.str.head(n)`)
+- [x] `/Expr/str/join`            (`.str.join(separator?)`)
+- [x] `/Expr/str/json_decode`     (`.str.jsonDecode()`)
+- [x] `/Expr/str/json_path_match` (`.str.jsonPathMatch(jsonPath)`)
+- [x] `/Expr/str/len_bytes`       (`.str.lenBytes()`)
+- [x] `/Expr/str/len_chars`       (`.str.lenChars()` / `.str.len()`)
+- [x] `/Expr/str/normalize`       (`.str.normalize(form?)`)
+- [x] `/Expr/str/pad_end`         (`.str.padEnd(width, fill?)` / `.str.rpad()`)
+- [x] `/Expr/str/pad_start`       (`.str.padStart(width, fill?)` / `.str.lpad()`)
+- [x] `/Expr/str/replace`         (`.str.replace(pattern, value)`)
+- [x] `/Expr/str/replace_all`     (`.str.replaceAll(pattern, value)`)
+- [x] `/Expr/str/replace_many`    (`.str.replaceMany(patterns, replacements)`)
+- [x] `/Expr/str/reverse`         (`.str.reverse()`)
+- [x] `/Expr/str/slice`           (`.str.slice(start, length?)`)
+- [x] `/Expr/str/split`           (`.str.split(delim, options?)`)
+- [x] `/Expr/str/split_exact` (`.str.split(delim, { exact: true, limit: n })`)
+- [x] `/Expr/str/splitn`      (`.str.split(delim, { limit: n })`)
+- [x] `/Expr/str/starts_with`     (`.str.startsWith(prefix)`)
+- [x] `/Expr/str/strip_chars`     (`.str.stripChars(characters?)` / `.str.trim()`)
+- [x] `/Expr/str/strip_chars_end` (`.str.stripCharsEnd(characters?)` / `.str.trimEnd()`)
+- [x] `/Expr/str/strip_chars_start` (`.str.stripCharsStart(characters?)` / `.str.trimStart()`)
+- [x] `/Expr/str/strip_prefix`    (`.str.stripPrefix(prefix)`)
+- [x] `/Expr/str/strip_suffix`    (`.str.stripSuffix(suffix)`)
+- [x] `/Expr/str/strptime`        (`.str.strptime(dtype, options?)`)
+- [x] `/Expr/str/tail`            (`.str.tail(n)`)
+- [x] `/Expr/str/to_date`         (`.str.toDate(options?)`)
+- [x] `/Expr/str/to_datetime`     (`.str.toDatetime(options?)`)
+- [x] `/Expr/str/to_decimal`      (`.str.toDecimal(options?)`)
+- [x] `/Expr/str/to_integer`      (`.str.toInteger(options?)`)
+- [x] `/Expr/str/to_lowercase`    (`.str.toLowerCase()` / `.str.lower()`)
+- [x] `/Expr/str/to_time`         (`.str.toTime(options?)`)
+- [x] `/Expr/str/to_titlecase`    (`.str.toTitleCase()`)
+- [x] `/Expr/str/to_uppercase`    (`.str.toUpperCase()` / `.str.upper()`)
+- [x] `/Expr/str/zfill`           (`.str.zfill(width)`)
+- [x] `/Expr/struct/__getitem__`  (`.struct[fieldName]` / `.struct.field(name)`)
 - [ ] `/Expr/struct/drop`
-- [ ] `/Expr/struct/jsonEncode`
-- [x] `/Expr/tail` (`.slice(-n, n)`)
-- [x] `/Expr/topK` (`.sort({ descending: true }).slice(0, k)`)
-- [x] `/Expr/topKBy` (`.sortBy(by, { descending: true }).slice(0, k)`)
-- [x] `/Expr/truediv` (`.div()`)
-- [ ] `/Expr/truncate`
+- [x] `/Expr/struct/field`        (`.struct.field(name)`)
+- [ ] `/Expr/struct/json_encode`
+- [x] `/Expr/struct/rename_fields` (`.struct.renameFields(mapping)`)
+- [x] `/Expr/struct/unnest`       (`.struct.unnest()`)
+- [x] `/Expr/struct/with_fields`  (`.struct.withFields(fields)`)
+- [x] `/Expr/tail`                (`.slice(-n, n)`)
+- [x] `/Expr/tan`                  (`.tan()`)
+- [x] `/Expr/tanh`                 (`.tanh()`)
+- [ ] `/Expr/to_physical`
+- [x] `/Expr/top_k`               (`.sort({ descending: true }).slice(0, k)`)
+- [x] `/Expr/top_k_by`            (`.sortBy(by, { descending: true }).slice(0, k)`)
+- [x] `/Expr/truediv`             (`.div()`)
+- [x] `/Expr/truncate`            (`.trunc()`)
 - [ ] `/Expr/unique`
-- [ ] `/Expr/uniqueCounts`
-- [ ] `/Expr/upperBound`
-- [ ] `/Expr/valueCounts`
-- [x] `/field` (`$df.col(...)`)
-- [x] `/first` (`$df.col(...).first()`)
-- [x] `/fold` (Custom accumulator expressions)
-- [x] `/format` (`$df.col(...).str.format(...)`)
-- [x] `/fromEpoch` (`$df.datetime(epoch)` / `$df.col(...).dt.fromEpoch(...)`)
-- [x] `/groups` (`df.groupBy(...)`)
-- [x] `/head` (`df.head(n)` / `$df.col(...).slice(0, n)`)
-- [x] `/implode` (`$df.implode(...)` / `$df.col(...).implode()`)
-- [x] `/intRange` (`$df.seqRange(...)`)
-- [x] `/intRanges` (`$df.seqRange(...)`)
-- [x] `/last` (`$df.col(...).last()`)
-- [x] `/len` (`df.height` / `$df.col(...).count({ includeNulls: true })`)
-- [x] `/linearSpace` (`$df.seqRange(...)`)
-- [x] `/linearSpaces` (`$df.seqRange(...)`)
-- [x] `/list` (`$df.col(...).implode()` / ArrayExpr)
-- [x] `/mapBatches` (`df.select(...)` / `derive(...)`)
-- [x] `/mapGroups` (`df.groupBy(...)...`)
-- [x] `/max` (`$df.col(...).max()`)
-- [x] `/maxHorizontal` (`$df.horizontal(<cols>).max()`)
-- [x] `/mean` (`$df.col(...).mean()`)
-- [x] `/meanHorizontal` (`$df.horizontal(<cols>).mean()`)
-- [x] `/median` (`$df.col(...).median()`)
-- [x] `/min` (`$df.col(...).min()`)
-- [x] `/minHorizontal` (`$df.horizontal(<cols>).min()`)
-- [x] `/nth` (`$df.col(...).get(n)`)
-- [x] `/nUnique` (`$df.col(...).nUnique()`)
-- [x] `/ones` (`$df.lit(1)`)
-- [x] `/quantile` (`$df.col(...).quantile(q)`)
-- [x] `/reduce` (Custom accumulator expressions)
-- [x] `/repeat` (`$df.lit(val)` / `$df.col(...).repeatBy(n)`)
-- [x] `/rollingCorr` (`$df.col(...).rolling(w, ...)`)
-- [x] `/rollingCov` (`$df.col(...).rolling(w, ...)`)
-- [x] `/rowIndex` (`df.withRowIndex()`)
-- [x] `/select` (`df.select(...)`)
-- [x] `/std` (`$df.col(...).std()`)
-- [x] `/struct` (`$df.struct(...)`)
-- [x] `/sum` (`$df.col(...).sum()`)
-- [x] `/sumHorizontal` (`$df.horizontal(<cols>).sum()`)
-- [x] `/tail` (`df.tail(n)` / `$df.col(...).slice(-n, n)`)
-- [x] `/time` (`$df.datetime(...)` / `$df.time(...)`)
-- [x] `/timeRange` (`$df.seqRange(...)`)
-- [x] `/timeRanges` (`$df.seqRange(...)`)
-- [x] `/var` (`$df.col(...).variance()`)
-- [x] `/zeros` (`$df.lit(0)`)
+- [ ] `/Expr/unique_counts`
+- [ ] `/Expr/upper_bound`
+- [ ] `/Expr/value_counts`
+- [x] `/Expr/var`                  (`.variance()`)
+- [ ] `/Expr/where`
+- [x] `/Expr/xor`                  (`.xor(other)`)
+- [x] `/field`                 (`$df.col(...)`)
+- [x] `/first`                 (`$df.col(...).first()`)
+- [x] `/fold`                  (Custom accumulator expressions)
+- [ ] `/format`                (`$df.col(...).str.format(...)`)
+- [ ] `/from_arrow`
+- [ ] `/from_dataframe`
+- [ ] `/from_dict`
+- [ ] `/from_dicts`
+- [x] `/from_epoch`            (`$df.datetime(epoch)` / `$df.col(...).dt.fromEpoch(...)`)
+- [ ] `/from_numpy`
+- [ ] `/from_pandas`
+- [ ] `/from_records`
+- [ ] `/from_repr`
+- [ ] `/get_extension_type`
+- [x] `/groups`                (`df.groupBy(...)`)
+- [x] `/head`                  (`df.head(n)` / `$df.col(...).slice(0, n)`)
+- [x] `/implode`               (`$df.implode(...)` / `$df.col(...).implode()`)
+- [x] `/int_range`             (`$df.seqRange(...)`)
+- [x] `/int_ranges`            (`$df.seqRange(...)`)
+- [ ] `/json_normalize`
+- [x] `/last`                  (`$df.col(...).last()`)
+- [x] `/len`                   (`df.height` / `$df.col(...).count({ includeNulls: true })`)
+- [x] `/linear_space`          (`$df.seqRange(...)`)
+- [x] `/linear_spaces`         (`$df.seqRange(...)`)
+- [x] `/list`                  (`$df.col(...).implode()` / ArrayExpr)
+- [ ] `/lit`
+- [x] `/map_batches`           (`df.select(...)` / `derive(...)`)
+- [x] `/map_groups`            (`df.groupBy(...)...`)
+- [x] `/max`                   (`$df.col(...).max()`)
+- [x] `/max_horizontal`        (`$df.horizontal(<cols>).max()`)
+- [x] `/mean`                  (`$df.col(...).mean()`)
+- [x] `/mean_horizontal`       (`$df.horizontal(<cols>).mean()`)
+- [x] `/median`                (`$df.col(...).median()`)
+- [ ] `/merge_sorted`
+- [x] `/min`                   (`$df.col(...).min()`)
+- [x] `/min_horizontal`        (`$df.horizontal(<cols>).min()`)
+- [x] `/n_unique`              (`$df.col(...).nUnique()`)
+- [x] `/nth`                   (`$df.col(...).get(n)`)
+- [x] `/ones`                  (`$df.lit(1)`)
+- [ ] `/partition_by`
+- [x] `/quantile`              (`$df.col(...).quantile(q)`)
+- [ ] `/read_avro`
+- [ ] `/read_clipboard`
+- [ ] `/read_csv`
+- [ ] `/read_csv_batched`
+- [ ] `/read_database`
+- [ ] `/read_database_uri`
+- [ ] `/read_delta`
+- [ ] `/read_excel`
+- [ ] `/read_ipc`
+- [ ] `/read_ipc_schema`
+- [ ] `/read_ipc_stream`
+- [ ] `/read_json`
+- [ ] `/read_lines`
+- [ ] `/read_ndjson`
+- [ ] `/read_ods`
+- [ ] `/read_parquet`
+- [ ] `/read_parquet_metadata`
+- [ ] `/read_parquet_schema`
+- [x] `/reduce`                (Custom accumulator expressions)
+- [ ] `/register_extension_type`
+- [x] `/repeat`                (`$df.lit(val)` / `$df.col(...).repeatBy(n)`)
+- [x] `/rolling_corr`          (`$df.col(...).rolling(w, ...)`)
+- [x] `/rolling_cov`           (`$df.col(...).rolling(w, ...)`)
+- [x] `/row_index`             (`df.withRowIndex()`)
+- [ ] `/scan_arrow_c_stream`
+- [ ] `/scan_csv`
+- [ ] `/scan_delta`
+- [ ] `/scan_iceberg`
+- [ ] `/scan_ipc`
+- [ ] `/scan_lines`
+- [ ] `/scan_ndjson`
+- [ ] `/scan_parquet`
+- [ ] `/scan_pyarrow_dataset`
+- [ ] `/ScanCastOptions`
+- [ ] `/self_dtype`
+- [x] `/select`                (`df.select(...)`)
+- [ ] `/set_random_seed`
+- [ ] `/sql`
+- [ ] `/sql_expr`
+- [x] `/std`                   (`$df.col(...).std()`)
+- [ ] `/StringCache`
+- [x] `/struct`                (`$df.struct(...)`)
+- [x] `/sum`                   (`$df.col(...).sum()`)
+- [x] `/sum_horizontal`        (`$df.horizontal(<cols>).sum()`)
+- [x] `/tail`                  (`df.tail(n)` / `$df.col(...).slice(-n, n)`)
+- [x] `/time`                  (`$df.datetime(...)` / `$df.time(...)`)
+- [x] `/time_range`            (`$df.seqRange(...)`)
+- [x] `/time_ranges`           (`$df.seqRange(...)`)
+- [ ] `/union`
+- [ ] `/unregister_extension_type`
+- [ ] `/using_string_cache`
+- [x] `/var`                   (`$df.col(...).variance()`)
+- [ ] `/when`
+- [x] `/zeros`                 (`$df.lit(0)`)

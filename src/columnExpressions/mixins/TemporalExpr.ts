@@ -251,23 +251,6 @@ export class DateTimeExprNamespace {
         return y.mod(4).eq(0).and(y.mod(100).ne(0)).or(y.mod(400).eq(0)).cast(BooleanDataType);
     }
 
-    /**
-     * Extracts the ISO 8601 week number (1-53) from a Datetime column.
-     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_temporal_single -->
-     * >>> df.withColumns($df.col("d").dt.isoWeek().alias("week"))
-     * shape: (1, 2)
-     * ┌────────────┬──────┐
-     * │ d          │ week │
-     * ├────────────┼──────┤
-     * │ 2026-05-20 │ 21   │
-     * └────────────┴──────┘
-     */
-    isoWeek(timeZone?: string) {
-        return this.strftime({ format: "%V", timeZone }).cast(Int32);
-    }
 
     /**
      * Extracts the ISO 8601 week-numbering year from a Datetime column.
@@ -741,7 +724,7 @@ export class DateTimeExprNamespace {
     }
 
     /**
-     * Extracts ISO week index. Alias for isoWeek.
+     * Extracts the ISO 8601 week number (1-53) from a Datetime column.
      * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
@@ -755,7 +738,7 @@ export class DateTimeExprNamespace {
      * └────────────┴──────┘
      */
     week(timeZone?: string) {
-        return this.isoWeek(timeZone);
+        return this.strftime({ format: "%V", timeZone }).cast(Int32);
     }
 
     /**

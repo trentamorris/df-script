@@ -12,7 +12,6 @@ import "./epoch.test";
 import "./hour.test";
 import "./isBusinessDay.test";
 import "./isLeapYear.test";
-import "./isoWeek.test";
 import "./isoYear.test";
 import "./microsecond.test";
 import "./millennium.test";

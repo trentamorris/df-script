@@ -28,6 +28,7 @@ import "./join.test";
 import "./joinAsof.test";
 import "./joinWhere.test";
 import "./limit.test";
+import "./partitionBy.test";
 import "./pivot.test";
 import "./rename.test";
 import "./reverse.test";

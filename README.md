@@ -448,7 +448,6 @@ Specific domain transforms are grouped under dedicated, clean namespaces with fu
 | **`.dt.hour`** | Extracts hour of day (0-23). |
 | **`.dt.isBusinessDay`** | Returns true if date falls on Monday through Friday. |
 | **`.dt.isLeapYear`** | Returns true if calendar year is a leap year. |
-| **`.dt.isoWeek`** | Extracts ISO 8601 week number (1-53). |
 | **`.dt.isoYear`** | Extracts ISO 8601 week-numbering year. |
 | **`.dt.microsecond`** | Extracts microsecond component (0-999). |
 | **`.dt.millennium`** | Extracts 1-based Gregorian millennium. |

@@ -7,7 +7,7 @@ import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
 import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct, toValidNumber, isValidNumber, isValidInt, binarySearch } from "../utils"
 import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
 
-function _partitionByColumns(
+export function partitionByColumns(
     columns: ColumnDict,
     height: number,
     partitionKeys: (string | IExpr)[]
@@ -37,7 +37,7 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
     if (height === 0) return results;
 
     const partitionKeys = expr._partitionBy || [];
-    const partitionGroups = _partitionByColumns(columns, height, partitionKeys);
+    const partitionGroups = partitionByColumns(columns, height, partitionKeys);
 
 
     const prePartitionArray = expr._evaluatePre(expr._partitionOpsIndex, columns, height);

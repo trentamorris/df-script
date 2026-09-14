@@ -1,9 +1,9 @@
-import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, seqRange, all, exclude, evaluateExpression, resolveExprOutputType, isColExpr, toColExpr } from "../columnExpressions"
+import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER, seqRange, all, exclude, evaluateExpression, resolveExprOutputType, isColExpr, toColExpr } from "../columnExpressions"
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions, SortArrayOptions, CastOptions } from "../types"
-import type { EqualsOptions, LimitOptions, SortOptions, PivotOptions, JoinOptions, JoinMaintainOrder, JoinAsofOptions, JoinWhereOptions, GroupByDynamicOptions, UnpivotOptions, TransposeOptions, UnstackOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
+import type { EqualsOptions, LimitOptions, SortOptions, PivotOptions, PartitionByOptions, JoinOptions, JoinMaintainOrder, JoinAsofOptions, JoinWhereOptions, GroupByDynamicOptions, UnpivotOptions, TransposeOptions, UnstackOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry, DataType } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError, InvalidArgumentError, IOStreamError } from "../exceptions"
@@ -22,7 +22,8 @@ import {
     alignAsofIndices,
     alignWhereIndices,
     materializeJoinedDataFrame,
-    writeStringToFileOrStream
+    writeStringToFileOrStream,
+    partitionByColumns
 } from "./utils"
 
 /**
@@ -585,7 +586,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const groups = buildGroupMap(this._columns, keysStr, this._height);
         const allKeys = Object.keys(this._columns) as (keyof T)[];
-        return new GroupedData(groups, keysArr, allKeys, this._columns, this._height, this._schema);
+        return new GroupedData(groups, keysArr, allKeys, this._columns, this._height, this._schema) as any;
     }
 
     /**
@@ -801,7 +802,7 @@ export class DataFrame<T extends RowRecord = any> {
             this._height,
             outSchema,
             synCols
-        );
+        ) as any;
     }
 
 
@@ -840,7 +841,7 @@ export class DataFrame<T extends RowRecord = any> {
      * Inserts a new column at a specific ordinal index position.
      * @param {number} index Target column index position.
      * @param {string} name Name of the inserted column.
-     * @param {IntoExpr} expr Value expression or column definition.
+     * @param {IntoExpr | ArrayLike<any>} expr Value expression, column definition, or raw column values array.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -853,8 +854,11 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 2 │ 20 │ y │
      * └───┴────┴───┘
      */
-    insertColumn(index: number, name: string, expr: IntoExpr): DataFrame<any> {
-        const colExpr = (toColExpr(expr, ColumnExpr) as ColumnExpr<any>).alias(name);
+    insertColumn(index: number, name: string, expr: IntoExpr | ArrayLike<any>): DataFrame<any> {
+        const colExpr = isArrayOrTypedArray(expr)
+            ? (toColExpr(LITERAL_MARKER, ColumnExpr) as ColumnExpr<any>)._derive(() => expr as any).alias(name)
+            : (toColExpr(expr, ColumnExpr) as ColumnExpr<any>).alias(name);
+
         const keys = Object.keys(this._columns);
         const keysLen = keys.length;
 
@@ -866,7 +870,8 @@ export class DataFrame<T extends RowRecord = any> {
             }
         }
 
-        const targetIndex = clamp(index, { min: 0, max: selectList.length });
+        const len = selectList.length;
+        const targetIndex = clamp(index < 0 ? len + index : index, { min: 0, max: len });
         selectList.splice(targetIndex, 0, colExpr);
 
         return this.select<any>(...selectList);
@@ -1344,6 +1349,36 @@ export class DataFrame<T extends RowRecord = any> {
         }
 
         return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
+    }
+
+    /**
+     * Splits a DataFrame into sub-DataFrames partitioned by column names or expressions (reusing `.over()` partition semantics).
+     *
+     * @param {K | K[]} by Key column(s) or column expressions to partition by.
+     * @param {PartitionByOptions} [options={}] Partition configuration options.
+     * @param {boolean} [options.asDict=false] If `true`, returns a dictionary mapping partition keys to sub-DataFrames.
+     * @returns {DataFrame<T>[] | Record<string, DataFrame<T>>}
+     * @example
+     * <!-- doc:base_dataframe_partition -->
+     * >>> const [groupA, groupB] = df.partitionBy("category")
+     */
+    partitionBy<K extends (keyof T & string) | IExpr>(
+        by: K | K[],
+        options: PartitionByOptions = {}
+    ): DataFrame<T>[] | Record<string, DataFrame<T>> {
+        const partitionKeys = Array.isArray(by) ? (by as (string | IExpr)[]) : [by as string | IExpr];
+        const groups = partitionByColumns(this._columns, this._height, partitionKeys);
+
+        const dict: Record<string, DataFrame<T>> = {};
+        for (const [hashKey, indices] of groups.entries()) {
+            dict[hashKey] = DataFrame._createDirect<T>(
+                gatherColumnsByIndices(this._columns, indices),
+                this._schema,
+                indices.length
+            );
+        }
+
+        return options.asDict ? dict : Object.values(dict);
     }
 
     /**

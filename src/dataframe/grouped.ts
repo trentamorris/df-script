@@ -1,8 +1,11 @@
 import { DataFrame } from "./dataframe"
 import { inferColumnType, coerceColumn } from "./utils"
-import type { GroupMap } from "./types"
-import { resolveColumnSelectors, ALL_COLUMNS_MARKER, resolveExprOutputType } from "../columnExpressions"
+import type { GroupMap, GroupedAggDelegatedOps } from "./types"
+import { resolveColumnSelectors, ALL_COLUMNS_MARKER, resolveExprOutputType, ColumnExpr } from "../columnExpressions"
+import { DataTypeRegistry } from "../datatypes"
 import type { IExpr, ColumnDict, RowRecord, DataFrameSchema } from "../types"
+
+export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
 
 /**
  * Represents a DataFrame grouped by key columns, supporting aggregation operations.
@@ -10,7 +13,7 @@ import type { IExpr, ColumnDict, RowRecord, DataFrameSchema } from "../types"
  * @category DataFrame
  * @syntax df.groupBy(...).{symbol}(...)
  */
-export class GroupedData<T, K extends keyof T> {
+export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> {
     private _groups: GroupMap
     private _keys: K[]
     private _allKeys: (keyof T)[]
@@ -76,26 +79,6 @@ export class GroupedData<T, K extends keyof T> {
     }
 
     /**
-     * Converts group keys back into a single distinct DataFrame without aggregations.
-     * @returns DataFrame
-     * @example
-     * <!-- doc:base_grouped_3x2 -->
-     * >>> df.groupBy("group").toDataframe()
-     * shape: (2, 1)
-     * ┌───────┐
-     * │ group │
-     * ├───────┤
-     * │ A     │
-     * │ B     │
-     * └───────┘
-     */
-    toDataframe<U extends RowRecord = any>(): DataFrame<U> {
-        const keysStr = this._toStringKeys(this._keys);
-        const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(keysStr);
-        return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
-    }
-
-    /**
      * Aggregates grouped partitions using aggregation column expressions.
      * @param exprs One or more aggregation column expressions.
      * @returns DataFrame
@@ -143,11 +126,59 @@ export class GroupedData<T, K extends keyof T> {
 
         for (const e of expandedExprs) {
             const targetKey = e._outputName || e._colName || ALL_COLUMNS_MARKER;
-            const type = resolveExprOutputType(e, this._parentSchema, newColumns[targetKey]) || inferColumnType(newColumns[targetKey]);
+            const type = resolveExprOutputType(e, this._parentSchema, newColumns[targetKey])
+                || inferColumnType(newColumns[targetKey])
+                || this._parentSchema[targetKey]
+                || DataTypeRegistry.Utf8;
             outSchema[targetKey] = type;
             newColumns[targetKey] = coerceColumn(newColumns[targetKey], type, groupCount);
         }
 
         return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
     }
+
+    /**
+     * Converts group keys back into a single distinct DataFrame without aggregations.
+     * @returns DataFrame
+     * @example
+     * <!-- doc:base_grouped_3x2 -->
+     * >>> df.groupBy("group").toDataframe()
+     * shape: (2, 1)
+     * ┌───────┐
+     * │ group │
+     * ├───────┤
+     * │ A     │
+     * │ B     │
+     * └───────┘
+     */
+    toDataframe<U extends RowRecord = any>(): DataFrame<U> {
+        const keysStr = this._toStringKeys(this._keys);
+        const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(keysStr);
+        return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
+    }
+}
+
+const GROUPED_AGG_METHODS: Record<keyof GroupedAggDelegatedOps, 1> = {
+    all: 1,
+    avg: 1,
+    count: 1,
+    first: 1,
+    kurtosis: 1,
+    last: 1,
+    max: 1,
+    mean: 1,
+    median: 1,
+    min: 1,
+    nUnique: 1,
+    skew: 1,
+    std: 1,
+    sum: 1,
+    variance: 1,
+};
+
+for (const method in GROUPED_AGG_METHODS) {
+    (GroupedData.prototype as any)[method] = function (this: GroupedData<any, any>, ...args: any[]) {
+        const allExpr = new ColumnExpr(ALL_COLUMNS_MARKER) as any;
+        return this.agg(allExpr[method](...args));
+    };
 }
