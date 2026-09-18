@@ -596,16 +596,17 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [x] `/Expr/dt/weekday`           (`.dt.weekday(timeZone?)`)
 - [x] `/Expr/dt/with_time_unit`    (`.dt.castTimeUnit(unit)`)
 - [x] `/Expr/dt/year`              (`.dt.year(timeZone?)`)
-- [ ] `/Expr/emw_sum_by`
 - [x] `/Expr/entropy`              (`.entropy()`)
 - [x] `/Expr/eq`                   (`.eq(other)`)
 - [x] `/Expr/eq_missing`           (`.eqMissing(other)`)
-- [ ] `/Expr/ewm_mean`
-- [ ] `/Expr/ewm_mean_by`
-- [ ] `/Expr/ewm_std`
-- [ ] `/Expr/ewm_sum`
-- [ ] `/Expr/ewm_sum_by`
-- [ ] `/Expr/ewm_var`
+- [x] `/Expr/ewm_kurt`             (`.ewmKurt(options)`)
+- [x] `/Expr/ewm_mean`             (`.ewmMean(options)`)
+- [x] `/Expr/ewm_mean_by`          (`.ewmMean({ by, halfLife, ... })`)
+- [x] `/Expr/ewm_skew`             (`.ewmSkew(options)`)
+- [x] `/Expr/ewm_std`              (`.ewmStd(options)`)
+- [x] `/Expr/ewm_sum`              (`.ewmSum(options)`)
+- [x] `/Expr/ewm_sum_by`           (`.ewmSum({ by, halfLife, ... })`)
+- [x] `/Expr/ewm_var`              (`.ewmVar(options)`)
 - [x] `/Expr/exclude`              (`$df.exclude(...)`)
 - [x] `/Expr/exp`                  (`.exp()`)
 - [ ] `/Expr/explode`

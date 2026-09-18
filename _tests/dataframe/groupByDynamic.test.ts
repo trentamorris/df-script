@@ -1674,7 +1674,78 @@ try {
         throw new Error(`Calendar sparse gap sums mismatch: ${JSON.stringify(calGapRows)}`);
     }
 
-    console.log("✓ All 113 hardened DataFrame groupByDynamic edge cases passed successfully!");
+    // 114. Empty DataFrame with includeBoundaries and secondary by keys
+    const dfEmpty = new DataFrame<{ grp: string; time: number; val: number }>({
+        grp: [],
+        time: [],
+        val: []
+    });
+    const resEmpty = dfEmpty.groupByDynamic("time", { every: 10, by: ["grp"], includeBoundaries: true }).agg(
+        $df.col("val").sum().alias("sum")
+    );
+    if (resEmpty.height !== 0) {
+        throw new Error(`Empty DataFrame groupByDynamic failed: expected height 0, got ${resEmpty.height}`);
+    }
+    const emptyCols = resEmpty.columns;
+    if (!emptyCols.includes("grp") || !emptyCols.includes("time") || !emptyCols.includes("_lower_boundary") || !emptyCols.includes("_upper_boundary")) {
+        throw new Error(`Empty DataFrame missing expected boundary or grouping columns: ${emptyCols.join(", ")}`);
+    }
+
+    // 115. All NaN / null in index column
+    const dfAllNaN = new DataFrame([
+        { time: null as any, val: 1 },
+        { time: undefined as any, val: 2 },
+        { time: "not_a_date" as any, val: 3 }
+    ]);
+    const resAllNaN = dfAllNaN.groupByDynamic("time", { every: 10 }).agg(
+        $df.col("val").sum().alias("sum")
+    );
+    if (resAllNaN.height !== 0) {
+        throw new Error(`All-null/NaN index column should yield 0 groups, got ${resAllNaN.height}`);
+    }
+
+    // 116. Single-row DataFrame with window skipping logic
+    const dfSingle = new DataFrame([
+        { time: 50, val: 999 }
+    ]);
+    const resSingle = dfSingle.groupByDynamic("time", { every: 10, period: 10, includeBoundaries: true }).agg(
+        $df.col("val").sum().alias("sum")
+    );
+    if (resSingle.height !== 1) {
+        throw new Error(`Single row DataFrame groupByDynamic expected height 1, got ${resSingle.height}`);
+    }
+    const singleRow = resSingle.toDicts()[0] as any;
+    if (singleRow.sum !== 999 || singleRow._lower_boundary !== 50 || singleRow._upper_boundary !== 60) {
+        throw new Error(`Single row row values mismatch: ${JSON.stringify(singleRow)}`);
+    }
+
+    // 117. Case-insensitive startBy Day of Week
+    const dfDays = new DataFrame([
+        { date: new Date("2024-01-01T12:00:00Z"), val: 10 }, // Monday
+        { date: new Date("2024-01-02T12:00:00Z"), val: 20 }, // Tuesday
+        { date: new Date("2024-01-08T12:00:00Z"), val: 30 }  // Next Monday
+    ]);
+    const resMixedCase = dfDays.groupByDynamic("date", { every: "1w", period: "1w", startBy: "MonDay" as any }).agg(
+        $df.col("val").sum().alias("sum")
+    );
+    if (resMixedCase.height !== 2) {
+        throw new Error(`Mixed-case startBy day of week expected height 2, got ${resMixedCase.height}`);
+    }
+
+    // 118. Fractional floating point steps with offset
+    const dfFloat = new DataFrame([
+        { x: 0.25, val: 1 },
+        { x: 0.75, val: 2 },
+        { x: 1.25, val: 3 }
+    ]);
+    const resFloat = dfFloat.groupByDynamic("x", { every: 0.5, period: 0.5, offset: 0.25 }).agg(
+        $df.col("val").sum().alias("sum")
+    );
+    if (resFloat.height !== 3) {
+        throw new Error(`Fractional floating point step groupByDynamic failed: expected height 3, got ${resFloat.height}`);
+    }
+
+    console.log("✓ All 118 hardened DataFrame groupByDynamic edge cases passed successfully!");
 } catch (e: any) {
     console.error(`❌ DataFrame groupByDynamic test failed: ${e.message}`);
     process.exit(1);
