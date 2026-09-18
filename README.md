@@ -161,15 +161,17 @@ console.log(processedDf.toDicts());
 - `$df.readCsv(content, options?)`: Reads CSV content into a new `DataFrame` with automatic schema inference.
 - `$df.col(selector)`: Creates a column reference expression by column name (`"a"`), multiple names (`["a", "b"]`), RegExp pattern (`/^user_/`), or DataType selector (`$df.Float64`, `$df.Numeric`).
 - `$df.all()`: Selects all columns in the DataFrame.
-- `$df.exclude(columns)`: Matches all columns except the specified ones.
 - `$df.coalesce(...exprs)`: Returns the first non-null value among columns or expressions.
-- `$df.lit(val)`: Explicitly wraps a raw value into a literal expression.
+- `$df.concat(items, options?)`: Concatenates multiple DataFrames along vertical, horizontal, or diagonal axes.
 - `$df.duration(optionsOrString)`: Constructs a `Duration` expression from component options (`{ days: 1, hours: 12 }`) or compound duration strings (`"1d 12h 30m"`).
+- `$df.element()`: References the current array element within an `.arr.eval(...)` expression.
+- `$df.exclude(columns)`: Matches all columns except the specified ones.
+- `$df.horizontal(...exprs)`: Combines multiple columns/expressions horizontally per row for row-wise evaluation (`.sum()`, `.arr`, `.eval()`).
+- `$df.implode(column)`: Aggregates a column's rows or grouped values into a list.
+- `$df.lit(val)`: Explicitly wraps a raw value into a literal expression.
+- `$df.seqRange(value, options?)`: Generates a sequence range of values.
 - `$df.struct(fields)`: Constructs a nested struct object expression from named expressions or sibling columns.
 - `$df.when(predicate).then(value)...otherwise(value)`: Constructs a conditional `CASE WHEN` expression chain.
-- `$df.implode(column)`: Aggregates a column's rows or grouped values into a list.
-- `$df.seqRange(value, options?)`: Generates a sequence range of values.
-- `$df.element()`: References the current array element within an `.arr.eval(...)` expression.
 - `$df.Float64`, `$df.Int32`, `$df.Utf8`, etc.: Direct access to data types and constructors for schema definitions and type-based column selection.
 
 ---
@@ -205,6 +207,7 @@ All methods and getters on `DataFrame` in alphabetical order:
 | **`joinAsof(other, options)`** | Inexact time-series / nearest-neighbor joins on sorted key columns. |
 | **`joinWhere(other, predicate, options?)`** | Arbitrary non-equi joins evaluated over candidate cartesian pairs. |
 | **`limit(n, options?)`** | Returns a subset of rows with optional `offset` and direction (`"start"` or `"end"`). |
+| **`partitionBy(by, options?)`** | Splits DataFrame into sub-DataFrames (as array or dictionary) partitioned by column keys or expressions. |
 | **`pivot(index, columns, values)`** | Reshapes tabular data from long to wide format based on unique column keys. |
 | **`rename(mapping)`** | Renames columns using a `{ oldName: newName }` dictionary. |
 | **`reverse()`** | Reverses the row ordering of the DataFrame. |
@@ -280,6 +283,12 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`entropy`** | Computes Shannon entropy (supports optional base and normalization). |
 | **`eq`** | Strict equality (==) with Kleene null propagation. |
 | **`eqMissing`** | Null-safe equality treating null and undefined as equivalent. |
+| **`ewmKurt`** | Computes exponentially weighted moving kurtosis. |
+| **`ewmMean`** | Computes exponentially weighted moving average/mean (supports `alpha`, `span`, `com`, `halfLife`, and `by`). |
+| **`ewmSkew`** | Computes exponentially weighted moving skewness. |
+| **`ewmStd`** | Computes exponentially weighted moving standard deviation. |
+| **`ewmSum`** | Computes exponentially weighted moving sum. |
+| **`ewmVar`** | Computes exponentially weighted moving variance. |
 | **`exp`** | Computes natural exponential (e^x). |
 | **`expm1`** | Computes e^x - 1 with high precision for values near zero. |
 | **`fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) with values or propagation strategies. |
