@@ -532,10 +532,6 @@ export function clamp<T extends number | bigint>(
     return v;
 }
 
-/**
- * Creates a seedable pseudo-random number generator using the Mulberry32 PRNG algorithm.
- * Returns a function that generates a pseudo-random float in the range [0, 1).
- */
 export function mulberry32(seed: number): () => number {
     let s = seed | 0;
     return function (): number {
@@ -545,4 +541,21 @@ export function mulberry32(seed: number): () => number {
         return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
     };
 }
+
+
+export function computeExponentialWeights(length: number, alpha: number): number[] {
+    const weights = new Array<number>(length);
+    const decay = 1 - alpha;
+    const lastIdx = length - 1;
+    for (let k = 0; k < length; k++) {
+        weights[k] = Math.pow(decay, lastIdx - k);
+    }
+    return weights;
+}
+
+
+export function computeHalfLifeDecay(delta: number, halfLife: number): number {
+    return Math.exp((-Math.LN2 * Math.max(0, delta)) / halfLife);
+}
+
 

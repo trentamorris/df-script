@@ -5,18 +5,31 @@ import type {
     KurtosisOptions,
     EntropyOptions,
     FillNullOptions,
+    FillOptions,
+    FillTarget,
     RollingOptions,
-    ShiftOptions
+    ShiftOptions,
+    EwmOptions,
+    EwmKurtOptions,
+    EwmMeanOptions,
+    EwmSkewOptions,
+    EwmStdOptions,
+    EwmSumOptions,
+    EwmVarOptions,
+    CentralMomentsResult,
+    ValidScalarTypes
 } from "../../types"
 import type { RandomOptions, NumericArg, IsCloseOptions } from "../types"
 import { ExprBase } from "../ExprBase"
-import { computeIsIn, compareMissing, computeRank, evaluateExpression } from "../utils"
+import { computeIsIn, compareMissing, computeRank, evaluateExpression, evaluateArg } from "../utils"
 import { ComputeError, InvalidArgumentError } from "../../exceptions"
 import {
     clamp,
     computeBy,
     computeDotProduct,
     computeEntropy,
+    computeExponentialWeights,
+    computeHalfLifeDecay,
     computeKurtosis,
     computeMode,
     computeQuantile,
@@ -25,16 +38,22 @@ import {
     computeStatisticalMatrix,
     computeWeightedAverage,
     filterByMask,
+    fillSequence,
     getArrayElement,
     getArrayStats,
+    getCentralMoments,
     getUniqueArrayStats,
     UniqueArrayStatsOptions,
     isArrayOfType,
     isArrayOrTypedArray,
+    isPlainObj,
     isValidNumber,
     mulberry32,
+    parseDurationString,
     reduceBitwise,
-    roundToScale
+    roundToScale,
+    toValidDate,
+    toValidNumber
 } from "../../utils"
 
 /**
@@ -89,6 +108,67 @@ export class StandardExpr extends ExprBase {
                 }
             }
             return postFn ? postFn(acc, hasValid) : acc;
+        });
+    }
+
+    _ewmUnary(options: EwmOptions, extract: (stats: CentralMomentsResult) => any) {
+        if (!options || typeof options !== "object") {
+            throw new InvalidArgumentError("ewm: options object must be provided");
+        }
+        const { alpha: a, span, com, halfLife, by, minSamples = 1, adjust = true, ignoreNulls = false } = options;
+        const hlMs = typeof halfLife === "string" ? parseDurationString(halfLife, { to: "ms" }) : (halfLife ?? null);
+
+        const count = (a !== undefined ? 1 : 0) + (span !== undefined ? 1 : 0) + (com !== undefined ? 1 : 0) + (halfLife !== undefined ? 1 : 0);
+        if (count !== 1 && (!by || count > 1)) {
+            throw new InvalidArgumentError("ewm: specify one decay parameter");
+        }
+
+        let alpha = 0;
+        if (a !== undefined) {
+            if (!isValidNumber(a) || a <= 0 || a > 1) throw new InvalidArgumentError("ewm: invalid alpha");
+            alpha = a;
+        } else if (span !== undefined) {
+            if (!isValidNumber(span) || span < 1) throw new InvalidArgumentError("ewm: invalid span");
+            alpha = 2 / (span + 1);
+        } else if (com !== undefined) {
+            if (!isValidNumber(com) || com < 0) throw new InvalidArgumentError("ewm: invalid com");
+            alpha = 1 / (1 + com);
+        } else if (hlMs !== null) {
+            if (!isValidNumber(hlMs) || hlMs <= 0) throw new InvalidArgumentError("ewm: invalid halfLife");
+            alpha = 1 - Math.exp(-Math.LN2 / hlMs);
+        }
+
+        const decay = 1 - alpha;
+        const toNum = (val: any): number => (val == null ? 0 : toValidNumber(val) ?? toValidDate(val)?.getTime() ?? 0);
+
+        return this._derive((vArray, columns) => {
+            const height = vArray.length;
+            const res = new Array(height);
+            const rawBy = by !== undefined ? evaluateArg(by, columns, height) : undefined;
+            const byVals = rawBy && hlMs != null ? Array.from(rawBy, toNum) : null;
+
+            for (let i = 0; i < height; i++) {
+                const len = i + 1;
+                const vals = Array.prototype.slice.call(vArray, 0, len);
+                let weights: number[];
+
+                if (byVals) {
+                    weights = new Array(len);
+                    for (let k = 0; k < len; k++) weights[k] = computeHalfLifeDecay(byVals[i] - byVals[k], hlMs!);
+                } else if (ignoreNulls) {
+                    weights = new Array(len);
+                    let step = 0;
+                    for (let k = i; k >= 0; k--) {
+                        weights[k] = (vals[k] != null && isValidNumber(vals[k])) ? Math.pow(decay, step++) : 0;
+                    }
+                } else {
+                    weights = computeExponentialWeights(len, alpha);
+                }
+
+                const stats = getCentralMoments(vals, weights, { adjust, minSamples });
+                res[i] = stats && stats.mean !== null ? extract(stats) : null;
+            }
+            return res;
         });
     }
 
@@ -930,6 +1010,98 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
+     * Window: Computes exponentially weighted moving kurtosis.
+     * @param options Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("val").ewmKurt({ alpha: 0.5 }).alias("ewm_kurt"))
+     */
+    ewmKurt(options: EwmKurtOptions) {
+        return this._ewmUnary(options, s => {
+            if (s.count < 2 || !s.m2Sum || s.m2Sum <= 0) return null;
+            const m2 = s.m2Sum / s.count;
+            const m4 = s.m4Sum / s.count;
+            const g2 = (m4 / (m2 * m2)) - 3;
+            return isValidNumber(g2) ? g2 : null;
+        });
+    }
+
+    /**
+     * Window: Computes exponentially weighted moving average (mean).
+     * @param options Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("val").ewmMean({ alpha: 0.5 }).alias("ewm_mean"))
+     * shape: (3, 2)
+     * ┌─────┬──────────┐
+     * │ val │ ewm_mean │
+     * ├─────┼──────────┤
+     * │ 10  │ 10       │
+     * │ 20  │ 16.666667│
+     * │ 30  │ 24.285714│
+     * └─────┴──────────┘
+     */
+    ewmMean(options: EwmMeanOptions) {
+        return this._ewmUnary(options, s => s.mean);
+    }
+
+    /**
+     * Window: Computes exponentially weighted moving skewness.
+     * @param options Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, optional `bias`, and optional `by`.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("val").ewmSkew({ alpha: 0.5 }).alias("ewm_skew"))
+     */
+    ewmSkew(options: EwmSkewOptions) {
+        return this._ewmUnary(options, s => {
+            if (s.count < 2 || !s.m2Sum || s.m2Sum <= 0) return null;
+            const m2 = s.m2Sum / s.count;
+            const m3 = s.m3Sum / s.count;
+            const g1 = m3 / Math.pow(m2, 1.5);
+            return isValidNumber(g1) ? g1 : null;
+        });
+    }
+
+    /**
+     * Window: Computes exponentially weighted moving standard deviation.
+     * @param options Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("val").ewmStd({ alpha: 0.5 }).alias("ewm_std"))
+     */
+    ewmStd(options: EwmStdOptions) {
+        return this._ewmUnary(options, s => s.count < 2 ? null : s.std);
+    }
+
+    /**
+     * Window: Computes exponentially weighted moving sum.
+     * @param options Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `minSamples`, `ignoreNulls`, and optional `by`.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("val").ewmSum({ alpha: 0.5 }).alias("ewm_sum"))
+     */
+    ewmSum(options: EwmSumOptions) {
+        return this._ewmUnary(options, s => s.weightedSum);
+    }
+
+    /**
+     * Window: Computes exponentially weighted moving variance.
+     * @param options Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("val").ewmVar({ alpha: 0.5 }).alias("ewm_var"))
+     */
+    ewmVar(options: EwmVarOptions) {
+        return this._ewmUnary(options, s => s.count < 2 ? null : s.variance);
+    }
+
+    /**
      * Computes natural exponent (e^x) of the column values.
      * @returns ColumnExpression
      * @example
@@ -968,6 +1140,117 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
+     * Replaces targeted values ("null", "nan", or "all") with a specified value or strategy.
+     * @param target The target value type to replace: "null", "nan", or "all".
+     * @param options Configuration options including replacement value, strategy, and optional limit, or a replacement scalar/expression directly.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_nulls_3x2 -->
+     * >>> df.withColumns($df.col("a").fill("null", { value: 0 }).alias("filled"))
+     * shape: (3, 2)
+     * ┌──────┬────────┐
+     * │ a    │ filled │
+     * ├──────┼────────┤
+     * │ 1    │ 1      │
+     * │ null │ 0      │
+     * │ 3    │ 3      │
+     * └──────┴────────┘
+     */
+    fill(
+        target: FillTarget,
+        options: FillOptions | ValidScalarTypes | IExpr = {}
+    ): this {
+        const opts: FillOptions = isPlainObj(options)
+            ? options as FillOptions
+            : { value: options };
+
+        let {
+            value = undefined,
+            strategy = undefined,
+            limit = undefined
+        } = opts;
+
+        return this._derive((vArray, columns) => {
+            const height = vArray.length;
+            const result = Array.from(vArray);
+
+            if (strategy === "zero") {
+                value = 0;
+            } else if (strategy === "one") {
+                value = 1;
+            } else if (strategy === "min" || strategy === "max" || strategy === "mean") {
+                value = (getArrayStats(vArray) as any)[strategy];
+            } else if (strategy && strategy !== "forward" && strategy !== "backward") {
+                throw new InvalidArgumentError(`Unsupported fill strategy: "${strategy}"`);
+            }
+
+            const isDirectional = strategy === "forward" || strategy === "backward";
+            const resolved = value !== undefined ? this._resolve(value, columns, height) : null;
+            const isArr = isArrayOrTypedArray(resolved);
+
+            const isTarget = (() => {
+                if (this._isColExpr(target)) {
+                    const mask = this._resolve(target, columns, height);
+                    return isArrayOrTypedArray(mask) ? (_: any, i: number) => Boolean(mask[i]) : () => Boolean(mask);
+                }
+                if (target === "null") return (v: any) => v == null;
+                if (target === "nan") return (v: any) => typeof v === "number" && Number.isNaN(v);
+                if (target === "all") return (v: any) => v == null || (typeof v === "number" && Number.isNaN(v));
+                return (v: any) => Object.is(v, target);
+            })();
+
+            let lastVal: any = null;
+            let consec = 0;
+
+            fillSequence(result, null, {
+                mode: "independent",
+                reverse: strategy === "backward",
+                condition: (v: any, i: number) => isTarget(v, i),
+                step: ({ originalValue, absoluteIndex }) => {
+                    if (!isDirectional) {
+                        return isArr ? resolved[absoluteIndex] : resolved;
+                    }
+
+                    if (!isTarget(originalValue, absoluteIndex)) {
+                        lastVal = originalValue;
+                        consec = 0;
+                        return originalValue;
+                    }
+
+                    if (lastVal !== null && (limit === undefined || consec < limit)) {
+                        consec++;
+                        return lastVal;
+                    }
+
+                    return originalValue;
+                }
+            });
+
+            return result;
+        }) as this;
+    }
+
+    /**
+     * Replaces NaN values with a specified value or strategy.
+     * @param options Replacement value, expression, or FillNullOptions configuration.
+     * @returns ColumnExpression
+     * @example 
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("a").fillNan(0).alias("clean"))
+     * shape: (3, 2)
+     * ┌───┬───────┐
+     * │ a │ clean │
+     * ├───┼───────┤
+     * │ 1 │ 1     │
+     * │ 2 │ 2     │
+     * │ 3 │ 3     │
+     * └───┴───────┘
+     */
+    fillNan(options: ValidScalarTypes | IExpr | FillNullOptions = {}): this {
+        return this.fill("nan", options);
+    }
+
+    /**
      * Replaces null, undefined, or missing values with a specified value or strategy.
      * @param options Configuration options including fill value, strategy ("forward", "backward", "zero", "one", "mean", "min", "max"), and optional limit.
      * @returns ColumnExpression
@@ -983,56 +1266,8 @@ export class StandardExpr extends ExprBase {
      * │ 3    │ 3      │
      * └──────┴────────┘
      */
-    fillNull({
-        value = undefined,
-        strategy = undefined,
-        limit = undefined
-    }: FillNullOptions = {}): this {
-        if (strategy === "zero") value = 0;
-        else if (strategy === "one") value = 1;
-
-        return this._derive((vArray, columns) => {
-            const height = vArray.length;
-            const result = Array.from(vArray);
-
-            if (strategy === "min" || strategy === "max" || strategy === "mean") {
-                value = (getArrayStats(vArray) as any)[strategy];
-            }
-
-            if (value !== undefined) {
-                const resolved = this._resolve(value, columns, height);
-                const isArr = isArrayOrTypedArray(resolved);
-                for (let i = 0; i < height; i++) {
-                    if (result[i] == null) result[i] = isArr ? resolved[i] : resolved;
-                }
-                return result;
-            }
-
-            if (strategy === "forward" || strategy === "backward") {
-                const isBwd = strategy === "backward";
-                let lastVal: any = null, consec = 0;
-
-                for (let i = 0; i < height; i++) {
-                    const idx = isBwd ? height - 1 - i : i;
-                    const val = result[idx];
-
-                    if (val != null) {
-                        lastVal = val;
-                        consec = 0;
-                    } else if (lastVal !== null && (limit === undefined || consec < limit)) {
-                        result[idx] = lastVal;
-                        consec++;
-                    }
-                }
-                return result;
-            }
-
-            if (strategy !== undefined) {
-                throw new InvalidArgumentError(`Unsupported fillNull strategy: "${strategy}"`);
-            }
-
-            return result;
-        }) as this;
+    fillNull(options: FillNullOptions = {}): this {
+        return this.fill("null", options);
     }
 
     /**

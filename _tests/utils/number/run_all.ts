@@ -11,3 +11,5 @@ import "./roundToScale.test";
 import "./toValidDecimal.test";
 import "./clamp.test";
 import "./mulberry32.test";
+import "./computeExponentialWeights.test";
+import "./computeHalfLifeDecay.test";

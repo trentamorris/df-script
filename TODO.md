@@ -209,12 +209,18 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Run TypeScript declaration emit (`tsc --emitDeclarationOnly`) concurrently to drastically cut build times.
   * Clean up `package.json` scripts to maintain cross-platform shell compatibility and readability.
 ### 🛠️ Unified Missing & NaN Filling Architecture
-- [ ] **Unified `fillNull` & `fillNan` with Target Selection (`FillNullOptions.target`)**:
-  * Extend `FillNullOptions` with `target?: "null" | "nan" | "all"` (defaulting to `"null"` for complete backward compatibility).
-  * Enable all existing strategies (`"forward"`, `"backward"`, `"min"`, `"max"`, `"mean"`, `"zero"`, `"one"`) and `limit` to work seamlessly when targeting `NaN`s or both `null`s and `NaN`s in a single pass.
-  * Update DataFrame-level `df.fillNull({ target })` to forward options cleanly across all columns.
-  * Add `.fillNan(valueOrOptions)` as a clean convenience alias delegating to `.fillNull({ ..., target: "nan" })`.
-  * Add dedicated unit tests in `_tests/columnExpressions/mixins/StandardExpr/fillNull.test.ts` (and `fillNan.test.ts`).
+- [x] **Unified `fillNull`, `fillNan` & Generic `fill` Powered by `fillSequence`**:
+  * [x] Extend `FillNullOptions` & `FillOptions` with target selection (`"null" | "nan" | "all"`).
+  * [x] Reused existing `fillSequence` utility to power forward, backward, constant, and independent stepping strategies across `fillNull` and `fillNan`.
+  * [x] Add `.fill(target, options)` and `.fillNan(valueOrOptions)` on both `ColumnExpr` (`StandardExpr`) and `DataFrame`.
+  * [x] Add dedicated unit test suites: `_tests/columnExpressions/mixins/StandardExpr/fill.test.ts`, `fillNan.test.ts`, `_tests/dataframe/fill.test.ts`, and `fillNan.test.ts`.
+
+### 🏎️ Automated Performance & Throughput Benchmarking Suite
+- [ ] **Method-Co-located Benchmarks (`<method>.bench.ts`)**:
+  * Adopt the lean suffix pattern placing `<method>.bench.ts` directly alongside `<method>.test.ts` in `_tests/` (e.g. `_tests/dataframe/filter.bench.ts` next to `filter.test.ts`).
+  * Avoid deep subfolder bloat (no `filter/robustness.test.ts` vs `filter/performance.test.ts` folder explosion) while maintaining strict 1:1 visibility.
+  * Separate execution pipelines: `npm test` runs instant unit correctness suites, while `npm run bench` runs throughput / latency micro-benchmarks with synthetic 100k–1M row datasets.
+  * Track throughput (rows/sec), latency per operation, and memory allocation overhead (`heapUsed`) on hot paths (`filter`, `groupBy`, `join`, `select`, `partitionBy`).
 
 
 ## 🔮 Future / Backlog Scope (V2.2.0+)
@@ -285,9 +291,9 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [x] `/DataFrame/equals`           (`$df.data(...).equals(other, { nullsEqual })`)
 - [ ] `/DataFrame/estimated_size`
 - [x] `/DataFrame/explode`          (`$df.data(...).explode(cols, options?)`)
-- [x] `/DataFrame/extend`           (`$df.concat([df1, df2], { how: "vertical" })` — in Polars this is in-place Arrow chunk reallocation; DFScript's immutable vertical concat already builds contiguous arrays directly)
-- [ ] `/DataFrame/fill_nan`
-- [x] `/DataFrame/fill_null`        (`$df.data(...).fillNull(options?)`)
+- [x] `/DataFrame/fill`              (`$df.data(...).fill(target, options?)`)
+- [x] `/DataFrame/fill_nan`          (`$df.data(...).fillNan(options?)`)
+- [x] `/DataFrame/fill_null`         (`$df.data(...).fillNull(options?)`)
 - [x] `/DataFrame/filter`           (`$df.data(...).filter(predicate)`)
 - [ ] `/DataFrame/flags`            (Polars internal engine metadata exposing chunk-level optimization flags like SORTED_ASC / FAST_EXPLODE)
 - [ ] `/DataFrame/fold`
@@ -317,19 +323,19 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [x] `/DataFrame/group_by/sum`          (`$df.data(...).groupBy(keys).sum()` / `.agg($df.all().sum())`)
 - [x] `/DataFrame/group_by/tail`         (`$df.data(...).groupBy(keys).tail(n)`)
 - [x] `/DataFrame/group_by_dynamic`      (`$df.data(...).groupByDynamic(<index_col>, { every, period, ... })`)
-- [ ] `/DataFrame/hash_rows`        (Deferred: requires standalone `Series` type; internal row hashing used in groupBy/join)
+- [ ] `/DataFrame/hash_rows`             (Deferred: requires standalone `Series` type; internal row hashing used in groupBy/join)
 - [x] `/DataFrame/head`                  (`$df.data(...).head(n)`)
 - [x] `/DataFrame/height`                (`$df.data(...).height`)
 - [x] `/DataFrame/hstack`                (`$df.concat([df1, df2], { how: "horizontal" })`)
 - [x] `/DataFrame/insert_column`         (`$df.data(...).insertColumn(index, name, expr)`)
 - [ ] `/DataFrame/interpolate`
 - [ ] `/DataFrame/is_duplicated`
-- [x] `/DataFrame/is_empty`            (`$df.data(...).height === 0`)
+- [x] `/DataFrame/is_empty`              (`$df.data(...).height === 0`)
 - [ ] `/DataFrame/is_sorted`
 - [ ] `/DataFrame/is_unique`
 - [x] `/DataFrame/item`                  (`$df.data(...).item(row?, col?)`)
-- [x] `/DataFrame/iter_columns`         (`$df.data(...).iterColumns()`)
-- [x] `/DataFrame/iter_rows`            (`$df.data(...).iterRows()`)
+- [x] `/DataFrame/iter_columns`          (`$df.data(...).iterColumns()`)
+- [x] `/DataFrame/iter_rows`             (`$df.data(...).iterRows()`)
 - [ ] `/DataFrame/iter_slices`
 - [x] `/DataFrame/join`                  (`$df.data(...).join(other, { on, how, ... })`)
 - [x] `/DataFrame/join_asof`             (`$df.data(...).joinAsof(other, { on, by, strategy, ... })`)
@@ -359,7 +365,7 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [ ] `/DataFrame/rechunk`
 - [x] `/DataFrame/remove`                (`$df.data(...).filter(<predicate>.not())`)
 - [x] `/DataFrame/rename`                (`$df.data(...).rename(mapping)`)
-- [ ] `/DataFrame/replace_column`   (Deferred: requires standalone `Series` type; currently `$df.data(...).withColumns(...)`)
+- [ ] `/DataFrame/replace_column`        (Deferred: requires standalone `Series` type; currently `$df.data(...).withColumns(...)`)
 - [x] `/DataFrame/reverse`               (`$df.data(...).reverse()`)
 - [ ] `/DataFrame/rolling`
 - [x] `/DataFrame/row`                   (`$df.data(...).row(index)`)
@@ -368,13 +374,13 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [ ] `/DataFrame/sample`
 - [x] `/DataFrame/schema`                (`$df.data(...).schema`)
 - [x] `/DataFrame/select`                (`$df.data(...).select(...)`)
-- [x] `/DataFrame/select_seq`       ( `$df.data(...).select(...)` — in Polars this executes sequentially rather than multi-threaded; in JS/TS the event loop engine is already strictly sequential and deterministic by default)
-- [ ] `/DataFrame/serialize`        (JSON format available via `$df.data(...).writeJson()`; binary buffer format tracked in Future Scope)
-- [ ] `/DataFrame/set_sorted`       (Future candidate: internal metadata flag asserting pre-sorted column order to bypass sorting checks)
+- [x] `/DataFrame/select_seq`            ( `$df.data(...).select(...)` — in Polars this executes sequentially rather than multi-threaded; in JS/TS the event loop engine is already strictly sequential and deterministic by default)
+- [ ] `/DataFrame/serialize`             (JSON format available via `$df.data(...).writeJson()`; binary buffer format tracked in Future Scope)
+- [ ] `/DataFrame/set_sorted`            (Future candidate: internal metadata flag asserting pre-sorted column order to bypass sorting checks)
 - [x] `/DataFrame/shape`                 (`$df.data(...).shape`)
-- [x] `/DataFrame/shift`            (`$df.data(...).select($df.all().shift(n, { fillValue }))`)
+- [x] `/DataFrame/shift`                 (`$df.data(...).select($df.all().shift(n, { fillValue }))`)
 - [ ] `/DataFrame/show`
-- [ ] `/DataFrame/shrink_to_fit`    (N/A in JS: Rust/Arrow uses this to release excess heap `capacity` down to `len`; in JS/V8, array backing stores and memory compaction are handled automatically by the engine GC)
+- [ ] `/DataFrame/shrink_to_fit`         (N/A in JS: Rust/Arrow uses this to release excess heap `capacity` down to `len`; in JS/V8, array backing stores and memory compaction are handled automatically by the engine GC)
 - [x] `/DataFrame/slice`                 (`$df.data(...).slice(offset, length?)`)
 - [x] `/DataFrame/sort`                  (`$df.data(...).sort(options)`)
 - [ ] `/DataFrame/sql`                   (Planned as tree-shakeable standalone function or separate subpath plugin `df-script/sql` to avoid bloating the core bundle with SQL parser/grammar overhead. Use a separate parser / plugin for now)
@@ -440,36 +446,6 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [ ] `/element`
 - [ ] `/enable_string_cache`
 - [ ] `/escape_regex`
-- [ ] `/exceptions/CategoricalRemappingWarning`
-- [ ] `/exceptions/ChronoFormatWarning`
-- [ ] `/exceptions/ColumnNotFoundError`
-- [ ] `/exceptions/ComputeError`
-- [ ] `/exceptions/CustomUFuncWarning`
-- [ ] `/exceptions/DataOrientationWarning`
-- [ ] `/exceptions/DuplicateError`
-- [ ] `/exceptions/InvalidOperationError`
-- [ ] `/exceptions/MapWithoutReturnDtypeWarning`
-- [ ] `/exceptions/ModuleUpgradeRequiredError`
-- [ ] `/exceptions/NoDataError`
-- [ ] `/exceptions/NoRowsReturnedError`
-- [ ] `/exceptions/OutOfBoundsError`
-- [ ] `/exceptions/PanicException`
-- [ ] `/exceptions/ParameterCollisionError`
-- [ ] `/exceptions/PerformanceWarning`
-- [ ] `/exceptions/PolarsError`
-- [ ] `/exceptions/PolarsInefficientMapWarning`
-- [ ] `/exceptions/PolarsWarning`
-- [ ] `/exceptions/RowsError`
-- [ ] `/exceptions/SchemaError`
-- [ ] `/exceptions/SchemaFieldNotFoundError`
-- [ ] `/exceptions/ShapeError`
-- [ ] `/exceptions/SQLInterfaceError`
-- [ ] `/exceptions/SQLSyntaxError`
-- [ ] `/exceptions/StringCacheMismatchError`
-- [ ] `/exceptions/StructFieldNotFoundError`
-- [ ] `/exceptions/TooManyRowsReturnedError`
-- [ ] `/exceptions/UnstableWarning`
-- [ ] `/exceptions/UnsuitableSQLError`
 - [ ] `/exclude`
 - [ ] `/explain_all`
 - [x] `/Expr/abs`                   (`.abs()`)
@@ -636,8 +612,8 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [ ] `/Expr/ext/storage`
 - [ ] `/Expr/ext/to`
 - [ ] `/Expr/extend_constant`
-- [ ] `/Expr/fill_nan`
-- [x] `/Expr/fill_null`            (`.fillNull(optionsOrValue)`)
+- [x] `/Expr/fill_nan`              (`.fillNan(optionsOrValue)`)
+- [x] `/Expr/fill_null`             (`.fillNull(optionsOrValue)`)
 - [x] `/Expr/filter`               (`.filter(predicate)`)
 - [x] `/Expr/first`                (`.first()`)
 - [ ] `/Expr/flatten`

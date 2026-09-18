@@ -12,6 +12,8 @@ import "./dtypes.test";
 import "./equals.test";
 import "../exceptions.test";
 import "./explode.test";
+import "./fill.test";
+import "./fillNan.test";
 import "./fillNull.test";
 import "./filter.test";
 import "./groupBy.test";

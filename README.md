@@ -189,6 +189,8 @@ All methods and getters on `DataFrame` in alphabetical order:
 | **`dtypes`** | Getter returning a dictionary of column names to their registered `DataType` instances. |
 | **`equals(other, options?)`** | Deep equality comparison with tolerance support for float columns. |
 | **`explode(columns)`** | Unnests list-like columns into multiple rows, replicating other columns per list element. |
+| **`fill(target, options?)`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) across columns with strategies or values. |
+| **`fillNan(options?)`** | Replaces `NaN` values across numeric columns with scalars, expressions, or statistical strategies. |
 | **`fillNull(ruleOrOptions)`** | Fills null values with strategies (`"forward"`, `"backward"`, `"mean"`, `"min"`, `"max"`, or literal values). |
 | **`filter(...predicates)`** | Filters rows where all predicate expressions evaluate to `true`. |
 | **`groupBy(keys)`** | Groups data by one or more columns, returning a `GroupedData` object for aggregations. |
@@ -280,6 +282,8 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`eqMissing`** | Null-safe equality treating null and undefined as equivalent. |
 | **`exp`** | Computes natural exponential (e^x). |
 | **`expm1`** | Computes e^x - 1 with high precision for values near zero. |
+| **`fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) with values or propagation strategies. |
+| **`fillNan`** | Replaces `NaN` values with scalars, expressions, or statistical strategies. |
 | **`fillNull`** | Fills null values with scalar values or forward/backward fill strategies. |
 | **`filter`** | Filters expression elements by a boolean predicate mask. |
 | **`first`** | Returns the first element of the expression or group. |

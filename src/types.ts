@@ -271,6 +271,30 @@ export interface RollingOptions {
     windowSize: number;
 }
 
+/** Exponentially Weighted Moving Reduction Operation */
+export type EwmOperation = "mean" | "sum" | "std" | "var" | "skew" | "kurt";
+
+/** Exponentially Weighted Moving Window Configuration */
+export interface EwmOptions {
+    alpha?: number;
+    span?: number;
+    halfLife?: number | string;
+    com?: number;
+    minSamples?: number;
+    adjust?: boolean;
+    ignoreNulls?: boolean;
+    by?: string | IExpr;
+    bias?: boolean;
+    fisher?: boolean;
+}
+
+export type EwmSumOptions = Omit<EwmOptions, "adjust" | "bias" | "fisher">;
+export type EwmMeanOptions = Omit<EwmOptions, "bias" | "fisher">;
+export type EwmVarOptions = Omit<EwmOptions, "bias" | "fisher">;
+export type EwmStdOptions = Omit<EwmOptions, "bias" | "fisher">;
+export type EwmSkewOptions = Omit<EwmOptions, "fisher">;
+export type EwmKurtOptions = EwmOptions;
+
 /** Sorting Configuration */
 export interface SortArrayOptions<T = any> {
     descending?: boolean | boolean[];
@@ -313,6 +337,14 @@ export type FlattenUnion<T> = {
 
 export type FillNullStrategy = "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one";
 
+export type FillTarget = "null" | "nan" | "all" | IExpr | ValidScalarTypes;
+
+export interface FillOptions {
+    value?: any;
+    strategy?: FillNullStrategy;
+    limit?: number;
+}
+
 export interface FillNullOptions {
     value?: any;
     strategy?: FillNullStrategy;
@@ -331,6 +363,23 @@ export interface SkewOptions {
 export interface KurtosisOptions {
     fisher?: boolean;
     bias?: boolean;
+}
+
+export interface CentralMomentsOptions {
+    adjust?: boolean;
+    minSamples?: number;
+}
+
+export interface CentralMomentsResult {
+    count: number;
+    sumW: number;
+    weightedSum: number;
+    mean: number | null;
+    m2Sum: number;
+    m3Sum: number;
+    m4Sum: number;
+    variance: number | null;
+    std: number | null;
 }
 
 export interface EntropyOptions {

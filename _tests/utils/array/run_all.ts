@@ -31,6 +31,7 @@ import "./computeEntropy.test";
 import "./reduceBitwise.test";
 import "./computeBy.test";
 import "./filterByMask.test";
+import "./getCentralMoments.test";
 
 console.log("=========================================");
 console.log("🎉 ALL ARRAY UTILS TESTS PASSED SUCCESSFULLY!");

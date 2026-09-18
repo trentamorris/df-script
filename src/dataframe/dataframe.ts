@@ -2,7 +2,7 @@ import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER,
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
-import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions, SortArrayOptions, CastOptions } from "../types"
+import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions, FillOptions, FillTarget, ValidScalarTypes, SortArrayOptions, CastOptions } from "../types"
 import type { EqualsOptions, LimitOptions, SortOptions, PivotOptions, PartitionByOptions, JoinOptions, JoinMaintainOrder, JoinAsofOptions, JoinWhereOptions, GroupByDynamicOptions, UnpivotOptions, TransposeOptions, UnstackOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry, DataType } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate } from "../utils"
@@ -448,6 +448,52 @@ export class DataFrame<T extends RowRecord = any> {
         }
 
         return this.select(...selectList);
+    }
+
+    /**
+     * Fills targeted values ("null", "nan", or "all") across columns using scalar values or statistical strategies.
+     * @param {FillTarget} target Target type ("null", "nan", "all").
+     * @param {FillOptions | ValidScalarTypes | IExpr} [options] Configuration options or scalar/expression replacement.
+     * @returns {DataFrame}
+     * @example
+     * <!-- doc:base_nulls_3x2 -->
+     * >>> df.fill("null", { value: 0 })
+     * shape: (3, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 0 │
+     * │ 3 │
+     * └───┘
+     */
+    fill(
+        target: FillTarget,
+        options: FillOptions | ValidScalarTypes | IExpr = {}
+    ): DataFrame<T> {
+        if (this._height === 0) return this;
+        return this.withColumns(all().fill(target, options));
+    }
+
+    /**
+     * Fills NaN values across numeric columns using scalar values or statistical strategies.
+     * @param {ValidScalarTypes | IExpr | FillNullOptions} [options] Replacement value or configuration options.
+     * @returns {DataFrame}
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.fillNan(0)
+     * shape: (3, 1)
+     * ┌───┐
+     * │ a │
+     * ├───┤
+     * │ 1 │
+     * │ 2 │
+     * │ 3 │
+     * └───┘
+     */
+    fillNan(options: ValidScalarTypes | IExpr | FillNullOptions = {}): DataFrame<T> {
+        if (this._height === 0) return this;
+        return this.withColumns(all().fillNan(options));
     }
 
     /**

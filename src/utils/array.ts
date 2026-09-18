@@ -3,7 +3,7 @@ import { isClass, isObj, isPlainObj, isValidDateObj, typedArrayTagGetter } from 
 import { toValidNumber, isValidNumber, isValidInt, toValidBigInt, isValidBigInt, clamp, SAFE_BIGINT_RANGE } from "./number";
 import { toValidDate } from "./date";
 import { toCanonicalString } from "./string";
-import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, EntropyOptions, SortArrayOptions } from "../types";
+import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions } from "../types";
 
 import { ComputeError, InvalidArgumentError } from "../exceptions";
 
@@ -1120,34 +1120,75 @@ export function binarySearch<T = any>(
 
 /**
  * Helper to compute count, mean, and central moment sums (m2Sum, m3Sum, m4Sum).
- * @internal
+ * Supports both unweighted and weighted evaluation.
  */
-function getCentralMoments(
-    arr: ArrayLike<any>
-): { count: number; mean: number; m2Sum: number; m3Sum: number; m4Sum: number } | null {
+export function getCentralMoments(
+    arr: ArrayLike<any>,
+    weights?: ArrayLike<number> | null,
+    options: CentralMomentsOptions = {}
+): CentralMomentsResult | null {
     if (!isArrayOrTypedArray(arr)) return null;
 
-    const { mean, count } = getArrayStats(arr);
-    if (count < 2 || mean === null) return null;
+    const len = arr.length;
+    const minSamples = options.minSamples ?? 2;
+    const adjust = options.adjust ?? true;
+
+    let count = 0;
+    let sumW = 0;
+    let total = 0;
+
+    if (!weights) {
+        const stats = getArrayStats(arr);
+        if (stats.count < minSamples || stats.mean === null) return null;
+        count = stats.count;
+        sumW = count;
+        total = stats.sum ?? 0;
+    } else {
+        for (let i = 0; i < len; i++) {
+            const val = toValidNumber(arr[i]);
+            if (val !== null) {
+                const w = weights[i] ?? 0;
+                count++;
+                sumW += w;
+                total += val * w;
+            }
+        }
+        if (count < minSamples) return null;
+    }
+
+    const mean = (!weights || adjust) && sumW > 0 ? total / sumW : total;
+    const centerMean = sumW > 0 ? total / sumW : 0;
 
     let m2Sum = 0;
     let m3Sum = 0;
     let m4Sum = 0;
-    const len = arr.length;
 
     for (let i = 0; i < len; i++) {
         const val = toValidNumber(arr[i]);
         if (val === null) continue;
-        const diff = val - mean;
+        const w = weights ? (weights[i] ?? 0) : 1;
+        const diff = val - centerMean;
         const diff2 = diff * diff;
-        m2Sum += diff2;
-        m3Sum += diff2 * diff;
-        m4Sum += diff2 * diff2;
+        m2Sum += w * diff2;
+        m3Sum += w * diff2 * diff;
+        m4Sum += w * diff2 * diff2;
     }
 
-    if (m2Sum <= 0) return null;
+    const rawVar = sumW > 0 ? m2Sum / sumW : 0;
+    const variance = rawVar < 1e-12 ? 0 : rawVar;
+    const std = Math.sqrt(variance);
 
-    return { count, mean, m2Sum, m3Sum, m4Sum };
+    return {
+        count,
+        sumW,
+        weightedSum: total,
+        mean,
+        m2Sum,
+        m3Sum,
+        m4Sum,
+        variance,
+        std
+    };
 }
 
 /**
@@ -1157,7 +1198,7 @@ function getCentralMoments(
  */
 export function computeSkewness(arr: ArrayLike<any>, options: SkewOptions = {}): number | null {
     const stats = getCentralMoments(arr);
-    if (!stats) return null;
+    if (!stats || stats.m2Sum <= 0) return null;
 
     const { count, m2Sum, m3Sum } = stats;
     const m2 = m2Sum / count;
@@ -1182,7 +1223,7 @@ export function computeSkewness(arr: ArrayLike<any>, options: SkewOptions = {}):
  */
 export function computeKurtosis(arr: ArrayLike<any>, options: KurtosisOptions = {}): number | null {
     const stats = getCentralMoments(arr);
-    if (!stats) return null;
+    if (!stats || stats.m2Sum <= 0) return null;
 
     const { count, m2Sum, m4Sum } = stats;
     const m2 = m2Sum / count;
