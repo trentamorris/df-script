@@ -1,7 +1,7 @@
-import { ColumnExpr } from "../ColumnExpr";
-import type { IExpr, ValidScalarTypes } from "../../types";
-import { evaluateArg, isEvaluatedColumn, evaluateArgsMatrix } from "../utils";
-import { WHEN_MARKER } from "../constants";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import type { IExpr, ValidScalarTypes } from "../types";
+import { evaluateArg, isEvaluatedColumn, evaluateArgsMatrix } from "../columnExpressions/utils";
+import { WHEN_MARKER } from "../columnExpressions/constants";
 
 type WhenArg = IExpr | ValidScalarTypes | any[] | Record<string, any>;
 

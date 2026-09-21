@@ -1,10 +1,10 @@
-import { ColumnExpr } from "../ColumnExpr";
-import { toColExpr } from "../ExprBase"
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { toColExpr } from "../columnExpressions/ExprBase";
 import { lit } from "./lit";
-import { DurationType } from "../../datatypes/types";
-import { InvalidArgumentError } from "../../exceptions";
-import { isValidNumber, parseDurationString, FIXED_DURATION_UNITS } from "../../utils";
-import type { IntoExpr, DurationOptions } from "../../types";
+import { DurationType } from "../datatypes/types";
+import { InvalidArgumentError } from "../exceptions";
+import { isValidNumber, parseDurationString, FIXED_DURATION_UNITS } from "../utils";
+import type { IntoExpr, DurationOptions } from "../types";
 
 /**
  * Constructs a Duration expression column from numeric values, string intervals, column references, or expressions.

@@ -1,7 +1,7 @@
-import { ColumnExpr } from "../ColumnExpr";
-import type { IExpr, ValidScalarTypes } from "../../types";
-import { evaluateArgsMatrix } from "../utils";
-import { COALESCE_MARKER } from "../constants";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import type { IExpr, ValidScalarTypes } from "../types";
+import { evaluateArgsMatrix } from "../columnExpressions/utils";
+import { COALESCE_MARKER } from "../columnExpressions/constants";
 
 /**
  * Returns the first non-null value among the specified expressions.

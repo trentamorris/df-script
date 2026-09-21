@@ -1,8 +1,8 @@
-import { ColumnExpr } from "../ColumnExpr";
-import { isColExpr } from "../ExprBase";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { isColExpr } from "../columnExpressions/ExprBase";
 import { lit } from "./lit";
-import type { IntoExpr } from "../../types";
-import { STRUCT_MARKER } from "../constants";
+import type { IntoExpr } from "../types";
+import { STRUCT_MARKER } from "../columnExpressions/constants";
 
 /**
  * Packages multiple expressions into a structured object column.

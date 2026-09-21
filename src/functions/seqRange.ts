@@ -1,8 +1,8 @@
-import { ColumnExpr } from "../ColumnExpr";
-import { LITERAL_MARKER } from "../constants";
-import { ShapeError } from "../../exceptions";
-import type { RegisteredDataType, FlattenUnion } from "../../types";
-import { clamp, fillSequence, CumulativeStepContext, IndependentStepContext } from "../../utils";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { LITERAL_MARKER } from "../columnExpressions/constants";
+import { ShapeError } from "../exceptions";
+import type { RegisteredDataType, FlattenUnion } from "../types";
+import { clamp, fillSequence, CumulativeStepContext, IndependentStepContext } from "../utils";
 
 export type SeqRangeOptions = {
     n?: number;

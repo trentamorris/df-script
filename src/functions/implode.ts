@@ -1,6 +1,6 @@
-import { ColumnExpr } from "../ColumnExpr";
-import { toColExpr } from "../ExprBase";
-import type { IntoExpr } from "../../types";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { toColExpr } from "../columnExpressions/ExprBase";
+import type { IntoExpr } from "../types";
 
 /**
  * Aggregates values of a column into a list within each group.

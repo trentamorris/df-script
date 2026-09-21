@@ -1,5 +1,5 @@
-import { ColumnExpr } from "../ColumnExpr";
-import { ALL_COLUMNS_MARKER } from "../constants";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
 
 /**
  * Creates an expression targeting all columns except the specified ones.

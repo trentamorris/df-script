@@ -1,4 +1,4 @@
-import { $df, ShapeError } from "../../../src/index";
+import { $df, ShapeError } from "../../src/index";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION SEQ_RANGE TESTS...");

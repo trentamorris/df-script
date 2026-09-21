@@ -1,8 +1,23 @@
 import { DataFrame } from "./dataframe"
-import { ColumnExpr, lit, all, exclude, coalesce, when, implode, seqRange, element, struct, duration, horizontal } from "./columnExpressions"
+import { ColumnExpr } from "./columnExpressions"
 
 import { DataTypeRegistry, DataType } from "./datatypes"
-import { concat, readJson, readCsv } from "./functions"
+import {
+    all,
+    coalesce,
+    concat,
+    duration,
+    element,
+    exclude,
+    horizontal,
+    implode,
+    lit,
+    readCsv,
+    readJson,
+    seqRange,
+    struct,
+    when
+} from "./functions"
 import type { RowRecord, DataFrameSchema, ColumnDict, InferSchema } from "./types"
 
 function data<S extends DataFrameSchema>(data: any[] | ColumnDict, schema: S): DataFrame<InferSchema<S>>;

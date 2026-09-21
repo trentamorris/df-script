@@ -31,17 +31,6 @@ _runSuite("StandardExpr", () => { require("./columnExpressions/mixins/StandardEx
 _runSuite("StringExpr", () => { require("./columnExpressions/mixins/StringExpr/run_all"); });
 _runSuite("StructExpr", () => { require("./columnExpressions/mixins/StructExpr/run_all"); });
 _runSuite("TemporalExpr", () => { require("./columnExpressions/mixins/TemporalExpr/run_all"); });
-_runSuite("all.test", () => { require("./columnExpressions/functions/all.test"); });
-_runSuite("coalesce.test", () => { require("./columnExpressions/functions/coalesce.test"); });
-_runSuite("duration.test", () => { require("./columnExpressions/functions/duration.test"); });
-_runSuite("element.test", () => { require("./columnExpressions/functions/element.test"); });
-_runSuite("exclude.test", () => { require("./columnExpressions/functions/exclude.test"); });
-_runSuite("horizontal.test", () => { require("./columnExpressions/functions/horizontal.test"); });
-_runSuite("implode.test", () => { require("./columnExpressions/functions/implode.test"); });
-_runSuite("lit.test", () => { require("./columnExpressions/functions/lit.test"); });
-_runSuite("seqRange.test", () => { require("./columnExpressions/functions/seqRange.test"); });
-_runSuite("struct.test", () => { require("./columnExpressions/functions/struct.test"); });
-_runSuite("when.test", () => { require("./columnExpressions/functions/when.test"); });
 _runSuite("typeSelector.test", () => { require("./columnExpressions/typeSelector.test"); });
 _runSuite("typeInference.test", () => { require("./columnExpressions/typeInference.test"); });
 
@@ -49,9 +38,20 @@ _runSuite("typeInference.test", () => { require("./columnExpressions/typeInferen
 _runSuite("dataframe", () => { require("./dataframe/run_all"); });
 
 // 3. Functions
+_runSuite("all.test", () => { require("./functions/all.test"); });
+_runSuite("coalesce.test", () => { require("./functions/coalesce.test"); });
 _runSuite("concat.test", () => { require("./functions/concat.test"); });
+_runSuite("duration.test", () => { require("./functions/duration.test"); });
+_runSuite("element.test", () => { require("./functions/element.test"); });
+_runSuite("exclude.test", () => { require("./functions/exclude.test"); });
+_runSuite("horizontal.test", () => { require("./functions/horizontal.test"); });
+_runSuite("implode.test", () => { require("./functions/implode.test"); });
+_runSuite("lit.test", () => { require("./functions/lit.test"); });
 _runSuite("readCsv.test", () => { require("./functions/readCsv.test"); });
 _runSuite("readJson.test", () => { require("./functions/readJson.test"); });
+_runSuite("seqRange.test", () => { require("./functions/seqRange.test"); });
+_runSuite("struct.test", () => { require("./functions/struct.test"); });
+_runSuite("when.test", () => { require("./functions/when.test"); });
 
 // 4. DataTypes
 _runSuite("dataTypes.test", () => { require("./datatypes/dataTypes.test"); });

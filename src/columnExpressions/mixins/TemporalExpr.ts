@@ -12,6 +12,7 @@ import {
     replaceDateComponents
 } from "../../utils";
 import {
+    MS_PER_DAY,
     MS_PER_SECOND,
     US_PER_MS,
     NS_PER_MS
@@ -428,15 +429,12 @@ export class DateTimeExprNamespace {
      * └────────────┴──────────────────────────┘
      */
     offsetDay(n: number | any, options: DayOffsetOptions = {}) {
-        const hasExclusionOptions = options?.excludeWeekdays?.length || options?.holidays || options?.roll;
-        const normalizedDays = hasExclusionOptions
-            ? this._expr._deriveBinary(n, (v: any, nVal: any) => {
-                const d = toValidDate(v);
-                return d ? offsetDay(d, nVal, options) : null;
-            })
-            : n;
-        const { duration: createDuration } = require("../functions/duration");
-        return this._expr.add(createDuration({ days: normalizedDays }));
+        return this._expr._deriveBinary(n, (v: any, nVal: any) => {
+            const d = toValidDate(v);
+            if (!d || nVal == null) return null;
+            const daysToAdd = offsetDay(d, nVal, options);
+            return new Date(d.getTime() + daysToAdd * MS_PER_DAY);
+        });
     }
 
     /**

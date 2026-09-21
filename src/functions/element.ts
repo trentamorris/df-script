@@ -1,5 +1,5 @@
-import { ColumnExpr } from "../ColumnExpr";
-import { ELEMENT_MARKER } from "../constants";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { ELEMENT_MARKER } from "../columnExpressions/constants";
 
 /**
  * Creates an expression referencing the current element(s) of an array during evaluation.

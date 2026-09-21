@@ -1,4 +1,4 @@
-import { ColumnExpr } from "../ColumnExpr";
+import { ColumnExpr } from "../columnExpressions/ColumnExpr";
 import { seqRange } from "./seqRange";
 import type { SeqRangeOptions } from "./seqRange";
 
