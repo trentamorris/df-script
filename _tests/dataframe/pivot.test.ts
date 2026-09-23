@@ -116,4 +116,49 @@ const bRow = sparseRows.find(r => r.grp === "B");
 if (!aRow || aRow.X !== 1 || aRow.Y !== null) throw new Error("Sparse pivot row A wrong");
 if (!bRow || bRow.Y !== 2 || bRow.X !== null) throw new Error("Sparse pivot row B wrong");
 
+// ─── 7. Empty DataFrame pivot ────────────────────────────────────────────────
+const dfEmpty = new DataFrame([]);
+const dfEmptyPivot = dfEmpty.pivot({ index: "a", columns: "b", values: "c" });
+if (dfEmptyPivot.height !== 0 || dfEmptyPivot.width !== 0) {
+    throw new Error("7. Empty DataFrame pivot failed");
+}
+
+// ─── 8. Numeric and Date pivot column keys ────────────────────────────────────
+const dfNumCols = new DataFrame([
+    { grp: "item1", quarter: 1, amount: 100 },
+    { grp: "item1", quarter: 2, amount: 200 },
+    { grp: "item2", quarter: 1, amount: 300 },
+]);
+const dfNumPivot = dfNumCols.pivot({ index: "grp", columns: "quarter", values: "amount" });
+if (dfNumPivot.height !== 2 || !dfNumPivot.columns.includes("1") || !dfNumPivot.columns.includes("2")) {
+    throw new Error("8. Numeric column key pivot failed");
+}
+const numPivDicts = dfNumPivot.toDicts() as any[];
+const item2 = numPivDicts.find(r => r.grp === "item2");
+if (!item2 || item2["1"] !== 300 || item2["2"] !== null) {
+    throw new Error("8. Numeric pivot values mismatch");
+}
+
+// ─── 9. Multi-index with 3 columns and Date values ───────────────────────────
+const d1 = new Date("2023-01-01");
+const d2 = new Date("2023-06-01");
+const dfMultiDate = new DataFrame([
+    { org: "Acme", region: "US", dept: "HR", eventDate: d1 },
+    { org: "Acme", region: "US", dept: "IT", eventDate: d2 },
+    { org: "Acme", region: "EU", dept: "HR", eventDate: d2 },
+]);
+const dfDatePivot = dfMultiDate.pivot({
+    index: ["org", "region"],
+    columns: "dept",
+    values: "eventDate"
+});
+if (dfDatePivot.height !== 2 || dfDatePivot.width !== 4) {
+    throw new Error(`9. Multi-index Date pivot shape mismatch: expected (2, 4), got ${dfDatePivot.shape}`);
+}
+const dateDicts = dfDatePivot.toDicts() as any[];
+const euRow = dateDicts.find(r => r.org === "Acme" && r.region === "EU");
+if (!euRow || euRow.HR !== d2 || euRow.IT !== null) {
+    throw new Error("9. Date pivot cell values mismatch");
+}
+
 console.log("✓ pivot tests passed!");

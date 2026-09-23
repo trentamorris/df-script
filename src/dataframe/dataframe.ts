@@ -1,4 +1,4 @@
-import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER, seqRange, all, exclude, evaluateExpression, resolveExprOutputType, isColExpr, toColExpr } from "../columnExpressions"
+import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER, seqRange, all, exclude, evaluateExpression, resolveExprOutputType, isColExpr, toColExpr, lit } from "../columnExpressions"
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
@@ -6,7 +6,7 @@ import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, Co
 import type { EqualsOptions, LimitOptions, SortOptions, PivotOptions, PartitionByOptions, JoinOptions, JoinMaintainOrder, JoinAsofOptions, JoinWhereOptions, GroupByDynamicOptions, UnpivotOptions, TransposeOptions, UnstackOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
 import { DataTypeRegistry, DataType } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate } from "../utils"
-import { assertColumnExists, assertHeight, DataFrameError, ShapeError, ColumnNotFoundError, InvalidArgumentError, IOStreamError } from "../exceptions"
+import { assertColumnExists, assertHeight, DataFrameError, ShapeError, InvalidArgumentError, IOStreamError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
     rowsToColumns,
@@ -108,7 +108,7 @@ export class DataFrame<T extends RowRecord = any> {
         this._applySchema(schema);
     }
 
-    private _normalizeArgs(args: any[]): IExpr[] {
+    static _normalizeArgs(args: any[]): IExpr[] {
         const flatArgs = args.flat(Infinity);
         const exprs: IExpr[] = [];
         const len = flatArgs.length;
@@ -126,13 +126,7 @@ export class DataFrame<T extends RowRecord = any> {
                 for (let j = 0; j < numKeys; j++) {
                     const key = keys[j];
                     const val = (arg as Record<string, any>)[key];
-                    if (isColExpr(val)) {
-                        exprs.push(val.alias(key));
-                    } else {
-                        const staticExpr = new ColumnExpr(key);
-                        staticExpr.evaluate = (_cols: ColumnDict, h: number) => new Array(h).fill(val) as any;
-                        exprs.push(staticExpr);
-                    }
+                    exprs.push(isColExpr(val) ? val.alias(key) : lit(val).alias(key));
                 }
             }
         }
@@ -143,8 +137,8 @@ export class DataFrame<T extends RowRecord = any> {
         columns: IntoExpr | IntoExpr[],
         contextName: string = "Target column"
     ): string[] {
-        const rawArgs = Array.isArray(columns) ? columns : [columns];
-        const exprArgs = this._normalizeArgs(rawArgs);
+        const rawArgs = toValidArray(columns, { clone: false });
+        const exprArgs = DataFrame._normalizeArgs(rawArgs);
         const expandedExprs = resolveColumnSelectors(
             exprArgs,
             Object.keys(this._columns),
@@ -535,21 +529,23 @@ export class DataFrame<T extends RowRecord = any> {
      * │ 3 │
      * └───┘
      */
-    filter(...exprs: (IExpr | ((row: T) => any))[]): DataFrame<T> {
+    filter(...exprs: (IExpr | ((row: T) => any) | (IExpr | ((row: T) => any))[])[]): DataFrame<T> {
         const height = this._height;
         if (height === 0) return this;
 
+        const flatExprs = exprs.flat(Infinity);
         const keys = Object.keys(this._columns);
         const exprSelectors: IExpr[] = [];
         const funcPredicates: ((row: T) => any)[] = [];
 
-        for (let i = 0; i < exprs.length; i++) {
-            const expr = exprs[i];
-            if (typeof expr === "function") funcPredicates.push(expr);
-            else exprSelectors.push(expr);
+        for (let i = 0; i < flatExprs.length; i++) {
+            const expr = flatExprs[i];
+            if (typeof expr === "function") funcPredicates.push(expr as (row: T) => any);
+            else exprSelectors.push(expr as IExpr);
         }
 
-        const expandedExprs = resolveColumnSelectors(exprSelectors, keys, undefined, this._schema, this._columns);
+        const normalizedSelectors = DataFrame._normalizeArgs(exprSelectors);
+        const expandedExprs = resolveColumnSelectors(normalizedSelectors, keys, undefined, this._schema, this._columns);
         const numExprs = expandedExprs.length;
         const numFuncs = funcPredicates.length;
 
@@ -623,7 +619,6 @@ export class DataFrame<T extends RowRecord = any> {
      * └─────┴─────┘
      */
     groupBy<K extends keyof T>(keys: K | K[]): GroupedData<T, K> {
-        const keysArr = toValidArray(keys);
         const keysStr = toArrayOfType<string>(keys, "string");
 
         for (let j = 0; j < keysStr.length; j++) {
@@ -632,7 +627,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const groups = buildGroupMap(this._columns, keysStr, this._height);
         const allKeys = Object.keys(this._columns) as (keyof T)[];
-        return new GroupedData(groups, keysArr, allKeys, this._columns, this._height, this._schema) as any;
+        return new GroupedData(groups, keysStr as any, allKeys, this._columns, this._height, this._schema) as any;
     }
 
     /**
@@ -707,7 +702,7 @@ export class DataFrame<T extends RowRecord = any> {
         const periodInterval = typeof rawPeriod === "string" ? parseDurationInterval(rawPeriod) : null;
 
         const secondaryBy = groupBy ?? by;
-        const rawByKeys = secondaryBy ? toArrayOfType<string>(toValidArray(secondaryBy), "string") : [];
+        const rawByKeys = secondaryBy ? toArrayOfType<string>(secondaryBy, "string") : [];
         const byKeys = Array.from(new Set(rawByKeys));
         for (let j = 0; j < byKeys.length; j++) {
             if (byKeys[j] === indexColName) throw new InvalidArgumentError(`Cannot group by index column "${indexColName}" in secondary grouping keys`);
@@ -955,15 +950,15 @@ export class DataFrame<T extends RowRecord = any> {
             throw new ShapeError(`Row index ${row} is out of bounds for DataFrame height ${height}.`);
         }
 
-        const colKey = typeof column === "number" ? keys[column] : column;
-        if (colKey === undefined || this._columns[colKey] === undefined) {
-            if (typeof column === "number") {
+        if (typeof column === "number") {
+            if (column < 0 || column >= width) {
                 throw new ShapeError(`Column index ${column} is out of bounds for DataFrame width ${width}.`);
             }
-            throw new ColumnNotFoundError(column);
+            return this._columns[keys[column]][row];
         }
 
-        return this._columns[colKey][row];
+        assertColumnExists(column, this._columns, "Column");
+        return this._columns[column][row];
     }
 
     /**
@@ -975,10 +970,8 @@ export class DataFrame<T extends RowRecord = any> {
      * [ Float64Array([1, 2]), ["x", "y"] ]
      */
     *iterColumns(): Generator<ColumnData> {
-        const cols = Object.values(this._columns);
-        const colsLen = cols.length;
-        for (let j = 0; j < colsLen; j++) {
-            yield cols[j];
+        for (const key in this._columns) {
+            yield this._columns[key];
         }
     }
 
@@ -1412,7 +1405,7 @@ export class DataFrame<T extends RowRecord = any> {
         by: K | K[],
         options: PartitionByOptions = {}
     ): DataFrame<T>[] | Record<string, DataFrame<T>> {
-        const partitionKeys = Array.isArray(by) ? (by as (string | IExpr)[]) : [by as string | IExpr];
+        const partitionKeys = toValidArray(by, { clone: false }) as (string | IExpr)[];
         const groups = partitionByColumns(this._columns, this._height, partitionKeys);
 
         const dict: Record<string, DataFrame<T>> = {};
@@ -1463,47 +1456,40 @@ export class DataFrame<T extends RowRecord = any> {
         const groups = new Map<string, number>();
         const firstRowIdxs: number[] = [];
         const colNames = new Set<string>();
-
         const height = this._height;
+        const rowGroupIdxs = new Int32Array(height);
         const pivotCol = this._columns[colKey];
         const valCol = this._columns[valKey];
 
         for (let i = 0; i < height; i++) {
             const rowKey = computeRowHash(this._columns, indexStr, i);
-            colNames.add(String(pivotCol[i]));
-
-            if (groups.get(rowKey) === undefined) {
-                groups.set(rowKey, groups.size);
+            let gIdx = groups.get(rowKey);
+            if (gIdx === undefined) {
+                groups.set(rowKey, gIdx = groups.size);
                 firstRowIdxs.push(i);
             }
+            rowGroupIdxs[i] = gIdx;
+            colNames.add(String(pivotCol[i]));
         }
 
         const outHeight = groups.size;
-
-        const indexColsDict: ColumnDict = {};
+        const newColumns: Record<string, any[]> = {};
         const outSchema: DataFrameSchema = {};
+
         for (let j = 0; j < indexLen; j++) {
             const idxKey = indexStr[j];
-            indexColsDict[idxKey] = this._columns[idxKey];
-            if (this._schema[idxKey]) {
-                outSchema[idxKey] = this._schema[idxKey];
-            }
+            newColumns[idxKey] = gatherColumnByIndices(this._columns[idxKey], firstRowIdxs) as any[];
+            if (this._schema[idxKey]) outSchema[idxKey] = this._schema[idxKey];
         }
-        const newColumns = gatherColumnsByIndices(indexColsDict, firstRowIdxs) as Record<string, any[]>;
 
-        const allCols = Array.from(colNames);
         const valType = this._schema[valKey] || DataTypeRegistry.Utf8;
-        for (let j = 0; j < allCols.length; j++) {
-            const colName = allCols[j];
+        for (const colName of colNames) {
             newColumns[colName] = new Array(outHeight).fill(null);
             outSchema[colName] = valType;
         }
 
         for (let i = 0; i < height; i++) {
-            const rowKey = computeRowHash(this._columns, indexStr, i);
-            const groupIdx = groups.get(rowKey)!;
-            const pivotColName = String(pivotCol[i]);
-            newColumns[pivotColName][groupIdx] = valCol[i];
+            newColumns[String(pivotCol[i])][rowGroupIdxs[i]] = valCol[i];
         }
 
         return DataFrame._createDirect<U>(newColumns, outSchema, outHeight);
@@ -1586,7 +1572,7 @@ export class DataFrame<T extends RowRecord = any> {
     select<U extends RowRecord = any>(
         ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
     ): DataFrame<U> {
-        const exprs = this._normalizeArgs(args);
+        const exprs = DataFrame._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns);
 
@@ -1655,7 +1641,7 @@ export class DataFrame<T extends RowRecord = any> {
             const len = isArrayOrTypedArray(col) ? col.length : 0;
             const expectedLen = (activeRowMap && !hasRowMap) ? this._height : targetHeight;
             if (len !== expectedLen) {
-                throw new ShapeError(`Column height mismatch for "${targetKey}": got ${len}, expected ${expectedLen}`);
+                throw new ShapeError(`Column height mismatch: Column "${targetKey}" has length ${len}, expected ${expectedLen}`);
             }
 
             if (activeRowMap && !hasRowMap) {
@@ -1856,14 +1842,15 @@ export class DataFrame<T extends RowRecord = any> {
         headerName = "column",
         columnNames: colNamesOpt
     }: TransposeOptions = {}): DataFrame<any> {
-        if (this._height === 0) {
-            const cols: ColumnDict = includeHeader ? { [headerName]: coerceColumn([], DataTypeRegistry.Utf8, 0) } : {};
+        const height = this._height;
+        if (height === 0) {
+            const cols: ColumnDict = includeHeader ? { [headerName]: [] } : {};
             const schema: DataFrameSchema = includeHeader ? { [headerName]: DataTypeRegistry.Utf8 } : {};
             return DataFrame._createDirect(cols, schema, 0);
         }
 
         let dataCols = this.columns;
-        let newColNames: (string | number)[];
+        let newColNames: string[] | null = null;
 
         if (typeof colNamesOpt === "string") {
             assertColumnExists(colNamesOpt, this._columns, "columnNames");
@@ -1874,19 +1861,17 @@ export class DataFrame<T extends RowRecord = any> {
                 if (c !== colNamesOpt) dataCols.push(c);
             }
             const keyCol = this._columns[colNamesOpt];
-            newColNames = new Array(this._height);
-            for (let i = 0; i < this._height; i++) {
+            newColNames = new Array(height);
+            for (let i = 0; i < height; i++) {
                 const val = keyCol[i];
                 if (val == null) throw new DataFrameError(`Transpose column "${colNamesOpt}" contains null/undefined at index ${i}`);
                 newColNames[i] = String(val);
             }
         } else if (colNamesOpt != null) {
             newColNames = Array.from(colNamesOpt as Iterable<any>, String);
-            if (newColNames.length !== this._height) {
-                throw new DataFrameError(`columnNames length (${newColNames.length}) must match the height of the DataFrame (${this._height})`);
+            if (newColNames.length !== height) {
+                throw new DataFrameError(`columnNames length (${newColNames.length}) must match the height of the DataFrame (${height})`);
             }
-        } else {
-            newColNames = Array.from({ length: this._height }, (_, i) => `column_${i}`);
         }
 
         const numDataCols = dataCols.length;
@@ -1898,8 +1883,8 @@ export class DataFrame<T extends RowRecord = any> {
             newCols[headerName] = coerceColumn(dataCols, newSchema[headerName] = DataTypeRegistry.Utf8, numDataCols);
         }
 
-        for (let i = 0; i < this._height; i++) {
-            const name = String(newColNames[i]);
+        for (let i = 0; i < height; i++) {
+            const name = newColNames ? newColNames[i] : `column_${i}`;
             if (newCols[name] !== undefined) throw new DataFrameError(`Duplicate column name in transposed DataFrame: "${name}"`);
             const rawVals = new Array(numDataCols);
             for (let j = 0; j < numDataCols; j++) rawVals[j] = cols[dataCols[j]][i];
@@ -2108,7 +2093,7 @@ export class DataFrame<T extends RowRecord = any> {
     ): DataFrame<any> {
         if (args.length === 0) return this;
 
-        const exprs = this._normalizeArgs(args);
+        const exprs = DataFrame._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns);
         const numEntries = expandedExprs.length;

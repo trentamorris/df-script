@@ -6,8 +6,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).alias(...)",
       "signature": "$df.col(<column_name>).alias(\n  name: string\n): this",
-      "lineStart": 124,
-      "lineEnd": 128
+      "lineStart": 121,
+      "lineEnd": 125
     },
     "cast": {
       "desc": "Coerces the column data type to another type.",
@@ -15,8 +15,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cast(...)",
       "signature": "$df.col(<column_name>).cast(\n  dataType: RegisteredDataType,\n  options: CastOptions = {}\n): this",
-      "lineStart": 133,
-      "lineEnd": 140
+      "lineStart": 130,
+      "lineEnd": 137
     },
     "debug": {
       "desc": "Prints the current evaluation intermediate array to console for debugging.",
@@ -24,8 +24,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).debug(...)",
       "signature": "$df.col(<column_name>).debug(\n  label?: string\n): this",
-      "lineStart": 145,
-      "lineEnd": 150
+      "lineStart": 142,
+      "lineEnd": 147
     }
   },
   "columnExpressions/mixins/ArrayExpr.ts": {
@@ -672,8 +672,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).abs(...)",
       "signature": "$df.col(<column_name>).abs()",
-      "lineStart": 190,
-      "lineEnd": 192
+      "lineStart": 191,
+      "lineEnd": 193
     },
     "add": {
       "desc": "Adds a scalar value or another column expression.",
@@ -691,8 +691,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).add(...)",
       "signature": "$df.col(<column_name>).add(\n  val: NumericArg\n)",
-      "lineStart": 210,
-      "lineEnd": 212
+      "lineStart": 211,
+      "lineEnd": 213
     },
     "all": {
       "desc": "Aggregation: Returns true if all values in the group are truthy.",
@@ -704,8 +704,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).all(...)",
       "signature": "$df.col(<column_name>).all()",
-      "lineStart": 227,
-      "lineEnd": 229
+      "lineStart": 228,
+      "lineEnd": 230
     },
     "allNull": {
       "desc": "Aggregation: Checks if all values in the group are null.",
@@ -717,8 +717,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).allNull(...)",
       "signature": "$df.col(<column_name>).allNull()",
-      "lineStart": 244,
-      "lineEnd": 246
+      "lineStart": 245,
+      "lineEnd": 247
     },
     "and": {
       "desc": "Logical AND check supporting Kleene logic.",
@@ -736,8 +736,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).and(...)",
       "signature": "$df.col(<column_name>).and(\n  other: any\n)",
-      "lineStart": 265,
-      "lineEnd": 280
+      "lineStart": 266,
+      "lineEnd": 281
     },
     "any": {
       "desc": "Aggregation: Checks if any value in the group is truthy.",
@@ -749,8 +749,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).any(...)",
       "signature": "$df.col(<column_name>).any()",
-      "lineStart": 295,
-      "lineEnd": 297
+      "lineStart": 296,
+      "lineEnd": 298
     },
     "anyNull": {
       "desc": "Aggregation: Checks if any value in the group is null.",
@@ -762,8 +762,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).anyNull(...)",
       "signature": "$df.col(<column_name>).anyNull()",
-      "lineStart": 312,
-      "lineEnd": 314
+      "lineStart": 313,
+      "lineEnd": 315
     },
     "arccos": {
       "desc": "Computes the mathematical arccosine (inverse cosine) of the column values.",
@@ -775,8 +775,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arccos(...)",
       "signature": "$df.col(<column_name>).arccos()",
-      "lineStart": 331,
-      "lineEnd": 333
+      "lineStart": 332,
+      "lineEnd": 334
     },
     "arccosh": {
       "desc": "Computes the hyperbolic arccosine of the column values.",
@@ -788,8 +788,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arccosh(...)",
       "signature": "$df.col(<column_name>).arccosh()",
-      "lineStart": 350,
-      "lineEnd": 352
+      "lineStart": 351,
+      "lineEnd": 353
     },
     "arcsin": {
       "desc": "Computes the arcsine of the column values.",
@@ -801,8 +801,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arcsin(...)",
       "signature": "$df.col(<column_name>).arcsin()",
-      "lineStart": 369,
-      "lineEnd": 371
+      "lineStart": 370,
+      "lineEnd": 372
     },
     "arcsinh": {
       "desc": "Computes the hyperbolic arcsine of the column values.",
@@ -814,8 +814,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arcsinh(...)",
       "signature": "$df.col(<column_name>).arcsinh()",
-      "lineStart": 388,
-      "lineEnd": 390
+      "lineStart": 389,
+      "lineEnd": 391
     },
     "arctan": {
       "desc": "Computes the arctangent of the column values.",
@@ -827,8 +827,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arctan(...)",
       "signature": "$df.col(<column_name>).arctan()",
-      "lineStart": 407,
-      "lineEnd": 409
+      "lineStart": 408,
+      "lineEnd": 410
     },
     "arctan2": {
       "desc": "Computes the quadrant-aware arctangent of two values.",
@@ -846,8 +846,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arctan2(...)",
       "signature": "$df.col(<column_name>).arctan2(\n  val: NumericArg\n)",
-      "lineStart": 427,
-      "lineEnd": 429
+      "lineStart": 428,
+      "lineEnd": 430
     },
     "arctanh": {
       "desc": "Computes the hyperbolic arctangent of the column values.",
@@ -859,8 +859,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arctanh(...)",
       "signature": "$df.col(<column_name>).arctanh()",
-      "lineStart": 446,
-      "lineEnd": 448
+      "lineStart": 447,
+      "lineEnd": 449
     },
     "argMax": {
       "desc": "Aggregation: Finds the index of the maximum value in the group.",
@@ -872,8 +872,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).argMax(...)",
       "signature": "$df.col(<column_name>).argMax()",
-      "lineStart": 463,
-      "lineEnd": 465
+      "lineStart": 464,
+      "lineEnd": 466
     },
     "argMin": {
       "desc": "Aggregation: Finds the index of the minimum value in the group.",
@@ -885,8 +885,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).argMin(...)",
       "signature": "$df.col(<column_name>).argMin()",
-      "lineStart": 480,
-      "lineEnd": 482
+      "lineStart": 481,
+      "lineEnd": 483
     },
     "avg": {
       "desc": "Aggregation: Computes the arithmetic mean of the group.",
@@ -898,8 +898,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).avg(...)",
       "signature": "$df.col(<column_name>).avg()",
-      "lineStart": 498,
-      "lineEnd": 500
+      "lineStart": 499,
+      "lineEnd": 501
     },
     "between": {
       "desc": "Checks if values fall inside lower and upper boundaries (inclusive).",
@@ -925,8 +925,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).between(...)",
       "signature": "$df.col(<column_name>).between(\n  lower: any,\n  upper: any,\n  closed: \"both\" | \"left\" | \"right\" | \"none\" = \"both\"\n)",
-      "lineStart": 520,
-      "lineEnd": 525
+      "lineStart": 521,
+      "lineEnd": 526
     },
     "bitwiseAnd": {
       "desc": "Aggregation: Computes bitwise AND across all elements in the group.",
@@ -938,8 +938,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).bitwiseAnd(...)",
       "signature": "$df.col(<column_name>).bitwiseAnd()",
-      "lineStart": 540,
-      "lineEnd": 542
+      "lineStart": 541,
+      "lineEnd": 543
     },
     "bitwiseOr": {
       "desc": "Aggregation: Computes bitwise OR across all elements in the group.",
@@ -951,8 +951,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).bitwiseOr(...)",
       "signature": "$df.col(<column_name>).bitwiseOr()",
-      "lineStart": 557,
-      "lineEnd": 559
+      "lineStart": 558,
+      "lineEnd": 560
     },
     "bitwiseXor": {
       "desc": "Aggregation: Computes bitwise XOR across all elements in the group.",
@@ -964,8 +964,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).bitwiseXor(...)",
       "signature": "$df.col(<column_name>).bitwiseXor()",
-      "lineStart": 574,
-      "lineEnd": 576
+      "lineStart": 575,
+      "lineEnd": 577
     },
     "cbrt": {
       "desc": "Computes the cube root of the column values.",
@@ -977,8 +977,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cbrt(...)",
       "signature": "$df.col(<column_name>).cbrt()",
-      "lineStart": 593,
-      "lineEnd": 595
+      "lineStart": 594,
+      "lineEnd": 596
     },
     "ceil": {
       "desc": "Rounds column values up to the nearest integer.",
@@ -990,8 +990,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ceil(...)",
       "signature": "$df.col(<column_name>).ceil()",
-      "lineStart": 612,
-      "lineEnd": 614
+      "lineStart": 613,
+      "lineEnd": 615
     },
     "clip": {
       "desc": "Clamps column values between lower and upper numeric thresholds.",
@@ -1013,8 +1013,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).clip(...)",
       "signature": "$df.col(<column_name>).clip(\n  lower: number | null = null,\n  upper: number | null = null\n)",
-      "lineStart": 633,
-      "lineEnd": 635
+      "lineStart": 634,
+      "lineEnd": 636
     },
     "copysign": {
       "desc": "Returns absolute value of expr with the sign of other.",
@@ -1032,8 +1032,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).copysign(...)",
       "signature": "$df.col(<column_name>).copysign(\n  val: NumericArg\n)",
-      "lineStart": 653,
-      "lineEnd": 655
+      "lineStart": 654,
+      "lineEnd": 656
     },
     "corr": {
       "desc": "Aggregation: Computes the Pearson correlation coefficient between two columns.",
@@ -1051,8 +1051,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).corr(...)",
       "signature": "$df.col(<column_name>).corr(\n  other: any\n)",
-      "lineStart": 671,
-      "lineEnd": 673
+      "lineStart": 672,
+      "lineEnd": 674
     },
     "cos": {
       "desc": "Computes the cosine of the column values.",
@@ -1064,8 +1064,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cos(...)",
       "signature": "$df.col(<column_name>).cos()",
-      "lineStart": 690,
-      "lineEnd": 692
+      "lineStart": 691,
+      "lineEnd": 693
     },
     "cosh": {
       "desc": "Computes the hyperbolic cosine of the column values.",
@@ -1077,8 +1077,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cosh(...)",
       "signature": "$df.col(<column_name>).cosh()",
-      "lineStart": 709,
-      "lineEnd": 711
+      "lineStart": 710,
+      "lineEnd": 712
     },
     "cot": {
       "desc": "Computes the cotangent of the column values.",
@@ -1090,8 +1090,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cot(...)",
       "signature": "$df.col(<column_name>).cot()",
-      "lineStart": 728,
-      "lineEnd": 735
+      "lineStart": 729,
+      "lineEnd": 736
     },
     "count": {
       "desc": "Aggregation: Returns the count of records inside the group.",
@@ -1109,8 +1109,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).count(...)",
       "signature": "$df.col(<column_name>).count(\n  options: { includeNulls?: boolean } = {}\n)",
-      "lineStart": 752,
-      "lineEnd": 755
+      "lineStart": 753,
+      "lineEnd": 756
     },
     "cov": {
       "desc": "Aggregation: Computes the covariance between two columns.",
@@ -1128,8 +1128,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cov(...)",
       "signature": "$df.col(<column_name>).cov(\n  other: any\n)",
-      "lineStart": 771,
-      "lineEnd": 773
+      "lineStart": 772,
+      "lineEnd": 774
     },
     "cumCount": {
       "desc": "Window: Computes cumulative count.",
@@ -1147,8 +1147,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cumCount(...)",
       "signature": "$df.col(<column_name>).cumCount(\n  reverse: boolean = false\n)",
-      "lineStart": 791,
-      "lineEnd": 793
+      "lineStart": 792,
+      "lineEnd": 794
     },
     "cumMax": {
       "desc": "Window: Computes cumulative maximum value.",
@@ -1166,8 +1166,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cumMax(...)",
       "signature": "$df.col(<column_name>).cumMax(\n  reverse: boolean = false\n)",
-      "lineStart": 811,
-      "lineEnd": 813
+      "lineStart": 812,
+      "lineEnd": 814
     },
     "cumMin": {
       "desc": "Window: Computes cumulative minimum value.",
@@ -1185,8 +1185,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cumMin(...)",
       "signature": "$df.col(<column_name>).cumMin(\n  reverse: boolean = false\n)",
-      "lineStart": 831,
-      "lineEnd": 833
+      "lineStart": 832,
+      "lineEnd": 834
     },
     "cumProd": {
       "desc": "Window: Computes cumulative product of values.",
@@ -1204,8 +1204,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cumProd(...)",
       "signature": "$df.col(<column_name>).cumProd(\n  reverse: boolean = false\n)",
-      "lineStart": 852,
-      "lineEnd": 854
+      "lineStart": 853,
+      "lineEnd": 855
     },
     "cumSum": {
       "desc": "Window: Computes cumulative sum of values.",
@@ -1223,8 +1223,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cumSum(...)",
       "signature": "$df.col(<column_name>).cumSum(\n  reverse: boolean = false\n)",
-      "lineStart": 872,
-      "lineEnd": 874
+      "lineStart": 873,
+      "lineEnd": 875
     },
     "degrees": {
       "desc": "Converts angles from radians to degrees.",
@@ -1236,8 +1236,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).degrees(...)",
       "signature": "$df.col(<column_name>).degrees()",
-      "lineStart": 891,
-      "lineEnd": 893
+      "lineStart": 892,
+      "lineEnd": 894
     },
     "denseRank": {
       "desc": "Window: Computes dense rank (ranks without gaps) within group partition.",
@@ -1249,8 +1249,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).denseRank(...)",
       "signature": "$df.col(<column_name>).denseRank()",
-      "lineStart": 909,
-      "lineEnd": 911
+      "lineStart": 910,
+      "lineEnd": 912
     },
     "div": {
       "desc": "Divides column values by a scalar or another column expression.",
@@ -1268,8 +1268,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).div(...)",
       "signature": "$df.col(<column_name>).div(\n  val: NumericArg\n)",
-      "lineStart": 929,
-      "lineEnd": 931
+      "lineStart": 930,
+      "lineEnd": 932
     },
     "dot": {
       "desc": "Aggregation: Computes the dot product with another column.",
@@ -1287,8 +1287,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dot(...)",
       "signature": "$df.col(<column_name>).dot(\n  other: any\n)",
-      "lineStart": 947,
-      "lineEnd": 949
+      "lineStart": 948,
+      "lineEnd": 950
     },
     "entropy": {
       "desc": "Aggregation: Computes the Shannon entropy of a column or group.",
@@ -1306,8 +1306,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).entropy(...)",
       "signature": "$df.col(<column_name>).entropy(\n  options: EntropyOptions = { base: Math.E, normalize: true }\n)",
-      "lineStart": 965,
-      "lineEnd": 967
+      "lineStart": 966,
+      "lineEnd": 968
     },
     "eq": {
       "desc": "Boolean comparison: Returns true if column values match the specified value exactly.",
@@ -1325,8 +1325,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).eq(...)",
       "signature": "$df.col(<column_name>).eq(\n  val: any\n)",
-      "lineStart": 985,
-      "lineEnd": 987
+      "lineStart": 986,
+      "lineEnd": 988
     },
     "eqMissing": {
       "desc": "Equivalence check that treats null values as equal to each other.",
@@ -1344,8 +1344,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).eqMissing(...)",
       "signature": "$df.col(<column_name>).eqMissing(\n  val: any\n)",
-      "lineStart": 1005,
-      "lineEnd": 1010
+      "lineStart": 1006,
+      "lineEnd": 1011
     },
     "ewmKurt": {
       "desc": "Window: Computes exponentially weighted moving kurtosis.",
@@ -1363,8 +1363,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ewmKurt(...)",
       "signature": "$df.col(<column_name>).ewmKurt(\n  options: EwmKurtOptions\n)",
-      "lineStart": 1020,
-      "lineEnd": 1028
+      "lineStart": 1021,
+      "lineEnd": 1029
     },
     "ewmMean": {
       "desc": "Window: Computes exponentially weighted moving average (mean).",
@@ -1382,8 +1382,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ewmMean(...)",
       "signature": "$df.col(<column_name>).ewmMean(\n  options: EwmMeanOptions\n)",
-      "lineStart": 1046,
-      "lineEnd": 1048
+      "lineStart": 1047,
+      "lineEnd": 1049
     },
     "ewmSkew": {
       "desc": "Window: Computes exponentially weighted moving skewness.",
@@ -1401,8 +1401,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ewmSkew(...)",
       "signature": "$df.col(<column_name>).ewmSkew(\n  options: EwmSkewOptions\n)",
-      "lineStart": 1058,
-      "lineEnd": 1066
+      "lineStart": 1059,
+      "lineEnd": 1067
     },
     "ewmStd": {
       "desc": "Window: Computes exponentially weighted moving standard deviation.",
@@ -1420,8 +1420,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ewmStd(...)",
       "signature": "$df.col(<column_name>).ewmStd(\n  options: EwmStdOptions\n)",
-      "lineStart": 1076,
-      "lineEnd": 1078
+      "lineStart": 1077,
+      "lineEnd": 1079
     },
     "ewmSum": {
       "desc": "Window: Computes exponentially weighted moving sum.",
@@ -1439,8 +1439,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ewmSum(...)",
       "signature": "$df.col(<column_name>).ewmSum(\n  options: EwmSumOptions\n)",
-      "lineStart": 1088,
-      "lineEnd": 1090
+      "lineStart": 1089,
+      "lineEnd": 1091
     },
     "ewmVar": {
       "desc": "Window: Computes exponentially weighted moving variance.",
@@ -1458,8 +1458,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ewmVar(...)",
       "signature": "$df.col(<column_name>).ewmVar(\n  options: EwmVarOptions\n)",
-      "lineStart": 1100,
-      "lineEnd": 1102
+      "lineStart": 1101,
+      "lineEnd": 1103
     },
     "exp": {
       "desc": "Computes natural exponent (e^x) of the column values.",
@@ -1471,8 +1471,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).exp(...)",
       "signature": "$df.col(<column_name>).exp()",
-      "lineStart": 1119,
-      "lineEnd": 1121
+      "lineStart": 1120,
+      "lineEnd": 1122
     },
     "expm1": {
       "desc": "Computes e^x - 1 for each element in the column.",
@@ -1484,8 +1484,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).expm1(...)",
       "signature": "$df.col(<column_name>).expm1()",
-      "lineStart": 1138,
-      "lineEnd": 1140
+      "lineStart": 1139,
+      "lineEnd": 1141
     },
     "fill": {
       "desc": "Replaces targeted values (\"null\", \"nan\", or \"all\") with a specified value or strategy.",
@@ -1507,8 +1507,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).fill(...)",
       "signature": "$df.col(<column_name>).fill(\n  target: FillTarget,\n  options: FillOptions | ValidScalarTypes | IExpr = {}\n): this",
-      "lineStart": 1159,
-      "lineEnd": 1231
+      "lineStart": 1160,
+      "lineEnd": 1232
     },
     "fillNan": {
       "desc": "Replaces NaN values with a specified value or strategy.",
@@ -1526,8 +1526,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).fillNan(...)",
       "signature": "$df.col(<column_name>).fillNan(\n  options: ValidScalarTypes | IExpr | FillNullOptions = {}\n): this",
-      "lineStart": 1249,
-      "lineEnd": 1251
+      "lineStart": 1250,
+      "lineEnd": 1252
     },
     "fillNull": {
       "desc": "Replaces null, undefined, or missing values with a specified value or strategy.",
@@ -1545,8 +1545,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).fillNull(...)",
       "signature": "$df.col(<column_name>).fillNull(\n  options: FillNullOptions = {}\n): this",
-      "lineStart": 1269,
-      "lineEnd": 1271
+      "lineStart": 1270,
+      "lineEnd": 1272
     },
     "filter": {
       "desc": "Filters elements of the column expression where the predicate evaluates to truthy.",
@@ -1564,8 +1564,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).filter(...)",
       "signature": "$df.col(<column_name>).filter(\n  predicate: IExpr\n)",
-      "lineStart": 1288,
-      "lineEnd": 1293
+      "lineStart": 1289,
+      "lineEnd": 1294
     },
     "first": {
       "desc": "Aggregation: Finds the first value in the group.",
@@ -1577,8 +1577,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).first(...)",
       "signature": "$df.col(<column_name>).first()",
-      "lineStart": 1309,
-      "lineEnd": 1311
+      "lineStart": 1310,
+      "lineEnd": 1312
     },
     "floor": {
       "desc": "Rounds column values down to the nearest integer.",
@@ -1590,8 +1590,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).floor(...)",
       "signature": "$df.col(<column_name>).floor()",
-      "lineStart": 1328,
-      "lineEnd": 1330
+      "lineStart": 1329,
+      "lineEnd": 1331
     },
     "floordiv": {
       "desc": "Performs integer division floor(x / y) on column values.",
@@ -1609,8 +1609,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).floordiv(...)",
       "signature": "$df.col(<column_name>).floordiv(\n  val: NumericArg\n)",
-      "lineStart": 1348,
-      "lineEnd": 1350
+      "lineStart": 1349,
+      "lineEnd": 1351
     },
     "ge": {
       "desc": "Boolean comparison: Returns true if greater than or equal to argument.",
@@ -1628,8 +1628,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ge(...)",
       "signature": "$df.col(<column_name>).ge(\n  val: any\n)",
-      "lineStart": 1368,
-      "lineEnd": 1370
+      "lineStart": 1369,
+      "lineEnd": 1371
     },
     "gt": {
       "desc": "Boolean comparison: Returns true if column value is greater than argument.",
@@ -1647,8 +1647,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).gt(...)",
       "signature": "$df.col(<column_name>).gt(\n  val: any\n)",
-      "lineStart": 1388,
-      "lineEnd": 1390
+      "lineStart": 1389,
+      "lineEnd": 1391
     },
     "hasNulls": {
       "desc": "Aggregation: Checks if any value in the group is null.",
@@ -1660,8 +1660,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).hasNulls(...)",
       "signature": "$df.col(<column_name>).hasNulls()",
-      "lineStart": 1405,
-      "lineEnd": 1407
+      "lineStart": 1406,
+      "lineEnd": 1408
     },
     "hypot": {
       "desc": "Computes the hypotenuse sqrt(x^2 + y^2) of two values.",
@@ -1679,8 +1679,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).hypot(...)",
       "signature": "$df.col(<column_name>).hypot(\n  val: NumericArg\n)",
-      "lineStart": 1425,
-      "lineEnd": 1427
+      "lineStart": 1426,
+      "lineEnd": 1428
     },
     "implode": {
       "desc": "Aggregation: Combines all values in the group into a single array/list cell.",
@@ -1692,8 +1692,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).implode(...)",
       "signature": "$df.col(<column_name>).implode()",
-      "lineStart": 1443,
-      "lineEnd": 1445
+      "lineStart": 1444,
+      "lineEnd": 1446
     },
     "isClose": {
       "desc": "Determines if floating-point values are approximately equal within tolerances.",
@@ -1715,8 +1715,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isClose(...)",
       "signature": "$df.col(<column_name>).isClose(\n  other: any,\n  {\n    absTol = 1e-8,\n    relTol = 1e-8,\n    nansEqual = false\n  }: IsCloseOptions = {}\n)",
-      "lineStart": 1464,
-      "lineEnd": 1481
+      "lineStart": 1465,
+      "lineEnd": 1482
     },
     "isDuplicated": {
       "desc": "Checks if values occur more than once in the column.",
@@ -1728,8 +1728,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isDuplicated(...)",
       "signature": "$df.col(<column_name>).isDuplicated()",
-      "lineStart": 1498,
-      "lineEnd": 1508
+      "lineStart": 1499,
+      "lineEnd": 1509
     },
     "isFinite": {
       "desc": "Checks if values are finite numbers (not NaN or Infinity).",
@@ -1741,8 +1741,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isFinite(...)",
       "signature": "$df.col(<column_name>).isFinite()",
-      "lineStart": 1526,
-      "lineEnd": 1528
+      "lineStart": 1527,
+      "lineEnd": 1529
     },
     "isIn": {
       "desc": "Checks if column values are members of a specified array or list.",
@@ -1760,8 +1760,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isIn(...)",
       "signature": "$df.col(<column_name>).isIn(\n  values: any[] | any\n)",
-      "lineStart": 1546,
-      "lineEnd": 1548
+      "lineStart": 1547,
+      "lineEnd": 1549
     },
     "isInfinite": {
       "desc": "Checks if values are positive or negative Infinity.",
@@ -1773,8 +1773,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isInfinite(...)",
       "signature": "$df.col(<column_name>).isInfinite()",
-      "lineStart": 1565,
-      "lineEnd": 1567
+      "lineStart": 1566,
+      "lineEnd": 1568
     },
     "isNan": {
       "desc": "Checks if values are NaN.",
@@ -1786,8 +1786,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNan(...)",
       "signature": "$df.col(<column_name>).isNan()",
-      "lineStart": 1584,
-      "lineEnd": 1586
+      "lineStart": 1585,
+      "lineEnd": 1587
     },
     "isNDistinct": {
       "desc": "Checks if column values match the N-th distinct value by positive or negative index position.",
@@ -1809,8 +1809,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNDistinct(...)",
       "signature": "$df.col(<column_name>).isNDistinct(\n  index: number,\n  nullOnOob: boolean = true\n)",
-      "lineStart": 1605,
-      "lineEnd": 1611
+      "lineStart": 1606,
+      "lineEnd": 1612
     },
     "isNotNan": {
       "desc": "Checks if values are not NaN.",
@@ -1822,8 +1822,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNotNan(...)",
       "signature": "$df.col(<column_name>).isNotNan()",
-      "lineStart": 1628,
-      "lineEnd": 1630
+      "lineStart": 1629,
+      "lineEnd": 1631
     },
     "isNotNull": {
       "desc": "Checks if column values are non-null and valid (not null, undefined, or missing).",
@@ -1835,8 +1835,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNotNull(...)",
       "signature": "$df.col(<column_name>).isNotNull()",
-      "lineStart": 1647,
-      "lineEnd": 1649
+      "lineStart": 1648,
+      "lineEnd": 1650
     },
     "isNull": {
       "desc": "Checks if column values are null, undefined, or missing.",
@@ -1848,8 +1848,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isNull(...)",
       "signature": "$df.col(<column_name>).isNull()",
-      "lineStart": 1666,
-      "lineEnd": 1668
+      "lineStart": 1667,
+      "lineEnd": 1669
     },
     "isUnique": {
       "desc": "Checks if values occur exactly once in the column.",
@@ -1861,8 +1861,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).isUnique(...)",
       "signature": "$df.col(<column_name>).isUnique()",
-      "lineStart": 1685,
-      "lineEnd": 1687
+      "lineStart": 1686,
+      "lineEnd": 1688
     },
     "kurtosis": {
       "desc": "Aggregation: Computes the kurtosis (peakedness/tailedness) of a numeric column.",
@@ -1880,8 +1880,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).kurtosis(...)",
       "signature": "$df.col(<column_name>).kurtosis(\n  options: KurtosisOptions = {}\n)",
-      "lineStart": 1703,
-      "lineEnd": 1705
+      "lineStart": 1704,
+      "lineEnd": 1706
     },
     "lag": {
       "desc": "Window: Shifts values down by offset, filling missing slots with default value.",
@@ -1903,8 +1903,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).lag(...)",
       "signature": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 1724,
-      "lineEnd": 1735
+      "lineStart": 1725,
+      "lineEnd": 1736
     },
     "last": {
       "desc": "Aggregation: Finds the last value in the group.",
@@ -1916,8 +1916,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).last(...)",
       "signature": "$df.col(<column_name>).last()",
-      "lineStart": 1751,
-      "lineEnd": 1753
+      "lineStart": 1752,
+      "lineEnd": 1754
     },
     "le": {
       "desc": "Boolean comparison: Returns true if less than or equal to argument.",
@@ -1935,8 +1935,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).le(...)",
       "signature": "$df.col(<column_name>).le(\n  val: any\n)",
-      "lineStart": 1771,
-      "lineEnd": 1773
+      "lineStart": 1772,
+      "lineEnd": 1774
     },
     "lead": {
       "desc": "Window: Shifts values up by offset, filling missing slots with default value.",
@@ -1958,8 +1958,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).lead(...)",
       "signature": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 1792,
-      "lineEnd": 1794
+      "lineStart": 1793,
+      "lineEnd": 1795
     },
     "log": {
       "desc": "Computes the logarithm of positive values with a specified base.",
@@ -1977,8 +1977,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).log(...)",
       "signature": "$df.col(<column_name>).log(\n  base: number = Math.E\n)",
-      "lineStart": 1812,
-      "lineEnd": 1814
+      "lineStart": 1813,
+      "lineEnd": 1815
     },
     "log1p": {
       "desc": "Computes natural logarithm of 1 + x.",
@@ -1990,8 +1990,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).log1p(...)",
       "signature": "$df.col(<column_name>).log1p()",
-      "lineStart": 1831,
-      "lineEnd": 1833
+      "lineStart": 1832,
+      "lineEnd": 1834
     },
     "lt": {
       "desc": "Boolean comparison: Returns true if less than argument.",
@@ -2009,8 +2009,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).lt(...)",
       "signature": "$df.col(<column_name>).lt(\n  val: any\n)",
-      "lineStart": 1851,
-      "lineEnd": 1853
+      "lineStart": 1852,
+      "lineEnd": 1854
     },
     "max": {
       "desc": "Aggregation: Finds the maximum value in the group.",
@@ -2022,8 +2022,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).max(...)",
       "signature": "$df.col(<column_name>).max()",
-      "lineStart": 1869,
-      "lineEnd": 1871
+      "lineStart": 1870,
+      "lineEnd": 1872
     },
     "maxBy": {
       "desc": "Aggregation: Finds the value in this column corresponding to the maximum value in the `by` expression.",
@@ -2041,8 +2041,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).maxBy(...)",
       "signature": "$df.col(<column_name>).maxBy(\n  by: any\n)",
-      "lineStart": 1887,
-      "lineEnd": 1889
+      "lineStart": 1888,
+      "lineEnd": 1890
     },
     "mean": {
       "desc": "Aggregation: Computes the arithmetic mean of elements in the group.",
@@ -2054,8 +2054,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mean(...)",
       "signature": "$df.col(<column_name>).mean()",
-      "lineStart": 1905,
-      "lineEnd": 1907
+      "lineStart": 1906,
+      "lineEnd": 1908
     },
     "median": {
       "desc": "Aggregation: Computes the 50th percentile median.",
@@ -2067,8 +2067,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).median(...)",
       "signature": "$df.col(<column_name>).median()",
-      "lineStart": 1923,
-      "lineEnd": 1925
+      "lineStart": 1924,
+      "lineEnd": 1926
     },
     "min": {
       "desc": "Aggregation: Finds the minimum value in the group.",
@@ -2080,8 +2080,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).min(...)",
       "signature": "$df.col(<column_name>).min()",
-      "lineStart": 1941,
-      "lineEnd": 1943
+      "lineStart": 1942,
+      "lineEnd": 1944
     },
     "minBy": {
       "desc": "Aggregation: Finds the value in this column corresponding to the minimum value in the `by` expression.",
@@ -2099,8 +2099,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).minBy(...)",
       "signature": "$df.col(<column_name>).minBy(\n  by: any\n)",
-      "lineStart": 1959,
-      "lineEnd": 1961
+      "lineStart": 1960,
+      "lineEnd": 1962
     },
     "mod": {
       "desc": "Computes modulo remainder (x % y) of column values.",
@@ -2118,8 +2118,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mod(...)",
       "signature": "$df.col(<column_name>).mod(\n  val: NumericArg\n)",
-      "lineStart": 1979,
-      "lineEnd": 1981
+      "lineStart": 1980,
+      "lineEnd": 1982
     },
     "mode": {
       "desc": "Aggregation: Finds the statistical mode (most frequent value).",
@@ -2131,8 +2131,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mode(...)",
       "signature": "$df.col(<column_name>).mode()",
-      "lineStart": 1996,
-      "lineEnd": 1998
+      "lineStart": 1997,
+      "lineEnd": 1999
     },
     "mul": {
       "desc": "Multiplies column values by a scalar or another column expression.",
@@ -2150,8 +2150,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).mul(...)",
       "signature": "$df.col(<column_name>).mul(\n  val: NumericArg\n)",
-      "lineStart": 2016,
-      "lineEnd": 2018
+      "lineStart": 2017,
+      "lineEnd": 2019
     },
     "nanMax": {
       "desc": "Aggregation: Finds the maximum value in the group, taking NaN values into account (NaN propagates).",
@@ -2163,8 +2163,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nanMax(...)",
       "signature": "$df.col(<column_name>).nanMax()",
-      "lineStart": 2033,
-      "lineEnd": 2035
+      "lineStart": 2034,
+      "lineEnd": 2036
     },
     "nanMin": {
       "desc": "Aggregation: Finds the minimum value in the group, taking NaN values into account (NaN propagates).",
@@ -2176,8 +2176,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nanMin(...)",
       "signature": "$df.col(<column_name>).nanMin()",
-      "lineStart": 2050,
-      "lineEnd": 2052
+      "lineStart": 2051,
+      "lineEnd": 2053
     },
     "ne": {
       "desc": "Boolean comparison: Returns true if values do not match.",
@@ -2195,8 +2195,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).ne(...)",
       "signature": "$df.col(<column_name>).ne(\n  val: any\n)",
-      "lineStart": 2070,
-      "lineEnd": 2072
+      "lineStart": 2071,
+      "lineEnd": 2073
     },
     "negate": {
       "desc": "Negates column values (-x).",
@@ -2208,8 +2208,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).negate(...)",
       "signature": "$df.col(<column_name>).negate()",
-      "lineStart": 2089,
-      "lineEnd": 2091
+      "lineStart": 2090,
+      "lineEnd": 2092
     },
     "neMissing": {
       "desc": "Difference check that treats null values as equal to each other.",
@@ -2227,8 +2227,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).neMissing(...)",
       "signature": "$df.col(<column_name>).neMissing(\n  val: any\n)",
-      "lineStart": 2109,
-      "lineEnd": 2111
+      "lineStart": 2110,
+      "lineEnd": 2112
     },
     "not": {
       "desc": "Logical negation.",
@@ -2240,8 +2240,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).not(...)",
       "signature": "$df.col(<column_name>).not()",
-      "lineStart": 2129,
-      "lineEnd": 2131
+      "lineStart": 2130,
+      "lineEnd": 2132
     },
     "notIn": {
       "desc": "Checks if values are not elements of a specific array or set list.",
@@ -2259,8 +2259,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).notIn(...)",
       "signature": "$df.col(<column_name>).notIn(\n  values: any[] | any\n)",
-      "lineStart": 2149,
-      "lineEnd": 2151
+      "lineStart": 2150,
+      "lineEnd": 2152
     },
     "nullCount": {
       "desc": "Aggregation: Counts the number of null or missing records.",
@@ -2272,8 +2272,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nullCount(...)",
       "signature": "$df.col(<column_name>).nullCount()",
-      "lineStart": 2166,
-      "lineEnd": 2168
+      "lineStart": 2167,
+      "lineEnd": 2169
     },
     "nUnique": {
       "desc": "Aggregation: Computes number of unique elements.",
@@ -2291,8 +2291,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).nUnique(...)",
       "signature": "$df.col(<column_name>).nUnique(\n  options: UniqueArrayStatsOptions = {}\n)",
-      "lineStart": 2184,
-      "lineEnd": 2186
+      "lineStart": 2185,
+      "lineEnd": 2187
     },
     "or": {
       "desc": "Logical OR check supporting Kleene logic.",
@@ -2310,8 +2310,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).or(...)",
       "signature": "$df.col(<column_name>).or(\n  other: any\n)",
-      "lineStart": 2205,
-      "lineEnd": 2220
+      "lineStart": 2206,
+      "lineEnd": 2221
     },
     "over": {
       "desc": "Executes a window aggregation partitioned by column keys.",
@@ -2329,8 +2329,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).over(...)",
       "signature": "$df.col(<column_name>).over(\n  columns: string | IExpr | (string | IExpr)[]\n)",
-      "lineStart": 2238,
-      "lineEnd": 2243
+      "lineStart": 2239,
+      "lineEnd": 2244
     },
     "pow": {
       "desc": "Raises column values to the specified power.",
@@ -2348,8 +2348,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).pow(...)",
       "signature": "$df.col(<column_name>).pow(\n  val: NumericArg\n)",
-      "lineStart": 2261,
-      "lineEnd": 2263
+      "lineStart": 2262,
+      "lineEnd": 2264
     },
     "product": {
       "desc": "Aggregation: Computes the product of all elements in the group.",
@@ -2361,8 +2361,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).product(...)",
       "signature": "$df.col(<column_name>).product()",
-      "lineStart": 2279,
-      "lineEnd": 2281
+      "lineStart": 2280,
+      "lineEnd": 2282
     },
     "quantile": {
       "desc": "Aggregation: Computes the specific quantile values (0.0 to 1.0).",
@@ -2380,8 +2380,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).quantile(...)",
       "signature": "$df.col(<column_name>).quantile(\n  q: number\n)",
-      "lineStart": 2297,
-      "lineEnd": 2300
+      "lineStart": 2298,
+      "lineEnd": 2301
     },
     "radians": {
       "desc": "Converts angles from degrees to radians.",
@@ -2393,8 +2393,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).radians(...)",
       "signature": "$df.col(<column_name>).radians()",
-      "lineStart": 2317,
-      "lineEnd": 2319
+      "lineStart": 2318,
+      "lineEnd": 2320
     },
     "rand": {
       "desc": "Fills sequence with pseudo-random generated floats or integers.",
@@ -2416,8 +2416,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rand(...)",
       "signature": "$df.col(<column_name>).rand(\n  seed?: number,\n  {\n    min = 0,\n    max = 1,\n    integer = false\n  }: RandomOptions = {}\n)",
-      "lineStart": 2338,
-      "lineEnd": 2351
+      "lineStart": 2339,
+      "lineEnd": 2352
     },
     "rank": {
       "desc": "Window: Computes rank within group partition.",
@@ -2429,8 +2429,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rank(...)",
       "signature": "$df.col(<column_name>).rank(\n  options: { dense?: boolean } = {}\n)",
-      "lineStart": 2367,
-      "lineEnd": 2369
+      "lineStart": 2368,
+      "lineEnd": 2370
     },
     "reverse": {
       "desc": "Reverses the order of values in the column.",
@@ -2442,8 +2442,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).reverse(...)",
       "signature": "$df.col(<column_name>).reverse(): this",
-      "lineStart": 2386,
-      "lineEnd": 2388
+      "lineStart": 2387,
+      "lineEnd": 2389
     },
     "rolling": {
       "desc": "Window: Computes a rolling window reduction using a ColumnExpression or a custom callback function.",
@@ -2465,8 +2465,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rolling(...)",
       "signature": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: number | RollingOptions,\n  exprOrFn: IExpr | ((vals: any[]) => any)\n)",
-      "lineStart": 2407,
-      "lineEnd": 2428
+      "lineStart": 2408,
+      "lineEnd": 2429
     },
     "rollingMax": {
       "desc": "Window: Computes rolling window maximum value.",
@@ -2484,8 +2484,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMax(...)",
       "signature": "$df.col(<column_name>).rollingMax(\n  windowSize: number\n)",
-      "lineStart": 2446,
-      "lineEnd": 2448
+      "lineStart": 2447,
+      "lineEnd": 2449
     },
     "rollingMean": {
       "desc": "Window: Computes rolling window mean average.",
@@ -2503,8 +2503,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMean(...)",
       "signature": "$df.col(<column_name>).rollingMean(\n  windowSize: number\n)",
-      "lineStart": 2466,
-      "lineEnd": 2468
+      "lineStart": 2467,
+      "lineEnd": 2469
     },
     "rollingMedian": {
       "desc": "Window: Computes rolling window median value.",
@@ -2522,8 +2522,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMedian(...)",
       "signature": "$df.col(<column_name>).rollingMedian(\n  windowSize: number\n)",
-      "lineStart": 2486,
-      "lineEnd": 2488
+      "lineStart": 2487,
+      "lineEnd": 2489
     },
     "rollingMin": {
       "desc": "Window: Computes rolling window minimum value.",
@@ -2541,8 +2541,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingMin(...)",
       "signature": "$df.col(<column_name>).rollingMin(\n  windowSize: number\n)",
-      "lineStart": 2506,
-      "lineEnd": 2508
+      "lineStart": 2507,
+      "lineEnd": 2509
     },
     "rollingQuantile": {
       "desc": "Window: Computes rolling window quantile value.",
@@ -2564,8 +2564,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingQuantile(...)",
       "signature": "$df.col(<column_name>).rollingQuantile(\n  quantile: number,\n  windowSize: number\n)",
-      "lineStart": 2527,
-      "lineEnd": 2529
+      "lineStart": 2528,
+      "lineEnd": 2530
     },
     "rollingRank": {
       "desc": "Window: Computes rolling window rank.",
@@ -2583,8 +2583,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingRank(...)",
       "signature": "$df.col(<column_name>).rollingRank(\n  windowSize: number\n)",
-      "lineStart": 2547,
-      "lineEnd": 2551
+      "lineStart": 2548,
+      "lineEnd": 2552
     },
     "rollingStd": {
       "desc": "Window: Computes rolling window standard deviation.",
@@ -2602,8 +2602,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingStd(...)",
       "signature": "$df.col(<column_name>).rollingStd(\n  windowSize: number\n)",
-      "lineStart": 2569,
-      "lineEnd": 2571
+      "lineStart": 2570,
+      "lineEnd": 2572
     },
     "rollingSum": {
       "desc": "Window: Computes rolling window sum.",
@@ -2621,8 +2621,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rollingSum(...)",
       "signature": "$df.col(<column_name>).rollingSum(\n  windowSize: number\n)",
-      "lineStart": 2589,
-      "lineEnd": 2591
+      "lineStart": 2590,
+      "lineEnd": 2592
     },
     "round": {
       "desc": "Rounds values to a specific scale of decimal digits.",
@@ -2640,8 +2640,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).round(...)",
       "signature": "$df.col(<column_name>).round(\n  decimals: number = 0\n)",
-      "lineStart": 2609,
-      "lineEnd": 2611
+      "lineStart": 2610,
+      "lineEnd": 2612
     },
     "roundSigFigs": {
       "desc": "Rounds values to a specific number of significant figures.",
@@ -2659,8 +2659,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).roundSigFigs(...)",
       "signature": "$df.col(<column_name>).roundSigFigs(\n  sigFigs: number\n)",
-      "lineStart": 2629,
-      "lineEnd": 2631
+      "lineStart": 2630,
+      "lineEnd": 2632
     },
     "rowNumber": {
       "desc": "Window: Computes 1-indexed row number count within group partitions.",
@@ -2672,8 +2672,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rowNumber(...)",
       "signature": "$df.col(<column_name>).rowNumber()",
-      "lineStart": 2648,
-      "lineEnd": 2652
+      "lineStart": 2649,
+      "lineEnd": 2653
     },
     "shift": {
       "desc": "Shifts values by the given number of rows, filling newly introduced slots with null. Positive offsets shift values down (lag); negative offsets shift values up (lead).\n\nSupports windowing and partition grouping via `.over(...)`.",
@@ -2691,8 +2691,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).shift(...)",
       "signature": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 2674,
-      "lineEnd": 2676
+      "lineStart": 2675,
+      "lineEnd": 2677
     },
     "sign": {
       "desc": "Returns sign indicator of column values (-1, 0, or 1).",
@@ -2704,8 +2704,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sign(...)",
       "signature": "$df.col(<column_name>).sign()",
-      "lineStart": 2693,
-      "lineEnd": 2695
+      "lineStart": 2694,
+      "lineEnd": 2696
     },
     "sin": {
       "desc": "Computes the sine of the column values.",
@@ -2717,8 +2717,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sin(...)",
       "signature": "$df.col(<column_name>).sin()",
-      "lineStart": 2712,
-      "lineEnd": 2714
+      "lineStart": 2713,
+      "lineEnd": 2715
     },
     "sinh": {
       "desc": "Computes the hyperbolic sine of the column values.",
@@ -2730,8 +2730,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sinh(...)",
       "signature": "$df.col(<column_name>).sinh()",
-      "lineStart": 2731,
-      "lineEnd": 2733
+      "lineStart": 2732,
+      "lineEnd": 2734
     },
     "skew": {
       "desc": "Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of skewness.",
@@ -2749,8 +2749,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).skew(...)",
       "signature": "$df.col(<column_name>).skew(\n  options: SkewOptions = {}\n)",
-      "lineStart": 2749,
-      "lineEnd": 2751
+      "lineStart": 2750,
+      "lineEnd": 2752
     },
     "spearmanCorr": {
       "desc": "Aggregation: Computes the Spearman rank correlation coefficient.",
@@ -2768,8 +2768,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).spearmanCorr(...)",
       "signature": "$df.col(<column_name>).spearmanCorr(\n  other: any\n)",
-      "lineStart": 2767,
-      "lineEnd": 2769
+      "lineStart": 2768,
+      "lineEnd": 2770
     },
     "sqrt": {
       "desc": "Computes the square root of non-negative column values.",
@@ -2781,8 +2781,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sqrt(...)",
       "signature": "$df.col(<column_name>).sqrt()",
-      "lineStart": 2786,
-      "lineEnd": 2788
+      "lineStart": 2787,
+      "lineEnd": 2789
     },
     "std": {
       "desc": "Aggregation: Computes sample standard deviation.",
@@ -2794,8 +2794,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).std(...)",
       "signature": "$df.col(<column_name>).std()",
-      "lineStart": 2803,
-      "lineEnd": 2805
+      "lineStart": 2804,
+      "lineEnd": 2806
     },
     "sub": {
       "desc": "Subtracts a scalar or another column expression.",
@@ -2813,8 +2813,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sub(...)",
       "signature": "$df.col(<column_name>).sub(\n  val: NumericArg\n)",
-      "lineStart": 2823,
-      "lineEnd": 2825
+      "lineStart": 2824,
+      "lineEnd": 2826
     },
     "sum": {
       "desc": "Aggregation: Computes the sum of elements in the group.",
@@ -2826,8 +2826,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sum(...)",
       "signature": "$df.col(<column_name>).sum()",
-      "lineStart": 2841,
-      "lineEnd": 2843
+      "lineStart": 2842,
+      "lineEnd": 2844
     },
     "tan": {
       "desc": "Computes the tangent of the column values.",
@@ -2839,8 +2839,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).tan(...)",
       "signature": "$df.col(<column_name>).tan()",
-      "lineStart": 2860,
-      "lineEnd": 2862
+      "lineStart": 2861,
+      "lineEnd": 2863
     },
     "tanh": {
       "desc": "Computes the hyperbolic tangent of the column values.",
@@ -2852,8 +2852,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).tanh(...)",
       "signature": "$df.col(<column_name>).tanh()",
-      "lineStart": 2879,
-      "lineEnd": 2881
+      "lineStart": 2880,
+      "lineEnd": 2882
     },
     "trunc": {
       "desc": "Truncates fractional digits of column values.",
@@ -2865,8 +2865,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).trunc(...)",
       "signature": "$df.col(<column_name>).trunc()",
-      "lineStart": 2898,
-      "lineEnd": 2900
+      "lineStart": 2899,
+      "lineEnd": 2901
     },
     "variance": {
       "desc": "Aggregation: Computes sample variance.",
@@ -2878,8 +2878,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).variance(...)",
       "signature": "$df.col(<column_name>).variance()",
-      "lineStart": 2915,
-      "lineEnd": 2917
+      "lineStart": 2916,
+      "lineEnd": 2918
     },
     "wAvg": {
       "desc": "Aggregation: Computes weighted average.",
@@ -2897,8 +2897,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).wAvg(...)",
       "signature": "$df.col(<column_name>).wAvg(\n  weights: any\n)",
-      "lineStart": 2933,
-      "lineEnd": 2935
+      "lineStart": 2934,
+      "lineEnd": 2936
     },
     "xor": {
       "desc": "Logical XOR check.",
@@ -2916,8 +2916,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).xor(...)",
       "signature": "$df.col(<column_name>).xor(\n  other: any\n)",
-      "lineStart": 2954,
-      "lineEnd": 2956
+      "lineStart": 2955,
+      "lineEnd": 2957
     }
   },
   "columnExpressions/mixins/StringExpr.ts": {
@@ -4814,8 +4814,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).resolveExprOutputType(...)",
       "signature": "$df.col(<column_name>).resolveExprOutputType(\n  expr: IExpr,\n  schema: DataFrameSchema,\n  colSample?: ColumnData | any[]\n): RegisteredDataType | undefined",
-      "lineStart": 174,
-      "lineEnd": 236
+      "lineStart": 166,
+      "lineEnd": 230
     }
   },
   "columnExpressions/utils.ts": {
@@ -4857,15 +4857,15 @@
       "syntax": "$df.col(<column_name>).isEvaluatedColumn(...)",
       "signature": "$df.col(<column_name>).isEvaluatedColumn(\n  arg: unknown,\n  evaluatedVal: unknown,\n  columns: ColumnDict | null | undefined,\n  height: number\n): boolean",
       "lineStart": 107,
-      "lineEnd": 123
+      "lineEnd": 118
     },
     "evaluateArgsMatrix": {
       "desc": "Evaluates multiple arguments against columns and height, returning the evaluated arrays and whether each argument resolved to a full column array.",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).evaluateArgsMatrix(...)",
       "signature": "$df.col(<column_name>).evaluateArgsMatrix(\n  args: unknown[],\n  columns: ColumnDict | null | undefined,\n  height: number\n):",
-      "lineStart": 129,
-      "lineEnd": 133
+      "lineStart": 124,
+      "lineEnd": 128
     }
   },
   "constants.ts": {
@@ -4886,7 +4886,7 @@
       "syntax": "df.DataFrame(...)",
       "signature": "df.DataFrame<T extends RowRecord = any>",
       "lineStart": 32,
-      "lineEnd": 2281
+      "lineEnd": 2266
     },
     "cast": {
       "desc": "Casts columns in the DataFrame to the specified data type(s).",
@@ -4910,8 +4910,8 @@
       "category": "DataFrame",
       "syntax": "df.cast(...)",
       "signature": "df.cast(\n  dtypes: RegisteredDataType | Record<string, RegisteredDataType>,\n  options: CastOptions = {}\n): DataFrame<any>",
-      "lineStart": 187,
-      "lineEnd": 208
+      "lineStart": 181,
+      "lineEnd": 202
     },
     "clone": {
       "desc": "Creates a deep copy of the current DataFrame instance, duplicating all underlying column data arrays and schema metadata. Modifying columns or values in the cloned DataFrame will not mutate the original.",
@@ -4923,8 +4923,8 @@
       "category": "DataFrame",
       "syntax": "df.clone(...)",
       "signature": "df.clone(): DataFrame<T>",
-      "lineStart": 226,
-      "lineEnd": 228
+      "lineStart": 220,
+      "lineEnd": 222
     },
     "columns": {
       "desc": "Gets array of column names in the DataFrame.",
@@ -4936,8 +4936,8 @@
       "category": "DataFrame",
       "syntax": "df.columns(...)",
       "signature": "df.get columns(): string[]",
-      "lineStart": 238,
-      "lineEnd": 240
+      "lineStart": 232,
+      "lineEnd": 234
     },
     "concat": {
       "desc": "Concatenates items vertically, horizontally, or diagonally.",
@@ -4973,8 +4973,8 @@
       "category": "DataFrame",
       "syntax": "df.concat(...)",
       "signature": "df.concat<U extends RowRecord = any>(\n  items: ConcatItem | ConcatItem[],\n  options?: {\n    how?: ConcatHow,\n    horizontal.strict?: boolean\n  }\n): DataFrame<U>",
-      "lineStart": 291,
-      "lineEnd": 299
+      "lineStart": 285,
+      "lineEnd": 293
     },
     "drop": {
       "desc": "Drops specified columns from the DataFrame.",
@@ -4993,8 +4993,8 @@
       "category": "DataFrame",
       "syntax": "df.drop(...)",
       "signature": "df.drop<K extends keyof T>(\n  ...args: (K | K[])[]\n): DataFrame<Omit<T, K>>",
-      "lineStart": 316,
-      "lineEnd": 318
+      "lineStart": 310,
+      "lineEnd": 312
     },
     "dropNulls": {
       "desc": "Drops rows with null or undefined values.",
@@ -5013,8 +5013,8 @@
       "category": "DataFrame",
       "syntax": "df.dropNulls(...)",
       "signature": "df.dropNulls(\n  subset?: string | string[]\n): DataFrame<T>",
-      "lineStart": 335,
-      "lineEnd": 337
+      "lineStart": 329,
+      "lineEnd": 331
     },
     "dtypes": {
       "desc": "Gets array of registered column DataTypes matching current schema order.",
@@ -5026,8 +5026,8 @@
       "category": "DataFrame",
       "syntax": "df.dtypes(...)",
       "signature": "df.get dtypes(): RegisteredDataType[]",
-      "lineStart": 347,
-      "lineEnd": 355
+      "lineStart": 341,
+      "lineEnd": 349
     },
     "equals": {
       "desc": "Compares this DataFrame with another for equality. Checks shape, column names, column order, schemas, and row values.",
@@ -5056,8 +5056,8 @@
       "category": "DataFrame",
       "syntax": "df.equals(...)",
       "signature": "df.equals<U extends RowRecord = any>(\n  other: DataFrame<U>,\n  {\n    nullsEqual = true\n  }: EqualsOptions = {}\n): boolean",
-      "lineStart": 370,
-      "lineEnd": 412
+      "lineStart": 364,
+      "lineEnd": 406
     },
     "explode": {
       "desc": "Explodes an array column into multiple rows, replicating non-target row attributes.",
@@ -5091,8 +5091,8 @@
       "category": "DataFrame",
       "syntax": "df.explode(...)",
       "signature": "df.explode(\n  columns: IntoExpr | IntoExpr[],\n  options?: {\n    emptyAsNull?: boolean,\n    keepNulls?: boolean\n  }\n): DataFrame<any>",
-      "lineStart": 432,
-      "lineEnd": 451
+      "lineStart": 426,
+      "lineEnd": 445
     },
     "fill": {
       "desc": "Fills targeted values (\"null\", \"nan\", or \"all\") across columns using scalar values or statistical strategies.",
@@ -5116,8 +5116,8 @@
       "category": "DataFrame",
       "syntax": "df.fill(...)",
       "signature": "df.fill(\n  target: FillTarget,\n  options: FillOptions | ValidScalarTypes | IExpr = {}\n): DataFrame<T>",
-      "lineStart": 470,
-      "lineEnd": 476
+      "lineStart": 464,
+      "lineEnd": 470
     },
     "fillNan": {
       "desc": "Fills NaN values across numeric columns using scalar values or statistical strategies.",
@@ -5136,8 +5136,8 @@
       "category": "DataFrame",
       "syntax": "df.fillNan(...)",
       "signature": "df.fillNan(\n  options: ValidScalarTypes | IExpr | FillNullOptions = {}\n): DataFrame<T>",
-      "lineStart": 494,
-      "lineEnd": 497
+      "lineStart": 488,
+      "lineEnd": 491
     },
     "fillNull": {
       "desc": "Fills null values across columns using scalar values or statistical strategies.",
@@ -5171,8 +5171,8 @@
       "category": "DataFrame",
       "syntax": "df.fillNull(...)",
       "signature": "df.fillNull(\n  options?: {\n    value?: any,\n    strategy?: FillNullStrategy,\n    limit?: number\n  }\n): DataFrame<T>",
-      "lineStart": 518,
-      "lineEnd": 521
+      "lineStart": 512,
+      "lineEnd": 515
     },
     "filter": {
       "desc": "Filters rows matching boolean column expressions or predicate callbacks.",
@@ -5190,9 +5190,9 @@
       "namespace": "df",
       "category": "DataFrame",
       "syntax": "df.filter(...)",
-      "signature": "df.filter(\n  ...exprs: (IExpr | ((row: T) => any))[]\n): DataFrame<T>",
-      "lineStart": 538,
-      "lineEnd": 608
+      "signature": "df.filter(\n  ...exprs: (IExpr | ((row: T) => any) | (IExpr | ((row: T) => any))[])[]\n): DataFrame<T>",
+      "lineStart": 532,
+      "lineEnd": 604
     },
     "groupBy": {
       "desc": "Groups rows by key columns to prepare for aggregations.",
@@ -5211,8 +5211,8 @@
       "category": "DataFrame",
       "syntax": "df.groupBy(...)",
       "signature": "df.groupBy<K extends keyof T>(\n  keys: K | K[]\n): GroupedData<T, K>",
-      "lineStart": 625,
-      "lineEnd": 636
+      "lineStart": 621,
+      "lineEnd": 631
     },
     "groupByDynamic": {
       "desc": "Groups dynamically based on a time or integer index column over sliding / stepping windows.",
@@ -5234,8 +5234,8 @@
       "category": "DataFrame",
       "syntax": "df.groupByDynamic(...)",
       "signature": "df.groupByDynamic<K extends keyof T & string>(\n  indexColumn: K | IntoExpr,\n  options: GroupByDynamicOptions<T>\n): GroupedData<T, K>",
-      "lineStart": 655,
-      "lineEnd": 852
+      "lineStart": 650,
+      "lineEnd": 847
     },
     "head": {
       "desc": "Returns the first N rows as a new DataFrame.",
@@ -5253,8 +5253,8 @@
       "category": "DataFrame",
       "syntax": "df.head(...)",
       "signature": "df.head(\n  n: number = 10\n): DataFrame<T>",
-      "lineStart": 870,
-      "lineEnd": 872
+      "lineStart": 865,
+      "lineEnd": 867
     },
     "height": {
       "desc": "Gets height (total row count) of the DataFrame.",
@@ -5266,8 +5266,8 @@
       "category": "DataFrame",
       "syntax": "df.height(...)",
       "signature": "df.get height(): number",
-      "lineStart": 882,
-      "lineEnd": 884
+      "lineStart": 877,
+      "lineEnd": 879
     },
     "insertColumn": {
       "desc": "Inserts a new column at a specific ordinal index position.",
@@ -5296,8 +5296,8 @@
       "category": "DataFrame",
       "syntax": "df.insertColumn(...)",
       "signature": "df.insertColumn(\n  index: number,\n  name: string,\n  expr: IntoExpr | ArrayLike<any>\n): DataFrame<any>",
-      "lineStart": 903,
-      "lineEnd": 924
+      "lineStart": 898,
+      "lineEnd": 919
     },
     "item": {
       "desc": "Retrieves a single scalar cell value by row and column position or name.",
@@ -5321,8 +5321,8 @@
       "category": "DataFrame",
       "syntax": "df.item(...)",
       "signature": "df.item(\n  row?: number,\n  column?: number | string\n): any",
-      "lineStart": 938,
-      "lineEnd": 967
+      "lineStart": 933,
+      "lineEnd": 962
     },
     "iterColumns": {
       "desc": "Yields a generator iterating over raw column arrays.",
@@ -5334,8 +5334,8 @@
       "category": "DataFrame",
       "syntax": "df.iterColumns(...)",
       "signature": "df.iterColumns(): Generator<ColumnData>",
-      "lineStart": 977,
-      "lineEnd": 983
+      "lineStart": 972,
+      "lineEnd": 976
     },
     "iterRows": {
       "desc": "Yields a generator iterating over rows as tuples or named objects.",
@@ -5357,8 +5357,8 @@
       "category": "DataFrame",
       "syntax": "df.iterRows(...)",
       "signature": "df.iterRows(\n  { named = false }: { named?: boolean } = {}\n): Generator<any[] | Record<string, any>>",
-      "lineStart": 995,
-      "lineEnd": 1017
+      "lineStart": 988,
+      "lineEnd": 1010
     },
     "join": {
       "desc": "Joins two DataFrames on key columns using a specified join strategy. - `\"inner\"` — Only rows with matching keys in both DataFrames. - `\"left\"` — All left rows; unmatched right values are `null`. - `\"right\"` — All right rows; unmatched left values are `null`. - `\"outer\"` — All rows from both sides; unmatched values are `null`. - `\"semi\"` — Left rows that have a match in the right DataFrame (only left columns retained). - `\"anti\"` — Left rows that have **no** match in the right DataFrame (only left columns retained). - `\"cross\"` — Cartesian product pairing every left row with every right row (keyless). non-key column names (default `[\"\", \"_right\"]`). Ignored for `\"semi\"` and `\"anti\"` joins. across DataFrames. Default `false` (SQL-standard: `NULL != NULL`). - `\"none\"` (or `false`) — No specific ordering is desired. - `\"left\"` (or `true`) — Preserves the order of the left DataFrame. - `\"right\"` — Preserves the order of the right DataFrame. - `\"left_right\"` — Preserves the order of the left DataFrame first, then the right. - `\"right_left\"` — Preserves the order of the right DataFrame first, then the left.",
@@ -5417,8 +5417,8 @@
       "category": "DataFrame",
       "syntax": "df.join(...)",
       "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options?: {\n    on?: string | string[],\n    leftOn?: string | string[],\n    rightOn?: string | string[],\n    how?: JoinType,\n    suffixes?: [string, string],\n    joinNulls?: boolean,\n    coalesce?: boolean,\n    maintainOrder?: JoinMaintainOrder | boolean\n  }\n): DataFrame<R>",
-      "lineStart": 1057,
-      "lineEnd": 1152
+      "lineStart": 1050,
+      "lineEnd": 1145
     },
     "joinAsof": {
       "desc": "Performs an asof (as-of) join for inexact matching on ordered numeric or temporal key columns.\n\nSimilar to a left join, but instead of exact key equality, matches the nearest key row from the right DataFrame according to the selected `strategy` (\"backward\", \"forward\", or \"nearest\") and optional `tolerance`. Both DataFrames must be sorted in ascending order on their respective `on` / `leftOn` / `rightOn` join keys.\n\n- `\"backward\"` — Matches the latest right row where `rightKey <= leftKey`. - `\"forward\"` — Matches the earliest right row where `rightKey >= leftKey`. - `\"nearest\"` — Matches the right row with the absolute nearest key value to `leftKey`.",
@@ -5502,8 +5502,8 @@
       "category": "DataFrame",
       "syntax": "df.joinAsof(...)",
       "signature": "df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: {\n    on?: string,\n    leftOn?: string,\n    rightOn?: string,\n    by?: string | string[],\n    leftBy?: string | string[],\n    rightBy?: string | string[],\n    strategy?: JoinAsofStrategy,\n    tolerance?: number | string,\n    allowExactMatches?: boolean,\n    suffixes?: [string, string],\n    coalesce?: boolean,\n    checkSorted?: boolean\n  }\n): DataFrame<R>",
-      "lineStart": 1191,
-      "lineEnd": 1270
+      "lineStart": 1184,
+      "lineEnd": 1263
     },
     "joinWhere": {
       "desc": "Joins two DataFrames based on arbitrary expression predicates (non-equi joins).\n\nEvaluates one or more boolean expressions across combined rows from both DataFrames. When column names collide between the two DataFrames, columns are suffixed according to `options.suffixes` (default `[\"\", \"_right\"]`).\n\nand an optional configuration options object (`{ how, suffixes }`).",
@@ -5527,8 +5527,8 @@
       "category": "DataFrame",
       "syntax": "df.joinWhere(...)",
       "signature": "df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  ...args: (IntoExpr | IntoExpr[] | JoinWhereOptions)[]\n): DataFrame<R>",
-      "lineStart": 1301,
-      "lineEnd": 1354
+      "lineStart": 1294,
+      "lineEnd": 1347
     },
     "limit": {
       "desc": "Limits the output to N rows starting from offset.",
@@ -5562,8 +5562,8 @@
       "category": "DataFrame",
       "syntax": "df.limit(...)",
       "signature": "df.limit(\n  n: number,\n  {\n    offset = 0,\n    from = \"start\"\n  }: LimitOptions = {}\n): DataFrame<T>",
-      "lineStart": 1374,
-      "lineEnd": 1398
+      "lineStart": 1367,
+      "lineEnd": 1391
     },
     "partitionBy": {
       "desc": "Splits a DataFrame into sub-DataFrames partitioned by column names or expressions (reusing `.over()` partition semantics).",
@@ -5582,8 +5582,8 @@
       "category": "DataFrame",
       "syntax": "df.partitionBy(...)",
       "signature": "df.partitionBy<K extends (\n  keyof T & string) | IExpr>( by: K | K[],\n  options: PartitionByOptions = {}\n): DataFrame<T>[] | Record<string, DataFrame<T>>",
-      "lineStart": 1411,
-      "lineEnd": 1428
+      "lineStart": 1404,
+      "lineEnd": 1421
     },
     "pivot": {
       "desc": "Pivots columns from long format to a wide datagrid structure.",
@@ -5621,8 +5621,8 @@
       "category": "DataFrame",
       "syntax": "df.pivot(...)",
       "signature": "df.pivot<U extends RowRecord = any>(\n  config: {\n    index: string | string[],\n    columns: string,\n    values: string,\n    agg?: AggFn | string\n  }\n): DataFrame<U>",
-      "lineStart": 1449,
-      "lineEnd": 1510
+      "lineStart": 1442,
+      "lineEnd": 1496
     },
     "rename": {
       "desc": "Renames columns based on a key-value mapping dictionary.",
@@ -5641,8 +5641,8 @@
       "category": "DataFrame",
       "syntax": "df.rename(...)",
       "signature": "df.rename(\n  mapping: Partial<Record<keyof T, string>> = {}\n): DataFrame<any>",
-      "lineStart": 1527,
-      "lineEnd": 1539
+      "lineStart": 1513,
+      "lineEnd": 1525
     },
     "reverse": {
       "desc": "Reverses the row ordering of the DataFrame.",
@@ -5654,8 +5654,8 @@
       "category": "DataFrame",
       "syntax": "df.reverse(...)",
       "signature": "df.reverse(): DataFrame<T>",
-      "lineStart": 1555,
-      "lineEnd": 1557
+      "lineStart": 1541,
+      "lineEnd": 1543
     },
     "schema": {
       "desc": "Gets current DataFrameSchema dictionary mapping column names to DataType.",
@@ -5667,8 +5667,8 @@
       "category": "DataFrame",
       "syntax": "df.schema(...)",
       "signature": "df.get schema(): DataFrameSchema",
-      "lineStart": 1567,
-      "lineEnd": 1569
+      "lineStart": 1553,
+      "lineEnd": 1555
     },
     "select": {
       "desc": "Selects specific columns or evaluates column expressions.",
@@ -5687,8 +5687,8 @@
       "category": "DataFrame",
       "syntax": "df.select(...)",
       "signature": "df.select<U extends RowRecord = any>(\n  ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]\n): DataFrame<U>",
-      "lineStart": 1586,
-      "lineEnd": 1683
+      "lineStart": 1572,
+      "lineEnd": 1669
     },
     "shape": {
       "desc": "Gets DataFrame dimensions as [height, width] tuple.",
@@ -5700,8 +5700,8 @@
       "category": "DataFrame",
       "syntax": "df.shape(...)",
       "signature": "df.get shape(): [number, number]",
-      "lineStart": 1693,
-      "lineEnd": 1695
+      "lineStart": 1679,
+      "lineEnd": 1681
     },
     "slice": {
       "desc": "Slices a subset range of rows between start and end index.",
@@ -5725,8 +5725,8 @@
       "category": "DataFrame",
       "syntax": "df.slice(...)",
       "signature": "df.slice(\n  start: number,\n  end?: number\n): DataFrame<T>",
-      "lineStart": 1713,
-      "lineEnd": 1722
+      "lineStart": 1699,
+      "lineEnd": 1708
     },
     "sort": {
       "desc": "Sorts DataFrame rows by one or more column expressions or custom sorters.",
@@ -5765,8 +5765,8 @@
       "category": "DataFrame",
       "syntax": "df.sort(...)",
       "signature": "df.sort(\n  config?: {\n    by: keyof T | (keyof T)[] | IExpr | IExpr[],\n    descending?: boolean | boolean[],\n    nullsLast?: boolean,\n    custom?: Partial<Record<keyof T, (a: any, b: any) => number>>\n  }\n): DataFrame<T>",
-      "lineStart": 1744,
-      "lineEnd": 1778
+      "lineStart": 1730,
+      "lineEnd": 1764
     },
     "tail": {
       "desc": "Returns the last N rows as a new DataFrame.",
@@ -5784,8 +5784,8 @@
       "category": "DataFrame",
       "syntax": "df.tail(...)",
       "signature": "df.tail(\n  n: number = 10\n): DataFrame<T>",
-      "lineStart": 1795,
-      "lineEnd": 1797
+      "lineStart": 1781,
+      "lineEnd": 1783
     },
     "toArray": {
       "desc": "Evaluates a column expression or retrieves column values as a raw JavaScript array.",
@@ -5804,8 +5804,8 @@
       "category": "DataFrame",
       "syntax": "df.toArray(...)",
       "signature": "df.toArray<K extends keyof T>(\n  nameOrExpr: K | IExpr\n): any[]",
-      "lineStart": 1808,
-      "lineEnd": 1810
+      "lineStart": 1794,
+      "lineEnd": 1796
     },
     "toDict": {
       "desc": "Converts columns into a JavaScript dictionary mapping column keys to raw arrays.",
@@ -5817,8 +5817,8 @@
       "category": "DataFrame",
       "syntax": "df.toDict(...)",
       "signature": "df.toDict(): DataFrameColumns<T>",
-      "lineStart": 1820,
-      "lineEnd": 1822
+      "lineStart": 1806,
+      "lineEnd": 1808
     },
     "toDicts": {
       "desc": "Converts rows into an array of JavaScript objects.",
@@ -5830,8 +5830,8 @@
       "category": "DataFrame",
       "syntax": "df.toDicts(...)",
       "signature": "df.toDicts(): T[]",
-      "lineStart": 1832,
-      "lineEnd": 1834
+      "lineStart": 1818,
+      "lineEnd": 1820
     },
     "transpose": {
       "desc": "Transposes rows into columns and columns into rows.",
@@ -5865,8 +5865,8 @@
       "category": "DataFrame",
       "syntax": "df.transpose(...)",
       "signature": "df.transpose(\n  {\n    includeHeader = false,\n    headerName = \"column\",\n    columnNames: colNamesOpt\n  }: TransposeOptions = {}\n): DataFrame<any>",
-      "lineStart": 1854,
-      "lineEnd": 1911
+      "lineStart": 1840,
+      "lineEnd": 1896
     },
     "unique": {
       "desc": "Filters distinct unique rows matching target key columns.",
@@ -5885,8 +5885,8 @@
       "category": "DataFrame",
       "syntax": "df.unique(...)",
       "signature": "df.unique<K extends keyof T>(\n  columns?: K | K[]\n): DataFrame<T>",
-      "lineStart": 1928,
-      "lineEnd": 1931
+      "lineStart": 1913,
+      "lineEnd": 1916
     },
     "unpivot": {
       "desc": "Unpivots a wide DataFrame into a long format structure.",
@@ -5925,8 +5925,8 @@
       "category": "DataFrame",
       "syntax": "df.unpivot(...)",
       "signature": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars: keyof T | (keyof T)[],\n    valueVars: keyof T | (keyof T)[],\n    varName?: string,\n    valueName?: string\n  }\n): DataFrame<U>",
-      "lineStart": 1954,
-      "lineEnd": 2001
+      "lineStart": 1939,
+      "lineEnd": 1986
     },
     "unstack": {
       "desc": "Unstacks selected columns into multiple wide columns of size `step`. Reshapes data from long to wide format without aggregation.",
@@ -5948,8 +5948,8 @@
       "category": "DataFrame",
       "syntax": "df.unstack(...)",
       "signature": "df.unstack(\n  columns: IntoExpr | IntoExpr[],\n  options: UnstackOptions\n): DataFrame<any>",
-      "lineStart": 2021,
-      "lineEnd": 2077
+      "lineStart": 2006,
+      "lineEnd": 2062
     },
     "width": {
       "desc": "Gets width (total column count) of the DataFrame.",
@@ -5961,8 +5961,8 @@
       "category": "DataFrame",
       "syntax": "df.width(...)",
       "signature": "df.get width(): number",
-      "lineStart": 2087,
-      "lineEnd": 2089
+      "lineStart": 2072,
+      "lineEnd": 2074
     },
     "withColumns": {
       "desc": "Adds new columns or updates existing ones using column expressions.",
@@ -5981,8 +5981,8 @@
       "category": "DataFrame",
       "syntax": "df.withColumns(...)",
       "signature": "df.withColumns(\n  ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]\n): DataFrame<any>",
-      "lineStart": 2106,
-      "lineEnd": 2137
+      "lineStart": 2091,
+      "lineEnd": 2122
     },
     "withRowIndex": {
       "desc": "Appends an incremental index column.",
@@ -6006,8 +6006,8 @@
       "category": "DataFrame",
       "syntax": "df.withRowIndex(...)",
       "signature": "df.withRowIndex(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
-      "lineStart": 2155,
-      "lineEnd": 2165
+      "lineStart": 2140,
+      "lineEnd": 2150
     },
     "writeCsv": {
       "desc": "Writes DataFrame to CSV format string or file/stream target.",
@@ -6049,8 +6049,8 @@
       "category": "DataFrame",
       "syntax": "df.writeCsv(...)",
       "signature": "df.writeCsv(\n  file?: string | { write: (str: string) => void },\n  options?: {\n    delimiter?: string,\n    header?: boolean,\n    quoteChar?: string\n  }\n): string",
-      "lineStart": 2182,
-      "lineEnd": 2217
+      "lineStart": 2167,
+      "lineEnd": 2202
     },
     "writeJson": {
       "desc": "Writes DataFrame rows to JSON format string or file/stream target.",
@@ -6187,8 +6187,8 @@
       "category": "DataFrame",
       "syntax": "df.writeJson(...)",
       "signature": "df.writeJson(\n  file?: string | { write: (str: string) => void },\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string",
-      "lineStart": 2253,
-      "lineEnd": 2280
+      "lineStart": 2238,
+      "lineEnd": 2265
     }
   },
   "dataframe/grouped.ts": {
@@ -6199,7 +6199,7 @@
       "syntax": "df.groupBy(...).GroupedData(...)",
       "signature": "df.groupBy(...).GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>",
       "lineStart": 16,
-      "lineEnd": 159
+      "lineEnd": 144
     },
     "agg": {
       "desc": "Aggregates grouped partitions using aggregation column expressions.",
@@ -6217,8 +6217,8 @@
       "category": "DataFrame",
       "syntax": "df.groupBy(...).agg(...)",
       "signature": "df.groupBy(...).agg<U extends RowRecord = any>(\n  ...exprs: (IExpr | any)[]\n): DataFrame<U>",
-      "lineStart": 96,
-      "lineEnd": 138
+      "lineStart": 86,
+      "lineEnd": 124
     },
     "toDataframe": {
       "desc": "Converts group keys back into a single distinct DataFrame without aggregations.",
@@ -6230,8 +6230,8 @@
       "category": "DataFrame",
       "syntax": "df.groupBy(...).toDataframe(...)",
       "signature": "df.groupBy(...).toDataframe<U extends RowRecord = any>(): DataFrame<U>",
-      "lineStart": 154,
-      "lineEnd": 158
+      "lineStart": 140,
+      "lineEnd": 143
     }
   },
   "dataframe/types.ts": {
@@ -6645,8 +6645,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.exclude(...)",
       "signature": "$df.exclude(\n  columns: string | string[]\n): ColumnExpr<any>",
-      "lineStart": 23,
-      "lineEnd": 27
+      "lineStart": 24,
+      "lineEnd": 28
     }
   },
   "functions/horizontal.ts": {

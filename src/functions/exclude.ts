@@ -1,5 +1,6 @@
 import { ColumnExpr } from "../columnExpressions/ColumnExpr";
 import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
+import { toValidArray } from "../utils/array";
 
 /**
  * Creates an expression targeting all columns except the specified ones.
@@ -22,6 +23,6 @@ import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
  */
 export function exclude(columns: string | string[]): ColumnExpr<any> {
     const expr = new ColumnExpr(ALL_COLUMNS_MARKER);
-    expr._excludedCols = Array.isArray(columns) ? columns : [columns];
+    expr._excludedCols = toValidArray(columns, { clone: false });
     return expr;
 }

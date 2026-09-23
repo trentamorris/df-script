@@ -677,5 +677,22 @@ if (!threwRegexDup) {
     throw new Error("Edge Case T7 failed: expected duplicate error between explicit string and regex match");
 }
 
+// Edge Case T8: $df.col([string, RegExp]) mixed array partitioning in ColumnExpr
+const dfColMixed = dfPattern.select($df.col(["extra_meta", /^num_/]));
+if (dfColMixed.columns.length !== 3 ||
+    dfColMixed.columns[0] !== "extra_meta" ||
+    !dfColMixed.columns.includes("num_1") ||
+    !dfColMixed.columns.includes("num_2")) {
+    throw new Error(`Edge Case T8 failed: expected $df.col(['extra_meta', /^num_/]) to select 3 columns, got ${JSON.stringify(dfColMixed.columns)}`);
+}
+
+// Edge Case T9: $df.col([RegExp, RegExp]) multiple regex patterns in ColumnExpr
+const dfColMultiRegex = dfPattern.select($df.col([/^num_1$/, /^score_math$/]));
+if (dfColMultiRegex.columns.length !== 2 ||
+    !dfColMultiRegex.columns.includes("num_1") ||
+    !dfColMultiRegex.columns.includes("score_math")) {
+    throw new Error(`Edge Case T9 failed: expected $df.col with multiple regex patterns to select 2 columns, got ${JSON.stringify(dfColMultiRegex.columns)}`);
+}
+
 console.log("✓ select tests passed!");
 

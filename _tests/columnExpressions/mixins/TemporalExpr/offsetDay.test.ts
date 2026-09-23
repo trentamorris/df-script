@@ -154,5 +154,171 @@ const resME = dfME.select([
 if (getISOStr(resME[0].me_offset) !== "2026-05-24") throw new Error("ME workweek Thu + 1 bday failed");
 if (getISOStr(resME[1].me_offset) !== "2026-05-21") throw new Error("ME workweek Sun - 1 bday failed");
 
+// =========================================================================
+// 10/10 COMPLEX FRONTIER EDGE CASES
+// =========================================================================
+
+// 9. Edge Case 1: DST (Daylight Saving Time) Spring Forward / Fall Back Wall-Clock Invariance
+// US Spring forward occurred March 8, 2026 (Sunday). Advance across the DST gap in localized timezone timestamps
+const dfDST = $df.data([
+    { dt: "2026-03-06T02:30:00.000-05:00", n: 1 }, // Friday 02:30 EST + 1 bday -> skips weekend (and DST skip) -> Monday 02:30 EDT
+    { dt: "2026-10-30T01:30:00.000-04:00", n: 1 }, // Friday 01:30 EDT before fall-back -> Monday 01:30 EST
+], { dt: $df.Datetime, n: $df.Int32 });
+
+const resDST = dfDST.select([
+    $df.col("dt").dt.offsetDay($df.col("n"), { excludeWeekdays: [0, 6] }).alias("dst_res")
+]).toDicts() as any[];
+
+if (getISOStr(resDST[0].dst_res) !== "2026-03-09") throw new Error(`DST spring forward date match failed: ${getISOStr(resDST[0].dst_res)}`);
+if (getISOStr(resDST[1].dst_res) !== "2026-11-02") throw new Error(`DST fall back date match failed: ${getISOStr(resDST[1].dst_res)}`);
+
+// 10. Edge Case 2: Multi-Month Holiday Drought (Skipping an entire month of holidays)
+// Every day in February 2026 is registered as a holiday
+const allFebHolidays: string[] = [];
+for (let d = 1; d <= 28; d++) {
+    allFebHolidays.push(`2026-02-${String(d).padStart(2, "0")}`);
+}
+
+const dfMonthDrought = $df.data([
+    { date: "2026-01-30", n: 1 },   // Friday Jan 30 + 1 bday -> skips Jan 31 Sat, Feb 1 Sun, ALL Feb holidays -> Monday Mar 2 (+31 cal days)
+    { date: "2026-03-02", n: -1 },  // Monday Mar 02 - 1 bday -> skips Mar 1 Sun, Feb 28 Sat, ALL Feb holidays -> Friday Jan 30 (-31 cal days)
+], { date: $df.Date, n: $df.Int32 });
+
+const resDrought = dfMonthDrought.select([
+    $df.col("date").dt.offsetDay($df.col("n"), {
+        excludeWeekdays: [0, 6],
+        holidays: allFebHolidays
+    }).alias("drought_res")
+]).toDicts() as any[];
+
+if (getISOStr(resDrought[0].drought_res) !== "2026-03-02") throw new Error(`Month drought forward failed: ${getISOStr(resDrought[0].drought_res)}`);
+if (getISOStr(resDrought[1].drought_res) !== "2026-01-30") throw new Error(`Month drought backward failed: ${getISOStr(resDrought[1].drought_res)}`);
+
+// 11. Edge Case 3: 1-Day Work Week (6-Day Weekend where only Wednesday is a working day)
+const dfOneDay = $df.data([
+    { date: "2026-05-20", n: 1 },   // Wednesday May 20 + 1 -> Wednesday May 27 (+7 cal days)
+    { date: "2026-05-20", n: 4 },   // Wednesday May 20 + 4 -> Wednesday June 17 (+28 cal days)
+    { date: "2026-05-20", n: -2 },  // Wednesday May 20 - 2 -> Wednesday May 6 (-14 cal days)
+], { date: $df.Date, n: $df.Int32 });
+
+const resOneDay = dfOneDay.select([
+    $df.col("date").dt.offsetDay($df.col("n"), {
+        excludeWeekdays: [0, 1, 2, 4, 5, 6] // Only Wed (3) is active
+    }).alias("one_day_res")
+]).toDicts() as any[];
+
+if (getISOStr(resOneDay[0].one_day_res) !== "2026-05-27") throw new Error("1-day workweek +1 failed");
+if (getISOStr(resOneDay[1].one_day_res) !== "2026-06-17") throw new Error("1-day workweek +4 failed");
+if (getISOStr(resOneDay[2].one_day_res) !== "2026-05-06") throw new Error("1-day workweek -2 failed");
+
+// 12. Edge Case 4: Roll on Starting Dates that are simultaneously Excluded Weekday AND Explicit Holiday
+const dfSatHoliday = $df.data([
+    { date: "2026-05-23" } // Saturday, also listed in holidays
+], { date: $df.Date });
+
+const resSatHol = dfSatHoliday.select([
+    $df.col("date").dt.offsetDay(0, { excludeWeekdays: [0, 6], holidays: ["2026-05-23"], roll: "forward" }).alias("roll_fwd"),
+    $df.col("date").dt.offsetDay(0, { excludeWeekdays: [0, 6], holidays: ["2026-05-23"], roll: "backward" }).alias("roll_bwd"),
+    $df.col("date").dt.offsetDay(1, { excludeWeekdays: [0, 6], holidays: ["2026-05-23"], roll: "forward" }).alias("roll_fwd_step1")
+]).toDicts() as any[];
+
+if (getISOStr(resSatHol[0].roll_fwd) !== "2026-05-25") throw new Error("Sat weekend+holiday roll forward failed");
+if (getISOStr(resSatHol[0].roll_bwd) !== "2026-05-22") throw new Error("Sat weekend+holiday roll backward failed");
+if (getISOStr(resSatHol[0].roll_fwd_step1) !== "2026-05-26") throw new Error("Sat weekend+holiday roll forward + 1 bday failed");
+
+// 13. Edge Case 5: Large Long-Term Horizons (e.g. 500 business days = 100 weeks = 700 calendar days)
+const dfLarge = $df.data([
+    { date: "2026-05-18", n: 250 },  // 50 weeks = 350 calendar days -> 2027-05-03
+    { date: "2026-05-18", n: -250 }  // 50 weeks prior = -350 calendar days -> 2025-06-02
+], { date: $df.Date, n: $df.Int32 });
+
+const resLarge = dfLarge.select([
+    $df.col("date").dt.offsetDay($df.col("n"), { excludeWeekdays: [0, 6] }).alias("large_res")
+]).toDicts() as any[];
+
+if (getISOStr(resLarge[0].large_res) !== "2027-05-03") throw new Error(`Large 250 forward failed: ${getISOStr(resLarge[0].large_res)}`);
+if (getISOStr(resLarge[1].large_res) !== "2025-06-02") throw new Error(`Large 250 backward failed: ${getISOStr(resLarge[1].large_res)}`);
+
+// 14. Edge Case 6: Mixed & Chaotic Holiday Format Handling in Column Expression Pipeline
+const dfChaoticHol = $df.data([
+    { date: "2026-05-18", n: 1 } // Monday + 1 bday with Tuesday formatted as Date obj, string, and timestamp
+], { date: $df.Date, n: $df.Int32 });
+
+const resChaotic = dfChaoticHol.select([
+    $df.col("date").dt.offsetDay($df.col("n"), {
+        excludeWeekdays: [0, 6],
+        holidays: [
+            "2026-05-19",
+            new Date("2026-05-19T10:00:00Z"),
+            Date.UTC(2026, 4, 19),
+            "invalid-holiday",
+            null as any,
+            NaN as any
+        ]
+    }).alias("chaotic_res")
+]).toDicts() as any[];
+
+if (getISOStr(resChaotic[0].chaotic_res) !== "2026-05-20") throw new Error("Chaotic holiday representation failed to skip Tuesday");
+
+// 15. Edge Case 7: Leap Day Feb 29 As Start Date With Positive and Negative Offsets
+const dfLeapStart = $df.data([
+    { date: "2024-02-29", n: 1 },  // Thursday leap day + 1 -> Friday Mar 1
+    { date: "2024-02-29", n: 2 },  // Thursday leap day + 2 -> Monday Mar 4
+    { date: "2024-02-29", n: -1 }, // Thursday leap day - 1 -> Wednesday Feb 28
+    { date: "2024-02-29", n: -5 }  // Thursday leap day - 5 -> Thursday Feb 22
+], { date: $df.Date, n: $df.Int32 });
+
+const resLeapStart = dfLeapStart.select([
+    $df.col("date").dt.offsetDay($df.col("n"), { excludeWeekdays: [0, 6] }).alias("leap_start_res")
+]).toDicts() as any[];
+
+if (getISOStr(resLeapStart[0].leap_start_res) !== "2024-03-01") throw new Error("Leap start +1 failed");
+if (getISOStr(resLeapStart[1].leap_start_res) !== "2024-03-04") throw new Error("Leap start +2 failed");
+if (getISOStr(resLeapStart[2].leap_start_res) !== "2024-02-28") throw new Error("Leap start -1 failed");
+if (getISOStr(resLeapStart[3].leap_start_res) !== "2024-02-22") throw new Error("Leap start -5 failed");
+
+// 16. Edge Case 8: Century Leap Year vs Normal Century Rule (Year 2000 vs 2100)
+// Year 2000 was a leap year (Feb 29 exists); Year 2100 is NOT a leap year (Feb 28 followed by Mar 1)
+const dfCentury = $df.data([
+    { date: "2000-02-28", n: 1 }, // 2000 was leap -> Feb 29 (Tue)
+    { date: "2100-02-28", n: 1 }  // 2100 not leap: Feb 28 is Sun. With roll="forward" to Mon Mar 1, + 1 bday -> Tue Mar 2
+], { date: $df.Date, n: $df.Int32 });
+
+const resCentury = dfCentury.select([
+    $df.col("date").dt.offsetDay($df.col("n"), { excludeWeekdays: [0, 6], roll: "forward" }).alias("century_res")
+]).toDicts() as any[];
+
+if (getISOStr(resCentury[0].century_res) !== "2000-02-29") throw new Error("Year 2000 leap century failed");
+if (getISOStr(resCentury[1].century_res) !== "2100-03-02") throw new Error(`Year 2100 non-leap century failed: ${getISOStr(resCentury[1].century_res)}`);
+
+// 17. Edge Case 9: Millisecond Sub-Zero Time Boundary Neutrality
+// 23:59:59.999Z + 1 calendar day must land on EXACTLY 23:59:59.999Z the next day without rolling over an extra second
+const dfMicroBoundary = $df.data([
+    { dt: "2026-05-18T23:59:59.999Z", n: 1 },
+    { dt: "2026-05-18T00:00:00.000Z", n: -1 }
+], { dt: $df.Datetime, n: $df.Int32 });
+
+const resMicro = dfMicroBoundary.select([
+    $df.col("dt").dt.offsetDay($df.col("n")).alias("boundary_dt")
+]).toDicts() as any[];
+
+if (getFullISO(resMicro[0].boundary_dt) !== "2026-05-19T23:59:59.999Z") throw new Error("End-of-day millisecond preservation failed");
+if (getFullISO(resMicro[1].boundary_dt) !== "2026-05-17T00:00:00.000Z") throw new Error("Start-of-day backward preservation failed");
+
+// 18. Edge Case 10: Chaining offsetDay with Other Expression Transforms
+// Testing offsetDay combined in a pipeline with dt.month(), dt.year(), and arithmetic
+const dfPipeline = $df.data([
+    { date: "2026-05-29" } // Friday May 29 + 1 bday -> June 1 (new month)
+], { date: $df.Date });
+
+const resPipeline = dfPipeline.select([
+    $df.col("date").dt.offsetDay(1, { excludeWeekdays: [0, 6] }).dt.month().alias("next_month"),
+    $df.col("date").dt.offsetDay(1, { excludeWeekdays: [0, 6] }).dt.day().alias("next_day")
+]).toDicts() as any[];
+
+if (resPipeline[0].next_month !== 6) throw new Error(`Pipeline month chain failed: ${resPipeline[0].next_month}`);
+if (resPipeline[0].next_day !== 1) throw new Error(`Pipeline day chain failed: ${resPipeline[0].next_day}`);
+
 console.log("✓ TemporalExpr.offsetDay tests passed!");
+
 

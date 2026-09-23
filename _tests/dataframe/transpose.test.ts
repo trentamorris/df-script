@@ -395,4 +395,68 @@ if (tWide.item(0, "column_0") !== 0 || tWide.item(499, "column_0") !== 998) {
     throw new Error("Wide transpose cell values mismatch");
 }
 
+// 29. Edge Case: Transposing mixed objects, dates, and booleans with Utf8 coercion
+const dfComplexTypes = new DataFrame({
+    flag: [true, false],
+    date: [new Date("2020-01-01"), new Date("2021-01-01")],
+    val: [100n, 200n]
+});
+const tComplexTypes = dfComplexTypes.transpose({ includeHeader: true, headerName: "feature" });
+if (tComplexTypes.height !== 3 || tComplexTypes.width !== 3) {
+    throw new Error(`29. Complex types transpose shape mismatch: got ${tComplexTypes.shape}`);
+}
+if (tComplexTypes.item(0, "feature") !== "flag" || tComplexTypes.item(1, "feature") !== "date" || tComplexTypes.item(2, "feature") !== "val") {
+    throw new Error("29. Feature header column mismatch");
+}
+if (tComplexTypes.item(0, "column_0") !== "true" || tComplexTypes.item(0, "column_1") !== "false") {
+    throw new Error("29. Boolean row transpose mismatch");
+}
+if (tComplexTypes.item(2, "column_0") !== "100" || tComplexTypes.item(2, "column_1") !== "200") {
+    throw new Error("29. BigInt row transpose mismatch");
+}
+
+// 30. Edge Case: Transpose columnNames from a boolean / number key column coerced to strings
+const dfKeyTypes = new DataFrame({
+    key: [true, false],
+    v1: [10, 20],
+    v2: [30, 40]
+});
+const tKeyTypes = dfKeyTypes.transpose({ columnNames: "key" });
+if (tKeyTypes.columns[0] !== "true" || tKeyTypes.columns[1] !== "false") {
+    throw new Error("30. Boolean column names transpose string coercion failed");
+}
+if (tKeyTypes.item(0, "true") !== 10 || tKeyTypes.item(1, "false") !== 40) {
+    throw new Error("30. Boolean key values transpose mismatch");
+}
+
+// 31. Edge Case: Transpose single column DataFrame to single row with includeHeader
+const dfSingleCol = new DataFrame({
+    single_metric: [42, 84, 126]
+});
+const tSingleCol = dfSingleCol.transpose({ includeHeader: true, headerName: "metric_id" });
+if (tSingleCol.height !== 1 || tSingleCol.width !== 4) {
+    throw new Error("31. Single column transpose shape mismatch");
+}
+if (tSingleCol.item(0, "metric_id") !== "single_metric" || tSingleCol.item(0, "column_0") !== 42 || tSingleCol.item(0, "column_2") !== 126) {
+    throw new Error("31. Single column transpose values mismatch");
+}
+
+// 32. Edge Case: Transpose with Generator/Iterable providing column names
+function* nameGen32() {
+    yield "alpha";
+    yield "beta";
+    yield "gamma";
+}
+const dfGenNames = new DataFrame({
+    x: [1, 2, 3],
+    y: [4, 5, 6]
+});
+const tGenNames = dfGenNames.transpose({ columnNames: nameGen32() });
+if (tGenNames.columns[0] !== "alpha" || tGenNames.columns[1] !== "beta" || tGenNames.columns[2] !== "gamma") {
+    throw new Error("32. Generator columnNames transpose failed");
+}
+if (tGenNames.item(0, "alpha") !== 1 || tGenNames.item(1, "gamma") !== 6) {
+    throw new Error("32. Generator columnNames cell values mismatch");
+}
+
 console.log("✓ transpose tests passed!");

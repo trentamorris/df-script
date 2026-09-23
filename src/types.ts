@@ -394,3 +394,18 @@ export interface ShiftOptions {
      */
     fillValue?: any;
 }
+
+export interface ToValidArrayOptions {
+    /**
+     * If true, returns a shallow copy of an existing array.
+     * If false, returns the input array directly without cloning.
+     * @default true
+     */
+    clone?: boolean;
+    /**
+     * If true, wraps null or undefined into an array containing that single element.
+     * If false, returns an empty array [].
+     * @default false
+     */
+    wrapNull?: boolean;
+}

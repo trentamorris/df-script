@@ -1,6 +1,6 @@
 import { DataFrame } from "../dataframe/dataframe"
 import { DataTypeRegistry } from "../datatypes"
-import { isTypedArray, isPlainObj, isArrayOfType, isArrayOrTypedArray } from "../utils"
+import { isTypedArray, isPlainObj, isArrayOfType, isArrayOrTypedArray, toValidArray } from "../utils"
 import type { ColumnDict, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType } from "../types"
 import { DataFrameError, SchemaError, ShapeError } from "../exceptions"
 
@@ -146,7 +146,7 @@ export function concat<U extends RowRecord = any>(
     if (rawItems == null) {
         throw new DataFrameError("Invalid input to concat: rawItems cannot be null or undefined.");
     }
-    const itemsArray = Array.isArray(rawItems) ? rawItems : [rawItems];
+    const itemsArray = toValidArray(rawItems, { clone: false });
     const items: DataFrame<any>[] = [];
     for (let i = 0; i < itemsArray.length; i++) {
         items.push(..._normalizeToDataFrames(itemsArray[i], "concat", i));

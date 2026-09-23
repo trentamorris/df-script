@@ -29,6 +29,33 @@ try {
     if (dateArr.length !== 1 || !(dateArr[0] instanceof Date)) {
         throw new Error("date conversion failed");
     }
+
+    // Direct scalar tests
+    const scalarStr = toArrayOfType<string>("single", "string");
+    if (scalarStr.length !== 1 || scalarStr[0] !== "single") throw new Error("scalar string failed");
+    const scalarNum = toArrayOfType<number>(42, "number");
+    if (scalarNum.length !== 1 || scalarNum[0] !== 42) throw new Error("scalar number failed");
+
+    // Int conversion
+    const intArr = toArrayOfType<number>([1, 2.8, "3"], "int");
+    if (intArr.length !== 3 || intArr[0] !== 1 || intArr[1] !== 2 || intArr[2] !== 3) {
+        throw new Error("int conversion failed");
+    }
+
+    // Regexp conversion (including string to RegExp)
+    const reg1 = /foo/i;
+    const regArr = toArrayOfType<RegExp>([reg1, "^test.*$"], "regexp");
+    if (regArr.length !== 2 || regArr[0] !== reg1 || !(regArr[1] instanceof RegExp) || regArr[1].source !== "^test.*$") {
+        throw new Error("regexp conversion failed");
+    }
+
+
+    // Array conversion
+    const nestedArr = toArrayOfType<any[]>([[1, 2], new Uint8Array([3, 4])], "array");
+    if (nestedArr.length !== 2 || nestedArr[0][0] !== 1 || nestedArr[1][0] !== 3) {
+        throw new Error("nested array conversion failed");
+    }
+
     console.log("✓ toArrayOfType tests passed!");
 } catch (err: any) {
     console.error(`❌ toArrayOfType test failed: ${err.message}`);

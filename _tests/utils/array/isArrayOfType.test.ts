@@ -41,6 +41,16 @@ try {
     if (!isArrayOfType([], "number")) throw new Error("Expected empty array to match by default");
     if (isArrayOfType([], "number", { allowEmpty: false })) throw new Error("Expected empty array to fail with allowEmpty: false");
 
+    // Tests for new types: "int", "regexp", "symbol", "array"
+    if (!isArrayOfType([1, 2, 0, -10], "int")) throw new Error("Expected [1, 2, 0, -10] to be of type 'int'");
+    if (isArrayOfType([1, 2.5, 3], "int")) throw new Error("Expected [1, 2.5, 3] to not be of type 'int'");
+
+    if (!isArrayOfType([/abc/i, new RegExp("xyz")], "regexp")) throw new Error("Expected RegExp array to be of type 'regexp'");
+    if (isArrayOfType([/abc/, "not-a-regex"], "regexp")) throw new Error("Expected mixed regex array to not be of type 'regexp'");
+
+    if (!isArrayOfType([[1, 2], ["x", "y"], new Uint8Array([1])], "array")) throw new Error("Expected array of arrays to be of type 'array'");
+    if (isArrayOfType([[1, 2], "not-an-array"], "array")) throw new Error("Expected mixed array to not be of type 'array'");
+
     console.log("✓ isArrayOfType tests passed!");
 } catch (err: any) {
     console.error(`❌ isArrayOfType test failed: ${err.message}`);

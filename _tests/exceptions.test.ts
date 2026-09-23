@@ -68,4 +68,25 @@ if (result_oob_null[0].sliced !== null) {
     throw new Error(`Expected sliced result to be null, got ${JSON.stringify(result_oob_null[0].sliced)}`);
 }
 
+// Verify assertion utilities in exceptions/utils.ts
+import { assertNotNull, assertValidArgument, assertColumnExists } from "../src/exceptions";
+
+// assertNotNull
+if (assertNotNull(123) !== 123) throw new Error("assertNotNull return value mismatch");
+try {
+    assertNotNull(null, "Cannot be null");
+    throw new Error("Expected InvalidArgumentError from assertNotNull");
+} catch (err: any) {
+    if (err.message !== "Cannot be null") throw new Error("assertNotNull message mismatch");
+}
+
+// assertValidArgument
+assertValidArgument(true, "ok");
+try {
+    assertValidArgument(false, "Condition failed");
+    throw new Error("Expected InvalidArgumentError from assertValidArgument");
+} catch (err: any) {
+    if (err.message !== "Condition failed") throw new Error("assertValidArgument message mismatch");
+}
+
 console.log("✓ Custom exceptions testing passed!");

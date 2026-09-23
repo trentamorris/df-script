@@ -32,4 +32,22 @@ if (emptyCols.length !== 0) {
     throw new Error(`Expected 0 cols for empty DataFrame, got ${emptyCols.length}`);
 }
 
+// 3. TypedArray columns iteration
+const dfTyped = new DataFrame({
+    i32: new Int32Array([10, 20, 30]),
+    f64: new Float64Array([1.1, 2.2, 3.3])
+});
+const typedCols = Array.from(dfTyped.iterColumns());
+if (typedCols.length !== 2 || !(typedCols[0] instanceof Int32Array) || !(typedCols[1] instanceof Float64Array)) {
+    throw new Error("3. TypedArray iterColumns mismatch");
+}
+
+// 4. Partial iteration via for...of loop break
+let count = 0;
+for (const col of df.iterColumns()) {
+    count++;
+    if (count === 1) break;
+}
+if (count !== 1) throw new Error("4. Early break in iterColumns loop failed");
+
 console.log("✓ iterColumns tests passed!");

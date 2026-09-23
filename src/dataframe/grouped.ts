@@ -1,5 +1,5 @@
 import { DataFrame } from "./dataframe"
-import { inferColumnType, coerceColumn } from "./utils"
+import { inferColumnType, coerceColumn, gatherColumnByIndices } from "./utils"
 import type { GroupMap, GroupedAggDelegatedOps } from "./types"
 import { resolveColumnSelectors, ALL_COLUMNS_MARKER, resolveExprOutputType, ColumnExpr } from "../columnExpressions"
 import { DataTypeRegistry } from "../datatypes"
@@ -40,14 +40,14 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
         this._synthesizedColumns = synthesizedColumns
     }
 
-    private _materializeKeyColumns(keysStr: string[]): { newColumns: ColumnDict; outSchema: DataFrameSchema; groupCount: number } {
+    private _materializeKeyColumns(keys: string[]): { newColumns: ColumnDict; outSchema: DataFrameSchema; groupCount: number } {
         const numGroups = this._groups.size;
-        const keysCount = keysStr.length;
+        const keysCount = keys.length;
         const newColumns: ColumnDict = {};
         const outSchema: DataFrameSchema = {};
 
         for (let i = 0; i < keysCount; i++) {
-            const k = keysStr[i];
+            const k = keys[i];
             newColumns[k] = new Array(numGroups);
             outSchema[k] = this._parentSchema[k];
         }
@@ -57,25 +57,15 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
             if (indices.length === 0) continue;
             const firstIdx = indices[0];
             for (let i = 0; i < keysCount; i++) {
-                const k = keysStr[i];
-                const val = this._synthesizedColumns?.[k]
-                    ? this._synthesizedColumns[k][groupIdx]
-                    : this._parentColumns[k]?.[firstIdx];
+                const k = keys[i];
+                const synth = this._synthesizedColumns?.[k];
+                const val = synth ? synth[groupIdx] : this._parentColumns[k]?.[firstIdx];
                 (newColumns[k] as any[])[groupIdx] = val === undefined ? null : val;
             }
             groupIdx++;
         }
 
         return { newColumns, outSchema, groupCount: groupIdx };
-    }
-
-    private _toStringKeys(keys: any[]): string[] {
-        const len = keys.length;
-        const result = new Array<string>(len);
-        for (let i = 0; i < len; i++) {
-            result[i] = String(keys[i]);
-        }
-        return result;
     }
 
     /**
@@ -94,44 +84,40 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * └───────┴─────────┘
      */
     agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
-        const allKeysStr = this._toStringKeys(this._allKeys);
-        const keysStr = this._toStringKeys(this._keys);
-        const expandedExprs = resolveColumnSelectors(exprs.flat(), allKeysStr, keysStr, this._parentSchema, this._parentColumns);
+        const keys = this._keys as unknown as string[];
+        const allKeys = this._allKeys as unknown as string[];
+        const normalizedExprs = DataFrame._normalizeArgs(exprs);
+        const expandedExprs = resolveColumnSelectors(normalizedExprs, allKeys, keys, this._parentSchema, this._parentColumns);
 
-        const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(keysStr);
+        const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(keys);
         const numGroups = this._groups.size;
 
-        for (let i = 0; i < expandedExprs.length; i++) {
+        for (let i = 0, len = expandedExprs.length; i < len; i++) {
             const e = expandedExprs[i];
             const targetKey = e._outputName || e._colName || ALL_COLUMNS_MARKER;
 
+            let evaluated: any;
             if (!e._aggFn) {
-                newColumns[targetKey] = e.evaluate(newColumns, numGroups);
+                evaluated = e.evaluate(newColumns, numGroups);
             } else {
-                const preGroupedCol = e._evaluatePre(e._groupingOpsIndex, this._parentColumns, this._parentHeight);
-                const aggregatedGroupValues = new Array(numGroups);
+                const pre = e._evaluatePre(e._groupingOpsIndex, this._parentColumns, this._parentHeight);
+                const aggregated = new Array(numGroups);
                 let gIdx = 0;
                 for (const indices of this._groups.values()) {
-                    if (indices.length === 0) continue;
-                    const groupValues = new Array(indices.length);
-                    for (let k = 0; k < indices.length; k++) {
-                        groupValues[k] = preGroupedCol[indices[k]];
+                    if (indices.length > 0) {
+                        aggregated[gIdx++] = e._aggFn(gatherColumnByIndices(pre, indices) as any[]);
                     }
-                    aggregatedGroupValues[gIdx] = e._aggFn(groupValues);
-                    gIdx++;
                 }
-                newColumns[targetKey] = e._evaluatePost(e._groupingOpsIndex, aggregatedGroupValues, newColumns);
+                evaluated = e._evaluatePost(e._groupingOpsIndex, aggregated, newColumns);
             }
-        }
 
-        for (const e of expandedExprs) {
-            const targetKey = e._outputName || e._colName || ALL_COLUMNS_MARKER;
-            const type = resolveExprOutputType(e, this._parentSchema, newColumns[targetKey])
-                || inferColumnType(newColumns[targetKey])
+            const type = resolveExprOutputType(e, this._parentSchema, evaluated)
+                || inferColumnType(evaluated)
                 || this._parentSchema[targetKey]
                 || DataTypeRegistry.Utf8;
+
             outSchema[targetKey] = type;
-            newColumns[targetKey] = coerceColumn(newColumns[targetKey], type, groupCount);
+            newColumns[targetKey] = coerceColumn(evaluated, type, groupCount);
         }
 
         return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
@@ -152,8 +138,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * └───────┘
      */
     toDataframe<U extends RowRecord = any>(): DataFrame<U> {
-        const keysStr = this._toStringKeys(this._keys);
-        const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(keysStr);
+        const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(this._keys as unknown as string[]);
         return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
     }
 }

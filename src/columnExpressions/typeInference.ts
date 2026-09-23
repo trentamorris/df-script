@@ -16,6 +16,7 @@ import {
     isValidBigInt,
     isValidBinary,
     isTypedArray,
+    isArrayOfType,
     isObj,
     unboxPrimitiveObj,
     typedArrayTagGetter
@@ -65,8 +66,7 @@ function _resolveOperandType(
     // 2. Collections & Structures
     if (Array.isArray(unboxed)) {
         let innerType: RegisteredDataType | undefined;
-        const len = unboxed.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0, len = unboxed.length; i < len; i++) {
             const item = unboxed[i];
             if (item != null && (innerType = _resolveOperandType(item, schema))) break;
         }
@@ -97,15 +97,8 @@ function _deduceBinaryType(
     if (!leftType || !rightType) return undefined;
 
     // Check if result column has boolean type
-    if (colSample && colSample.length > 0) {
-        let hasBool = false;
-        for (let i = 0; i < colSample.length; i++) {
-            const v = colSample[i];
-            if (v == null) continue;
-            if (typeof v !== "boolean") { hasBool = false; break; }
-            hasBool = true;
-        }
-        if (hasBool) return DataTypeRegistry.Boolean;
+    if (colSample?.length && isArrayOfType(colSample, "boolean", { mode: "every", allowNulls: true, allowEmpty: false })) {
+        return DataTypeRegistry.Boolean;
     }
 
     const leftIsDuration = leftType instanceof DurationType;
@@ -142,11 +135,9 @@ function _deduceBinaryType(
 
         // If resulting values are non-integers (e.g. division 10 / 3 = 3.333), infer Float64
         if (colSample !== undefined) {
-            const range = { range: { min: -Infinity, max: Infinity } } as const;
-            const len = colSample.length;
-            for (let i = 0; i < len; i++) {
+            for (let i = 0, len = colSample.length; i < len; i++) {
                 const v = colSample[i];
-                if (isValidNumber(v) && !isValidInt(v, range)) return DataTypeRegistry.Float64;
+                if (isValidNumber(v) && !Number.isInteger(v)) return DataTypeRegistry.Float64;
             }
         }
 
@@ -158,9 +149,10 @@ function _deduceBinaryType(
         for (let i = 0; i < 4; i++) {
             const width = _INT_PRECEDENCE[i];
             if (l.endsWith(width) || r.endsWith(width)) {
-                return (width !== "64" && l === `UInt${width}` && r === `UInt${width}`)
-                    ? (DataTypeRegistry as any)[`UInt${width}`]
-                    : (DataTypeRegistry as any)[`Int${width}`];
+                const key = (width !== "64" && l === `UInt${width}` && r === `UInt${width}`)
+                    ? `UInt${width}`
+                    : `Int${width}`;
+                return DataTypeRegistry[key as keyof typeof DataTypeRegistry] as RegisteredDataType;
             }
         }
     }
@@ -193,15 +185,15 @@ export function resolveExprOutputType(
     }
     if (expr._branchOperands) {
         let inferred: RegisteredDataType | undefined;
-        const len = expr._branchOperands.length;
-        for (let i = 0; i < len; i++) {
+        for (let i = 0, len = expr._branchOperands.length; i < len; i++) {
             const t = _resolveOperandType(expr._branchOperands[i], schema);
             if (!t) continue;
-            if (!inferred) inferred = t;
-            else if (inferred !== t) {
-                if (inferred.isNumeric && t.isNumeric) {
-                    inferred = _deduceBinaryType(inferred, t, colSample) ?? inferred;
-                }
+            if (!inferred) {
+                inferred = t;
+                continue;
+            }
+            if (inferred !== t && inferred.isNumeric && t.isNumeric) {
+                inferred = _deduceBinaryType(inferred, t, colSample) ?? inferred;
             }
         }
         if (inferred) return inferred;
@@ -220,8 +212,10 @@ export function resolveExprOutputType(
         if (baseType instanceof ArrayType && (expr._isUnnest || (colSample as any)?.rowMap)) return baseType.innerType;
         if (!(baseType instanceof ArrayType) && Array.isArray(sampleVal)) return DataTypeRegistry.Array(baseType);
         if (isBareCol) return baseType;
-        if (baseType.isTemporal && expr._aggFn && (isValidDateObj(sampleVal) || typeof sampleVal === "string")) return baseType;
-        if (baseType instanceof DurationType && expr._aggFn && isValidNumber(sampleVal)) return baseType;
+        if (expr._aggFn) {
+            if (baseType.isTemporal && (isValidDateObj(sampleVal) || typeof sampleVal === "string")) return baseType;
+            if (baseType instanceof DurationType && isValidNumber(sampleVal)) return baseType;
+        }
     }
 
     // 4. Statistical aggregations

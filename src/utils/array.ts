@@ -1,9 +1,9 @@
 /** @internalfile */
-import { isClass, isObj, isPlainObj, isValidDateObj, typedArrayTagGetter } from "./object";
-import { toValidNumber, isValidNumber, isValidInt, toValidBigInt, isValidBigInt, clamp, SAFE_BIGINT_RANGE } from "./number";
+import { isClass, isObj, isPlainObj, isValidDateObj, isRegExp, typedArrayTagGetter } from "./object";
+import { toValidNumber, isValidNumber, isValidInt, toValidInt, toValidBigInt, isValidBigInt, clamp, SAFE_BIGINT_RANGE } from "./number";
 import { toValidDate } from "./date";
-import { toCanonicalString } from "./string";
-import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions } from "../types";
+import { toCanonicalString, toCleanRegExp } from "./string";
+import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions, ToValidArrayOptions } from "../types";
 
 import { ComputeError, InvalidArgumentError } from "../exceptions";
 
@@ -19,11 +19,15 @@ export function isArrayOrTypedArray(v: unknown): v is any[] | AnyTypedArray {
     return Array.isArray(v) || isTypedArray(v);
 }
 
-export function toValidArray<T>(val: T | T[] | null | undefined): T[] {
-    if (val == null) return [];
-    if (Array.isArray(val)) return [...val];
+export function toValidArray<T>(
+    val: T | readonly T[] | null | undefined,
+    options: ToValidArrayOptions = {}
+): T[] {
+    const { clone = true, wrapNull = false } = options;
+    if (val == null) return wrapNull ? ([val] as T[]) : [];
+    if (Array.isArray(val)) return clone ? [...val] : (val as T[]);
     if (isTypedArray(val)) return Array.from(val as any);
-    return [val];
+    return [val as T];
 }
 
 export function getArrayElement(arr: any[] | AnyTypedArray, index: number, nullOnOob: boolean): any {
@@ -38,11 +42,14 @@ export function getArrayElement(arr: any[] | AnyTypedArray, index: number, nullO
 export type ArrayItemType =
     | "string"
     | "number"
+    | "int"
     | "boolean"
     | "bigint"
     | "object"
     | "plainObject"
     | "date"
+    | "regexp"
+    | "array"
     | "any"
     | "null"
     | "undefined"
@@ -81,12 +88,21 @@ function _getTypeValidators(type: ArrayItemType): {
             return { check: (v) => typeof v === "string", coerce: (v) => String(v) };
         case "number":
             return { check: isValidNumber, coerce: (v) => toValidNumber(v) ?? NaN };
+        case "int":
+            return { check: isValidInt, coerce: (v) => toValidInt(v) };
         case "boolean":
             return { check: (v) => typeof v === "boolean", coerce: Boolean };
         case "bigint":
             return { check: isValidBigInt, coerce: (v) => toValidBigInt(v) };
         case "date":
             return { check: isValidDateObj, coerce: (v) => toValidDate(v) };
+        case "regexp":
+            return {
+                check: isRegExp,
+                coerce: (v) => isRegExp(v) ? v : (typeof v === "string" ? toCleanRegExp("", v)?.reg ?? null : null)
+            };
+        case "array":
+            return { check: isArrayOrTypedArray, coerce: (v) => isArrayOrTypedArray(v) ? toValidArray(v, { clone: false }) : null };
         case "object":
             return { check: isObj, coerce: (v) => (isObj(v) ? v : null) };
         case "plainObject":

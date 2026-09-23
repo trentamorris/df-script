@@ -52,6 +52,7 @@ import {
     parseDurationString,
     reduceBitwise,
     roundToScale,
+    toValidArray,
     toValidDate,
     toValidNumber
 } from "../../utils"
@@ -2237,7 +2238,7 @@ export class StandardExpr extends ExprBase {
      */
     over(columns: string | IExpr | (string | IExpr)[]) {
         const newInst = this._derive();
-        const cols = Array.isArray(columns) ? columns : [columns];
+        const cols = toValidArray(columns, { clone: false });
         newInst._partitionBy = cols;
         return newInst;
     }

@@ -67,33 +67,33 @@ export class ExprBase implements IExpr {
         return _derive(this, kleeneUnary(fn));
     }
 
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
+    private _runOps(value: ColumnData, start: number, end: number, columns: ColumnDict): ColumnData {
         const ops = this._ops;
-        const idx = opsIndex !== undefined ? opsIndex : ops.length;
-        let value: ColumnData = aggregatedArray;
-        for (let i = idx; i < ops.length; i++) {
+        for (let i = start; i < end; i++) {
             value = ops[i](value, columns);
         }
-        return value as ColumnData;
+        return value;
+    }
+
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
+        const start = opsIndex !== undefined ? opsIndex : 0;
+        return this._runOps(aggregatedArray, start, this._ops.length, columns);
     }
 
     _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData {
-        let value = this._getInitialValue(columns, height);
-        const ops = this._ops;
-        const idx = opsIndex !== undefined ? opsIndex : ops.length;
-        for (let i = 0; i < idx; i++) {
-            value = ops[i](value, columns);
-        }
-        return value as ColumnData;
+        const end = opsIndex !== undefined ? opsIndex : this._ops.length;
+        return this._runOps(this._getInitialValue(columns, height), 0, end, columns);
     }
 
     _getInitialValue(columns: ColumnDict, height: number): ColumnData {
         const name = (this as any)._colName;
-        if (name && name !== ALL_COLUMNS_MARKER && !name.startsWith(ALL_COLUMNS_MARKER) && !(name in columns)) {
+        if (name && (name in columns)) {
+            return columns[name];
+        }
+        if (name && name !== ALL_COLUMNS_MARKER && !name.startsWith(ALL_COLUMNS_MARKER)) {
             throw new ColumnNotFoundError(name);
         }
-        const val = name && name !== ALL_COLUMNS_MARKER ? columns[name] : null;
-        return val || new Array(height).fill(null);
+        return new Array(height).fill(null);
     }
 
     _isColExpr(v: unknown): v is IExpr {
@@ -106,10 +106,7 @@ export class ExprBase implements IExpr {
 
     _resolve(val: any, columns: ColumnDict, height: number) {
         if (val instanceof ExprBase) {
-            if (val._isLiteral) {
-                return val._literalValue;
-            }
-            return evaluateExpression(val, columns, height);
+            return val._isLiteral ? val._literalValue : evaluateExpression(val, columns, height);
         }
         return val;
     }

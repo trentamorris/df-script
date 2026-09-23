@@ -269,5 +269,171 @@ if (!aAgg || aAgg.sum_x !== 30 || aAgg.min_x !== 10 || aAgg.max_y !== 200 || aAg
     ]);
 }
 
+// 17. Edge Case: Non-aggregation expression inside agg (e.g. literal, arithmetic on key, scalar expr)
+const literalExprDf = new DataFrame([
+    { grp: "A", val: 10 },
+    { grp: "A", val: 20 },
+    { grp: "B", val: 30 },
+]);
+const literalAggRes = literalExprDf.groupBy("grp").agg(
+    $df.col("val").sum().alias("sum_val"),
+    $df.lit(42).alias("constant_val"),
+    $df.col("grp").alias("group_copy")
+).toDicts();
+
+const litA = literalAggRes.find((r: any) => r.grp === "A");
+const litB = literalAggRes.find((r: any) => r.grp === "B");
+if (!litA || litA.sum_val !== 30 || litA.constant_val !== 42 || litA.group_copy !== "A") {
+    throw new Error("Non-agg literal and column expression inside agg failed for group A");
+}
+if (!litB || litB.sum_val !== 30 || litB.constant_val !== 42 || litB.group_copy !== "B") {
+    throw new Error("Non-agg literal and column expression inside agg failed for group B");
+}
+
+// 18. Edge Case: Post-aggregation scalar arithmetic (e.g. $df.col("score").sum().add(100))
+const postAggTestDf = new DataFrame([
+    { grp: "A", score: 10 },
+    { grp: "A", score: 20 },
+    { grp: "B", score: 50 },
+]);
+const postAggRes = postAggTestDf.groupBy("grp").agg(
+    $df.col("score").sum().add(100).alias("sum_plus_100"),
+    $df.col("score").max().alias("max_score")
+).toDicts();
+
+const postA = postAggRes.find((r: any) => r.grp === "A");
+const postB = postAggRes.find((r: any) => r.grp === "B");
+if (!postA || postA.sum_plus_100 !== 130 || postA.max_score !== 20) {
+    throw new Error("Post-aggregation expression failed for group A");
+}
+if (!postB || postB.sum_plus_100 !== 150 || postB.max_score !== 50) {
+    throw new Error("Post-aggregation expression failed for group B");
+}
+
+// 19. Edge Case: Grouping with complex types (Date, BigInt, Boolean keys)
+const complexKeyDf = new DataFrame([
+    { dateKey: new Date("2025-01-01T00:00:00Z"), big: 100n, flag: true, val: 5 },
+    { dateKey: new Date("2025-01-01T00:00:00Z"), big: 100n, flag: true, val: 15 },
+    { dateKey: new Date("2025-01-02T00:00:00Z"), big: 200n, flag: false, val: 50 },
+]);
+const complexAgg = complexKeyDf.groupBy(["dateKey", "big", "flag"]).agg(
+    $df.col("val").sum().alias("total")
+);
+if (complexAgg.height !== 2) throw new Error("Complex key grouping height mismatch, expected 2");
+const complexRows = complexAgg.toDicts();
+const d1 = complexRows.find((r: any) => r.big === 100n);
+const d2 = complexRows.find((r: any) => r.big === 200n);
+if (!d1 || d1.total !== 20 || d1.flag !== true) throw new Error("Complex key group 1 failed");
+if (!d2 || d2.total !== 50 || d2.flag !== false) throw new Error("Complex key group 2 failed");
+
+// 20. Edge Case: Nested and array/implode aggregations inside agg()
+const arrayAggDf = new DataFrame([
+    { grp: "X", item: "apple" },
+    { grp: "X", item: "banana" },
+    { grp: "Y", item: "cherry" },
+]);
+const arrayAggRes = arrayAggDf.groupBy("grp").agg(
+    $df.col("item").implode().alias("items"),
+    $df.col("item").first().alias("first_item"),
+    $df.col("item").last().alias("last_item")
+).toDicts();
+
+const xGroup = arrayAggRes.find((r: any) => r.grp === "X");
+const yGroup = arrayAggRes.find((r: any) => r.grp === "Y");
+if (!xGroup || !Array.isArray(xGroup.items) || xGroup.items.length !== 2 || xGroup.first_item !== "apple" || xGroup.last_item !== "banana") {
+    throw new Error("Array/implode aggregation failed for group X");
+}
+if (!yGroup || !Array.isArray(yGroup.items) || yGroup.items.length !== 1 || yGroup.first_item !== "cherry" || yGroup.last_item !== "cherry") {
+    throw new Error("Array/implode aggregation failed for group Y");
+}
+
+// 21. Edge Case: Zero matching rows / empty groups filter condition
+const sparseDf = new DataFrame([
+    { cat: "A", num: 1 },
+    { cat: "A", num: 2 },
+    { cat: "B", num: 10 },
+]);
+const filteredPreAgg = sparseDf.groupBy("cat").agg(
+    $df.when($df.col("num").gt(5)).then($df.col("num")).otherwise(null).sum().alias("sum_gt_5")
+).toDicts();
+const aFiltered = filteredPreAgg.find((r: any) => r.cat === "A");
+const bFiltered = filteredPreAgg.find((r: any) => r.cat === "B");
+if (!aFiltered || aFiltered.sum_gt_5 !== null) throw new Error("All-filtered-out group should sum to null");
+if (!bFiltered || bFiltered.sum_gt_5 !== 10) throw new Error("Group B sum_gt_5 should be 10");
+
+// 23. Edge Case: Duplicate output column aliases (last expression wins)
+const dupAliasDf = new DataFrame([
+    { grp: "A", val: 10 },
+    { grp: "A", val: 20 },
+]);
+const dupAliasRes = dupAliasDf.groupBy("grp").agg(
+    $df.col("val").min().alias("res"),
+    $df.col("val").max().alias("res")
+).toDicts();
+if (dupAliasRes[0].res !== 20) {
+    throw new Error("Duplicate output alias in agg() should overwrite with last evaluated value");
+}
+
+// 24. Edge Case: Grouping by entire dataset as a single group vs unique per row
+const uniformDf = new DataFrame([
+    { id: 1, v: 100 },
+    { id: 2, v: 200 },
+    { id: 3, v: 300 },
+]);
+const allDistinctRes = uniformDf.groupBy("id").agg($df.col("v").sum().alias("v_sum"));
+if (allDistinctRes.height !== 3) throw new Error("Unique key per row should produce N groups");
+
+const constKeyDf = new DataFrame([
+    { grp: 1, v: 10 },
+    { grp: 1, v: 20 },
+    { grp: 1, v: 30 },
+]);
+const singleGroupRes = constKeyDf.groupBy("grp").agg(
+    $df.col("v").sum().alias("v_sum"),
+    $df.col("v").count().alias("v_count"),
+    $df.col("v").mean().alias("v_mean")
+).toDicts();
+if (singleGroupRes.length !== 1 || singleGroupRes[0].v_sum !== 60 || singleGroupRes[0].v_count !== 3 || singleGroupRes[0].v_mean !== 20) {
+    throw new Error("Single monolithic group aggregation failed");
+}
+
+// 25. Edge Case: String operations on grouped partitions
+const strAggDf = new DataFrame([
+    { cat: "A", str: "hello" },
+    { cat: "A", str: "world" },
+    { cat: "B", str: "foo" },
+]);
+const strAggRes = strAggDf.groupBy("cat").agg(
+    $df.col("str").first().str.toUpperCase().alias("first_upper")
+).toDicts();
+const aStr = strAggRes.find((r: any) => r.cat === "A");
+const bStr = strAggRes.find((r: any) => r.cat === "B");
+if (!aStr || aStr.first_upper !== "HELLO" || !bStr || bStr.first_upper !== "FOO") {
+    throw new Error("String transformation on grouped result failed");
+}
+
+// 26. Edge Case: Dictionary aggregation mapping (via _normalizeArgs)
+const dictAggDf = new DataFrame([
+    { dept: "Eng", salary: 100 },
+    { dept: "Eng", salary: 150 },
+    { dept: "Sales", salary: 80 },
+]);
+const dictAggRes = dictAggDf.groupBy("dept").agg({
+    total_salary: $df.col("salary").sum(),
+    avg_salary: $df.col("salary").mean(),
+    dept_label: "department_summary"
+}).toDicts();
+
+const engGroup = dictAggRes.find((r: any) => r.dept === "Eng");
+const salesGroup = dictAggRes.find((r: any) => r.dept === "Sales");
+if (!engGroup || engGroup.total_salary !== 250 || engGroup.avg_salary !== 125 || engGroup.dept_label !== "department_summary") {
+    throw new Error("Dictionary aggregation failed for Eng group");
+}
+if (!salesGroup || salesGroup.total_salary !== 80 || salesGroup.avg_salary !== 80 || salesGroup.dept_label !== "department_summary") {
+    throw new Error("Dictionary aggregation failed for Sales group");
+}
+
 console.log("✓ GroupedData.agg tests passed!");
+
+
 

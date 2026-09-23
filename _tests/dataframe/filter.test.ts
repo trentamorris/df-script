@@ -211,6 +211,15 @@ if (df.height !== origHeight) {
     throw new Error("21. Immutability violation: original DataFrame height modified");
 }
 
+// 22. Edge Case: Nested expression arrays & string column names (via _normalizeArgs)
+const dfNestedFilter = df.filter([
+    $df.col("age").gt(20),
+    $df.col("name").ne("Bob")
+]);
+if (dfNestedFilter.height !== 2) {
+    throw new Error("22. Nested array of filter expressions failed");
+}
+
 console.log("✓ filter tests passed!");
 
 

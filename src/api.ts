@@ -30,7 +30,14 @@ export const $df = {
     all,
     coalesce,
     col: <T = any>(
-        name: keyof T | string | (keyof T | string)[] | RegExp | RegExp[] | DataType | Function | (DataType | Function)[]
+        name:
+            | keyof T
+            | string
+            | RegExp
+            | DataType
+            | Function
+            | (keyof T | string | RegExp)[]
+            | (DataType | Function)[]
     ) => new ColumnExpr<T>(name),
     concat,
     data,

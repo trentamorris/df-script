@@ -46,7 +46,7 @@ export function evalBinaryOp(v: any, r: any, fn: (a: any, b: any) => any): any {
     return fn(normV, normR);
 }
 
-export const kleeneUnary = (fn: (v: any) => any) => {
+export function kleeneUnary(fn: (v: any) => any) {
     return (vArray: ColumnData) => {
         const height = vArray.length;
         const result = new Array(height);
@@ -55,9 +55,9 @@ export const kleeneUnary = (fn: (v: any) => any) => {
         }
         return result;
     };
-};
+}
 
-export const kleeneBinary = (expr: IExpr, other: any, fn: (v: any, r: any) => any) => {
+export function kleeneBinary(expr: IExpr, other: any, fn: (v: any, r: any) => any) {
     const op = (vArray: ColumnData, columns: ColumnDict) => {
         const height = vArray.length;
         const rResolved = expr._resolve(other, columns, height);
@@ -75,7 +75,7 @@ export const kleeneBinary = (expr: IExpr, other: any, fn: (v: any, r: any) => an
     };
     (op as any)._binaryMeta = { _left: expr, _right: other };
     return op;
-};
+}
 
 export function evaluateExpression(expr: IExpr, columns: ColumnDict, height: number): ColumnData {
     return expr._isWindow
@@ -110,16 +110,11 @@ export function isEvaluatedColumn(
     columns: ColumnDict | null | undefined,
     height: number
 ): boolean {
-    if (!isArrayOrTypedArray(evaluatedVal) || evaluatedVal.length !== height) {
-        return false;
-    }
-    if (isExpr(arg)) {
-        return true;
-    }
-    if (typeof arg === "string" && columns != null && (arg in columns)) {
-        return true;
-    }
-    return false;
+    return (
+        isArrayOrTypedArray(evaluatedVal) &&
+        evaluatedVal.length === height &&
+        (isExpr(arg) || (typeof arg === "string" && columns != null && (arg in columns)))
+    );
 }
 
 /**
@@ -154,9 +149,9 @@ export function buildCanonicalSet(vals: any): Set<string> {
 
 export function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any): any[] {
     const height = vArray.length;
-    const isExpr = values && typeof values === "object" && "evaluate" in values;
-    const resolved = isExpr ? values.evaluate(columns, height) : null;
-    const staticSet = isExpr ? null : buildCanonicalSet(values);
+    const exprValues = isExpr(values);
+    const resolved = exprValues ? evaluateExpression(values, columns, height) : null;
+    const staticSet = exprValues ? null : buildCanonicalSet(values);
     const result = new Array(height);
 
     for (let i = 0; i < height; i++) {
@@ -165,7 +160,7 @@ export function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any): 
             result[i] = null;
             continue;
         }
-        const set = staticSet ?? buildCanonicalSet(resolved[i]);
+        const set = staticSet ?? buildCanonicalSet(resolved![i]);
         result[i] = set.has(toCanonicalString(v));
     }
     return result;

@@ -26,7 +26,16 @@ export class ColumnExpr<T> extends ExprBase {
      * @category ColumnExpression
      * @syntax $df.col(<column_name>).{symbol}(...)
      */
-    constructor(colName: keyof T | string | (keyof T | string)[] | RegExp | RegExp[] | DataType | Function | (DataType | Function)[]) {
+    constructor(
+        colName:
+            | keyof T
+            | string
+            | RegExp
+            | DataType
+            | Function
+            | (keyof T | string | RegExp)[]
+            | (DataType | Function)[]
+    ) {
         super();
 
         if (isRegExp(colName)) {
@@ -50,20 +59,17 @@ export class ColumnExpr<T> extends ExprBase {
             return;
         }
 
-        const len = colName.length;
         const strings: string[] = [];
-        let patterns: RegExp[] | undefined;
+        const patterns: RegExp[] = [];
+        const len = colName.length;
 
         for (let i = 0; i < len; i++) {
             const item = colName[i];
-            if (isRegExp(item)) {
-                (patterns ??= []).push(item);
-            } else {
-                strings.push(String(item));
-            }
+            if (isRegExp(item)) patterns.push(item);
+            else strings.push(String(item));
         }
 
-        if (patterns) this._patterns = patterns;
+        if (patterns.length > 0) this._patterns = patterns;
         if (strings.length > 0) this._colNames = strings;
     }
 }
@@ -102,52 +108,70 @@ function _getTargetKeys(
     excludeSet: Set<string>,
     schema?: DataFrameSchema
 ): string[] | null {
-    if (expr instanceof ColumnExpr && expr._colNames?.length) return expr._colNames;
-    if (!(expr instanceof ColumnExpr) && (!isObj(expr) || !("evaluate" in expr) || expr._colName)) return null;
-
-    let predicate: (key: string) => boolean;
-
-    if (!(expr instanceof ColumnExpr)) {
-        predicate = () => true;
-    } else if (expr._colName === ALL_COLUMNS_MARKER) {
-        const excluded = new Set(expr._excludedCols);
-        predicate = (k) => !excluded.has(k);
-    } else if (expr._patterns?.length) {
-        const patterns = expr._patterns;
-        const numPatterns = patterns.length;
-        predicate = (k) => {
-            for (let i = 0; i < numPatterns; i++) {
-                patterns[i].lastIndex = 0;
-                if (patterns[i].test(k)) return true;
-            }
-            return false;
-        };
-    } else if (expr._targetTypes?.length) {
-        if (!schema) {
-            throw new SchemaError("Cannot resolve DataType without DataFrame schema.");
-        }
-        const types = expr._targetTypes;
-        const numTypes = types.length;
-        predicate = (k) => {
-            const colType = schema[k];
-            if (!colType) return false;
-            for (let i = 0; i < numTypes; i++) {
-                if (colType.matches(types[i])) return true;
-            }
-            return false;
-        };
-    } else {
-        return null;
+    if (expr?._colNames?.length && !expr._patterns?.length) {
+        return expr._colNames;
     }
 
+    const isExpr = expr instanceof ColumnExpr;
+    const isAll = isExpr && expr._colName === ALL_COLUMNS_MARKER;
+    const patterns = isExpr && expr._patterns ? expr._patterns : [];
+    const exactNames = isExpr && expr._colNames ? expr._colNames : [];
+    const types = isExpr && expr._targetTypes ? expr._targetTypes : [];
+    const numPatterns = patterns.length;
+    const numTypes = types.length;
+
+    if (!isAll && numPatterns === 0 && numTypes === 0) {
+        if (isExpr || !isObj(expr) || !("evaluate" in expr) || expr._colName) {
+            return null;
+        }
+    }
+
+    if (numTypes > 0 && !schema) {
+        throw new SchemaError("Cannot resolve DataType without DataFrame schema.");
+    }
+
+    const excluded = isAll && expr._excludedCols ? new Set(expr._excludedCols) : null;
     const targets: string[] = [];
     const allLen = allKeys.length;
+
     for (let i = 0; i < allLen; i++) {
         const key = allKeys[i];
-        if (!excludeSet.has(key) && predicate(key)) {
+        if (excludeSet.has(key)) continue;
+
+        if (isAll) {
+            if (!excluded || !excluded.has(key)) targets.push(key);
+            continue;
+        }
+
+        if (exactNames.indexOf(key) !== -1) {
+            targets.push(key);
+            continue;
+        }
+
+        let matched = false;
+        for (let p = 0; p < numPatterns; p++) {
+            patterns[p].lastIndex = 0;
+            if (patterns[p].test(key)) {
+                matched = true;
+                break;
+            }
+        }
+
+        if (!matched && numTypes > 0 && schema![key]) {
+            const colType = schema![key];
+            for (let t = 0; t < numTypes; t++) {
+                if (colType.matches(types[t])) {
+                    matched = true;
+                    break;
+                }
+            }
+        }
+
+        if (matched || (!numPatterns && !numTypes)) {
             targets.push(key);
         }
     }
+
     return targets;
 }
 

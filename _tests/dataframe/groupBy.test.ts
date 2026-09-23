@@ -132,4 +132,32 @@ if (!nanGroup || nanGroup.total !== 30) throw new Error("NaN group total wrong: 
 if (!nullGrp7 || nullGrp7.total !== 30) throw new Error("null group total wrong: " + nullGrp7?.total);
 if (!oneGrp || oneGrp.total !== 40) throw new Error("one group total wrong: " + oneGrp?.total);
 
+// ─── 8. Edge Cases for groupBy key input variations ───────────────────────────
+// 8a. Array of keys vs single key string equivalence
+const dfKeysTest = new DataFrame([
+    { a: "x", b: 1, val: 10 },
+    { a: "x", b: 1, val: 20 },
+    { a: "y", b: 2, val: 30 },
+]);
+const aggSingle = dfKeysTest.groupBy("a").agg($df.col("val").sum().alias("s"));
+const aggArray = dfKeysTest.groupBy(["a"]).agg($df.col("val").sum().alias("s"));
+if (aggSingle.height !== aggArray.height || aggSingle.height !== 2) {
+    throw new Error("Single string vs array key mismatch in groupBy");
+}
+
+// 8b. Empty keys array []
+const aggEmptyKeys = dfKeysTest.groupBy([]).agg($df.col("val").sum().alias("s"));
+if (aggEmptyKeys.height !== 1 || (aggEmptyKeys.toDicts()[0] as any).s !== 60) {
+    throw new Error("Empty keys array [] in groupBy should group all rows into 1 global group");
+}
+
+// 8c. Non-existent column in groupBy throws ColumnNotFoundError
+let threwNonExistent = false;
+try {
+    dfKeysTest.groupBy("non_existent_column" as any);
+} catch (e: any) {
+    if (e.name === "ColumnNotFoundError") threwNonExistent = true;
+}
+if (!threwNonExistent) throw new Error("groupBy with non-existent column must throw ColumnNotFoundError");
+
 console.log("✓ groupBy tests passed!");
