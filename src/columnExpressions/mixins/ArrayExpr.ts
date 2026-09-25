@@ -28,7 +28,11 @@ import { ComputeError } from "../../exceptions";
  * @syntax $df.col(<column_name>).arr.{symbol}(...)
  */
 export class ArrayExprNamespace {
-    constructor(public _expr: any) { }
+    _expr: any;
+
+    constructor(expr: any) {
+        this._expr = expr;
+    }
 
     _deriveArray(fn: (arr: any[] | AnyTypedArray) => any) {
         return this._expr._deriveUnary((v: any) => isArrayOrTypedArray(v) ? fn(v as any) : null);

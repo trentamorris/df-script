@@ -4,7 +4,8 @@ import {
     INT8_MIN, INT8_MAX, UINT8_MIN, UINT8_MAX,
     INT16_MIN, INT16_MAX, UINT16_MIN, UINT16_MAX,
     INT32_MIN, INT32_MAX, UINT32_MIN, UINT32_MAX,
-    INT64_MIN, INT64_MAX, UINT64_MIN, UINT64_MAX
+    INT64_MIN, INT64_MAX, UINT64_MIN, UINT64_MAX,
+    SAFE_BIGINT_MIN, SAFE_BIGINT_MAX
 } from "../constants";
 
 const _STRICT_SCIENTIFIC_REGEX = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/;
@@ -345,8 +346,8 @@ export const BIGINT_RANGES = {
 
 export const SAFE_BIGINT_RANGE = {
     range: {
-        min: BigInt(Number.MIN_SAFE_INTEGER),
-        max: BigInt(Number.MAX_SAFE_INTEGER)
+        min: SAFE_BIGINT_MIN,
+        max: SAFE_BIGINT_MAX
     }
 } as const;
 

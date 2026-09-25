@@ -582,7 +582,9 @@ function _resolveGroupRecord(
     const index = Math.trunc(num);
     if (index >= 0) return record[String(index)] ?? null;
 
-    const targetIndex = ((record as any)._length ?? 0) + index;
+    let count = 0;
+    while (String(count) in record) count++;
+    const targetIndex = count + index;
     return targetIndex >= 1 ? (record[String(targetIndex)] ?? null) : null;
 }
 
@@ -625,21 +627,44 @@ function _collectPatternCandidates<T>(
     return candidates;
 }
 
-function _selectLeftmostCandidates<T>(candidates: CandidateMatch<T>[]): CandidateMatch<T>[] {
-    if (candidates.length <= 1) return candidates;
-    candidates.sort((a, b) => {
-        if (a._start !== b._start) return a._start - b._start;
-        return a._i - b._i;
-    });
-    const selected: CandidateMatch<T>[] = [];
-    let lastPos = 0;
+function _intervalsOverlap(s1: number, e1: number, s2: number, e2: number): boolean {
+    return s1 === e1 || s2 === e2 ? s1 <= e2 && s2 <= e1 : s1 < e2 && s2 < e1;
+}
+
+function _filterNonOverlapping<T>(candidates: CandidateMatch<T>[], leftmost: boolean): CandidateMatch<T>[] {
     const len = candidates.length;
+    if (len <= 1) return candidates;
+
+    candidates.sort(leftmost
+        ? (a, b) => a._start !== b._start ? a._start - b._start : a._i - b._i
+        : (a, b) => a._i - b._i
+    );
+
+    const selected: CandidateMatch<T>[] = [];
+    if (leftmost) {
+        let lastPos = 0;
+        for (let i = 0; i < len; i++) {
+            const c = candidates[i];
+            if (c._start >= lastPos) {
+                selected.push(c);
+                lastPos = c._end;
+            }
+        }
+        return selected;
+    }
+
     for (let i = 0; i < len; i++) {
         const c = candidates[i];
-        if (c._start >= lastPos) {
-            selected.push(c);
-            lastPos = c._end;
+        let overlaps = false;
+        const selLen = selected.length;
+        for (let j = 0; j < selLen; j++) {
+            const a = selected[j];
+            if (_intervalsOverlap(c._start, c._end, a._start, a._end)) {
+                overlaps = true;
+                break;
+            }
         }
+        if (!overlaps) selected.push(c);
     }
     return selected;
 }
@@ -673,15 +698,17 @@ function _matchManyCore<T>(
     const candidates: CandidateMatch<T>[] = [];
 
     for (let i = 0; i < len; i++) {
-        const res = extractRegexEngine(str, list[i], { ...engineOpts, global: false });
-        if (res && res[0] && res[0]._index != null) {
-            const start = Number(res[0]._index);
-            const matchLen = res[0]["0"]?.length ?? 0;
+        const cleaned = toCleanRegExp(str, list[i], { ...engineOpts, global: false });
+        if (!cleaned) continue;
+        const match = cleaned.input.match(cleaned.reg);
+        if (match && match.index !== undefined) {
+            const start = match.index;
+            const matchLen = match[0].length;
             candidates.push({
                 _i: i,
                 _start: start,
                 _end: start + matchLen,
-                _payload: resolvePayload(res[0], start)
+                _payload: resolvePayload(_matchToRecord(match), start)
             });
         }
     }
@@ -689,29 +716,7 @@ function _matchManyCore<T>(
     const result = new Array<T | null>(len).fill(null);
     if (candidates.length === 0) return result;
 
-    const selected = isLeftmost ? _selectLeftmostCandidates(candidates) : [];
-    if (!isLeftmost) {
-        candidates.sort((a, b) => a._i - b._i);
-        const candLen = candidates.length;
-        for (let i = 0; i < candLen; i++) {
-            const c = candidates[i];
-            let overlaps = false;
-            const selLen = selected.length;
-            for (let j = 0; j < selLen; j++) {
-                const a = selected[j];
-                let isOverlapping = false;
-                if (c._start === c._end && a._start === a._end) isOverlapping = c._start === a._start;
-                else if (a._start === a._end) isOverlapping = a._start >= c._start && a._start < c._end;
-                else if (c._start === c._end) isOverlapping = c._start >= a._start && c._start < a._end;
-                else isOverlapping = c._start < a._end && c._end > a._start;
-                if (isOverlapping) {
-                    overlaps = true;
-                    break;
-                }
-            }
-            if (!overlaps) selected.push(c);
-        }
-    }
+    const selected = _filterNonOverlapping(candidates, isLeftmost);
 
     for (let i = 0; i < selected.length; i++) {
         const c = selected[i];
@@ -1015,7 +1020,7 @@ export function replaceManyString(
 
     if (candidates.length === 0) return input;
 
-    const selected = _selectLeftmostCandidates(candidates);
+    const selected = _filterNonOverlapping(candidates, true);
     let result = "";
     let lastIndex = 0;
     const selLen = selected.length;

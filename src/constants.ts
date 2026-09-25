@@ -58,6 +58,13 @@ export const INT64_MAX = 9_223_372_036_854_775_807n;
 export const UINT64_MIN = 0n;
 export const UINT64_MAX = 18_446_744_073_709_551_615n;
 
+/** JavaScript Safe Integer Boundaries (Number.MIN_SAFE_INTEGER & Number.MAX_SAFE_INTEGER) */
+export const SAFE_INT_MIN = -9_007_199_254_740_991;
+export const SAFE_INT_MAX = 9_007_199_254_740_991;
+export const SAFE_BIGINT_MIN = -9_007_199_254_740_991n;
+export const SAFE_BIGINT_MAX = 9_007_199_254_740_991n;
+
+
 /** 32-bit & Standard Integer Boundaries */
 export const INT32_MIN = -2_147_483_648;
 export const INT32_MAX = 2_147_483_647;

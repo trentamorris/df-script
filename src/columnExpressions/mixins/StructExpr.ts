@@ -11,7 +11,10 @@ import { createDelegatingProxy } from "../utils";
  */
 
 export class StructExprNamespace {
-    constructor(public _expr: any) {
+    _expr: any;
+
+    constructor(expr: any) {
+        this._expr = expr;
         return createDelegatingProxy(this, (prop, target) => prop in target ? undefined : target.field(prop));
     }
 

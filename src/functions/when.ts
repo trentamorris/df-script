@@ -6,10 +6,16 @@ import { WHEN_MARKER } from "../columnExpressions/constants";
 type WhenArg = IExpr | ValidScalarTypes | any[] | Record<string, any>;
 
 export class WhenThenChain {
+    _predicates: WhenArg[];
+    _values: WhenArg[];
+
     constructor(
-        public _predicates: WhenArg[],
-        public _values: WhenArg[] = []
-    ) { }
+        predicates: WhenArg[],
+        values: WhenArg[] = []
+    ) {
+        this._predicates = predicates;
+        this._values = values;
+    }
 
     then(value: WhenArg): WhenThen {
         return new WhenThen(this._predicates, [...this._values, value]);
@@ -19,16 +25,23 @@ export class WhenThenChain {
 export { WhenThenChain as When };
 
 export class WhenThen extends ColumnExpr<any> {
+    _predicates: WhenArg[];
+    _values: WhenArg[];
+    _otherwise: WhenArg;
+
     get _branchOperands(): WhenArg[] {
         return this._otherwise != null ? [...this._values, this._otherwise] : this._values;
     }
 
     constructor(
-        public _predicates: WhenArg[] = [],
-        public _values: WhenArg[] = [],
-        public _otherwise: WhenArg = null
+        predicates: WhenArg[] = [],
+        values: WhenArg[] = [],
+        otherwise: WhenArg = null
     ) {
         super(WHEN_MARKER);
+        this._predicates = predicates;
+        this._values = values;
+        this._otherwise = otherwise;
 
         this._ops = [(_, columns) => {
             const height = _.length;

@@ -51,7 +51,11 @@ import {
  * @syntax $df.col(<column_name>).str.{symbol}(...)
  */
 export class StringExprNamespace {
-    constructor(public _expr: any) { }
+    _expr: any;
+
+    constructor(expr: any) {
+        this._expr = expr;
+    }
 
     _deriveString(fn: (v: string) => any) {
         return this._expr._deriveUnary((v: any) => fn(String(v)));

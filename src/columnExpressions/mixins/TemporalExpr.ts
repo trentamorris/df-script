@@ -36,7 +36,11 @@ import {
  * at expression-build time requires schema-level checks in DataFrame operations.
  */
 export class DateTimeExprNamespace {
-    constructor(public _expr: any) { }
+    _expr: any;
+
+    constructor(expr: any) {
+        this._expr = expr;
+    }
 
     /** Returns the column's schema timezone from a prior convertTimeZone call, or null. */
     _colTz(): string | null {
