@@ -33,11 +33,14 @@ async function main() {
   console.log(`🚀 PREPARING RELEASE: ${pkgName} v${version}`);
   console.log("=========================================\n");
 
-  // Step 1: Run Full Test Suite
-  console.log("▶ [1/4] Running project tests...");
+  // Step 1: Run Full Test Suite (Source & Dist)
+  console.log("▶ [1/4] Running project tests (source & dist)...");
   try {
+    console.log("  → Running source tests (npm test)...");
     run("npm test");
-    console.log("✅ All tests passed successfully.\n");
+    console.log("  → Running bundle distribution tests (npm run test:dist)...");
+    run("npm run test:dist");
+    console.log("✅ All source and dist tests passed successfully.\n");
   } catch (err) {
     console.error("❌ Tests failed! Aborting release.");
     process.exit(1);
