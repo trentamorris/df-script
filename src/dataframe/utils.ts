@@ -4,7 +4,7 @@ import type { JoinOptions, JoinAsofOptions, JoinWhereOptions } from "./types"
 import { DataFrame } from "./dataframe"
 import { DataTypeRegistry } from "../datatypes"
 import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
-import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct, toValidNumber, isValidNumber, isValidInt, binarySearch } from "../utils"
+import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct, toValidNumber, isValidNumber, isValidInt, binarySearch, toArrayOfType } from "../utils"
 import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
 
 export function partitionByColumns(
@@ -472,21 +472,25 @@ export function alignAsofIndices(
     const allowExactMatches = options.allowExactMatches ?? true;
     const checkSorted = options.checkSorted ?? true;
 
-    const leftOnCol = leftCols[leftOnKey];
-    const rightOnCol = rightCols[rightOnKey];
+    const leftNumCol = toArrayOfType(leftCols[leftOnKey], Float64Array, {
+        coerce: (v) => toValidNumber(v) ?? NaN
+    }) as unknown as Float64Array;
+    const rightNumCol = toArrayOfType(rightCols[rightOnKey], Float64Array, {
+        coerce: (v) => toValidNumber(v) ?? NaN
+    }) as unknown as Float64Array;
 
     if (checkSorted) {
-        const assertSorted = (col: ColumnData, height: number, colName: string, side: string) => {
+        const assertSorted = (col: Float64Array, height: number, colName: string, side: string) => {
             for (let i = 1; i < height; i++) {
-                const prev = toValidNumber(col[i - 1]);
-                const curr = toValidNumber(col[i]);
+                const prev = col[i - 1];
+                const curr = col[i];
                 if (isValidNumber(prev) && isValidNumber(curr) && curr < prev) {
                     throw new InvalidArgumentError(`${side} DataFrame key column "${colName}" is not sorted in ascending order at row ${i}.`);
                 }
             }
         };
-        assertSorted(leftOnCol, leftHeight, leftOnKey, "left");
-        assertSorted(rightOnCol, rightHeight, rightOnKey, "right");
+        assertSorted(leftNumCol, leftHeight, leftOnKey, "left");
+        assertSorted(rightNumCol, rightHeight, rightOnKey, "right");
     }
 
     const hasBy = leftByKeys.length > 0;
@@ -500,11 +504,11 @@ export function alignAsofIndices(
     const leftIndices: number[] = new Array(leftHeight);
     const rightIndices: (number | null)[] = new Array(leftHeight);
 
+    const getVal = (_: number, c: number) => rightNumCol[c];
+
     const matchCandidate = (leftVal: number, candidates: number[]): number | null => {
         const len = candidates.length;
         if (len === 0) return null;
-
-        const getVal = (_: number, c: number) => toValidNumber(rightOnCol[c]) ?? NaN;
 
         if (strategy === "backward") {
             const pos = binarySearch(candidates, leftVal, { side: allowExactMatches ? "right" : "left", getValue: getVal }) - 1;
@@ -518,13 +522,13 @@ export function alignAsofIndices(
         const pos = binarySearch(candidates, leftVal, { side: "right", getValue: getVal });
         let bIdx = pos - 1, fIdx = pos;
         if (!allowExactMatches) {
-            if (bIdx >= 0 && getVal(bIdx, candidates[bIdx]) === leftVal) bIdx--;
-            if (fIdx < len && getVal(fIdx, candidates[fIdx]) === leftVal) fIdx++;
+            if (bIdx >= 0 && rightNumCol[candidates[bIdx]] === leftVal) bIdx--;
+            if (fIdx < len && rightNumCol[candidates[fIdx]] === leftVal) fIdx++;
         }
         if (bIdx < 0) return fIdx < len ? candidates[fIdx] : null;
         if (fIdx >= len) return bIdx >= 0 ? candidates[bIdx] : null;
-        const bVal = getVal(bIdx, candidates[bIdx]);
-        const fVal = getVal(fIdx, candidates[fIdx]);
+        const bVal = rightNumCol[candidates[bIdx]];
+        const fVal = rightNumCol[candidates[fIdx]];
         return Math.abs(leftVal - bVal) <= Math.abs(leftVal - fVal) ? candidates[bIdx] : candidates[fIdx];
     };
 
@@ -532,7 +536,7 @@ export function alignAsofIndices(
 
     for (let i = 0; i < leftHeight; i++) {
         leftIndices[i] = i;
-        const leftVal = toValidNumber(leftOnCol[i]);
+        const leftVal = leftNumCol[i];
 
         if (!isValidNumber(leftVal)) {
             rightIndices[i] = null;
@@ -551,7 +555,7 @@ export function alignAsofIndices(
         let matchedRIdx = matchCandidate(leftVal, candidates);
 
         if (matchedRIdx !== null && tol !== null) {
-            const rVal = toValidNumber(rightOnCol[matchedRIdx]);
+            const rVal = rightNumCol[matchedRIdx];
             if (!isValidNumber(tol) || !isValidNumber(rVal) || Math.abs(leftVal - rVal) > tol) {
                 matchedRIdx = null;
             }
@@ -605,16 +609,30 @@ export function alignWhereIndices(
     const leftKeysLen = leftKeys.length;
     const rightKeysLen = rightKeys.length;
 
+    const bindSideBuffers = (sourceCols: ColumnDict, keys: string[], targetKeys: string[]) => {
+        const len = keys.length;
+        const targetBuffers = new Array(len);
+        const sourceColList = new Array(len);
+        for (let k = 0; k < len; k++) {
+            targetBuffers[k] = evalCols[targetKeys[k]];
+            sourceColList[k] = sourceCols[keys[k]];
+        }
+        return { targetBuffers, sourceCols: sourceColList };
+    };
+
+    const { targetBuffers: leftTargetBuffers, sourceCols: leftSourceCols } = bindSideBuffers(leftCols, leftKeys, leftTargetKeys);
+    const { targetBuffers: rightTargetBuffers, sourceCols: rightSourceCols } = bindSideBuffers(rightCols, rightKeys, rightTargetKeys);
+
     for (let i = 0; i < leftHeight; i++) {
         let leftMatched = false;
 
         for (let k = 0; k < leftKeysLen; k++) {
-            (evalCols[leftTargetKeys[k]] as any[])[0] = leftCols[leftKeys[k]][i];
+            leftTargetBuffers[k][0] = leftSourceCols[k][i];
         }
 
         rightLoop: for (let j = 0; j < rightHeight; j++) {
             for (let k = 0; k < rightKeysLen; k++) {
-                (evalCols[rightTargetKeys[k]] as any[])[0] = rightCols[rightKeys[k]][j];
+                rightTargetBuffers[k][0] = rightSourceCols[k][j];
             }
 
             for (let p = 0; p < numPreds; p++) {

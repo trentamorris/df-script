@@ -1,5 +1,6 @@
 /** @internalfile */
 import { DANGEROUS_OBJ_PROPERTIES } from "../constants";
+import type { TypedArrayConstructor } from "../types";
 const _TAG_DATE = "[object Date]";
 const _TAG_REGEXP = "[object RegExp]";
 const _TAG_SET = "[object Set]";
@@ -37,6 +38,7 @@ const _mapSize = _mapProto ? Object.getOwnPropertyDescriptor(_mapProto, "size")?
 const _arrayBufferProto = typeof ArrayBuffer === "function" ? ArrayBuffer.prototype : undefined;
 const _sharedArrayBufferProto = typeof SharedArrayBuffer === "function" ? SharedArrayBuffer.prototype : undefined;
 const _dataViewProto = typeof DataView === "function" ? DataView.prototype : undefined;
+const _typedArrayCtorProto = typeof Uint8Array === "function" ? Object.getPrototypeOf(Uint8Array) : undefined;
 
 export const typedArrayTagGetter = typeof Uint8Array === "function"
     ? Object.getOwnPropertyDescriptor(Object.getPrototypeOf(Uint8Array.prototype), Symbol.toStringTag)?.get
@@ -138,6 +140,10 @@ export function isClass(v: unknown): v is new (...args: any[]) => any {
     }
 
     return false;
+}
+
+export function isTypedArrayConstructor(v: unknown): v is TypedArrayConstructor {
+    return typeof v === "function" && _typedArrayCtorProto !== undefined && Object.prototype.isPrototypeOf.call(_typedArrayCtorProto, v);
 }
 
 function _checkNativeSlot(

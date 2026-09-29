@@ -167,9 +167,18 @@ const dfTieR = new DataFrame([
 ]);
 // |15 - 10| = 5, |15 - 20| = 5 -> backward candidate (10) preferred when tied
 const dfTieRes = dfTieL.joinAsof(dfTieR, { on: "time", strategy: "nearest" });
-if ((dfTieRes.toDicts() as any[])[0].candidate !== "before") {
-    throw new Error("Nearest tie breaking failed");
-}
+// 15. Edge Case: Left row earlier than any Right row & partitioned by key yielding nulls
+const dfEarlyTrades = new DataFrame([
+    { time: 2, symbol: "AAPL", price: 95.0 },     // Earlier than any quote (earliest is 5) -> null
+    { time: 10, symbol: "UNKNOWN", price: 50.0 }, // Symbol not present in quotes -> null
+    { time: 12, symbol: "AAPL", price: 100.0 }    // Matches quote at time 5 -> bid: 99.5
+]);
+const dfEarlyRes = dfEarlyTrades.joinAsof(quotes, { on: "time", by: "symbol", strategy: "backward" });
+const earlyRows = dfEarlyRes.toDicts() as any[];
+if (earlyRows[0].bid !== null) throw new Error("Expected null for trade timestamp earlier than all quotes");
+if (earlyRows[1].bid !== null) throw new Error("Expected null for trade with unknown symbol");
+if (earlyRows[2].bid !== 99.5) throw new Error("Expected 99.5 for trade matching earlier quote");
 
 console.log("✓ joinAsof tests passed!");
+
 

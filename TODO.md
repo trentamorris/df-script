@@ -217,9 +217,12 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
 
 ### 🏎️ Automated Performance & Throughput Benchmarking Suite
 - [ ] **Method-Co-located Benchmarks (`<method>.bench.ts`)**:
-  * Adopt the lean suffix pattern placing `<method>.bench.ts` directly alongside `<method>.test.ts` in `_tests/` (e.g. `_tests/dataframe/filter.bench.ts` next to `filter.test.ts`).
+  * Adopt the lean suffix pattern placing `<method>.bench.ts` directly alongside `<method>.test.ts` in `_tests/` (e.g. `_tests/dataframe/groupBy.bench.ts` next to `groupBy.test.ts`, `_tests/dataframe/join.bench.ts` next to `join.test.ts`).
+  * **Dual-Faceted Validation**:
+    * `<method>.test.ts`: Robustness, edge cases, type coercions, null/NaN handling, Kleene logic, and invariant checks.
+    * `<method>.bench.ts`: Throughput (rows/sec), memory pressure (`heapUsed`), and latency scaling across realistic dataset volumes (1k, 50k, 500k rows).
   * Avoid deep subfolder bloat (no `filter/robustness.test.ts` vs `filter/performance.test.ts` folder explosion) while maintaining strict 1:1 visibility.
-  * Separate execution pipelines: `npm test` runs instant unit correctness suites, while `npm run bench` runs throughput / latency micro-benchmarks with synthetic 100k–1M row datasets.
+  * Separate execution pipelines: `npm test` runs instant unit correctness suites, while `npm run bench` runs throughput / latency micro-benchmarks with synthetic datasets.
   * Track throughput (rows/sec), latency per operation, and memory allocation overhead (`heapUsed`) on hot paths (`filter`, `groupBy`, `join`, `select`, `partitionBy`).
 
 
@@ -236,6 +239,9 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Introduce a dedicated 1D `Series` container (`$df.Series(name, values, dtype)`) providing direct columnar operations, element-wise math/string/temporal expressions, and seamless conversions (`df.to_series()`, `df.drop_in_place()`) without wrapping into single-column DataFrames.
 - [ ] **Optional Multi-Threaded / Web Worker Chunk Parallelization**:
   * Evaluate optional multi-threaded expression chunking via Worker Threads / Web Workers and `SharedArrayBuffer` for heavy background numeric operations without disrupting synchronous, single-threaded browser DX.
+- [ ] **Argument Normalization & Flexible Parameter Signatures**:
+  * Normalize arguments across column expressions and DataFrame operations to support both positional and option object signatures (e.g., `.round(2)` vs `.round({ decimals: 2 })`, `.clip(min, max)` vs `.clip({ lower, upper })`).
+  * Add defensive parameter unpacking to prevent accidental `NaN` or unhandled options when developers pass options objects to methods expecting positional primitives.
 
 ### 🐻 Complete Polars Functionality Parity & Migration Backlog
 The following list tracks the complete surface of Polars functionality to achieve 100% parity where applicable to JS/TS.

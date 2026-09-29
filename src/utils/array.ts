@@ -1,9 +1,9 @@
 /** @internalfile */
-import { isClass, isObj, isPlainObj, isValidDateObj, isRegExp, typedArrayTagGetter } from "./object";
+import { isClass, isObj, isPlainObj, isValidDateObj, isRegExp, typedArrayTagGetter, isTypedArrayConstructor } from "./object";
 import { toValidNumber, isValidNumber, isValidInt, toValidInt, toValidBigInt, isValidBigInt, clamp, SAFE_BIGINT_RANGE } from "./number";
 import { toValidDate } from "./date";
 import { toCanonicalString, toCleanRegExp } from "./string";
-import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions, ToValidArrayOptions } from "../types";
+import type { AnyTypedArray, TypedArrayConstructor, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions, ToValidArrayOptions } from "../types";
 
 import { ComputeError, InvalidArgumentError } from "../exceptions";
 
@@ -62,6 +62,7 @@ export type IsArrayOfTypeOptionsParams = {
     mode?: ArrayCheckMode;
     allowNulls?: boolean;
     allowEmpty?: boolean;
+    coerce?: (v: unknown) => any;
 };
 
 /**
@@ -69,17 +70,27 @@ export type IsArrayOfTypeOptionsParams = {
  */
 function _getTypeValidators(type: ArrayItemType): {
     check: (v: unknown) => boolean;
-    coerce: (v: unknown) => any;
+    coerce: (v: unknown) => unknown;
+    isTypedArrayTarget?: boolean;
 } {
     if (typeof type === "function") {
-        const isC = isClass(type);
+        if (isTypedArrayConstructor(type)) {
+            const isBigIntTypedArray = type === BigInt64Array || type === BigUint64Array;
+            return {
+                check: isBigIntTypedArray ? isValidBigInt : isValidNumber,
+                coerce: isBigIntTypedArray ? (v) => toValidBigInt(v) : (v) => toValidNumber(v) ?? NaN,
+                isTypedArrayTarget: true,
+            };
+        }
+        if (isClass(type)) {
+            return { check: (v) => v instanceof type, coerce: (v) => v instanceof type ? v : null };
+        }
         return {
-            check: isC ? (v) => v instanceof type : (v) => Boolean((type as any)(v)),
+            check: (v) => Boolean((type as Function)(v)),
             coerce: (v) => {
-                if (isC) return v instanceof (type as any) ? v : null;
-                const res = (type as any)(v);
+                const res = (type as Function)(v);
                 return typeof res === "boolean" ? (res ? v : null) : res;
-            },
+            }
         };
     }
 
@@ -161,43 +172,47 @@ export function isArrayOfType(
 export function toArrayOfType<T = any>(
     val: unknown,
     type: ArrayItemType = "any",
-    {
+    options: IsArrayOfTypeOptionsParams = {}
+): T[] {
+    const {
         mode = "every",
         allowNulls = false,
         allowEmpty = true,
-    }: IsArrayOfTypeOptionsParams = {}
-): T[] {
-    const arr = toValidArray(val);
+        coerce: customCoerce
+    } = options;
+
+    const arr = toValidArray(val, { clone: false });
     const len = arr.length;
+
+    const { check, coerce: defaultCoerce, isTypedArrayTarget } = _getTypeValidators(type);
+    const coerceFn = customCoerce ?? defaultCoerce;
 
     if (len === 0) {
         if (!allowEmpty) throw new ComputeError("Expected non-empty array");
-        return [];
+        return (isTypedArrayTarget ? new (type as TypedArrayConstructor)(0) : []) as any;
     }
 
-    const { check, coerce } = _getTypeValidators(type);
-
-    const res: T[] = new Array(len);
+    const res: any = isTypedArrayTarget ? new (type as TypedArrayConstructor)(len) : new Array(len);
     let matchCount = 0;
 
     for (let i = 0; i < len; i++) {
         const item = arr[i];
 
-        if (allowNulls && item == null) {
-            res[matchCount++] = item as any;
+        if (allowNulls && item == null && !isTypedArrayTarget) {
+            res[matchCount++] = item;
             continue;
         }
 
-        const coerced = coerce(item);
+        const coerced = coerceFn(item);
 
-        if (check(coerced)) {
-            res[matchCount++] = coerced as T;
+        if (isTypedArrayTarget || check(coerced)) {
+            res[matchCount++] = coerced;
         } else if (mode === "every") {
             throw new ComputeError(`Failed to convert array item at index ${i} ('${item}') to target type '${type}'`);
         }
     }
 
-    if (mode === "some") {
+    if (mode === "some" && !isTypedArrayTarget) {
         if (matchCount === 0) throw new ComputeError(`No items in array could be converted to target type '${type}'`);
         if (matchCount < len) res.length = matchCount;
     }

@@ -14,13 +14,14 @@ export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyo
  * @syntax df.groupBy(...).{symbol}(...)
  */
 export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> {
-    private _groups: GroupMap
     private _keys: K[]
     private _allKeys: (keyof T)[]
     private _parentColumns: ColumnDict
     private _parentHeight: number
     private _parentSchema: DataFrameSchema
     private _synthesizedColumns?: Record<string, any[]>
+    private _groupIndicesList: number[][]
+    private _firstIndices: number[]
 
     constructor(
         groups: GroupMap,
@@ -31,41 +32,38 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
         parentSchema: DataFrameSchema,
         synthesizedColumns?: Record<string, any[]>
     ) {
-        this._groups = groups
         this._keys = keys
         this._allKeys = allKeys
         this._parentColumns = parentColumns
         this._parentHeight = parentHeight
         this._parentSchema = parentSchema
         this._synthesizedColumns = synthesizedColumns
+
+        const numGroups = groups.size;
+        const groupList = new Array<number[]>(numGroups);
+        const firstIdxs = new Array<number>(numGroups);
+        let g = 0;
+        for (const indices of groups.values()) {
+            groupList[g] = indices;
+            firstIdxs[g++] = indices[0];
+        }
+        this._groupIndicesList = groupList;
+        this._firstIndices = firstIdxs;
     }
 
     private _materializeKeyColumns(keys: string[]): { newColumns: ColumnDict; outSchema: DataFrameSchema; groupCount: number } {
-        const numGroups = this._groups.size;
         const keysCount = keys.length;
         const newColumns: ColumnDict = {};
         const outSchema: DataFrameSchema = {};
 
         for (let i = 0; i < keysCount; i++) {
             const k = keys[i];
-            newColumns[k] = new Array(numGroups);
             outSchema[k] = this._parentSchema[k];
+            const synth = this._synthesizedColumns?.[k];
+            newColumns[k] = synth ? synth : gatherColumnByIndices(this._parentColumns[k], this._firstIndices);
         }
 
-        let groupIdx = 0;
-        for (const indices of this._groups.values()) {
-            if (indices.length === 0) continue;
-            const firstIdx = indices[0];
-            for (let i = 0; i < keysCount; i++) {
-                const k = keys[i];
-                const synth = this._synthesizedColumns?.[k];
-                const val = synth ? synth[groupIdx] : this._parentColumns[k]?.[firstIdx];
-                (newColumns[k] as any[])[groupIdx] = val === undefined ? null : val;
-            }
-            groupIdx++;
-        }
-
-        return { newColumns, outSchema, groupCount: groupIdx };
+        return { newColumns, outSchema, groupCount: this._firstIndices.length };
     }
 
     /**
@@ -90,7 +88,8 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
         const expandedExprs = resolveColumnSelectors(normalizedExprs, allKeys, keys, this._parentSchema, this._parentColumns);
 
         const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(keys);
-        const numGroups = this._groups.size;
+        const groupIndicesList = this._groupIndicesList;
+        const numGroups = groupIndicesList.length;
 
         for (let i = 0, len = expandedExprs.length; i < len; i++) {
             const e = expandedExprs[i];
@@ -102,11 +101,9 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
             } else {
                 const pre = e._evaluatePre(e._groupingOpsIndex, this._parentColumns, this._parentHeight);
                 const aggregated = new Array(numGroups);
-                let gIdx = 0;
-                for (const indices of this._groups.values()) {
-                    if (indices.length > 0) {
-                        aggregated[gIdx++] = e._aggFn(gatherColumnByIndices(pre, indices) as any[]);
-                    }
+                for (let g = 0; g < numGroups; g++) {
+                    const indices = groupIndicesList[g];
+                    aggregated[g] = e._aggFn(gatherColumnByIndices(pre, indices) as any[]);
                 }
                 evaluated = e._evaluatePost(e._groupingOpsIndex, aggregated, newColumns);
             }

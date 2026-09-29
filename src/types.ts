@@ -19,6 +19,7 @@ export type DataFrameColumns<T extends RowRecord> = {
     [K in keyof T]: ColumnData<T[K]>;
 };
 
+export type TypedArrayConstructor<T extends AnyTypedArray = AnyTypedArray> = new (length: number) => T;
 export type AnyTypedArray =
     | Int8Array
     | Uint8Array

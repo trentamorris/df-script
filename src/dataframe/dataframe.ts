@@ -703,7 +703,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const secondaryBy = groupBy ?? by;
         const rawByKeys = secondaryBy ? toArrayOfType<string>(secondaryBy, "string") : [];
-        const byKeys = Array.from(new Set(rawByKeys));
+        const byKeys: string[] = Array.from(new Set(rawByKeys));
         for (let j = 0; j < byKeys.length; j++) {
             if (byKeys[j] === indexColName) throw new InvalidArgumentError(`Cannot group by index column "${indexColName}" in secondary grouping keys`);
             assertColumnExists(byKeys[j], this._columns, "Secondary grouping key");

@@ -17,4 +17,8 @@ export interface IsCloseOptions {
     nansEqual?: boolean;
 }
 
+export interface RoundOptions {
+    decimals?: number;
+}
+
 export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => any;

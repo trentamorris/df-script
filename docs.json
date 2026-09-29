@@ -2639,9 +2639,9 @@
       "namespace": "$df.col",
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).round(...)",
-      "signature": "$df.col(<column_name>).round(\n  decimals: number = 0\n)",
+      "signature": "$df.col(<column_name>).round(\n  decimalsOrOptions: number | RoundOptions = 0\n)",
       "lineStart": 2610,
-      "lineEnd": 2612
+      "lineEnd": 2615
     },
     "roundSigFigs": {
       "desc": "Rounds values to a specific number of significant figures.",
@@ -2659,8 +2659,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).roundSigFigs(...)",
       "signature": "$df.col(<column_name>).roundSigFigs(\n  sigFigs: number\n)",
-      "lineStart": 2630,
-      "lineEnd": 2632
+      "lineStart": 2633,
+      "lineEnd": 2635
     },
     "rowNumber": {
       "desc": "Window: Computes 1-indexed row number count within group partitions.",
@@ -2672,8 +2672,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).rowNumber(...)",
       "signature": "$df.col(<column_name>).rowNumber()",
-      "lineStart": 2649,
-      "lineEnd": 2653
+      "lineStart": 2652,
+      "lineEnd": 2656
     },
     "shift": {
       "desc": "Shifts values by the given number of rows, filling newly introduced slots with null. Positive offsets shift values down (lag); negative offsets shift values up (lead).\n\nSupports windowing and partition grouping via `.over(...)`.",
@@ -2691,8 +2691,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).shift(...)",
       "signature": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
-      "lineStart": 2675,
-      "lineEnd": 2677
+      "lineStart": 2678,
+      "lineEnd": 2680
     },
     "sign": {
       "desc": "Returns sign indicator of column values (-1, 0, or 1).",
@@ -2704,8 +2704,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sign(...)",
       "signature": "$df.col(<column_name>).sign()",
-      "lineStart": 2694,
-      "lineEnd": 2696
+      "lineStart": 2697,
+      "lineEnd": 2699
     },
     "sin": {
       "desc": "Computes the sine of the column values.",
@@ -2717,8 +2717,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sin(...)",
       "signature": "$df.col(<column_name>).sin()",
-      "lineStart": 2713,
-      "lineEnd": 2715
+      "lineStart": 2716,
+      "lineEnd": 2718
     },
     "sinh": {
       "desc": "Computes the hyperbolic sine of the column values.",
@@ -2730,8 +2730,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sinh(...)",
       "signature": "$df.col(<column_name>).sinh()",
-      "lineStart": 2732,
-      "lineEnd": 2734
+      "lineStart": 2735,
+      "lineEnd": 2737
     },
     "skew": {
       "desc": "Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of skewness.",
@@ -2749,8 +2749,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).skew(...)",
       "signature": "$df.col(<column_name>).skew(\n  options: SkewOptions = {}\n)",
-      "lineStart": 2750,
-      "lineEnd": 2752
+      "lineStart": 2753,
+      "lineEnd": 2755
     },
     "spearmanCorr": {
       "desc": "Aggregation: Computes the Spearman rank correlation coefficient.",
@@ -2768,8 +2768,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).spearmanCorr(...)",
       "signature": "$df.col(<column_name>).spearmanCorr(\n  other: any\n)",
-      "lineStart": 2768,
-      "lineEnd": 2770
+      "lineStart": 2771,
+      "lineEnd": 2773
     },
     "sqrt": {
       "desc": "Computes the square root of non-negative column values.",
@@ -2781,8 +2781,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sqrt(...)",
       "signature": "$df.col(<column_name>).sqrt()",
-      "lineStart": 2787,
-      "lineEnd": 2789
+      "lineStart": 2790,
+      "lineEnd": 2792
     },
     "std": {
       "desc": "Aggregation: Computes sample standard deviation.",
@@ -2794,8 +2794,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).std(...)",
       "signature": "$df.col(<column_name>).std()",
-      "lineStart": 2804,
-      "lineEnd": 2806
+      "lineStart": 2807,
+      "lineEnd": 2809
     },
     "sub": {
       "desc": "Subtracts a scalar or another column expression.",
@@ -2813,8 +2813,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sub(...)",
       "signature": "$df.col(<column_name>).sub(\n  val: NumericArg\n)",
-      "lineStart": 2824,
-      "lineEnd": 2826
+      "lineStart": 2827,
+      "lineEnd": 2829
     },
     "sum": {
       "desc": "Aggregation: Computes the sum of elements in the group.",
@@ -2826,8 +2826,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).sum(...)",
       "signature": "$df.col(<column_name>).sum()",
-      "lineStart": 2842,
-      "lineEnd": 2844
+      "lineStart": 2845,
+      "lineEnd": 2847
     },
     "tan": {
       "desc": "Computes the tangent of the column values.",
@@ -2839,8 +2839,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).tan(...)",
       "signature": "$df.col(<column_name>).tan()",
-      "lineStart": 2861,
-      "lineEnd": 2863
+      "lineStart": 2864,
+      "lineEnd": 2866
     },
     "tanh": {
       "desc": "Computes the hyperbolic tangent of the column values.",
@@ -2852,8 +2852,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).tanh(...)",
       "signature": "$df.col(<column_name>).tanh()",
-      "lineStart": 2880,
-      "lineEnd": 2882
+      "lineStart": 2883,
+      "lineEnd": 2885
     },
     "trunc": {
       "desc": "Truncates fractional digits of column values.",
@@ -2865,8 +2865,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).trunc(...)",
       "signature": "$df.col(<column_name>).trunc()",
-      "lineStart": 2899,
-      "lineEnd": 2901
+      "lineStart": 2902,
+      "lineEnd": 2904
     },
     "variance": {
       "desc": "Aggregation: Computes sample variance.",
@@ -2878,8 +2878,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).variance(...)",
       "signature": "$df.col(<column_name>).variance()",
-      "lineStart": 2916,
-      "lineEnd": 2918
+      "lineStart": 2919,
+      "lineEnd": 2921
     },
     "wAvg": {
       "desc": "Aggregation: Computes weighted average.",
@@ -2897,8 +2897,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).wAvg(...)",
       "signature": "$df.col(<column_name>).wAvg(\n  weights: any\n)",
-      "lineStart": 2934,
-      "lineEnd": 2936
+      "lineStart": 2937,
+      "lineEnd": 2939
     },
     "xor": {
       "desc": "Logical XOR check.",
@@ -2916,8 +2916,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).xor(...)",
       "signature": "$df.col(<column_name>).xor(\n  other: any\n)",
-      "lineStart": 2955,
-      "lineEnd": 2957
+      "lineStart": 2958,
+      "lineEnd": 2960
     }
   },
   "columnExpressions/mixins/StringExpr.ts": {
@@ -6199,7 +6199,7 @@
       "syntax": "df.groupBy(...).GroupedData(...)",
       "signature": "df.groupBy(...).GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>",
       "lineStart": 16,
-      "lineEnd": 144
+      "lineEnd": 141
     },
     "agg": {
       "desc": "Aggregates grouped partitions using aggregation column expressions.",
@@ -6217,8 +6217,8 @@
       "category": "DataFrame",
       "syntax": "df.groupBy(...).agg(...)",
       "signature": "df.groupBy(...).agg<U extends RowRecord = any>(\n  ...exprs: (IExpr | any)[]\n): DataFrame<U>",
-      "lineStart": 86,
-      "lineEnd": 124
+      "lineStart": 84,
+      "lineEnd": 121
     },
     "toDataframe": {
       "desc": "Converts group keys back into a single distinct DataFrame without aggregations.",
@@ -6230,8 +6230,8 @@
       "category": "DataFrame",
       "syntax": "df.groupBy(...).toDataframe(...)",
       "signature": "df.groupBy(...).toDataframe<U extends RowRecord = any>(): DataFrame<U>",
-      "lineStart": 140,
-      "lineEnd": 143
+      "lineStart": 137,
+      "lineEnd": 140
     }
   },
   "dataframe/types.ts": {

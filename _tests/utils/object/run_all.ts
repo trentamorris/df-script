@@ -21,3 +21,4 @@ import "./isDataView.test";
 import "./isUint8Array.test";
 import "./isUint8ClampedArray.test";
 import "./unboxPrimitiveObj.test";
+import "./isTypedArrayConstructor.test";

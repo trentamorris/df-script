@@ -1,5 +1,5 @@
 /** @internalfile */
-import { isPlainObj, isRegExp, isValidDateObj, isSet, isMap, isSafeObjPropertyKey, unboxPrimitiveObj } from "./object";
+import { isObj, isPlainObj, isRegExp, isValidDateObj, isSet, isMap, isSafeObjPropertyKey, unboxPrimitiveObj } from "./object";
 import { isTypedArray, toValidArray } from "./array";
 import { isValidNumber, isValidInt } from "./number";
 import {
@@ -209,19 +209,29 @@ function _canonicalizeList(items: unknown[], nextOpt: { depth: number; maxDepth:
     return parts;
 }
 
+function _canonicalizePrimitive(val: any, type: string): string | null {
+    if (type === "string") return `s:${val.length}:${val}`;
+    if (type === "number" || type === "boolean" || type === "bigint") return `${type}:${val}`;
+    return null;
+}
+
 export function toCanonicalString(
     val: any,
     { depth = 0, maxDepth = 50 }: { depth?: number; maxDepth?: number } = {}
 ): string {
-    if (depth > maxDepth) return "v:circular";
+    const rawPrimitive = _canonicalizePrimitive(val, typeof val);
+    if (rawPrimitive !== null) return rawPrimitive;
+
     if (val === null) return "v:null";
     if (val === undefined) return "v:undefined";
+    if (depth > maxDepth) return "v:circular";
 
-    val = unboxPrimitiveObj(val);
+    if (isObj(val)) val = unboxPrimitiveObj(val);
     const type = typeof val;
 
-    if (type === "number" || type === "boolean" || type === "bigint") return `${type}:${val}`;
-    if (type === "string") return `s:${val.length}:${val}`;
+    const unboxedPrimitive = _canonicalizePrimitive(val, type);
+    if (unboxedPrimitive !== null) return unboxedPrimitive;
+
     if (type === "symbol" || type === "function") {
         const s = val.toString();
         return `${type === "symbol" ? "y" : "f"}:${s.length}:${s}`;

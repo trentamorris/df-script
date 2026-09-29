@@ -19,7 +19,7 @@ import type {
     CentralMomentsResult,
     ValidScalarTypes
 } from "../../types"
-import type { RandomOptions, NumericArg, IsCloseOptions } from "../types"
+import type { RandomOptions, NumericArg, IsCloseOptions, RoundOptions } from "../types"
 import { ExprBase } from "../ExprBase"
 import { computeIsIn, compareMissing, computeRank, evaluateExpression, evaluateArg } from "../utils"
 import { ComputeError, InvalidArgumentError } from "../../exceptions"
@@ -1442,7 +1442,7 @@ export class StandardExpr extends ExprBase {
      * └───────┴──────────┘
      */
     implode() {
-        return this._deriveAgg(v => v);
+        return this._deriveAgg(v => v.slice());
     }
 
     /**
@@ -2607,7 +2607,10 @@ export class StandardExpr extends ExprBase {
      * │ 3 │ 3       │
      * └───┴─────────┘
      */
-    round(decimals: number = 0) {
+    round(decimalsOrOptions: number | RoundOptions = 0) {
+        const decimals = typeof decimalsOrOptions === "object" && decimalsOrOptions !== null
+            ? (decimalsOrOptions.decimals ?? 0)
+            : decimalsOrOptions;
         return this._deriveUnary((v) => roundToScale(v, decimals));
     }
 
