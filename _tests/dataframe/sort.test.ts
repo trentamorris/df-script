@@ -222,5 +222,40 @@ if (exprResults[0].score !== 80 || exprResults[1].score !== 50 || exprResults[2]
     throw new Error("Complex expression sort failed");
 }
 
-console.log("✓ sort tests passed!");
+// 16. Fast-path single column sort with BigInt
+const dfBigIntFast = new DataFrame({
+    id: [300n, 100n, 200n],
+    label: ["c", "a", "b"]
+});
+const sortedBigIntFast = dfBigIntFast.sort({ by: "id" });
+const bigIntRowsFast = sortedBigIntFast.toDicts();
+if (bigIntRowsFast[0].id !== 100n || bigIntRowsFast[1].id !== 200n || bigIntRowsFast[2].id !== 300n) {
+    throw new Error("BigInt column sort failed");
+}
 
+// 17. Single-column sort with NaNs and nullsLast: false
+const dfNaNs = new DataFrame({
+    val: [10, NaN, 5, null]
+});
+const sortedNaNsNullsFirst = dfNaNs.sort({ by: "val", nullsLast: false });
+const nanRowsFirst = sortedNaNsNullsFirst.toArray("val");
+// null and NaN should be first
+if (nanRowsFirst[2] !== 5 || nanRowsFirst[3] !== 10) {
+    throw new Error("NaN/null nullsLast: false sorting failed");
+}
+
+// 18. Single-column Date sorting
+const dateValA = new Date("2024-03-01");
+const dateValB = new Date("2024-01-01");
+const dateValC = new Date("2024-02-01");
+const dfDatesFast = new DataFrame({
+    dt: [dateValA, dateValB, dateValC],
+    v: [3, 1, 2]
+});
+const sortedDatesFast = dfDatesFast.sort({ by: "dt", descending: false });
+const dateRowsFast = sortedDatesFast.toDicts();
+if (dateRowsFast[0].v !== 1 || dateRowsFast[1].v !== 2 || dateRowsFast[2].v !== 3) {
+    throw new Error("Date column sort failed");
+}
+
+console.log("✓ sort tests passed!");

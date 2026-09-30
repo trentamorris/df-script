@@ -31,7 +31,7 @@ export function createDelegatingProxy<T extends object>(
  */
 export function evalUnaryOp(v: any, fn: (a: any) => any): any {
     if (v == null) return null;
-    const normV = isValidDateObj(v) ? v.getTime() : v;
+    const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
     return fn(normV);
 }
 
@@ -41,8 +41,8 @@ export function evalUnaryOp(v: any, fn: (a: any) => any): any {
  */
 export function evalBinaryOp(v: any, r: any, fn: (a: any, b: any) => any): any {
     if (v == null || r == null) return null;
-    const normV = isValidDateObj(v) ? v.getTime() : v;
-    const normR = isValidDateObj(r) ? r.getTime() : r;
+    const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
+    const normR = typeof r === "object" && isValidDateObj(r) ? r.getTime() : r;
     return fn(normV, normR);
 }
 

@@ -170,12 +170,22 @@ export function resolveExprOutputType(
 ): RegisteredDataType | undefined {
     if (!expr) return undefined;
 
-    // 1. Direct explicit overrides & literals
+    // 1. Direct explicit overrides
     if (expr._castType) return expr._castType;
     if ((expr as any)._targetType instanceof DataType) return (expr as any)._targetType;
-    if (expr._isLiteral && expr._literalValue !== undefined) return _resolveOperandType(expr._literalValue, schema);
 
-    // 2. Expression AST branches (binary, coalesce/when-then, struct field)
+    const colName = expr._colName;
+    const baseType = colName ? schema[colName] : undefined;
+    const isBareCol = (!expr._ops || expr._ops.length === 0) && !expr._aggFn && !expr._evaluateWindow;
+
+    if (baseType && isBareCol && !expr._isUnnest) return baseType;
+
+    // 3. Literals
+    if (expr._isLiteral && expr._literalValue !== undefined) {
+        return _resolveOperandType(expr._literalValue, schema);
+    }
+
+    // 4. Expression AST branches (binary, coalesce/when-then, struct field)
     if (expr._binaryMeta) {
         return _deduceBinaryType(
             _resolveOperandType(expr._binaryMeta._left, schema),
@@ -203,22 +213,19 @@ export function resolveExprOutputType(
         if (parent instanceof StructType) return parent.fields?.[expr._fieldName];
     }
 
-    const baseType = expr._colName ? schema[expr._colName] : undefined;
+    // 5. Schema column references & transformations (sampling only when needed)
     const sampleVal = colSample?.[0];
-    const isBareCol = (!expr._ops || expr._ops.length === 0) && !expr._aggFn && !expr._evaluateWindow;
 
-    // 3. Schema column references & transformations
     if (baseType) {
         if (baseType instanceof ArrayType && (expr._isUnnest || (colSample as any)?.rowMap)) return baseType.innerType;
         if (!(baseType instanceof ArrayType) && Array.isArray(sampleVal)) return DataTypeRegistry.Array(baseType);
-        if (isBareCol) return baseType;
         if (expr._aggFn) {
             if (baseType.isTemporal && (isValidDateObj(sampleVal) || typeof sampleVal === "string")) return baseType;
             if (baseType instanceof DurationType && isValidNumber(sampleVal)) return baseType;
         }
     }
 
-    // 4. Statistical aggregations
+    // 6. Statistical aggregations
     if (expr._aggFn && isValidNumber(sampleVal)) {
         if (!Number.isInteger(sampleVal) || (baseType?.isNumeric && !(baseType instanceof DurationType))) {
             return DataTypeRegistry.Float64;

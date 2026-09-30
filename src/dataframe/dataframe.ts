@@ -1733,9 +1733,10 @@ export class DataFrame<T extends RowRecord = any> {
         const { by, descending = false, nullsLast = true, customComp } = config;
         const sortKeys = toValidArray(by);
         const evalCols = Object.values(this.select(...sortKeys as any)._columns);
-        const height = this._height;
-        if (height === 1) return this;
         const nCols = evalCols.length;
+
+        const height = this._height;
+        if (height <= 1) return this;
 
         const colOpts: SortArrayOptions[] = new Array(nCols);
         const isDescArr = Array.isArray(descending);

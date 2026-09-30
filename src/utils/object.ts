@@ -65,7 +65,7 @@ const _symbolValueOf = _symbolProto?.valueOf;
 const _objectCtorString = Function.prototype.toString.call(Object);
 
 export function isObj(v: unknown): v is Record<PropertyKey, unknown> {
-    return v !== null && typeof v === "object" && !Array.isArray(v);
+    return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 export function isSafeObjPropertyKey(key: unknown): key is string {

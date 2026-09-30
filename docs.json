@@ -4815,7 +4815,7 @@
       "syntax": "$df.col(<column_name>).resolveExprOutputType(...)",
       "signature": "$df.col(<column_name>).resolveExprOutputType(\n  expr: IExpr,\n  schema: DataFrameSchema,\n  colSample?: ColumnData | any[]\n): RegisteredDataType | undefined",
       "lineStart": 166,
-      "lineEnd": 230
+      "lineEnd": 237
     }
   },
   "columnExpressions/utils.ts": {
@@ -4886,7 +4886,7 @@
       "syntax": "df.DataFrame(...)",
       "signature": "df.DataFrame<T extends RowRecord = any>",
       "lineStart": 32,
-      "lineEnd": 2266
+      "lineEnd": 2267
     },
     "cast": {
       "desc": "Casts columns in the DataFrame to the specified data type(s).",
@@ -5766,7 +5766,7 @@
       "syntax": "df.sort(...)",
       "signature": "df.sort(\n  config?: {\n    by: keyof T | (keyof T)[] | IExpr | IExpr[],\n    descending?: boolean | boolean[],\n    nullsLast?: boolean,\n    custom?: Partial<Record<keyof T, (a: any, b: any) => number>>\n  }\n): DataFrame<T>",
       "lineStart": 1730,
-      "lineEnd": 1764
+      "lineEnd": 1765
     },
     "tail": {
       "desc": "Returns the last N rows as a new DataFrame.",
@@ -5784,8 +5784,8 @@
       "category": "DataFrame",
       "syntax": "df.tail(...)",
       "signature": "df.tail(\n  n: number = 10\n): DataFrame<T>",
-      "lineStart": 1781,
-      "lineEnd": 1783
+      "lineStart": 1782,
+      "lineEnd": 1784
     },
     "toArray": {
       "desc": "Evaluates a column expression or retrieves column values as a raw JavaScript array.",
@@ -5804,8 +5804,8 @@
       "category": "DataFrame",
       "syntax": "df.toArray(...)",
       "signature": "df.toArray<K extends keyof T>(\n  nameOrExpr: K | IExpr\n): any[]",
-      "lineStart": 1794,
-      "lineEnd": 1796
+      "lineStart": 1795,
+      "lineEnd": 1797
     },
     "toDict": {
       "desc": "Converts columns into a JavaScript dictionary mapping column keys to raw arrays.",
@@ -5817,8 +5817,8 @@
       "category": "DataFrame",
       "syntax": "df.toDict(...)",
       "signature": "df.toDict(): DataFrameColumns<T>",
-      "lineStart": 1806,
-      "lineEnd": 1808
+      "lineStart": 1807,
+      "lineEnd": 1809
     },
     "toDicts": {
       "desc": "Converts rows into an array of JavaScript objects.",
@@ -5830,8 +5830,8 @@
       "category": "DataFrame",
       "syntax": "df.toDicts(...)",
       "signature": "df.toDicts(): T[]",
-      "lineStart": 1818,
-      "lineEnd": 1820
+      "lineStart": 1819,
+      "lineEnd": 1821
     },
     "transpose": {
       "desc": "Transposes rows into columns and columns into rows.",
@@ -5865,8 +5865,8 @@
       "category": "DataFrame",
       "syntax": "df.transpose(...)",
       "signature": "df.transpose(\n  {\n    includeHeader = false,\n    headerName = \"column\",\n    columnNames: colNamesOpt\n  }: TransposeOptions = {}\n): DataFrame<any>",
-      "lineStart": 1840,
-      "lineEnd": 1896
+      "lineStart": 1841,
+      "lineEnd": 1897
     },
     "unique": {
       "desc": "Filters distinct unique rows matching target key columns.",
@@ -5885,8 +5885,8 @@
       "category": "DataFrame",
       "syntax": "df.unique(...)",
       "signature": "df.unique<K extends keyof T>(\n  columns?: K | K[]\n): DataFrame<T>",
-      "lineStart": 1913,
-      "lineEnd": 1916
+      "lineStart": 1914,
+      "lineEnd": 1917
     },
     "unpivot": {
       "desc": "Unpivots a wide DataFrame into a long format structure.",
@@ -5925,8 +5925,8 @@
       "category": "DataFrame",
       "syntax": "df.unpivot(...)",
       "signature": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars: keyof T | (keyof T)[],\n    valueVars: keyof T | (keyof T)[],\n    varName?: string,\n    valueName?: string\n  }\n): DataFrame<U>",
-      "lineStart": 1939,
-      "lineEnd": 1986
+      "lineStart": 1940,
+      "lineEnd": 1987
     },
     "unstack": {
       "desc": "Unstacks selected columns into multiple wide columns of size `step`. Reshapes data from long to wide format without aggregation.",
@@ -5948,8 +5948,8 @@
       "category": "DataFrame",
       "syntax": "df.unstack(...)",
       "signature": "df.unstack(\n  columns: IntoExpr | IntoExpr[],\n  options: UnstackOptions\n): DataFrame<any>",
-      "lineStart": 2006,
-      "lineEnd": 2062
+      "lineStart": 2007,
+      "lineEnd": 2063
     },
     "width": {
       "desc": "Gets width (total column count) of the DataFrame.",
@@ -5961,8 +5961,8 @@
       "category": "DataFrame",
       "syntax": "df.width(...)",
       "signature": "df.get width(): number",
-      "lineStart": 2072,
-      "lineEnd": 2074
+      "lineStart": 2073,
+      "lineEnd": 2075
     },
     "withColumns": {
       "desc": "Adds new columns or updates existing ones using column expressions.",
@@ -5981,8 +5981,8 @@
       "category": "DataFrame",
       "syntax": "df.withColumns(...)",
       "signature": "df.withColumns(\n  ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]\n): DataFrame<any>",
-      "lineStart": 2091,
-      "lineEnd": 2122
+      "lineStart": 2092,
+      "lineEnd": 2123
     },
     "withRowIndex": {
       "desc": "Appends an incremental index column.",
@@ -6006,8 +6006,8 @@
       "category": "DataFrame",
       "syntax": "df.withRowIndex(...)",
       "signature": "df.withRowIndex(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
-      "lineStart": 2140,
-      "lineEnd": 2150
+      "lineStart": 2141,
+      "lineEnd": 2151
     },
     "writeCsv": {
       "desc": "Writes DataFrame to CSV format string or file/stream target.",
@@ -6049,8 +6049,8 @@
       "category": "DataFrame",
       "syntax": "df.writeCsv(...)",
       "signature": "df.writeCsv(\n  file?: string | { write: (str: string) => void },\n  options?: {\n    delimiter?: string,\n    header?: boolean,\n    quoteChar?: string\n  }\n): string",
-      "lineStart": 2167,
-      "lineEnd": 2202
+      "lineStart": 2168,
+      "lineEnd": 2203
     },
     "writeJson": {
       "desc": "Writes DataFrame rows to JSON format string or file/stream target.",
@@ -6187,8 +6187,8 @@
       "category": "DataFrame",
       "syntax": "df.writeJson(...)",
       "signature": "df.writeJson(\n  file?: string | { write: (str: string) => void },\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string",
-      "lineStart": 2238,
-      "lineEnd": 2265
+      "lineStart": 2239,
+      "lineEnd": 2266
     }
   },
   "dataframe/grouped.ts": {

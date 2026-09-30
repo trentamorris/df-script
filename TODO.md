@@ -224,6 +224,14 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * Avoid deep subfolder bloat (no `filter/robustness.test.ts` vs `filter/performance.test.ts` folder explosion) while maintaining strict 1:1 visibility.
   * Separate execution pipelines: `npm test` runs instant unit correctness suites, while `npm run bench` runs throughput / latency micro-benchmarks with synthetic datasets.
   * Track throughput (rows/sec), latency per operation, and memory allocation overhead (`heapUsed`) on hot paths (`filter`, `groupBy`, `join`, `select`, `partitionBy`).
+- [ ] **Automated Memory / Heap Growth Invariant Checks**:
+  * Implement assertions verifying `process.memoryUsage().heapUsed` stays flat across 10,000+ chained operations to guarantee zero memory leakage on hot transformation paths.
+- [ ] **Generative Property-Based & Chaos Fuzzing Suite (`test:fuzz`)**:
+  * Implement zero-dependency seeded PRNG (`fuzzHelper.ts` powered by `mulberry32`) to generate random shapes, nested schemas, pathological strings, extreme dates, NaNs, and infinities.
+  * Co-locate `<method>.fuzz.ts` files or provide dedicated fuzz invariant suites verifying algebraic and mathematical properties (e.g., partition invariants, identity laws, non-growth filters, idempotent sorting).
+  * Keep decoupled from the instant 3.5s `npm test` pipeline via an isolated `npm run test:fuzz` script for nightly/extended regression testing.
+
+
 
 
 ## 🔮 Future / Backlog Scope (V2.2.0+)

@@ -229,28 +229,30 @@ export function compareScalarValues(
     const dir = isDesc ? -1 : 1;
 
     if (typeof customComp === "function") return customComp(a, b) * dir;
-    if (Object.is(a, b)) return 0;
+    if (a === b) return 0;
     if (a == null && b == null) return 0;
     if (a == null || b == null) return (a == null ? 1 : -1) * (nullsLast ? 1 : -1);
+
+    const typeA = typeof a;
+    const typeB = typeof b;
+
+    const isNumA = typeA === "number" || typeA === "bigint";
+    const isNumB = typeB === "number" || typeB === "bigint";
+    if (isNumA && isNumB) {
+        const isNaNA = Number.isNaN(a);
+        const isNaNB = Number.isNaN(b);
+        if (isNaNA && isNaNB) return 0;
+        if (isNaNA || isNaNB) return (isNaNA ? 1 : -1) * (nullsLast ? 1 : -1);
+        return (a < b ? -1 : (a > b ? 1 : 0)) * dir;
+    }
+
+    if (typeA !== typeB) return typeA < typeB ? -1 : 1;
+    if (typeA === "string") return a.localeCompare(b) * dir;
 
     const isDateA = isValidDateObj(a);
     const isDateB = isValidDateObj(b);
     if (isDateA !== isDateB) return isDateA ? -1 : 1;
     if (isDateA && isDateB) return (a.getTime() < b.getTime() ? -1 : (a.getTime() > b.getTime() ? 1 : 0)) * dir;
-
-    const typeA = typeof a;
-    const typeB = typeof b;
-    const isNumA = typeA === "number" || typeA === "bigint";
-    const isNumB = typeB === "number" || typeB === "bigint";
-
-    const isNaNA = Number.isNaN(a);
-    const isNaNB = Number.isNaN(b);
-    if (isNaNA && isNaNB) return 0;
-    if (isNaNA || isNaNB) return (isNaNA ? 1 : -1) * (nullsLast ? 1 : -1);
-
-    if (isNumA && isNumB) return (a < b ? -1 : (a > b ? 1 : 0)) * dir;
-    if (typeA !== typeB) return typeA < typeB ? -1 : 1;
-    if (typeA === "string") return a.localeCompare(b) * dir;
 
     return (a < b ? -1 : (a > b ? 1 : 0)) * dir;
 }
