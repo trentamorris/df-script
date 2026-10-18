@@ -5,7 +5,10 @@ Building DFScript has taken a massive amount of time, late nights, and rigorous 
 You can donate directly using the cryptocurrency addresses below:
 
 ## 🔒 Monero (XMR)
-**Address:** `85Zht1bSk1mRXodgk3kDdPNuvBypzs7WPKEY9Fe8u72wB8o5Y3DNPdeCcAvaFEXpQgJUZmX2j2kCEM6tjYyr6K26BgGTCNf`
+**Address:** [`85Zht1bSk1mRXodgk3kDdPNuvBypzs7WPKEY9Fe8u72wB8o5Y3DNPdeCcAvaFEXpQgJUZmX2j2kCEM6tjYyr6K26BgGTCNf`](monero:85Zht1bSk1mRXodgk3kDdPNuvBypzs7WPKEY9Fe8u72wB8o5Y3DNPdeCcAvaFEXpQgJUZmX2j2kCEM6tjYyr6K26BgGTCNf?tx_description=df-script%20Support)
+
+## 💵 Cash App
+**Cashtag:** [`$TrentMorrisTX`](https://cash.app/$TrentMorrisTX)
 
 ### 💡 Feature Sponsorship & Priority Development
 Please reach out via GitHub Issues or contact us directly to discuss sponsored development opportunities.
