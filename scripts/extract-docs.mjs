@@ -87,6 +87,7 @@ const SYNTAX_REGEX = new RegExp(`${TAG_SYNTAX}\\s+(.+)`);
 // ─── JSDoc Parser ────────────────────────────────────────────────────────────
 
 function parseJSDocComment(comment) {
+  comment = comment.replace(/\r\n/g, "\n");
   let desc = "";
   let returns;
   const examplesList = [];
