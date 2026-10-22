@@ -36,8 +36,8 @@ if (resTyped[1].joined !== "") throw new Error("join empty TypedArray failed");
 if (resTyped[2].joined !== null) throw new Error("join null TypedArray failed");
 
 // Test direct non-array value passed to join: isArrayOrTypedArray will return false and result in null
-const nonArrayExpr = $df.lit("scalar_string" as any).str.join("-");
-const resDirect = nonArrayExpr.evaluate({}, 1);
-if (resDirect[0] !== null) throw new Error("join non-array scalar should evaluate to null");
+const nonArrayDf = $df.data({ scalar: ["scalar_string"] });
+const resDirect = nonArrayDf.select([$df.col("scalar" as any).str.join("-").alias("res")]).toDicts() as any[];
+if (resDirect[0].res !== null) throw new Error("join non-array scalar should evaluate to null");
 
 console.log("✓ StringExpr.join tests passed!");

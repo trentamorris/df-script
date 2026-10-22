@@ -551,7 +551,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const evaluatedExprs: ColumnData[] = new Array(numExprs);
         for (let i = 0; i < numExprs; i++) {
-            evaluatedExprs[i] = expandedExprs[i].evaluate(this._columns, height);
+            evaluatedExprs[i] = expandedExprs[i]._evaluate(this._columns, height);
         }
 
         let currentIndex = 0;

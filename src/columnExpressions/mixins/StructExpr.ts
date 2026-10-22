@@ -110,7 +110,7 @@ export class StructExprNamespace {
             const len = resolved.length;
             const fieldValues = new Array(len);
             for (let j = 0; j < len; j++) {
-                fieldValues[j] = resolved[j].expr.evaluate(columns, height);
+                fieldValues[j] = resolved[j].expr._evaluate(columns, height);
             }
 
             for (let i = 0; i < height; i++) {

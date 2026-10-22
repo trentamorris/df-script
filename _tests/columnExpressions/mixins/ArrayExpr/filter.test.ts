@@ -125,14 +125,6 @@ if (resMixed[1].f !== null) throw new Error("12. Null row failed");
 if (resMixed[2].f !== null) throw new Error("12. Undefined row failed");
 if (JSON.stringify(resMixed[3].f) !== JSON.stringify([4, 5])) throw new Error("12. Mixed row 3 failed");
 
-// Standalone raw array evaluation on non-array items
-const rawCols = { v: [[1, 2, 3], "not-array", 42, null] };
-const rawRes = $df.col("v").arr.filter($df.element().gt(1)).evaluate(rawCols, 4);
-if (JSON.stringify(rawRes[0]) !== JSON.stringify([2, 3])) throw new Error("12b. Raw row 0 failed");
-if (rawRes[1] !== null) throw new Error("12b. Raw string failed");
-if (rawRes[2] !== null) throw new Error("12b. Raw number failed");
-if (rawRes[3] !== null) throw new Error("12b. Raw null failed");
-
 // 13. Logical AND condition on elements
 const dfAnd = $df.data({
     v: [[1, 5, 10, 15, 20], [2, 4, 6, 8]]

@@ -7,8 +7,9 @@ console.log("Running StandardExpr.filter tests...");
 const colData = [10, 20, 30, 40, 50];
 const cols = { a: colData };
 const expr = $df.col("a").filter($df.col("a").gt(25));
-const resStandalone = expr.evaluate(cols, 5);
-if (resStandalone.length !== 5 || resStandalone[0] !== null || resStandalone[1] !== null || resStandalone[2] !== 30 || resStandalone[3] !== 40 || resStandalone[4] !== 50) {
+const dfStandalone = $df.data({ a: colData });
+const resStandalone = dfStandalone.select([expr.alias("res")]).toDicts() as any[];
+if (resStandalone.length !== 5 || resStandalone[0].res !== null || resStandalone[1].res !== null || resStandalone[2].res !== 30 || resStandalone[3].res !== 40 || resStandalone[4].res !== 50) {
     throw new Error(`1. StandardExpr.filter standalone evaluation failed: ${JSON.stringify(resStandalone)}`);
 }
 

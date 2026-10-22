@@ -71,11 +71,11 @@ export interface IExpr {
     alias(name: string): this;
     cast(dataType: RegisteredDataType, options?: CastOptions): this;
     _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
-    evaluate(columns: ColumnDict, height: number): ColumnData;
+    _evaluate(columns: ColumnDict, height: number): ColumnData;
     _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
     _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
     _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
-    debug(label?: string): this;
+    _debug(label?: string): this;
 }
 
 export type TimeUnit = "s" | "ms" | "us" | "ns";

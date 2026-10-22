@@ -1607,7 +1607,7 @@ export class StandardExpr extends ExprBase {
         return this._derive((vArray, columns) => {
             const { values } = getUniqueArrayStats(vArray, { strict: true });
             const targetVal = getArrayElement(values, index, nullOnOob);
-            return this.eq(targetVal).evaluate(columns, vArray.length);
+            return this.eq(targetVal)._evaluate(columns, vArray.length);
         });
     }
 
@@ -2413,7 +2413,7 @@ export class StandardExpr extends ExprBase {
         if (!(win >= 1)) {
             throw new InvalidArgumentError("rolling: windowSize must be a positive number >= 1");
         }
-        if (typeof exprOrFn !== "function" && typeof (exprOrFn as any)?.evaluate !== "function") {
+        if (typeof exprOrFn !== "function" && typeof (exprOrFn as any)?._evaluate !== "function") {
             throw new InvalidArgumentError("rolling: second argument must be a reducer function or ColumnExpression");
         }
 

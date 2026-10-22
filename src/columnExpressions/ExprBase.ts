@@ -22,7 +22,7 @@ const _derive = <T extends IExpr>(
 export function isExpr(v: unknown): v is IExpr { return v instanceof ExprBase; };
 
 export function isColExpr(v: unknown): v is IExpr {
-    return v instanceof ExprBase || (isObj(v) && typeof (v as any).evaluate === "function");
+    return v instanceof ExprBase || (isObj(v) && typeof (v as any)._evaluate === "function");
 }
 
 export function toColExpr<T extends IExpr = IExpr>(col: any, contextExpr?: any): T {
@@ -55,6 +55,13 @@ export class ExprBase implements IExpr {
     _fieldName?: string;
     _isUnnest?: boolean;
 
+    _debug(label?: string): this {
+        return this._derive((vArray) => {
+            console.log(`[DEBUG] ${label ? label + ': ' : ''}`, vArray);
+            return vArray;
+        });
+    }
+
     _derive(op?: OpFn): this {
         return _derive(this, op) as this;
     }
@@ -67,22 +74,29 @@ export class ExprBase implements IExpr {
         return _derive(this, kleeneUnary(fn));
     }
 
-    private _runOps(value: ColumnData, start: number, end: number, columns: ColumnDict): ColumnData {
+    _evaluate(columns: ColumnDict, height: number): ColumnData {
+        return this._evaluatePre(undefined, columns, height);
+    }
+
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
+        let value: ColumnData = aggregatedArray;
         const ops = this._ops;
-        for (let i = start; i < end; i++) {
+        const start = opsIndex !== undefined ? opsIndex : 0;
+        const len = ops.length;
+        for (let i = start; i < len; i++) {
             value = ops[i](value, columns);
         }
         return value;
     }
 
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
-        const start = opsIndex !== undefined ? opsIndex : 0;
-        return this._runOps(aggregatedArray, start, this._ops.length, columns);
-    }
-
     _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData {
-        const end = opsIndex !== undefined ? opsIndex : this._ops.length;
-        return this._runOps(this._getInitialValue(columns, height), 0, end, columns);
+        let value = this._getInitialValue(columns, height);
+        const ops = this._ops;
+        const end = opsIndex !== undefined ? opsIndex : ops.length;
+        for (let i = 0; i < end; i++) {
+            value = ops[i](value, columns);
+        }
+        return value;
     }
 
     _getInitialValue(columns: ColumnDict, height: number): ColumnData {
@@ -134,19 +148,5 @@ export class ExprBase implements IExpr {
         })());
         derivedInst._castType = dataType;
         return derivedInst as this;
-    }
-
-    /**
-     * Prints the current evaluation intermediate array to console for debugging.
-     */
-    debug(label?: string): this {
-        return this._derive((vArray) => {
-            console.log(`[DEBUG] ${label ? label + ': ' : ''}`, vArray);
-            return vArray;
-        });
-    }
-
-    evaluate(columns: ColumnDict, height: number): ColumnData {
-        return this._evaluatePre(undefined, columns, height);
     }
 }

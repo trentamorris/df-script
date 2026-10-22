@@ -97,7 +97,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
 
             let evaluated: any;
             if (!e._aggFn) {
-                evaluated = e.evaluate(newColumns, numGroups);
+                evaluated = e._evaluate(newColumns, numGroups);
             } else {
                 const pre = e._evaluatePre(e._groupingOpsIndex, this._parentColumns, this._parentHeight);
                 const aggregated = new Array(numGroups);

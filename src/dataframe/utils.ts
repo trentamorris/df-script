@@ -24,7 +24,7 @@ export function partitionByColumns(
             evalKeys[i] = pKey;
         } else {
             const keyName = `__part_${i}`;
-            evalCols[keyName] = pKey.evaluate(columns, height);
+            evalCols[keyName] = pKey._evaluate(columns, height);
             evalKeys[i] = keyName;
         }
     }
@@ -636,7 +636,7 @@ export function alignWhereIndices(
             }
 
             for (let p = 0; p < numPreds; p++) {
-                const evalRes = predicates[p].evaluate(evalCols, 1);
+                const evalRes = predicates[p]._evaluate(evalCols, 1);
                 if (evalRes[0] !== true) continue rightLoop;
             }
 

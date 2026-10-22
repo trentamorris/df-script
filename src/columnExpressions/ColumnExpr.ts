@@ -121,7 +121,7 @@ function _getTargetKeys(
     const numTypes = types.length;
 
     if (!isAll && numPatterns === 0 && numTypes === 0) {
-        if (isExpr || !isObj(expr) || !("evaluate" in expr) || expr._colName) {
+        if (isExpr || !isObj(expr) || !("_evaluate" in expr) || expr._colName) {
             return null;
         }
     }
@@ -212,7 +212,7 @@ export function resolveColumnSelectors(
                 const columnsKeys = Object.keys(columns);
                 const firstKey = columnsKeys[0];
                 const height = firstKey ? columns[firstKey].length : 0;
-                const evaluated = baseExpr.evaluate(columns, height);
+                const evaluated = baseExpr._evaluate(columns, height);
                 const evalLen = evaluated.length;
                 for (let idx = 0; idx < evalLen; idx++) {
                     const item = evaluated[idx];

@@ -6,8 +6,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).alias(...)",
       "signature": "$df.col(<column_name>).alias(\n  name: string\n): this",
-      "lineStart": 121,
-      "lineEnd": 125
+      "lineStart": 135,
+      "lineEnd": 139
     },
     "cast": {
       "desc": "Coerces the column data type to another type.",
@@ -15,17 +15,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).cast(...)",
       "signature": "$df.col(<column_name>).cast(\n  dataType: RegisteredDataType,\n  options: CastOptions = {}\n): this",
-      "lineStart": 130,
-      "lineEnd": 137
-    },
-    "debug": {
-      "desc": "Prints the current evaluation intermediate array to console for debugging.",
-      "namespace": "$df.col",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).debug(...)",
-      "signature": "$df.col(<column_name>).debug(\n  label?: string\n): this",
-      "lineStart": 142,
-      "lineEnd": 147
+      "lineStart": 144,
+      "lineEnd": 151
     }
   },
   "columnExpressions/mixins/ArrayExpr.ts": {
