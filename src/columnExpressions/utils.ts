@@ -1,3 +1,6 @@
+/**
+ * @internalfile
+ */
 import type { IExpr, ColumnData, ColumnDict } from "../types";
 import type { ProxyPropertyResolver } from "./types";
 import { isExpr } from "./ExprBase";

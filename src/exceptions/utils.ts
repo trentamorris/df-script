@@ -1,3 +1,6 @@
+/**
+ * @internalfile
+ */
 import { ColumnNotFoundError, ShapeError, InvalidArgumentError } from "./index";
 import type { ColumnDict } from "../types";
 import { isArrayOrTypedArray } from "../utils";

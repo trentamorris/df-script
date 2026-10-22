@@ -1,3 +1,6 @@
+/**
+ * @internalfile
+ */
 import type { IExpr, DataFrameSchema, RegisteredDataType, DatetimeTimeUnit, ColumnData } from "../types";
 import {
     DatetimeType,
