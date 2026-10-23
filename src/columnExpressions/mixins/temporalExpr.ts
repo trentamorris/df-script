@@ -22,19 +22,6 @@ import {
  * @namespace $df.col.dt
  * @category ColumnExpression
  * @syntax $df.col(<column_name>).dt.{symbol}(...)
- *
- * **Implementation Notes**
- *
- * _TimeUnit_: `Date` objects are always millisecond-based, so `timeUnit` is schema
- * metadata only. Sub-millisecond precision (`us`, `ns`) cannot be stored; methods such
- * as `microsecond()` and `nanosecond()` always scale from milliseconds. Migrating to
- * raw `BigInt` arrays would be required for true sub-ms storage.
- *
- * _Timezone enforcement_: `convertTimeZone` can only validate that the column is
- * timezone-aware when `_castType` is explicitly set within the expression chain
- * (e.g. after `castTimeUnit`). Enforcement against a column whose type is unknown
- * at expression-build time requires schema-level checks in DataFrame operations.
- * @internal
  */
 export class DateTimeExprNamespace {
     _expr: any;
