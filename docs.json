@@ -4101,8 +4101,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.castTimeUnit(...)",
       "signature": "$df.col(<column_name>).dt.castTimeUnit(\n  unit: DatetimeTimeUnit\n)",
-      "lineStart": 82,
-      "lineEnd": 84
+      "lineStart": 68,
+      "lineEnd": 70
     },
     "century": {
       "desc": "Extracts the 1-indexed century component (e.g. 21 for 2026) from a Datetime column.",
@@ -4114,8 +4114,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.century(...)",
       "signature": "$df.col(<column_name>).dt.century(\n  timeZone?: string\n)",
-      "lineStart": 99,
-      "lineEnd": 101
+      "lineStart": 85,
+      "lineEnd": 87
     },
     "convertTimeZone": {
       "desc": "Converts a Datetime column to a different IANA timezone. Preserves the exact UTC epoch instant while changing the timezone label, affecting how local wall-clock component extractors (`hour()`, `day()`, etc.) and `strftime` interpret values. Requires the column to already be timezone-aware; use `replace({ timeZone })` to assign a timezone to a naive column first.",
@@ -4136,8 +4136,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.convertTimeZone(...)",
       "signature": "$df.col(<column_name>).dt.convertTimeZone(\n  timeZone: string\n)",
-      "lineStart": 123,
-      "lineEnd": 132
+      "lineStart": 109,
+      "lineEnd": 118
     },
     "date": {
       "desc": "Extracts the Date object component from a Datetime column, truncating time to 00:00:00.000 UTC.",
@@ -4149,8 +4149,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.date(...)",
       "signature": "$df.col(<column_name>).dt.date()",
-      "lineStart": 147,
-      "lineEnd": 149
+      "lineStart": 133,
+      "lineEnd": 135
     },
     "day": {
       "desc": "Extracts the calendar day component (1-31) from a Datetime column.",
@@ -4168,8 +4168,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.day(...)",
       "signature": "$df.col(<column_name>).dt.day(\n  timeZone?: string\n)",
-      "lineStart": 165,
-      "lineEnd": 167
+      "lineStart": 151,
+      "lineEnd": 153
     },
     "daysInMonth": {
       "desc": "Extracts the total number of days in the month (28-31) for each Datetime value.",
@@ -4187,8 +4187,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.daysInMonth(...)",
       "signature": "$df.col(<column_name>).dt.daysInMonth(\n  timeZone?: string\n)",
-      "lineStart": 183,
-      "lineEnd": 185
+      "lineStart": 169,
+      "lineEnd": 171
     },
     "epoch": {
       "desc": "Returns the epoch duration timestamp offset in the specified time resolution unit.",
@@ -4206,8 +4206,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.epoch(...)",
       "signature": "$df.col(<column_name>).dt.epoch(\n  unit: TimeUnit = \"ms\"\n)",
-      "lineStart": 201,
-      "lineEnd": 203
+      "lineStart": 187,
+      "lineEnd": 189
     },
     "hour": {
       "desc": "Extracts the local hour component (0-23) from a Datetime column.",
@@ -4225,8 +4225,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.hour(...)",
       "signature": "$df.col(<column_name>).dt.hour(\n  timeZone?: string\n)",
-      "lineStart": 219,
-      "lineEnd": 221
+      "lineStart": 205,
+      "lineEnd": 207
     },
     "isBusinessDay": {
       "desc": "Evaluates whether each Datetime value falls on a business day. Supports custom weekend day definitions and holiday arrays or timestamp sets.",
@@ -4244,8 +4244,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.isBusinessDay(...)",
       "signature": "$df.col(<column_name>).dt.isBusinessDay(\n  options: IsBusinessDayOptions = {}\n)",
-      "lineStart": 238,
-      "lineEnd": 240
+      "lineStart": 224,
+      "lineEnd": 226
     },
     "isLeapYear": {
       "desc": "Checks if the calendar year of a Datetime value is a leap year (366 days).",
@@ -4263,8 +4263,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.isLeapYear(...)",
       "signature": "$df.col(<column_name>).dt.isLeapYear(\n  timeZone?: string\n)",
-      "lineStart": 256,
-      "lineEnd": 259
+      "lineStart": 242,
+      "lineEnd": 245
     },
     "isoYear": {
       "desc": "Extracts the ISO 8601 week-numbering year from a Datetime column.",
@@ -4282,8 +4282,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.isoYear(...)",
       "signature": "$df.col(<column_name>).dt.isoYear(\n  timeZone?: string\n)",
-      "lineStart": 276,
-      "lineEnd": 278
+      "lineStart": 262,
+      "lineEnd": 264
     },
     "microsecond": {
       "desc": "Extracts the microsecond component (0-999,000) scaled from Datetime millisecond precision.",
@@ -4301,8 +4301,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.microsecond(...)",
       "signature": "$df.col(<column_name>).dt.microsecond(\n  timeZone?: string\n)",
-      "lineStart": 294,
-      "lineEnd": 296
+      "lineStart": 280,
+      "lineEnd": 282
     },
     "millennium": {
       "desc": "Extracts the 1-indexed millennium component index (e.g. 3 for the year 2026) from a Datetime column.",
@@ -4314,8 +4314,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.millennium(...)",
       "signature": "$df.col(<column_name>).dt.millennium(\n  timeZone?: string\n)",
-      "lineStart": 311,
-      "lineEnd": 313
+      "lineStart": 297,
+      "lineEnd": 299
     },
     "millisecond": {
       "desc": "Extracts the millisecond component (0-999) from a Datetime column.",
@@ -4333,8 +4333,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.millisecond(...)",
       "signature": "$df.col(<column_name>).dt.millisecond(\n  timeZone?: string\n)",
-      "lineStart": 329,
-      "lineEnd": 331
+      "lineStart": 315,
+      "lineEnd": 317
     },
     "minute": {
       "desc": "Extracts the minute component (0-59) from a Datetime column.",
@@ -4352,8 +4352,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.minute(...)",
       "signature": "$df.col(<column_name>).dt.minute(\n  timeZone?: string\n)",
-      "lineStart": 347,
-      "lineEnd": 349
+      "lineStart": 333,
+      "lineEnd": 335
     },
     "month": {
       "desc": "Extracts the calendar month component (1-12) from a Datetime column.",
@@ -4371,8 +4371,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.month(...)",
       "signature": "$df.col(<column_name>).dt.month(\n  timeZone?: string\n)",
-      "lineStart": 365,
-      "lineEnd": 367
+      "lineStart": 351,
+      "lineEnd": 353
     },
     "monthEnd": {
       "desc": "Returns a Datetime column shifted to the last calendar day of the month at 00:00:00.000 UTC.",
@@ -4384,8 +4384,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.monthEnd(...)",
       "signature": "$df.col(<column_name>).dt.monthEnd()",
-      "lineStart": 382,
-      "lineEnd": 384
+      "lineStart": 368,
+      "lineEnd": 370
     },
     "monthStart": {
       "desc": "Returns a Datetime column shifted to the first calendar day of the month at 00:00:00.000 UTC.",
@@ -4397,8 +4397,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.monthStart(...)",
       "signature": "$df.col(<column_name>).dt.monthStart()",
-      "lineStart": 399,
-      "lineEnd": 401
+      "lineStart": 385,
+      "lineEnd": 387
     },
     "nanosecond": {
       "desc": "Extracts the nanosecond component (0-999,000,000) scaled from Datetime millisecond precision.",
@@ -4416,8 +4416,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.nanosecond(...)",
       "signature": "$df.col(<column_name>).dt.nanosecond(\n  timeZone?: string\n)",
-      "lineStart": 417,
-      "lineEnd": 419
+      "lineStart": 403,
+      "lineEnd": 405
     },
     "offsetDay": {
       "desc": "Offsets a Datetime column by N calendar days (numeric constant, column reference, or expression). Reuses $df.duration({ days: n }) and expression addition math under the hood.",
@@ -4439,8 +4439,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.offsetDay(...)",
       "signature": "$df.col(<column_name>).dt.offsetDay(\n  n: number | any,\n  options: DayOffsetOptions = {}\n)",
-      "lineStart": 437,
-      "lineEnd": 444
+      "lineStart": 423,
+      "lineEnd": 430
     },
     "ordinalDay": {
       "desc": "Extracts the day of the year (1-366) from a Datetime column.",
@@ -4458,8 +4458,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.ordinalDay(...)",
       "signature": "$df.col(<column_name>).dt.ordinalDay(\n  timeZone?: string\n)",
-      "lineStart": 460,
-      "lineEnd": 462
+      "lineStart": 446,
+      "lineEnd": 448
     },
     "quarter": {
       "desc": "Extracts the calendar quarter of the year (1-4) from a Datetime column.",
@@ -4477,8 +4477,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.quarter(...)",
       "signature": "$df.col(<column_name>).dt.quarter(\n  timeZone?: string\n)",
-      "lineStart": 478,
-      "lineEnd": 480
+      "lineStart": 464,
+      "lineEnd": 466
     },
     "replace": {
       "desc": "Replaces specific date and time components (`year`, `month`, `day`, `hour`, `minute`, `second`, `ms`, `timeZone`) of a Datetime column. Unspecified components are preserved from the original value. When `timeZone` is provided in options, components are interpreted in that timezone. Note: `month` is 1-indexed (1 = January, 12 = December); `day` is 1-indexed (1-31).",
@@ -4496,8 +4496,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.replace(...)",
       "signature": "$df.col(<column_name>).dt.replace(\n  options: ReplaceDateOptions\n)",
-      "lineStart": 499,
-      "lineEnd": 501
+      "lineStart": 485,
+      "lineEnd": 487
     },
     "second": {
       "desc": "Extracts the second component (0-59) from a Datetime column.",
@@ -4509,8 +4509,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.second(...)",
       "signature": "$df.col(<column_name>).dt.second()",
-      "lineStart": 516,
-      "lineEnd": 518
+      "lineStart": 502,
+      "lineEnd": 504
     },
     "strftime": {
       "desc": "Formats Datetime values into custom formatted strings using strftime directive pattern tokens. Automatically applies the column's assigned timezone unless explicitly overridden in options.",
@@ -4531,8 +4531,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.strftime(...)",
       "signature": "$df.col(<column_name>).dt.strftime(\n  options: StrftimeOptions\n)",
-      "lineStart": 537,
-      "lineEnd": 543
+      "lineStart": 523,
+      "lineEnd": 529
     },
     "time": {
       "desc": "Extracts the time component formatted string (`\"HH:MM:SS.mmm\"`) from a Datetime column.",
@@ -4544,8 +4544,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.time(...)",
       "signature": "$df.col(<column_name>).dt.time()",
-      "lineStart": 558,
-      "lineEnd": 560
+      "lineStart": 544,
+      "lineEnd": 546
     },
     "timestamp": {
       "desc": "Returns numeric timestamp relative to Epoch. Alias for epoch.",
@@ -4563,8 +4563,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.timestamp(...)",
       "signature": "$df.col(<column_name>).dt.timestamp(\n  unit: TimeUnit = \"ms\"\n)",
-      "lineStart": 576,
-      "lineEnd": 578
+      "lineStart": 562,
+      "lineEnd": 564
     },
     "totalDays": {
       "desc": "Converts a Duration value (in milliseconds) to total days count.",
@@ -4576,8 +4576,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalDays(...)",
       "signature": "$df.col(<column_name>).dt.totalDays()",
-      "lineStart": 595,
-      "lineEnd": 597
+      "lineStart": 581,
+      "lineEnd": 583
     },
     "totalHours": {
       "desc": "Converts a Duration value (in milliseconds) to total hours count.",
@@ -4589,8 +4589,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalHours(...)",
       "signature": "$df.col(<column_name>).dt.totalHours()",
-      "lineStart": 613,
-      "lineEnd": 615
+      "lineStart": 599,
+      "lineEnd": 601
     },
     "totalMicroseconds": {
       "desc": "Converts Duration to microsecond count.",
@@ -4602,8 +4602,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalMicroseconds(...)",
       "signature": "$df.col(<column_name>).dt.totalMicroseconds()",
-      "lineStart": 631,
-      "lineEnd": 633
+      "lineStart": 617,
+      "lineEnd": 619
     },
     "totalMilliseconds": {
       "desc": "Converts Duration to millisecond count.",
@@ -4615,8 +4615,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalMilliseconds(...)",
       "signature": "$df.col(<column_name>).dt.totalMilliseconds()",
-      "lineStart": 649,
-      "lineEnd": 651
+      "lineStart": 635,
+      "lineEnd": 637
     },
     "totalMinutes": {
       "desc": "Converts Duration to floating point minutes.",
@@ -4628,8 +4628,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalMinutes(...)",
       "signature": "$df.col(<column_name>).dt.totalMinutes()",
-      "lineStart": 667,
-      "lineEnd": 669
+      "lineStart": 653,
+      "lineEnd": 655
     },
     "totalNanoseconds": {
       "desc": "Converts Duration to nanosecond count.",
@@ -4641,8 +4641,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalNanoseconds(...)",
       "signature": "$df.col(<column_name>).dt.totalNanoseconds()",
-      "lineStart": 685,
-      "lineEnd": 687
+      "lineStart": 671,
+      "lineEnd": 673
     },
     "totalSeconds": {
       "desc": "Converts Duration to floating point seconds.",
@@ -4654,8 +4654,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalSeconds(...)",
       "signature": "$df.col(<column_name>).dt.totalSeconds()",
-      "lineStart": 703,
-      "lineEnd": 705
+      "lineStart": 689,
+      "lineEnd": 691
     },
     "utcOffset": {
       "desc": "Returns the UTC offset of a timezone for a given Datetime value. Supports returning the total offset, the standard (base) offset, or just the daylight saving time component, in multiple output formats. (`\"total\"` | `\"standardTime\"` | `\"daylightSavingTime\"`), and `format` controls the output unit (`\"milliseconds\"` | `\"minutes\"` | `\"hours\"` | `\"iso\"` | `\"basic\"`).",
@@ -4677,8 +4677,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.utcOffset(...)",
       "signature": "$df.col(<column_name>).dt.utcOffset(\n  timeZone?: string,\n  options: UtcOffsetOptions = {}\n)",
-      "lineStart": 726,
-      "lineEnd": 728
+      "lineStart": 712,
+      "lineEnd": 714
     },
     "week": {
       "desc": "Extracts the ISO 8601 week number (1-53) from a Datetime column.",
@@ -4696,8 +4696,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.week(...)",
       "signature": "$df.col(<column_name>).dt.week(\n  timeZone?: string\n)",
-      "lineStart": 744,
-      "lineEnd": 746
+      "lineStart": 730,
+      "lineEnd": 732
     },
     "weekday": {
       "desc": "Extracts weekday component (1=Monday, 7=Sunday).",
@@ -4715,8 +4715,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.weekday(...)",
       "signature": "$df.col(<column_name>).dt.weekday(\n  timeZone?: string\n)",
-      "lineStart": 762,
-      "lineEnd": 764
+      "lineStart": 748,
+      "lineEnd": 750
     },
     "year": {
       "desc": "Extracts the year component from a Datetime column.",
@@ -4734,8 +4734,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.year(...)",
       "signature": "$df.col(<column_name>).dt.year(\n  timeZone?: string\n)",
-      "lineStart": 780,
-      "lineEnd": 782
+      "lineStart": 766,
+      "lineEnd": 768
     }
   },
   "dataframe/dataframe.ts": {
