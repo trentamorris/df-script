@@ -7,7 +7,7 @@ import {
     TemporalDataType,
     NestedDataType,
     NumericDataType
-} from "./DataType";
+} from "./dataType";
 import {
     toValidInt,
     toValidBigInt,

@@ -12,7 +12,7 @@ import type {
     ReplaceOptions,
     ReplaceManyOptions
 } from "../../types";
-import { ExprBase } from "../ExprBase";
+import { ExprBase } from "../exprBase";
 import { TEXT_ENCODER } from "../../constants";
 import {
     toValidDate,

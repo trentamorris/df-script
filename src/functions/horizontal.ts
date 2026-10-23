@@ -1,7 +1,7 @@
-import { ColumnExpr, resolveColumnSelectors } from "../columnExpressions/ColumnExpr";
-import { toColExpr } from "../columnExpressions/ExprBase";
+import { ColumnExpr, resolveColumnSelectors } from "../columnExpressions/columnExpr";
+import { toColExpr } from "../columnExpressions/exprBase";
 import type { IntoExpr } from "../types";
-import { ArrayExprNamespace } from "../columnExpressions/mixins/ArrayExpr";
+import { ArrayExprNamespace } from "../columnExpressions/mixins/arrayExpr";
 import { evaluateArgsMatrix, createDelegatingProxy } from "../columnExpressions/utils";
 import { HORIZONTAL_MARKER } from "../columnExpressions/constants";
 

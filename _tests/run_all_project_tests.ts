@@ -26,11 +26,12 @@ const _runSuite = (name: string, fn: () => void) => {
 };
 
 // 1. ColumnExpressions
-_runSuite("ArrayExpr", () => { require("./columnExpressions/mixins/ArrayExpr/run_all"); });
-_runSuite("StandardExpr", () => { require("./columnExpressions/mixins/StandardExpr/run_all"); });
-_runSuite("StringExpr", () => { require("./columnExpressions/mixins/StringExpr/run_all"); });
-_runSuite("StructExpr", () => { require("./columnExpressions/mixins/StructExpr/run_all"); });
-_runSuite("TemporalExpr", () => { require("./columnExpressions/mixins/TemporalExpr/run_all"); });
+_runSuite("exprBase", () => { require("./columnExpressions/exprBase/run_all"); });
+_runSuite("arrayExpr", () => { require("./columnExpressions/mixins/arrayExpr/run_all"); });
+_runSuite("standardExpr", () => { require("./columnExpressions/mixins/standardExpr/run_all"); });
+_runSuite("stringExpr", () => { require("./columnExpressions/mixins/stringExpr/run_all"); });
+_runSuite("structExpr", () => { require("./columnExpressions/mixins/structExpr/run_all"); });
+_runSuite("temporalExpr", () => { require("./columnExpressions/mixins/temporalExpr/run_all"); });
 _runSuite("typeSelector.test", () => { require("./columnExpressions/typeSelector.test"); });
 _runSuite("typeInference.test", () => { require("./columnExpressions/typeInference.test"); });
 

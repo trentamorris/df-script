@@ -20,7 +20,7 @@ import type {
     ValidScalarTypes
 } from "../../types"
 import type { RandomOptions, NumericArg, IsCloseOptions, RoundOptions } from "../types"
-import { ExprBase } from "../ExprBase"
+import { ExprBase } from "../exprBase"
 import { computeIsIn, compareMissing, computeRank, evaluateExpression, evaluateArg } from "../utils"
 import { ComputeError, InvalidArgumentError } from "../../exceptions"
 import {

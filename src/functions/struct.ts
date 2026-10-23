@@ -1,5 +1,5 @@
-import { ColumnExpr } from "../columnExpressions/ColumnExpr";
-import { isColExpr } from "../columnExpressions/ExprBase";
+import { ColumnExpr } from "../columnExpressions/columnExpr";
+import { isColExpr } from "../columnExpressions/exprBase";
 import { lit } from "./lit";
 import type { IntoExpr } from "../types";
 import { STRUCT_MARKER } from "../columnExpressions/constants";

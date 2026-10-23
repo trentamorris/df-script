@@ -324,7 +324,7 @@ export interface ExplodeOptions {
 }
 
 
-import type { DataType } from "./datatypes/DataType";
+import type { DataType } from "./datatypes/dataType";
 
 export type InferDataType<T> = T extends DataType<infer U> ? U : any;
 

@@ -1,4 +1,4 @@
-import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { ELEMENT_MARKER } from "../columnExpressions/constants";
 
 /**

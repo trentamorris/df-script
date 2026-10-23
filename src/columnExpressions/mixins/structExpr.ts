@@ -1,4 +1,4 @@
-import { ExprBase } from "../ExprBase";
+import { ExprBase } from "../exprBase";
 import type { IntoExpr } from "../../types";
 import { InvalidArgumentError } from "../../exceptions";
 import { LITERAL_MARKER } from "../constants";

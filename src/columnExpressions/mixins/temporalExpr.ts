@@ -1,7 +1,7 @@
 import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, DayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
 import { DatetimeType, Int32, BooleanDataType } from "../../datatypes/types";
 import { InvalidArgumentError } from "../../exceptions";
-import { ExprBase } from "../ExprBase";
+import { ExprBase } from "../exprBase";
 import {
     toValidDate,
     toEpoch,

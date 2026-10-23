@@ -1,4 +1,4 @@
-import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { ColumnExpr } from "../columnExpressions/columnExpr";
 import type { IExpr, ValidScalarTypes } from "../types";
 import { evaluateArg, isEvaluatedColumn, evaluateArgsMatrix } from "../columnExpressions/utils";
 import { WHEN_MARKER } from "../columnExpressions/constants";

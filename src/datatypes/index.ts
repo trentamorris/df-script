@@ -7,7 +7,7 @@ import {
     FloatDataType,
     TemporalDataType,
     NestedDataType
-} from "./DataType";
+} from "./dataType";
 import {
     Int8,
     Int16,
@@ -36,7 +36,7 @@ import {
 export { BaseDataType as DataType };
 export { Boolean, Date, Object, Array };
 export * from "./types";
-export * from "./DataType";
+export * from "./dataType";
 
 export const DataTypeRegistry = {
     Int8,

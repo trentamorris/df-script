@@ -1,5 +1,5 @@
 {
-  "columnExpressions/ExprBase.ts": {
+  "columnExpressions/exprBase.ts": {
     "alias": {
       "desc": "Renames the output expression column key.",
       "namespace": "$df.col",
@@ -19,7 +19,7 @@
       "lineEnd": 151
     }
   },
-  "columnExpressions/mixins/ArrayExpr.ts": {
+  "columnExpressions/mixins/arrayExpr.ts": {
     "agg": {
       "desc": "Applies an aggregation expression or element-wise calculation over each array cell.",
       "examples": [
@@ -652,7 +652,7 @@
       "lineEnd": 880
     }
   },
-  "columnExpressions/mixins/StandardExpr.ts": {
+  "columnExpressions/mixins/standardExpr.ts": {
     "abs": {
       "desc": "Computes the absolute value of the column values.",
       "examples": [
@@ -2911,7 +2911,7 @@
       "lineEnd": 2960
     }
   },
-  "columnExpressions/mixins/StringExpr.ts": {
+  "columnExpressions/mixins/stringExpr.ts": {
     "concat": {
       "desc": "Concatenates string elements with another string value or expression.",
       "examples": [
@@ -4038,7 +4038,7 @@
       "lineEnd": 1356
     }
   },
-  "columnExpressions/mixins/StructExpr.ts": {
+  "columnExpressions/mixins/structExpr.ts": {
     "field": {
       "desc": "Extracts a sub-field property value from nested objects/struct columns.",
       "examples": [
@@ -4123,7 +4123,7 @@
       "lineEnd": 177
     }
   },
-  "columnExpressions/mixins/TemporalExpr.ts": {
+  "columnExpressions/mixins/temporalExpr.ts": {
     "DateTimeExprNamespace": {
       "desc": "**Implementation Notes**\n\n_TimeUnit_: `Date` objects are always millisecond-based, so `timeUnit` is schema metadata only. Sub-millisecond precision (`us`, `ns`) cannot be stored; methods such as `microsecond()` and `nanosecond()` always scale from milliseconds. Migrating to raw `BigInt` arrays would be required for true sub-ms storage.\n\n_Timezone enforcement_: `convertTimeZone` can only validate that the column is timezone-aware when `_castType` is explicitly set within the expression chain (e.g. after `castTimeUnit`). Enforcement against a column whose type is unknown at expression-build time requires schema-level checks in DataFrame operations.",
       "namespace": "$df.col.dt",

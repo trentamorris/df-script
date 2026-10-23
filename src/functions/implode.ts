@@ -1,5 +1,5 @@
-import { ColumnExpr } from "../columnExpressions/ColumnExpr";
-import { toColExpr } from "../columnExpressions/ExprBase";
+import { ColumnExpr } from "../columnExpressions/columnExpr";
+import { toColExpr } from "../columnExpressions/exprBase";
 import type { IntoExpr } from "../types";
 
 /**

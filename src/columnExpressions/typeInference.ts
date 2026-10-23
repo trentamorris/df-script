@@ -24,7 +24,7 @@ import {
     unboxPrimitiveObj,
     typedArrayTagGetter
 } from "../utils";
-import { isExpr } from "./ExprBase";
+import { isExpr } from "./exprBase";
 
 const _TYPED_ARRAY_MAP: Record<string, RegisteredDataType> = {
     Int8Array: DataTypeRegistry.Int8,

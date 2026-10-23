@@ -1,4 +1,4 @@
-import { ColumnExpr } from "../columnExpressions/ColumnExpr";
+import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { LITERAL_MARKER } from "../columnExpressions/constants";
 import { ShapeError } from "../exceptions";
 import type { RegisteredDataType, FlattenUnion } from "../types";

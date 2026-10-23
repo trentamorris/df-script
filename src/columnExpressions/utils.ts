@@ -3,7 +3,7 @@
  */
 import type { IExpr, ColumnData, ColumnDict } from "../types";
 import type { ProxyPropertyResolver } from "./types";
-import { isExpr } from "./ExprBase";
+import { isExpr } from "./exprBase";
 import { isArrayOrTypedArray, sortArray, toCanonicalString } from "../utils";
 import { isValidDateObj } from "../utils/object";
 import { resolveWindowExpr } from "../dataframe/utils";
