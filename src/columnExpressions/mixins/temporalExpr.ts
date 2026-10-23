@@ -34,6 +34,7 @@ import {
  * timezone-aware when `_castType` is explicitly set within the expression chain
  * (e.g. after `castTimeUnit`). Enforcement against a column whose type is unknown
  * at expression-build time requires schema-level checks in DataFrame operations.
+ * @internal
  */
 export class DateTimeExprNamespace {
     _expr: any;
@@ -782,6 +783,7 @@ export class DateTimeExprNamespace {
 
 export class TemporalExpr extends ExprBase {
     /**
+     * @ignore
      * Datetime namespace accessor for date, time, and duration operations.
      * @namespace $df.col
      * @category ColumnExpression

@@ -11,7 +11,7 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  * @param {...IntoExpr[]} moreFields Additional fields when a single expression is passed as the first parameter.
  * @returns {ColumnExpr<any>} A column expression packaging the specified fields.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_2x2 -->

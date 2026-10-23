@@ -171,25 +171,6 @@
       "lineStart": 237,
       "lineEnd": 239
     },
-    "filter": {
-      "desc": "Filters elements of list columns matching a boolean sub-expression.",
-      "examples": [
-        ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n┌───────────┐\n│ a         │\n├───────────┤\n│ [1, 2, 3] │\n│ [4, 5]    │\n└───────────┘\n>>> df.withColumns($df.col(\"a\").arr.filter($df.element().gt(2)).alias(\"filtered\"))\nshape: (2, 2)\n┌───────────┬──────────┐\n│ a         │ filtered │\n├───────────┼──────────┤\n│ [1, 2, 3] │ [3]      │\n│ [4, 5]    │ [4, 5]   │\n└───────────┴──────────┘"
-      ],
-      "params": [
-        {
-          "name": "expr",
-          "desc": "The boolean column expression to filter by."
-        }
-      ],
-      "returns": "ColumnExpression",
-      "namespace": "$df.col.arr",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).arr.filter(...)",
-      "signature": "$df.col(<column_name>).arr.filter(\n  expr: IExpr\n)",
-      "lineStart": 256,
-      "lineEnd": 258
-    },
     "eval": {
       "desc": "Evaluates subExpr element-wise across array lists.",
       "examples": [
@@ -206,8 +187,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arr.eval(...)",
       "signature": "$df.col(<column_name>).arr.eval(\n  expr: IExpr\n)",
-      "lineStart": 275,
-      "lineEnd": 285
+      "lineStart": 256,
+      "lineEnd": 266
     },
     "explode": {
       "desc": "Expands lists into row-wise elements and produces an index mapping for DataFrame unnesting.",
@@ -225,7 +206,26 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arr.explode(...)",
       "signature": "$df.col(<column_name>).arr.explode(\n  {\n    emptyAsNull = true,\n    keepNulls = true\n  }: ExplodeOptions = {}\n)",
-      "lineStart": 302,
+      "lineStart": 283,
+      "lineEnd": 339
+    },
+    "filter": {
+      "desc": "Filters elements of list columns matching a boolean sub-expression.",
+      "examples": [
+        ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n┌───────────┐\n│ a         │\n├───────────┤\n│ [1, 2, 3] │\n│ [4, 5]    │\n└───────────┘\n>>> df.withColumns($df.col(\"a\").arr.filter($df.element().gt(2)).alias(\"filtered\"))\nshape: (2, 2)\n┌───────────┬──────────┐\n│ a         │ filtered │\n├───────────┼──────────┤\n│ [1, 2, 3] │ [3]      │\n│ [4, 5]    │ [4, 5]   │\n└───────────┴──────────┘"
+      ],
+      "params": [
+        {
+          "name": "expr",
+          "desc": "The boolean column expression to filter by."
+        }
+      ],
+      "returns": "ColumnExpression",
+      "namespace": "$df.col.arr",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.filter(...)",
+      "signature": "$df.col(<column_name>).arr.filter(\n  expr: IExpr\n)",
+      "lineStart": 356,
       "lineEnd": 358
     },
     "first": {
@@ -515,6 +515,25 @@
       "lineStart": 675,
       "lineEnd": 677
     },
+    "sort": {
+      "desc": "Sorts elements inside each list.",
+      "examples": [
+        ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n┌───────────┐\n│ a         │\n├───────────┤\n│ [1, 2, 3] │\n│ [4, 5]    │\n└───────────┘\n>>> df.withColumns($df.col(\"a\").arr.sort().alias(\"sorted\"))\nshape: (2, 2)\n┌───────────┬───────────┐\n│ a         │ sorted    │\n├───────────┼───────────┤\n│ [1, 2, 3] │ [1, 2, 3] │\n│ [4, 5]    │ [4, 5]    │\n└───────────┴───────────┘"
+      ],
+      "params": [
+        {
+          "name": "options",
+          "desc": "Sort customization parameters (e.g. descending flag)."
+        }
+      ],
+      "returns": "ColumnExpression",
+      "namespace": "$df.col.arr",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).arr.sort(...)",
+      "signature": "$df.col(<column_name>).arr.sort(\n  options?: SortArrayOptions\n)",
+      "lineStart": 694,
+      "lineEnd": 696
+    },
     "splice": {
       "desc": "Splices elements in list cells.",
       "examples": [
@@ -539,26 +558,7 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).arr.splice(...)",
       "signature": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: any[]\n)",
-      "lineStart": 696,
-      "lineEnd": 702
-    },
-    "sort": {
-      "desc": "Sorts elements inside each list.",
-      "examples": [
-        ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n┌───────────┐\n│ a         │\n├───────────┤\n│ [1, 2, 3] │\n│ [4, 5]    │\n└───────────┘\n>>> df.withColumns($df.col(\"a\").arr.sort().alias(\"sorted\"))\nshape: (2, 2)\n┌───────────┬───────────┐\n│ a         │ sorted    │\n├───────────┼───────────┤\n│ [1, 2, 3] │ [1, 2, 3] │\n│ [4, 5]    │ [4, 5]    │\n└───────────┴───────────┘"
-      ],
-      "params": [
-        {
-          "name": "options",
-          "desc": "Sort customization parameters (e.g. descending flag)."
-        }
-      ],
-      "returns": "ColumnExpression",
-      "namespace": "$df.col.arr",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).arr.sort(...)",
-      "signature": "$df.col(<column_name>).arr.sort(\n  options?: SortArrayOptions\n)",
-      "lineStart": 719,
+      "lineStart": 715,
       "lineEnd": 721
     },
     "std": {
@@ -637,19 +637,6 @@
       "signature": "$df.col(<column_name>).arr.variance()",
       "lineStart": 855,
       "lineEnd": 857
-    },
-    "arr": {
-      "desc": "Array namespace accessor for list-based column operations.",
-      "examples": [
-        ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n┌───────────┐\n│ a         │\n├───────────┤\n│ [1, 2, 3] │\n│ [4, 5]    │\n└───────────┘\n>>> df.select($df.col(\"a\").arr.len())\nshape: (2, 1)\n┌─────┐\n│ len │\n├─────┤\n│ 3   │\n│ 2   │\n└─────┘"
-      ],
-      "returns": "ArrayExprNamespace",
-      "namespace": "$df.col",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).arr",
-      "signature": "$df.col(<column_name>).get arr()",
-      "lineStart": 878,
-      "lineEnd": 880
     }
   },
   "columnExpressions/mixins/standardExpr.ts": {
@@ -2988,19 +2975,6 @@
       "lineStart": 157,
       "lineEnd": 168
     },
-    "escapeRegex": {
-      "desc": "Escapes special regular expression characters in string elements.",
-      "examples": [
-        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.withColumns($df.col(\"s\").str.escapeRegex().alias(\"escaped\"))\nshape: (3, 2)\n┌──────────┬─────────┐\n│ s        │ escaped │\n├──────────┼─────────┤\n│ \"apple\"  │ apple   │\n│ \"banana\" │ banana  │\n│ \"cherry\" │ cherry  │\n└──────────┴─────────┘"
-      ],
-      "returns": "ColumnExpression",
-      "namespace": "$df.col.str",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).str.escapeRegex(...)",
-      "signature": "$df.col(<column_name>).str.escapeRegex(\n  options: EscapeRegexOptions = {}\n)",
-      "lineStart": 185,
-      "lineEnd": 187
-    },
     "decode": {
       "desc": "Decodes hex or base64 encoded string column values into string.",
       "examples": [
@@ -3020,8 +2994,21 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.decode(...)",
       "signature": "$df.col(<column_name>).str.decode(\n  options: StringDecodeOptions\n)",
-      "lineStart": 207,
-      "lineEnd": 209
+      "lineStart": 188,
+      "lineEnd": 190
+    },
+    "decodeUriComponent": {
+      "desc": "Decodes Uniform Resource Identifier (URI) components.",
+      "examples": [
+        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.withColumns($df.col(\"s\").str.encodeUriComponent().str.decodeUriComponent().alias(\"decoded\"))\nshape: (2, 2)\n┌─────────────┬─────────────┐\n│ s           │ decoded     │\n├─────────────┼─────────────┤\n│ \"  hello  \" │ \"  hello  \" │\n│ \"  world  \" │ \"  world  \" │\n└─────────────┴─────────────┘"
+      ],
+      "returns": "ColumnExpression",
+      "namespace": "$df.col.str",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.decodeUriComponent(...)",
+      "signature": "$df.col(<column_name>).str.decodeUriComponent()",
+      "lineStart": 206,
+      "lineEnd": 210
     },
     "encode": {
       "desc": "Encodes string column values into hex or base64.",
@@ -3042,21 +3029,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.encode(...)",
       "signature": "$df.col(<column_name>).str.encode(\n  options: StringEncodeOptions\n)",
-      "lineStart": 229,
-      "lineEnd": 231
-    },
-    "decodeUriComponent": {
-      "desc": "Decodes Uniform Resource Identifier (URI) components.",
-      "examples": [
-        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.withColumns($df.col(\"s\").str.encodeUriComponent().str.decodeUriComponent().alias(\"decoded\"))\nshape: (2, 2)\n┌─────────────┬─────────────┐\n│ s           │ decoded     │\n├─────────────┼─────────────┤\n│ \"  hello  \" │ \"  hello  \" │\n│ \"  world  \" │ \"  world  \" │\n└─────────────┴─────────────┘"
-      ],
-      "returns": "ColumnExpression",
-      "namespace": "$df.col.str",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).str.decodeUriComponent(...)",
-      "signature": "$df.col(<column_name>).str.decodeUriComponent()",
-      "lineStart": 247,
-      "lineEnd": 251
+      "lineStart": 230,
+      "lineEnd": 232
     },
     "encodeUriComponent": {
       "desc": "Encodes Uniform Resource Identifier (URI) components.",
@@ -3068,8 +3042,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.encodeUriComponent(...)",
       "signature": "$df.col(<column_name>).str.encodeUriComponent()",
-      "lineStart": 267,
-      "lineEnd": 271
+      "lineStart": 248,
+      "lineEnd": 252
     },
     "endsWith": {
       "desc": "Checks if string ends with a suffix.",
@@ -3087,6 +3061,19 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.endsWith(...)",
       "signature": "$df.col(<column_name>).str.endsWith(\n  suffix: string\n)",
+      "lineStart": 269,
+      "lineEnd": 271
+    },
+    "escapeRegex": {
+      "desc": "Escapes special regular expression characters in string elements.",
+      "examples": [
+        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.withColumns($df.col(\"s\").str.escapeRegex().alias(\"escaped\"))\nshape: (3, 2)\n┌──────────┬─────────┐\n│ s        │ escaped │\n├──────────┼─────────┤\n│ \"apple\"  │ apple   │\n│ \"banana\" │ banana  │\n│ \"cherry\" │ cherry  │\n└──────────┴─────────┘"
+      ],
+      "returns": "ColumnExpression",
+      "namespace": "$df.col.str",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.escapeRegex(...)",
+      "signature": "$df.col(<column_name>).str.escapeRegex(\n  options: EscapeRegexOptions = {}\n)",
       "lineStart": 288,
       "lineEnd": 290
     },
@@ -3746,25 +3733,6 @@
       "lineStart": 963,
       "lineEnd": 973
     },
-    "tail": {
-      "desc": "Extracts the last n characters of each string element.",
-      "examples": [
-        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.withColumns($df.col(\"s\").str.tail(3).alias(\"suffix\"))\nshape: (3, 2)\n┌──────────┬────────┐\n│ s        │ suffix │\n├──────────┼────────┤\n│ \"apple\"  │ ple    │\n│ \"banana\" │ ana    │\n│ \"cherry\" │ rry    │\n└──────────┴────────┘"
-      ],
-      "params": [
-        {
-          "name": "n",
-          "desc": "Number of characters to extract from the end of the string (default 1)."
-        }
-      ],
-      "returns": "ColumnExpression",
-      "namespace": "$df.col.str",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).str.tail(...)",
-      "signature": "$df.col(<column_name>).str.tail(\n  n: number = 1\n)",
-      "lineStart": 991,
-      "lineEnd": 993
-    },
     "strptime": {
       "desc": "Parses date/time string into Datetime.",
       "examples": [
@@ -3784,6 +3752,25 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).str.strptime(...)",
       "signature": "$df.col(<column_name>).str.strptime(\n  options: StrptimeOptions\n)",
+      "lineStart": 991,
+      "lineEnd": 993
+    },
+    "tail": {
+      "desc": "Extracts the last n characters of each string element.",
+      "examples": [
+        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.withColumns($df.col(\"s\").str.tail(3).alias(\"suffix\"))\nshape: (3, 2)\n┌──────────┬────────┐\n│ s        │ suffix │\n├──────────┼────────┤\n│ \"apple\"  │ ple    │\n│ \"banana\" │ ana    │\n│ \"cherry\" │ rry    │\n└──────────┴────────┘"
+      ],
+      "params": [
+        {
+          "name": "n",
+          "desc": "Number of characters to extract from the end of the string (default 1)."
+        }
+      ],
+      "returns": "ColumnExpression",
+      "namespace": "$df.col.str",
+      "category": "ColumnExpression",
+      "syntax": "$df.col(<column_name>).str.tail(...)",
+      "signature": "$df.col(<column_name>).str.tail(\n  n: number = 1\n)",
       "lineStart": 1011,
       "lineEnd": 1013
     },
@@ -4023,19 +4010,6 @@
       "signature": "$df.col(<column_name>).str.zfill(\n  width: number\n)",
       "lineStart": 1330,
       "lineEnd": 1332
-    },
-    "str": {
-      "desc": "String namespace accessor for text operations.",
-      "examples": [
-        ">>> const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"] })\n>>> df\nshape: (3, 1)\n┌──────────┐\n│ s        │\n├──────────┤\n│ \"apple\"  │\n│ \"banana\" │\n│ \"cherry\" │\n└──────────┘\n>>> df.select($df.col(\"s\").str.len())\nshape: (3, 1)\n┌─────┐\n│ len │\n├─────┤\n│ 5   │\n│ 6   │\n│ 6   │\n└─────┘"
-      ],
-      "returns": "StringExprNamespace",
-      "namespace": "$df.col",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).str",
-      "signature": "$df.col(<column_name>).get str()",
-      "lineStart": 1354,
-      "lineEnd": 1356
     }
   },
   "columnExpressions/mixins/structExpr.ts": {
@@ -4108,31 +4082,9 @@
       "signature": "$df.col(<column_name>).struct.unnest()",
       "lineStart": 146,
       "lineEnd": 151
-    },
-    "struct": {
-      "desc": "Struct namespace accessor for operating on nested object/struct columns.",
-      "examples": [
-        ">>> const df = $df.data({ user: [{ name: \"Alice\", age: 30 }] })\n>>> df\nshape: (1, 1)\n┌────────────────────────────────┐\n│ user                           │\n├────────────────────────────────┤\n│ { name: \"Alice\", age: 30 }     │\n└────────────────────────────────┘\n>>> df.select($df.col(\"user\").struct.field(\"name\"))\nshape: (1, 1)\n┌─────────┐\n│ name    │\n├─────────┤\n│ \"Alice\" │\n└─────────┘"
-      ],
-      "returns": "StructExprNamespace",
-      "namespace": "$df.col",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).struct",
-      "signature": "$df.col(<column_name>).get struct()",
-      "lineStart": 175,
-      "lineEnd": 177
     }
   },
   "columnExpressions/mixins/temporalExpr.ts": {
-    "DateTimeExprNamespace": {
-      "desc": "**Implementation Notes**\n\n_TimeUnit_: `Date` objects are always millisecond-based, so `timeUnit` is schema metadata only. Sub-millisecond precision (`us`, `ns`) cannot be stored; methods such as `microsecond()` and `nanosecond()` always scale from milliseconds. Migrating to raw `BigInt` arrays would be required for true sub-ms storage.\n\n_Timezone enforcement_: `convertTimeZone` can only validate that the column is timezone-aware when `_castType` is explicitly set within the expression chain (e.g. after `castTimeUnit`). Enforcement against a column whose type is unknown at expression-build time requires schema-level checks in DataFrame operations.",
-      "namespace": "$df.col.dt",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).dt.DateTimeExprNamespace(...)",
-      "signature": "$df.col(<column_name>).dt.DateTimeExprNamespace",
-      "lineStart": 38,
-      "lineEnd": 38
-    },
     "castTimeUnit": {
       "desc": "Casts the schema time unit of a Datetime column (`\"ms\"`, `\"us\"`, `\"ns\"`). This is a metadata-only operation — underlying millisecond Date timestamps are preserved.",
       "examples": [
@@ -4149,8 +4101,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.castTimeUnit(...)",
       "signature": "$df.col(<column_name>).dt.castTimeUnit(\n  unit: DatetimeTimeUnit\n)",
-      "lineStart": 80,
-      "lineEnd": 82
+      "lineStart": 81,
+      "lineEnd": 83
     },
     "century": {
       "desc": "Extracts the 1-indexed century component (e.g. 21 for 2026) from a Datetime column.",
@@ -4162,8 +4114,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.century(...)",
       "signature": "$df.col(<column_name>).dt.century(\n  timeZone?: string\n)",
-      "lineStart": 97,
-      "lineEnd": 99
+      "lineStart": 98,
+      "lineEnd": 100
     },
     "convertTimeZone": {
       "desc": "Converts a Datetime column to a different IANA timezone. Preserves the exact UTC epoch instant while changing the timezone label, affecting how local wall-clock component extractors (`hour()`, `day()`, etc.) and `strftime` interpret values. Requires the column to already be timezone-aware; use `replace({ timeZone })` to assign a timezone to a naive column first.",
@@ -4184,8 +4136,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.convertTimeZone(...)",
       "signature": "$df.col(<column_name>).dt.convertTimeZone(\n  timeZone: string\n)",
-      "lineStart": 121,
-      "lineEnd": 130
+      "lineStart": 122,
+      "lineEnd": 131
     },
     "date": {
       "desc": "Extracts the Date object component from a Datetime column, truncating time to 00:00:00.000 UTC.",
@@ -4197,8 +4149,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.date(...)",
       "signature": "$df.col(<column_name>).dt.date()",
-      "lineStart": 145,
-      "lineEnd": 147
+      "lineStart": 146,
+      "lineEnd": 148
     },
     "day": {
       "desc": "Extracts the calendar day component (1-31) from a Datetime column.",
@@ -4216,8 +4168,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.day(...)",
       "signature": "$df.col(<column_name>).dt.day(\n  timeZone?: string\n)",
-      "lineStart": 163,
-      "lineEnd": 165
+      "lineStart": 164,
+      "lineEnd": 166
     },
     "daysInMonth": {
       "desc": "Extracts the total number of days in the month (28-31) for each Datetime value.",
@@ -4235,8 +4187,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.daysInMonth(...)",
       "signature": "$df.col(<column_name>).dt.daysInMonth(\n  timeZone?: string\n)",
-      "lineStart": 181,
-      "lineEnd": 183
+      "lineStart": 182,
+      "lineEnd": 184
     },
     "epoch": {
       "desc": "Returns the epoch duration timestamp offset in the specified time resolution unit.",
@@ -4254,8 +4206,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.epoch(...)",
       "signature": "$df.col(<column_name>).dt.epoch(\n  unit: TimeUnit = \"ms\"\n)",
-      "lineStart": 199,
-      "lineEnd": 201
+      "lineStart": 200,
+      "lineEnd": 202
     },
     "hour": {
       "desc": "Extracts the local hour component (0-23) from a Datetime column.",
@@ -4273,8 +4225,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.hour(...)",
       "signature": "$df.col(<column_name>).dt.hour(\n  timeZone?: string\n)",
-      "lineStart": 217,
-      "lineEnd": 219
+      "lineStart": 218,
+      "lineEnd": 220
     },
     "isBusinessDay": {
       "desc": "Evaluates whether each Datetime value falls on a business day. Supports custom weekend day definitions and holiday arrays or timestamp sets.",
@@ -4292,8 +4244,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.isBusinessDay(...)",
       "signature": "$df.col(<column_name>).dt.isBusinessDay(\n  options: IsBusinessDayOptions = {}\n)",
-      "lineStart": 236,
-      "lineEnd": 238
+      "lineStart": 237,
+      "lineEnd": 239
     },
     "isLeapYear": {
       "desc": "Checks if the calendar year of a Datetime value is a leap year (366 days).",
@@ -4311,8 +4263,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.isLeapYear(...)",
       "signature": "$df.col(<column_name>).dt.isLeapYear(\n  timeZone?: string\n)",
-      "lineStart": 254,
-      "lineEnd": 257
+      "lineStart": 255,
+      "lineEnd": 258
     },
     "isoYear": {
       "desc": "Extracts the ISO 8601 week-numbering year from a Datetime column.",
@@ -4330,8 +4282,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.isoYear(...)",
       "signature": "$df.col(<column_name>).dt.isoYear(\n  timeZone?: string\n)",
-      "lineStart": 274,
-      "lineEnd": 276
+      "lineStart": 275,
+      "lineEnd": 277
     },
     "microsecond": {
       "desc": "Extracts the microsecond component (0-999,000) scaled from Datetime millisecond precision.",
@@ -4349,8 +4301,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.microsecond(...)",
       "signature": "$df.col(<column_name>).dt.microsecond(\n  timeZone?: string\n)",
-      "lineStart": 292,
-      "lineEnd": 294
+      "lineStart": 293,
+      "lineEnd": 295
     },
     "millennium": {
       "desc": "Extracts the 1-indexed millennium component index (e.g. 3 for the year 2026) from a Datetime column.",
@@ -4362,8 +4314,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.millennium(...)",
       "signature": "$df.col(<column_name>).dt.millennium(\n  timeZone?: string\n)",
-      "lineStart": 309,
-      "lineEnd": 311
+      "lineStart": 310,
+      "lineEnd": 312
     },
     "millisecond": {
       "desc": "Extracts the millisecond component (0-999) from a Datetime column.",
@@ -4381,8 +4333,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.millisecond(...)",
       "signature": "$df.col(<column_name>).dt.millisecond(\n  timeZone?: string\n)",
-      "lineStart": 327,
-      "lineEnd": 329
+      "lineStart": 328,
+      "lineEnd": 330
     },
     "minute": {
       "desc": "Extracts the minute component (0-59) from a Datetime column.",
@@ -4400,8 +4352,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.minute(...)",
       "signature": "$df.col(<column_name>).dt.minute(\n  timeZone?: string\n)",
-      "lineStart": 345,
-      "lineEnd": 347
+      "lineStart": 346,
+      "lineEnd": 348
     },
     "month": {
       "desc": "Extracts the calendar month component (1-12) from a Datetime column.",
@@ -4419,8 +4371,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.month(...)",
       "signature": "$df.col(<column_name>).dt.month(\n  timeZone?: string\n)",
-      "lineStart": 363,
-      "lineEnd": 365
+      "lineStart": 364,
+      "lineEnd": 366
     },
     "monthEnd": {
       "desc": "Returns a Datetime column shifted to the last calendar day of the month at 00:00:00.000 UTC.",
@@ -4432,8 +4384,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.monthEnd(...)",
       "signature": "$df.col(<column_name>).dt.monthEnd()",
-      "lineStart": 380,
-      "lineEnd": 382
+      "lineStart": 381,
+      "lineEnd": 383
     },
     "monthStart": {
       "desc": "Returns a Datetime column shifted to the first calendar day of the month at 00:00:00.000 UTC.",
@@ -4445,8 +4397,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.monthStart(...)",
       "signature": "$df.col(<column_name>).dt.monthStart()",
-      "lineStart": 397,
-      "lineEnd": 399
+      "lineStart": 398,
+      "lineEnd": 400
     },
     "nanosecond": {
       "desc": "Extracts the nanosecond component (0-999,000,000) scaled from Datetime millisecond precision.",
@@ -4464,8 +4416,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.nanosecond(...)",
       "signature": "$df.col(<column_name>).dt.nanosecond(\n  timeZone?: string\n)",
-      "lineStart": 415,
-      "lineEnd": 417
+      "lineStart": 416,
+      "lineEnd": 418
     },
     "offsetDay": {
       "desc": "Offsets a Datetime column by N calendar days (numeric constant, column reference, or expression). Reuses $df.duration({ days: n }) and expression addition math under the hood.",
@@ -4487,8 +4439,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.offsetDay(...)",
       "signature": "$df.col(<column_name>).dt.offsetDay(\n  n: number | any,\n  options: DayOffsetOptions = {}\n)",
-      "lineStart": 435,
-      "lineEnd": 442
+      "lineStart": 436,
+      "lineEnd": 443
     },
     "ordinalDay": {
       "desc": "Extracts the day of the year (1-366) from a Datetime column.",
@@ -4506,8 +4458,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.ordinalDay(...)",
       "signature": "$df.col(<column_name>).dt.ordinalDay(\n  timeZone?: string\n)",
-      "lineStart": 458,
-      "lineEnd": 460
+      "lineStart": 459,
+      "lineEnd": 461
     },
     "quarter": {
       "desc": "Extracts the calendar quarter of the year (1-4) from a Datetime column.",
@@ -4525,8 +4477,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.quarter(...)",
       "signature": "$df.col(<column_name>).dt.quarter(\n  timeZone?: string\n)",
-      "lineStart": 476,
-      "lineEnd": 478
+      "lineStart": 477,
+      "lineEnd": 479
     },
     "replace": {
       "desc": "Replaces specific date and time components (`year`, `month`, `day`, `hour`, `minute`, `second`, `ms`, `timeZone`) of a Datetime column. Unspecified components are preserved from the original value. When `timeZone` is provided in options, components are interpreted in that timezone. Note: `month` is 1-indexed (1 = January, 12 = December); `day` is 1-indexed (1-31).",
@@ -4544,8 +4496,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.replace(...)",
       "signature": "$df.col(<column_name>).dt.replace(\n  options: ReplaceDateOptions\n)",
-      "lineStart": 497,
-      "lineEnd": 499
+      "lineStart": 498,
+      "lineEnd": 500
     },
     "second": {
       "desc": "Extracts the second component (0-59) from a Datetime column.",
@@ -4557,8 +4509,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.second(...)",
       "signature": "$df.col(<column_name>).dt.second()",
-      "lineStart": 514,
-      "lineEnd": 516
+      "lineStart": 515,
+      "lineEnd": 517
     },
     "strftime": {
       "desc": "Formats Datetime values into custom formatted strings using strftime directive pattern tokens. Automatically applies the column's assigned timezone unless explicitly overridden in options.",
@@ -4579,8 +4531,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.strftime(...)",
       "signature": "$df.col(<column_name>).dt.strftime(\n  options: StrftimeOptions\n)",
-      "lineStart": 535,
-      "lineEnd": 541
+      "lineStart": 536,
+      "lineEnd": 542
     },
     "time": {
       "desc": "Extracts the time component formatted string (`\"HH:MM:SS.mmm\"`) from a Datetime column.",
@@ -4592,8 +4544,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.time(...)",
       "signature": "$df.col(<column_name>).dt.time()",
-      "lineStart": 556,
-      "lineEnd": 558
+      "lineStart": 557,
+      "lineEnd": 559
     },
     "timestamp": {
       "desc": "Returns numeric timestamp relative to Epoch. Alias for epoch.",
@@ -4611,8 +4563,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.timestamp(...)",
       "signature": "$df.col(<column_name>).dt.timestamp(\n  unit: TimeUnit = \"ms\"\n)",
-      "lineStart": 574,
-      "lineEnd": 576
+      "lineStart": 575,
+      "lineEnd": 577
     },
     "totalDays": {
       "desc": "Converts a Duration value (in milliseconds) to total days count.",
@@ -4624,8 +4576,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalDays(...)",
       "signature": "$df.col(<column_name>).dt.totalDays()",
-      "lineStart": 593,
-      "lineEnd": 595
+      "lineStart": 594,
+      "lineEnd": 596
     },
     "totalHours": {
       "desc": "Converts a Duration value (in milliseconds) to total hours count.",
@@ -4637,8 +4589,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalHours(...)",
       "signature": "$df.col(<column_name>).dt.totalHours()",
-      "lineStart": 611,
-      "lineEnd": 613
+      "lineStart": 612,
+      "lineEnd": 614
     },
     "totalMicroseconds": {
       "desc": "Converts Duration to microsecond count.",
@@ -4650,8 +4602,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalMicroseconds(...)",
       "signature": "$df.col(<column_name>).dt.totalMicroseconds()",
-      "lineStart": 629,
-      "lineEnd": 631
+      "lineStart": 630,
+      "lineEnd": 632
     },
     "totalMilliseconds": {
       "desc": "Converts Duration to millisecond count.",
@@ -4663,8 +4615,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalMilliseconds(...)",
       "signature": "$df.col(<column_name>).dt.totalMilliseconds()",
-      "lineStart": 647,
-      "lineEnd": 649
+      "lineStart": 648,
+      "lineEnd": 650
     },
     "totalMinutes": {
       "desc": "Converts Duration to floating point minutes.",
@@ -4676,8 +4628,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalMinutes(...)",
       "signature": "$df.col(<column_name>).dt.totalMinutes()",
-      "lineStart": 665,
-      "lineEnd": 667
+      "lineStart": 666,
+      "lineEnd": 668
     },
     "totalNanoseconds": {
       "desc": "Converts Duration to nanosecond count.",
@@ -4689,8 +4641,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalNanoseconds(...)",
       "signature": "$df.col(<column_name>).dt.totalNanoseconds()",
-      "lineStart": 683,
-      "lineEnd": 685
+      "lineStart": 684,
+      "lineEnd": 686
     },
     "totalSeconds": {
       "desc": "Converts Duration to floating point seconds.",
@@ -4702,8 +4654,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.totalSeconds(...)",
       "signature": "$df.col(<column_name>).dt.totalSeconds()",
-      "lineStart": 701,
-      "lineEnd": 703
+      "lineStart": 702,
+      "lineEnd": 704
     },
     "utcOffset": {
       "desc": "Returns the UTC offset of a timezone for a given Datetime value. Supports returning the total offset, the standard (base) offset, or just the daylight saving time component, in multiple output formats. (`\"total\"` | `\"standardTime\"` | `\"daylightSavingTime\"`), and `format` controls the output unit (`\"milliseconds\"` | `\"minutes\"` | `\"hours\"` | `\"iso\"` | `\"basic\"`).",
@@ -4725,8 +4677,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.utcOffset(...)",
       "signature": "$df.col(<column_name>).dt.utcOffset(\n  timeZone?: string,\n  options: UtcOffsetOptions = {}\n)",
-      "lineStart": 724,
-      "lineEnd": 726
+      "lineStart": 725,
+      "lineEnd": 727
     },
     "week": {
       "desc": "Extracts the ISO 8601 week number (1-53) from a Datetime column.",
@@ -4744,8 +4696,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.week(...)",
       "signature": "$df.col(<column_name>).dt.week(\n  timeZone?: string\n)",
-      "lineStart": 742,
-      "lineEnd": 744
+      "lineStart": 743,
+      "lineEnd": 745
     },
     "weekday": {
       "desc": "Extracts weekday component (1=Monday, 7=Sunday).",
@@ -4763,8 +4715,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.weekday(...)",
       "signature": "$df.col(<column_name>).dt.weekday(\n  timeZone?: string\n)",
-      "lineStart": 760,
-      "lineEnd": 762
+      "lineStart": 761,
+      "lineEnd": 763
     },
     "year": {
       "desc": "Extracts the year component from a Datetime column.",
@@ -4782,21 +4734,8 @@
       "category": "ColumnExpression",
       "syntax": "$df.col(<column_name>).dt.year(...)",
       "signature": "$df.col(<column_name>).dt.year(\n  timeZone?: string\n)",
-      "lineStart": 778,
-      "lineEnd": 780
-    },
-    "dt": {
-      "desc": "Datetime namespace accessor for date, time, and duration operations.",
-      "examples": [
-        ">>> const df = $df.data({ date: [\"2026-05-20T10:00:00.123Z\"] })\n>>> df\nshape: (1, 1)\n┌──────────────────────────┐\n│ date                     │\n├──────────────────────────┤\n│ 2026-05-20T10:00:00.123Z │\n└──────────────────────────┘\n>>> df.select($df.col(\"date\").dt.year())\nshape: (1, 1)\n┌──────┐\n│ year │\n├──────┤\n│ 2026 │\n└──────┘"
-      ],
-      "returns": "DateTimeExprNamespace",
-      "namespace": "$df.col",
-      "category": "ColumnExpression",
-      "syntax": "$df.col(<column_name>).dt",
-      "signature": "$df.col(<column_name>).get dt()",
-      "lineStart": 800,
-      "lineEnd": 802
+      "lineStart": 779,
+      "lineEnd": 781
     }
   },
   "dataframe/dataframe.ts": {
@@ -6237,7 +6176,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression targeting all columns.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.all(...)",
       "signature": "$df.all(): ColumnExpr<any>",
       "lineStart": 22,
@@ -6259,7 +6198,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression resolving to the first non-null value.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.coalesce(...)",
       "signature": "$df.coalesce(\n  ...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]\n): ColumnExpr<any>",
       "lineStart": 26,
@@ -6294,7 +6233,7 @@
       ],
       "returns": "DataFrame",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.concat(...)",
       "signature": "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItem | ConcatItem[],\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>",
       "lineStart": 142,
@@ -6316,7 +6255,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression with the calculated duration values.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.duration(options)",
       "signature": "$df.duration(\n  options: DurationOptions | string = {}\n): ColumnExpr<any>",
       "lineStart": 27,
@@ -6331,7 +6270,7 @@
       ],
       "returns": "{ColumnExpr<T>} A column expression referencing the array element.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.element(...)",
       "signature": "$df.element<T = any>(): ColumnExpr<T>",
       "lineStart": 24,
@@ -6353,7 +6292,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression targeting all columns except the specified ones.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.exclude(...)",
       "signature": "$df.exclude(\n  columns: string | string[]\n): ColumnExpr<any>",
       "lineStart": 24,
@@ -6375,7 +6314,7 @@
       ],
       "returns": "{HorizontalExpr} A column expression representing the horizontal row arrays.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.horizontal(...)",
       "signature": "$df.horizontal(\n  ...exprs: (IntoExpr | IntoExpr[])[]\n): HorizontalExpr",
       "lineStart": 31,
@@ -6397,7 +6336,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression representing the list of values.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.implode(...)",
       "signature": "$df.implode(\n  column: IntoExpr | IntoExpr[]\n): ColumnExpr<any>",
       "lineStart": 24,
@@ -6430,7 +6369,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression with the literal value.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.lit(...)",
       "signature": "$df.lit(\n  value: any,\n  options?: {\n    dtype?,\n    name?\n  }\n): ColumnExpr<any>",
       "lineStart": 29,
@@ -6467,7 +6406,7 @@
       ],
       "returns": "DataFrame",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.readCsv(...)",
       "signature": "$df.readCsv<T extends RowRecord = any>(\n  content: string,\n  options?: {\n    hasHeader?,\n    schema?,\n    inferSchema?\n  }\n): DataFrame<T>",
       "lineStart": 29,
@@ -6504,7 +6443,7 @@
       ],
       "returns": "A new DataFrame instance populated with the parsed records.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.readJson(...)",
       "signature": "$df.readJson(\n  content: string,\n  {\n    format = \"json\",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<any>",
       "lineStart": 28,
@@ -6573,7 +6512,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression generating the sequence.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.seqRange(...)",
       "signature": "$df.seqRange(\n  value: any,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<any>",
       "lineStart": 67,
@@ -6600,7 +6539,7 @@
       ],
       "returns": "{ColumnExpr<any>} A column expression packaging the specified fields.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.struct(...)",
       "signature": "$df.struct(\n  fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
       "lineStart": 27,
@@ -6622,7 +6561,7 @@
       ],
       "returns": "{WhenThenChain} A When object builder to chain `.then()` and `.otherwise()`/`.when()`.",
       "namespace": "$df",
-      "category": "ColumnExpression",
+      "category": "Function",
       "syntax": "$df.when(...)",
       "signature": "$df.when(\n  predicate: WhenArg\n): WhenThenChain",
       "lineStart": 109,

@@ -8,7 +8,7 @@ import { toValidArray } from "../utils/array";
  * @param {string | string[]} columns The name or names of columns to exclude.
  * @returns {ColumnExpr<any>} A column expression targeting all columns except the specified ones.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_2x2 -->

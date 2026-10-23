@@ -9,7 +9,7 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * @param {...(IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]} exprs The list of expressions or columns to coalesce.
  * @returns {ColumnExpr<any>} A column expression resolving to the first non-null value.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_nulls_3x2 -->

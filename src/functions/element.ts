@@ -8,7 +8,7 @@ import { ELEMENT_MARKER } from "../columnExpressions/constants";
  * @template T The type of the element.
  * @returns {ColumnExpr<T>} A column expression referencing the array element.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_array_nested_2rows -->

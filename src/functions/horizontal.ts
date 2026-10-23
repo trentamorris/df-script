@@ -15,7 +15,7 @@ export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
  * @param {...(IntoExpr | IntoExpr[])[]} exprs Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
  * @returns {HorizontalExpr} A column expression representing the horizontal row arrays.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_2x2 -->

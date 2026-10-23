@@ -12,7 +12,7 @@ import type { IntoExpr, DurationOptions } from "../types";
  * @param {DurationOptions | string} [options] Duration component options or string interval (e.g. "1d 12h").
  * @returns {ColumnExpr<any>} A column expression with the calculated duration values.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.duration(options)
  * @example
  * <!-- doc:base_temporal_single -->

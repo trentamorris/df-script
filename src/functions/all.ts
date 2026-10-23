@@ -6,7 +6,7 @@ import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
  *
  * @returns {ColumnExpr<any>} A column expression targeting all columns.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_2x2 -->

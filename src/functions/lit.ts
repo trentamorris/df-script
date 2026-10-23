@@ -13,7 +13,7 @@ export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
  * @param [options.name] The name of the output column.
  * @returns {ColumnExpr<any>} A column expression with the literal value.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_2x2 -->

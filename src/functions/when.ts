@@ -89,7 +89,7 @@ export class WhenThen extends ColumnExpr<any> {
  * @param {WhenArg} predicate The boolean condition or expression.
  * @returns {WhenThenChain} A When object builder to chain `.then()` and `.otherwise()`/`.when()`.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_numbers_3x1 -->

@@ -50,7 +50,7 @@ export type SeqRangeOptions = {
  * @param [options.endIndex] The ending index in the DataFrame to insert the sequence.
  * @returns {ColumnExpr<any>} A column expression generating the sequence.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_numbers_3x1 -->

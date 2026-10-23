@@ -157,6 +157,7 @@ export interface StructExprNamespace {
 
 export class StructExpr extends ExprBase {
     /**
+     * @ignore
      * Struct namespace accessor for operating on nested object/struct columns.
      * @namespace $df.col
      * @category ColumnExpression

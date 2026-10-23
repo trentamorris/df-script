@@ -168,25 +168,6 @@ export class StringExprNamespace {
     }
 
     /**
-     * Escapes special regular expression characters in string elements.
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.escapeRegex().alias("escaped"))
-     * shape: (3, 2)
-     * ┌──────────┬─────────┐
-     * │ s        │ escaped │
-     * ├──────────┼─────────┤
-     * │ "apple"  │ apple   │
-     * │ "banana" │ banana  │
-     * │ "cherry" │ cherry  │
-     * └──────────┴─────────┘
-     */
-    escapeRegex(options: EscapeRegexOptions = {}) {
-        return this._deriveString((str) => escapeRegExp(str, options));
-    }
-
-    /**
      * Decodes hex or base64 encoded string column values into string.
      * @note [Runtime Fallback]: Automatically leverages native `Uint8Array.fromBase64` / `Uint8Array.fromHex`
      * when available in the runtime, with seamless automatic fallback to standard decoding across older environments.
@@ -209,6 +190,26 @@ export class StringExprNamespace {
     }
 
     /**
+     * Decodes Uniform Resource Identifier (URI) components.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_strings_3x1 -->
+     * >>> df.withColumns($df.col("s").str.encodeUriComponent().str.decodeUriComponent().alias("decoded"))
+     * shape: (2, 2)
+     * ┌─────────────┬─────────────┐
+     * │ s           │ decoded     │
+     * ├─────────────┼─────────────┤
+     * │ "  hello  " │ "  hello  " │
+     * │ "  world  " │ "  world  " │
+     * └─────────────┴─────────────┘
+     */
+    decodeUriComponent() {
+        return this._deriveString((str) => {
+            try { return decodeURIComponent(str); } catch { return str; }
+        });
+    }
+
+    /**
      * Encodes string column values into hex or base64.
      * @note [Runtime Fallback]: Automatically leverages native `Uint8Array.prototype.toBase64` / `Uint8Array.prototype.toHex`
      * when available, with automatic fallback across standard environments.
@@ -228,26 +229,6 @@ export class StringExprNamespace {
      */
     encode(options: StringEncodeOptions) {
         return this._deriveString((str) => encodeString(str, options.encoding));
-    }
-
-    /**
-     * Decodes Uniform Resource Identifier (URI) components.
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.encodeUriComponent().str.decodeUriComponent().alias("decoded"))
-     * shape: (2, 2)
-     * ┌─────────────┬─────────────┐
-     * │ s           │ decoded     │
-     * ├─────────────┼─────────────┤
-     * │ "  hello  " │ "  hello  " │
-     * │ "  world  " │ "  world  " │
-     * └─────────────┴─────────────┘
-     */
-    decodeUriComponent() {
-        return this._deriveString((str) => {
-            try { return decodeURIComponent(str); } catch { return str; }
-        });
     }
 
     /**
@@ -287,6 +268,25 @@ export class StringExprNamespace {
      */
     endsWith(suffix: string) {
         return this._deriveString((str) => str.endsWith(suffix));
+    }
+
+    /**
+     * Escapes special regular expression characters in string elements.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_strings_3x1 -->
+     * >>> df.withColumns($df.col("s").str.escapeRegex().alias("escaped"))
+     * shape: (3, 2)
+     * ┌──────────┬─────────┐
+     * │ s        │ escaped │
+     * ├──────────┼─────────┤
+     * │ "apple"  │ apple   │
+     * │ "banana" │ banana  │
+     * │ "cherry" │ cherry  │
+     * └──────────┴─────────┘
+     */
+    escapeRegex(options: EscapeRegexOptions = {}) {
+        return this._deriveString((str) => escapeRegExp(str, options));
     }
 
     /**
@@ -973,26 +973,6 @@ export class StringExprNamespace {
     }
 
     /**
-     * Extracts the last n characters of each string element.
-     * @param n Number of characters to extract from the end of the string (default 1).
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.tail(3).alias("suffix"))
-     * shape: (3, 2)
-     * ┌──────────┬────────┐
-     * │ s        │ suffix │
-     * ├──────────┼────────┤
-     * │ "apple"  │ ple    │
-     * │ "banana" │ ana    │
-     * │ "cherry" │ rry    │
-     * └──────────┴────────┘
-     */
-    tail(n: number = 1) {
-        return this.slice(-n);
-    }
-
-    /**
      * Parses date/time string into Datetime.
      * @note [Timezone Compatibility]: Direct string parsing with timezone offsets relies on native `Intl.DateTimeFormat`
      * and `Date.UTC`. Unrecognized timezone identifiers safely default to `"UTC"`.
@@ -1010,6 +990,26 @@ export class StringExprNamespace {
      */
     strptime(options: StrptimeOptions) {
         return this._deriveString((str) => strptime(str, options));
+    }
+
+    /**
+     * Extracts the last n characters of each string element.
+     * @param n Number of characters to extract from the end of the string (default 1).
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_strings_3x1 -->
+     * >>> df.withColumns($df.col("s").str.tail(3).alias("suffix"))
+     * shape: (3, 2)
+     * ┌──────────┬────────┐
+     * │ s        │ suffix │
+     * ├──────────┼────────┤
+     * │ "apple"  │ ple    │
+     * │ "banana" │ ana    │
+     * │ "cherry" │ rry    │
+     * └──────────┴────────┘
+     */
+    tail(n: number = 1) {
+        return this.slice(-n);
     }
 
     /**
@@ -1334,6 +1334,7 @@ export class StringExprNamespace {
 
 export class StringExpr extends ExprBase {
     /**
+     * @ignore
      * String namespace accessor for text operations.
      * @namespace $df.col
      * @category ColumnExpression

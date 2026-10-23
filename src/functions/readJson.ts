@@ -6,7 +6,7 @@ import { DataFrameError } from "../exceptions";
 /**
  * Parses JSON content (JSON or NDJSON) and loads it into a new DataFrame.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @param content The JSON or NDJSON content string.
  * @param [options] Parse and configuration options.

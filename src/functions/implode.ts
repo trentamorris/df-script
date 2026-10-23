@@ -8,7 +8,7 @@ import type { IntoExpr } from "../types";
  * @param {IntoExpr | IntoExpr[]} column The column or expression to implode.
  * @returns {ColumnExpr<any>} A column expression representing the list of values.
  * @namespace $df
- * @category ColumnExpression
+ * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * <!-- doc:base_grouped_3x2 -->

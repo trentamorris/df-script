@@ -239,25 +239,6 @@ export class ArrayExprNamespace {
     }
 
     /**
-     * Filters elements of list columns matching a boolean sub-expression.
-     * @param expr The boolean column expression to filter by.
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_array_nested_2rows -->
-     * >>> df.withColumns($df.col("a").arr.filter($df.element().gt(2)).alias("filtered"))
-     * shape: (2, 2)
-     * ┌───────────┬──────────┐
-     * │ a         │ filtered │
-     * ├───────────┼──────────┤
-     * │ [1, 2, 3] │ [3]      │
-     * │ [4, 5]    │ [4, 5]   │
-     * └───────────┴──────────┘
-     */
-    filter(expr: IExpr) {
-        return this._evalSubExpr(expr, (val, mask) => filterByMask(val, mask));
-    }
-
-    /**
      * Evaluates subExpr element-wise across array lists.
      * @param expr The sub-expression to evaluate inside each nested list.
      * @returns ColumnExpression
@@ -355,6 +336,25 @@ export class ArrayExprNamespace {
             (res as any).rowMap = rowMap;
             return res;
         });
+    }
+
+    /**
+     * Filters elements of list columns matching a boolean sub-expression.
+     * @param expr The boolean column expression to filter by.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_array_nested_2rows -->
+     * >>> df.withColumns($df.col("a").arr.filter($df.element().gt(2)).alias("filtered"))
+     * shape: (2, 2)
+     * ┌───────────┬──────────┐
+     * │ a         │ filtered │
+     * ├───────────┼──────────┤
+     * │ [1, 2, 3] │ [3]      │
+     * │ [4, 5]    │ [4, 5]   │
+     * └───────────┴──────────┘
+     */
+    filter(expr: IExpr) {
+        return this._evalSubExpr(expr, (val, mask) => filterByMask(val, mask));
     }
 
     /**
@@ -677,6 +677,25 @@ export class ArrayExprNamespace {
     }
 
     /**
+     * Sorts elements inside each list.
+     * @param options Sort customization parameters (e.g. descending flag).
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_array_nested_2rows -->
+     * >>> df.withColumns($df.col("a").arr.sort().alias("sorted"))
+     * shape: (2, 2)
+     * ┌───────────┬───────────┐
+     * │ a         │ sorted    │
+     * ├───────────┼───────────┤
+     * │ [1, 2, 3] │ [1, 2, 3] │
+     * │ [4, 5]    │ [4, 5]    │
+     * └───────────┴───────────┘
+     */
+    sort(options?: SortArrayOptions) {
+        return this._deriveArray((arr) => sortArray(arr, options));
+    }
+
+    /**
      * Splices elements in list cells.
      * @param start The index where array modifications begin.
      * @param deleteCount The number of elements to remove.
@@ -699,25 +718,6 @@ export class ArrayExprNamespace {
             copy.splice(start, deleteCount ?? copy.length, ...items);
             return copy;
         });
-    }
-
-    /**
-     * Sorts elements inside each list.
-     * @param options Sort customization parameters (e.g. descending flag).
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_array_nested_2rows -->
-     * >>> df.withColumns($df.col("a").arr.sort().alias("sorted"))
-     * shape: (2, 2)
-     * ┌───────────┬───────────┐
-     * │ a         │ sorted    │
-     * ├───────────┼───────────┤
-     * │ [1, 2, 3] │ [1, 2, 3] │
-     * │ [4, 5]    │ [4, 5]    │
-     * └───────────┴───────────┘
-     */
-    sort(options?: SortArrayOptions) {
-        return this._deriveArray((arr) => sortArray(arr, options));
     }
 
     /**
@@ -859,6 +859,7 @@ export class ArrayExprNamespace {
 
 export class ArrayExpr extends ExprBase {
     /**
+     * @ignore
      * Array namespace accessor for list-based column operations.
      * @namespace $df.col
      * @category ColumnExpression
