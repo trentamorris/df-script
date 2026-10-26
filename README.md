@@ -264,7 +264,7 @@ Output:
 
 For most web applications, performing complex data transformations requires maintaining a dedicated backend service. Suddenly, an otherwise straightforward application introduces deployment pipelines, network latency, serialization bottlenecks, asynchronous state management, and ongoing cloud hosting bills, all just to run operations modern client CPUs can perform in milliseconds.
 
-To avoid this, many developers implement hand-written functions or native chains of `.map()`, `.filter()`, and `.reduce()` to transform data directly in the browser. These chained operations repeatedly traverse the dataset and flood memory with intermediate objects, degrading performance and freezing the UI. Worse, what starts as a simple script quickly balloons into hundreds of lines of fragile boilerplate once production edge cases surface:
+To avoid this, many developers implement hand-written functions or native chains of `.map()`, `.filter()`, and `.reduce()` to transform data directly in the browser. These chained operations repeatedly traverse the dataset and flood memory with intermediate objects, degrading performance and freezing the UI. Worse, what starts as a simple utility quickly devolves into hundreds of lines of fragile boilerplate once real-world edge cases surface:
 
 - **Composite Keys**: Hashing multi-column keys without collisions, distinguishing string `"null"` from literal `null` and `undefined`, maintaining deterministic order, and handling sparse indices.
 - **Relational Joins**: Reliable outer joins without silent truncation, resolving column name collisions with automatic suffixing, and aligning time-series with as-of nearest matches.

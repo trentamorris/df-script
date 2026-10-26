@@ -57,5 +57,4 @@ This document outlines core engineering principles and standards for writing cle
 ## 12. Zero Dependencies, Runtime Portability & Numeric Integrity
 - **Zero Runtime Dependencies**: The core library must remain strictly 0 dependencies with 0 native C++/Rust bindings or WebAssembly binaries. All algorithms must be pure, standards-compliant TypeScript/JavaScript.
 - **Universal Runtime Support**: Code must execute seamlessly across Node.js (14+), Bun, Deno, modern web browsers, Web Workers, and Edge environments (Cloudflare Workers, Fastly Compute).
-- **Numeric & Float Integrity**: Guard against floating-point drift, `NaN` contagion, `-0` vs `+0`, integer overflows, and `BigInt` cross-type operations in all calculations and aggregations.
 
