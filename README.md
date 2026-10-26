@@ -278,50 +278,77 @@ To avoid this, many developers implement hand-written functions or native chains
 ---
 
 
-## Core Concepts
+## Data Types
 
-### The `$df` Entry Point
+`df-script` features a strongly-typed schema registry accessible via the `$df` namespace for casting, schema validation, and columnar memory allocations.
 
-`df-script` uses the `$df` namespace to instantiate DataFrames, reference columns, construct expressions, and specify data types.
+### 1. Concrete Data Types
 
-- `$df.data(dataRowsOrCols, schema?)`: Instantiates a new `DataFrame`.
-- `$df.readJson(content, options?)`: Reads JSON/NDJSON content into a new `DataFrame`.
-- `$df.readCsv(content, options?)`: Reads CSV content into a new `DataFrame` with automatic schema inference.
-- `$df.col(selector)`: Creates a column reference expression by column name (`"a"`), multiple names (`["a", "b"]`), RegExp pattern (`/^user_/`), or DataType selector (`$df.Float64`, `$df.Numeric`).
-- `$df.all()`: Selects all columns in the DataFrame.
-- `$df.coalesce(...exprs)`: Returns the first non-null value among columns or expressions.
-- `$df.concat(items, options?)`: Concatenates multiple DataFrames along vertical, horizontal, or diagonal axes.
-- `$df.duration(optionsOrString)`: Constructs a `Duration` expression from component options (`{ days: 1, hours: 12 }`) or compound duration strings (`"1d 12h 30m"`).
-- `$df.element()`: References the current array element within an `.arr.eval(...)` expression.
-- `$df.exclude(columns)`: Matches all columns except the specified ones.
-- `$df.horizontal(...exprs)`: Combines multiple columns/expressions horizontally per row for row-wise evaluation (`.sum()`, `.arr`, `.eval()`).
-- `$df.implode(column)`: Aggregates a column's rows or grouped values into a list.
-- `$df.lit(val)`: Explicitly wraps a raw value into a literal expression.
-- `$df.seqRange(value, options?)`: Generates a sequence range of values.
-- `$df.struct(fields)`: Constructs a nested struct object expression from named expressions or sibling columns.
-- `$df.when(predicate).then(value)...otherwise(value)`: Constructs a conditional `CASE WHEN` expression chain.
-- `$df.Float64`, `$df.Int32`, `$df.Utf8`, etc.: Direct access to data types and constructors for schema definitions and type-based column selection.
+| Data Type | Description |
+| :--- | :--- |
+| **`$df.Int8`** | 8-bit signed integer (-128 to 127). |
+| **`$df.Int16`** | 16-bit signed integer (-32,768 to 32,767). |
+| **`$df.Int32`** | 32-bit signed integer (-2,147,483,648 to 2,147,483,647). |
+| **`$df.Int64`** | 64-bit signed integer supported via native `BigInt`. |
+| **`$df.UInt8`** | 8-bit unsigned integer (0 to 255). |
+| **`$df.UInt16`** | 16-bit unsigned integer (0 to 65,535). |
+| **`$df.UInt32`** | 32-bit unsigned integer (0 to 4,294,967,295). |
+| **`$df.UInt64`** | 64-bit unsigned integer supported via native `BigInt`. |
+| **`$df.Float32`** | 32-bit single-precision floating-point number. |
+| **`$df.Float64`** | 64-bit double-precision floating-point number (standard JS number). |
+| **`$df.Decimal(p?, s?)`** | Fixed-point exact decimal with configurable precision and scale. |
+| **`$df.Boolean`** | Boolean logic (`true`, `false`, with Kleene `null` support). |
+| **`$df.Utf8`** | UTF-8 encoded text string (surrogate-pair and Unicode aware). |
+| **`$df.Binary`** | Raw binary byte data (`Uint8Array` / `ArrayBuffer`). |
+| **`$df.Date`** | Calendar date representation without time component (YYYY-MM-DD). |
+| **`$df.Datetime`** | Temporal timestamp representation with timezone and microsecond precision. |
+| **`$df.Time`** | Time-of-day representation (microseconds since midnight). |
+| **`$df.Duration`** | Signed temporal duration with unit conversions (days to nanoseconds). |
+| **`$df.Array`** | Homogeneous list/array of nested elements. |
+| **`$df.Struct`** | Key-value record struct with named sub-fields. |
+| **`$df.Object`** | Arbitrary JavaScript object container. |
+| **`$df.Null`** | Explicit null type indicator. |
 
-### Typing and Schema Registry
+### 2. Type Selectors
 
-```typescript
-const schema = {
-  id: $df.Int32,
-  price: $df.Decimal(10, 2),
-  active: $df.Boolean,
-  createdAt: $df.Datetime
-};
+Type selectors match entire families of data types when filtering columns via `$df.col(...)`:
 
-const df = $df.data(rawData, schema);
-```
+| Selector | Matches |
+| :--- | :--- |
+| **`$df.Numeric`** | All integer and floating-point types (`Int8`..`Int64`, `UInt8`..`UInt64`, `Float32`, `Float64`, `Decimal`). |
+| **`$df.Integer`** | All signed and unsigned integer types (`Int8`..`Int64`, `UInt8`..`UInt64`). |
+| **`$df.SignedInteger`** | All signed integer types (`Int8`, `Int16`, `Int32`, `Int64`). |
+| **`$df.UnsignedInteger`** | All unsigned integer types (`UInt8`, `UInt16`, `UInt32`, `UInt64`). |
+| **`$df.Float`** | Single and double precision floating-point types (`Float32`, `Float64`). |
+| **`$df.Temporal`** | All date, time, timestamp, and duration types (`Date`, `Datetime`, `Time`, `Duration`). |
+| **`$df.Nested`** | All nested structural types (`Array`, `Struct`). |
 
-#### Supported Data Types
-- **Integers**: `Int8`, `Int16`, `Int32`, `Int64`, `UInt8`, `UInt16`, `UInt32`, `UInt64`
-- **Floats & Decimals**: `Float32`, `Float64`, `Decimal(precision?, scale?)`
-- **General**: `Boolean`, `Utf8` (Strings), `Binary`, `Null`, `Object`
-- **Temporal**: `Date`, `Datetime`, `Time`, `Duration`
-- **Nested Structures**: `Array`, `Struct`
-- **Type Selectors**: `Numeric`, `Integer`, `SignedInteger`, `UnsignedInteger`, `Float`, `Temporal`, `Nested`
+
+---
+
+
+## Functions
+
+The `$df` entry point provides top-level functions to create DataFrames, construct expressions, and parse tabular inputs:
+
+| Function | Description |
+| :--- | :--- |
+| **`$df.all()`** | Selects all columns in the DataFrame. |
+| **`$df.coalesce(...exprs)`** | Returns the first non-null value among columns or expressions. |
+| **`$df.col(selector)`** | Creates a column reference expression by name (`"a"`), names array (`["a", "b"]`), RegExp (`/^user_/`), or DataType selector (`$df.Float64`). |
+| **`$df.concat(items, options?)`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
+| **`$df.data(data, schema?)`** | Instantiates a new `DataFrame` from row objects, column arrays, or typed matrices. |
+| **`$df.duration(optionsOrString)`** | Constructs a `Duration` expression from component options (`{ days: 1, hours: 12 }`) or duration strings (`"1d 12h 30m"`). |
+| **`$df.element()`** | References the current array element within an `.arr.eval(...)` expression. |
+| **`$df.exclude(columns)`** | Matches all columns except the specified ones. |
+| **`$df.horizontal(...exprs)`** | Combines multiple columns/expressions horizontally per row for row-wise evaluation. |
+| **`$df.implode(column)`** | Aggregates a column's rows or grouped values into a list. |
+| **`$df.lit(val)`** | Explicitly wraps a raw scalar value into a literal expression. |
+| **`$df.readCsv(content, options?)`** | Reads CSV content into a new `DataFrame` with automatic schema inference. |
+| **`$df.readJson(content, options?)`** | Reads JSON/NDJSON content into a new `DataFrame`. |
+| **`$df.seqRange(value, options?)`** | Generates a sequence range of values. |
+| **`$df.struct(fields)`** | Constructs a nested struct object expression from named expressions or sibling columns. |
+| **`$df.when(predicate).then(value)...otherwise(value)`** | Constructs a conditional `CASE WHEN` expression chain. |
 
 
 ---
