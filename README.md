@@ -327,9 +327,9 @@ const df = $df.data(rawData, schema);
 ---
 
 
-## DataFrame API Reference
+## DataFrame Operations
 
-All methods and getters on `DataFrame` in alphabetical order:
+All operations and getters on `DataFrame` in alphabetical order:
 
 | Method / Property | Description |
 | :--- | :--- |
@@ -385,11 +385,11 @@ All methods and getters on `DataFrame` in alphabetical order:
 ---
 
 
-## Column Expressions API Reference
+## Column Expressions
 
 All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent chaining.
 
-### 1. Core & Math Expressions (Alphabetical)
+### Standard Expressions
 
 | Method | Description |
 | :--- | :--- |
@@ -530,14 +530,6 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`variance`** | Computes sample variance. |
 | **`wAvg`** | Computes weighted average using weight expression. |
 | **`xor`** | Logical exclusive OR (XOR). |
-
-
----
-
-
-## Namespaces API Reference
-
-Specific domain transforms are grouped under dedicated, clean namespaces with full IDE autocomplete:
 
 ### String Namespace (`.str`)
 
