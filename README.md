@@ -1,5 +1,6 @@
-# 🚀 df-script: High-Performance TypeScript DataFrame Library
+# df-script: High-Performance TypeScript DataFrame Library
 
+[![Documentation](https://img.shields.io/badge/Documentation-df--script.js.org-6366f1?style=for-the-badge&logo=googledocs&logoColor=white)](https://df-script.js.org)
 [![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/trentamorris/df-script)
 [![npm version](https://img.shields.io/npm/v/df-script?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/df-script)
 [![Bundle Size](https://img.shields.io/bundlephobia/minzip/df-script?style=for-the-badge&color=blue)](https://bundlephobia.com/package/df-script)
@@ -9,13 +10,23 @@
 [![License](https://img.shields.io/npm/l/df-script?style=for-the-badge&color=informational)](LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-Support-green?style=for-the-badge)](DONATIONS.md)
 
-**df-script** is a blazing-fast, **zero-dependency**, expression-based DataFrame and data manipulation library for **TypeScript** and **JavaScript**.
+**Official Documentation & Interactive Notebook:** [https://df-script.js.org](https://df-script.js.org)
 
-Heavily inspired by modern columnar engines like **Polars** and **Pandas**, `df-script` brings declarative, high-performance data transformations directly to JavaScript runtimes (Node.js, Browser, Bun, Deno, and Edge Workers). Easily execute complex multi-column groupings, relational joins, windowed rolling statistics, string parsing, temporal conversions, nested structs, and hundreds more with a fluent, expressive API and zero external dependencies.
 
 ---
 
-### 📦 Installation
+
+## Introduction
+
+**df-script** is a blazing-fast, **zero-dependency**, expression-based DataFrame and data manipulation library for **TypeScript** and **JavaScript**.
+
+Heavily inspired by modern columnar engines like **Polars** and **Pandas**, `df-script` brings declarative, high-performance data transformations directly to modern JavaScript and TypeScript environments. Easily execute complex multi-column groupings, relational joins, windowed rolling statistics, string parsing, temporal conversions, and nested structs with a fluent, expressive API and zero external dependencies.
+
+
+---
+
+
+## Installation
 
 ```bash
 npm install df-script
@@ -41,9 +52,31 @@ import { $df, DataFrame, ColumnExpr, DataType } from "df-script";
 const { $df, DataFrame, ColumnExpr, DataType } = require("df-script");
 ```
 
+
 ---
 
-## 🚀 Quick Start
+
+## Compatibility
+
+- **Supported Languages & Standards**:
+  - **Pure TypeScript/JavaScript** (0 dependencies, 0 native C++/Rust bindings, 0 WebAssembly).
+  - TypeScript (`.ts`, `.tsx`) with complete compile-time type safety.
+  - JavaScript (`.js`, `.jsx`) for Node.js and browser runtimes.
+  - Dual ESM (`dist/index.mjs`) & CommonJS (`dist/index.js`) distribution.
+  - Standards-compliant ES2020+.
+- **Target Platforms & Runtimes**:
+  - Node.js (14+), Bun, Deno, etc.
+  - Modern browsers (Chrome, Safari, Firefox, Edge, ...).
+  - Edge runtimes (Cloudflare Workers, Fastly Compute, AWS Lambda, ...) and Web Workers.
+- **UI Frameworks & Bundlers**:
+  - React, Next.js, Vue, Nuxt, Svelte, SolidJS, Astro, etc.
+  - Vite, Webpack, Rollup, esbuild, etc.
+
+
+---
+
+
+## Quick Start
 
 ### 1. Basic DataFrame & Expression Pipeline
 ```typescript
@@ -56,6 +89,17 @@ const df = $df.data([
   { id: 3, name: "Charlie", joinDate: "2026-03-05", sales: 2300.00, tags: ["sales", "north"] },
   { id: 4, name: "David", joinDate: "2026-03-12", sales: null, tags: ["marketing"] },
 ]);
+/*
+df:
+┌────┬─────────┬────────────┬─────────┬───────────────────┐
+│ id │ name    │ joinDate   │ sales   │ tags              │
+├────┼─────────┼────────────┼─────────┼───────────────────┤
+│ 1  │ Alice   │ 2026-01-15 │ 1200.50 │ ["sales", "east"] │
+│ 2  │ Bob     │ 2026-02-20 │ 850.00  │ ["support","west"]│
+│ 3  │ Charlie │ 2026-03-05 │ 2300.00 │ ["sales", "north"]│
+│ 4  │ David   │ 2026-03-12 │ null    │ ["marketing"]     │
+└────┴─────────┴────────────┴─────────┴───────────────────┘
+*/
 
 // Select columns, transform strings, format dates, and compute expressions
 const processedDf = df.select(
@@ -67,13 +111,16 @@ const processedDf = df.select(
 );
 
 console.log(processedDf.toDicts());
-/* Output:
-[
-  { id: 1, NAME_UPPER: 'ALICE', joinYear: 2026, salesAdjusted: 1700.5, tagCount: 2 },
-  { id: 2, NAME_UPPER: 'BOB', joinYear: 2026, salesAdjusted: 1350, tagCount: 2 },
-  { id: 3, NAME_UPPER: 'CHARLIE', joinYear: 2026, salesAdjusted: 2800, tagCount: 2 },
-  { id: 4, NAME_UPPER: 'DAVID', joinYear: 2026, salesAdjusted: null, tagCount: 1 }
-]
+/*
+Output:
+┌────┬────────────┬──────────┬───────────────┬──────────┐
+│ id │ NAME_UPPER │ joinYear │ salesAdjusted │ tagCount │
+├────┼────────────┼──────────┼───────────────┼──────────┤
+│ 1  │ ALICE      │ 2026     │ 1700.5        │ 2        │
+│ 2  │ BOB        │ 2026     │ 1350          │ 2        │
+│ 3  │ CHARLIE    │ 2026     │ 2800          │ 2        │
+│ 4  │ DAVID      │ 2026     │ null          │ 1        │
+└────┴────────────┴──────────┴───────────────┴──────────┘
 */
 ```
 
@@ -84,6 +131,16 @@ const transactions = $df.data([
   { region: "East", category: "Hardware", revenue: 550, quantity: 5, timestamp: "2026-02-10" },
   { region: "West", category: "Software", revenue: 1200, quantity: 1, timestamp: "2026-01-20" },
 ]);
+/*
+transactions:
+┌────────┬──────────┬─────────┬──────────┬────────────┐
+│ region │ category │ revenue │ quantity │ timestamp  │
+├────────┼──────────┼─────────┼──────────┼────────────┤
+│ East   │ Hardware │ 450     │ 3        │ 2026-02-01 │
+│ East   │ Hardware │ 550     │ 5        │ 2026-02-10 │
+│ West   │ Software │ 1200    │ 1        │ 2026-01-20 │
+└────────┴──────────┴─────────┴──────────┴────────────┘
+*/
 
 const salesSummary = transactions
   .groupBy(["region", "category"])
@@ -96,11 +153,14 @@ const salesSummary = transactions
   .sort("total_revenue", { descending: true });
 
 console.log(salesSummary.toDicts());
-/* Output:
-[
-  { region: 'East', category: 'Hardware', total_revenue: 1000, avg_revenue: 500, units_sold: 8, year: 2026 },
-  { region: 'West', category: 'Software', total_revenue: 1200, avg_revenue: 1200, units_sold: 1, year: 2026 }
-]
+/*
+Output:
+┌────────┬──────────┬───────────────┬─────────────┬────────────┬──────┐
+│ region │ category │ total_revenue │ avg_revenue │ units_sold │ year │
+├────────┼──────────┼───────────────┼─────────────┼────────────┼──────┤
+│ West   │ Software │ 1200          │ 1200        │ 1          │ 2026 │
+│ East   │ Hardware │ 1000          │ 500         │ 8          │ 2026 │
+└────────┴──────────┴───────────────┴─────────────┴────────────┴──────┘
 */
 ```
 
@@ -110,11 +170,29 @@ const orders = $df.data([
   { orderId: 101, customerId: 1, amount: 250 },
   { orderId: 102, customerId: 2, amount: 1400 },
 ]);
+/*
+orders:
+┌─────────┬────────────┬────────┐
+│ orderId │ customerId │ amount │
+├─────────┼────────────┼────────┤
+│ 101     │ 1          │ 250    │
+│ 102     │ 2          │ 1400   │
+└─────────┴────────────┴────────┘
+*/
 
 const customers = $df.data([
   { id: 1, firstName: "Alice", lastName: "Smith" },
   { id: 2, firstName: "Bob", lastName: "Jones" },
 ]);
+/*
+customers:
+┌────┬───────────┬──────────┐
+│ id │ firstName │ lastName │
+├────┼───────────┼──────────┤
+│ 1  │ Alice     │ Smith    │
+│ 2  │ Bob       │ Jones    │
+└────┴───────────┴──────────┘
+*/
 
 // Join tables with complete null safety and compute new columns
 const enrichedOrders = orders.join(customers, {
@@ -127,11 +205,14 @@ const enrichedOrders = orders.join(customers, {
 ]);
 
 console.log(enrichedOrders.toDicts());
-/* Output:
-[
-  { orderId: 101, customerId: 1, amount: 250, id: 1, firstName: 'Alice', lastName: 'Smith', fullName: 'Alice Smith', tier: 'Standard' },
-  { orderId: 102, customerId: 2, amount: 1400, id: 2, firstName: 'Bob', lastName: 'Jones', fullName: 'Bob Jones', tier: 'VIP' }
-]
+/*
+Output:
+┌─────────┬────────────┬────────┬────┬───────────┬──────────┬─────────────┬──────────┐
+│ orderId │ customerId │ amount │ id │ firstName │ lastName │ fullName    │ tier     │
+├─────────┼────────────┼────────┼────┼───────────┼──────────┼─────────────┼──────────┤
+│ 101     │ 1          │ 250    │ 1  │ Alice     │ Smith    │ Alice Smith │ Standard │
+│ 102     │ 2          │ 1400   │ 2  │ Bob       │ Jones    │ Bob Jones   │ VIP      │
+└─────────┴────────────┴────────┴────┴───────────┴──────────┴─────────────┴──────────┘
 */
 ```
 
@@ -142,6 +223,16 @@ const sensorData = $df.data([
   { timestamp: "2026-03-01T01:00:00Z", temperature: 20.9, powerUsage: 14 },
   { timestamp: "2026-03-01T02:00:00Z", temperature: 21.5, powerUsage: 13 },
 ]);
+/*
+sensorData:
+┌──────────────────────┬─────────────┬────────────┐
+│ timestamp            │ temperature │ powerUsage │
+├──────────────────────┼─────────────┼────────────┤
+│ 2026-03-01T00:00:00Z │ 20.1        │ 12         │
+│ 2026-03-01T01:00:00Z │ 20.9        │ 14         │
+│ 2026-03-01T02:00:00Z │ 21.5        │ 13         │
+└──────────────────────┴─────────────┴────────────┘
+*/
 
 // Compute moving averages and cumulative metrics without manual loop state
 const telemetryWithTrends = sensorData
@@ -153,78 +244,41 @@ const telemetryWithTrends = sensorData
   ]);
 
 console.log(telemetryWithTrends.toDicts());
-/* Output:
-[
-  { timestamp: '2026-03-01T00:00:00Z', temperature: 20.1, powerUsage: 12, temp_rolling_avg: 20.1, cumulative_kwh: 12, temp_delta: null },
-  { timestamp: '2026-03-01T01:00:00Z', temperature: 20.9, powerUsage: 14, temp_rolling_avg: 20.5, cumulative_kwh: 26, temp_delta: 0.8 },
-  { timestamp: '2026-03-01T02:00:00Z', temperature: 21.5, powerUsage: 13, temp_rolling_avg: 21.2, cumulative_kwh: 39, temp_delta: 0.6 }
-]
+/*
+Output:
+┌──────────────────────┬─────────────┬────────────┬──────────────────┬────────────────┬────────────┐
+│ timestamp            │ temperature │ powerUsage │ temp_rolling_avg │ cumulative_kwh │ temp_delta │
+├──────────────────────┼─────────────┼────────────┼──────────────────┼────────────────┼────────────┤
+│ 2026-03-01T00:00:00Z │ 20.1        │ 12         │ 20.1             │ 12             │ null       │
+│ 2026-03-01T01:00:00Z │ 20.9        │ 14         │ 20.5             │ 26             │ 0.8        │
+│ 2026-03-01T02:00:00Z │ 21.5        │ 13         │ 21.2             │ 39             │ 0.6        │
+└──────────────────────┴─────────────┴────────────┴──────────────────┴────────────────┴────────────┘
 */
 ```
 
----
-
-## ✨ Key Features
-
-- 📦 **Zero Dependencies** — 0 external runtime dependencies; completely standalone (<45 KB gzipped).
-- ⚡ **Columnar Execution** — Flat memory layouts and contiguous loops that eliminate intermediate array allocations.
-- 🔗 **Expression-Based API** — Compose complex transformations, aggregations, and conditions using fluent `$df` expressions.
-- 📂 **Strict Namespaces**:
-  - `.str` — Unicode string manipulations, regex extractions, and JSON path lookups.
-  - `.dt` — Timezone conversions, business days, microsecond-precision datetimes, and durations.
-  - `.arr` — Array/list column operations and element-wise `.arr.eval()` mapping.
-  - `.struct` — Nested object handling and `.struct.unnest()` column flattening.
-- 🛡️ **Defensive & Type-Safe** — Automatic type coercion, Kleene three-valued logic for null safety, and strict schema validation.
 
 ---
 
-## 📌 Compatibility & Runtime Specifications
 
-| Attribute | Specification |
-| :--- | :--- |
-| **Supported Languages** | **TypeScript** (`.ts`, `.tsx`), **JavaScript** (`.js`, `.jsx`), ESM (`.mjs`), CommonJS (`.cjs`) |
-| **Target Standard** | Standard **ES2020+** compatible |
-| **Target Platforms** | **Node.js** (14+), **Bun**, **Deno**, **Modern Web Browsers** (Chrome 80+, Safari 13.1+, Firefox 74+, Edge 80+), Cloudflare Workers, Fastly Compute, AWS Lambda |
-| **UI Frameworks** | React, Next.js, Vue, Nuxt, Svelte, SolidJS, Astro, Vite, Webpack, esbuild |
-| **Operational Scope** | In-memory columnar DataFrame & vectorized expression engine with zero intermediate allocations |
-| **I/O & Formats** | High-throughput RFC-compliant **CSV parsing & streaming**, **JSON / JSONLines**, and row/column records |
-| **Runtime Footprint** | **Pure TypeScript/JavaScript** (0 external dependencies, 0 native C++/Rust bindings, 0 WebAssembly overhead) |
-| **Bundle Size** | **~44 KB gzipped** (~127 KB minified) for the complete engine; **~21 KB gzipped** for standalone utils |
-| **Distribution** | Dual **ESM** (`dist/index.mjs`) & **CommonJS** (`dist/index.js`) with comprehensive `.d.ts` declaration maps |
-| **Package Managers** | `npm`, `pnpm`, `bun`, `yarn` |
+## Why df-script?
 
----
+For most web applications, performing complex data transformations requires maintaining a dedicated backend service. Suddenly, an otherwise straightforward application introduces deployment pipelines, network latency, serialization bottlenecks, asynchronous state management, and ongoing cloud hosting bills, all just to run operations modern client CPUs can perform in milliseconds.
 
-## 💡 Why df-script? (Polars & Pandas for TypeScript)
-
-For the vast majority of web applications, transforming data in a meaningful way still imposes a heavy architectural tax: **spinning up a dedicated backend service (commonly Python with Pandas or Polars).** 
-
-Suddenly, a straightforward transformation requirement introduces container pipelines, deployment overhead, network latency, serialization bottlenecks, UI loading spinners, and ongoing cloud hosting bills, all just to run operations modern client CPUs can crunch in single-digit milliseconds.
-
-When developers attempt to eliminate the backend and transform data directly in JavaScript or TypeScript, they hit another roadblock: hand-rolling bespoke data processing helpers. What begins as a seemingly innocent 10-line utility for grouping, joining, or rolling metrics quickly balloons into hundreds of lines of fragile, bug-ridden boilerplate. Real-world client data immediately exposes an overwhelming mountain of edge cases:
+To avoid this, many developers implement hand-written functions or native chains of `.map()`, `.filter()`, and `.reduce()` to transform data directly in the browser. These chained operations repeatedly traverse the dataset and flood memory with intermediate objects, degrading performance and freezing the UI. Worse, what starts as a simple script quickly balloons into hundreds of lines of fragile boilerplate once production edge cases surface:
 
 - **Composite Keys**: Hashing multi-column keys without collisions, distinguishing string `"null"` from literal `null` and `undefined`, maintaining deterministic order, and handling sparse indices.
-- **Relational Joins**: Preserving outer join semantics without silent truncation, resolving column name collisions with automatic suffixing, and aligning time-series with as-of nearest matches.
+- **Relational Joins**: Reliable outer joins without silent truncation, resolving column name collisions with automatic suffixing, and aligning time-series with as-of nearest matches.
 - **Windowing & Rolling Metrics**: Managing sliding window boundaries, min-sample thresholds, cumulative accumulators, and lead/lag offsets without unbounded memory growth.
-- **Numeric Gotchas**: Eliminating silent precision loss from floating-point drift, `NaN` contagion, `-0` vs `+0`, integer overflows, and `BigInt` cross-type operations.
+- **Numeric Integrity**: Eliminating silent precision loss from floating-point drift, `NaN` contagion, `-0` vs `+0`, integer overflows, and `BigInt` cross-type operations.
 - **Date & String Edge Cases**: Handling timezone offsets across client environments, ISO/RFC parsing variations, regex escaping, and Unicode surrogate pairs.
 
-Attempting to solve these edge cases using naive chains of `.map()`, `.filter()`, `.flatMap()`, and `.reduce()` compounds the issue: each chained operation performs another full pass over the dataset and floods the V8 garbage collector with millions of short-lived intermediate objects, triggering noticeable UI freezes, frame drops, and memory leaks.
+**`df-script` changes this equation entirely.** It introduces a zero-dependency, column-oriented DataFrame engine constructed specifically to enable complex chained data transformations directly in the browser with zero network latency and no server maintenance. By avoiding high-level array iterators like `.map()` and `.reduce()` in favor of contiguous columnar loops, `df-script` drastically cuts intermediate object allocations to reduce garbage collection pressure. Every function is backed by a dedicated 1:1 test suite covering hundreds of extreme edge cases, so you never have to hand-roll fragile data logic again.
 
-Groupings, relational joins, and rolling windows are only a fraction of the data transformations modern applications need. Hand-rolling solutions for all of them is an unsustainable engineering sinkhole.
-
-**`df-script` changes this equation entirely.** It introduces a zero-dependency, column-oriented DataFrame engine constructed specifically to bring native transformation power directly to the browser and edge:
-
-- 🎯 **Target Sweet Spot (1,000 to 500,000+ rows)**: Purpose-built for operational client datasets, real-time dashboards, local CSV exploration, and IoT telemetry streams directly in-memory or inside a Web Worker.
-- 🚀 **Eliminate the Python Backend Tax**: Execute complex multi-column groupings, rolling statistics, relational joins, time-series matching, and pivots locally and synchronously right where the user interacts with the data. Zero API round-trips, zero server downtime, and zero backend maintenance.
-- 🛠️ **Never Hand-Roll `groupBy`, `join`, or Windowing Again**: Complex grouping logic, Kleene three-valued null safety, and edge cases are already solved and verified across thousands of unit tests.
-- 🪶 **Lightweight Footprint (<45 KB gzipped)**: Zero external dependencies (~127 KB minified) with no WebAssembly startup latency, no asynchronous compilation steps, and no native C++ bindings.
-- ⚡ **Compiled Columnar Performance**: Compiles declarative `$df.col(...)` expression trees down to contiguous, element-wise loops with cached lengths and minimal memory allocations, keeping your UI responsive at 60 FPS.
-- 🛡️ **TypeScript-First & Universal**: Clean, Polars-inspired domain namespaces (`.str`, `.dt`, `.arr`, `.struct`) with automatic schema deduction, full compile-time type safety, and standard ES2020+ portability across browsers, Web Workers, Node.js, Bun, and Deno.
 
 ---
 
-## 📖 Core Concepts
+
+## Core Concepts
 
 ### The `$df` Entry Point
 
@@ -248,11 +302,32 @@ Groupings, relational joins, and rolling windows are only a fraction of the data
 - `$df.when(predicate).then(value)...otherwise(value)`: Constructs a conditional `CASE WHEN` expression chain.
 - `$df.Float64`, `$df.Int32`, `$df.Utf8`, etc.: Direct access to data types and constructors for schema definitions and type-based column selection.
 
-[↑ Back to Top](#-df-script-high-performance-typescript-dataframe-library)
+### Typing and Schema Registry
+
+```typescript
+const schema = {
+  id: $df.Int32,
+  price: $df.Decimal(10, 2),
+  active: $df.Boolean,
+  createdAt: $df.Datetime
+};
+
+const df = $df.data(rawData, schema);
+```
+
+#### Supported Data Types
+- **Integers**: `Int8`, `Int16`, `Int32`, `Int64`, `UInt8`, `UInt16`, `UInt32`, `UInt64`
+- **Floats & Decimals**: `Float32`, `Float64`, `Decimal(precision?, scale?)`
+- **General**: `Boolean`, `Utf8` (Strings), `Binary`, `Null`, `Object`
+- **Temporal**: `Date`, `Datetime`, `Time`, `Duration`
+- **Nested Structures**: `Array`, `Struct`
+- **Type Selectors**: `Numeric`, `Integer`, `SignedInteger`, `UnsignedInteger`, `Float`, `Temporal`, `Nested`
+
 
 ---
 
-## 🛠️ DataFrame API Reference
+
+## DataFrame API Reference
 
 All methods and getters on `DataFrame` in alphabetical order:
 
@@ -306,11 +381,11 @@ All methods and getters on `DataFrame` in alphabetical order:
 | **`writeCsv(file?, options?)`** | Serializes the DataFrame into RFC-4180 CSV string or writes to disk/stream. |
 | **`writeJson(file?, options?)`** | Serializes the DataFrame into JSON or NDJSON string or writes to disk/stream. |
 
-[↑ Back to Top](#-df-script-high-performance-typescript-dataframe-library)
 
 ---
 
-## 🧮 Column Expressions API Reference
+
+## Column Expressions API Reference
 
 All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent chaining.
 
@@ -456,15 +531,15 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`wAvg`** | Computes weighted average using weight expression. |
 | **`xor`** | Logical exclusive OR (XOR). |
 
-[↑ Back to Top](#-df-script-high-performance-typescript-dataframe-library)
 
 ---
 
-## 📂 Namespaces API Reference
+
+## Namespaces API Reference
 
 Specific domain transforms are grouped under dedicated, clean namespaces with full IDE autocomplete:
 
-### 🔤 String Namespace (`.str`)
+### String Namespace (`.str`)
 
 | Method | Description |
 | :--- | :--- |
@@ -527,7 +602,7 @@ Specific domain transforms are grouped under dedicated, clean namespaces with fu
 | **`.str.upper`** | Converts ASCII/Unicode characters to uppercase. |
 | **`.str.zfill`** | Pads string on the left with zeros up to specified width. |
 
-### 📅 Temporal Namespace (`.dt`)
+### Temporal Namespace (`.dt`)
 
 | Method | Description |
 | :--- | :--- |
@@ -570,7 +645,7 @@ Specific domain transforms are grouped under dedicated, clean namespaces with fu
 | **`.dt.weekday`** | Extracts day of week (1 = Monday, 7 = Sunday). |
 | **`.dt.year`** | Extracts calendar year. |
 
-### 📊 Array/List Namespace (`.arr`)
+### Array/List Namespace (`.arr`)
 
 | Method | Description |
 | :--- | :--- |
@@ -611,7 +686,7 @@ Specific domain transforms are grouped under dedicated, clean namespaces with fu
 | **`.arr.unique`** | Deduplicates elements within each list row. |
 | **`.arr.variance`** | Computes sample variance of elements in each list row. |
 
-### 🗃️ Struct/Object Namespace (`.struct`)
+### Struct/Object Namespace (`.struct`)
 
 | Method | Description |
 | :--- | :--- |
@@ -620,48 +695,10 @@ Specific domain transforms are grouped under dedicated, clean namespaces with fu
 | **`.struct.unnest`** | Unnests/flattens all struct fields into individual top-level columns in select(). |
 | **`.struct.withFields`** | Adds or overrides fields within the struct column. |
 
-[↑ Back to Top](#-df-script-high-performance-typescript-dataframe-library)
 
 ---
 
-## 🛡️ Typing and Schema Registry
 
-```typescript
-import { $df } from "df-script";
-
-const schema = {
-  id: $df.DataType.Int32,
-  price: $df.DataType.Decimal(10, 2),
-  active: $df.DataType.Boolean,
-  createdAt: $df.DataType.Datetime
-};
-
-const df = $df.data(rawData, schema);
-```
-
-### Supported Data Types
-- **Integers**: `Int8`, `Int16`, `Int32`, `Int64`, `UInt8`, `UInt16`, `UInt32`, `UInt64`
-- **Floats & Decimals**: `Float32`, `Float64`, `Decimal(precision?, scale?)`
-- **General**: `Boolean`, `Utf8` (Strings), `Binary`, `Null`, `Object`
-- **Temporal**: `Date`, `Datetime`, `Time`, `Duration`
-- **Nested Structures**: `List` (Arrays), `Struct` (Objects)
-
-[↑ Back to Top](#-df-script-high-performance-typescript-dataframe-library)
-
----
-
-## 🧑‍💻 Contributing & Development
-
-```bash
-# Run test suite
-npm test
-
-# Build production bundles
-npm run build
-```
-
----
-
-## 📄 License
+## License
 
 `df-script` is open-source software licensed under the [MIT License](LICENSE).
