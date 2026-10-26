@@ -46,3 +46,16 @@ This document outlines core engineering principles and standards for writing cle
 - **Tag Placement**: Place `@note` tags directly below the main summary description and before `@param` / `@returns` tags in JSDoc blocks.
 - **Clean Label Formatting**: Use clean uppercase labels (e.g. `@note [Environment]: ...`, `@note [Timezone Compatibility]: ...`, `@note [Runtime Fallback]: ...`) rather than ad-hoc markdown symbols.
 - **Environment Boundaries**: Document functions that interface with host-specific runtime capabilities (e.g. Node.js `fs` access or native `Intl` resolution) so consumers and documentation generators have clear visibility into execution boundaries.
+
+## 11. Testing Standards & 1:1 Hierarchy Mirroring
+- **1:1 File Hierarchy Mirroring**: Test files in `_tests/` must mirror the exact directory and file structure of `src/` (e.g., `src/functions/concat.ts` ➔ `_tests/functions/concat.test.ts`, `src/utils/number.ts` ➔ `_tests/utils/number.test.ts`).
+- **Atomic Method Tests for Core Classes**: For large core classes like `DataFrame`, each public method or getter must have its own dedicated test file under `_tests/dataframe/<methodName>.test.ts` (e.g., `df.width` ➔ `_tests/dataframe/width.test.ts`, `df.select()` ➔ `_tests/dataframe/select.test.ts`). Avoid catch-all or miscellaneous test files.
+- **Test Runner Registration**: Every new test file must be imported in `_tests/run_all_project_tests.ts` and the relevant subdirectory runner (e.g. `_tests/dataframe/run_all.ts`).
+- **Dual Verification Requirement**: After any code changes, verify that both the local test suite and distribution bundle verification pass with zero errors (`npm test` and `npm run test:dist`).
+- **Standalone Execution & Node Guards**: Always declare `declare const process: any;` at the top of test files when referencing Node `process` to ensure standalone execution compatibility.
+
+## 12. Zero Dependencies, Runtime Portability & Numeric Integrity
+- **Zero Runtime Dependencies**: The core library must remain strictly 0 dependencies with 0 native C++/Rust bindings or WebAssembly binaries. All algorithms must be pure, standards-compliant TypeScript/JavaScript.
+- **Universal Runtime Support**: Code must execute seamlessly across Node.js (14+), Bun, Deno, modern web browsers, Web Workers, and Edge environments (Cloudflare Workers, Fastly Compute).
+- **Numeric & Float Integrity**: Guard against floating-point drift, `NaN` contagion, `-0` vs `+0`, integer overflows, and `BigInt` cross-type operations in all calculations and aggregations.
+
