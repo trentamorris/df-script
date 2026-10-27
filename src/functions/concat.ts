@@ -104,40 +104,40 @@ function _blitStackedColumns<U extends RowRecord>(
  * <!-- doc:base_concat_pair -->
  * >>> $df.concat([df1, df2], { how: "vertical" })
  * shape: (4, 1)
- * ┌──────┐
- * │ a    │
- * ├──────┤
- * │ 1    │
- * │ 2    │
- * │ null │
- * │ null │
- * └──────┘
+ * +------+
+ * | a    |
+ * +------+
+ * | 1    |
+ * | 2    |
+ * | null |
+ * | null |
+ * +------+
  * 
  * @example
  * // 2. Horizontal Concatenation:
  * <!-- doc:base_concat_pair -->
  * >>> $df.concat([df1, df2], { how: "horizontal" })
  * shape: (2, 2)
- * ┌───┬────┐
- * │ a │ b  │
- * ├───┼────┤
- * │ 1 │ 10 │
- * │ 2 │ 20 │
- * └───┴────┘
+ * +---+----+
+ * | a | b  |
+ * +---+----+
+ * | 1 | 10 |
+ * | 2 | 20 |
+ * +---+----+
  * 
  * @example
  * // 3. Diagonal Concatenation (mismatched columns):
  * <!-- doc:base_concat_pair -->
  * >>> $df.concat([df1, df2], { how: "diagonal" })
  * shape: (4, 2)
- * ┌──────┬──────┐
- * │ a    │ b    │
- * ├──────┼──────┤
- * │ 1    │ null │
- * │ 2    │ null │
- * │ null │ 10   │
- * │ null │ 20   │
- * └──────┴──────┘
+ * +------+------+
+ * | a    | b    |
+ * +------+------+
+ * | 1    | null |
+ * | 2    | null |
+ * | null | 10   |
+ * | null | 20   |
+ * +------+------+
  */
 export function concat<U extends RowRecord = any>(
     rawItems: ConcatItem | ConcatItem[],

@@ -14,12 +14,12 @@ import type { IntoExpr } from "../types";
  * <!-- doc:base_grouped_3x2 -->
  * >>> df.groupBy("group").agg($df.implode("val").alias("imploded"))
  * shape: (2, 2)
- * ┌───────┬──────────┐
- * │ group │ imploded │
- * ├───────┼──────────┤
- * │ A     │ [10, 20] │
- * │ B     │ [30]     │
- * └───────┴──────────┘
+ * +-------+----------+
+ * | group | imploded |
+ * +-------+----------+
+ * | A     | [10, 20] |
+ * | B     | [30]     |
+ * +-------+----------+
  */
 export function implode(column: IntoExpr | IntoExpr[]): ColumnExpr<any> {
     return (toColExpr(column, ColumnExpr) as ColumnExpr<any>).implode();

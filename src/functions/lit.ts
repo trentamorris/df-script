@@ -19,12 +19,12 @@ export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.lit(42).alias("answer"))
  * shape: (2, 1)
- * ┌────────┐
- * │ answer │
- * ├────────┤
- * │ 42     │
- * │ 42     │
- * └────────┘
+ * +--------+
+ * | answer |
+ * +--------+
+ * | 42     |
+ * | 42     |
+ * +--------+
  */
 export function lit(value: any, options: LitOptions = {}): ColumnExpr<any> {
     const expr = seqRange(value, { ...options, mode: "constant" });

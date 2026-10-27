@@ -14,12 +14,12 @@ import { ELEMENT_MARKER } from "../columnExpressions/constants";
  * <!-- doc:base_array_nested_2rows -->
  * >>> df.select($df.col("a").arr.filter($df.element().gt(2)).alias("filtered"))
  * shape: (2, 1)
- * ┌──────────┐
- * │ filtered │
- * ├──────────┤
- * │ [3]      │
- * │ [4, 5]   │
- * └──────────┘
+ * +----------+
+ * | filtered |
+ * +----------+
+ * | [3]      |
+ * | [4, 5]   |
+ * +----------+
  */
 export function element<T = any>(): ColumnExpr<T> {
     return new ColumnExpr(ELEMENT_MARKER);

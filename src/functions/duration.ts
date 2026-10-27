@@ -18,11 +18,11 @@ import type { IntoExpr, DurationOptions } from "../types";
  * <!-- doc:base_temporal_single -->
  * >>> df.select($df.col("date").cast($df.Datetime).add($df.duration({ days: 1 })).alias("plus_1_day"))
  * shape: (1, 1)
- * ┌──────────────────────────┐
- * │ plus_1_day               │
- * ├──────────────────────────┤
- * │ 2026-05-21T10:00:00.123Z │
- * └──────────────────────────┘
+ * +--------------------------+
+ * | plus_1_day               |
+ * +--------------------------+
+ * | 2026-05-21T10:00:00.123Z |
+ * +--------------------------+
  */
 export function duration(options: DurationOptions | string = {}): ColumnExpr<any> {
     if (typeof options === "string") {

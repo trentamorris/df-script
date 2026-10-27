@@ -15,13 +15,13 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * <!-- doc:base_nulls_3x2 -->
  * >>> df.select($df.coalesce($df.col("a"), $df.col("b"), $df.lit(3)).alias("coalesced"))
  * shape: (3, 1)
- * ┌───────────┐
- * │ coalesced │
- * ├───────────┤
- * │ 1         │
- * │ 2         │
- * │ 3         │
- * └───────────┘
+ * +-----------+
+ * | coalesced |
+ * +-----------+
+ * | 1         |
+ * | 2         |
+ * | 3         |
+ * +-----------+
  */
 export function coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))

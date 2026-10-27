@@ -12,12 +12,12 @@ import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.all())
  * shape: (2, 2)
- * ┌───┬───┐
- * │ a │ b │
- * ├───┼───┤
- * │ 1 │ x │
- * │ 2 │ y │
- * └───┴───┘
+ * +---+---+
+ * | a | b |
+ * +---+---+
+ * | 1 | x |
+ * | 2 | y |
+ * +---+---+
  */
 export function all(): ColumnExpr<any> {
     return new ColumnExpr(ALL_COLUMNS_MARKER);

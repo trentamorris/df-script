@@ -78,12 +78,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.agg($df.element().sum()).alias("sum_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────┐
-     * │ a         │ sum_a │
-     * ├───────────┼───────┤
-     * │ [1, 2, 3] │ 6     │
-     * │ [4, 5]    │ 9     │
-     * └───────────┴───────┘
+     * +-----------+-------+
+     * | a         | sum_a |
+     * +-----------+-------+
+     * | [1, 2, 3] | 6     |
+     * | [4, 5]    | 9     |
+     * +-----------+-------+
      */
     agg(expr: IExpr) {
         return this._evalSubExpr(expr, (_val, evaluated) => isArrayOrTypedArray(evaluated) ? evaluated[0] ?? null : evaluated);
@@ -96,12 +96,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.all().alias("all_true"))
      * shape: (2, 2)
-     * ┌───────────────┬──────────┐
-     * │ a             │ all_true │
-     * ├───────────────┼──────────┤
-     * │ [true, true]  │ true     │
-     * │ [true, false] │ false    │
-     * └───────────────┴──────────┘
+     * +---------------+----------+
+     * | a             | all_true |
+     * +---------------+----------+
+     * | [true, true]  | true     |
+     * | [true, false] | false    |
+     * +---------------+----------+
      */
     all() {
         return this._deriveArray((arr) => isArrayOfType(arr, (x) => !!x, { mode: "every" }));
@@ -114,12 +114,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.any().alias("any_true"))
      * shape: (2, 2)
-     * ┌───────────────┬──────────┐
-     * │ a             │ any_true │
-     * ├───────────────┼──────────┤
-     * │ [true, true]  │ true     │
-     * │ [true, false] │ true     │
-     * └───────────────┴──────────┘
+     * +---------------+----------+
+     * | a             | any_true |
+     * +---------------+----------+
+     * | [true, true]  | true     |
+     * | [true, false] | true     |
+     * +---------------+----------+
      */
     any() {
         return this._deriveArray((arr) => isArrayOfType(arr, (x) => !!x, { mode: "some" }));
@@ -132,12 +132,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.argMax().alias("max_idx"))
      * shape: (2, 2)
-     * ┌───────────┬─────────┐
-     * │ a         │ max_idx │
-     * ├───────────┼─────────┤
-     * │ [1, 2, 3] │ 2       │
-     * │ [4, 5]    │ 1       │
-     * └───────────┴─────────┘
+     * +-----------+---------+
+     * | a         | max_idx |
+     * +-----------+---------+
+     * | [1, 2, 3] | 2       |
+     * | [4, 5]    | 1       |
+     * +-----------+---------+
      */
     argMax() {
         return this._deriveArray((arr) => getArrayStats(arr).maxIdx);
@@ -150,12 +150,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.argMin().alias("min_idx"))
      * shape: (2, 2)
-     * ┌───────────┬─────────┐
-     * │ a         │ min_idx │
-     * ├───────────┼─────────┤
-     * │ [1, 2, 3] │ 0       │
-     * │ [4, 5]    │ 0       │
-     * └───────────┴─────────┘
+     * +-----------+---------+
+     * | a         | min_idx |
+     * +-----------+---------+
+     * | [1, 2, 3] | 0       |
+     * | [4, 5]    | 0       |
+     * +-----------+---------+
      */
     argMin() {
         return this._deriveArray((arr) => getArrayStats(arr).minIdx);
@@ -169,12 +169,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.contains(3).alias("has_three"))
      * shape: (2, 2)
-     * ┌───────────┬───────────┐
-     * │ a         │ has_three │
-     * ├───────────┼───────────┤
-     * │ [1, 2, 3] │ true      │
-     * │ [4, 5]    │ false     │
-     * └───────────┴───────────┘
+     * +-----------+-----------+
+     * | a         | has_three |
+     * +-----------+-----------+
+     * | [1, 2, 3] | true      |
+     * | [4, 5]    | false     |
+     * +-----------+-----------+
      */
     contains(item: any) {
         return this._deriveArrayBinary(item, (arr, val) => Array.prototype.includes.call(arr, val));
@@ -188,12 +188,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.containsAll([1, 2]).alias("has_all"))
      * shape: (2, 2)
-     * ┌───────────┬─────────┐
-     * │ a         │ has_all │
-     * ├───────────┼─────────┤
-     * │ [1, 2, 3] │ true    │
-     * │ [4, 5]    │ false   │
-     * └───────────┴─────────┘
+     * +-----------+---------+
+     * | a         | has_all |
+     * +-----------+---------+
+     * | [1, 2, 3] | true    |
+     * | [4, 5]    | false   |
+     * +-----------+---------+
      */
     containsAll(items: ArrayLike<any>) {
         return this._deriveArray((arr) => isArrayOfType(items, (x) => Array.prototype.includes.call(arr, x), { mode: "every" }));
@@ -207,12 +207,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.containsAny([2, 3]).alias("has_any"))
      * shape: (2, 2)
-     * ┌────────┬─────────┐
-     * │ a      │ has_any │
-     * ├────────┼─────────┤
-     * │ [1, 2] │ true    │
-     * │ [3, 4] │ true    │
-     * └────────┴─────────┘
+     * +--------+---------+
+     * | a      | has_any |
+     * +--------+---------+
+     * | [1, 2] | true    |
+     * | [3, 4] | true    |
+     * +--------+---------+
      */
     containsAny(items: ArrayLike<any>) {
         return this._deriveArray((arr) => isArrayOfType(items, (x) => Array.prototype.includes.call(arr, x), { mode: "some" }));
@@ -227,12 +227,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.countMatches(2).alias("twos"))
      * shape: (2, 2)
-     * ┌───────────┬──────┐
-     * │ a         │ twos │
-     * ├───────────┼──────┤
-     * │ [1, 2, 3] │ 1    │
-     * │ [4, 5]    │ 0    │
-     * └───────────┴──────┘
+     * +-----------+------+
+     * | a         | twos |
+     * +-----------+------+
+     * | [1, 2, 3] | 1    |
+     * | [4, 5]    | 0    |
+     * +-----------+------+
      */
     countMatches(item: any, options: UniqueArrayStatsOptions = {}) {
         return this._deriveArrayBinary(item, (arr, val) => getUniqueArrayStats(arr, options).frequencies.get(val) ?? 0);
@@ -246,12 +246,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.eval($df.element().mul(10)).alias("multiplied"))
      * shape: (2, 2)
-     * ┌────────┬────────────┐
-     * │ a      │ multiplied │
-     * ├────────┼────────────┤
-     * │ [1, 2] │ [10, 20]   │
-     * │ [3, 4] │ [30, 40]   │
-     * └────────┴────────────┘
+     * +--------+------------+
+     * | a      | multiplied |
+     * +--------+------------+
+     * | [1, 2] | [10, 20]   |
+     * | [3, 4] | [30, 40]   |
+     * +--------+------------+
      */
     eval(expr: IExpr) {
         return this._evalSubExpr(expr, (_val, res) => res, (subExpr, subColumns, subHeight) => {
@@ -273,12 +273,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.select([$df.col("group"), $df.col("values").arr.explode()])
      * shape: (2, 2)
-     * ┌───────┬────────┐
-     * │ group │ values │
-     * ├───────┼────────┤
-     * │ A     │ 1      │
-     * │ A     │ 2      │
-     * └───────┴────────┘
+     * +-------+--------+
+     * | group | values |
+     * +-------+--------+
+     * | A     | 1      |
+     * | A     | 2      |
+     * +-------+--------+
      */
     explode({ emptyAsNull = true, keepNulls = true }: ExplodeOptions = {}) {
         return this._expr._derive((vArray: any[]) => {
@@ -346,12 +346,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.filter($df.element().gt(2)).alias("filtered"))
      * shape: (2, 2)
-     * ┌───────────┬──────────┐
-     * │ a         │ filtered │
-     * ├───────────┼──────────┤
-     * │ [1, 2, 3] │ [3]      │
-     * │ [4, 5]    │ [4, 5]   │
-     * └───────────┴──────────┘
+     * +-----------+----------+
+     * | a         | filtered |
+     * +-----------+----------+
+     * | [1, 2, 3] | [3]      |
+     * | [4, 5]    | [4, 5]   |
+     * +-----------+----------+
      */
     filter(expr: IExpr) {
         return this._evalSubExpr(expr, (val, mask) => filterByMask(val, mask));
@@ -365,12 +365,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.first().alias("first_a"))
      * shape: (2, 2)
-     * ┌───────────┬─────────┐
-     * │ a         │ first_a │
-     * ├───────────┼─────────┤
-     * │ [1, 2, 3] │ 1       │
-     * │ [4, 5]    │ 4       │
-     * └───────────┴─────────┘
+     * +-----------+---------+
+     * | a         | first_a |
+     * +-----------+---------+
+     * | [1, 2, 3] | 1       |
+     * | [4, 5]    | 4       |
+     * +-----------+---------+
      */
     first(nullOnOob: boolean = true) {
         return this.get(0, nullOnOob);
@@ -385,12 +385,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.gather([0, 2]).alias("g"))
      * shape: (2, 2)
-     * ┌───────────┬──────────┐
-     * │ a         │ g        │
-     * ├───────────┼──────────┤
-     * │ [1, 2, 3] │ [1, 3]   │
-     * │ [4, 5]    │ [4, null]│
-     * └───────────┴──────────┘
+     * +-----------+----------+
+     * | a         | g        |
+     * +-----------+----------+
+     * | [1, 2, 3] | [1, 3]   |
+     * | [4, 5]    | [4, null]|
+     * +-----------+----------+
      */
     gather(
         indices: number | ArrayLike<number>,
@@ -415,12 +415,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.gatherEvery({ step: 2 }).alias("ge"))
      * shape: (2, 2)
-     * ┌───────────┬────────┐
-     * │ a         │ ge     │
-     * ├───────────┼────────┤
-     * │ [1, 2, 3] │ [1, 3] │
-     * │ [4, 5]    │ [4]    │
-     * └───────────┴────────┘
+     * +-----------+--------+
+     * | a         | ge     |
+     * +-----------+--------+
+     * | [1, 2, 3] | [1, 3] |
+     * | [4, 5]    | [4]    |
+     * +-----------+--------+
      */
     gatherEvery(options: StepSliceArrayOptions = {}) {
         return this._deriveArray((arr) => stepSliceArray(arr, options));
@@ -435,12 +435,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.get(1).alias("second"))
      * shape: (2, 2)
-     * ┌───────────┬────────┐
-     * │ a         │ second │
-     * ├───────────┼────────┤
-     * │ [1, 2, 3] │ 2      │
-     * │ [4, 5]    │ 5      │
-     * └───────────┴────────┘
+     * +-----------+--------+
+     * | a         | second |
+     * +-----------+--------+
+     * | [1, 2, 3] | 2      |
+     * | [4, 5]    | 5      |
+     * +-----------+--------+
      */
     get(index: number, nullOnOob: boolean = true) {
         return this._deriveArray((arr) => getArrayElement(arr, index, nullOnOob));
@@ -455,12 +455,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.join("-").alias("joined"))
      * shape: (2, 2)
-     * ┌────────────┬────────┐
-     * │ a          │ joined │
-     * ├────────────┼────────┤
-     * │ ["a", "b"] │ "a-b"  │
-     * │ ["c"]      │ "c"    │
-     * └────────────┴────────┘
+     * +------------+--------+
+     * | a          | joined |
+     * +------------+--------+
+     * | ["a", "b"] | "a-b"  |
+     * | ["c"]      | "c"    |
+     * +------------+--------+
      */
     join(separator: string = ",", options: JoinArrayOptions = {}) {
         return this._deriveArray((arr) => joinArray(arr, separator, options));
@@ -474,12 +474,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.last().alias("last_a"))
      * shape: (2, 2)
-     * ┌───────────┬────────┐
-     * │ a         │ last_a │
-     * ├───────────┼────────┤
-     * │ [1, 2, 3] │ 3      │
-     * │ [4, 5]    │ 5      │
-     * └───────────┴────────┘
+     * +-----------+--------+
+     * | a         | last_a |
+     * +-----------+--------+
+     * | [1, 2, 3] | 3      |
+     * | [4, 5]    | 5      |
+     * +-----------+--------+
      */
     last(nullOnOob: boolean = true) {
         return this.get(-1, nullOnOob);
@@ -499,12 +499,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.lengths().alias("len_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────┐
-     * │ a         │ len_a │
-     * ├───────────┼───────┤
-     * │ [1, 2, 3] │ 3     │
-     * │ [4, 5]    │ 2     │
-     * └───────────┴───────┘
+     * +-----------+-------+
+     * | a         | len_a |
+     * +-----------+-------+
+     * | [1, 2, 3] | 3     |
+     * | [4, 5]    | 2     |
+     * +-----------+-------+
      */
     lengths() {
         return this._deriveArray((arr) => arr.length);
@@ -517,12 +517,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.max().alias("max_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────┐
-     * │ a         │ max_a │
-     * ├───────────┼───────┤
-     * │ [1, 2, 3] │ 3     │
-     * │ [4, 5]    │ 5     │
-     * └───────────┴───────┘
+     * +-----------+-------+
+     * | a         | max_a |
+     * +-----------+-------+
+     * | [1, 2, 3] | 3     |
+     * | [4, 5]    | 5     |
+     * +-----------+-------+
      */
     max() {
         return this._deriveArray((arr) => getArrayStats(arr).max);
@@ -535,12 +535,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.mean().alias("mean_a"))
      * shape: (2, 2)
-     * ┌───────────┬────────┐
-     * │ a         │ mean_a │
-     * ├───────────┼────────┤
-     * │ [1, 2, 3] │ 2      │
-     * │ [4, 5]    │ 4.5    │
-     * └───────────┴────────┘
+     * +-----------+--------+
+     * | a         | mean_a |
+     * +-----------+--------+
+     * | [1, 2, 3] | 2      |
+     * | [4, 5]    | 4.5    |
+     * +-----------+--------+
      */
     mean() {
         return this._deriveArray((arr) => getArrayStats(arr).mean);
@@ -553,12 +553,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.median().alias("med"))
      * shape: (2, 2)
-     * ┌───────────┬──────┐
-     * │ a         │ med  │
-     * ├───────────┼──────┤
-     * │ [1, 2, 3] │ 2    │
-     * │ [4, 5]    │ 4.5  │
-     * └───────────┴──────┘
+     * +-----------+------+
+     * | a         | med  |
+     * +-----------+------+
+     * | [1, 2, 3] | 2    |
+     * | [4, 5]    | 4.5  |
+     * +-----------+------+
      */
     median() {
         return this._deriveArray((arr) => computeQuantile(arr, 0.5));
@@ -571,12 +571,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.min().alias("min_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────┐
-     * │ a         │ min_a │
-     * ├───────────┼───────┤
-     * │ [1, 2, 3] │ 1     │
-     * │ [4, 5]    │ 4     │
-     * └───────────┴───────┘
+     * +-----------+-------+
+     * | a         | min_a |
+     * +-----------+-------+
+     * | [1, 2, 3] | 1     |
+     * | [4, 5]    | 4     |
+     * +-----------+-------+
      */
     min() {
         return this._deriveArray((arr) => getArrayStats(arr).min);
@@ -589,12 +589,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.mode().alias("mode_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────────┐
-     * │ a         │ mode_a    │
-     * ├───────────┼───────────┤
-     * │ [1, 2, 3] │ [1, 2, 3] │
-     * │ [4, 5]    │ [4, 5]    │
-     * └───────────┴───────────┘
+     * +-----------+-----------+
+     * | a         | mode_a    |
+     * +-----------+-----------+
+     * | [1, 2, 3] | [1, 2, 3] |
+     * | [4, 5]    | [4, 5]    |
+     * +-----------+-----------+
      */
     mode() {
         return this._deriveArray((arr) => computeMode(arr));
@@ -608,12 +608,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.nUnique().alias("unique_len"))
      * shape: (2, 2)
-     * ┌───────────┬────────────┐
-     * │ a         │ unique_len │
-     * ├───────────┼────────────┤
-     * │ [1, 2, 3] │ 3          │
-     * │ [4, 5]    │ 2          │
-     * └───────────┴────────────┘
+     * +-----------+------------+
+     * | a         | unique_len |
+     * +-----------+------------+
+     * | [1, 2, 3] | 3          |
+     * | [4, 5]    | 2          |
+     * +-----------+------------+
      */
     nUnique(options: UniqueArrayStatsOptions = {}) {
         return this._deriveArray((arr) => getUniqueArrayStats(arr, options).count);
@@ -626,12 +626,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.reverse().alias("reversed"))
      * shape: (2, 2)
-     * ┌───────────┬───────────┐
-     * │ a         │ reversed  │
-     * ├───────────┼───────────┤
-     * │ [1, 2, 3] │ [3, 2, 1] │
-     * │ [4, 5]    │ [5, 4]    │
-     * └───────────┴───────────┘
+     * +-----------+-----------+
+     * | a         | reversed  |
+     * +-----------+-----------+
+     * | [1, 2, 3] | [3, 2, 1] |
+     * | [4, 5]    | [5, 4]    |
+     * +-----------+-----------+
      */
     reverse() {
         return this._deriveArray((arr) => arr.slice().reverse());
@@ -645,12 +645,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.shift(1).alias("shifted"))
      * shape: (2, 2)
-     * ┌───────────┬──────────────────┐
-     * │ a         │ shifted          │
-     * ├───────────┼──────────────────┤
-     * │ [1, 2, 3] │ [null, 1, 2]     │
-     * │ [4, 5]    │ [null, 4]        │
-     * └───────────┴──────────────────┘
+     * +-----------+------------------+
+     * | a         | shifted          |
+     * +-----------+------------------+
+     * | [1, 2, 3] | [null, 1, 2]     |
+     * | [4, 5]    | [null, 4]        |
+     * +-----------+------------------+
      */
     shift(n: number = 1, options: ShiftOptions = {}) {
         return this._deriveArray((arr) => shiftArray(arr, n, options.fillValue));
@@ -665,12 +665,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.slice(1, 3).alias("sliced"))
      * shape: (2, 2)
-     * ┌───────────┬────────┐
-     * │ a         │ sliced │
-     * ├───────────┼────────┤
-     * │ [1, 2, 3] │ [2, 3] │
-     * │ [4, 5]    │ [5]    │
-     * └───────────┴────────┘
+     * +-----------+--------+
+     * | a         | sliced |
+     * +-----------+--------+
+     * | [1, 2, 3] | [2, 3] |
+     * | [4, 5]    | [5]    |
+     * +-----------+--------+
      */
     slice(start?: number, end?: number) {
         return this._deriveArray((arr) => arr.slice(start, end));
@@ -684,12 +684,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.sort().alias("sorted"))
      * shape: (2, 2)
-     * ┌───────────┬───────────┐
-     * │ a         │ sorted    │
-     * ├───────────┼───────────┤
-     * │ [1, 2, 3] │ [1, 2, 3] │
-     * │ [4, 5]    │ [4, 5]    │
-     * └───────────┴───────────┘
+     * +-----------+-----------+
+     * | a         | sorted    |
+     * +-----------+-----------+
+     * | [1, 2, 3] | [1, 2, 3] |
+     * | [4, 5]    | [4, 5]    |
+     * +-----------+-----------+
      */
     sort(options?: SortArrayOptions) {
         return this._deriveArray((arr) => sortArray(arr, options));
@@ -705,12 +705,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.splice(1, 1, 10, 20).alias("spliced"))
      * shape: (2, 2)
-     * ┌───────────┬─────────────────┐
-     * │ a         │ spliced         │
-     * ├───────────┼─────────────────┤
-     * │ [1, 2, 3] │ [1, 10, 20, 3]  │
-     * │ [4, 5]    │ [4, 10, 20]     │
-     * └───────────┴─────────────────┘
+     * +-----------+-----------------+
+     * | a         | spliced         |
+     * +-----------+-----------------+
+     * | [1, 2, 3] | [1, 10, 20, 3]  |
+     * | [4, 5]    | [4, 10, 20]     |
+     * +-----------+-----------------+
      */
     splice(start: number, deleteCount?: number, ...items: any[]) {
         return this._deriveArray((arr) => {
@@ -727,12 +727,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.std().alias("std_dev"))
      * shape: (2, 2)
-     * ┌───────────┬──────────┐
-     * │ a         │ std_dev  │
-     * ├───────────┼──────────┤
-     * │ [1, 2, 3] │ 1        │
-     * │ [4, 5]    │ 0.707107 │
-     * └───────────┴──────────┘
+     * +-----------+----------+
+     * | a         | std_dev  |
+     * +-----------+----------+
+     * | [1, 2, 3] | 1        |
+     * | [4, 5]    | 0.707107 |
+     * +-----------+----------+
      */
     std() {
         return this._deriveArray((arr) => getArrayStats(arr).std);
@@ -745,12 +745,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.sum().alias("sum_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────┐
-     * │ a         │ sum_a │
-     * ├───────────┼───────┤
-     * │ [1, 2, 3] │ 6     │
-     * │ [4, 5]    │ 9     │
-     * └───────────┴───────┘
+     * +-----------+-------+
+     * | a         | sum_a |
+     * +-----------+-------+
+     * | [1, 2, 3] | 6     |
+     * | [4, 5]    | 9     |
+     * +-----------+-------+
      */
     sum() {
         return this._deriveArray((arr) => getArrayStats(arr).sum);
@@ -764,12 +764,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.toStruct({ fields: ["x", "y"] }).alias("struct_a"))
      * shape: (2, 2)
-     * ┌────────┬────────────────┐
-     * │ a      │ struct_a       │
-     * ├────────┼────────────────┤
-     * │ [1, 2] │ { x: 1, y: 2 } │
-     * │ [3, 4] │ { x: 3, y: 4 } │
-     * └────────┴────────────────┘
+     * +--------+----------------+
+     * | a      | struct_a       |
+     * +--------+----------------+
+     * | [1, 2] | { x: 1, y: 2 } |
+     * | [3, 4] | { x: 3, y: 4 } |
+     * +--------+----------------+
      */
     toStruct({ upperBound, fields }: ToStructOptions = {}) {
         return this._expr._derive((vArray: any[]) => {
@@ -827,12 +827,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.unique().alias("unique_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────────┐
-     * │ a         │ unique_a  │
-     * ├───────────┼───────────┤
-     * │ [1, 2, 3] │ [1, 2, 3] │
-     * │ [4, 5]    │ [4, 5]    │
-     * └───────────┴───────────┘
+     * +-----------+-----------+
+     * | a         | unique_a  |
+     * +-----------+-----------+
+     * | [1, 2, 3] | [1, 2, 3] |
+     * | [4, 5]    | [4, 5]    |
+     * +-----------+-----------+
      */
     unique(options: UniqueArrayStatsOptions = {}) {
         return this._deriveArray((arr) => getUniqueArrayStats(arr, options).values);
@@ -845,12 +845,12 @@ export class ArrayExprNamespace {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.variance().alias("var_a"))
      * shape: (2, 2)
-     * ┌───────────┬───────┐
-     * │ a         │ var_a │
-     * ├───────────┼───────┤
-     * │ [1, 2, 3] │ 1     │
-     * │ [4, 5]    │ 0.5   │
-     * └───────────┴───────┘
+     * +-----------+-------+
+     * | a         | var_a |
+     * +-----------+-------+
+     * | [1, 2, 3] | 1     |
+     * | [4, 5]    | 0.5   |
+     * +-----------+-------+
      */
     variance() {
         return this._deriveArray((arr) => getArrayStats(arr).variance);
@@ -869,12 +869,12 @@ export class ArrayExpr extends ExprBase {
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.select($df.col("a").arr.len())
      * shape: (2, 1)
-     * ┌─────┐
-     * │ len │
-     * ├─────┤
-     * │ 3   │
-     * │ 2   │
-     * └─────┘
+     * +-----+
+     * | len |
+     * +-----+
+     * | 3   |
+     * | 2   |
+     * +-----+
      */
     get arr() {
         return new ArrayExprNamespace(this);

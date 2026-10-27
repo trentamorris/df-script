@@ -98,13 +98,13 @@ export class WhenThen extends ColumnExpr<any> {
  * ...     .otherwise("Low").alias("tier")
  * ... )
  * shape: (3, 1)
- * ┌──────┐
- * │ tier │
- * ├──────┤
- * │ Low  │
- * │ Low  │
- * │ High │
- * └──────┘
+ * +------+
+ * | tier |
+ * +------+
+ * | Low  |
+ * | Low  |
+ * | High |
+ * +------+
  */
 export function when(predicate: WhenArg): WhenThenChain {
     return new WhenThenChain([predicate]);

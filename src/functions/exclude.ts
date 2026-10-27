@@ -14,12 +14,12 @@ import { toValidArray } from "../utils/array";
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.exclude("a"))
  * shape: (2, 1)
- * ┌───┐
- * │ b │
- * ├───┤
- * │ x │
- * │ y │
- * └───┘
+ * +---+
+ * | b |
+ * +---+
+ * | x |
+ * | y |
+ * +---+
  */
 export function exclude(columns: string | string[]): ColumnExpr<any> {
     const expr = new ColumnExpr(ALL_COLUMNS_MARKER);

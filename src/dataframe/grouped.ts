@@ -74,12 +74,12 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * <!-- doc:base_grouped_3x2 -->
      * >>> df.groupBy("group").agg($df.col("val").sum().alias("sum_val"))
      * shape: (2, 2)
-     * ┌───────┬─────────┐
-     * │ group │ sum_val │
-     * ├───────┼─────────┤
-     * │ A     │ 30      │
-     * │ B     │ 30      │
-     * └───────┴─────────┘
+     * +-------+---------+
+     * | group | sum_val |
+     * +-------+---------+
+     * | A     | 30      |
+     * | B     | 30      |
+     * +-------+---------+
      */
     agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
         const keys = this._keys as unknown as string[];
@@ -127,12 +127,12 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * <!-- doc:base_grouped_3x2 -->
      * >>> df.groupBy("group").toDataframe()
      * shape: (2, 1)
-     * ┌───────┐
-     * │ group │
-     * ├───────┤
-     * │ A     │
-     * │ B     │
-     * └───────┘
+     * +-------+
+     * | group |
+     * +-------+
+     * | A     |
+     * | B     |
+     * +-------+
      */
     toDataframe<U extends RowRecord = any>(): DataFrame<U> {
         const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(this._keys as unknown as string[]);

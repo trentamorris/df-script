@@ -18,12 +18,12 @@ import { DataFrameError } from "../exceptions";
  * <!-- doc:base_2x2 -->
  * >>> $df.readJson('[{"a":1,"b":"x"},{"a":2,"b":"y"}]')
  * shape: (2, 2)
- * ┌───┬───┐
- * │ a │ b │
- * ├───┼───┤
- * │ 1 │ x │
- * │ 2 │ y │
- * └───┴───┘
+ * +---+---+
+ * | a | b |
+ * +---+---+
+ * | 1 | x |
+ * | 2 | y |
+ * +---+---+
  */
 export function readJson(
     content: string,

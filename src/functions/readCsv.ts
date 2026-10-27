@@ -19,12 +19,12 @@ import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
  * <!-- doc:base_2x2 -->
  * >>> $df.readCsv("a,b\n1,x\n2,y")
  * shape: (2, 2)
- * ┌───┬───┐
- * │ a │ b │
- * ├───┼───┤
- * │ 1 │ x │
- * │ 2 │ y │
- * └───┴───┘
+ * +---+---+
+ * | a | b |
+ * +---+---+
+ * | 1 | x |
+ * | 2 | y |
+ * +---+---+
  */
 export function readCsv<T extends RowRecord = any>(
     content: string,

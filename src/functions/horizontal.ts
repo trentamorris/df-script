@@ -21,12 +21,12 @@ export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.horizontal("a", "b").sum().alias("row_sum"))
  * shape: (2, 1)
- * ┌─────────┐
- * │ row_sum │
- * ├─────────┤
- * │ 1       │
- * │ 2       │
- * └─────────┘
+ * +---------+
+ * | row_sum |
+ * +---------+
+ * | 1       |
+ * | 2       |
+ * +---------+
  */
 export function horizontal(
     ...exprs: (IntoExpr | IntoExpr[])[]

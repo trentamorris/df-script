@@ -17,12 +17,12 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.struct({ x: "a", y: "b" }).alias("coord"))
  * shape: (2, 1)
- * ┌──────────────────┐
- * │ coord            │
- * ├──────────────────┤
- * │ { x: 1, y: "x" } │
- * │ { x: 2, y: "y" } │
- * └──────────────────┘
+ * +------------------+
+ * | coord            |
+ * +------------------+
+ * | { x: 1, y: "x" } |
+ * | { x: 2, y: "y" } |
+ * +------------------+
  */
 export function struct(
     fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,
