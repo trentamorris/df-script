@@ -333,22 +333,22 @@ The `$df` entry point provides top-level functions to create DataFrames, constru
 
 | Function | Description |
 | :--- | :--- |
-| **`$df.all()`** | Selects all columns in the DataFrame. |
-| **`$df.coalesce(...exprs)`** | Returns the first non-null value among columns or expressions. |
-| **`$df.col(selector)`** | Creates a column reference expression by name (`"a"`), names array (`["a", "b"]`), RegExp (`/^user_/`), or DataType selector (`$df.Float64`). |
-| **`$df.concat(items, options?)`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
-| **`$df.data(data, schema?)`** | Instantiates a new `DataFrame` from row objects, column arrays, or typed matrices. |
-| **`$df.duration(optionsOrString)`** | Constructs a `Duration` expression from component options (`{ days: 1, hours: 12 }`) or duration strings (`"1d 12h 30m"`). |
-| **`$df.element()`** | References the current array element within an `.arr.eval(...)` expression. |
-| **`$df.exclude(columns)`** | Matches all columns except the specified ones. |
-| **`$df.horizontal(...exprs)`** | Combines multiple columns/expressions horizontally per row for row-wise evaluation. |
-| **`$df.implode(column)`** | Aggregates a column's rows or grouped values into a list. |
-| **`$df.lit(val)`** | Explicitly wraps a raw scalar value into a literal expression. |
-| **`$df.readCsv(content, options?)`** | Reads CSV content into a new `DataFrame` with automatic schema inference. |
-| **`$df.readJson(content, options?)`** | Reads JSON/NDJSON content into a new `DataFrame`. |
-| **`$df.seqRange(value, options?)`** | Generates a sequence range of values. |
-| **`$df.struct(fields)`** | Constructs a nested struct object expression from named expressions or sibling columns. |
-| **`$df.when(predicate).then(value)...otherwise(value)`** | Constructs a conditional `CASE WHEN` expression chain. |
+| **`$df.all`** | Selects all columns in the DataFrame. |
+| **`$df.coalesce`** | Returns the first non-null value among columns or expressions. |
+| **`$df.col`** | Creates a column reference expression by name (`"a"`), names array (`["a", "b"]`), RegExp (`/^user_/`), or DataType selector (`$df.Float64`). |
+| **`$df.concat`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
+| **`$df.data`** | Instantiates a new `DataFrame` from row objects, column arrays, or typed matrices. |
+| **`$df.duration`** | Constructs a `Duration` expression from component options (`{ days: 1, hours: 12 }`) or duration strings (`"1d 12h 30m"`). |
+| **`$df.element`** | References the current array element within an `.arr.eval(...)` expression. |
+| **`$df.exclude`** | Matches all columns except the specified ones. |
+| **`$df.horizontal`** | Combines multiple columns/expressions horizontally per row for row-wise evaluation. |
+| **`$df.implode`** | Aggregates a column's rows or grouped values into a list. |
+| **`$df.lit`** | Explicitly wraps a raw scalar value into a literal expression. |
+| **`$df.readCsv`** | Reads CSV content into a new `DataFrame` with automatic schema inference. |
+| **`$df.readJson`** | Reads JSON/NDJSON content into a new `DataFrame`. |
+| **`$df.seqRange`** | Generates a sequence range of values. |
+| **`$df.struct`** | Constructs a nested struct object expression from named expressions or sibling columns. |
+| **`$df.when`** | Constructs a conditional `CASE WHEN` expression chain. |
 
 
 ---
@@ -360,53 +360,53 @@ All operations and getters on `DataFrame` in alphabetical order:
 
 | Method / Property | Description |
 | :--- | :--- |
-| **`cast(schema, options?)`** | Casts DataFrame columns to target data types using a schema mapping. |
-| **`clone()`** | Deep-copies the DataFrame, duplicating all underlying columnar memory buffers and schema. |
-| **`columns`** | Getter returning an array of all column names in the DataFrame. |
-| **`concat(items, options?)`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
-| **`drop(...names)`** | Drops one or more specified columns from the DataFrame. |
-| **`dropNulls(subset?)`** | Drops rows containing null or undefined values across all or specified columns. |
-| **`dtypes`** | Getter returning a dictionary of column names to their registered `DataType` instances. |
-| **`equals(other, options?)`** | Deep equality comparison with tolerance support for float columns. |
-| **`explode(columns)`** | Unnests list-like columns into multiple rows, replicating other columns per list element. |
-| **`fill(target, options?)`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) across columns with strategies or values. |
-| **`fillNan(options?)`** | Replaces `NaN` values across numeric columns with scalars, expressions, or statistical strategies. |
-| **`fillNull(ruleOrOptions)`** | Fills null values with strategies (`"forward"`, `"backward"`, `"mean"`, `"min"`, `"max"`, or literal values). |
-| **`filter(...predicates)`** | Filters rows where all predicate expressions evaluate to `true`. |
-| **`groupBy(keys)`** | Groups data by one or more columns, returning a `GroupedData` object for aggregations. |
-| **`groupByDynamic(indexCol, options)`** | Dynamic time-series/numeric window grouping over tumbling, sliding, or rolling temporal intervals. |
-| **`head(n?)`** | Returns the first `n` rows of the DataFrame (defaults to 5). |
-| **`height`** | Getter returning the total number of rows in the DataFrame. |
-| **`insertColumn(index, name, values)`** | Inserts a new column at a specific zero-based index. |
-| **`item(row?, col?)`** | Returns an individual scalar cell value at the specified row and column coordinate. |
-| **`iterColumns()`** | Generator iterating over `{ name, values }` pairs for each column. |
-| **`iterRows()`** | Generator iterating over row record objects `{ [column]: value }`. |
-| **`join(other, onOrOptions, how?, suffixes?)`** | Relational joins (`"inner"`, `"left"`, `"right"`, `"outer"`, `"semi"`, `"anti"`, `"cross"`). |
-| **`joinAsof(other, options)`** | Inexact time-series / nearest-neighbor joins on sorted key columns. |
-| **`joinWhere(other, predicate, options?)`** | Arbitrary non-equi joins evaluated over candidate cartesian pairs. |
-| **`limit(n, options?)`** | Returns a subset of rows with optional `offset` and direction (`"start"` or `"end"`). |
-| **`partitionBy(by, options?)`** | Splits DataFrame into sub-DataFrames (as array or dictionary) partitioned by column keys or expressions. |
-| **`pivot(index, columns, values)`** | Reshapes tabular data from long to wide format based on unique column keys. |
-| **`rename(mapping)`** | Renames columns using a `{ oldName: newName }` dictionary. |
-| **`reverse()`** | Reverses the row ordering of the DataFrame. |
-| **`schema`** | Getter returning the current column-to-`DataType` schema specification. |
-| **`select(...exprs)`** | Projects and evaluates column expressions, selectors, regex patterns, or struct unnesting. |
-| **`shape`** | Getter returning the `[height, width]` dimensions tuple. |
-| **`slice(start, end?)`** | Slices a continuous range of rows by start and end indices. |
-| **`sort(options)`** | Multi-column sorting with `descending`, `nullsLast`, and custom comparator functions. |
-| **`tail(n?)`** | Returns the last `n` rows of the DataFrame (defaults to 5). |
-| **`toArray()`** | Serializes the DataFrame into a two-dimensional row array (`any[][]`). |
-| **`toDict()`** | Serializes the DataFrame into a column-oriented dictionary `{ [col]: any[] }`. |
-| **`toDicts()`** | Serializes the DataFrame into an array of row objects `RowRecord[]`. |
-| **`transpose(options?)`** | Swaps rows and columns into a transposed DataFrame. |
-| **`unique(columns?)`** | Returns distinct rows, optionally deduplicating based on a subset of columns. |
-| **`unpivot(idVars, valueVars, varName?, valName?)`** | Melts wide columns into long format name-value pairs. |
-| **`unstack(step, options?)`** | Unstacks multi-level grouped columns. |
-| **`width`** | Getter returning the total number of columns in the DataFrame. |
-| **`withColumns(...exprs)`** | Adds or updates columns in-place using expression evaluations. |
-| **`withRowIndex(name?, offset?)`** | Inserts a zero-based or offset row index column into the DataFrame. |
-| **`writeCsv(file?, options?)`** | Serializes the DataFrame into RFC-4180 CSV string or writes to disk/stream. |
-| **`writeJson(file?, options?)`** | Serializes the DataFrame into JSON or NDJSON string or writes to disk/stream. |
+| **`.cast`** | Casts DataFrame columns to target data types using a schema mapping. |
+| **`.clone`** | Deep-copies the DataFrame, duplicating all underlying columnar memory buffers and schema. |
+| **`.columns`** | Getter returning an array of all column names in the DataFrame. |
+| **`.concat`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
+| **`.drop`** | Drops one or more specified columns from the DataFrame. |
+| **`.dropNulls`** | Drops rows containing null or undefined values across all or specified columns. |
+| **`.dtypes`** | Getter returning a dictionary of column names to their registered `DataType` instances. |
+| **`.equals`** | Deep equality comparison with tolerance support for float columns. |
+| **`.explode`** | Unnests list-like columns into multiple rows, replicating other columns per list element. |
+| **`.fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) across columns with strategies or values. |
+| **`.fillNan`** | Replaces `NaN` values across numeric columns with scalars, expressions, or statistical strategies. |
+| **`.fillNull`** | Fills null values with strategies (`"forward"`, `"backward"`, `"mean"`, `"min"`, `"max"`, or literal values). |
+| **`.filter`** | Filters rows where all predicate expressions evaluate to `true`. |
+| **`.groupBy`** | Groups data by one or more columns, returning a `GroupedData` object for aggregations. |
+| **`.groupByDynamic`** | Dynamic time-series/numeric window grouping over tumbling, sliding, or rolling temporal intervals. |
+| **`.head`** | Returns the first `n` rows of the DataFrame (defaults to 5). |
+| **`.height`** | Getter returning the total number of rows in the DataFrame. |
+| **`.insertColumn`** | Inserts a new column at a specific zero-based index. |
+| **`.item`** | Returns an individual scalar cell value at the specified row and column coordinate. |
+| **`.iterColumns`** | Generator iterating over `{ name, values }` pairs for each column. |
+| **`.iterRows`** | Generator iterating over row record objects `{ [column]: value }`. |
+| **`.join`** | Relational joins (`"inner"`, `"left"`, `"right"`, `"outer"`, `"semi"`, `"anti"`, `"cross"`). |
+| **`.joinAsof`** | Inexact time-series / nearest-neighbor joins on sorted key columns. |
+| **`.joinWhere`** | Arbitrary non-equi joins evaluated over candidate cartesian pairs. |
+| **`.limit`** | Returns a subset of rows with optional `offset` and direction (`"start"` or `"end"`). |
+| **`.partitionBy`** | Splits DataFrame into sub-DataFrames (as array or dictionary) partitioned by column keys or expressions. |
+| **`.pivot`** | Reshapes tabular data from long to wide format based on unique column keys. |
+| **`.rename`** | Renames columns using a `{ oldName: newName }` dictionary. |
+| **`.reverse`** | Reverses the row ordering of the DataFrame. |
+| **`.schema`** | Getter returning the current column-to-`DataType` schema specification. |
+| **`.select`** | Projects and evaluates column expressions, selectors, regex patterns, or struct unnesting. |
+| **`.shape`** | Getter returning the `[height, width]` dimensions tuple. |
+| **`.slice`** | Slices a continuous range of rows by start and end indices. |
+| **`.sort`** | Multi-column sorting with `descending`, `nullsLast`, and custom comparator functions. |
+| **`.tail`** | Returns the last `n` rows of the DataFrame (defaults to 5). |
+| **`.toArray`** | Serializes the DataFrame into a two-dimensional row array (`any[][]`). |
+| **`.toDict`** | Serializes the DataFrame into a column-oriented dictionary `{ [col]: any[] }`. |
+| **`.toDicts`** | Serializes the DataFrame into an array of row objects `RowRecord[]`. |
+| **`.transpose`** | Swaps rows and columns into a transposed DataFrame. |
+| **`.unique`** | Returns distinct rows, optionally deduplicating based on a subset of columns. |
+| **`.unpivot`** | Melts wide columns into long format name-value pairs. |
+| **`.unstack`** | Unstacks multi-level grouped columns. |
+| **`.width`** | Getter returning the total number of columns in the DataFrame. |
+| **`.withColumns`** | Adds or updates columns in-place using expression evaluations. |
+| **`.withRowIndex`** | Inserts a zero-based or offset row index column into the DataFrame. |
+| **`.writeCsv`** | Serializes the DataFrame into RFC-4180 CSV string or writes to disk/stream. |
+| **`.writeJson`** | Serializes the DataFrame into JSON or NDJSON string or writes to disk/stream. |
 
 
 ---
@@ -420,143 +420,143 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 
 | Method | Description |
 | :--- | :--- |
-| **`abs`** | Computes element-wise absolute value. |
-| **`add`** | Element-wise addition with value or expression. |
-| **`all`** | Returns true if all elements evaluate to true (Kleene logic). |
-| **`allNull`** | Returns true if all elements in the expression are null or undefined. |
-| **`and`** | Logical AND with Kleene three-valued null logic. |
-| **`any`** | Returns true if at least one element evaluates to true. |
-| **`anyNull`** | Returns true if any element is null or undefined. |
-| **`arccos`** | Element-wise inverse cosine in radians. |
-| **`arccosh`** | Element-wise inverse hyperbolic cosine. |
-| **`arcsin`** | Element-wise inverse sine in radians. |
-| **`arcsinh`** | Element-wise inverse hyperbolic sine. |
-| **`arctan`** | Element-wise inverse tangent in radians. |
-| **`arctan2`** | Element-wise four-quadrant inverse tangent with second argument. |
-| **`arctanh`** | Element-wise inverse hyperbolic tangent. |
-| **`argMax`** | Returns the index of the first maximum value. |
-| **`argMin`** | Returns the index of the first minimum value. |
-| **`avg`** | Alias for mean(); computes the arithmetic mean. |
-| **`between`** | Evaluates if elements are within an inclusive or exclusive numeric/date range. |
-| **`bitwiseAnd`** | Bitwise AND (&) operation on integers. |
-| **`bitwiseOr`** | Bitwise OR (|) operation on integers. |
-| **`bitwiseXor`** | Bitwise XOR (^) operation on integers. |
-| **`cbrt`** | Computes element-wise cube root. |
-| **`ceil`** | Rounds numbers upward to the nearest integer. |
-| **`clip`** | Clamps values between a lower and upper boundary. |
-| **`copysign`** | Copies the sign of the magnitude argument to the target numbers. |
-| **`corr`** | Computes Pearson correlation coefficient with another column or expression. |
-| **`cos`** | Element-wise cosine in radians. |
-| **`cosh`** | Element-wise hyperbolic cosine. |
-| **`cot`** | Element-wise cotangent in radians. |
-| **`count`** | Counts non-null elements (or all elements with { includeNulls: true }). |
-| **`cov`** | Computes covariance with another column or expression. |
-| **`cumCount`** | Cumulative count of elements along the column. |
-| **`cumMax`** | Cumulative maximum value along the column. |
-| **`cumMin`** | Cumulative minimum value along the column. |
-| **`cumProd`** | Cumulative product of values along the column. |
-| **`cumSum`** | Cumulative running sum along the column. |
-| **`degrees`** | Converts angles from radians to degrees. |
-| **`denseRank`** | Computes dense rank window order without rank gaps. |
-| **`div`** | Element-wise division. |
-| **`dot`** | Computes dot product vector multiplication with another expression. |
-| **`entropy`** | Computes Shannon entropy (supports optional base and normalization). |
-| **`eq`** | Strict equality (==) with Kleene null propagation. |
-| **`eqMissing`** | Null-safe equality treating null and undefined as equivalent. |
-| **`ewmKurt`** | Computes exponentially weighted moving kurtosis. |
-| **`ewmMean`** | Computes exponentially weighted moving average/mean (supports `alpha`, `span`, `com`, `halfLife`, and `by`). |
-| **`ewmSkew`** | Computes exponentially weighted moving skewness. |
-| **`ewmStd`** | Computes exponentially weighted moving standard deviation. |
-| **`ewmSum`** | Computes exponentially weighted moving sum. |
-| **`ewmVar`** | Computes exponentially weighted moving variance. |
-| **`exp`** | Computes natural exponential (e^x). |
-| **`expm1`** | Computes e^x - 1 with high precision for values near zero. |
-| **`fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) with values or propagation strategies. |
-| **`fillNan`** | Replaces `NaN` values with scalars, expressions, or statistical strategies. |
-| **`fillNull`** | Fills null values with scalar values or forward/backward fill strategies. |
-| **`filter`** | Filters expression elements by a boolean predicate mask. |
-| **`first`** | Returns the first element of the expression or group. |
-| **`floor`** | Rounds numbers downward to the nearest integer. |
-| **`floordiv`** | Integer/floor division. |
-| **`ge`** | Greater than or equal to (>=) comparison. |
-| **`gt`** | Greater than (>) comparison. |
-| **`hasNulls`** | Returns true if column contains at least one null or undefined value. |
-| **`hypot`** | Computes hypotenuse sqrt(a^2 + b^2). |
-| **`implode`** | Aggregates elements into a single list/array column. |
-| **`isClose`** | Evaluates if numeric values are approximately equal within tolerances. |
-| **`isDuplicated`** | Returns boolean mask where true marks duplicated values. |
-| **`isFinite`** | Checks if number is finite (neither NaN, Infinity, nor -Infinity). |
-| **`isIn`** | Checks if value is present in a set or array of values. |
-| **`isInfinite`** | Checks if number is Infinity or -Infinity. |
-| **`isNDistinct`** | Matches the N-th distinct value in order (supports negative index). |
-| **`isNan`** | Checks if numeric value is NaN. |
-| **`isNotNan`** | Checks if numeric value is not NaN. |
-| **`isNotNull`** | Checks if value is neither null nor undefined. |
-| **`isNull`** | Checks if value is null or undefined. |
-| **`isUnique`** | Returns boolean mask where true marks unique (non-duplicated) values. |
-| **`kurtosis`** | Computes fourth standardized moment (peakedness/kurtosis). |
-| **`lag`** | Shifts values backward by offset within partition window. |
-| **`last`** | Returns the last element of the expression or group. |
-| **`le`** | Less than or equal to (<=) comparison. |
-| **`lead`** | Shifts values forward by offset within partition window. |
-| **`log`** | Computes logarithm with optional base (defaults to natural log). |
-| **`log1p`** | Computes natural log of (1 + x) for values near zero. |
-| **`lt`** | Less than (<) comparison. |
-| **`max`** | Returns the maximum non-null value. |
-| **`maxBy`** | Returns the value of this expression where another expression achieves maximum. |
-| **`mean`** | Computes the arithmetic average of non-null numbers. |
-| **`median`** | Computes the 50th percentile median value. |
-| **`min`** | Returns the minimum non-null value. |
-| **`minBy`** | Returns the value of this expression where another expression achieves minimum. |
-| **`mod`** | Modulo division remainder. |
-| **`mode`** | Computes the most frequently occurring value(s). |
-| **`mul`** | Element-wise multiplication. |
-| **`nUnique`** | Returns the count of distinct non-null values. |
-| **`nanMax`** | Returns maximum treating NaN values according to IEEE 754 rules. |
-| **`nanMin`** | Returns minimum treating NaN values according to IEEE 754 rules. |
-| **`ne`** | Strict inequality (!=) with Kleene null propagation. |
-| **`neMissing`** | Null-safe inequality. |
-| **`negate`** | Negates numeric values (-x). |
-| **`not`** | Logical NOT operator. |
-| **`notIn`** | Checks if value is not present in a set or array. |
-| **`nullCount`** | Returns the total count of null and undefined values. |
-| **`or`** | Logical OR with Kleene three-valued null logic. |
-| **`over`** | Evaluates the expression over an analytical partition window (grouping keys). |
-| **`pow`** | Computes exponentiation (x^y). |
-| **`product`** | Computes product of all non-null values. |
-| **`quantile`** | Computes quantile value at probability p (0 <= p <= 1). |
-| **`radians`** | Converts angles from degrees to radians. |
-| **`rand`** | Generates uniform pseudo-random values between 0 and 1. |
-| **`rank`** | Computes competition rank order (1, 2, 2, 4). |
-| **`reverse`** | Reverses the element order of the column. |
-| **`rolling`** | Evaluates custom function or expression over a sliding window. |
-| **`rollingMax`** | Computes rolling maximum over a sliding window. |
-| **`rollingMean`** | Computes rolling moving average over a sliding window. |
-| **`rollingMedian`** | Computes rolling median over a sliding window. |
-| **`rollingMin`** | Computes rolling minimum over a sliding window. |
-| **`rollingQuantile`** | Computes rolling quantile over a sliding window. |
-| **`rollingRank`** | Computes rolling rank over a sliding window. |
-| **`rollingStd`** | Computes rolling standard deviation over a sliding window. |
-| **`rollingSum`** | Computes rolling sum over a sliding window. |
-| **`round`** | Rounds numbers to specified decimal places. |
-| **`roundSigFigs`** | Rounds numbers to a specified number of significant figures. |
-| **`rowNumber`** | Computes sequential 1-based row index within partition window. |
-| **`shift`** | Shifts column values by a signed offset (filling empty cells with null). |
-| **`sign`** | Extracts sign of number (-1, 0, 1). |
-| **`sin`** | Element-wise sine in radians. |
-| **`sinh`** | Element-wise hyperbolic sine. |
-| **`skew`** | Computes third standardized moment (skewness asymmetry). |
-| **`spearmanCorr`** | Computes Spearman rank correlation coefficient. |
-| **`sqrt`** | Computes square root. |
-| **`std`** | Computes sample standard deviation. |
-| **`sub`** | Element-wise subtraction. |
-| **`sum`** | Computes sum of all non-null numeric values. |
-| **`tan`** | Element-wise tangent in radians. |
-| **`tanh`** | Element-wise hyperbolic tangent. |
-| **`trunc`** | Truncates fractional parts toward zero. |
-| **`variance`** | Computes sample variance. |
-| **`wAvg`** | Computes weighted average using weight expression. |
-| **`xor`** | Logical exclusive OR (XOR). |
+| **`.abs`** | Computes element-wise absolute value. |
+| **`.add`** | Element-wise addition with value or expression. |
+| **`.all`** | Returns true if all elements evaluate to true (Kleene logic). |
+| **`.allNull`** | Returns true if all elements in the expression are null or undefined. |
+| **`.and`** | Logical AND with Kleene three-valued null logic. |
+| **`.any`** | Returns true if at least one element evaluates to true. |
+| **`.anyNull`** | Returns true if any element is null or undefined. |
+| **`.arccos`** | Element-wise inverse cosine in radians. |
+| **`.arccosh`** | Element-wise inverse hyperbolic cosine. |
+| **`.arcsin`** | Element-wise inverse sine in radians. |
+| **`.arcsinh`** | Element-wise inverse hyperbolic sine. |
+| **`.arctan`** | Element-wise inverse tangent in radians. |
+| **`.arctan2`** | Element-wise four-quadrant inverse tangent with second argument. |
+| **`.arctanh`** | Element-wise inverse hyperbolic tangent. |
+| **`.argMax`** | Returns the index of the first maximum value. |
+| **`.argMin`** | Returns the index of the first minimum value. |
+| **`.avg`** | Alias for mean(); computes the arithmetic mean. |
+| **`.between`** | Evaluates if elements are within an inclusive or exclusive numeric/date range. |
+| **`.bitwiseAnd`** | Bitwise AND (&) operation on integers. |
+| **`.bitwiseOr`** | Bitwise OR (|) operation on integers. |
+| **`.bitwiseXor`** | Bitwise XOR (^) operation on integers. |
+| **`.cbrt`** | Computes element-wise cube root. |
+| **`.ceil`** | Rounds numbers upward to the nearest integer. |
+| **`.clip`** | Clamps values between a lower and upper boundary. |
+| **`.copysign`** | Copies the sign of the magnitude argument to the target numbers. |
+| **`.corr`** | Computes Pearson correlation coefficient with another column or expression. |
+| **`.cos`** | Element-wise cosine in radians. |
+| **`.cosh`** | Element-wise hyperbolic cosine. |
+| **`.cot`** | Element-wise cotangent in radians. |
+| **`.count`** | Counts non-null elements (or all elements with { includeNulls: true }). |
+| **`.cov`** | Computes covariance with another column or expression. |
+| **`.cumCount`** | Cumulative count of elements along the column. |
+| **`.cumMax`** | Cumulative maximum value along the column. |
+| **`.cumMin`** | Cumulative minimum value along the column. |
+| **`.cumProd`** | Cumulative product of values along the column. |
+| **`.cumSum`** | Cumulative running sum along the column. |
+| **`.degrees`** | Converts angles from radians to degrees. |
+| **`.denseRank`** | Computes dense rank window order without rank gaps. |
+| **`.div`** | Element-wise division. |
+| **`.dot`** | Computes dot product vector multiplication with another expression. |
+| **`.entropy`** | Computes Shannon entropy (supports optional base and normalization). |
+| **`.eq`** | Strict equality (==) with Kleene null propagation. |
+| **`.eqMissing`** | Null-safe equality treating null and undefined as equivalent. |
+| **`.ewmKurt`** | Computes exponentially weighted moving kurtosis. |
+| **`.ewmMean`** | Computes exponentially weighted moving average/mean (supports `alpha`, `span`, `com`, `halfLife`, and `by`). |
+| **`.ewmSkew`** | Computes exponentially weighted moving skewness. |
+| **`.ewmStd`** | Computes exponentially weighted moving standard deviation. |
+| **`.ewmSum`** | Computes exponentially weighted moving sum. |
+| **`.ewmVar`** | Computes exponentially weighted moving variance. |
+| **`.exp`** | Computes natural exponential (e^x). |
+| **`.expm1`** | Computes e^x - 1 with high precision for values near zero. |
+| **`.fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) with values or propagation strategies. |
+| **`.fillNan`** | Replaces `NaN` values with scalars, expressions, or statistical strategies. |
+| **`.fillNull`** | Fills null values with scalar values or forward/backward fill strategies. |
+| **`.filter`** | Filters expression elements by a boolean predicate mask. |
+| **`.first`** | Returns the first element of the expression or group. |
+| **`.floor`** | Rounds numbers downward to the nearest integer. |
+| **`.floordiv`** | Integer/floor division. |
+| **`.ge`** | Greater than or equal to (>=) comparison. |
+| **`.gt`** | Greater than (>) comparison. |
+| **`.hasNulls`** | Returns true if column contains at least one null or undefined value. |
+| **`.hypot`** | Computes hypotenuse sqrt(a^2 + b^2). |
+| **`.implode`** | Aggregates elements into a single list/array column. |
+| **`.isClose`** | Evaluates if numeric values are approximately equal within tolerances. |
+| **`.isDuplicated`** | Returns boolean mask where true marks duplicated values. |
+| **`.isFinite`** | Checks if number is finite (neither NaN, Infinity, nor -Infinity). |
+| **`.isIn`** | Checks if value is present in a set or array of values. |
+| **`.isInfinite`** | Checks if number is Infinity or -Infinity. |
+| **`.isNDistinct`** | Matches the N-th distinct value in order (supports negative index). |
+| **`.isNan`** | Checks if numeric value is NaN. |
+| **`.isNotNan`** | Checks if numeric value is not NaN. |
+| **`.isNotNull`** | Checks if value is neither null nor undefined. |
+| **`.isNull`** | Checks if value is null or undefined. |
+| **`.isUnique`** | Returns boolean mask where true marks unique (non-duplicated) values. |
+| **`.kurtosis`** | Computes fourth standardized moment (peakedness/kurtosis). |
+| **`.lag`** | Shifts values backward by offset within partition window. |
+| **`.last`** | Returns the last element of the expression or group. |
+| **`.le`** | Less than or equal to (<=) comparison. |
+| **`.lead`** | Shifts values forward by offset within partition window. |
+| **`.log`** | Computes logarithm with optional base (defaults to natural log). |
+| **`.log1p`** | Computes natural log of (1 + x) for values near zero. |
+| **`.lt`** | Less than (<) comparison. |
+| **`.max`** | Returns the maximum non-null value. |
+| **`.maxBy`** | Returns the value of this expression where another expression achieves maximum. |
+| **`.mean`** | Computes the arithmetic average of non-null numbers. |
+| **`.median`** | Computes the 50th percentile median value. |
+| **`.min`** | Returns the minimum non-null value. |
+| **`.minBy`** | Returns the value of this expression where another expression achieves minimum. |
+| **`.mod`** | Modulo division remainder. |
+| **`.mode`** | Computes the most frequently occurring value(s). |
+| **`.mul`** | Element-wise multiplication. |
+| **`.nUnique`** | Returns the count of distinct non-null values. |
+| **`.nanMax`** | Returns maximum treating NaN values according to IEEE 754 rules. |
+| **`.nanMin`** | Returns minimum treating NaN values according to IEEE 754 rules. |
+| **`.ne`** | Strict inequality (!=) with Kleene null propagation. |
+| **`.neMissing`** | Null-safe inequality. |
+| **`.negate`** | Negates numeric values (-x). |
+| **`.not`** | Logical NOT operator. |
+| **`.notIn`** | Checks if value is not present in a set or array. |
+| **`.nullCount`** | Returns the total count of null and undefined values. |
+| **`.or`** | Logical OR with Kleene three-valued null logic. |
+| **`.over`** | Evaluates the expression over an analytical partition window (grouping keys). |
+| **`.pow`** | Computes exponentiation (x^y). |
+| **`.product`** | Computes product of all non-null values. |
+| **`.quantile`** | Computes quantile value at probability p (0 <= p <= 1). |
+| **`.radians`** | Converts angles from degrees to radians. |
+| **`.rand`** | Generates uniform pseudo-random values between 0 and 1. |
+| **`.rank`** | Computes competition rank order (1, 2, 2, 4). |
+| **`.reverse`** | Reverses the element order of the column. |
+| **`.rolling`** | Evaluates custom function or expression over a sliding window. |
+| **`.rollingMax`** | Computes rolling maximum over a sliding window. |
+| **`.rollingMean`** | Computes rolling moving average over a sliding window. |
+| **`.rollingMedian`** | Computes rolling median over a sliding window. |
+| **`.rollingMin`** | Computes rolling minimum over a sliding window. |
+| **`.rollingQuantile`** | Computes rolling quantile over a sliding window. |
+| **`.rollingRank`** | Computes rolling rank over a sliding window. |
+| **`.rollingStd`** | Computes rolling standard deviation over a sliding window. |
+| **`.rollingSum`** | Computes rolling sum over a sliding window. |
+| **`.round`** | Rounds numbers to specified decimal places. |
+| **`.roundSigFigs`** | Rounds numbers to a specified number of significant figures. |
+| **`.rowNumber`** | Computes sequential 1-based row index within partition window. |
+| **`.shift`** | Shifts column values by a signed offset (filling empty cells with null). |
+| **`.sign`** | Extracts sign of number (-1, 0, 1). |
+| **`.sin`** | Element-wise sine in radians. |
+| **`.sinh`** | Element-wise hyperbolic sine. |
+| **`.skew`** | Computes third standardized moment (skewness asymmetry). |
+| **`.spearmanCorr`** | Computes Spearman rank correlation coefficient. |
+| **`.sqrt`** | Computes square root. |
+| **`.std`** | Computes sample standard deviation. |
+| **`.sub`** | Element-wise subtraction. |
+| **`.sum`** | Computes sum of all non-null numeric values. |
+| **`.tan`** | Element-wise tangent in radians. |
+| **`.tanh`** | Element-wise hyperbolic tangent. |
+| **`.trunc`** | Truncates fractional parts toward zero. |
+| **`.variance`** | Computes sample variance. |
+| **`.wAvg`** | Computes weighted average using weight expression. |
+| **`.xor`** | Logical exclusive OR (XOR). |
 
 ### String Namespace (`.str`)
 
@@ -664,7 +664,7 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`.dt.weekday`** | Extracts day of week (1 = Monday, 7 = Sunday). |
 | **`.dt.year`** | Extracts calendar year. |
 
-### Array/List Namespace (`.arr`)
+### Array Namespace (`.arr`)
 
 | Method | Description |
 | :--- | :--- |
@@ -705,7 +705,7 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`.arr.unique`** | Deduplicates elements within each list row. |
 | **`.arr.variance`** | Computes sample variance of elements in each list row. |
 
-### Struct/Object Namespace (`.struct`)
+### Struct Namespace (`.struct`)
 
 | Method | Description |
 | :--- | :--- |
