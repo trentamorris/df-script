@@ -333,22 +333,22 @@ The `$df` entry point provides top-level functions to create DataFrames, constru
 
 | Function | Description |
 | :--- | :--- |
-| **`$df.all`** | Selects all columns in the DataFrame. |
-| **`$df.coalesce`** | Returns the first non-null value among columns or expressions. |
-| **`$df.col`** | Creates a column reference expression by name (`"a"`), names array (`["a", "b"]`), RegExp (`/^user_/`), or DataType selector (`$df.Float64`). |
-| **`$df.concat`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
-| **`$df.data`** | Instantiates a new `DataFrame` from row objects, column arrays, or typed matrices. |
-| **`$df.duration`** | Constructs a `Duration` expression from component options (`{ days: 1, hours: 12 }`) or duration strings (`"1d 12h 30m"`). |
-| **`$df.element`** | References the current array element within an `.arr.eval(...)` expression. |
-| **`$df.exclude`** | Matches all columns except the specified ones. |
-| **`$df.horizontal`** | Combines multiple columns/expressions horizontally per row for row-wise evaluation. |
-| **`$df.implode`** | Aggregates a column's rows or grouped values into a list. |
-| **`$df.lit`** | Explicitly wraps a raw scalar value into a literal expression. |
-| **`$df.readCsv`** | Reads CSV content into a new `DataFrame` with automatic schema inference. |
-| **`$df.readJson`** | Reads JSON/NDJSON content into a new `DataFrame`. |
-| **`$df.seqRange`** | Generates a sequence range of values. |
-| **`$df.struct`** | Constructs a nested struct object expression from named expressions or sibling columns. |
-| **`$df.when`** | Constructs a conditional `CASE WHEN` expression chain. |
+| **`$df.all`** | Selects all columns. |
+| **`$df.coalesce`** | Returns the first non-null value among expressions. |
+| **`$df.col`** | Creates a column reference expression. |
+| **`$df.concat`** | Concatenates multiple DataFrames. |
+| **`$df.data`** | Creates a new DataFrame from rows, columns, or matrices. |
+| **`$df.duration`** | Creates a duration expression. |
+| **`$df.element`** | References the current array element in `.arr.eval()`. |
+| **`$df.exclude`** | Selects all columns except the specified ones. |
+| **`$df.horizontal`** | Combines columns or expressions horizontally per row. |
+| **`$df.implode`** | Collects values into a list column. |
+| **`$df.lit`** | Wraps a raw scalar value into a literal expression. |
+| **`$df.readCsv`** | Reads CSV data into a DataFrame. |
+| **`$df.readJson`** | Reads JSON or NDJSON data into a DataFrame. |
+| **`$df.seqRange`** | Generates a range sequence. |
+| **`$df.struct`** | Constructs a struct expression. |
+| **`$df.when`** | Starts a conditional `when / then / otherwise` expression. |
 
 
 ---
@@ -360,53 +360,53 @@ All operations and getters on `DataFrame` in alphabetical order:
 
 | Method / Property | Description |
 | :--- | :--- |
-| **`.cast`** | Casts DataFrame columns to target data types using a schema mapping. |
-| **`.clone`** | Deep-copies the DataFrame, duplicating all underlying columnar memory buffers and schema. |
-| **`.columns`** | Getter returning an array of all column names in the DataFrame. |
-| **`.concat`** | Concatenates multiple DataFrames along `"vertical"`, `"horizontal"`, or `"diagonal"` axes. |
-| **`.drop`** | Drops one or more specified columns from the DataFrame. |
-| **`.dropNulls`** | Drops rows containing null or undefined values across all or specified columns. |
-| **`.dtypes`** | Getter returning a dictionary of column names to their registered `DataType` instances. |
-| **`.equals`** | Deep equality comparison with tolerance support for float columns. |
-| **`.explode`** | Unnests list-like columns into multiple rows, replicating other columns per list element. |
-| **`.fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) across columns with strategies or values. |
-| **`.fillNan`** | Replaces `NaN` values across numeric columns with scalars, expressions, or statistical strategies. |
-| **`.fillNull`** | Fills null values with strategies (`"forward"`, `"backward"`, `"mean"`, `"min"`, `"max"`, or literal values). |
-| **`.filter`** | Filters rows where all predicate expressions evaluate to `true`. |
-| **`.groupBy`** | Groups data by one or more columns, returning a `GroupedData` object for aggregations. |
-| **`.groupByDynamic`** | Dynamic time-series/numeric window grouping over tumbling, sliding, or rolling temporal intervals. |
-| **`.head`** | Returns the first `n` rows of the DataFrame (defaults to 5). |
-| **`.height`** | Getter returning the total number of rows in the DataFrame. |
-| **`.insertColumn`** | Inserts a new column at a specific zero-based index. |
-| **`.item`** | Returns an individual scalar cell value at the specified row and column coordinate. |
-| **`.iterColumns`** | Generator iterating over `{ name, values }` pairs for each column. |
-| **`.iterRows`** | Generator iterating over row record objects `{ [column]: value }`. |
-| **`.join`** | Relational joins (`"inner"`, `"left"`, `"right"`, `"outer"`, `"semi"`, `"anti"`, `"cross"`). |
-| **`.joinAsof`** | Inexact time-series / nearest-neighbor joins on sorted key columns. |
-| **`.joinWhere`** | Arbitrary non-equi joins evaluated over candidate cartesian pairs. |
-| **`.limit`** | Returns a subset of rows with optional `offset` and direction (`"start"` or `"end"`). |
-| **`.partitionBy`** | Splits DataFrame into sub-DataFrames (as array or dictionary) partitioned by column keys or expressions. |
-| **`.pivot`** | Reshapes tabular data from long to wide format based on unique column keys. |
-| **`.rename`** | Renames columns using a `{ oldName: newName }` dictionary. |
-| **`.reverse`** | Reverses the row ordering of the DataFrame. |
-| **`.schema`** | Getter returning the current column-to-`DataType` schema specification. |
-| **`.select`** | Projects and evaluates column expressions, selectors, regex patterns, or struct unnesting. |
-| **`.shape`** | Getter returning the `[height, width]` dimensions tuple. |
-| **`.slice`** | Slices a continuous range of rows by start and end indices. |
-| **`.sort`** | Multi-column sorting with `descending`, `nullsLast`, and custom comparator functions. |
-| **`.tail`** | Returns the last `n` rows of the DataFrame (defaults to 5). |
-| **`.toArray`** | Serializes the DataFrame into a two-dimensional row array (`any[][]`). |
-| **`.toDict`** | Serializes the DataFrame into a column-oriented dictionary `{ [col]: any[] }`. |
-| **`.toDicts`** | Serializes the DataFrame into an array of row objects `RowRecord[]`. |
-| **`.transpose`** | Swaps rows and columns into a transposed DataFrame. |
-| **`.unique`** | Returns distinct rows, optionally deduplicating based on a subset of columns. |
-| **`.unpivot`** | Melts wide columns into long format name-value pairs. |
+| **`.cast`** | Casts columns to specified data types. |
+| **`.clone`** | Creates a deep copy of the DataFrame. |
+| **`.columns`** | Array of column names. |
+| **`.concat`** | Concatenates multiple DataFrames. |
+| **`.drop`** | Drops specified columns. |
+| **`.dropNulls`** | Drops rows containing null or undefined values. |
+| **`.dtypes`** | Dictionary of column data types. |
+| **`.equals`** | Checks deep equality between two DataFrames. |
+| **`.explode`** | Unnests list columns into multiple rows. |
+| **`.fill`** | Fills targeted values across columns. |
+| **`.fillNan`** | Fills `NaN` values across numeric columns. |
+| **`.fillNull`** | Fills null values with scalar values or strategies. |
+| **`.filter`** | Filters rows matching predicate expressions. |
+| **`.groupBy`** | Groups rows for aggregations. |
+| **`.groupByDynamic`** | Groups rows over dynamic time-series or numeric windows. |
+| **`.head`** | Returns the first `n` rows (defaults to 5). |
+| **`.height`** | Total row count. |
+| **`.insertColumn`** | Inserts a new column at a given index. |
+| **`.item`** | Returns a scalar cell value at a row and column. |
+| **`.iterColumns`** | Iterates over `{ name, values }` pairs for each column. |
+| **`.iterRows`** | Iterates over row objects. |
+| **`.join`** | Joins with another DataFrame. |
+| **`.joinAsof`** | Performs an as-of join on sorted key columns. |
+| **`.joinWhere`** | Performs a join based on arbitrary predicate conditions. |
+| **`.limit`** | Returns a subset of rows with optional offset. |
+| **`.partitionBy`** | Splits DataFrame into sub-DataFrames by group keys. |
+| **`.pivot`** | Reshapes data from long to wide format. |
+| **`.rename`** | Renames columns using a name mapping. |
+| **`.reverse`** | Reverses row order. |
+| **`.schema`** | Column-to-DataType schema mapping. |
+| **`.select`** | Projects and evaluates column expressions. |
+| **`.shape`** | Tuple of `[height, width]` dimensions. |
+| **`.slice`** | Slices a range of rows. |
+| **`.sort`** | Sorts rows by one or more columns or expressions. |
+| **`.tail`** | Returns the last `n` rows (defaults to 5). |
+| **`.toArray`** | Converts DataFrame to a 2D array of rows. |
+| **`.toDict`** | Converts DataFrame to a column-oriented object. |
+| **`.toDicts`** | Converts DataFrame to an array of row objects. |
+| **`.transpose`** | Transposes rows and columns. |
+| **`.unique`** | Returns distinct rows. |
+| **`.unpivot`** | Reshapes data from wide to long format. |
 | **`.unstack`** | Unstacks multi-level grouped columns. |
-| **`.width`** | Getter returning the total number of columns in the DataFrame. |
-| **`.withColumns`** | Adds or updates columns in-place using expression evaluations. |
-| **`.withRowIndex`** | Inserts a zero-based or offset row index column into the DataFrame. |
-| **`.writeCsv`** | Serializes the DataFrame into RFC-4180 CSV string or writes to disk/stream. |
-| **`.writeJson`** | Serializes the DataFrame into JSON or NDJSON string or writes to disk/stream. |
+| **`.width`** | Total column count. |
+| **`.withColumns`** | Adds or updates columns using expressions. |
+| **`.withRowIndex`** | Inserts a row index column. |
+| **`.writeCsv`** | Serializes or writes DataFrame to CSV. |
+| **`.writeJson`** | Serializes or writes DataFrame to JSON / NDJSON. |
 
 
 ---
@@ -420,246 +420,246 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 
 | Method | Description |
 | :--- | :--- |
-| **`.abs`** | Computes element-wise absolute value. |
-| **`.add`** | Element-wise addition with value or expression. |
-| **`.all`** | Returns true if all elements evaluate to true (Kleene logic). |
-| **`.allNull`** | Returns true if all elements in the expression are null or undefined. |
-| **`.and`** | Logical AND with Kleene three-valued null logic. |
+| **`.abs`** | Computes absolute value. |
+| **`.add`** | Addition with value or expression. |
+| **`.all`** | Returns true if all elements evaluate to true. |
+| **`.allNull`** | Returns true if all elements are null or undefined. |
+| **`.and`** | Logical AND. |
 | **`.any`** | Returns true if at least one element evaluates to true. |
 | **`.anyNull`** | Returns true if any element is null or undefined. |
-| **`.arccos`** | Element-wise inverse cosine in radians. |
-| **`.arccosh`** | Element-wise inverse hyperbolic cosine. |
-| **`.arcsin`** | Element-wise inverse sine in radians. |
-| **`.arcsinh`** | Element-wise inverse hyperbolic sine. |
-| **`.arctan`** | Element-wise inverse tangent in radians. |
-| **`.arctan2`** | Element-wise four-quadrant inverse tangent with second argument. |
-| **`.arctanh`** | Element-wise inverse hyperbolic tangent. |
-| **`.argMax`** | Returns the index of the first maximum value. |
-| **`.argMin`** | Returns the index of the first minimum value. |
-| **`.avg`** | Alias for mean(); computes the arithmetic mean. |
-| **`.between`** | Evaluates if elements are within an inclusive or exclusive numeric/date range. |
-| **`.bitwiseAnd`** | Bitwise AND (&) operation on integers. |
-| **`.bitwiseOr`** | Bitwise OR (|) operation on integers. |
-| **`.bitwiseXor`** | Bitwise XOR (^) operation on integers. |
-| **`.cbrt`** | Computes element-wise cube root. |
-| **`.ceil`** | Rounds numbers upward to the nearest integer. |
-| **`.clip`** | Clamps values between a lower and upper boundary. |
-| **`.copysign`** | Copies the sign of the magnitude argument to the target numbers. |
-| **`.corr`** | Computes Pearson correlation coefficient with another column or expression. |
-| **`.cos`** | Element-wise cosine in radians. |
-| **`.cosh`** | Element-wise hyperbolic cosine. |
-| **`.cot`** | Element-wise cotangent in radians. |
-| **`.count`** | Counts non-null elements (or all elements with { includeNulls: true }). |
-| **`.cov`** | Computes covariance with another column or expression. |
-| **`.cumCount`** | Cumulative count of elements along the column. |
-| **`.cumMax`** | Cumulative maximum value along the column. |
-| **`.cumMin`** | Cumulative minimum value along the column. |
-| **`.cumProd`** | Cumulative product of values along the column. |
-| **`.cumSum`** | Cumulative running sum along the column. |
-| **`.degrees`** | Converts angles from radians to degrees. |
-| **`.denseRank`** | Computes dense rank window order without rank gaps. |
-| **`.div`** | Element-wise division. |
-| **`.dot`** | Computes dot product vector multiplication with another expression. |
-| **`.entropy`** | Computes Shannon entropy (supports optional base and normalization). |
-| **`.eq`** | Strict equality (==) with Kleene null propagation. |
-| **`.eqMissing`** | Null-safe equality treating null and undefined as equivalent. |
-| **`.ewmKurt`** | Computes exponentially weighted moving kurtosis. |
-| **`.ewmMean`** | Computes exponentially weighted moving average/mean (supports `alpha`, `span`, `com`, `halfLife`, and `by`). |
-| **`.ewmSkew`** | Computes exponentially weighted moving skewness. |
-| **`.ewmStd`** | Computes exponentially weighted moving standard deviation. |
-| **`.ewmSum`** | Computes exponentially weighted moving sum. |
-| **`.ewmVar`** | Computes exponentially weighted moving variance. |
-| **`.exp`** | Computes natural exponential (e^x). |
-| **`.expm1`** | Computes e^x - 1 with high precision for values near zero. |
-| **`.fill`** | Replaces targeted values (`"null"`, `"nan"`, `"all"`, or expressions) with values or propagation strategies. |
-| **`.fillNan`** | Replaces `NaN` values with scalars, expressions, or statistical strategies. |
-| **`.fillNull`** | Fills null values with scalar values or forward/backward fill strategies. |
-| **`.filter`** | Filters expression elements by a boolean predicate mask. |
-| **`.first`** | Returns the first element of the expression or group. |
-| **`.floor`** | Rounds numbers downward to the nearest integer. |
-| **`.floordiv`** | Integer/floor division. |
-| **`.ge`** | Greater than or equal to (>=) comparison. |
-| **`.gt`** | Greater than (>) comparison. |
-| **`.hasNulls`** | Returns true if column contains at least one null or undefined value. |
-| **`.hypot`** | Computes hypotenuse sqrt(a^2 + b^2). |
-| **`.implode`** | Aggregates elements into a single list/array column. |
-| **`.isClose`** | Evaluates if numeric values are approximately equal within tolerances. |
-| **`.isDuplicated`** | Returns boolean mask where true marks duplicated values. |
-| **`.isFinite`** | Checks if number is finite (neither NaN, Infinity, nor -Infinity). |
-| **`.isIn`** | Checks if value is present in a set or array of values. |
-| **`.isInfinite`** | Checks if number is Infinity or -Infinity. |
-| **`.isNDistinct`** | Matches the N-th distinct value in order (supports negative index). |
-| **`.isNan`** | Checks if numeric value is NaN. |
-| **`.isNotNan`** | Checks if numeric value is not NaN. |
-| **`.isNotNull`** | Checks if value is neither null nor undefined. |
-| **`.isNull`** | Checks if value is null or undefined. |
-| **`.isUnique`** | Returns boolean mask where true marks unique (non-duplicated) values. |
-| **`.kurtosis`** | Computes fourth standardized moment (peakedness/kurtosis). |
-| **`.lag`** | Shifts values backward by offset within partition window. |
-| **`.last`** | Returns the last element of the expression or group. |
-| **`.le`** | Less than or equal to (<=) comparison. |
-| **`.lead`** | Shifts values forward by offset within partition window. |
-| **`.log`** | Computes logarithm with optional base (defaults to natural log). |
-| **`.log1p`** | Computes natural log of (1 + x) for values near zero. |
-| **`.lt`** | Less than (<) comparison. |
-| **`.max`** | Returns the maximum non-null value. |
-| **`.maxBy`** | Returns the value of this expression where another expression achieves maximum. |
-| **`.mean`** | Computes the arithmetic average of non-null numbers. |
-| **`.median`** | Computes the 50th percentile median value. |
-| **`.min`** | Returns the minimum non-null value. |
-| **`.minBy`** | Returns the value of this expression where another expression achieves minimum. |
-| **`.mod`** | Modulo division remainder. |
-| **`.mode`** | Computes the most frequently occurring value(s). |
-| **`.mul`** | Element-wise multiplication. |
-| **`.nUnique`** | Returns the count of distinct non-null values. |
-| **`.nanMax`** | Returns maximum treating NaN values according to IEEE 754 rules. |
-| **`.nanMin`** | Returns minimum treating NaN values according to IEEE 754 rules. |
-| **`.ne`** | Strict inequality (!=) with Kleene null propagation. |
-| **`.neMissing`** | Null-safe inequality. |
-| **`.negate`** | Negates numeric values (-x). |
-| **`.not`** | Logical NOT operator. |
-| **`.notIn`** | Checks if value is not present in a set or array. |
-| **`.nullCount`** | Returns the total count of null and undefined values. |
-| **`.or`** | Logical OR with Kleene three-valued null logic. |
-| **`.over`** | Evaluates the expression over an analytical partition window (grouping keys). |
-| **`.pow`** | Computes exponentiation (x^y). |
-| **`.product`** | Computes product of all non-null values. |
-| **`.quantile`** | Computes quantile value at probability p (0 <= p <= 1). |
-| **`.radians`** | Converts angles from degrees to radians. |
-| **`.rand`** | Generates uniform pseudo-random values between 0 and 1. |
-| **`.rank`** | Computes competition rank order (1, 2, 2, 4). |
-| **`.reverse`** | Reverses the element order of the column. |
-| **`.rolling`** | Evaluates custom function or expression over a sliding window. |
-| **`.rollingMax`** | Computes rolling maximum over a sliding window. |
-| **`.rollingMean`** | Computes rolling moving average over a sliding window. |
-| **`.rollingMedian`** | Computes rolling median over a sliding window. |
-| **`.rollingMin`** | Computes rolling minimum over a sliding window. |
-| **`.rollingQuantile`** | Computes rolling quantile over a sliding window. |
-| **`.rollingRank`** | Computes rolling rank over a sliding window. |
-| **`.rollingStd`** | Computes rolling standard deviation over a sliding window. |
-| **`.rollingSum`** | Computes rolling sum over a sliding window. |
-| **`.round`** | Rounds numbers to specified decimal places. |
-| **`.roundSigFigs`** | Rounds numbers to a specified number of significant figures. |
-| **`.rowNumber`** | Computes sequential 1-based row index within partition window. |
-| **`.shift`** | Shifts column values by a signed offset (filling empty cells with null). |
-| **`.sign`** | Extracts sign of number (-1, 0, 1). |
-| **`.sin`** | Element-wise sine in radians. |
-| **`.sinh`** | Element-wise hyperbolic sine. |
-| **`.skew`** | Computes third standardized moment (skewness asymmetry). |
-| **`.spearmanCorr`** | Computes Spearman rank correlation coefficient. |
+| **`.arccos`** | Inverse cosine in radians. |
+| **`.arccosh`** | Inverse hyperbolic cosine. |
+| **`.arcsin`** | Inverse sine in radians. |
+| **`.arcsinh`** | Inverse hyperbolic sine. |
+| **`.arctan`** | Inverse tangent in radians. |
+| **`.arctan2`** | Four-quadrant inverse tangent. |
+| **`.arctanh`** | Inverse hyperbolic tangent. |
+| **`.argMax`** | Index of the first maximum value. |
+| **`.argMin`** | Index of the first minimum value. |
+| **`.avg`** | Computes arithmetic mean (alias for `.mean`). |
+| **`.between`** | Checks if values fall within a range. |
+| **`.bitwiseAnd`** | Bitwise AND (`&`). |
+| **`.bitwiseOr`** | Bitwise OR (`\|`). |
+| **`.bitwiseXor`** | Bitwise XOR (`^`). |
+| **`.cbrt`** | Computes cube root. |
+| **`.ceil`** | Rounds upward to nearest integer. |
+| **`.clip`** | Clamps values between lower and upper bounds. |
+| **`.copysign`** | Copies the sign of another value or expression. |
+| **`.corr`** | Pearson correlation coefficient. |
+| **`.cos`** | Cosine in radians. |
+| **`.cosh`** | Hyperbolic cosine. |
+| **`.cot`** | Cotangent in radians. |
+| **`.count`** | Counts non-null elements. |
+| **`.cov`** | Covariance with another column or expression. |
+| **`.cumCount`** | Cumulative count of elements. |
+| **`.cumMax`** | Cumulative maximum value. |
+| **`.cumMin`** | Cumulative minimum value. |
+| **`.cumProd`** | Cumulative product. |
+| **`.cumSum`** | Cumulative running sum. |
+| **`.degrees`** | Converts radians to degrees. |
+| **`.denseRank`** | Computes dense rank without gaps. |
+| **`.div`** | Division. |
+| **`.dot`** | Computes dot product. |
+| **`.entropy`** | Computes Shannon entropy. |
+| **`.eq`** | Equality comparison (`==`). |
+| **`.eqMissing`** | Null-safe equality comparison. |
+| **`.ewmKurt`** | Exponentially weighted moving kurtosis. |
+| **`.ewmMean`** | Exponentially weighted moving mean. |
+| **`.ewmSkew`** | Exponentially weighted moving skewness. |
+| **`.ewmStd`** | Exponentially weighted moving standard deviation. |
+| **`.ewmSum`** | Exponentially weighted moving sum. |
+| **`.ewmVar`** | Exponentially weighted moving variance. |
+| **`.exp`** | Exponential (`e^x`). |
+| **`.expm1`** | Computes `e^x - 1`. |
+| **`.fill`** | Fills targeted values with values or strategies. |
+| **`.fillNan`** | Fills `NaN` values. |
+| **`.fillNull`** | Fills null values with scalar values or strategies. |
+| **`.filter`** | Filters elements by boolean predicate. |
+| **`.first`** | Returns first element. |
+| **`.floor`** | Rounds downward to nearest integer. |
+| **`.floordiv`** | Integer / floor division. |
+| **`.ge`** | Greater than or equal (`>=`). |
+| **`.gt`** | Greater than (`>`). |
+| **`.hasNulls`** | Checks if column contains any null values. |
+| **`.hypot`** | Computes hypotenuse `sqrt(a^2 + b^2)`. |
+| **`.implode`** | Collects elements into a single list column. |
+| **`.isClose`** | Checks approximate numeric equality. |
+| **`.isDuplicated`** | Boolean mask of duplicated values. |
+| **`.isFinite`** | Checks if numbers are finite. |
+| **`.isIn`** | Checks if values exist in a set or array. |
+| **`.isInfinite`** | Checks if numbers are infinite. |
+| **`.isNDistinct`** | Matches the N-th distinct value. |
+| **`.isNan`** | Checks if values are `NaN`. |
+| **`.isNotNan`** | Checks if values are not `NaN`. |
+| **`.isNotNull`** | Checks if values are neither null nor undefined. |
+| **`.isNull`** | Checks if values are null or undefined. |
+| **`.isUnique`** | Boolean mask of unique values. |
+| **`.kurtosis`** | Computes kurtosis. |
+| **`.lag`** | Shifts values backward by offset. |
+| **`.last`** | Returns last element. |
+| **`.le`** | Less than or equal (`<=`). |
+| **`.lead`** | Shifts values forward by offset. |
+| **`.log`** | Computes logarithm. |
+| **`.log1p`** | Computes `ln(1 + x)`. |
+| **`.lt`** | Less than (`<`). |
+| **`.max`** | Maximum value. |
+| **`.maxBy`** | Value where another expression is maximized. |
+| **`.mean`** | Arithmetic mean. |
+| **`.median`** | 50th percentile median. |
+| **`.min`** | Minimum value. |
+| **`.minBy`** | Value where another expression is minimized. |
+| **`.mod`** | Modulo remainder. |
+| **`.mode`** | Most frequently occurring value(s). |
+| **`.mul`** | Multiplication. |
+| **`.nUnique`** | Count of distinct non-null values. |
+| **`.nanMax`** | Maximum treating `NaN` by IEEE 754 rules. |
+| **`.nanMin`** | Minimum treating `NaN` by IEEE 754 rules. |
+| **`.ne`** | Inequality comparison (`!=`). |
+| **`.neMissing`** | Null-safe inequality comparison. |
+| **`.negate`** | Negates values (`-x`). |
+| **`.not`** | Logical NOT. |
+| **`.notIn`** | Checks if values are not in a set or array. |
+| **`.nullCount`** | Total count of null and undefined values. |
+| **`.or`** | Logical OR. |
+| **`.over`** | Evaluates expression over a partition window. |
+| **`.pow`** | Exponentiation (`x^y`). |
+| **`.product`** | Product of all non-null values. |
+| **`.quantile`** | Quantile value at probability `p`. |
+| **`.radians`** | Converts degrees to radians. |
+| **`.rand`** | Generates uniform random numbers between 0 and 1. |
+| **`.rank`** | Computes rank order. |
+| **`.reverse`** | Reverses element order. |
+| **`.rolling`** | Evaluates expression over a sliding window. |
+| **`.rollingMax`** | Rolling maximum over a sliding window. |
+| **`.rollingMean`** | Rolling mean over a sliding window. |
+| **`.rollingMedian`** | Rolling median over a sliding window. |
+| **`.rollingMin`** | Rolling minimum over a sliding window. |
+| **`.rollingQuantile`** | Rolling quantile over a sliding window. |
+| **`.rollingRank`** | Rolling rank over a sliding window. |
+| **`.rollingStd`** | Rolling standard deviation over a sliding window. |
+| **`.rollingSum`** | Rolling sum over a sliding window. |
+| **`.round`** | Rounds numbers to decimal places. |
+| **`.roundSigFigs`** | Rounds numbers to significant figures. |
+| **`.rowNumber`** | Sequential 1-based row number within partition. |
+| **`.shift`** | Shifts values by offset. |
+| **`.sign`** | Sign of numbers (-1, 0, 1). |
+| **`.sin`** | Sine in radians. |
+| **`.sinh`** | Hyperbolic sine. |
+| **`.skew`** | Computes skewness. |
+| **`.spearmanCorr`** | Spearman rank correlation. |
 | **`.sqrt`** | Computes square root. |
-| **`.std`** | Computes sample standard deviation. |
-| **`.sub`** | Element-wise subtraction. |
-| **`.sum`** | Computes sum of all non-null numeric values. |
-| **`.tan`** | Element-wise tangent in radians. |
-| **`.tanh`** | Element-wise hyperbolic tangent. |
-| **`.trunc`** | Truncates fractional parts toward zero. |
-| **`.variance`** | Computes sample variance. |
-| **`.wAvg`** | Computes weighted average using weight expression. |
-| **`.xor`** | Logical exclusive OR (XOR). |
+| **`.std`** | Sample standard deviation. |
+| **`.sub`** | Subtraction. |
+| **`.sum`** | Sum of non-null values. |
+| **`.tan`** | Tangent in radians. |
+| **`.tanh`** | Hyperbolic tangent. |
+| **`.trunc`** | Truncates decimal digits toward zero. |
+| **`.variance`** | Sample variance. |
+| **`.wAvg`** | Weighted average. |
+| **`.xor`** | Logical XOR. |
 
 ### String Namespace (`.str`)
 
 | Method | Description |
 | :--- | :--- |
-| **`.str.concat`** | Concatenates strings across columns or literal arguments. |
-| **`.str.contains`** | Checks if string contains substring or matches RegExp pattern. |
-| **`.str.containsAny`** | Checks if string contains any substring from a list. |
-| **`.str.countMatches`** | Counts non-overlapping occurrences of pattern or substring. |
-| **`.str.decode`** | Decodes binary bytes/strings using specified encoding (hex, base64, etc.). |
+| **`.str.concat`** | Concatenates strings. |
+| **`.str.contains`** | Checks if string contains substring or pattern. |
+| **`.str.containsAny`** | Checks if string contains any candidate substring. |
+| **`.str.countMatches`** | Counts pattern occurrences. |
+| **`.str.decode`** | Decodes binary data using specified encoding. |
 | **`.str.decodeUriComponent`** | Decodes URI-encoded characters. |
-| **`.str.encode`** | Encodes strings to binary formats (hex, base64, utf8). |
-| **`.str.encodeUriComponent`** | Encodes string components for safe URI transmission. |
-| **`.str.endsWith`** | Checks if string ends with specified suffix. |
-| **`.str.escapeRegex`** | Escapes regex metacharacters in string for literal matching. |
-| **`.str.explode`** | Splits string by delimiter and explodes into multiple rows. |
-| **`.str.extract`** | Extracts first matching regex capture group (supports group index or name). |
-| **`.str.extractAll`** | Extracts all regex match occurrences as an array of strings. |
-| **`.str.extractGroups`** | Extracts all named and numbered capture groups as a struct record. |
-| **`.str.extractMany`** | Extracts matches from multiple regex patterns with leftmost tie-breaking. |
-| **`.str.find`** | Finds zero-based character index of first match (or null if not found). |
-| **`.str.findMany`** | Finds character indices of multiple patterns simultaneously. |
-| **`.str.head`** | Extracts the first n characters of the string. |
-| **`.str.join`** | Joins string values across rows or groups using a delimiter. |
-| **`.str.jsonDecode`** | Parses JSON string into typed struct/object or list column. |
-| **`.str.jsonPathMatch`** | Extracts values matching a JSONPath query expression. |
-| **`.str.len`** | Returns string character count. |
-| **`.str.lenBytes`** | Returns UTF-8 encoded byte count of the string. |
-| **`.str.lenChars`** | Returns Unicode code point count (surrogate-pair aware). |
-| **`.str.lower`** | Converts ASCII/Unicode characters to lowercase. |
-| **`.str.lpad`** | Pads string on the left up to specified width. |
-| **`.str.normalize`** | Applies Unicode normalization form (NFC, NFD, NFKC, NFKD). |
-| **`.str.padEnd`** | Alias for rpad(); pads string on the right. |
-| **`.str.padStart`** | Alias for lpad(); pads string on the left. |
-| **`.str.replace`** | Replaces first pattern match with replacement string or function. |
-| **`.str.replaceAll`** | Replaces all pattern matches across the string. |
-| **`.str.replaceMany`** | Replaces multiple patterns in a single pass with conflict resolution. |
-| **`.str.reverse`** | Reverses characters in the string. |
-| **`.str.rpad`** | Pads string on the right up to specified width. |
-| **`.str.slice`** | Extracts a substring slice by offset and length. |
-| **`.str.split`** | Splits string by delimiter into a list/array of substrings. |
-| **`.str.startsWith`** | Checks if string starts with specified prefix. |
-| **`.str.stripChars`** | Strips specified leading and trailing characters (defaults to whitespace). |
-| **`.str.stripCharsEnd`** | Strips specified trailing characters from the end of the string. |
-| **`.str.stripCharsStart`** | Strips specified leading characters from the start of the string. |
-| **`.str.stripPrefix`** | Removes prefix from start of string if present. |
-| **`.str.stripSuffix`** | Removes suffix from end of string if present. |
-| **`.str.strptime`** | Parses string to Datetime or Date using format specifiers. |
-| **`.str.tail`** | Extracts the last n characters of the string. |
+| **`.str.encode`** | Encodes string to binary format. |
+| **`.str.encodeUriComponent`** | Encodes string for safe URI transmission. |
+| **`.str.endsWith`** | Checks if string ends with suffix. |
+| **`.str.escapeRegex`** | Escapes regex special characters. |
+| **`.str.explode`** | Splits string and explodes into rows. |
+| **`.str.extract`** | Extracts first regex match or capture group. |
+| **`.str.extractAll`** | Extracts all regex matches as an array. |
+| **`.str.extractGroups`** | Extracts named or numbered capture groups into a struct. |
+| **`.str.extractMany`** | Extracts matches from multiple patterns. |
+| **`.str.find`** | Finds index of first match. |
+| **`.str.findMany`** | Finds indices of multiple patterns. |
+| **`.str.head`** | Returns first `n` characters. |
+| **`.str.join`** | Joins string values with a delimiter. |
+| **`.str.jsonDecode`** | Parses JSON string into a struct or list. |
+| **`.str.jsonPathMatch`** | Extracts values matching a JSONPath query. |
+| **`.str.len`** | String character length. |
+| **`.str.lenBytes`** | Byte length in UTF-8. |
+| **`.str.lenChars`** | Unicode code point count. |
+| **`.str.lower`** | Converts string to lowercase. |
+| **`.str.lpad`** | Pads string on the left. |
+| **`.str.normalize`** | Applies Unicode normalization (NFC, NFD, NFKC, NFKD). |
+| **`.str.padEnd`** | Pads string on the right (alias for `.rpad`). |
+| **`.str.padStart`** | Pads string on the left (alias for `.lpad`). |
+| **`.str.replace`** | Replaces first pattern match. |
+| **`.str.replaceAll`** | Replaces all pattern matches. |
+| **`.str.replaceMany`** | Replaces multiple patterns. |
+| **`.str.reverse`** | Reverses string characters. |
+| **`.str.rpad`** | Pads string on the right. |
+| **`.str.slice`** | Slices substring by offset and length. |
+| **`.str.split`** | Splits string into an array of substrings. |
+| **`.str.startsWith`** | Checks if string starts with prefix. |
+| **`.str.stripChars`** | Strips leading and trailing characters. |
+| **`.str.stripCharsEnd`** | Strips trailing characters. |
+| **`.str.stripCharsStart`** | Strips leading characters. |
+| **`.str.stripPrefix`** | Removes prefix if present. |
+| **`.str.stripSuffix`** | Removes suffix if present. |
+| **`.str.strptime`** | Parses string to date or datetime with format specifiers. |
+| **`.str.tail`** | Returns last `n` characters. |
 | **`.str.toCamelCase`** | Converts string to camelCase. |
-| **`.str.toDate`** | Parses ISO 8601 date string to Date. |
-| **`.str.toDatetime`** | Parses ISO 8601 datetime string to Datetime. |
-| **`.str.toDecimal`** | Parses numeric string to fixed-point Decimal(precision, scale). |
-| **`.str.toInteger`** | Parses numeric string to integer (Int8..Int64, UInt8..UInt64). |
+| **`.str.toDate`** | Parses ISO 8601 string to Date. |
+| **`.str.toDatetime`** | Parses ISO 8601 string to Datetime. |
+| **`.str.toDecimal`** | Parses numeric string to Decimal. |
+| **`.str.toInteger`** | Parses numeric string to integer. |
 | **`.str.toKebabCase`** | Converts string to kebab-case. |
-| **`.str.toLowerCase`** | Alias for lower(). |
+| **`.str.toLowerCase`** | Converts string to lowercase (alias for `.lower`). |
 | **`.str.toPascalCase`** | Converts string to PascalCase. |
 | **`.str.toSnakeCase`** | Converts string to snake_case. |
-| **`.str.toTime`** | Parses time string (HH:MM:SS) to Time. |
+| **`.str.toTime`** | Parses time string to Time. |
 | **`.str.toTitleCase`** | Converts string to Title Case. |
-| **`.str.toUpperCase`** | Alias for upper(). |
-| **`.str.upper`** | Converts ASCII/Unicode characters to uppercase. |
-| **`.str.zfill`** | Pads string on the left with zeros up to specified width. |
+| **`.str.toUpperCase`** | Converts string to uppercase (alias for `.upper`). |
+| **`.str.upper`** | Converts string to uppercase. |
+| **`.str.zfill`** | Pads string on the left with zeros. |
 
 ### Temporal Namespace (`.dt`)
 
 | Method | Description |
 | :--- | :--- |
-| **`.dt.castTimeUnit`** | Casts duration/timestamp to target time unit precision. |
-| **`.dt.century`** | Extracts 1-based Gregorian century. |
-| **`.dt.convertTimeZone`** | Converts datetime to target IANA timezone. |
-| **`.dt.date`** | Extracts Date component (zeroing time component). |
-| **`.dt.day`** | Extracts 1-based day of month (1-31). |
-| **`.dt.daysInMonth`** | Returns number of days in the current month (28-31). |
-| **`.dt.epoch`** | Returns elapsed units since Unix Epoch (1970-01-01T00:00:00Z). |
+| **`.dt.castTimeUnit`** | Casts duration or timestamp precision. |
+| **`.dt.century`** | Extracts century. |
+| **`.dt.convertTimeZone`** | Converts datetime to target timezone. |
+| **`.dt.date`** | Extracts Date component. |
+| **`.dt.day`** | Extracts day of month (1-31). |
+| **`.dt.daysInMonth`** | Returns number of days in the month (28-31). |
+| **`.dt.epoch`** | Returns elapsed units since Unix Epoch. |
 | **`.dt.hour`** | Extracts hour of day (0-23). |
-| **`.dt.isBusinessDay`** | Returns true if date falls on Monday through Friday. |
-| **`.dt.isLeapYear`** | Returns true if calendar year is a leap year. |
-| **`.dt.isoYear`** | Extracts ISO 8601 week-numbering year. |
-| **`.dt.microsecond`** | Extracts microsecond component (0-999). |
-| **`.dt.millennium`** | Extracts 1-based Gregorian millennium. |
-| **`.dt.millisecond`** | Extracts millisecond component (0-999). |
+| **`.dt.isBusinessDay`** | Checks if date falls on a weekday. |
+| **`.dt.isLeapYear`** | Checks if year is a leap year. |
+| **`.dt.isoYear`** | Extracts ISO week-numbering year. |
+| **`.dt.microsecond`** | Extracts microsecond (0-999). |
+| **`.dt.millennium`** | Extracts millennium. |
+| **`.dt.millisecond`** | Extracts millisecond (0-999). |
 | **`.dt.minute`** | Extracts minute of hour (0-59). |
-| **`.dt.month`** | Extracts 1-based month of year (1-12). |
-| **`.dt.monthEnd`** | Snaps date to the final calendar day of the current month. |
-| **`.dt.monthStart`** | Snaps date to the first calendar day of the current month. |
-| **`.dt.nanosecond`** | Extracts nanosecond component (0-999). |
-| **`.dt.offsetDay`** | Adds or subtracts signed integer calendar days. |
-| **`.dt.ordinalDay`** | Extracts 1-based day of year (1-366). |
+| **`.dt.month`** | Extracts month of year (1-12). |
+| **`.dt.monthEnd`** | Snaps date to the last day of the month. |
+| **`.dt.monthStart`** | Snaps date to the first day of the month. |
+| **`.dt.nanosecond`** | Extracts nanosecond (0-999). |
+| **`.dt.offsetDay`** | Adds or subtracts calendar days. |
+| **`.dt.ordinalDay`** | Extracts day of year (1-366). |
 | **`.dt.quarter`** | Extracts calendar quarter (1-4). |
-| **`.dt.replace`** | Replaces specific datetime components (year, month, day, etc.). |
+| **`.dt.replace`** | Replaces specific datetime components. |
 | **`.dt.second`** | Extracts second of minute (0-59). |
-| **`.dt.strftime`** | Formats datetime as a string using strftime-style format specifiers. |
-| **`.dt.time`** | Extracts Time component (microseconds since midnight). |
-| **`.dt.timestamp`** | Returns Unix timestamp in specified time unit. |
-| **`.dt.totalDays`** | Computes total fractional duration in days. |
-| **`.dt.totalHours`** | Computes total fractional duration in hours. |
-| **`.dt.totalMicroseconds`** | Computes total duration in integer/fractional microseconds. |
-| **`.dt.totalMilliseconds`** | Computes total fractional duration in milliseconds. |
-| **`.dt.totalMinutes`** | Computes total fractional duration in minutes. |
-| **`.dt.totalNanoseconds`** | Computes total duration in integer/fractional nanoseconds. |
-| **`.dt.totalSeconds`** | Computes total fractional duration in seconds. |
-| **`.dt.utcOffset`** | Returns timezone UTC offset in minutes or milliseconds. |
+| **`.dt.strftime`** | Formats datetime with format specifiers. |
+| **`.dt.time`** | Extracts Time component. |
+| **`.dt.timestamp`** | Returns Unix timestamp. |
+| **`.dt.totalDays`** | Computes duration in days. |
+| **`.dt.totalHours`** | Computes duration in hours. |
+| **`.dt.totalMicroseconds`** | Computes duration in microseconds. |
+| **`.dt.totalMilliseconds`** | Computes duration in milliseconds. |
+| **`.dt.totalMinutes`** | Computes duration in minutes. |
+| **`.dt.totalNanoseconds`** | Computes duration in nanoseconds. |
+| **`.dt.totalSeconds`** | Computes duration in seconds. |
+| **`.dt.utcOffset`** | Returns UTC offset. |
 | **`.dt.week`** | Extracts calendar week number. |
 | **`.dt.weekday`** | Extracts day of week (1 = Monday, 7 = Sunday). |
 | **`.dt.year`** | Extracts calendar year. |
@@ -668,51 +668,51 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 
 | Method | Description |
 | :--- | :--- |
-| **`.arr.agg`** | Aggregates elements of each list row using an aggregation expression. |
-| **`.arr.all`** | Returns true if all elements in the list row are truthy (Kleene logic). |
-| **`.arr.any`** | Returns true if at least one element in the list row is truthy. |
-| **`.arr.argMax`** | Returns the index of the first maximum element in each list row. |
-| **`.arr.argMin`** | Returns the index of the first minimum element in each list row. |
-| **`.arr.contains`** | Checks if list row contains the specified literal item. |
-| **`.arr.containsAll`** | Checks if list row contains all items in the candidate set. |
-| **`.arr.containsAny`** | Checks if list row contains any item in the candidate set. |
-| **`.arr.countMatches`** | Counts occurrences of the target item in each list row. |
-| **`.arr.eval`** | Evaluates an expression element-wise over each list item using $df.element(). |
-| **`.arr.explode`** | Explodes/unnests list rows into individual scalar rows. |
-| **`.arr.filter`** | Filters list row elements using an element-wise predicate expression. |
-| **`.arr.first`** | Extracts the first element of each list row (supports nullOnOob). |
-| **`.arr.gather`** | Gathers elements at specified indices (supports negative indexing). |
-| **`.arr.gatherEvery`** | Gathers elements at periodic interval steps with optional offset. |
-| **`.arr.get`** | Extracts element at zero-based index (supports negative indexing). |
-| **`.arr.join`** | Joins array elements into a string separated by delimiter. |
-| **`.arr.last`** | Extracts the last element of each list row (supports nullOnOob). |
-| **`.arr.len`** | Returns the element count of each list row. |
-| **`.arr.lengths`** | Alias for len(); returns length of each list row. |
-| **`.arr.max`** | Computes maximum element in each list row. |
-| **`.arr.mean`** | Computes arithmetic mean of numeric elements in each list row. |
-| **`.arr.median`** | Computes median value of numeric elements in each list row. |
-| **`.arr.min`** | Computes minimum element in each list row. |
-| **`.arr.mode`** | Computes most frequent element(s) in each list row. |
-| **`.arr.nUnique`** | Returns count of distinct elements in each list row. |
-| **`.arr.reverse`** | Reverses element ordering in each list row. |
-| **`.arr.shift`** | Shifts list elements by offset, filling vacated slots with null. |
-| **`.arr.slice`** | Slices a sub-array from offset with optional length. |
-| **`.arr.sort`** | Sorts elements of each list row with optional descending flag. |
-| **`.arr.splice`** | Deletes and/or inserts elements at an index in each list row. |
-| **`.arr.std`** | Computes sample standard deviation of elements in each list row. |
-| **`.arr.sum`** | Computes sum of numeric elements in each list row. |
-| **`.arr.toStruct`** | Converts array elements into a struct object with indexed/custom field names. |
-| **`.arr.unique`** | Deduplicates elements within each list row. |
-| **`.arr.variance`** | Computes sample variance of elements in each list row. |
+| **`.arr.agg`** | Aggregates list elements using an expression. |
+| **`.arr.all`** | Returns true if all list elements are truthy. |
+| **`.arr.any`** | Returns true if any list element is truthy. |
+| **`.arr.argMax`** | Index of maximum element in list. |
+| **`.arr.argMin`** | Index of minimum element in list. |
+| **`.arr.contains`** | Checks if list contains item. |
+| **`.arr.containsAll`** | Checks if list contains all candidate items. |
+| **`.arr.containsAny`** | Checks if list contains any candidate item. |
+| **`.arr.countMatches`** | Counts item occurrences in list. |
+| **`.arr.eval`** | Evaluates expression element-wise over list. |
+| **`.arr.explode`** | Unnests list into individual rows. |
+| **`.arr.filter`** | Filters list elements by predicate expression. |
+| **`.arr.first`** | Extracts first element of list. |
+| **`.arr.gather`** | Gathers elements at specified indices. |
+| **`.arr.gatherEvery`** | Gathers elements at periodic interval steps. |
+| **`.arr.get`** | Extracts element at index. |
+| **`.arr.join`** | Joins list elements into a string. |
+| **`.arr.last`** | Extracts last element of list. |
+| **`.arr.len`** | Returns list element count. |
+| **`.arr.lengths`** | Returns list length (alias for `.len`). |
+| **`.arr.max`** | Maximum element in list. |
+| **`.arr.mean`** | Arithmetic mean of numeric list elements. |
+| **`.arr.median`** | Median of numeric list elements. |
+| **`.arr.min`** | Minimum element in list. |
+| **`.arr.mode`** | Most frequent element(s) in list. |
+| **`.arr.nUnique`** | Count of distinct list elements. |
+| **`.arr.reverse`** | Reverses list element order. |
+| **`.arr.shift`** | Shifts list elements by offset. |
+| **`.arr.slice`** | Slices sub-array by offset and length. |
+| **`.arr.sort`** | Sorts list elements. |
+| **`.arr.splice`** | Deletes and/or inserts elements in list. |
+| **`.arr.std`** | Sample standard deviation of list elements. |
+| **`.arr.sum`** | Sum of numeric list elements. |
+| **`.arr.toStruct`** | Converts list elements into a struct object. |
+| **`.arr.unique`** | Deduplicates list elements. |
+| **`.arr.variance`** | Sample variance of list elements. |
 
 ### Struct Namespace (`.struct`)
 
 | Method | Description |
 | :--- | :--- |
-| **`.struct.field`** | Extracts a specific nested field from the struct column. |
-| **`.struct.renameFields`** | Renames nested struct fields using a dictionary mapping. |
-| **`.struct.unnest`** | Unnests/flattens all struct fields into individual top-level columns in select(). |
-| **`.struct.withFields`** | Adds or overrides fields within the struct column. |
+| **`.struct.field`** | Extracts a nested field from the struct. |
+| **`.struct.renameFields`** | Renames nested struct fields. |
+| **`.struct.unnest`** | Unnests struct fields into top-level columns. |
+| **`.struct.withFields`** | Adds or updates struct fields. |
 
 
 ---
