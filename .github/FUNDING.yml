@@ -1,2 +1,4 @@
 # GitHub Sponsors button configuration
-custom: ["https://github.com/trentamorris/df-script/blob/main/DONATIONS.md"]
+custom:
+  - "https://cash.app/$TrentMorrisTX"
+  - "https://github.com/trentamorris/df-script/blob/main/DONATIONS.md"

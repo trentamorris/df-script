@@ -4,13 +4,13 @@ Building df-script has taken a massive amount of time, late nights, and rigorous
 
 You can donate directly using the addresses below:
 
-## 🔒 Monero (XMR)
+## Monero (XMR)
 **Address:** [`85Zht1bSk1mRXodgk3kDdPNuvBypzs7WPKEY9Fe8u72wB8o5Y3DNPdeCcAvaFEXpQgJUZmX2j2kCEM6tjYyr6K26BgGTCNf`](monero:85Zht1bSk1mRXodgk3kDdPNuvBypzs7WPKEY9Fe8u72wB8o5Y3DNPdeCcAvaFEXpQgJUZmX2j2kCEM6tjYyr6K26BgGTCNf?tx_description=df-script%20Support)
 
-## 💵 Cash App
+## Cash App
 **Cashtag:** [`$TrentMorrisTX`](https://cash.app/$TrentMorrisTX)
 
-### 💡 Feature Sponsorship & Priority Development
+## Feature Sponsorship & Priority Development
 Please reach out via GitHub Issues or contact us directly to discuss sponsored development opportunities.
 
 ---
