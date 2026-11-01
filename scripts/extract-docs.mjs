@@ -1,8 +1,8 @@
 /**
  * extract-docs.mjs
  *
- * Reads JSDoc comments from the df-script library source files recursively
- * and outputs a static, structured docs.json file grouped by file paths.
+ * Reads JSDoc comments and TypeScript type definitions from the df-script library
+ * source files recursively and outputs a static, structured docs.json file.
  *
  * Usage:
  *   node scripts/extract-docs.mjs
@@ -13,49 +13,53 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const srcDir = path.resolve(__dirname, "../src");
 const docExamplesPath = path.resolve(__dirname, "../doc-examples.ts");
 
 let docExamples = {};
 try {
-    const content = fs.readFileSync(docExamplesPath, "utf-8");
-    const match = content.match(/export const DOC_EXAMPLES:\s*Record<string,\s*string>\s*=\s*(\{[\s\S]*?\n\};)/);
-    if (match) {
-        docExamples = new Function("return " + match[1])();
-    }
+  const content = fs.readFileSync(docExamplesPath, "utf-8");
+  const match = content.match(/export const DOC_EXAMPLES:\s*Record<string,\s*string>\s*=\s*(\{[\s\S]*?\n\};)/);
+  if (match) {
+    docExamples = new Function("return " + match[1])();
+  }
 } catch (e) {}
 
 /**
  * Strips embedded example tables from source files, keeping only clean <!-- doc:KEY --> tags.
  */
-function syncJSDocsInFiles(sourceFiles) {
-    let updatedCount = 0;
-    const tagRegex = /\/\*[\s\S]*?\*\//g;
+export function syncJSDocsInFiles(sourceFiles) {
+  let updatedCount = 0;
+  const tagRegex = /\/\*[\s\S]*?\*\//g;
 
-    for (const filePath of sourceFiles) {
-        let content = fs.readFileSync(filePath, "utf-8");
-        let changed = false;
+  for (const filePath of sourceFiles) {
+    let content = fs.readFileSync(filePath, "utf-8");
+    let changed = false;
 
-        content = content.replace(tagRegex, (jsdoc) => {
-            return jsdoc.replace(/<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*\* >>>|\n\s*\* @|\*\/))/g, (match, key, tableContent) => {
-                if (tableContent && tableContent.trim()) {
-                    changed = true;
-                    return `<!-- doc:${key} -->`;
-                }
-                return match;
-            });
-        });
-
-        if (changed) {
-            fs.writeFileSync(filePath, content, "utf-8");
-            updatedCount++;
-            console.log(`  Stripped embedded JSDoc tables in: ${path.relative(srcDir, filePath)}`);
+    content = content.replace(tagRegex, jsdoc => {
+      return jsdoc.replace(
+        /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*\* >>>|\n\s*\* @|\*\/))/g,
+        (match, key, tableContent) => {
+          if (tableContent && tableContent.trim()) {
+            changed = true;
+            return `<!-- doc:${key} -->`;
+          }
+          return match;
         }
+      );
+    });
+
+    if (changed) {
+      fs.writeFileSync(filePath, content, "utf-8");
+      updatedCount++;
+      console.log(`  Stripped embedded JSDoc tables in: ${path.relative(srcDir, filePath)}`);
     }
-    if (updatedCount > 0) {
-        console.log(`✓ Cleaned embedded tables in ${updatedCount} source files.`);
-    }
+  }
+  if (updatedCount > 0) {
+    console.log(`✓ Cleaned embedded tables in ${updatedCount} source files.`);
+  }
 }
 
 // ─── JSDoc Tag Constants ──────────────────────────────────────────────────────
@@ -74,19 +78,24 @@ const TAG_NOTE = "@note";
 
 // ─── Regexes to capture JSDoc comments followed by identifiers ────────────────
 
-// Capture any JSDoc block + the immediate next declaration name (method, function, or class)
-const JSDOC_BLOCK_REGEX = /\/\*\*([\s\S]*?)\*\/[\s\r\n]*?(?:(?:export|public|private|static|function|class|get|set)\s+|\*\s*)*([a-zA-Z0-9_$]+)/g;
+// Capture any JSDoc block (not followed by another JSDoc block) + modifiers + immediate declaration name
+const JSDOC_BLOCK_REGEX =
+  /\/\*\*((?:(?!\*\/)[\s\S])*?)\*\/[\s\r\n]*?(?![\s\r\n]*\/\*\*)((?:(?:export|public|private|static|abstract|readonly|override|async|function|class|get|set)\s+|\*\s*)*)([a-zA-Z0-9_$]+)/g;
 
 // Regexes for specific tags
-const PARAM_REGEX = new RegExp(`${TAG_PARAM}\\s+(?:\\{([^{}]*(?:\\{[^{}]*\\}[^{}]*)*)\\}\\s+)?([\\[\\]a-zA-Z0-9_$.?]+)\\s+(.*)`);
-const RETURNS_REGEX = new RegExp(`${TAG_RETURNS}\\s+(.*)`);
+const PARAM_REGEX = new RegExp(
+  `${TAG_PARAM}\\s+(?:\\{([^{}]*(?:\\{[^{}]*\\}[^{}]*)*)\\}\\s+)?(\\[[^\\]]+\\]|[a-zA-Z0-9_$.?]+)(?:\\s+(.*))?`
+);
+const RETURNS_REGEX = new RegExp(
+  `${TAG_RETURNS}\\s+(?:\\{([^{}]*(?:\\{[^{}]*\\}[^{}]*)*)\\}\\s*)?(.*)`
+);
 const NAMESPACE_REGEX = new RegExp(`${TAG_NAMESPACE}\\s+([a-zA-Z0-9_$..]+)`);
 const CATEGORY_REGEX = new RegExp(`${TAG_CATEGORY}\\s+([a-zA-Z0-9_$..]+)`);
 const SYNTAX_REGEX = new RegExp(`${TAG_SYNTAX}\\s+(.+)`);
 
 // ─── JSDoc Parser ────────────────────────────────────────────────────────────
 
-function parseJSDocComment(comment) {
+export function parseJSDocComment(comment) {
   comment = comment.replace(/\r\n/g, "\n");
   let desc = "";
   let returns;
@@ -98,6 +107,7 @@ function parseJSDocComment(comment) {
   let currentExampleLines = [];
   let inExample = false;
   let inNote = false;
+  let inParam = false;
 
   for (const rawLine of comment.split("\n")) {
     const line = rawLine.replace(/^\s*\*?\s?/, "");
@@ -110,6 +120,7 @@ function parseJSDocComment(comment) {
         inExample = false;
       }
       inNote = false;
+      inParam = false;
 
       if (trimmed.startsWith(TAG_EXAMPLE)) {
         inExample = true;
@@ -121,19 +132,42 @@ function parseJSDocComment(comment) {
         const m = trimmed.match(PARAM_REGEX);
         if (m) {
           const type = m[1] ? m[1].trim() : undefined;
-          const name = m[2];
-          const desc = m[3].trim();
-          paramsList.push(type ? { name, type, desc } : { name, desc });
+          let rawName = m[2].trim();
+          let defaultVal = undefined;
+          if (rawName.startsWith("[") && rawName.endsWith("]")) {
+            const inner = rawName.slice(1, -1);
+            const eqIdx = inner.indexOf("=");
+            if (eqIdx !== -1) {
+              rawName = `[${inner.slice(0, eqIdx).trim()}]`;
+              defaultVal = inner.slice(eqIdx + 1).trim();
+            }
+          }
+          const pDesc = (m[3] || "").trim();
+          const paramObj = { name: rawName };
+          if (type) paramObj.type = type;
+          if (defaultVal) paramObj.default = defaultVal;
+          paramObj.desc = pDesc;
+          paramsList.push(paramObj);
+          inParam = true;
         }
       } else if (trimmed.startsWith(TAG_RETURNS)) {
         const m = trimmed.match(RETURNS_REGEX);
-        if (m) returns = m[1].trim();
+        if (m) {
+          const rType = m[1] ? m[1].trim() : "";
+          const rDesc = m[2] ? m[2].trim() : "";
+          returns = rType || rDesc;
+        }
       }
     } else {
       if (inExample) {
         currentExampleLines.push(line);
       } else if (inNote && notesList.length > 0 && trimmed.length > 0) {
         notesList[notesList.length - 1] += " " + trimmed;
+      } else if (inParam && paramsList.length > 0) {
+        if (trimmed.length > 0) {
+          const lastParam = paramsList[paramsList.length - 1];
+          lastParam.desc = lastParam.desc ? `${lastParam.desc} ${trimmed}` : trimmed;
+        }
       } else {
         inNote = false;
         descLines.push(trimmed);
@@ -154,18 +188,26 @@ function parseJSDocComment(comment) {
 
   return {
     desc,
-    examples: examplesList.length > 0 ? examplesList.map(ex => {
-        return ex.replace(/<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*>>> (?:df\.[a-zA-Z0-9_$]|df1\.|df2\.|trades\.|quotes\.|\$df\.|\$col|\/\/)|$))/g, (_, key) => {
-            return docExamples[key] ? docExamples[key].replace(/^ {5}\* /gm, "") : "";
-        }).trim();
-    }) : undefined,
+    examples:
+      examplesList.length > 0
+        ? examplesList.map(ex => {
+            return ex
+              .replace(
+                /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*>>> (?:df\.[a-zA-Z0-9_$]|df1\.|df2\.|trades\.|quotes\.|\$df\.|\$col|\/\/)|$))/g,
+                (_, key) => {
+                  return docExamples[key] ? docExamples[key].replace(/^ {5}\* /gm, "") : "";
+                }
+              )
+              .trim();
+          })
+        : undefined,
     params: paramsList.length > 0 ? paramsList : undefined,
     notes: notesList.length > 0 ? notesList : undefined,
     returns
   };
 }
 
-function extractSignatureAndEnd(rawContent, startIndex, symbolName, isGetter) {
+export function extractSignatureAndEnd(rawContent, startIndex, symbolName, isGetter) {
   let parenDepth = 0;
   let braceDepth = 0;
   let angleDepth = 0;
@@ -181,6 +223,7 @@ function extractSignatureAndEnd(rawContent, startIndex, symbolName, isGetter) {
   // 1. Scan the signature until top-level '{' or ';'
   while (i < rawContent.length) {
     const char = rawContent[i];
+    const prevChar = i > startIndex ? rawContent[i - 1] : "";
 
     if (inString) {
       if (char === inString && !isEscaped) {
@@ -200,12 +243,21 @@ function extractSignatureAndEnd(rawContent, startIndex, symbolName, isGetter) {
         braceDepth++;
       } else if (char === "}") braceDepth--;
       else if (char === "<") angleDepth++;
-      else if (char === ">") {
+      else if (char === ">" && prevChar !== "=") {
         if (angleDepth > 0) angleDepth--;
-      } else if (char === ";" && parenDepth === 0 && braceDepth === 0) {
+      } else if (char === ";" && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
+        let finalEnd = i;
+        const implRegex = new RegExp(`^\\s*(?:export\\s+)?(?:async\\s+)?function\\s+${symbolName}\\b`);
+        if (implRegex.test(rawContent.slice(i + 1))) {
+          const nextBrace = rawContent.indexOf("{", i + 1);
+          if (nextBrace !== -1) {
+            bodyStartIndex = nextBrace;
+            break;
+          }
+        }
         return {
           signature: signature.replace(/\s+/g, " ").trim(),
-          endIndex: i
+          endIndex: finalEnd
         };
       }
     }
@@ -247,32 +299,64 @@ function extractSignatureAndEnd(rawContent, startIndex, symbolName, isGetter) {
     }
   }
 
+  let normalizedSig = signature.replace(/\s+/g, " ").trim();
+  if (isGetter) {
+    normalizedSig = normalizedSig.replace(/^get\s+([a-zA-Z0-9_$]+)\s*\(\s*\)/, "$1");
+  }
+
   return {
-    signature: signature.replace(/\s+/g, " ").trim(),
+    signature: normalizedSig,
     endIndex
   };
 }
 
-// splitByComma: Splits a string on commas at the top-level (respecting nested parentheses, curly braces, and generics).
-function splitByComma(str) {
+// splitByComma: Splits a string on commas at the top-level (respecting strings, nested parentheses, curly braces, brackets, and generics).
+export function splitByComma(str) {
   const parts = [];
   let current = "";
   let parenDepth = 0;
   let braceDepth = 0;
+  let bracketDepth = 0;
   let angleDepth = 0;
-  
+  let inString = null;
+  let isEscaped = false;
+
   for (let i = 0; i < str.length; i++) {
     const char = str[i];
-    if (char === "(") parenDepth++;
-    else if (char === ")") parenDepth--;
-    else if (char === "{") braceDepth++;
-    else if (char === "}") braceDepth--;
-    else if (char === "<") angleDepth++;
-    else if (char === ">") {
+    const prevChar = i > 0 ? str[i - 1] : "";
+
+    if (inString) {
+      if (char === inString && !isEscaped) {
+        inString = null;
+      }
+      isEscaped = char === "\\" && !isEscaped;
+      current += char;
+      continue;
+    }
+
+    if (char === '"' || char === "'" || char === "`") {
+      inString = char;
+    } else if (char === "(") parenDepth++;
+    else if (char === ")") {
+      if (parenDepth > 0) parenDepth--;
+    } else if (char === "{") braceDepth++;
+    else if (char === "}") {
+      if (braceDepth > 0) braceDepth--;
+    } else if (char === "[") bracketDepth++;
+    else if (char === "]") {
+      if (bracketDepth > 0) bracketDepth--;
+    } else if (char === "<") angleDepth++;
+    else if (char === ">" && prevChar !== "=") {
       if (angleDepth > 0) angleDepth--;
     }
-    
-    if (char === "," && parenDepth === 0 && braceDepth === 0 && angleDepth === 0) {
+
+    if (
+      char === "," &&
+      parenDepth === 0 &&
+      braceDepth === 0 &&
+      bracketDepth === 0 &&
+      angleDepth === 0
+    ) {
       parts.push(current.trim());
       current = "";
     } else {
@@ -285,83 +369,423 @@ function splitByComma(str) {
   return parts;
 }
 
-// formatSignature: splits params onto individual lines and, when a function has a
-// single config/options param with documented sub-properties, expands them inline.
-function formatSignature(signatureStr, params) {
-  const firstParen = signatureStr.indexOf("(");
-  const lastParen = signatureStr.lastIndexOf(")");
-  if (firstParen === -1 || lastParen === -1) {
+function findParamOpenParen(str) {
+  let angleDepth = 0;
+  let inString = null;
+  let isEscaped = false;
+
+  for (let i = 0; i < str.length; i++) {
+    const char = str[i];
+    const prevChar = i > 0 ? str[i - 1] : "";
+
+    if (inString) {
+      if (char === inString && !isEscaped) inString = null;
+      isEscaped = char === "\\" && !isEscaped;
+      continue;
+    }
+    if (char === '"' || char === "'" || char === "`") {
+      inString = char;
+    } else if (char === "<") {
+      angleDepth++;
+    } else if (char === ">" && prevChar !== "=") {
+      if (angleDepth > 0) angleDepth--;
+    } else if (char === "(" && angleDepth === 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+function findMatchingCloseParen(str, openParenIdx) {
+  let parenDepth = 0;
+  let inString = null;
+  let isEscaped = false;
+
+  for (let i = openParenIdx; i < str.length; i++) {
+    const char = str[i];
+
+    if (inString) {
+      if (char === inString && !isEscaped) inString = null;
+      isEscaped = char === "\\" && !isEscaped;
+      continue;
+    }
+    if (char === '"' || char === "'" || char === "`") {
+      inString = char;
+    } else if (char === "(") {
+      parenDepth++;
+    } else if (char === ")") {
+      parenDepth--;
+      if (parenDepth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+function splitParamNameAndType(paramStr) {
+  let parenDepth = 0;
+  let braceDepth = 0;
+  let bracketDepth = 0;
+  let angleDepth = 0;
+  let inString = null;
+  let isEscaped = false;
+
+  for (let i = 0; i < paramStr.length; i++) {
+    const char = paramStr[i];
+    const prevChar = i > 0 ? paramStr[i - 1] : "";
+
+    if (inString) {
+      if (char === inString && !isEscaped) inString = null;
+      isEscaped = char === "\\" && !isEscaped;
+      continue;
+    }
+    if (char === '"' || char === "'" || char === "`") inString = char;
+    else if (char === "(") parenDepth++;
+    else if (char === ")" && parenDepth > 0) parenDepth--;
+    else if (char === "{") braceDepth++;
+    else if (char === "}" && braceDepth > 0) braceDepth--;
+    else if (char === "[") bracketDepth++;
+    else if (char === "]" && bracketDepth > 0) bracketDepth--;
+    else if (char === "<") angleDepth++;
+    else if (char === ">" && prevChar !== "=" && angleDepth > 0) angleDepth--;
+    else if (
+      char === ":" &&
+      parenDepth === 0 &&
+      braceDepth === 0 &&
+      bracketDepth === 0 &&
+      angleDepth === 0
+    ) {
+      return {
+        namePart: paramStr.substring(0, i).trim(),
+        typeAndDefault: paramStr.substring(i + 1).trim()
+      };
+    }
+  }
+  return { namePart: paramStr.trim(), typeAndDefault: "" };
+}
+
+// formatSignature: splits params onto individual lines when there are 2+ params or a destructured parameter,
+// and keeps 0 or 1 simple parameter on a single line.
+export function formatSignature(signatureStr) {
+  const firstParen = findParamOpenParen(signatureStr);
+  if (firstParen === -1) {
     return signatureStr;
   }
-  
+  const lastParen = findMatchingCloseParen(signatureStr, firstParen);
+  if (lastParen === -1) {
+    return signatureStr;
+  }
+
   const prefix = signatureStr.substring(0, firstParen);
   const paramsStr = signatureStr.substring(firstParen + 1, lastParen);
   const suffix = signatureStr.substring(lastParen + 1);
-  
-  // Split top-level params from the raw signature
+
   const rawParams = splitByComma(paramsStr);
-  
+
   if (rawParams.length === 0) {
     return `${prefix}()${suffix}`;
   }
 
-  // Try to expand a config/options param using JSDoc sub-params
-  const expandedParams = rawParams.map(p => {
-    // 1. Check if the parameter is destructured (e.g. "{ a, b }: Type = {}")
-    const destructuringMatch = p.match(/^\s*\{([\s\S]*)\}\s*:\s*([a-zA-Z0-9_$<>, ]+)\s*(?:=\s*([\s\S]*))?$/);
-    if (destructuringMatch) {
-      const fieldsStr = destructuringMatch[1].trim();
-      const typeName = destructuringMatch[2].trim();
-      const defaultValue = destructuringMatch[3] ? destructuringMatch[3].trim() : undefined;
-      
-      const fields = splitByComma(fieldsStr);
+  const formattedParams = rawParams.map(p => {
+    const { namePart, typeAndDefault } = splitParamNameAndType(p);
+
+    // Check if the parameter is destructured (e.g. "{ a, b }: Type = {}")
+    if (namePart.startsWith("{") && namePart.endsWith("}") && typeAndDefault) {
+      const fieldsStr = namePart.slice(1, -1).trim();
+      const fields = splitByComma(fieldsStr).map(f => {
+        const colonIdx = f.indexOf(":");
+        if (colonIdx !== -1 && !f.includes("=")) {
+          return f.substring(0, colonIdx).trim();
+        }
+        return f;
+      });
 
       const lines = fields.map(f => `    ${f}`);
-      const defaultPart = defaultValue ? ` = ${defaultValue}` : "";
-      return `  {\n${lines.join(",\n")}\n  }: ${typeName}${defaultPart}`;
+      return `  {\n${lines.join(",\n")}\n  }: ${typeAndDefault}`;
     }
 
-    // 2. Otherwise, check if we can expand a named config object parameter using JSDoc sub-params
-    let namePart = p;
-    let typePart = "";
-    
-    const lastColon = p.lastIndexOf(":");
-    if (lastColon !== -1) {
-      namePart = p.substring(0, lastColon).trim();
-      typePart = p.substring(lastColon + 1).trim();
-    }
-
-    let cleanType = typePart.split("=")[0].trim();
-    let isOptionalParam = namePart.endsWith("?") || typePart.includes("=");
-    let paramName = namePart.replace(/\?$/, "").trim();
-
-    if (!paramName || !cleanType || !params) return "  " + p;
-
-    // Collect documented sub-params for this param name (e.g. config.on, config.values)
-    const subParams = params.filter(pr => {
-      const cleanName = pr.name.replace(/^\[|\]$/g, ""); // strip optional brackets
-      return cleanName.startsWith(paramName + ".");
-    });
-
-    if (subParams.length === 0) return "  " + p;
-
-    const lines = subParams.map(sp => {
-      const cleanName = sp.name.replace(/^\[|\]$/g, "");
-      const propName = cleanName.slice(paramName.length + 1); // strip "config."
-      const isOptional = sp.name.startsWith("[");
-      const typePart = sp.type ? `: ${sp.type}` : "";
-      return `    ${propName}${isOptional ? "?" : ""}${typePart}`;
-    });
-
-    return `  ${paramName}${isOptionalParam ? "?" : ""}: {\n${lines.join(",\n")}\n  }`;
+    return "  " + p;
   });
-  
-  return `${prefix}(\n${expandedParams.join(",\n")}\n)${suffix}`;
+
+  if (formattedParams.length === 1 && !formattedParams[0].includes("\n")) {
+    return `${prefix}(${formattedParams[0].trim()})${suffix}`;
+  }
+
+  return `${prefix}(\n${formattedParams.join(",\n")}\n)${suffix}`;
+}
+
+// ─── Objective TypeScript Type & SubType Extractor ───────────────────────────
+
+/**
+ * Replaces comments and string literals with spaces while preserving exact character offsets and newlines.
+ */
+function maskCommentsAndStrings(str) {
+  let out = "";
+  let i = 0;
+  const len = str.length;
+
+  while (i < len) {
+    const ch = str[i];
+    const next = i + 1 < len ? str[i + 1] : "";
+
+    if (ch === "/" && next === "/") {
+      out += "  ";
+      i += 2;
+      while (i < len && str[i] !== "\n") {
+        out += " ";
+        i++;
+      }
+      continue;
+    }
+
+    if (ch === "/" && next === "*") {
+      out += "  ";
+      i += 2;
+      while (i < len && !(str[i] === "*" && str[i + 1] === "/")) {
+        out += str[i] === "\n" ? "\n" : " ";
+        i++;
+      }
+      if (i < len) {
+        out += "  ";
+        i += 2;
+      }
+      continue;
+    }
+
+    if (ch === '"' || ch === "'" || ch === "`") {
+      const quote = ch;
+      out += " ";
+      i++;
+      while (i < len) {
+        if (str[i] === "\\") {
+          out += "  ";
+          i += 2;
+          continue;
+        }
+        if (str[i] === quote) {
+          out += " ";
+          i++;
+          break;
+        }
+        out += str[i] === "\n" ? "\n" : " ";
+        i++;
+      }
+      continue;
+    }
+
+    out += ch;
+    i++;
+  }
+
+  return out;
+}
+
+/**
+ * Extracts all top-level TypeScript `interface` and `type` declarations from a file's raw content.
+ */
+export function extractTypesFromContent(rawContent, filePath = "", typesMap = {}) {
+  const normalized = rawContent.replace(/\r\n/g, "\n");
+  const masked = maskCommentsAndStrings(normalized);
+  const declRegex = /^[ \t]*(?:export\s+)?(interface|type)\s+([A-Za-z_$][A-Za-z0-9_$]*)\b/gm;
+
+  let match;
+  while ((match = declRegex.exec(masked)) !== null) {
+    const kind = match[1];
+    const typeName = match[2];
+    const firstNonSpaceOffset = match[0].search(/\S/);
+    const declStart = match.index + (firstNonSpaceOffset !== -1 ? firstNonSpaceOffset : 0);
+    let cursor = match.index + match[0].length;
+    let declEnd = -1;
+
+    if (kind === "interface") {
+      // Scan until opening '{' of interface body (skipping generic <...> and extends clause)
+      let angleDepth = 0;
+      let parenDepth = 0;
+      let openBraceIdx = -1;
+
+      for (let i = cursor; i < masked.length; i++) {
+        const ch = masked[i];
+        const prev = i > cursor ? masked[i - 1] : "";
+        if (ch === "<") angleDepth++;
+        else if (ch === ">" && prev !== "=" && angleDepth > 0) angleDepth--;
+        else if (ch === "(") parenDepth++;
+        else if (ch === ")" && parenDepth > 0) parenDepth--;
+        else if (ch === "{" && angleDepth === 0 && parenDepth === 0) {
+          openBraceIdx = i;
+          break;
+        }
+      }
+
+      if (openBraceIdx === -1) continue;
+
+      let braceDepth = 0;
+      for (let i = openBraceIdx; i < masked.length; i++) {
+        const ch = masked[i];
+        if (ch === "{") braceDepth++;
+        else if (ch === "}") {
+          braceDepth--;
+          if (braceDepth === 0) {
+            declEnd = i;
+            break;
+          }
+        }
+      }
+    } else if (kind === "type") {
+      // Scan until top-level '=' (skipping generic parameter list <...>)
+      let angleDepth = 0;
+      let parenDepth = 0;
+      let braceDepth = 0;
+      let bracketDepth = 0;
+      let eqIdx = -1;
+
+      for (let i = cursor; i < masked.length; i++) {
+        const ch = masked[i];
+        const prev = i > cursor ? masked[i - 1] : "";
+        const next = i + 1 < masked.length ? masked[i + 1] : "";
+        if (ch === "<") angleDepth++;
+        else if (ch === ">" && prev !== "=" && angleDepth > 0) angleDepth--;
+        else if (ch === "(") parenDepth++;
+        else if (ch === ")" && parenDepth > 0) parenDepth--;
+        else if (ch === "{") braceDepth++;
+        else if (ch === "}" && braceDepth > 0) braceDepth--;
+        else if (ch === "[") bracketDepth++;
+        else if (ch === "]" && bracketDepth > 0) bracketDepth--;
+        else if (
+          ch === "=" &&
+          next !== ">" &&
+          angleDepth === 0 &&
+          parenDepth === 0 &&
+          braceDepth === 0 &&
+          bracketDepth === 0
+        ) {
+          eqIdx = i;
+          break;
+        } else if (
+          ch === ";" &&
+          angleDepth === 0 &&
+          parenDepth === 0 &&
+          braceDepth === 0 &&
+          bracketDepth === 0
+        ) {
+          break;
+        }
+      }
+
+      if (eqIdx === -1) continue;
+
+      // Scan RHS of type alias until top-level ';' (or end of top-level type expression)
+      angleDepth = 0;
+      parenDepth = 0;
+      braceDepth = 0;
+      bracketDepth = 0;
+
+      for (let i = eqIdx + 1; i < masked.length; i++) {
+        const ch = masked[i];
+        const prev = i > eqIdx + 1 ? masked[i - 1] : "";
+        if (ch === "<") angleDepth++;
+        else if (ch === ">" && prev !== "=" && angleDepth > 0) angleDepth--;
+        else if (ch === "(") parenDepth++;
+        else if (ch === ")" && parenDepth > 0) parenDepth--;
+        else if (ch === "{") braceDepth++;
+        else if (ch === "}" && braceDepth > 0) braceDepth--;
+        else if (ch === "[") bracketDepth++;
+        else if (ch === "]" && bracketDepth > 0) bracketDepth--;
+        else if (
+          ch === ";" &&
+          angleDepth === 0 &&
+          parenDepth === 0 &&
+          braceDepth === 0 &&
+          bracketDepth === 0
+        ) {
+          declEnd = i;
+          break;
+        } else if (
+          ch === "\n" &&
+          angleDepth === 0 &&
+          parenDepth === 0 &&
+          braceDepth === 0 &&
+          bracketDepth === 0
+        ) {
+          const rest = masked.slice(i + 1).trimStart();
+          if (
+            /^(?:export|interface|type|function|const|let|var|class|abstract)\b/.test(rest)
+          ) {
+            declEnd = i - 1;
+            break;
+          }
+        }
+      }
+      if (declEnd === -1) {
+        declEnd = masked.length - 1;
+      }
+    }
+
+    if (declEnd === -1) continue;
+
+    const signature = normalized.substring(declStart, declEnd + 1).trim();
+    const lineStart = normalized.substring(0, declStart).split("\n").length;
+    const lineEnd = normalized.substring(0, declEnd + 1).split("\n").length;
+
+    typesMap[typeName] = {
+      filePath,
+      lineStart,
+      lineEnd,
+      signature,
+      subTypes: []
+    };
+
+    declRegex.lastIndex = declEnd + 1;
+  }
+
+  return typesMap;
+}
+
+/**
+ * Extracts all referenced project type keys from a signature string.
+ */
+export function extractSubTypes(signature, typesMap, selfName = null) {
+  if (!signature || !typesMap) return [];
+  const masked = maskCommentsAndStrings(signature);
+  const subTypes = [];
+  const idRegex = /\b([A-Za-z_$][A-Za-z0-9_$]*)\b/g;
+
+  let m;
+  while ((m = idRegex.exec(masked)) !== null) {
+    const id = m[1];
+    if (id === selfName) continue;
+    if (!Object.prototype.hasOwnProperty.call(typesMap, id)) continue;
+
+    // Skip if this identifier is a parameter or property name immediately followed by ':' or '?:'
+    const afterStr = masked.slice(m.index + id.length);
+    if (/^\s*\??\s*:/.test(afterStr)) continue;
+
+    if (!subTypes.includes(id)) {
+      subTypes.push(id);
+    }
+  }
+
+  return subTypes;
+}
+
+export function extractAllProjectTypes() {
+  const typesMap = {};
+  const sourceFiles = getSourceFiles(srcDir);
+
+  for (const filePath of sourceFiles) {
+    const rawContent = fs.readFileSync(filePath, "utf-8");
+    const relativePath = path.relative(srcDir, filePath).replace(/\\/g, "/");
+    extractTypesFromContent(rawContent, relativePath, typesMap);
+  }
+
+  for (const [typeName, typeEntry] of Object.entries(typesMap)) {
+    typeEntry.subTypes = extractSubTypes(typeEntry.signature, typesMap, typeName);
+  }
+
+  return typesMap;
 }
 
 // ─── Recursive Directory Walker ──────────────────────────────────────────────
 
-function getSourceFiles(dir) {
+export function getSourceFiles(dir) {
   let results = [];
   if (!fs.existsSync(dir)) return results;
   const list = fs.readdirSync(dir);
@@ -379,103 +803,160 @@ function getSourceFiles(dir) {
 
 // ─── Pure Raw Extraction ─────────────────────────────────────────────────────
 
-function extractRawDocs() {
-  const docs = {};
+export function extractRawDocsFromContent(rawContent, relativePath = "", typesMap = null) {
+  let fileDocs = null;
+  let match;
+
+  // Scan the raw file content for an `@namespace <value>` tag in any JSDoc block
+  const namespaceMatch = rawContent.match(NAMESPACE_REGEX);
+  const fileNamespace = namespaceMatch ? namespaceMatch[1].trim() : null;
+
+  // Scan for `@category <value>`
+  const categoryMatch = rawContent.match(CATEGORY_REGEX);
+  const fileCategory = categoryMatch ? categoryMatch[1].trim() : "ColumnExpression";
+
+  // Scan for `@syntax <template>`
+  const syntaxMatch = rawContent.match(SYNTAX_REGEX);
+  const fileSyntaxTemplate = syntaxMatch ? syntaxMatch[1].trim() : null;
+
+  JSDOC_BLOCK_REGEX.lastIndex = 0;
+  while ((match = JSDOC_BLOCK_REGEX.exec(rawContent)) !== null) {
+    const comment = match[1];
+    const modifiers = match[2] || "";
+    const symbolName = match[3];
+
+    // Skip internal functions marked with @internal or @ignore, or constructor / leading underscore symbols
+    if (
+      comment.includes(TAG_INTERNAL) ||
+      comment.includes(TAG_IGNORE) ||
+      symbolName.startsWith("_") ||
+      symbolName === "constructor"
+    ) {
+      continue;
+    }
+
+    const isClass = /\bclass\b/.test(modifiers);
+    const isGetter = /\bget\b/.test(modifiers);
+
+    let symbolCategory = fileCategory;
+    const localCategoryMatch = comment.match(CATEGORY_REGEX);
+    if (localCategoryMatch) {
+      symbolCategory = localCategoryMatch[1].trim();
+    }
+    if (isClass && symbolCategory !== "Exception" && symbolCategory !== "DataType") {
+      continue;
+    }
+
+    const parsed = parseJSDocComment(comment);
+
+    let symbolNamespace = fileNamespace;
+    const localNamespaceMatch = comment.match(NAMESPACE_REGEX);
+    if (localNamespaceMatch) {
+      symbolNamespace = localNamespaceMatch[1].trim();
+    }
+
+    if (symbolNamespace) {
+      parsed.namespace = symbolNamespace;
+    }
+
+    parsed.category = symbolCategory;
+
+    let symbolSyntax = null;
+    const localSyntaxMatch = comment.match(SYNTAX_REGEX);
+    if (localSyntaxMatch) {
+      symbolSyntax = localSyntaxMatch[1].trim().replace("{symbol}", symbolName);
+    } else if (fileSyntaxTemplate) {
+      symbolSyntax = fileSyntaxTemplate.replace("{symbol}", symbolName);
+    } else {
+      symbolSyntax = `$df.col(<column_name>).${symbolName}(...)`;
+    }
+    if (isGetter) {
+      symbolSyntax = symbolSyntax.replace(/\(\.\.\.\)$/, "");
+    }
+
+    if (isClass) {
+      parsed.name = symbolName;
+    } else if (isGetter) {
+      parsed.name = `.${symbolName}`;
+    } else if (symbolCategory === "Function") {
+      parsed.name = `${symbolName}()`;
+    } else {
+      parsed.name = `.${symbolName}()`;
+    }
+
+    const { signature: rawSignature, endIndex } = extractSignatureAndEnd(
+      rawContent,
+      JSDOC_BLOCK_REGEX.lastIndex,
+      symbolName,
+      isGetter
+    );
+
+    if (isClass && symbolCategory === "Exception") {
+      const classBody = rawContent.substring(JSDOC_BLOCK_REGEX.lastIndex, endIndex + 1);
+      const ctorMatch = classBody.match(/constructor\s*\(([\s\S]*?)\)/);
+      const ctorParams = ctorMatch ? ctorMatch[1].replace(/\s+/g, " ").trim() : "message: string";
+      parsed.signature = formatSignature(`new ${symbolName}(${ctorParams})`);
+    } else {
+      const formattedSignature = formatSignature(rawSignature);
+      const symbolIndex = symbolSyntax.indexOf(symbolName);
+      const callerPrefix = symbolIndex !== -1 ? symbolSyntax.substring(0, symbolIndex) : "";
+      parsed.signature = callerPrefix + formattedSignature;
+    }
+
+    if (relativePath) {
+      parsed.filePath = relativePath;
+    }
+    parsed.lineStart = rawContent.substring(0, match.index + match[0].length).split("\n").length;
+    parsed.lineEnd = rawContent.substring(0, endIndex + 1).split("\n").length;
+    parsed.subTypes = typesMap ? extractSubTypes(parsed.signature, typesMap, symbolName) : [];
+
+    if (parsed.desc || parsed.params || parsed.returns || parsed.examples || parsed.notes) {
+      if (!fileDocs) {
+        fileDocs = {};
+      }
+      fileDocs[symbolName] = parsed;
+    }
+  }
+
+  return fileDocs;
+}
+
+export function extractRawDocs() {
+  const typesMap = extractAllProjectTypes();
+  const docs = {
+    columnExpressions: {},
+    dataframe: {},
+    datatypes: {},
+    exceptions: {},
+    functions: {},
+    types: typesMap
+  };
+
   const sourceFiles = getSourceFiles(srcDir);
 
   for (const filePath of sourceFiles) {
     const rawContent = fs.readFileSync(filePath, "utf-8");
 
-    // Skip pure type definition files (@typefile) or internal utility files (@internalfile)
     if (rawContent.includes(TAG_TYPEFILE) || rawContent.includes(TAG_INTERNALFILE)) {
       continue;
     }
 
-    // Normalize path to relative format with forward slashes for cross-platform stability
     const relativePath = path.relative(srcDir, filePath).replace(/\\/g, "/");
+    const fileDocs = extractRawDocsFromContent(rawContent, relativePath, typesMap);
 
-    let fileDocs = null;
-    let match;
+    if (!fileDocs) continue;
 
-    // Scan the raw file content for an `@namespace <value>` tag in any JSDoc block
-    const namespaceMatch = rawContent.match(NAMESPACE_REGEX);
-    const fileNamespace = namespaceMatch ? namespaceMatch[1].trim() : null;
-
-    // Scan for `@category <value>`
-    const categoryMatch = rawContent.match(CATEGORY_REGEX);
-    const fileCategory = categoryMatch ? categoryMatch[1].trim() : "ColumnExpression";
-
-    // Scan for `@syntax <template>`
-    const syntaxMatch = rawContent.match(SYNTAX_REGEX);
-    const fileSyntaxTemplate = syntaxMatch ? syntaxMatch[1].trim() : null;
-
-    JSDOC_BLOCK_REGEX.lastIndex = 0;
-    while ((match = JSDOC_BLOCK_REGEX.exec(rawContent)) !== null) {
-      const comment = match[1];
-      const symbolName = match[2];
-
-      // Skip internal functions marked with @internal or @ignore, or constructor / leading underscore symbols
-      if (comment.includes(TAG_INTERNAL) || comment.includes(TAG_IGNORE) || symbolName.startsWith("_") || symbolName === "constructor") {
-        continue;
-      }
-
-      const parsed = parseJSDocComment(comment);
-
-      // Parse @namespace from the individual JSDoc if overridden, otherwise use file-level namespace
-      let symbolNamespace = fileNamespace;
-      const localNamespaceMatch = comment.match(NAMESPACE_REGEX);
-      if (localNamespaceMatch) {
-        symbolNamespace = localNamespaceMatch[1].trim();
-      }
-
-      if (symbolNamespace) {
-        parsed.namespace = symbolNamespace;
-      }
-
-      // Parse @category from the individual JSDoc if overridden, otherwise use file-level category
-      let symbolCategory = fileCategory;
-      const localCategoryMatch = comment.match(CATEGORY_REGEX);
-      if (localCategoryMatch) {
-        symbolCategory = localCategoryMatch[1].trim();
-      }
-      parsed.category = symbolCategory;
-
-      // Parse @syntax from the individual JSDoc if overridden, otherwise use file-level syntax template
-      let symbolSyntax = null;
-      const localSyntaxMatch = comment.match(SYNTAX_REGEX);
-      if (localSyntaxMatch) {
-        symbolSyntax = localSyntaxMatch[1].trim().replace("{symbol}", symbolName);
-      } else if (fileSyntaxTemplate) {
-        symbolSyntax = fileSyntaxTemplate.replace("{symbol}", symbolName);
-      } else {
-        symbolSyntax = `$df.col(<column_name>).${symbolName}(...)`;
-      }
-      parsed.syntax = symbolSyntax;
-
-      const afterComment = match[0].substring(match[0].lastIndexOf("*/") + 2);
-      const isGetter = /\bget\b/.test(afterComment);
-      const { signature: rawSignature, endIndex } = extractSignatureAndEnd(rawContent, JSDOC_BLOCK_REGEX.lastIndex, symbolName, isGetter);
-      const formattedSignature = formatSignature(rawSignature, parsed.params);
-
-      const symbolIndex = symbolSyntax.indexOf(symbolName);
-      const callerPrefix = symbolIndex !== -1 ? symbolSyntax.substring(0, symbolIndex) : "";
-      parsed.signature = callerPrefix + formattedSignature;
-
-      // Compute 1-based start and end line numbers of the symbol declaration for GitHub source linking (#L{lineStart}-L{lineEnd}).
-      parsed.lineStart = rawContent.substring(0, match.index + match[0].length).split("\n").length;
-      parsed.lineEnd = rawContent.substring(0, endIndex + 1).split("\n").length;
-
-      // If we successfully parsed JSDoc details, add them
-      if (parsed.desc || parsed.params || parsed.returns || parsed.examples || parsed.notes) {
-        if (!fileDocs) {
-          fileDocs = {};
-        }
-        fileDocs[symbolName] = parsed;
-      }
-    }
-
-    if (fileDocs) {
-      docs[relativePath] = fileDocs;
+    if (relativePath.startsWith("columnExpressions/")) {
+      const subKey = path.basename(relativePath, ".ts");
+      docs.columnExpressions[subKey] = Object.assign(docs.columnExpressions[subKey] || {}, fileDocs);
+    } else if (relativePath.startsWith("dataframe/")) {
+      Object.assign(docs.dataframe, fileDocs);
+    } else if (relativePath.startsWith("datatypes/")) {
+      Object.assign(docs.datatypes, fileDocs);
+    } else if (relativePath.startsWith("exceptions/")) {
+      Object.assign(docs.exceptions, fileDocs);
+    } else if (relativePath.startsWith("functions/")) {
+      Object.assign(docs.functions, fileDocs);
     }
   }
 
@@ -485,7 +966,7 @@ function extractRawDocs() {
 /**
  * Hydrates clean <!-- doc:KEY --> tags in compiled .d.ts files with full ASCII tables.
  */
-function hydrateDtsInDir(dir) {
+export function hydrateDtsInDir(dir) {
   if (!fs.existsSync(dir)) return;
   let count = 0;
   function walk(currentDir) {
@@ -496,14 +977,19 @@ function hydrateDtsInDir(dir) {
       } else if (full.endsWith(".d.ts")) {
         let content = fs.readFileSync(full, "utf-8");
         let changed = false;
-        content = content.replace(/([ \t]*\*[ \t]*)<!-- @?doc:([a-zA-Z0-9_]+) -->/g, (_, prefix, key) => {
-          if (docExamples[key]) {
-            changed = true;
-            const lines = docExamples[key].split("\n").map(l => l.replace(/^[ \t]*\*[ \t]?/, "").trimEnd());
-            return lines.map(line => ` * ${line}`).join("\n");
+        content = content.replace(
+          /([ \t]*\*[ \t]*)<!-- @?doc:([a-zA-Z0-9_]+) -->/g,
+          (_, prefix, key) => {
+            if (docExamples[key]) {
+              changed = true;
+              const lines = docExamples[key]
+                .split("\n")
+                .map(l => l.replace(/^[ \t]*\*[ \t]?/, "").trimEnd());
+              return lines.map(line => ` * ${line}`).join("\n");
+            }
+            return "";
           }
-          return "";
-        });
+        );
         if (changed) {
           fs.writeFileSync(full, content, "utf-8");
           count++;
@@ -519,31 +1005,33 @@ function hydrateDtsInDir(dir) {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
-const isSync = process.argv.includes("--sync");
-if (isSync) {
-  console.log("Synchronizing JSDoc template tables in TypeScript source files...");
-  const sourceFiles = getSourceFiles(srcDir);
-  syncJSDocsInFiles(sourceFiles);
+const isMain = process.argv[1] && path.resolve(process.argv[1]) === __filename;
+
+if (isMain) {
+  const isSync = process.argv.includes("--sync");
+  if (isSync) {
+    console.log("Synchronizing JSDoc template tables in TypeScript source files...");
+    const sourceFiles = getSourceFiles(srcDir);
+    syncJSDocsInFiles(sourceFiles);
+  }
+
+  const outArg = process.argv.indexOf("--out");
+  const outPath =
+    outArg !== -1 ? path.resolve(process.argv[outArg + 1]) : path.resolve(__dirname, "../docs.json");
+
+  console.log("Extracting raw docs and types recursively from source files...");
+  const docs = extractRawDocs();
+  const typeCount = Object.keys(docs.types).length;
+
+  console.log(`  Extracted ${typeCount} TypeScript type definitions.`);
+
+  fs.writeFileSync(outPath, JSON.stringify(docs, null, 2), "utf-8");
+  console.log(`  Written to: ${outPath}`);
+
+  const distDir = path.resolve(__dirname, "../dist");
+  if (fs.existsSync(distDir)) {
+    hydrateDtsInDir(distDir);
+  }
+
+  console.log("Done.");
 }
-
-const outArg = process.argv.indexOf("--out");
-const outPath = outArg !== -1
-  ? path.resolve(process.argv[outArg + 1])
-  : path.resolve(__dirname, "../docs.json");
-
-console.log("Extracting raw docs recursively from source files...");
-const docs = extractRawDocs();
-const fileCount = Object.keys(docs).length;
-const symbolCount = Object.values(docs).reduce((acc, f) => acc + Object.keys(f).length, 0);
-
-console.log(`  Found JSDocs in ${fileCount} files containing ${symbolCount} documented symbols.`);
-
-fs.writeFileSync(outPath, JSON.stringify(docs, null, 2), "utf-8");
-console.log(`  Written to: ${outPath}`);
-
-const distDir = path.resolve(__dirname, "../dist");
-if (fs.existsSync(distDir)) {
-  hydrateDtsInDir(distDir);
-}
-
-console.log("Done.");

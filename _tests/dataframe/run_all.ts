@@ -10,7 +10,6 @@ import "./drop.test";
 import "./dropNulls.test";
 import "./dtypes.test";
 import "./equals.test";
-import "../exceptions.test";
 import "./explode.test";
 import "./fill.test";
 import "./fillNan.test";

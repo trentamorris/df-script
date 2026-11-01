@@ -41,7 +41,9 @@ _runSuite("dataframe", () => { require("./dataframe/run_all"); });
 // 3. Functions
 _runSuite("all.test", () => { require("./functions/all.test"); });
 _runSuite("coalesce.test", () => { require("./functions/coalesce.test"); });
+_runSuite("col.test", () => { require("./functions/col.test"); });
 _runSuite("concat.test", () => { require("./functions/concat.test"); });
+_runSuite("data.test", () => { require("./functions/data.test"); });
 _runSuite("duration.test", () => { require("./functions/duration.test"); });
 _runSuite("element.test", () => { require("./functions/element.test"); });
 _runSuite("exclude.test", () => { require("./functions/exclude.test"); });
@@ -56,6 +58,7 @@ _runSuite("when.test", () => { require("./functions/when.test"); });
 
 // 4. DataTypes
 _runSuite("dataTypes.test", () => { require("./datatypes/dataTypes.test"); });
+_runSuite("exceptions", () => { require("./exceptions/run_all"); });
 
 // 5. Utils
 _runSuite("utils/array", () => { require("./utils/array/run_all"); });

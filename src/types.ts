@@ -49,6 +49,15 @@ export interface CastOptions {
 
 export type IntoExpr = string | RegExp | IExpr;
 
+export type ColumnSelector<T = any> =
+    | keyof T
+    | string
+    | RegExp
+    | DataType
+    | Function
+    | (keyof T | string | RegExp)[]
+    | (DataType | Function)[];
+
 export interface IExpr {
     _ops: OpFn[];
     _colName?: string;
