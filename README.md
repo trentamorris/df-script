@@ -10,11 +10,16 @@
 [![License](https://img.shields.io/npm/l/df-script?style=for-the-badge&color=informational)](LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-Support-green?style=for-the-badge)](DONATIONS.md)
 
-**Official Documentation & Interactive Notebook:** [https://df-script.js.org](https://df-script.js.org)
+## Overview & Machine-Readable References
 
+- **Version**: 2.4.0
+- **License**: MIT (Trent Morris)
+- **Interactive Documentation**: [https://df-script.js.org](https://df-script.js.org)
+- **Repository**: [https://github.com/trentamorris/df-script](https://github.com/trentamorris/df-script)
+- **Full LLM Reference (Markdown)**: [llms-full.txt](https://df-script.js.org/llms-full.txt)
+- **Raw API Schema (JSON)**: [docs.json](https://df-script.js.org/docs.json)
 
 ---
-
 
 ## Introduction
 
