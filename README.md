@@ -10,7 +10,7 @@
 [![License](https://img.shields.io/npm/l/df-script?style=for-the-badge&color=informational)](LICENSE)
 [![Donate](https://img.shields.io/badge/Donate-Support-green?style=for-the-badge)](DONATIONS.md)
 
-## Overview & Machine-Readable References
+## Overview
 
 - **Version**: 2.4.0
 - **License**: MIT (Trent Morris)

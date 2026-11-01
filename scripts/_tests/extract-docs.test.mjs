@@ -214,13 +214,15 @@ test("extractRawDocsFromContent: method named 'get' vs getter 'get width'", () =
   assert.ok(docs);
   assert.strictEqual(docs.Dummy, undefined);
   assert.strictEqual(docs.width.signature, "df.width: number");
-  assert.strictEqual(docs.width.name, ".width");
+  assert.strictEqual(docs.width.callExpression, ".width");
+  assert.strictEqual(docs.width.propertyAccess, "width");
   assert.strictEqual(docs.width.filePath, "dataframe/dataframe.ts");
   assert.strictEqual(
     docs.get.signature,
     "df.get(\n  index: number,\n  nullOnOob: boolean = true\n)"
   );
-  assert.strictEqual(docs.get.name, ".get()");
+  assert.strictEqual(docs.get.callExpression, ".get()");
+  assert.strictEqual(docs.get.propertyAccess, "get");
 });
 
 test("extractRawDocsFromContent: file-level JSDoc followed by class JSDoc in Exception file", () => {
@@ -253,9 +255,11 @@ test("extractRawDocsFromContent: file-level JSDoc followed by class JSDoc in Exc
   const docs = extractRawDocsFromContent(source, "exceptions/exceptions.ts", {});
   assert.ok(docs);
   assert.strictEqual(docs.DFScriptError.desc, "Base exception class for all df-script errors.");
-  assert.strictEqual(docs.DFScriptError.name, "DFScriptError");
+  assert.strictEqual(docs.DFScriptError.callExpression, "DFScriptError");
+  assert.strictEqual(docs.DFScriptError.propertyAccess, "DFScriptError");
   assert.strictEqual(docs.DFScriptError.signature, "new DFScriptError(message: string)");
-  assert.strictEqual(docs.ColumnNotFoundError.name, "ColumnNotFoundError");
+  assert.strictEqual(docs.ColumnNotFoundError.callExpression, "ColumnNotFoundError");
+  assert.strictEqual(docs.ColumnNotFoundError.propertyAccess, "ColumnNotFoundError");
   assert.strictEqual(
     docs.ColumnNotFoundError.signature,
     "new ColumnNotFoundError(\n  columnName: string,\n  message?: string\n)"
@@ -472,7 +476,8 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     assert.strictEqual(fnDoc.filePath, expected.filePath, `Expected filePath '${expected.filePath}' for ${fnName}`);
     assert.strictEqual(fnDoc.category, "Function", `Expected category 'Function' for ${fnName}`);
     assert.strictEqual(fnDoc.namespace, "$df", `Expected namespace '$df' for ${fnName}`);
-    assert.strictEqual(fnDoc.name, `${fnName}()`, `Unexpected name for ${fnName}: ${fnDoc.name}`);
+    assert.strictEqual(fnDoc.propertyAccess, fnName, `Unexpected propertyAccess for ${fnName}: ${fnDoc.propertyAccess}`);
+    assert.strictEqual(fnDoc.callExpression, `${fnName}()`, `Unexpected callExpression for ${fnName}: ${fnDoc.callExpression}`);
     assert.strictEqual(fnDoc.signature, expected.signature, `Signature mismatch for ${fnName}`);
     assert.strictEqual(fnDoc.returns, expected.returns, `Returns mismatch for ${fnName}`);
     assert.deepStrictEqual(fnDoc.subTypes, expected.subTypes, `subTypes mismatch for ${fnName}`);
@@ -536,6 +541,108 @@ test("Full codebase invariant check: all symbols and types have valid signatures
   }
 
   assert.ok(totalOps >= 340, `Expected at least 340 documented operations, got ${totalOps}`);
+});
+
+// ─── 8. propertyAccess, accessor & callExpression Invariants and Edge Cases ─
+
+test("extractRawDocs: propertyAccess, accessor, and callExpression are populated accurately across all categories", () => {
+  const allDocs = extractRawDocs();
+
+  // 1. Column expressions with accessors (arr, str, struct, dt)
+  const arrayAgg = allDocs.columnExpressions.arrayExpr?.agg;
+  assert.ok(arrayAgg, "Expected arrayExpr.agg to exist");
+  assert.strictEqual(arrayAgg.namespace, "$df.col");
+  assert.strictEqual(arrayAgg.accessor, "arr");
+  assert.strictEqual(arrayAgg.propertyAccess, "agg");
+  assert.strictEqual(arrayAgg.callExpression, ".arr.agg()");
+
+  const stringConcat = allDocs.columnExpressions.stringExpr?.concat;
+  assert.ok(stringConcat, "Expected stringExpr.concat to exist");
+  assert.strictEqual(stringConcat.namespace, "$df.col");
+  assert.strictEqual(stringConcat.accessor, "str");
+  assert.strictEqual(stringConcat.propertyAccess, "concat");
+  assert.strictEqual(stringConcat.callExpression, ".str.concat()");
+
+  const structField = allDocs.columnExpressions.structExpr?.field;
+  assert.ok(structField, "Expected structExpr.field to exist");
+  assert.strictEqual(structField.namespace, "$df.col");
+  assert.strictEqual(structField.accessor, "struct");
+  assert.strictEqual(structField.propertyAccess, "field");
+  assert.strictEqual(structField.callExpression, ".struct.field()");
+
+  const dtYear = allDocs.columnExpressions.temporalExpr?.year;
+  assert.ok(dtYear, "Expected temporalExpr.year to exist");
+  assert.strictEqual(dtYear.namespace, "$df.col");
+  assert.strictEqual(dtYear.accessor, "dt");
+  assert.strictEqual(dtYear.propertyAccess, "year");
+  assert.strictEqual(dtYear.callExpression, ".dt.year()");
+
+  // 2. Base / Standard column expressions ($df.col namespace, no accessor)
+  const standardAbs = allDocs.columnExpressions.standardExpr?.abs;
+  assert.ok(standardAbs, "Expected standardExpr.abs to exist");
+  assert.strictEqual(standardAbs.namespace, "$df.col");
+  assert.strictEqual(standardAbs.accessor, undefined);
+  assert.strictEqual(standardAbs.propertyAccess, "abs");
+  assert.strictEqual(standardAbs.callExpression, ".abs()");
+
+  // 3. DataFrame operations
+  const dfFilter = allDocs.dataframe?.filter;
+  assert.ok(dfFilter, "Expected dataframe.filter to exist");
+  assert.strictEqual(dfFilter.namespace, "df");
+  assert.strictEqual(dfFilter.accessor, undefined);
+  assert.strictEqual(dfFilter.propertyAccess, "filter");
+  assert.strictEqual(dfFilter.callExpression, ".filter()");
+
+  const dfShapeGetter = allDocs.dataframe?.shape;
+  assert.ok(dfShapeGetter, "Expected dataframe.shape to exist");
+  assert.strictEqual(dfShapeGetter.namespace, "df");
+  assert.strictEqual(dfShapeGetter.accessor, undefined);
+  assert.strictEqual(dfShapeGetter.propertyAccess, "shape");
+  assert.strictEqual(dfShapeGetter.callExpression, ".shape");
+
+  // 4. Standalone functions
+  const fnCol = allDocs.functions?.col;
+  assert.ok(fnCol, "Expected functions.col to exist");
+  assert.strictEqual(fnCol.namespace, "$df");
+  assert.strictEqual(fnCol.accessor, undefined);
+  assert.strictEqual(fnCol.propertyAccess, "col");
+  assert.strictEqual(fnCol.callExpression, "col()");
+
+  // 5. Exceptions (classes)
+  const errDf = allDocs.exceptions?.DataFrameError;
+  assert.ok(errDf, "Expected exceptions.DataFrameError to exist");
+  assert.strictEqual(errDf.namespace, "Exception");
+  assert.strictEqual(errDf.accessor, undefined);
+  assert.strictEqual(errDf.propertyAccess, "DataFrameError");
+  assert.strictEqual(errDf.callExpression, "DataFrameError");
+
+  // Invariant across all documented operations
+  const allGroups = [
+    ...Object.values(allDocs.columnExpressions),
+    allDocs.dataframe,
+    allDocs.datatypes,
+    allDocs.exceptions,
+    allDocs.functions
+  ];
+
+  for (const group of allGroups) {
+    for (const [sym, item] of Object.entries(group)) {
+      assert.strictEqual(item.propertyAccess, sym, `propertyAccess must match symbol key '${sym}'`);
+      assert.ok(item.callExpression, `callExpression must be defined for '${sym}'`);
+      assert.strictEqual(item.name, undefined, `name must be removed for '${sym}'`);
+      assert.strictEqual(item.methodName, undefined, `methodName must be removed for '${sym}'`);
+      assert.strictEqual(item.qualifiedName, undefined, `qualifiedName must be removed for '${sym}'`);
+      if (item.category === "ColumnExpression") {
+        assert.strictEqual(item.namespace, "$df.col");
+        if (item.accessor) {
+          assert.ok(
+            item.callExpression.startsWith(`.${item.accessor}.`),
+            `Expected callExpression for '${sym}' with accessor '${item.accessor}' to start with '.${item.accessor}.', got '${item.callExpression}'`
+          );
+        }
+      }
+    }
+  }
 });
 
 console.log(`✅ All ${passed} test suites in scripts/_tests/extract-docs.test.mjs passed!`);

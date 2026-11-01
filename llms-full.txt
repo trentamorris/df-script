@@ -12,7 +12,7 @@
 
 ## Namespace: $df.col.exprBase
 
-## .alias()
+## Operation
 
 Renames the output expression column key.
 
@@ -23,7 +23,7 @@ $df.col(<column_name>).alias(name: string): this
 
 ---
 
-## .cast()
+## Operation
 
 Coerces the column data type to another type.
 
@@ -43,7 +43,7 @@ $df.col(<column_name>).cast(
 
 ## Namespace: $df.col.arrayExpr
 
-## .agg()
+## Operation
 
 Applies an aggregation expression or element-wise calculation over each array cell.
 
@@ -83,7 +83,7 @@ shape: (2, 2)
 
 ---
 
-## .all()
+## Operation
 
 Returns true if all items in nested list cells are truthy.
 
@@ -117,7 +117,7 @@ shape: (2, 2)
 
 ---
 
-## .any()
+## Operation
 
 Returns true if any item in nested list cells is truthy.
 
@@ -151,7 +151,7 @@ shape: (2, 2)
 
 ---
 
-## .argMax()
+## Operation
 
 Finds the index of the maximum value in each array.
 
@@ -185,7 +185,7 @@ shape: (2, 2)
 
 ---
 
-## .argMin()
+## Operation
 
 Finds the index of the minimum value in each array.
 
@@ -219,7 +219,7 @@ shape: (2, 2)
 
 ---
 
-## .contains()
+## Operation
 
 Checks if nested lists contain item.
 
@@ -256,7 +256,7 @@ shape: (2, 2)
 
 ---
 
-## .containsAll()
+## Operation
 
 Checks if nested lists contain all elements in items.
 
@@ -293,7 +293,7 @@ shape: (2, 2)
 
 ---
 
-## .containsAny()
+## Operation
 
 Checks if nested lists contain any element in items.
 
@@ -330,7 +330,7 @@ shape: (2, 2)
 
 ---
 
-## .countMatches()
+## Operation
 
 Counts occurrence frequency of item inside nested lists.
 
@@ -374,7 +374,7 @@ shape: (2, 2)
 
 ---
 
-## .eval()
+## Operation
 
 Evaluates subExpr element-wise across array lists.
 
@@ -414,7 +414,7 @@ shape: (2, 2)
 
 ---
 
-## .explode()
+## Operation
 
 Expands lists into row-wise elements and produces an index mapping for DataFrame unnesting.
 
@@ -459,7 +459,7 @@ shape: (2, 2)
 
 ---
 
-## .filter()
+## Operation
 
 Filters elements of list columns matching a boolean sub-expression.
 
@@ -499,7 +499,7 @@ shape: (2, 2)
 
 ---
 
-## .first()
+## Operation
 
 Returns the first element of each list.
 
@@ -536,7 +536,7 @@ shape: (2, 2)
 
 ---
 
-## .gather()
+## Operation
 
 Gathers specific indices from each nested list.
 
@@ -577,7 +577,7 @@ shape: (2, 2)
 
 ---
 
-## .gatherEvery()
+## Operation
 
 Gather element slices with custom steps.
 
@@ -617,7 +617,7 @@ shape: (2, 2)
 
 ---
 
-## .get()
+## Operation
 
 Extracts a single list element by its index position.
 
@@ -658,7 +658,7 @@ shape: (2, 2)
 
 ---
 
-## .join()
+## Operation
 
 Joins elements of list columns into a single string column.
 
@@ -702,7 +702,7 @@ shape: (2, 2)
 
 ---
 
-## .last()
+## Operation
 
 Returns the last element of each list.
 
@@ -739,7 +739,7 @@ shape: (2, 2)
 
 ---
 
-## .len()
+## Operation
 
 Returns the length of each list inside the column cell.
 
@@ -750,7 +750,7 @@ $df.col(<column_name>).arr.len()
 
 ---
 
-## .lengths()
+## Operation
 
 Returns the length of each list inside the column cell.
 
@@ -784,7 +784,7 @@ shape: (2, 2)
 
 ---
 
-## .max()
+## Operation
 
 Returns the maximum value of elements inside each list.
 
@@ -818,7 +818,7 @@ shape: (2, 2)
 
 ---
 
-## .mean()
+## Operation
 
 Returns average of elements inside each list.
 
@@ -852,7 +852,7 @@ shape: (2, 2)
 
 ---
 
-## .median()
+## Operation
 
 Returns statistical median inside each list.
 
@@ -886,7 +886,7 @@ shape: (2, 2)
 
 ---
 
-## .min()
+## Operation
 
 Returns minimum of elements inside each list.
 
@@ -920,7 +920,7 @@ shape: (2, 2)
 
 ---
 
-## .mode()
+## Operation
 
 Returns the mode value inside each list.
 
@@ -954,7 +954,7 @@ shape: (2, 2)
 
 ---
 
-## .nUnique()
+## Operation
 
 Returns the unique count of elements inside each list.
 
@@ -994,7 +994,7 @@ shape: (2, 2)
 
 ---
 
-## .reverse()
+## Operation
 
 Reverses elements of list columns.
 
@@ -1028,7 +1028,7 @@ shape: (2, 2)
 
 ---
 
-## .shift()
+## Operation
 
 Shifts elements of list columns by N offsets.
 
@@ -1071,7 +1071,7 @@ shape: (2, 2)
 
 ---
 
-## .slice()
+## Operation
 
 Slices nested list arrays.
 
@@ -1112,7 +1112,7 @@ shape: (2, 2)
 
 ---
 
-## .sort()
+## Operation
 
 Sorts elements inside each list.
 
@@ -1152,7 +1152,7 @@ shape: (2, 2)
 
 ---
 
-## .splice()
+## Operation
 
 Splices elements in list cells.
 
@@ -1195,7 +1195,7 @@ shape: (2, 2)
 
 ---
 
-## .std()
+## Operation
 
 Returns sample standard deviation of elements inside each list.
 
@@ -1229,7 +1229,7 @@ shape: (2, 2)
 
 ---
 
-## .sum()
+## Operation
 
 Returns sum of elements inside each list.
 
@@ -1263,7 +1263,7 @@ shape: (2, 2)
 
 ---
 
-## .toStruct()
+## Operation
 
 Converts list column elements to struct columns.
 
@@ -1308,7 +1308,7 @@ shape: (2, 2)
 
 ---
 
-## .unique()
+## Operation
 
 Fills each list with unique elements only.
 
@@ -1348,7 +1348,7 @@ shape: (2, 2)
 
 ---
 
-## .variance()
+## Operation
 
 Returns sample variance of elements inside each list.
 
@@ -1384,7 +1384,7 @@ shape: (2, 2)
 
 ## Namespace: $df.col.standardExpr
 
-## .abs()
+## Operation
 
 Computes the absolute value of the column values.
 
@@ -1420,7 +1420,7 @@ shape: (3, 2)
 
 ---
 
-## .add()
+## Operation
 
 Adds a scalar value or another column expression.
 
@@ -1462,7 +1462,7 @@ shape: (3, 2)
 
 ---
 
-## .all()
+## Operation
 
 Aggregation: Returns true if all values in the group are truthy.
 
@@ -1497,7 +1497,7 @@ shape: (1, 1)
 
 ---
 
-## .allNull()
+## Operation
 
 Aggregation: Checks if all values in the group are null.
 
@@ -1531,7 +1531,7 @@ shape: (1, 1)
 
 ---
 
-## .and()
+## Operation
 
 Logical AND check supporting Kleene logic.
 
@@ -1572,7 +1572,7 @@ shape: (4, 3)
 
 ---
 
-## .any()
+## Operation
 
 Aggregation: Checks if any value in the group is truthy.
 
@@ -1607,7 +1607,7 @@ shape: (1, 1)
 
 ---
 
-## .anyNull()
+## Operation
 
 Aggregation: Checks if any value in the group is null.
 
@@ -1641,7 +1641,7 @@ shape: (1, 1)
 
 ---
 
-## .arccos()
+## Operation
 
 Computes the mathematical arccosine (inverse cosine) of the column values.
 
@@ -1677,7 +1677,7 @@ shape: (3, 2)
 
 ---
 
-## .arccosh()
+## Operation
 
 Computes the hyperbolic arccosine of the column values.
 
@@ -1713,7 +1713,7 @@ shape: (3, 2)
 
 ---
 
-## .arcsin()
+## Operation
 
 Computes the arcsine of the column values.
 
@@ -1749,7 +1749,7 @@ shape: (3, 2)
 
 ---
 
-## .arcsinh()
+## Operation
 
 Computes the hyperbolic arcsine of the column values.
 
@@ -1785,7 +1785,7 @@ shape: (3, 2)
 
 ---
 
-## .arctan()
+## Operation
 
 Computes the arctangent of the column values.
 
@@ -1821,7 +1821,7 @@ shape: (3, 2)
 
 ---
 
-## .arctan2()
+## Operation
 
 Computes the quadrant-aware arctangent of two values.
 
@@ -1863,7 +1863,7 @@ shape: (3, 3)
 
 ---
 
-## .arctanh()
+## Operation
 
 Computes the hyperbolic arctangent of the column values.
 
@@ -1899,7 +1899,7 @@ shape: (3, 2)
 
 ---
 
-## .argMax()
+## Operation
 
 Aggregation: Finds the index of the maximum value in the group.
 
@@ -1933,7 +1933,7 @@ shape: (1, 1)
 
 ---
 
-## .argMin()
+## Operation
 
 Aggregation: Finds the index of the minimum value in the group.
 
@@ -1967,7 +1967,7 @@ shape: (1, 1)
 
 ---
 
-## .avg()
+## Operation
 
 Aggregation: Computes the arithmetic mean of the group.
 
@@ -2002,7 +2002,7 @@ shape: (2, 2)
 
 ---
 
-## .between()
+## Operation
 
 Checks if values fall inside lower and upper boundaries (inclusive).
 
@@ -2047,7 +2047,7 @@ shape: (3, 3)
 
 ---
 
-## .bitwiseAnd()
+## Operation
 
 Aggregation: Computes bitwise AND across all elements in the group.
 
@@ -2081,7 +2081,7 @@ shape: (1, 1)
 
 ---
 
-## .bitwiseOr()
+## Operation
 
 Aggregation: Computes bitwise OR across all elements in the group.
 
@@ -2115,7 +2115,7 @@ shape: (1, 1)
 
 ---
 
-## .bitwiseXor()
+## Operation
 
 Aggregation: Computes bitwise XOR across all elements in the group.
 
@@ -2149,7 +2149,7 @@ shape: (1, 1)
 
 ---
 
-## .cbrt()
+## Operation
 
 Computes the cube root of the column values.
 
@@ -2185,7 +2185,7 @@ shape: (3, 2)
 
 ---
 
-## .ceil()
+## Operation
 
 Rounds column values up to the nearest integer.
 
@@ -2221,7 +2221,7 @@ shape: (3, 2)
 
 ---
 
-## .clip()
+## Operation
 
 Clamps column values between lower and upper numeric thresholds.
 
@@ -2264,7 +2264,7 @@ shape: (3, 2)
 
 ---
 
-## .copysign()
+## Operation
 
 Returns absolute value of expr with the sign of other.
 
@@ -2306,7 +2306,7 @@ shape: (3, 3)
 
 ---
 
-## .corr()
+## Operation
 
 Aggregation: Computes the Pearson correlation coefficient between two columns.
 
@@ -2343,7 +2343,7 @@ shape: (1, 1)
 
 ---
 
-## .cos()
+## Operation
 
 Computes the cosine of the column values.
 
@@ -2379,7 +2379,7 @@ shape: (3, 2)
 
 ---
 
-## .cosh()
+## Operation
 
 Computes the hyperbolic cosine of the column values.
 
@@ -2415,7 +2415,7 @@ shape: (3, 2)
 
 ---
 
-## .cot()
+## Operation
 
 Computes the cotangent of the column values.
 
@@ -2451,7 +2451,7 @@ shape: (3, 2)
 
 ---
 
-## .count()
+## Operation
 
 Aggregation: Returns the count of records inside the group.
 
@@ -2489,7 +2489,7 @@ shape: (2, 2)
 
 ---
 
-## .cov()
+## Operation
 
 Aggregation: Computes the covariance between two columns.
 
@@ -2526,7 +2526,7 @@ shape: (1, 1)
 
 ---
 
-## .cumCount()
+## Operation
 
 Window: Computes cumulative count.
 
@@ -2565,7 +2565,7 @@ shape: (3, 2)
 
 ---
 
-## .cumMax()
+## Operation
 
 Window: Computes cumulative maximum value.
 
@@ -2604,7 +2604,7 @@ shape: (3, 2)
 
 ---
 
-## .cumMin()
+## Operation
 
 Window: Computes cumulative minimum value.
 
@@ -2643,7 +2643,7 @@ shape: (3, 2)
 
 ---
 
-## .cumProd()
+## Operation
 
 Window: Computes cumulative product of values.
 
@@ -2683,7 +2683,7 @@ shape: (4, 2)
 
 ---
 
-## .cumSum()
+## Operation
 
 Window: Computes cumulative sum of values.
 
@@ -2722,7 +2722,7 @@ shape: (3, 2)
 
 ---
 
-## .degrees()
+## Operation
 
 Converts angles from radians to degrees.
 
@@ -2758,7 +2758,7 @@ shape: (3, 2)
 
 ---
 
-## .denseRank()
+## Operation
 
 Window: Computes dense rank (ranks without gaps) within group partition.
 
@@ -2793,7 +2793,7 @@ shape: (2, 2)
 
 ---
 
-## .div()
+## Operation
 
 Divides column values by a scalar or another column expression.
 
@@ -2835,7 +2835,7 @@ shape: (3, 2)
 
 ---
 
-## .dot()
+## Operation
 
 Aggregation: Computes the dot product with another column.
 
@@ -2872,7 +2872,7 @@ shape: (1, 1)
 
 ---
 
-## .entropy()
+## Operation
 
 Aggregation: Computes the Shannon entropy of a column or group.
 
@@ -2912,7 +2912,7 @@ shape: (1, 1)
 
 ---
 
-## .eq()
+## Operation
 
 Boolean comparison: Returns true if column values match the specified value exactly.
 
@@ -2951,7 +2951,7 @@ shape: (3, 2)
 
 ---
 
-## .eqMissing()
+## Operation
 
 Equivalence check that treats null values as equal to each other.
 
@@ -2990,7 +2990,7 @@ shape: (3, 2)
 
 ---
 
-## .ewmKurt()
+## Operation
 
 Window: Computes exponentially weighted moving kurtosis.
 
@@ -3024,7 +3024,7 @@ shape: (3, 1)
 
 ---
 
-## .ewmMean()
+## Operation
 
 Window: Computes exponentially weighted moving average (mean).
 
@@ -3066,7 +3066,7 @@ shape: (3, 2)
 
 ---
 
-## .ewmSkew()
+## Operation
 
 Window: Computes exponentially weighted moving skewness.
 
@@ -3100,7 +3100,7 @@ shape: (3, 1)
 
 ---
 
-## .ewmStd()
+## Operation
 
 Window: Computes exponentially weighted moving standard deviation.
 
@@ -3134,7 +3134,7 @@ shape: (3, 1)
 
 ---
 
-## .ewmSum()
+## Operation
 
 Window: Computes exponentially weighted moving sum.
 
@@ -3168,7 +3168,7 @@ shape: (3, 1)
 
 ---
 
-## .ewmVar()
+## Operation
 
 Window: Computes exponentially weighted moving variance.
 
@@ -3202,7 +3202,7 @@ shape: (3, 1)
 
 ---
 
-## .exp()
+## Operation
 
 Computes natural exponent (e^x) of the column values.
 
@@ -3238,7 +3238,7 @@ shape: (3, 2)
 
 ---
 
-## .expm1()
+## Operation
 
 Computes e^x - 1 for each element in the column.
 
@@ -3274,7 +3274,7 @@ shape: (3, 2)
 
 ---
 
-## .fill()
+## Operation
 
 Replaces targeted values ("null", "nan", or "all") with a specified value or strategy.
 
@@ -3323,7 +3323,7 @@ shape: (3, 2)
 
 ---
 
-## .fillNan()
+## Operation
 
 Replaces NaN values with a specified value or strategy.
 
@@ -3367,7 +3367,7 @@ shape: (3, 2)
 
 ---
 
-## .fillNull()
+## Operation
 
 Replaces null, undefined, or missing values with a specified value or strategy.
 
@@ -3409,7 +3409,7 @@ shape: (3, 2)
 
 ---
 
-## .filter()
+## Operation
 
 Filters elements of the column expression where the predicate evaluates to truthy.
 
@@ -3450,7 +3450,7 @@ shape: (2, 1)
 
 ---
 
-## .first()
+## Operation
 
 Aggregation: Finds the first value in the group.
 
@@ -3485,7 +3485,7 @@ shape: (2, 2)
 
 ---
 
-## .floor()
+## Operation
 
 Rounds column values down to the nearest integer.
 
@@ -3521,7 +3521,7 @@ shape: (3, 2)
 
 ---
 
-## .floordiv()
+## Operation
 
 Performs integer division floor(x / y) on column values.
 
@@ -3563,7 +3563,7 @@ shape: (3, 2)
 
 ---
 
-## .ge()
+## Operation
 
 Boolean comparison: Returns true if greater than or equal to argument.
 
@@ -3602,7 +3602,7 @@ shape: (3, 2)
 
 ---
 
-## .gt()
+## Operation
 
 Boolean comparison: Returns true if column value is greater than argument.
 
@@ -3641,7 +3641,7 @@ shape: (3, 2)
 
 ---
 
-## .hasNulls()
+## Operation
 
 Aggregation: Checks if any value in the group is null.
 
@@ -3675,7 +3675,7 @@ shape: (1, 1)
 
 ---
 
-## .hypot()
+## Operation
 
 Computes the hypotenuse sqrt(x^2 + y^2) of two values.
 
@@ -3717,7 +3717,7 @@ shape: (3, 3)
 
 ---
 
-## .implode()
+## Operation
 
 Aggregation: Combines all values in the group into a single array/list cell.
 
@@ -3752,7 +3752,7 @@ shape: (2, 2)
 
 ---
 
-## .isClose()
+## Operation
 
 Determines if floating-point values are approximately equal within tolerances.
 
@@ -3802,7 +3802,7 @@ shape: (3, 2)
 
 ---
 
-## .isDuplicated()
+## Operation
 
 Checks if values occur more than once in the column.
 
@@ -3838,7 +3838,7 @@ shape: (3, 2)
 
 ---
 
-## .isFinite()
+## Operation
 
 Checks if values are finite numbers (not NaN or Infinity).
 
@@ -3874,7 +3874,7 @@ shape: (3, 2)
 
 ---
 
-## .isIn()
+## Operation
 
 Checks if column values are members of a specified array or list.
 
@@ -3913,7 +3913,7 @@ shape: (3, 2)
 
 ---
 
-## .isInfinite()
+## Operation
 
 Checks if values are positive or negative Infinity.
 
@@ -3949,7 +3949,7 @@ shape: (3, 2)
 
 ---
 
-## .isNan()
+## Operation
 
 Checks if values are NaN.
 
@@ -3985,7 +3985,7 @@ shape: (3, 2)
 
 ---
 
-## .isNDistinct()
+## Operation
 
 Checks if column values match the N-th distinct value by positive or negative index position.
 
@@ -4028,7 +4028,7 @@ shape: (3, 3)
 
 ---
 
-## .isNotNan()
+## Operation
 
 Checks if values are not NaN.
 
@@ -4064,7 +4064,7 @@ shape: (3, 2)
 
 ---
 
-## .isNotNull()
+## Operation
 
 Checks if column values are non-null and valid (not null, undefined, or missing).
 
@@ -4100,7 +4100,7 @@ shape: (3, 2)
 
 ---
 
-## .isNull()
+## Operation
 
 Checks if column values are null, undefined, or missing.
 
@@ -4136,7 +4136,7 @@ shape: (3, 2)
 
 ---
 
-## .isUnique()
+## Operation
 
 Checks if values occur exactly once in the column.
 
@@ -4172,7 +4172,7 @@ shape: (3, 2)
 
 ---
 
-## .kurtosis()
+## Operation
 
 Aggregation: Computes the kurtosis (peakedness/tailedness) of a numeric column.
 
@@ -4212,7 +4212,7 @@ shape: (1, 1)
 
 ---
 
-## .lag()
+## Operation
 
 Window: Shifts values down by offset, filling missing slots with default value.
 
@@ -4258,7 +4258,7 @@ shape: (3, 2)
 
 ---
 
-## .last()
+## Operation
 
 Aggregation: Finds the last value in the group.
 
@@ -4293,7 +4293,7 @@ shape: (2, 2)
 
 ---
 
-## .le()
+## Operation
 
 Boolean comparison: Returns true if less than or equal to argument.
 
@@ -4332,7 +4332,7 @@ shape: (3, 2)
 
 ---
 
-## .lead()
+## Operation
 
 Window: Shifts values up by offset, filling missing slots with default value.
 
@@ -4378,7 +4378,7 @@ shape: (3, 2)
 
 ---
 
-## .log()
+## Operation
 
 Computes the logarithm of positive values with a specified base.
 
@@ -4417,7 +4417,7 @@ shape: (3, 2)
 
 ---
 
-## .log1p()
+## Operation
 
 Computes natural logarithm of 1 + x.
 
@@ -4453,7 +4453,7 @@ shape: (3, 2)
 
 ---
 
-## .lt()
+## Operation
 
 Boolean comparison: Returns true if less than argument.
 
@@ -4492,7 +4492,7 @@ shape: (3, 2)
 
 ---
 
-## .max()
+## Operation
 
 Aggregation: Finds the maximum value in the group.
 
@@ -4527,7 +4527,7 @@ shape: (2, 2)
 
 ---
 
-## .maxBy()
+## Operation
 
 Aggregation: Finds the value in this column corresponding to the maximum value in the `by` expression.
 
@@ -4564,7 +4564,7 @@ shape: (1, 1)
 
 ---
 
-## .mean()
+## Operation
 
 Aggregation: Computes the arithmetic mean of elements in the group.
 
@@ -4599,7 +4599,7 @@ shape: (2, 2)
 
 ---
 
-## .median()
+## Operation
 
 Aggregation: Computes the 50th percentile median.
 
@@ -4634,7 +4634,7 @@ shape: (2, 2)
 
 ---
 
-## .min()
+## Operation
 
 Aggregation: Finds the minimum value in the group.
 
@@ -4669,7 +4669,7 @@ shape: (2, 2)
 
 ---
 
-## .minBy()
+## Operation
 
 Aggregation: Finds the value in this column corresponding to the minimum value in the `by` expression.
 
@@ -4706,7 +4706,7 @@ shape: (1, 1)
 
 ---
 
-## .mod()
+## Operation
 
 Computes modulo remainder (x % y) of column values.
 
@@ -4748,7 +4748,7 @@ shape: (3, 2)
 
 ---
 
-## .mode()
+## Operation
 
 Aggregation: Finds the statistical mode (most frequent value).
 
@@ -4782,7 +4782,7 @@ shape: (1, 1)
 
 ---
 
-## .mul()
+## Operation
 
 Multiplies column values by a scalar or another column expression.
 
@@ -4824,7 +4824,7 @@ shape: (3, 2)
 
 ---
 
-## .nanMax()
+## Operation
 
 Aggregation: Finds the maximum value in the group, taking NaN values into account (NaN propagates).
 
@@ -4858,7 +4858,7 @@ shape: (1, 1)
 
 ---
 
-## .nanMin()
+## Operation
 
 Aggregation: Finds the minimum value in the group, taking NaN values into account (NaN propagates).
 
@@ -4892,7 +4892,7 @@ shape: (1, 1)
 
 ---
 
-## .ne()
+## Operation
 
 Boolean comparison: Returns true if values do not match.
 
@@ -4931,7 +4931,7 @@ shape: (3, 2)
 
 ---
 
-## .negate()
+## Operation
 
 Negates column values (-x).
 
@@ -4967,7 +4967,7 @@ shape: (3, 2)
 
 ---
 
-## .neMissing()
+## Operation
 
 Difference check that treats null values as equal to each other.
 
@@ -5006,7 +5006,7 @@ shape: (3, 2)
 
 ---
 
-## .not()
+## Operation
 
 Logical negation.
 
@@ -5044,7 +5044,7 @@ shape: (4, 3)
 
 ---
 
-## .notIn()
+## Operation
 
 Checks if values are not elements of a specific array or set list.
 
@@ -5083,7 +5083,7 @@ shape: (3, 2)
 
 ---
 
-## .nullCount()
+## Operation
 
 Aggregation: Counts the number of null or missing records.
 
@@ -5117,7 +5117,7 @@ shape: (1, 1)
 
 ---
 
-## .nUnique()
+## Operation
 
 Aggregation: Computes number of unique elements.
 
@@ -5157,7 +5157,7 @@ shape: (1, 1)
 
 ---
 
-## .or()
+## Operation
 
 Logical OR check supporting Kleene logic.
 
@@ -5198,7 +5198,7 @@ shape: (4, 3)
 
 ---
 
-## .over()
+## Operation
 
 Executes a window aggregation partitioned by column keys.
 
@@ -5240,7 +5240,7 @@ shape: (3, 3)
 
 ---
 
-## .pow()
+## Operation
 
 Raises column values to the specified power.
 
@@ -5282,7 +5282,7 @@ shape: (3, 2)
 
 ---
 
-## .product()
+## Operation
 
 Aggregation: Computes the product of all elements in the group.
 
@@ -5317,7 +5317,7 @@ shape: (2, 2)
 
 ---
 
-## .quantile()
+## Operation
 
 Aggregation: Computes the specific quantile values (0.0 to 1.0).
 
@@ -5354,7 +5354,7 @@ shape: (1, 1)
 
 ---
 
-## .radians()
+## Operation
 
 Converts angles from degrees to radians.
 
@@ -5390,7 +5390,7 @@ shape: (3, 2)
 
 ---
 
-## .rand()
+## Operation
 
 Fills sequence with pseudo-random generated floats or integers.
 
@@ -5440,7 +5440,7 @@ shape: (3, 2)
 
 ---
 
-## .rank()
+## Operation
 
 Window: Computes rank within group partition.
 
@@ -5475,7 +5475,7 @@ shape: (2, 2)
 
 ---
 
-## .reverse()
+## Operation
 
 Reverses the order of values in the column.
 
@@ -5511,7 +5511,7 @@ shape: (3, 2)
 
 ---
 
-## .rolling()
+## Operation
 
 Window: Computes a rolling window reduction using a ColumnExpression or a custom callback function.
 
@@ -5558,7 +5558,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingMax()
+## Operation
 
 Window: Computes rolling window maximum value.
 
@@ -5597,7 +5597,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingMean()
+## Operation
 
 Window: Computes rolling window mean average.
 
@@ -5636,7 +5636,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingMedian()
+## Operation
 
 Window: Computes rolling window median value.
 
@@ -5675,7 +5675,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingMin()
+## Operation
 
 Window: Computes rolling window minimum value.
 
@@ -5714,7 +5714,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingQuantile()
+## Operation
 
 Window: Computes rolling window quantile value.
 
@@ -5757,7 +5757,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingRank()
+## Operation
 
 Window: Computes rolling window rank.
 
@@ -5796,7 +5796,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingStd()
+## Operation
 
 Window: Computes rolling window standard deviation.
 
@@ -5835,7 +5835,7 @@ shape: (3, 2)
 
 ---
 
-## .rollingSum()
+## Operation
 
 Window: Computes rolling window sum.
 
@@ -5874,7 +5874,7 @@ shape: (3, 2)
 
 ---
 
-## .round()
+## Operation
 
 Rounds values to a specific scale of decimal digits.
 
@@ -5916,7 +5916,7 @@ shape: (3, 2)
 
 ---
 
-## .roundSigFigs()
+## Operation
 
 Rounds values to a specific number of significant figures.
 
@@ -5955,7 +5955,7 @@ shape: (3, 2)
 
 ---
 
-## .rowNumber()
+## Operation
 
 Window: Computes 1-indexed row number count within group partitions.
 
@@ -5991,7 +5991,7 @@ shape: (3, 3)
 
 ---
 
-## .shift()
+## Operation
 
 Shifts values by the given number of rows, filling newly introduced slots with null. Positive offsets shift values down (lag); negative offsets shift values up (lead).
 
@@ -6038,7 +6038,7 @@ shape: (3, 2)
 
 ---
 
-## .sign()
+## Operation
 
 Returns sign indicator of column values (-1, 0, or 1).
 
@@ -6074,7 +6074,7 @@ shape: (3, 2)
 
 ---
 
-## .sin()
+## Operation
 
 Computes the sine of the column values.
 
@@ -6110,7 +6110,7 @@ shape: (3, 2)
 
 ---
 
-## .sinh()
+## Operation
 
 Computes the hyperbolic sine of the column values.
 
@@ -6146,7 +6146,7 @@ shape: (3, 2)
 
 ---
 
-## .skew()
+## Operation
 
 Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of skewness.
 
@@ -6186,7 +6186,7 @@ shape: (1, 1)
 
 ---
 
-## .spearmanCorr()
+## Operation
 
 Aggregation: Computes the Spearman rank correlation coefficient.
 
@@ -6223,7 +6223,7 @@ shape: (1, 1)
 
 ---
 
-## .sqrt()
+## Operation
 
 Computes the square root of non-negative column values.
 
@@ -6259,7 +6259,7 @@ shape: (3, 2)
 
 ---
 
-## .std()
+## Operation
 
 Aggregation: Computes sample standard deviation.
 
@@ -6293,7 +6293,7 @@ shape: (1, 1)
 
 ---
 
-## .sub()
+## Operation
 
 Subtracts a scalar or another column expression.
 
@@ -6335,7 +6335,7 @@ shape: (3, 2)
 
 ---
 
-## .sum()
+## Operation
 
 Aggregation: Computes the sum of elements in the group.
 
@@ -6370,7 +6370,7 @@ shape: (2, 2)
 
 ---
 
-## .tan()
+## Operation
 
 Computes the tangent of the column values.
 
@@ -6406,7 +6406,7 @@ shape: (3, 2)
 
 ---
 
-## .tanh()
+## Operation
 
 Computes the hyperbolic tangent of the column values.
 
@@ -6442,7 +6442,7 @@ shape: (3, 2)
 
 ---
 
-## .trunc()
+## Operation
 
 Truncates fractional digits of column values.
 
@@ -6478,7 +6478,7 @@ shape: (3, 2)
 
 ---
 
-## .variance()
+## Operation
 
 Aggregation: Computes sample variance.
 
@@ -6512,7 +6512,7 @@ shape: (1, 1)
 
 ---
 
-## .wAvg()
+## Operation
 
 Aggregation: Computes weighted average.
 
@@ -6549,7 +6549,7 @@ shape: (1, 1)
 
 ---
 
-## .xor()
+## Operation
 
 Logical XOR check.
 
@@ -6592,7 +6592,7 @@ shape: (4, 3)
 
 ## Namespace: $df.col.stringExpr
 
-## .concat()
+## Operation
 
 Concatenates string elements with another string value or expression.
 
@@ -6634,7 +6634,7 @@ shape: (3, 2)
 
 ---
 
-## .contains()
+## Operation
 
 Checks if a string contains the search substring pattern (supports Regex).
 
@@ -6672,7 +6672,7 @@ shape: (2, 2)
 
 ---
 
-## .containsAny()
+## Operation
 
 Checks if a string contains any of the search patterns.
 
@@ -6710,7 +6710,7 @@ shape: (2, 2)
 
 ---
 
-## .countMatches()
+## Operation
 
 Counts occurrences of a substring or regular expression match in each string element.
 
@@ -6752,7 +6752,7 @@ shape: (3, 2)
 
 ---
 
-## .decode()
+## Operation
 
 Decodes hex or base64 encoded string column values into string.
 
@@ -6794,7 +6794,7 @@ shape: (3, 2)
 
 ---
 
-## .decodeUriComponent()
+## Operation
 
 Decodes Uniform Resource Identifier (URI) components.
 
@@ -6829,7 +6829,7 @@ shape: (2, 2)
 
 ---
 
-## .encode()
+## Operation
 
 Encodes string column values into hex or base64.
 
@@ -6871,7 +6871,7 @@ shape: (3, 2)
 
 ---
 
-## .encodeUriComponent()
+## Operation
 
 Encodes Uniform Resource Identifier (URI) components.
 
@@ -6906,7 +6906,7 @@ shape: (2, 2)
 
 ---
 
-## .endsWith()
+## Operation
 
 Checks if string ends with a suffix.
 
@@ -6944,7 +6944,7 @@ shape: (2, 2)
 
 ---
 
-## .escapeRegex()
+## Operation
 
 Escapes special regular expression characters in string elements.
 
@@ -6983,7 +6983,7 @@ shape: (3, 2)
 
 ---
 
-## .explode()
+## Operation
 
 Splits strings into lists of single characters.
 
@@ -7019,7 +7019,7 @@ shape: (3, 2)
 
 ---
 
-## .extract()
+## Operation
 
 Extracts a captured group from the first regex match.
 
@@ -7064,7 +7064,7 @@ shape: (2, 2)
 
 ---
 
-## .extractAll()
+## Operation
 
 Extracts all occurrences matching a regular expression pattern.
 
@@ -7110,7 +7110,7 @@ shape: (3, 2)
 
 ---
 
-## .extractGroups()
+## Operation
 
 Extracts all captured groups from the first regex match into a structured object (struct).
 
@@ -7154,7 +7154,7 @@ shape: (2, 2)
 
 ---
 
-## .extractMany()
+## Operation
 
 Extracts the first regex match for each pattern in a list of patterns.
 
@@ -7200,7 +7200,7 @@ shape: (3, 2)
 
 ---
 
-## .find()
+## Operation
 
 Return the byte offset of the first substring matching a pattern. Returns null if pattern is not found.
 
@@ -7246,7 +7246,7 @@ shape: (3, 2)
 
 ---
 
-## .findMany()
+## Operation
 
 Return the starting byte offset of each match for multiple patterns.
 
@@ -7292,7 +7292,7 @@ shape: (3, 2)
 
 ---
 
-## .head()
+## Operation
 
 Extracts the first n characters of each string element.
 
@@ -7331,7 +7331,7 @@ shape: (3, 2)
 
 ---
 
-## .join()
+## Operation
 
 Joins a list of string elements into a single string using a delimiter. Accepts `JoinArrayOptions` (`{ ignoreNulls, nullValue, prefix, suffix, limit, truncationMarker, valueFormatter }`).
 
@@ -7375,7 +7375,7 @@ shape: (2, 2)
 
 ---
 
-## .jsonDecode()
+## Operation
 
 Decodes JSON string elements into parsed objects or arrays. Reuses safeJsonParse utility.
 
@@ -7416,7 +7416,7 @@ shape: (2, 2)
 
 ---
 
-## .jsonPathMatch()
+## Operation
 
 Extracts fields or array elements from JSON strings using JSONPath syntax.
 
@@ -7454,7 +7454,7 @@ shape: (2, 2)
 
 ---
 
-## .len()
+## Operation
 
 Returns string length in UTF-16 code units. Alias for lenChars.
 
@@ -7490,7 +7490,7 @@ shape: (3, 2)
 
 ---
 
-## .lenBytes()
+## Operation
 
 Returns string length in UTF-8 encoded bytes.
 
@@ -7526,7 +7526,7 @@ shape: (3, 2)
 
 ---
 
-## .lenChars()
+## Operation
 
 Returns string length in character count.
 
@@ -7562,7 +7562,7 @@ shape: (3, 2)
 
 ---
 
-## .lower()
+## Operation
 
 Converts strings to lowercase.
 
@@ -7598,7 +7598,7 @@ shape: (3, 2)
 
 ---
 
-## .lpad()
+## Operation
 
 Pads start of strings to specified width.
 
@@ -7641,7 +7641,7 @@ shape: (3, 2)
 
 ---
 
-## .normalize()
+## Operation
 
 Normalizes Unicode strings using standard normalization forms (NFC, NFD, NFKC, NFKD).
 
@@ -7680,7 +7680,7 @@ shape: (3, 2)
 
 ---
 
-## .padEnd()
+## Operation
 
 Pads end of strings to specified width. Alias for rpad.
 
@@ -7723,7 +7723,7 @@ shape: (3, 2)
 
 ---
 
-## .padStart()
+## Operation
 
 Pads start of strings to specified width. Alias for lpad.
 
@@ -7766,7 +7766,7 @@ shape: (3, 2)
 
 ---
 
-## .replace()
+## Operation
 
 Replaces the first occurrence matching a string pattern.
 
@@ -7813,7 +7813,7 @@ shape: (2, 2)
 
 ---
 
-## .replaceAll()
+## Operation
 
 Replaces all occurrences matching a string pattern or global regular expression.
 
@@ -7861,7 +7861,7 @@ shape: (3, 2)
 
 ---
 
-## .replaceMany()
+## Operation
 
 Replaces multiple string patterns simultaneously or sequentially with their respective replacements. Matches Polars `.str.replaceMany()` behavior, accepting pattern/replacement arrays or a pattern-to-replacement map dictionary.
 
@@ -7909,7 +7909,7 @@ shape: (3, 2)
 
 ---
 
-## .reverse()
+## Operation
 
 Reverses characters in each string element.
 
@@ -7945,7 +7945,7 @@ shape: (3, 2)
 
 ---
 
-## .rpad()
+## Operation
 
 Pads end of strings to specified width.
 
@@ -7988,7 +7988,7 @@ shape: (3, 2)
 
 ---
 
-## .slice()
+## Operation
 
 Extracts a substring slice using start offset and length.
 
@@ -8031,7 +8031,7 @@ shape: (3, 2)
 
 ---
 
-## .split()
+## Operation
 
 Splits strings into lists by delimiter with optional limit and exact padding.
 
@@ -8076,7 +8076,7 @@ shape: (2, 2)
 
 ---
 
-## .startsWith()
+## Operation
 
 Checks if string starts with a prefix.
 
@@ -8115,7 +8115,7 @@ shape: (3, 2)
 
 ---
 
-## .stripChars()
+## Operation
 
 Strips matching characters from start and end of string.
 
@@ -8160,7 +8160,7 @@ shape: (2, 2)
 
 ---
 
-## .stripCharsEnd()
+## Operation
 
 Strips matching characters from end of string.
 
@@ -8205,7 +8205,7 @@ shape: (2, 2)
 
 ---
 
-## .stripCharsStart()
+## Operation
 
 Strips matching characters from start of string.
 
@@ -8250,7 +8250,7 @@ shape: (2, 2)
 
 ---
 
-## .stripPrefix()
+## Operation
 
 Strips matching prefix substring from start of string.
 
@@ -8289,7 +8289,7 @@ shape: (3, 2)
 
 ---
 
-## .stripSuffix()
+## Operation
 
 Strips matching suffix substring from end of string.
 
@@ -8327,7 +8327,7 @@ shape: (2, 2)
 
 ---
 
-## .strptime()
+## Operation
 
 Parses date/time string into Datetime.
 
@@ -8365,7 +8365,7 @@ shape: (1, 2)
 
 ---
 
-## .tail()
+## Operation
 
 Extracts the last n characters of each string element.
 
@@ -8404,7 +8404,7 @@ shape: (3, 2)
 
 ---
 
-## .toCamelCase()
+## Operation
 
 Converts string casing to camelCase.
 
@@ -8440,7 +8440,7 @@ shape: (3, 2)
 
 ---
 
-## .toDate()
+## Operation
 
 Parses string into Date object.
 
@@ -8472,7 +8472,7 @@ shape: (1, 2)
 
 ---
 
-## .toDatetime()
+## Operation
 
 Parses string into Datetime value.
 
@@ -8504,7 +8504,7 @@ shape: (1, 2)
 
 ---
 
-## .toDecimal()
+## Operation
 
 Converts string into numeric decimal representation.
 
@@ -8547,7 +8547,7 @@ shape: (3, 2)
 
 ---
 
-## .toInteger()
+## Operation
 
 Parses string into integer number.
 
@@ -8583,7 +8583,7 @@ shape: (3, 2)
 
 ---
 
-## .toKebabCase()
+## Operation
 
 Converts string casing to kebab-case.
 
@@ -8619,7 +8619,7 @@ shape: (3, 2)
 
 ---
 
-## .toLowerCase()
+## Operation
 
 Converts all string elements in the column to lowercase.
 
@@ -8655,7 +8655,7 @@ shape: (3, 2)
 
 ---
 
-## .toPascalCase()
+## Operation
 
 Converts string casing to PascalCase.
 
@@ -8691,7 +8691,7 @@ shape: (3, 2)
 
 ---
 
-## .toSnakeCase()
+## Operation
 
 Converts string casing to snake_case.
 
@@ -8727,7 +8727,7 @@ shape: (3, 2)
 
 ---
 
-## .toTime()
+## Operation
 
 Parses string into time component representation.
 
@@ -8763,7 +8763,7 @@ shape: (3, 2)
 
 ---
 
-## .toTitleCase()
+## Operation
 
 Converts string casing to Title Case.
 
@@ -8799,7 +8799,7 @@ shape: (3, 2)
 
 ---
 
-## .toUpperCase()
+## Operation
 
 Converts all string elements in the column to uppercase.
 
@@ -8835,7 +8835,7 @@ shape: (3, 2)
 
 ---
 
-## .trim()
+## Operation
 
 Trims leading and trailing whitespace characters from each string element.
 
@@ -8870,7 +8870,7 @@ shape: (2, 2)
 
 ---
 
-## .trimEnd()
+## Operation
 
 Trims trailing whitespace characters from each string element.
 
@@ -8905,7 +8905,7 @@ shape: (2, 2)
 
 ---
 
-## .trimStart()
+## Operation
 
 Trims leading whitespace characters from each string element.
 
@@ -8940,7 +8940,7 @@ shape: (2, 2)
 
 ---
 
-## .upper()
+## Operation
 
 Converts string to uppercase.
 
@@ -8976,7 +8976,7 @@ shape: (3, 2)
 
 ---
 
-## .zfill()
+## Operation
 
 Pads start of string with zeros to target width.
 
@@ -9017,7 +9017,7 @@ shape: (3, 2)
 
 ## Namespace: $df.col.structExpr
 
-## .field()
+## Operation
 
 Extracts a sub-field property value from nested objects/struct columns.
 
@@ -9052,7 +9052,7 @@ shape: (1, 2)
 
 ---
 
-## .renameFields()
+## Operation
 
 Renames existing field keys inside structured object columns.
 
@@ -9087,7 +9087,7 @@ shape: (1, 2)
 
 ---
 
-## .withFields()
+## Operation
 
 Inserts or updates fields inside structured object columns.
 
@@ -9125,7 +9125,7 @@ shape: (1, 2)
 
 ---
 
-## .unnest()
+## Operation
 
 Expands nested struct attributes into distinct columns in the DataFrame schema.
 
@@ -9159,7 +9159,7 @@ shape: (1, 2)
 
 ## Namespace: $df.col.temporalExpr
 
-## .castTimeUnit()
+## Operation
 
 Casts the schema time unit of a Datetime column (`"ms"`, `"us"`, `"ns"`). This is a metadata-only operation — underlying millisecond Date timestamps are preserved.
 
@@ -9197,7 +9197,7 @@ shape: (1, 2)
 
 ---
 
-## .century()
+## Operation
 
 Extracts the 1-indexed century component (e.g. 21 for 2026) from a Datetime column.
 
@@ -9229,7 +9229,7 @@ shape: (1, 2)
 
 ---
 
-## .convertTimeZone()
+## Operation
 
 Converts a Datetime column to a different IANA timezone. Preserves the exact UTC epoch instant while changing the timezone label, affecting how local wall-clock component extractors (`hour()`, `day()`, etc.) and `strftime` interpret values. Requires the column to already be timezone-aware; use `replace({ timeZone })` to assign a timezone to a naive column first.
 
@@ -9264,7 +9264,7 @@ shape: (1, 2)
 
 ---
 
-## .date()
+## Operation
 
 Extracts the Date object component from a Datetime column, truncating time to 00:00:00.000 UTC.
 
@@ -9296,7 +9296,7 @@ shape: (1, 2)
 
 ---
 
-## .day()
+## Operation
 
 Extracts the calendar day component (1-31) from a Datetime column.
 
@@ -9331,7 +9331,7 @@ shape: (1, 2)
 
 ---
 
-## .daysInMonth()
+## Operation
 
 Extracts the total number of days in the month (28-31) for each Datetime value.
 
@@ -9366,7 +9366,7 @@ shape: (1, 2)
 
 ---
 
-## .epoch()
+## Operation
 
 Returns the epoch duration timestamp offset in the specified time resolution unit.
 
@@ -9404,7 +9404,7 @@ shape: (1, 2)
 
 ---
 
-## .hour()
+## Operation
 
 Extracts the local hour component (0-23) from a Datetime column.
 
@@ -9439,7 +9439,7 @@ shape: (1, 2)
 
 ---
 
-## .isBusinessDay()
+## Operation
 
 Evaluates whether each Datetime value falls on a business day. Supports custom weekend day definitions and holiday arrays or timestamp sets.
 
@@ -9477,7 +9477,7 @@ shape: (1, 2)
 
 ---
 
-## .isLeapYear()
+## Operation
 
 Checks if the calendar year of a Datetime value is a leap year (366 days).
 
@@ -9512,7 +9512,7 @@ shape: (1, 2)
 
 ---
 
-## .isoYear()
+## Operation
 
 Extracts the ISO 8601 week-numbering year from a Datetime column.
 
@@ -9547,7 +9547,7 @@ shape: (1, 2)
 
 ---
 
-## .microsecond()
+## Operation
 
 Extracts the microsecond component (0-999,000) scaled from Datetime millisecond precision.
 
@@ -9582,7 +9582,7 @@ shape: (1, 2)
 
 ---
 
-## .millennium()
+## Operation
 
 Extracts the 1-indexed millennium component index (e.g. 3 for the year 2026) from a Datetime column.
 
@@ -9614,7 +9614,7 @@ shape: (1, 2)
 
 ---
 
-## .millisecond()
+## Operation
 
 Extracts the millisecond component (0-999) from a Datetime column.
 
@@ -9649,7 +9649,7 @@ shape: (1, 2)
 
 ---
 
-## .minute()
+## Operation
 
 Extracts the minute component (0-59) from a Datetime column.
 
@@ -9684,7 +9684,7 @@ shape: (1, 2)
 
 ---
 
-## .month()
+## Operation
 
 Extracts the calendar month component (1-12) from a Datetime column.
 
@@ -9719,7 +9719,7 @@ shape: (1, 2)
 
 ---
 
-## .monthEnd()
+## Operation
 
 Returns a Datetime column shifted to the last calendar day of the month at 00:00:00.000 UTC.
 
@@ -9751,7 +9751,7 @@ shape: (1, 2)
 
 ---
 
-## .monthStart()
+## Operation
 
 Returns a Datetime column shifted to the first calendar day of the month at 00:00:00.000 UTC.
 
@@ -9783,7 +9783,7 @@ shape: (1, 2)
 
 ---
 
-## .nanosecond()
+## Operation
 
 Extracts the nanosecond component (0-999,000,000) scaled from Datetime millisecond precision.
 
@@ -9818,7 +9818,7 @@ shape: (1, 2)
 
 ---
 
-## .offsetDay()
+## Operation
 
 Offsets a Datetime column by N calendar days (numeric constant, column reference, or expression). Reuses $df.duration({ days: n }) and expression addition math under the hood.
 
@@ -9860,7 +9860,7 @@ shape: (1, 2)
 
 ---
 
-## .ordinalDay()
+## Operation
 
 Extracts the day of the year (1-366) from a Datetime column.
 
@@ -9895,7 +9895,7 @@ shape: (1, 2)
 
 ---
 
-## .quarter()
+## Operation
 
 Extracts the calendar quarter of the year (1-4) from a Datetime column.
 
@@ -9930,7 +9930,7 @@ shape: (1, 2)
 
 ---
 
-## .replace()
+## Operation
 
 Replaces specific date and time components (`year`, `month`, `day`, `hour`, `minute`, `second`, `ms`, `timeZone`) of a Datetime column. Unspecified components are preserved from the original value. When `timeZone` is provided in options, components are interpreted in that timezone. Note: `month` is 1-indexed (1 = January, 12 = December); `day` is 1-indexed (1-31).
 
@@ -9968,7 +9968,7 @@ shape: (1, 2)
 
 ---
 
-## .second()
+## Operation
 
 Extracts the second component (0-59) from a Datetime column.
 
@@ -10000,7 +10000,7 @@ shape: (1, 2)
 
 ---
 
-## .strftime()
+## Operation
 
 Formats Datetime values into custom formatted strings using strftime directive pattern tokens. Automatically applies the column's assigned timezone unless explicitly overridden in options.
 
@@ -10038,7 +10038,7 @@ shape: (1, 2)
 
 ---
 
-## .time()
+## Operation
 
 Extracts the time component formatted string (`"HH:MM:SS.mmm"`) from a Datetime column.
 
@@ -10070,7 +10070,7 @@ shape: (1, 2)
 
 ---
 
-## .timestamp()
+## Operation
 
 Returns numeric timestamp relative to Epoch. Alias for epoch.
 
@@ -10108,7 +10108,7 @@ shape: (1, 2)
 
 ---
 
-## .totalDays()
+## Operation
 
 Converts a Duration value (in milliseconds) to total days count.
 
@@ -10141,7 +10141,7 @@ shape: (2, 3)
 
 ---
 
-## .totalHours()
+## Operation
 
 Converts a Duration value (in milliseconds) to total hours count.
 
@@ -10174,7 +10174,7 @@ shape: (2, 3)
 
 ---
 
-## .totalMicroseconds()
+## Operation
 
 Converts Duration to microsecond count.
 
@@ -10207,7 +10207,7 @@ shape: (2, 3)
 
 ---
 
-## .totalMilliseconds()
+## Operation
 
 Converts Duration to millisecond count.
 
@@ -10240,7 +10240,7 @@ shape: (2, 3)
 
 ---
 
-## .totalMinutes()
+## Operation
 
 Converts Duration to floating point minutes.
 
@@ -10273,7 +10273,7 @@ shape: (2, 3)
 
 ---
 
-## .totalNanoseconds()
+## Operation
 
 Converts Duration to nanosecond count.
 
@@ -10306,7 +10306,7 @@ shape: (2, 3)
 
 ---
 
-## .totalSeconds()
+## Operation
 
 Converts Duration to floating point seconds.
 
@@ -10339,7 +10339,7 @@ shape: (2, 3)
 
 ---
 
-## .utcOffset()
+## Operation
 
 Returns the UTC offset of a timezone for a given Datetime value. Supports returning the total offset, the standard (base) offset, or just the daylight saving time component, in multiple output formats.
 
@@ -10381,7 +10381,7 @@ shape: (1, 2)
 
 ---
 
-## .week()
+## Operation
 
 Extracts the ISO 8601 week number (1-53) from a Datetime column.
 
@@ -10416,7 +10416,7 @@ shape: (1, 2)
 
 ---
 
-## .weekday()
+## Operation
 
 Extracts weekday component (1=Monday, 7=Sunday).
 
@@ -10451,7 +10451,7 @@ shape: (1, 2)
 
 ---
 
-## .year()
+## Operation
 
 Extracts the year component from a Datetime column.
 
@@ -10488,7 +10488,7 @@ shape: (1, 2)
 
 # DataFrame API
 
-## .cast()
+## Operation
 
 Casts columns in the DataFrame to the specified data type(s).
 
@@ -10528,7 +10528,7 @@ shape: (2, 2)
 
 ---
 
-## .clone()
+## Operation
 
 Creates a deep copy of the current DataFrame instance, duplicating all underlying column data arrays and schema metadata. Modifying columns or values in the cloned DataFrame will not mutate the original.
 
@@ -10554,7 +10554,7 @@ shape: (2, 2)
 
 ---
 
-## .columns
+## Operation
 
 Gets array of column names in the DataFrame.
 
@@ -10582,7 +10582,7 @@ shape: (2, 2)
 
 ---
 
-## .concat()
+## Operation
 
 Concatenates items vertically, horizontally, or diagonally.
 
@@ -10700,7 +10700,7 @@ shape: (4, 2)
 
 ---
 
-## .drop()
+## Operation
 
 Drops specified columns from the DataFrame.
 
@@ -10737,7 +10737,7 @@ shape: (2, 1)
 
 ---
 
-## .dropNulls()
+## Operation
 
 Drops rows with null or undefined values.
 
@@ -10775,7 +10775,7 @@ shape: (2, 1)
 
 ---
 
-## .dtypes
+## Operation
 
 Gets array of registered column DataTypes matching current schema order.
 
@@ -10806,7 +10806,7 @@ shape: (2, 2)
 
 ---
 
-## .equals()
+## Operation
 
 Compares this DataFrame with another for equality. Checks shape, column names, column order, schemas, and row values.
 
@@ -10848,7 +10848,7 @@ true
 
 ---
 
-## .explode()
+## Operation
 
 Explodes an array column into multiple rows, replicating non-target row attributes.
 
@@ -10895,7 +10895,7 @@ shape: (2, 2)
 
 ---
 
-## .fill()
+## Operation
 
 Fills targeted values ("null", "nan", or "all") across columns using scalar values or statistical strategies.
 
@@ -10944,7 +10944,7 @@ shape: (3, 1)
 
 ---
 
-## .fillNan()
+## Operation
 
 Fills NaN values across numeric columns using scalar values or statistical strategies.
 
@@ -10988,7 +10988,7 @@ shape: (3, 1)
 
 ---
 
-## .fillNull()
+## Operation
 
 Fills null values across columns using scalar values or statistical strategies.
 
@@ -11033,7 +11033,7 @@ shape: (3, 1)
 
 ---
 
-## .filter()
+## Operation
 
 Filters rows matching boolean column expressions or predicate callbacks.
 
@@ -11074,7 +11074,7 @@ shape: (2, 1)
 
 ---
 
-## .groupBy()
+## Operation
 
 Groups rows by key columns to prepare for aggregations.
 
@@ -11115,7 +11115,7 @@ shape: (2, 2)
 
 ---
 
-## .groupByDynamic()
+## Operation
 
 Groups dynamically based on a time or integer index column over sliding / stepping windows.
 
@@ -11166,7 +11166,7 @@ shape: (2, 2)
 
 ---
 
-## .head()
+## Operation
 
 Returns the first N rows as a new DataFrame.
 
@@ -11204,7 +11204,7 @@ shape: (2, 1)
 
 ---
 
-## .height
+## Operation
 
 Gets height (total row count) of the DataFrame.
 
@@ -11232,7 +11232,7 @@ shape: (2, 2)
 
 ---
 
-## .insertColumn()
+## Operation
 
 Inserts a new column at a specific ordinal index position.
 
@@ -11278,7 +11278,7 @@ shape: (2, 3)
 
 ---
 
-## .item()
+## Operation
 
 Retrieves a single scalar cell value by row and column position or name.
 
@@ -11313,7 +11313,7 @@ shape: (2, 2)
 
 ---
 
-## .iterColumns()
+## Operation
 
 Yields a generator iterating over raw column arrays.
 
@@ -11342,7 +11342,7 @@ shape: (2, 2)
 
 ---
 
-## .iterRows()
+## Operation
 
 Yields a generator iterating over rows as tuples or named objects.
 
@@ -11376,7 +11376,7 @@ shape: (2, 2)
 
 ---
 
-## .join()
+## Operation
 
 Joins two DataFrames on key columns using a specified join strategy.
 
@@ -11438,7 +11438,7 @@ shape: (2, 3)
 
 ---
 
-## .joinAsof()
+## Operation
 
 Performs an asof (as-of) join for inexact matching on ordered numeric or temporal key columns.
 
@@ -11517,7 +11517,7 @@ shape: (3, 4)
 
 ---
 
-## .joinWhere()
+## Operation
 
 Joins two DataFrames based on arbitrary expression predicates (non-equi joins).
 
@@ -11578,7 +11578,7 @@ shape: (4, 4)
 
 ---
 
-## .limit()
+## Operation
 
 Limits the output to N rows starting from offset.
 
@@ -11628,7 +11628,7 @@ shape: (2, 1)
 
 ---
 
-## .partitionBy()
+## Operation
 
 Splits a DataFrame into sub-DataFrames partitioned by column names or expressions (reusing `.over()` partition semantics).
 
@@ -11658,7 +11658,7 @@ df.partitionBy<K extends (keyof T & string) | IExpr>(
 
 ---
 
-## .pivot()
+## Operation
 
 Pivots columns from long format to a wide datagrid structure.
 
@@ -11705,7 +11705,7 @@ shape: (2, 3)
 
 ---
 
-## .rename()
+## Operation
 
 Renames columns based on a key-value mapping dictionary.
 
@@ -11742,7 +11742,7 @@ shape: (2, 2)
 
 ---
 
-## .reverse()
+## Operation
 
 Reverses the row ordering of the DataFrame.
 
@@ -11776,7 +11776,7 @@ shape: (2, 2)
 
 ---
 
-## .schema
+## Operation
 
 Gets current DataFrameSchema dictionary mapping column names to DataType.
 
@@ -11807,7 +11807,7 @@ shape: (2, 2)
 
 ---
 
-## .select()
+## Operation
 
 Selects specific columns or evaluates column expressions.
 
@@ -11848,7 +11848,7 @@ shape: (2, 2)
 
 ---
 
-## .shape
+## Operation
 
 Gets DataFrame dimensions as [height, width] tuple.
 
@@ -11876,7 +11876,7 @@ shape: (2, 2)
 
 ---
 
-## .slice()
+## Operation
 
 Slices a subset range of rows between start and end index.
 
@@ -11918,7 +11918,7 @@ shape: (2, 1)
 
 ---
 
-## .sort()
+## Operation
 
 Sorts DataFrame rows by one or more column expressions or custom sorters.
 
@@ -11964,7 +11964,7 @@ shape: (3, 2)
 
 ---
 
-## .tail()
+## Operation
 
 Returns the last N rows as a new DataFrame.
 
@@ -12002,7 +12002,7 @@ shape: (2, 1)
 
 ---
 
-## .toArray()
+## Operation
 
 Evaluates a column expression or retrieves column values as a raw JavaScript array.
 
@@ -12036,7 +12036,7 @@ shape: (2, 2)
 
 ---
 
-## .toDict()
+## Operation
 
 Converts columns into a JavaScript dictionary mapping column keys to raw arrays.
 
@@ -12067,7 +12067,7 @@ shape: (2, 2)
 
 ---
 
-## .toDicts()
+## Operation
 
 Converts rows into an array of JavaScript objects.
 
@@ -12095,7 +12095,7 @@ shape: (2, 2)
 
 ---
 
-## .transpose()
+## Operation
 
 Transposes rows into columns and columns into rows.
 
@@ -12146,7 +12146,7 @@ shape: (2, 3)
 
 ---
 
-## .unique()
+## Operation
 
 Filters distinct unique rows matching target key columns.
 
@@ -12183,7 +12183,7 @@ shape: (2, 2)
 
 ---
 
-## .unpivot()
+## Operation
 
 Unpivots a wide DataFrame into a long format structure.
 
@@ -12232,7 +12232,7 @@ shape: (4, 3)
 
 ---
 
-## .unstack()
+## Operation
 
 Unstacks selected columns into multiple wide columns of size `step`. Reshapes data from long to wide format without aggregation.
 
@@ -12278,7 +12278,7 @@ shape: (2, 2)
 
 ---
 
-## .width
+## Operation
 
 Gets width (total column count) of the DataFrame.
 
@@ -12306,7 +12306,7 @@ shape: (2, 2)
 
 ---
 
-## .withColumns()
+## Operation
 
 Adds new columns or updates existing ones using column expressions.
 
@@ -12346,7 +12346,7 @@ shape: (2, 3)
 
 ---
 
-## .withRowIndex()
+## Operation
 
 Appends an incremental index column.
 
@@ -12387,7 +12387,7 @@ shape: (2, 3)
 
 ---
 
-## .writeCsv()
+## Operation
 
 Writes DataFrame to CSV format string or file/stream target.
 
@@ -12428,7 +12428,7 @@ shape: (2, 2)
 
 ---
 
-## .writeJson()
+## Operation
 
 Writes DataFrame rows to JSON format string or file/stream target.
 
@@ -12491,7 +12491,7 @@ shape: (2, 2)
 
 ---
 
-## .agg()
+## Operation
 
 Aggregates grouped partitions using aggregation column expressions.
 
@@ -12533,7 +12533,7 @@ shape: (2, 2)
 
 ---
 
-## .toDataframe()
+## Operation
 
 Converts group keys back into a single distinct DataFrame without aggregations.
 
@@ -12573,7 +12573,7 @@ shape: (2, 1)
 
 # Top-Level Functions
 
-## all()
+## Operation
 
 Creates an expression targeting all columns in the DataFrame.
 
@@ -12610,7 +12610,7 @@ shape: (2, 2)
 
 ---
 
-## coalesce()
+## Operation
 
 Returns the first non-null value among the specified expressions.
 
@@ -12654,7 +12654,7 @@ shape: (3, 1)
 
 ---
 
-## col()
+## Operation
 
 Creates a column expression referencing one or more columns by name, regular expression, or data type.
 
@@ -12695,7 +12695,7 @@ shape: (2, 1)
 
 ---
 
-## concat()
+## Operation
 
 Concatenates items vertically, horizontally, or diagonally.
 
@@ -12816,7 +12816,7 @@ shape: (4, 2)
 
 ---
 
-## data()
+## Operation
 
 Constructs a new DataFrame from an array of row records or a column dictionary.
 
@@ -12854,7 +12854,7 @@ shape: (2, 2)
 
 ---
 
-## duration()
+## Operation
 
 Constructs a Duration expression column from numeric values, string intervals, column references, or expressions.
 
@@ -12893,7 +12893,7 @@ shape: (1, 1)
 
 ---
 
-## element()
+## Operation
 
 Creates an expression referencing the current element(s) of an array during evaluation. Primarily used inside array operations like `filter`, `map`, or `eval`.
 
@@ -12930,7 +12930,7 @@ shape: (2, 1)
 
 ---
 
-## exclude()
+## Operation
 
 Creates an expression targeting all columns except the specified ones.
 
@@ -12970,7 +12970,7 @@ shape: (2, 1)
 
 ---
 
-## horizontal()
+## Operation
 
 Combines multiple columns or expressions horizontally into an array per row, allowing expression evaluation with `.eval($df.element()...)`, direct horizontal aggregations (`.sum()`, `.min()`, `.max()`, `.mean()`), or `.arr` operations across columns.
 
@@ -13011,7 +13011,7 @@ shape: (2, 1)
 
 ---
 
-## implode()
+## Operation
 
 Aggregates values of a column into a list within each group.
 
@@ -13053,7 +13053,7 @@ shape: (2, 2)
 
 ---
 
-## lit()
+## Operation
 
 Creates a literal column expression that repeats the given value for all rows.
 
@@ -13100,7 +13100,7 @@ shape: (2, 1)
 
 ---
 
-## readCsv()
+## Operation
 
 Reads a CSV string and constructs a DataFrame. Automatically infers column data types unless an explicit schema is provided.
 
@@ -13148,7 +13148,7 @@ shape: (2, 2)
 
 ---
 
-## readJson()
+## Operation
 
 Parses JSON content (JSON or NDJSON) and loads it into a new DataFrame.
 
@@ -13200,7 +13200,7 @@ shape: (2, 2)
 
 ---
 
-## seqRange()
+## Operation
 
 Creates a column expression that generates a range of values. If mode is "cumulative" (default) or "independent", it generates a sequence. If mode is "constant", it repeats the given value.
 
@@ -13258,7 +13258,7 @@ shape: (3, 1)
 
 ---
 
-## struct()
+## Operation
 
 Packages multiple expressions into a structured object column.
 
@@ -13303,7 +13303,7 @@ shape: (2, 1)
 
 ---
 
-## when()
+## Operation
 
 Provides conditional branch evaluations inside column expressions.
 

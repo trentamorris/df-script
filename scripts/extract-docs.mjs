@@ -855,11 +855,23 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
       symbolNamespace = localNamespaceMatch[1].trim();
     }
 
+    let accessor = undefined;
+    if (symbolCategory === "ColumnExpression") {
+      if (symbolNamespace && symbolNamespace.startsWith("$df.col.")) {
+        accessor = symbolNamespace.slice("$df.col.".length);
+      }
+      symbolNamespace = "$df.col";
+    }
+
     if (symbolNamespace) {
       parsed.namespace = symbolNamespace;
     }
+    if (accessor) {
+      parsed.accessor = accessor;
+    }
 
     parsed.category = symbolCategory;
+    parsed.propertyAccess = symbolName;
 
     let symbolSyntax = null;
     const localSyntaxMatch = comment.match(SYNTAX_REGEX);
@@ -875,13 +887,17 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
     }
 
     if (isClass) {
-      parsed.name = symbolName;
+      parsed.callExpression = symbolName;
     } else if (isGetter) {
-      parsed.name = `.${symbolName}`;
+      parsed.callExpression = `.${symbolName}`;
     } else if (symbolCategory === "Function") {
-      parsed.name = `${symbolName}()`;
+      parsed.callExpression = `${symbolName}()`;
     } else {
-      parsed.name = `.${symbolName}()`;
+      if (accessor) {
+        parsed.callExpression = `.${accessor}.${symbolName}()`;
+      } else {
+        parsed.callExpression = `.${symbolName}()`;
+      }
     }
 
     const { signature: rawSignature, endIndex } = extractSignatureAndEnd(
