@@ -33,7 +33,7 @@ const dfExpr = $df.data([
     { a: null, b: 20 },
     { a: 5, b: 30 }
 ]);
-const filledWithCol = dfExpr.fill("null", $df.col("b").mul(10)).toDicts() as any[];
+const filledWithCol = dfExpr.fill("null", { value: $df.col("b").mul(10) }).toDicts() as any[];
 if (filledWithCol[0].a !== 100) throw new Error("df.fill with expression row 0 failed");
 if (filledWithCol[1].a !== 200) throw new Error("df.fill with expression row 1 failed");
 if (filledWithCol[2].a !== 5) throw new Error("df.fill preserved value row 2 failed");
@@ -57,7 +57,7 @@ if (filledFwdLimit[2].a !== null) throw new Error("df.fill limit 1 row 2 must be
 
 // 7. Empty DataFrame fill
 const emptyDf = $df.data([] as { a: number }[]);
-const resEmpty = emptyDf.fill("null", 0).toDicts();
+const resEmpty = emptyDf.fill("null", { value: 0 }).toDicts();
 if (resEmpty.length !== 0) throw new Error("Empty DataFrame fill failed");
 
 console.log("✓ DataFrame.fill tests passed (including all advanced edge cases)!");

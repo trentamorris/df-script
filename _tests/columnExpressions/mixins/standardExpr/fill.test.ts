@@ -12,8 +12,8 @@ const df = $df.data([
 
 // 1. Target "null"
 const resNull = df.select([
-    $df.col("val").fill("null", 99).alias("f_null_val"),
-    $df.col("val").fill("null", $df.col("other")).alias("f_null_col"),
+    $df.col("val").fill("null", { value: 99 }).alias("f_null_val"),
+    $df.col("val").fill("null", { value: $df.col("other") }).alias("f_null_col"),
     $df.col("val").fill("null", { strategy: "zero" }).alias("f_null_zero")
 ]).toDicts() as any[];
 
@@ -26,8 +26,8 @@ if (resNull[1].f_null_zero !== 0) throw new Error("fill null zero strategy faile
 
 // 2. Target "nan"
 const resNan = df.select([
-    $df.col("val").fill("nan", 88).alias("f_nan_val"),
-    $df.col("val").fill("nan", $df.col("other")).alias("f_nan_col")
+    $df.col("val").fill("nan", { value: 88 }).alias("f_nan_val"),
+    $df.col("val").fill("nan", { value: $df.col("other") }).alias("f_nan_col")
 ]).toDicts() as any[];
 
 if (resNan[0].f_nan_val !== 10) throw new Error("fill nan [0] failed");
@@ -38,7 +38,7 @@ if (resNan[2].f_nan_col !== 300) throw new Error("fill nan col expr failed");
 
 // 3. Target "all"
 const resAll = df.select([
-    $df.col("val").fill("all", 77).alias("f_all_val")
+    $df.col("val").fill("all", { value: 77 }).alias("f_all_val")
 ]).toDicts() as any[];
 
 if (resAll[0].f_all_val !== 10) throw new Error("fill all [0] failed");
@@ -55,7 +55,7 @@ const dfSeq = $df.data([
 ]);
 
 const resSeq = dfSeq.select([
-    $df.col("val").fill("null", $df.seqRange(100, { step: 10 })).alias("f_seq")
+    $df.col("val").fill("null", { value: $df.seqRange(100, { step: 10 }) }).alias("f_seq")
 ]).toDicts() as any[];
 
 if (resSeq[0].f_seq !== 10) throw new Error("fill seq [0] failed");
@@ -85,7 +85,7 @@ if (resFwd[1].bwd !== 4 || resFwd[2].bwd !== 4) throw new Error("fill nan backwa
 
 // EDGE CASE 1: Empty DataFrame (Height 0)
 const emptyDf = $df.data({ a: [] as number[] });
-const resEmpty = emptyDf.select([$df.col("a").fill("null", 0)]).toDicts();
+const resEmpty = emptyDf.select([$df.col("a").fill("null", { value: 0 })]).toDicts();
 if (resEmpty.length !== 0) throw new Error("Empty DataFrame fill failed");
 
 // EDGE CASE 2: All Target Rows (All NULLs / All NaNs)
@@ -150,7 +150,7 @@ const exprDf = $df.data([
     { a: 3, x: 30, y: 9 }
 ]);
 const resExpr = exprDf.select([
-    $df.col("a").fill("null", $df.col("x").mul(2).add($df.col("y"))).alias("filled_computed")
+    $df.col("a").fill("null", { value: $df.col("x").mul(2).add($df.col("y")) }).alias("filled_computed")
 ]).toDicts() as any[];
 if (resExpr[0].filled_computed !== 1) throw new Error("Expr fill row 0 failed");
 if (resExpr[1].filled_computed !== 47) throw new Error(`Expr fill row 1 failed: expected 47, got ${resExpr[1].filled_computed}`);
@@ -163,10 +163,10 @@ const whenDf = $df.data([
     { a: 50, tier: "bronze" }
 ]);
 const resWhen = whenDf.select([
-    $df.col("a").fill("null",
-        $df.when($df.col("tier").eq("gold")).then(1000)
+    $df.col("a").fill("null", {
+        value: $df.when($df.col("tier").eq("gold")).then(1000)
             .otherwise(500)
-    ).alias("tiered_fill")
+    }).alias("tiered_fill")
 ]).toDicts() as any[];
 if (resWhen[0].tiered_fill !== 1000) throw new Error("When/then fill row 0 failed");
 if (resWhen[1].tiered_fill !== 500) throw new Error("When/then fill row 1 failed");
@@ -180,9 +180,9 @@ const falseyDf = $df.data([
     { v: -0, s: "valid", b: true }
 ]);
 const resFalsey = falseyDf.select([
-    $df.col("v").fill("null", 999).alias("f_num"),
-    $df.col("s").fill("null", "FALLBACK").alias("f_str"),
-    $df.col("b").fill("null", true).alias("f_bool")
+    $df.col("v").fill("null", { value: 999 }).alias("f_num"),
+    $df.col("s").fill("null", { value: "FALLBACK" }).alias("f_str"),
+    $df.col("b").fill("null", { value: true }).alias("f_bool")
 ]).toDicts() as any[];
 if (resFalsey[0].f_num !== 0) throw new Error("0 must not be overwritten by fill");
 if (resFalsey[0].f_str !== "") throw new Error("Empty string must not be overwritten by fill");
@@ -200,7 +200,7 @@ const mixedDf = $df.data([
     { x: NaN }
 ]);
 const resMixed = mixedDf.select([
-    $df.col("x").fill("all", -99).alias("filled_all")
+    $df.col("x").fill("all", { value: -99 }).alias("filled_all")
 ]).toDicts() as any[];
 if (resMixed[0].filled_all !== -99) throw new Error("fill 'all' failed on null");
 if (resMixed[1].filled_all !== -99) throw new Error("fill 'all' failed on NaN");
@@ -283,7 +283,7 @@ const customFnDf = $df.data([
     { v: -99 } // target: negative
 ]);
 const resCustomFn = customFnDf.select([
-    $df.col("v").fill($df.col("v").lt(0), 0).alias("clamped_zero")
+    $df.col("v").fill($df.col("v").lt(0), { value: 0 }).alias("clamped_zero")
 ]).toDicts() as any[];
 if (resCustomFn[0].clamped_zero !== 10) throw new Error("Expression predicate row 0 failed");
 if (resCustomFn[1].clamped_zero !== 0) throw new Error("Expression predicate row 1 replacement failed");
@@ -297,7 +297,7 @@ const crossColDf = $df.data([
     { status: "ERR", reading: 0, baseline: 60 }
 ]);
 const resCrossCol = crossColDf.select([
-    $df.col("reading").fill($df.col("status").eq("ERR"), $df.col("baseline").mul(2)).alias("fixed")
+    $df.col("reading").fill($df.col("status").eq("ERR"), { value: $df.col("baseline").mul(2) }).alias("fixed")
 ]).toDicts() as any[];
 if (resCrossCol[0].fixed !== 100) throw new Error("Cross column expression target row 0 failed");
 if (resCrossCol[1].fixed !== 75) throw new Error("Cross column expression target row 1 failed");
@@ -373,7 +373,7 @@ const allTargetDf = $df.data([
 const resAllTarget = allTargetDf.select([
     $df.col("a").fill("null", { strategy: "forward" }).alias("all_fwd"),
     $df.col("a").fill("null", { strategy: "backward" }).alias("all_bwd"),
-    $df.col("a").fill("null", 999).alias("all_const")
+    $df.col("a").fill("null", { value: 999 }).alias("all_const")
 ]).toDicts() as any[];
 for (let i = 0; i < 3; i++) {
     if (resAllTarget[i].all_fwd !== null) throw new Error(`All target forward fill row ${i} should remain null`);
@@ -391,7 +391,7 @@ const chainDf = $df.data([
 const resChain = chainDf.select([
     $df.col("val")
         .fill("null", { strategy: "forward" })
-        .fill("null", 0) // initial null filled with 0
+        .fill("null", { value: 0 }) // initial null filled with 0
         .mul($df.col("mult"))
         .alias("computed_total")
 ]).toDicts() as any[];
@@ -450,7 +450,7 @@ if (resBwdLimitZero[0].bwd_l0 !== null || resBwdLimitZero[1].bwd_l0 !== null) {
 // EDGE CASE 24: Single-Row DataFrame (Height 1) edge cases
 const singleRowNullDf = $df.data([{ v: null }]);
 const resSingleNull = singleRowNullDf.select([
-    $df.col("v").fill("null", 42).alias("val_filled"),
+    $df.col("v").fill("null", { value: 42 }).alias("val_filled"),
     $df.col("v").fill("null", { strategy: "forward" }).alias("fwd"),
     $df.col("v").fill("null", { strategy: "backward" }).alias("bwd")
 ]).toDicts() as any[];
@@ -460,7 +460,7 @@ if (resSingleNull[0].bwd !== null) throw new Error("Single row null backward fil
 
 const singleRowValidDf = $df.data([{ v: 100 }]);
 const resSingleValid = singleRowValidDf.select([
-    $df.col("v").fill("null", 42).alias("val_filled"),
+    $df.col("v").fill("null", { value: 42 }).alias("val_filled"),
     $df.col("v").fill("null", { strategy: "forward" }).alias("fwd")
 ]).toDicts() as any[];
 if (resSingleValid[0].val_filled !== 100) throw new Error("Single row valid value modified unexpectedly");
@@ -473,11 +473,91 @@ const undefDf = $df.data([
     { u: undefined }
 ]);
 const resUndef = undefDf.select([
-    $df.col("u").fill("null", 0).alias("u_null"),
+    $df.col("u").fill("null", { value: 0 }).alias("u_null"),
     $df.col("u").fill("all", { strategy: "forward" }).alias("u_fwd")
 ]).toDicts() as any[];
 if (resUndef[0].u_null !== 0 || resUndef[2].u_null !== 0) throw new Error("Undefined should be caught by target 'null'");
 if (resUndef[0].u_fwd !== null) throw new Error("Leading undefined in forward fill should normalize to null");
 if (resUndef[2].u_fwd !== 20) throw new Error("Forward fill of undefined row 2 should receive 20");
 
-console.log("✓ StandardExpr.fill tests passed (including all 10/10 difficulty edge cases 1-25)!");
+// EDGE CASE 26: Strict FillOptions with { value: ... } object argument pattern
+{
+    const dfOpts = $df.data({
+        a: [10, null, 30],
+        b: [null, 20, null]
+    });
+    const resOpts = dfOpts.select([
+        $df.col("a").fill("null", { value: 999 }).alias("filled_val"),
+        $df.col("a").fill("null", { value: $df.col("b") }).alias("filled_expr"),
+        $df.col("b").fill("null", { strategy: "zero" }).alias("filled_strat")
+    ]).toDicts() as any[];
+
+    if (resOpts[1].filled_val !== 999) throw new Error("Case 26a: FillOptions.value scalar failed");
+    if (resOpts[1].filled_expr !== 20) throw new Error("Case 26b: FillOptions.value expr failed");
+    if (resOpts[0].filled_strat !== 0 || resOpts[2].filled_strat !== 0) throw new Error("Case 26c: FillOptions.strategy zero failed");
+}
+
+// EDGE CASE 27: Filling with BigInt and Date scalar values
+{
+    const dFallback = new Date("2026-01-01T00:00:00Z");
+    const dfBigDate = $df.data({
+        big: [100n, null, 300n],
+        dt: [new Date("2025-01-01T00:00:00Z"), null, new Date("2027-01-01T00:00:00Z")]
+    });
+    const resBigDate = dfBigDate.select([
+        $df.col("big").fill("null", { value: 999n }).alias("big_filled"),
+        $df.col("dt").fill("null", { value: dFallback }).alias("dt_filled")
+    ]).toDicts() as any[];
+
+    if (resBigDate[1].big_filled !== 999n) throw new Error("Case 27a: BigInt scalar fill failed");
+    if (resBigDate[1].dt_filled.getTime() !== dFallback.getTime()) throw new Error("Case 27b: Date scalar fill failed");
+}
+
+// EDGE CASE 28: Multi-Column Expression Projection with FillOptions
+{
+    const dfMulti = $df.data({
+        x: [1, null, 3],
+        y: [null, 20, null],
+        z: [100, 200, null]
+    });
+    const resMulti = dfMulti.select(
+        $df.col(["x", "y", "z"]).fill("null", { value: 0 })
+    ).toDicts() as any[];
+
+    if (resMulti[1].x !== 0 || resMulti[0].y !== 0 || resMulti[2].z !== 0) {
+        throw new Error("Case 28: Multi-column projection fill failed");
+    }
+}
+
+// EDGE CASE 29: Limit larger than total consecutive gap size (Graceful boundary saturation)
+{
+    const dfGap = $df.data({
+        v: [10, null, null, 40]
+    });
+    const resGap = dfGap.select(
+        $df.col("v").fill("null", { strategy: "forward", limit: 100 }).alias("fwd_sat")
+    ).toDicts() as any[];
+    if (resGap[1].fwd_sat !== 10 || resGap[2].fwd_sat !== 10) {
+        throw new Error("Case 29: Forward fill with excessive limit failed");
+    }
+}
+
+// EDGE CASE 30: All statistical strategies on mixed numeric series (min, max, mean, zero, one)
+{
+    const dfStats = $df.data({
+        v: [10, null, 30, null] // non-nulls: 10, 30 -> min=10, max=30, mean=20
+    });
+    const resStats = dfStats.select([
+        $df.col("v").fill("null", { strategy: "min" }).alias("f_min"),
+        $df.col("v").fill("null", { strategy: "max" }).alias("f_max"),
+        $df.col("v").fill("null", { strategy: "mean" }).alias("f_mean"),
+        $df.col("v").fill("null", { strategy: "one" }).alias("f_one")
+    ]).toDicts() as any[];
+
+    if (resStats[1].f_min !== 10) throw new Error("Case 30a: Strategy min failed");
+    if (resStats[1].f_max !== 30) throw new Error("Case 30b: Strategy max failed");
+    if (resStats[1].f_mean !== 20) throw new Error("Case 30c: Strategy mean failed");
+    if (resStats[1].f_one !== 1) throw new Error("Case 30d: Strategy one failed");
+}
+
+console.log("✓ StandardExpr.fill tests passed (including all 10/10 difficulty edge cases 1-30)!");

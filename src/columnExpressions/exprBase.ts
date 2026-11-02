@@ -131,6 +131,20 @@ export class ExprBase implements IExpr {
 
     /**
      * Renames the output expression column key.
+     *
+     * @param name Name of the output column.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("a").alias("renamed_a"))
+     * shape: (3, 2)
+     * +---+-----------+
+     * | a | renamed_a |
+     * +---+-----------+
+     * | 1 | 1         |
+     * | 2 | 2         |
+     * | 3 | 3         |
+     * +---+-----------+
      */
     alias(name: string): this {
         const newInst = this._derive();
@@ -140,6 +154,21 @@ export class ExprBase implements IExpr {
 
     /**
      * Coerces the column data type to another type.
+     *
+     * @param dataType Registered target data type (e.g. `$df.DataType.Int32`, `$df.DataType.String`).
+     * @param [options] Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("a").cast($df.DataType.Float64).alias("float_a"))
+     * shape: (3, 2)
+     * +---+---------+
+     * | a | float_a |
+     * +---+---------+
+     * | 1 | 1.0     |
+     * | 2 | 2.0     |
+     * | 3 | 3.0     |
+     * +---+---------+
      */
     cast(dataType: RegisteredDataType, options: CastOptions = {}): this {
         const strict = options.strict ?? true;

@@ -273,7 +273,8 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [ ] `/concat_arr`
 - [ ] `/concat_list`
 - [ ] `/concat_str`
-- [ ] `/corr`
+- [x] `/corr` (expression)               (`$df.col(...).corr(other)`)
+- [ ] `/corr` (function)                 (`$df.corr(a, b)`)
 - [ ] `/count`
 - [ ] `/cov`
 - [ ] `/cum_count`
@@ -293,7 +294,7 @@ The following list tracks the complete surface of Polars functionality to achiev
 - [x] `/DataFrame/clone`            (`$df.data(...).clone()`)
 - [x] `/DataFrame/collect_schema`   (`$df.data(...).schema`)
 - [x] `/DataFrame/columns`          (`$df.data(...).columns`)
-- [ ] `/DataFrame/corr`
+- [ ] `/DataFrame/corr`             (`df.corr([columns], options)` matrix calculation with subset selection and prepended variable column)
 - [x] `/DataFrame/count`            (`$df.data(...).height` [total rows] or `$df.data(...).select($df.all().count())` [non-null per column])
 - [ ] `/DataFrame/describe`
 - [ ] `/DataFrame/deserialize`      (JSON format available via `$df.readJson()`; binary buffer format tracked in Future Scope)

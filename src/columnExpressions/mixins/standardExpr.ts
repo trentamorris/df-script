@@ -16,10 +16,9 @@ import type {
     EwmStdOptions,
     EwmSumOptions,
     EwmVarOptions,
-    CentralMomentsResult,
-    ValidScalarTypes
+    CentralMomentsResult
 } from "../../types"
-import type { RandomOptions, NumericArg, IsCloseOptions, RoundOptions } from "../types"
+import type { RandomOptions, NumericArg, NumericSeriesArg, BooleanArg, ComparisonArg, IsCloseOptions, BetweenOptions, CountOptions, RankOptions, IsNDistinctOptions } from "../types"
 import { ExprBase } from "../exprBase"
 import { computeIsIn, compareMissing, computeRank, evaluateExpression, evaluateArg } from "../utils"
 import { ComputeError, InvalidArgumentError } from "../../exceptions"
@@ -46,7 +45,6 @@ import {
     UniqueArrayStatsOptions,
     isArrayOfType,
     isArrayOrTypedArray,
-    isPlainObj,
     isValidNumber,
     mulberry32,
     parseDurationString,
@@ -247,8 +245,16 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
-     * Logical AND check supporting Kleene logic.
-     * @param other The other boolean column expression or literal value to compare.
+     * Performs an element-wise logical AND operation between the column and another operand
+     * using Kleene 3-valued logic (true, false, null).
+     *
+     * In Kleene 3-valued logic:
+     * - `false` AND anything is `false`.
+     * - `true` AND `true` is `true`.
+     * - `true` AND `null` is `null` (unknown).
+     * - `null` AND `null` is `null` (unknown).
+     *
+     * @param other The boolean column expression or literal value to compare.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_bool_4x2 -->
@@ -263,7 +269,7 @@ export class StandardExpr extends ExprBase {
      * | null  | true  | null    |
      * +-------+-------+---------+
      */
-    and(other: any) {
+    and(other: BooleanArg) {
         return this._derive((vArray, columns) => {
             const height = vArray.length;
             const otherVal = this._resolve(other, columns, height);
@@ -501,10 +507,11 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
-     * Checks if values fall inside lower and upper boundaries (inclusive).
+     * Checks if values fall inside lower and upper boundaries.
+     *
      * @param lower The lower boundary value or expression.
      * @param upper The upper boundary value or expression.
-     * @param closed Control boundary inclusivity: "both", "left", "right", or "none" (default: "both").
+     * @param [options] Boundary configuration options (see `BetweenOptions`).
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x2 -->
@@ -518,7 +525,8 @@ export class StandardExpr extends ExprBase {
      * | 3 | 30 | false    |
      * +---+----+----------+
      */
-    between(lower: any, upper: any, closed: "both" | "left" | "right" | "none" = "both") {
+    between(lower: ComparisonArg, upper: ComparisonArg, options: BetweenOptions = {}) {
+        const closed = options.closed ?? "both";
         const lowerBound = (closed === "both" || closed === "left") ? this.ge(lower) : this.gt(lower);
         const upperBound = (closed === "both" || closed === "right") ? this.le(upper) : this.lt(upper);
 
@@ -656,8 +664,13 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
-     * Aggregation: Computes the Pearson correlation coefficient between two columns.
-     * @param other The target column expression to correlate with.
+     * Aggregation: Computes the Pearson correlation coefficient between this column and another column expression or numeric array.
+     *
+     * Computes the sample Pearson product-moment correlation coefficient $r \in [-1, 1]$ using a single-pass,
+     * numerically stable Welford algorithm. Pairs containing `null`, `undefined`, or `NaN` are automatically
+     * dropped (pairwise deletion). Returns `null` if fewer than 2 valid pairs exist or if either column has zero variance.
+     *
+     * @param {NumericSeriesArg} other The target column expression, numeric literal, or numeric array to correlate with.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x2 -->
@@ -669,7 +682,7 @@ export class StandardExpr extends ExprBase {
      * | 1           |
      * +-------------+
      */
-    corr(other: any) {
+    corr(other: NumericSeriesArg) {
         return this._deriveAggBinary(other, pairs => computeStatisticalMatrix(pairs)?.correlation ?? null);
     }
 
@@ -736,8 +749,8 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
-     * Aggregation: Returns the count of records inside the group.
-     * @param options Config flags including whether to count null values.
+     * Aggregation: Returns the count of records inside the group or column.
+     * @param {CountOptions} [options={}] Configuration options for counting.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_grouped_3x2 -->
@@ -750,14 +763,19 @@ export class StandardExpr extends ExprBase {
      * | B     | 1   |
      * +-------+-----+
      */
-    count(options: { includeNulls?: boolean } = {}) {
+    count(options: CountOptions = {}) {
         if (options.includeNulls) return this._deriveAgg(v => v.length);
         return this._deriveAgg(v => getArrayStats(v).count);
     }
 
     /**
-     * Aggregation: Computes the covariance between two columns.
-     * @param other The target column expression to compute covariance with.
+     * Aggregation: Computes the sample covariance between this column and another column expression or numeric array.
+     *
+     * Computes sample covariance with $N - 1$ degrees of freedom using a single-pass,
+     * numerically stable Welford algorithm. Pairs containing `null`, `undefined`, or `NaN`
+     * are automatically dropped (pairwise deletion). Returns `null` if fewer than 2 valid pairs exist.
+     *
+     * @param {NumericSeriesArg} other The target column expression, numeric literal, or numeric array to compute covariance with.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x2 -->
@@ -769,7 +787,7 @@ export class StandardExpr extends ExprBase {
      * | 10         |
      * +------------+
      */
-    cov(other: any) {
+    cov(other: NumericSeriesArg) {
         return this._deriveAggBinary(other, pairs => computeStatisticalMatrix(pairs)?.covariance ?? null);
     }
 
@@ -932,8 +950,12 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
-     * Aggregation: Computes the dot product with another column.
-     * @param other The other column expression to compute the dot product with.
+     * Aggregation: Computes the dot product between this column and another column expression, numeric scalar, or array.
+     *
+     * Computes $\mathbf{x} \cdot \mathbf{y} = \sum_{i} x_i y_i$. Pairs containing `null`, `undefined`, or non-finite values
+     * (`NaN`, `Infinity`) are automatically dropped. Returns `null` if no valid pairs exist or if the DataFrame is empty.
+     *
+     * @param {NumericSeriesArg} other The other column expression, numeric literal, or numeric array to compute the dot product with.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x2 -->
@@ -942,10 +964,10 @@ export class StandardExpr extends ExprBase {
      * +-------------+
      * | dot_product |
      * +-------------+
-     * | 140         |
+     * | 32          |
      * +-------------+
      */
-    dot(other: any) {
+    dot(other: NumericSeriesArg) {
         return this._deriveAggBinary(other, pairs => computeDotProduct(pairs));
     }
 
@@ -968,8 +990,12 @@ export class StandardExpr extends ExprBase {
     }
 
     /**
-     * Boolean comparison: Returns true if column values match the specified value exactly.
-     * @param val The value or column expression to compare against.
+     * Boolean comparison: Returns true if column values match the specified value exactly under Kleene logic.
+     *
+     * Evaluates strict equality (`===`) between this column and `val`. Under standard three-valued (Kleene) logic,
+     * comparing any value to `null` or `undefined` yields `null` (unknown). In IEEE-754 arithmetic, `NaN === NaN` yields `false`.
+     *
+     * @param {ComparisonArg} val The value, literal array, or column expression to compare against.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
@@ -983,13 +1009,17 @@ export class StandardExpr extends ExprBase {
      * | 3 | false  |
      * +---+--------+
      */
-    eq(val: any) {
+    eq(val: ComparisonArg) {
         return this._deriveBinary(val, (v, r) => v === r);
     }
 
     /**
-     * Equivalence check that treats null values as equal to each other.
-     * @param val The value or column expression to compare against.
+     * Equivalence comparison that treats null and missing values as equal to each other.
+     *
+     * Returns `true` if both values are identical, or if both values are nullish (`null` or `undefined`).
+     * Returns `false` if one value is nullish while the other is non-null. Non-null values follow standard equality.
+     *
+     * @param {ComparisonArg} val The value, literal array, or column expression to compare against.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_nulls_3x2 -->
@@ -1003,7 +1033,7 @@ export class StandardExpr extends ExprBase {
      * | 3    | false      |
      * +------+------------+
      */
-    eqMissing(val: any) {
+    eqMissing(val: ComparisonArg) {
         return this._derive((vArray, columns) => {
             const rResolved = this._resolve(val, columns, vArray.length);
             return compareMissing(vArray, rResolved);
@@ -1142,8 +1172,8 @@ export class StandardExpr extends ExprBase {
 
     /**
      * Replaces targeted values ("null", "nan", or "all") with a specified value or strategy.
-     * @param target The target value type to replace: "null", "nan", or "all".
-     * @param options Configuration options including replacement value, strategy, and optional limit, or a replacement scalar/expression directly.
+     * @param {FillTarget} target The target value type to replace: "null", "nan", or "all".
+     * @param {FillOptions} [options={}] Configuration options specifying replacement value, strategy, and optional limit.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_nulls_3x2 -->
@@ -1159,17 +1189,13 @@ export class StandardExpr extends ExprBase {
      */
     fill(
         target: FillTarget,
-        options: FillOptions | ValidScalarTypes | IExpr = {}
+        options: FillOptions = {}
     ): this {
-        const opts: FillOptions = isPlainObj(options)
-            ? options as FillOptions
-            : { value: options };
-
         let {
             value = undefined,
             strategy = undefined,
             limit = undefined
-        } = opts;
+        } = options;
 
         return this._derive((vArray, columns) => {
             const height = vArray.length;
@@ -1233,11 +1259,11 @@ export class StandardExpr extends ExprBase {
 
     /**
      * Replaces NaN values with a specified value or strategy.
-     * @param options Replacement value, expression, or FillNullOptions configuration.
+     * @param {FillNullOptions} [options={}] Configuration options specifying replacement value, strategy, and optional limit.
      * @returns ColumnExpression
      * @example 
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("a").fillNan(0).alias("clean"))
+     * >>> df.withColumns($df.col("a").fillNan({ value: 0 }).alias("clean"))
      * shape: (3, 2)
      * +---+-------+
      * | a | clean |
@@ -1247,7 +1273,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | 3     |
      * +---+-------+
      */
-    fillNan(options: ValidScalarTypes | IExpr | FillNullOptions = {}): this {
+    fillNan(options: FillNullOptions = {}): this {
         return this.fill("nan", options);
     }
 
@@ -1286,7 +1312,7 @@ export class StandardExpr extends ExprBase {
      * | 3        |
      * +----------+
      */
-    filter(predicate: IExpr) {
+    filter(predicate: IExpr): this {
         return this._derive((vArray, columns) => {
             const mask = evaluateExpression(predicate, columns, vArray.length);
             return filterByMask(vArray, mask, { nullify: true });
@@ -1366,7 +1392,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | true   |
      * +---+--------+
      */
-    ge(val: any) {
+    ge(val: ComparisonArg) {
         return this._deriveBinary(val, (v, r) => v >= r);
     }
 
@@ -1386,7 +1412,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | true   |
      * +---+--------+
      */
-    gt(val: any) {
+    gt(val: ComparisonArg) {
         return this._deriveBinary(val, (v, r) => v > r);
     }
 
@@ -1544,7 +1570,7 @@ export class StandardExpr extends ExprBase {
      * | "cherry" | false   |
      * +----------+---------+
      */
-    isIn(values: any[] | any) {
+    isIn(values: ComparisonArg) {
         return this._derive((vArray, columns) => computeIsIn(vArray, columns, values));
     }
 
@@ -1603,7 +1629,8 @@ export class StandardExpr extends ExprBase {
      * | 3 | 30 | false    |
      * +---+----+----------+
      */
-    isNDistinct(index: number, nullOnOob: boolean = true) {
+    isNDistinct(index: number, options: IsNDistinctOptions = {}) {
+        const { nullOnOob = true } = options;
         return this._derive((vArray, columns) => {
             const { values } = getUniqueArrayStats(vArray, { strict: true });
             const targetVal = getArrayElement(values, index, nullOnOob);
@@ -1769,7 +1796,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | false  |
      * +---+--------+
      */
-    le(val: any) {
+    le(val: ComparisonArg) {
         return this._deriveBinary(val, (v, r) => v <= r);
     }
 
@@ -1849,7 +1876,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | false  |
      * +---+--------+
      */
-    lt(val: any) {
+    lt(val: ComparisonArg) {
         return this._deriveBinary(val, (v, r) => v < r);
     }
 
@@ -1885,7 +1912,7 @@ export class StandardExpr extends ExprBase {
      * | B         |
      * +-----------+
      */
-    maxBy(by: any) {
+    maxBy(by: ComparisonArg) {
         return this._deriveAggBinary(by, p => computeBy(p, "maxIdx"));
     }
 
@@ -1957,7 +1984,7 @@ export class StandardExpr extends ExprBase {
      * | A            |
      * +--------------+
      */
-    minBy(by: any) {
+    minBy(by: ComparisonArg) {
         return this._deriveAggBinary(by, p => computeBy(p, "minIdx"));
     }
 
@@ -2068,7 +2095,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | true    |
      * +---+---------+
      */
-    ne(val: any) {
+    ne(val: ComparisonArg) {
         return this.eq(val).not();
     }
 
@@ -2107,7 +2134,7 @@ export class StandardExpr extends ExprBase {
      * | 3    | true        |
      * +------+-------------+
      */
-    neMissing(val: any) {
+    neMissing(val: ComparisonArg) {
         return this.eqMissing(val).not();
     }
 
@@ -2147,7 +2174,7 @@ export class StandardExpr extends ExprBase {
      * | "cherry" | true   |
      * +----------+--------+
      */
-    notIn(values: any[] | any) {
+    notIn(values: ComparisonArg) {
         return this.isIn(values).not();
     }
 
@@ -2203,7 +2230,7 @@ export class StandardExpr extends ExprBase {
      * | null  | true  | true   |
      * +-------+-------+--------+
      */
-    or(other: any) {
+    or(other: BooleanArg) {
         return this._derive((vArray, columns) => {
             const height = vArray.length;
             const otherVal = this._resolve(other, columns, height);
@@ -2365,7 +2392,7 @@ export class StandardExpr extends ExprBase {
      * | 95    | 2    |
      * +-------+------+
      */
-    rank(options: { dense?: boolean } = {}) {
+    rank(options: RankOptions = {}) {
         return this._window((vals, _, currIdx) => computeRank(vals, vals[currIdx], options));
     }
 
@@ -2607,10 +2634,7 @@ export class StandardExpr extends ExprBase {
      * | 3 | 3       |
      * +---+---------+
      */
-    round(decimalsOrOptions: number | RoundOptions = 0) {
-        const decimals = typeof decimalsOrOptions === "object" && decimalsOrOptions !== null
-            ? (decimalsOrOptions.decimals ?? 0)
-            : decimalsOrOptions;
+    round(decimals: number = 0) {
         return this._deriveUnary((v) => roundToScale(v, decimals));
     }
 
@@ -2768,7 +2792,7 @@ export class StandardExpr extends ExprBase {
      * | 1        |
      * +----------+
      */
-    spearmanCorr(other: any) {
+    spearmanCorr(other: NumericSeriesArg) {
         return this._deriveAggBinary(other, pairs => computeSpearmanCorrelation(pairs));
     }
 
@@ -2934,7 +2958,7 @@ export class StandardExpr extends ExprBase {
      * | 2.333333 |
      * +----------+
      */
-    wAvg(weights: any) {
+    wAvg(weights: NumericSeriesArg) {
         return this._deriveAggBinary(weights, pairs => computeWeightedAverage(pairs));
     }
 
@@ -2955,7 +2979,7 @@ export class StandardExpr extends ExprBase {
      * | false | false | false   |
      * +-------+-------+---------+
      */
-    xor(other: any) {
+    xor(other: BooleanArg) {
         return this._deriveBinary(other, (v, w) => !!v !== !!w);
     }
 }

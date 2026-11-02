@@ -725,11 +725,27 @@ export function extractTypesFromContent(rawContent, filePath = "", typesMap = {}
     const lineStart = normalized.substring(0, declStart).split("\n").length;
     const lineEnd = normalized.substring(0, declEnd + 1).split("\n").length;
 
+    const properties = extractTypeProperties(signature);
+
+    // Extract preceding JSDoc comment for the type/interface declaration if present
+    const beforeDecl = normalized.substring(0, declStart).trimEnd();
+    let desc = "";
+    if (beforeDecl.endsWith("*/")) {
+      const commentStart = beforeDecl.lastIndexOf("/**");
+      if (commentStart !== -1) {
+        const commentContent = beforeDecl.substring(commentStart + 3, beforeDecl.length - 2);
+        const parsed = parseJSDocComment(commentContent);
+        desc = parsed.desc || "";
+      }
+    }
+
     typesMap[typeName] = {
       filePath,
       lineStart,
       lineEnd,
+      ...(desc ? { desc } : {}),
       signature,
+      ...(properties ? { properties } : {}),
       subTypes: []
     };
 
@@ -737,6 +753,183 @@ export function extractTypesFromContent(rawContent, filePath = "", typesMap = {}
   }
 
   return typesMap;
+}
+
+/**
+ * Extracts structured properties from an interface or object type signature string.
+ * @param {string} signature - The TypeScript type/interface declaration string.
+ * @returns {Record<string, { type: string, optional: boolean, desc: string, default?: string }> | undefined}
+ */
+export function extractTypeProperties(signature) {
+  if (!signature) return undefined;
+
+  const openBrace = signature.indexOf("{");
+  const closeBrace = signature.lastIndexOf("}");
+  if (openBrace === -1 || closeBrace === -1 || closeBrace <= openBrace) {
+    return undefined;
+  }
+
+  const body = signature.slice(openBrace + 1, closeBrace);
+  const properties = {};
+
+  let i = 0;
+  const len = body.length;
+
+  while (i < len) {
+    while (i < len && /\s/.test(body[i])) i++;
+    if (i >= len) break;
+
+    let rawJsDoc = null;
+    if (body[i] === "/" && body[i + 1] === "*") {
+      const startComment = i;
+      const endComment = body.indexOf("*/", i + 2);
+      if (endComment !== -1) {
+        rawJsDoc = body.slice(startComment + 2, endComment);
+        i = endComment + 2;
+        while (i < len && /\s/.test(body[i])) i++;
+      }
+    }
+    if (i >= len) break;
+
+    let propName = "";
+    if (body[i] === '"' || body[i] === "'") {
+      const quote = body[i];
+      i++;
+      const startQuote = i;
+      while (i < len && body[i] !== quote) {
+        if (body[i] === "\\") i++;
+        i++;
+      }
+      propName = body.slice(startQuote, i);
+      if (i < len) i++;
+    } else if (body[i] === "[") {
+      const startBracket = i;
+      let bDepth = 0;
+      while (i < len) {
+        if (body[i] === "[") bDepth++;
+        else if (body[i] === "]") {
+          bDepth--;
+          if (bDepth === 0) {
+            i++;
+            break;
+          }
+        }
+        i++;
+      }
+      propName = body.slice(startBracket, i).trim();
+    } else {
+      const startId = i;
+      while (i < len && /[a-zA-Z0-9_$]/.test(body[i])) i++;
+      propName = body.slice(startId, i).trim();
+    }
+
+    if (!propName) {
+      i++;
+      continue;
+    }
+
+    while (i < len && /\s/.test(body[i])) i++;
+
+    let isOptional = false;
+    if (body[i] === "?") {
+      isOptional = true;
+      i++;
+      while (i < len && /\s/.test(body[i])) i++;
+    }
+
+    if (body[i] === "(") {
+      let pDepth = 0;
+      while (i < len) {
+        if (body[i] === "(") pDepth++;
+        else if (body[i] === ")") {
+          pDepth--;
+          if (pDepth === 0) {
+            i++;
+            break;
+          }
+        }
+        i++;
+      }
+      while (i < len && body[i] !== ";" && body[i] !== "\n") i++;
+      if (body[i] === ";") i++;
+      continue;
+    }
+
+    if (body[i] !== ":") {
+      i++;
+      continue;
+    }
+    i++;
+    while (i < len && /\s/.test(body[i])) i++;
+
+    const typeStart = i;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    let angleDepth = 0;
+
+    while (i < len) {
+      const ch = body[i];
+      if (ch === "{") braceDepth++;
+      else if (ch === "}") {
+        if (braceDepth > 0) braceDepth--;
+        else break;
+      } else if (ch === "[") bracketDepth++;
+      else if (ch === "]") {
+        if (bracketDepth > 0) bracketDepth--;
+      } else if (ch === "(") parenDepth++;
+      else if (ch === ")") {
+        if (parenDepth > 0) parenDepth--;
+      } else if (ch === "<") angleDepth++;
+      else if (ch === ">") {
+        if (angleDepth > 0 && body[i - 1] !== "=") angleDepth--;
+      } else if (ch === ";" || ch === ",") {
+        if (braceDepth === 0 && bracketDepth === 0 && parenDepth === 0 && angleDepth === 0) {
+          break;
+        }
+      } else if (ch === "\n") {
+        if (braceDepth === 0 && bracketDepth === 0 && parenDepth === 0 && angleDepth === 0) {
+          const rest = body.slice(i + 1).trimStart();
+          if (rest.startsWith("/**") || rest.startsWith("}") || /^[a-zA-Z0-9_$'"[]+(\?)?:/.test(rest)) {
+            break;
+          }
+        }
+      }
+      i++;
+    }
+
+    let rawType = body.slice(typeStart, i).trim();
+    if (body[i] === ";" || body[i] === ",") i++;
+
+    rawType = rawType.replace(/\s+/g, " ");
+
+    let desc = "";
+    let defaultValue = undefined;
+
+    if (rawJsDoc) {
+      const parsedComment = parseJSDocComment(rawJsDoc);
+      desc = parsedComment.desc || "";
+
+      const defaultTagMatch = rawJsDoc.match(/@default\s+([^\r\n*]+)/);
+      if (defaultTagMatch) {
+        defaultValue = defaultTagMatch[1].trim();
+      } else {
+        const inlineDefaultMatch = desc.match(/\(default:\s*([^)]+)\)|[Dd]efaults?\s+to\s+([^.]+)/);
+        if (inlineDefaultMatch) {
+          defaultValue = (inlineDefaultMatch[1] || inlineDefaultMatch[2]).trim();
+        }
+      }
+    }
+
+    properties[propName] = {
+      type: rawType,
+      optional: isOptional,
+      desc,
+      ...(defaultValue !== undefined ? { default: defaultValue } : {})
+    };
+  }
+
+  return Object.keys(properties).length > 0 ? properties : undefined;
 }
 
 /**

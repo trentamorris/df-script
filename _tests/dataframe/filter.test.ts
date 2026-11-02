@@ -220,6 +220,76 @@ if (dfNestedFilter.height !== 2) {
     throw new Error("22. Nested array of filter expressions failed");
 }
 
+
+// 23. Edge Case: BigInt filter in DataFrame
+const dfBigInt = new DataFrame({
+    id: [1, 2, 3],
+    val: [10n, 20n, 30n]
+});
+const dfBigFiltered = dfBigInt.filter($df.col("val").ge(20n));
+if (dfBigFiltered.height !== 2 || dfBigFiltered.toDicts()[0].id !== 2 || dfBigFiltered.toDicts()[1].id !== 3) {
+    throw new Error("23. BigInt DataFrame filter failed");
+}
+
+// 24. Edge Case: Filter empty DataFrame returns self with height 0
+const dfEmptyBase = new DataFrame([] as any[]);
+const dfEmptyFiltered = dfEmptyBase.filter($df.col("any").gt(10));
+if (dfEmptyFiltered.height !== 0) {
+    throw new Error("24. Empty DataFrame filter should return 0 height");
+}
+
+// 25. Edge Case: Filter matching no rows
+const dfNoMatch = df.filter($df.col("age").gt(9999));
+if (dfNoMatch.height !== 0) {
+    throw new Error("25. Filter matching 0 rows failed");
+}
+if (Object.keys(dfNoMatch.schema).length !== Object.keys(df.schema).length) {
+    throw new Error("25. Schema should be preserved on 0 row match");
+}
+
+// 26. Edge Case: Filter matching all rows
+const dfAllMatch = df.filter($df.col("age").gt(0));
+if (dfAllMatch.height !== df.height) {
+    throw new Error("26. Filter matching all rows failed");
+}
+
+// 27. Edge Case: Filter with boolean column containing true, false, and null
+const dfBoolNull = new DataFrame({
+    a: [1, 2, 3, 4],
+    cond: [true, false, null, true]
+});
+const dfBoolFiltered = dfBoolNull.filter($df.col("cond"));
+if (dfBoolFiltered.height !== 2 || dfBoolFiltered.toDicts()[0].a !== 1 || dfBoolFiltered.toDicts()[1].a !== 4) {
+    throw new Error("27. Boolean column with nulls in DataFrame filter failed");
+}
+
+// 28. Edge Case: Multi-argument filter where one argument filters to empty
+const dfMultiArgEmpty = df.filter($df.col("age").ge(20), $df.col("age").lt(10));
+if (dfMultiArgEmpty.height !== 0) {
+    throw new Error("28. Multi-arg filter to empty failed");
+}
+
+// 29. Edge Case: Filter with array of expressions
+const dfDeepNested = df.filter([
+    $df.col("age").ge(20),
+    $df.col("name").ne("Bob")
+]);
+if (dfDeepNested.height !== 2) {
+    throw new Error("29. Array of filter expressions failed");
+}
+
+// 30. Edge Case: Filter preserving TypedArrays
+const dfTyped = new DataFrame({
+    idx: new Int32Array([10, 20, 30, 40]),
+    f: new Float64Array([1.1, 2.2, 3.3, 4.4])
+});
+const dfTypedFiltered = dfTyped.filter($df.col("idx").gt(20));
+if (dfTypedFiltered.height !== 2) throw new Error("30. TypedArray filter height failed");
+const typedDictsRes = dfTypedFiltered.toDicts();
+if (typedDictsRes[0].idx !== 30 || typedDictsRes[1].idx !== 40) {
+    throw new Error("30. TypedArray filter values failed");
+}
+
 console.log("✓ filter tests passed!");
 
 

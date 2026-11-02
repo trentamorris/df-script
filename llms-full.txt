@@ -21,6 +21,34 @@ Renames the output expression column key.
 $df.col(<column_name>).alias(name: string): this
 ```
 
+### Parameters
+- `name` (any): Name of the output column.
+
+### Returns: `ColumnExpression`
+
+### Examples
+```typescript
+>>> const df = $df.data({ a: [1, 2, 3] })
+>>> df
+shape: (3, 1)
++---+
+| a |
++---+
+| 1 |
+| 2 |
+| 3 |
++---+
+>>> df.withColumns($df.col("a").alias("renamed_a"))
+shape: (3, 2)
++---+-----------+
+| a | renamed_a |
++---+-----------+
+| 1 | 1         |
+| 2 | 2         |
+| 3 | 3         |
++---+-----------+
+```
+
 ---
 
 ## Operation
@@ -35,9 +63,38 @@ $df.col(<column_name>).cast(
 ): this
 ```
 
+### Parameters
+- `dataType` (any): Registered target data type (e.g. `$df.DataType.Int32`, `$df.DataType.String`).
+- `[options]` (any): Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
+
+### Returns: `ColumnExpression`
+
 ### Types Referenced
 - [`RegisteredDataType`](#registereddatatype)
 - [`CastOptions`](#castoptions)
+
+### Examples
+```typescript
+>>> const df = $df.data({ a: [1, 2, 3] })
+>>> df
+shape: (3, 1)
++---+
+| a |
++---+
+| 1 |
+| 2 |
+| 3 |
++---+
+>>> df.withColumns($df.col("a").cast($df.DataType.Float64).alias("float_a"))
+shape: (3, 2)
++---+---------+
+| a | float_a |
++---+---------+
+| 1 | 1.0     |
+| 2 | 2.0     |
+| 3 | 3.0     |
++---+---------+
+```
 
 ---
 
@@ -1533,17 +1590,22 @@ shape: (1, 1)
 
 ## Operation
 
-Logical AND check supporting Kleene logic.
+Performs an element-wise logical AND operation between the column and another operand using Kleene 3-valued logic (true, false, null).
+
+In Kleene 3-valued logic: - `false` AND anything is `false`. - `true` AND `true` is `true`. - `true` AND `null` is `null` (unknown). - `null` AND `null` is `null` (unknown).
 
 ### Signature
 ```typescript
-$df.col(<column_name>).and(other: any)
+$df.col(<column_name>).and(other: BooleanArg)
 ```
 
 ### Parameters
-- `other` (any): The other boolean column expression or literal value to compare.
+- `other` (any): The boolean column expression or literal value to compare.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`BooleanArg`](#booleanarg)
 
 ### Examples
 ```typescript
@@ -2004,23 +2066,27 @@ shape: (2, 2)
 
 ## Operation
 
-Checks if values fall inside lower and upper boundaries (inclusive).
+Checks if values fall inside lower and upper boundaries.
 
 ### Signature
 ```typescript
 $df.col(<column_name>).between(
-  lower: any,
-  upper: any,
-  closed: "both" | "left" | "right" | "none" = "both"
+  lower: ComparisonArg,
+  upper: ComparisonArg,
+  options: BetweenOptions = {}
 )
 ```
 
 ### Parameters
 - `lower` (any): The lower boundary value or expression.
 - `upper` (any): The upper boundary value or expression.
-- `closed` (any): Control boundary inclusivity: "both", "left", "right", or "none" (default: "both").
+- `[options]` (any): Boundary configuration options (see `BetweenOptions`).
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
+- [`BetweenOptions`](#betweenoptions)
 
 ### Examples
 ```typescript
@@ -2308,17 +2374,22 @@ shape: (3, 3)
 
 ## Operation
 
-Aggregation: Computes the Pearson correlation coefficient between two columns.
+Aggregation: Computes the Pearson correlation coefficient between this column and another column expression or numeric array.
+
+Computes the sample Pearson product-moment correlation coefficient $r \in [-1, 1]$ using a single-pass, numerically stable Welford algorithm. Pairs containing `null`, `undefined`, or `NaN` are automatically dropped (pairwise deletion). Returns `null` if fewer than 2 valid pairs exist or if either column has zero variance.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).corr(other: any)
+$df.col(<column_name>).corr(other: NumericSeriesArg)
 ```
 
 ### Parameters
-- `other` (any): The target column expression to correlate with.
+- `other` (NumericSeriesArg): The target column expression, numeric literal, or numeric array to correlate with.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -2453,17 +2524,20 @@ shape: (3, 2)
 
 ## Operation
 
-Aggregation: Returns the count of records inside the group.
+Aggregation: Returns the count of records inside the group or column.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).count(options: { includeNulls?: boolean } = {})
+$df.col(<column_name>).count(options: CountOptions = {})
 ```
 
 ### Parameters
-- `options` (any): Config flags including whether to count null values.
+- `[options]` (CountOptions, default: {}): Configuration options for counting.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`CountOptions`](#countoptions)
 
 ### Examples
 ```typescript
@@ -2491,17 +2565,22 @@ shape: (2, 2)
 
 ## Operation
 
-Aggregation: Computes the covariance between two columns.
+Aggregation: Computes the sample covariance between this column and another column expression or numeric array.
+
+Computes sample covariance with $N - 1$ degrees of freedom using a single-pass, numerically stable Welford algorithm. Pairs containing `null`, `undefined`, or `NaN` are automatically dropped (pairwise deletion). Returns `null` if fewer than 2 valid pairs exist.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).cov(other: any)
+$df.col(<column_name>).cov(other: NumericSeriesArg)
 ```
 
 ### Parameters
-- `other` (any): The target column expression to compute covariance with.
+- `other` (NumericSeriesArg): The target column expression, numeric literal, or numeric array to compute covariance with.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -2837,17 +2916,22 @@ shape: (3, 2)
 
 ## Operation
 
-Aggregation: Computes the dot product with another column.
+Aggregation: Computes the dot product between this column and another column expression, numeric scalar, or array.
+
+Computes $\mathbf{x} \cdot \mathbf{y} = \sum_{i} x_i y_i$. Pairs containing `null`, `undefined`, or non-finite values (`NaN`, `Infinity`) are automatically dropped. Returns `null` if no valid pairs exist or if the DataFrame is empty.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dot(other: any)
+$df.col(<column_name>).dot(other: NumericSeriesArg)
 ```
 
 ### Parameters
-- `other` (any): The other column expression to compute the dot product with.
+- `other` (NumericSeriesArg): The other column expression, numeric literal, or numeric array to compute the dot product with.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -2866,7 +2950,7 @@ shape: (1, 1)
 +-------------+
 | dot_product |
 +-------------+
-| 140         |
+| 32          |
 +-------------+
 ```
 
@@ -2914,17 +2998,22 @@ shape: (1, 1)
 
 ## Operation
 
-Boolean comparison: Returns true if column values match the specified value exactly.
+Boolean comparison: Returns true if column values match the specified value exactly under Kleene logic.
+
+Evaluates strict equality (`===`) between this column and `val`. Under standard three-valued (Kleene) logic, comparing any value to `null` or `undefined` yields `null` (unknown). In IEEE-754 arithmetic, `NaN === NaN` yields `false`.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).eq(val: any)
+$df.col(<column_name>).eq(val: ComparisonArg)
 ```
 
 ### Parameters
-- `val` (any): The value or column expression to compare against.
+- `val` (ComparisonArg): The value, literal array, or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -2953,17 +3042,22 @@ shape: (3, 2)
 
 ## Operation
 
-Equivalence check that treats null values as equal to each other.
+Equivalence comparison that treats null and missing values as equal to each other.
+
+Returns `true` if both values are identical, or if both values are nullish (`null` or `undefined`). Returns `false` if one value is nullish while the other is non-null. Non-null values follow standard equality.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).eqMissing(val: any)
+$df.col(<column_name>).eqMissing(val: ComparisonArg)
 ```
 
 ### Parameters
-- `val` (any): The value or column expression to compare against.
+- `val` (ComparisonArg): The value, literal array, or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3282,21 +3376,19 @@ Replaces targeted values ("null", "nan", or "all") with a specified value or str
 ```typescript
 $df.col(<column_name>).fill(
   target: FillTarget,
-  options: FillOptions | ValidScalarTypes | IExpr = {}
+  options: FillOptions = {}
 ): this
 ```
 
 ### Parameters
-- `target` (any): The target value type to replace: "null", "nan", or "all".
-- `options` (any): Configuration options including replacement value, strategy, and optional limit, or a replacement scalar/expression directly.
+- `target` (FillTarget): The target value type to replace: "null", "nan", or "all".
+- `[options]` (FillOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
 - [`FillTarget`](#filltarget)
 - [`FillOptions`](#filloptions)
-- [`ValidScalarTypes`](#validscalartypes)
-- [`IExpr`](#iexpr)
 
 ### Examples
 ```typescript
@@ -3329,17 +3421,15 @@ Replaces NaN values with a specified value or strategy.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).fillNan(options: ValidScalarTypes | IExpr | FillNullOptions = {}): this
+$df.col(<column_name>).fillNan(options: FillNullOptions = {}): this
 ```
 
 ### Parameters
-- `options` (any): Replacement value, expression, or FillNullOptions configuration.
+- `[options]` (FillNullOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
-- [`ValidScalarTypes`](#validscalartypes)
-- [`IExpr`](#iexpr)
 - [`FillNullOptions`](#fillnulloptions)
 
 ### Examples
@@ -3354,7 +3444,7 @@ shape: (3, 1)
 | 2 |
 | 3 |
 +---+
->>> df.withColumns($df.col("a").fillNan(0).alias("clean"))
+>>> df.withColumns($df.col("a").fillNan({ value: 0 }).alias("clean"))
 shape: (3, 2)
 +---+-------+
 | a | clean |
@@ -3415,7 +3505,7 @@ Filters elements of the column expression where the predicate evaluates to truth
 
 ### Signature
 ```typescript
-$df.col(<column_name>).filter(predicate: IExpr)
+$df.col(<column_name>).filter(predicate: IExpr): this
 ```
 
 ### Parameters
@@ -3569,13 +3659,16 @@ Boolean comparison: Returns true if greater than or equal to argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ge(val: any)
+$df.col(<column_name>).ge(val: ComparisonArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3608,13 +3701,16 @@ Boolean comparison: Returns true if column value is greater than argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).gt(val: any)
+$df.col(<column_name>).gt(val: ComparisonArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3880,13 +3976,16 @@ Checks if column values are members of a specified array or list.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).isIn(values: any[] | any)
+$df.col(<column_name>).isIn(values: ComparisonArg)
 ```
 
 ### Parameters
 - `values` (any): An array of candidate values or a single value to match against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3993,7 +4092,7 @@ Checks if column values match the N-th distinct value by positive or negative in
 ```typescript
 $df.col(<column_name>).isNDistinct(
   index: number,
-  nullOnOob: boolean = true
+  options: IsNDistinctOptions = {}
 )
 ```
 
@@ -4002,6 +4101,9 @@ $df.col(<column_name>).isNDistinct(
 - `nullOnOob` (any): If true, returns null if index is out of bounds (default: true).
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`IsNDistinctOptions`](#isndistinctoptions)
 
 ### Examples
 ```typescript
@@ -4299,13 +4401,16 @@ Boolean comparison: Returns true if less than or equal to argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).le(val: any)
+$df.col(<column_name>).le(val: ComparisonArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4459,13 +4564,16 @@ Boolean comparison: Returns true if less than argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).lt(val: any)
+$df.col(<column_name>).lt(val: ComparisonArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4533,13 +4641,16 @@ Aggregation: Finds the value in this column corresponding to the maximum value i
 
 ### Signature
 ```typescript
-$df.col(<column_name>).maxBy(by: any)
+$df.col(<column_name>).maxBy(by: ComparisonArg)
 ```
 
 ### Parameters
 - `by` (any): Column or expression to order by.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4675,13 +4786,16 @@ Aggregation: Finds the value in this column corresponding to the minimum value i
 
 ### Signature
 ```typescript
-$df.col(<column_name>).minBy(by: any)
+$df.col(<column_name>).minBy(by: ComparisonArg)
 ```
 
 ### Parameters
 - `by` (any): Column or expression to order by.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4898,13 +5012,16 @@ Boolean comparison: Returns true if values do not match.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ne(val: any)
+$df.col(<column_name>).ne(val: ComparisonArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4973,13 +5090,16 @@ Difference check that treats null values as equal to each other.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).neMissing(val: any)
+$df.col(<column_name>).neMissing(val: ComparisonArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -5050,13 +5170,16 @@ Checks if values are not elements of a specific array or set list.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).notIn(values: any[] | any)
+$df.col(<column_name>).notIn(values: ComparisonArg)
 ```
 
 ### Parameters
 - `values` (any): An array of candidate values or a single value to match against.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -5163,13 +5286,16 @@ Logical OR check supporting Kleene logic.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).or(other: any)
+$df.col(<column_name>).or(other: BooleanArg)
 ```
 
 ### Parameters
 - `other` (any): The other boolean column expression or literal value to compare.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`BooleanArg`](#booleanarg)
 
 ### Examples
 ```typescript
@@ -5446,10 +5572,13 @@ Window: Computes rank within group partition.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).rank(options: { dense?: boolean } = {})
+$df.col(<column_name>).rank(options: RankOptions = {})
 ```
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`RankOptions`](#rankoptions)
 
 ### Examples
 ```typescript
@@ -5880,16 +6009,13 @@ Rounds values to a specific scale of decimal digits.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).round(decimalsOrOptions: number | RoundOptions = 0)
+$df.col(<column_name>).round(decimals: number = 0)
 ```
 
 ### Parameters
 - `decimals` (any): Number of decimal places to round to (default: 0).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RoundOptions`](#roundoptions)
 
 ### Examples
 ```typescript
@@ -6192,13 +6318,16 @@ Aggregation: Computes the Spearman rank correlation coefficient.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).spearmanCorr(other: any)
+$df.col(<column_name>).spearmanCorr(other: NumericSeriesArg)
 ```
 
 ### Parameters
 - `other` (any): The other column expression to correlate with.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -6518,13 +6647,16 @@ Aggregation: Computes weighted average.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).wAvg(weights: any)
+$df.col(<column_name>).wAvg(weights: NumericSeriesArg)
 ```
 
 ### Parameters
 - `weights` (any): The weight values or column expression.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -6555,13 +6687,16 @@ Logical XOR check.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).xor(other: any)
+$df.col(<column_name>).xor(other: BooleanArg)
 ```
 
 ### Parameters
 - `other` (any): The other boolean column expression or literal value to compare.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`BooleanArg`](#booleanarg)
 
 ### Examples
 ```typescript
@@ -10903,21 +11038,19 @@ Fills targeted values ("null", "nan", or "all") across columns using scalar valu
 ```typescript
 df.fill(
   target: FillTarget,
-  options: FillOptions | ValidScalarTypes | IExpr = {}
+  options: FillOptions = {}
 ): DataFrame<T>
 ```
 
 ### Parameters
 - `target` (FillTarget): Target type ("null", "nan", "all").
-- `[options]` (FillOptions | ValidScalarTypes | IExpr): Configuration options or scalar/expression replacement.
+- `[options]` (FillOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
 - [`FillTarget`](#filltarget)
 - [`FillOptions`](#filloptions)
-- [`ValidScalarTypes`](#validscalartypes)
-- [`IExpr`](#iexpr)
 
 ### Examples
 ```typescript
@@ -10950,17 +11083,15 @@ Fills NaN values across numeric columns using scalar values or statistical strat
 
 ### Signature
 ```typescript
-df.fillNan(options: ValidScalarTypes | IExpr | FillNullOptions = {}): DataFrame<T>
+df.fillNan(options: FillNullOptions = {}): DataFrame<T>
 ```
 
 ### Parameters
-- `[options]` (ValidScalarTypes | IExpr | FillNullOptions): Replacement value or configuration options.
+- `[options]` (FillNullOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`ValidScalarTypes`](#validscalartypes)
-- [`IExpr`](#iexpr)
 - [`FillNullOptions`](#fillnulloptions)
 
 ### Examples
@@ -10975,7 +11106,7 @@ shape: (3, 1)
 | 2 |
 | 3 |
 +---+
->>> df.fillNan(0)
+>>> df.fillNan({ value: 0 })
 shape: (3, 1)
 +---+
 | a |
@@ -13390,6 +13521,48 @@ export type NumericArg = number | bigint | IExpr | null;
 ```
 References: [`IExpr`](#iexpr)
 
+### NumericSeriesArg
+```typescript
+export type NumericSeriesArg = NumericArg | number[];
+```
+References: [`NumericArg`](#numericarg)
+
+### BooleanArg
+```typescript
+export type BooleanArg = boolean | boolean[] | IExpr | null | undefined;
+```
+References: [`IExpr`](#iexpr)
+
+### ComparisonArg
+```typescript
+export type ComparisonArg = IExpr | ValidScalarTypes | ValidScalarTypes[] | null | undefined;
+```
+References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
+
+### IsNDistinctOptions
+```typescript
+export interface IsNDistinctOptions {
+    /**
+     * If true (default), returns null when index is out of bounds.
+     * If false, throws an error if index is out of bounds.
+     * @default true
+     */
+    nullOnOob?: boolean;
+}
+```
+
+### RankOptions
+```typescript
+export interface RankOptions {
+    /**
+     * When true, ranks are consecutive integers without gaps between tied values (1, 2, 2, 3).
+     * When false (default), ranks have gaps for tied values (1, 2, 2, 4).
+     * @default false
+     */
+    dense?: boolean;
+}
+```
+
 ### IsCloseOptions
 ```typescript
 export interface IsCloseOptions {
@@ -13399,12 +13572,38 @@ export interface IsCloseOptions {
 }
 ```
 
-### RoundOptions
+### CountOptions
 ```typescript
-export interface RoundOptions {
-    decimals?: number;
+export interface CountOptions {
+    /**
+     * Whether to include `null`, `undefined`, or `NaN` values in the count.
+     * When `false`, counts only non-null, valid elements.
+     * @default false
+     */
+    includeNulls?: boolean;
 }
 ```
+
+### ClosedBoundary
+```typescript
+export type ClosedBoundary = "both" | "left" | "right" | "none";
+```
+
+### BetweenOptions
+```typescript
+export interface BetweenOptions {
+    /**
+     * Controls boundary inclusivity:
+     * - `"both"`: `lower <= x <= upper` (default)
+     * - `"left"`: `lower <= x < upper`
+     * - `"right"`: `lower < x <= upper`
+     * - `"none"`: `lower < x < upper`
+     * @default "both"
+     */
+    closed?: ClosedBoundary;
+}
+```
+References: [`ClosedBoundary`](#closedboundary)
 
 ### ProxyPropertyResolver
 ```typescript
@@ -14379,22 +14578,47 @@ References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
 ### FillOptions
 ```typescript
 export interface FillOptions {
-    value?: any;
+    /**
+     * Replacement scalar value or column expression to substitute in place of target values.
+     */
+    value?: IExpr | ValidScalarTypes | null;
+    /**
+     * Filling strategy to calculate or propagate replacement values.
+     * - `"forward"`: Propagate last valid value forward.
+     * - `"backward"`: Propagate next valid value backward.
+     * - `"min"`: Replace with column minimum.
+     * - `"max"`: Replace with column maximum.
+     * - `"mean"`: Replace with column arithmetic mean.
+     * - `"zero"`: Replace with 0.
+     * - `"one"`: Replace with 1.
+     */
     strategy?: FillNullStrategy;
+    /**
+     * Maximum number of consecutive target values to fill when using directional strategies ("forward", "backward").
+     */
     limit?: number;
 }
 ```
-References: [`FillNullStrategy`](#fillnullstrategy)
+References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`FillNullStrategy`](#fillnullstrategy)
 
 ### FillNullOptions
 ```typescript
 export interface FillNullOptions {
-    value?: any;
+    /**
+     * Replacement scalar value or column expression to substitute in place of null values.
+     */
+    value?: IExpr | ValidScalarTypes | null;
+    /**
+     * Filling strategy to calculate or propagate replacement values.
+     */
     strategy?: FillNullStrategy;
+    /**
+     * Maximum number of consecutive null values to fill when using directional strategies ("forward", "backward").
+     */
     limit?: number;
 }
 ```
-References: [`FillNullStrategy`](#fillnullstrategy)
+References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`FillNullStrategy`](#fillnullstrategy)
 
 ### ToStructOptions
 ```typescript

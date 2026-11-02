@@ -207,4 +207,79 @@ if (resCum[0].cum_sum_no_20 !== 10 || resCum[1].cum_sum_no_20 !== 10 || resCum[2
     throw new Error(`22. Filtered cumSum failed: ${JSON.stringify(resCum)}`);
 }
 
+
+// 23. Edge Case: Date predicate comparison filtering
+const dfDates = $df.data({
+    d: [new Date("2026-01-01"), new Date("2026-06-01"), new Date("2026-12-31")],
+    v: [10, 20, 30]
+});
+const resDates = dfDates.select([
+    $df.col("v").filter($df.col("d").gt(new Date("2026-03-01"))).alias("res")
+]).toDicts() as any[];
+if (resDates[0].res !== null || resDates[1].res !== 20 || resDates[2].res !== 30) {
+    throw new Error("23. Date predicate comparison filtering failed");
+}
+
+// 24. Edge Case: BigInt predicate comparison filtering
+const dfBigInts = $df.data({
+    b: [10n, 20n, 30n],
+    v: ["a", "b", "c"]
+});
+const resBigInts = dfBigInts.select([
+    $df.col("v").filter($df.col("b").ge(20n)).alias("res")
+]).toDicts() as any[];
+if (resBigInts[0].res !== null || resBigInts[1].res !== "b" || resBigInts[2].res !== "c") {
+    throw new Error("24. BigInt predicate comparison filtering failed");
+}
+
+// 25. Edge Case: Predicate column containing NaN and null
+const dfPredicateNulls = $df.data({
+    a: [NaN, 10, null, 20],
+    v: [1, 2, 3, 4]
+});
+const resPredNulls = dfPredicateNulls.select([
+    $df.col("v").filter($df.col("a").gt(5)).alias("res")
+]).toDicts() as any[];
+if (resPredNulls[0].res !== null || resPredNulls[1].res !== 2 || resPredNulls[2].res !== null || resPredNulls[3].res !== 4) {
+    throw new Error("25. Predicate containing NaN and null failed");
+}
+
+// 26. Edge Case: Multi-column left projection with filter
+const dfMultiFilter = $df.data({
+    a: [10, 20, 30],
+    b: [100, 200, 300]
+});
+const resMultiFilter = dfMultiFilter.select([
+    $df.col(["a", "b"]).filter($df.col("a").gt(15))
+]).toDicts() as any[];
+if (resMultiFilter[0].a !== null || resMultiFilter[0].b !== null ||
+    resMultiFilter[1].a !== 20 || resMultiFilter[1].b !== 200 ||
+    resMultiFilter[2].a !== 30 || resMultiFilter[2].b !== 300) {
+    throw new Error("26. Multi-column left projection with filter failed");
+}
+
+// 27. Edge Case: Chained filter expressions (.filter().filter())
+const dfChain = $df.data({ a: [10, 20, 30] });
+const resChain = dfChain.select([
+    $df.col("a").filter($df.col("a").gt(10)).filter($df.col("a").lt(30)).alias("res")
+]).toDicts() as any[];
+if (resChain[0].res !== null || resChain[1].res !== 20 || resChain[2].res !== null) {
+    throw new Error("27. Chained filter expressions failed");
+}
+
+// 28. Edge Case: Single-row DataFrame
+const dfSingle = $df.data({ a: [10] });
+const resSingleMatch = dfSingle.select([$df.col("a").filter($df.col("a").eq(10)).alias("res")]).toDicts() as any[];
+const resSingleMismatch = dfSingle.select([$df.col("a").filter($df.col("a").eq(99)).alias("res")]).toDicts() as any[];
+if (resSingleMatch[0].res !== 10 || resSingleMismatch[0].res !== null) {
+    throw new Error("28. Single-row filter failed");
+}
+
+// 29. Edge Case: Empty DataFrame (schema preserved)
+const dfEmpty = $df.data([{ a: 1 }]).filter($df.col("a").eq(999));
+const resEmpty = dfEmpty.select([$df.col("a").filter($df.col("a").eq(1)).alias("res")]).toDicts();
+if (resEmpty.length !== 0) {
+    throw new Error("29. Empty DataFrame filter failed");
+}
+
 console.log("✓ StandardExpr.filter tests passed!");

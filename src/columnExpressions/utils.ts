@@ -179,7 +179,9 @@ export function compareMissing(vArray: ArrayLike<any>, rResolved: any): boolean[
         if (v == null || r == null) {
             result[i] = v == null && r == null;
         } else {
-            result[i] = v === r;
+            const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
+            const normR = typeof r === "object" && isValidDateObj(r) ? r.getTime() : r;
+            result[i] = normV === normR;
         }
     }
     return result;

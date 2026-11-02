@@ -350,14 +350,39 @@ export type FillNullStrategy = "forward" | "backward" | "min" | "max" | "mean" |
 export type FillTarget = "null" | "nan" | "all" | IExpr | ValidScalarTypes;
 
 export interface FillOptions {
-    value?: any;
+    /**
+     * Replacement scalar value or column expression to substitute in place of target values.
+     */
+    value?: IExpr | ValidScalarTypes | null;
+    /**
+     * Filling strategy to calculate or propagate replacement values.
+     * - `"forward"`: Propagate last valid value forward.
+     * - `"backward"`: Propagate next valid value backward.
+     * - `"min"`: Replace with column minimum.
+     * - `"max"`: Replace with column maximum.
+     * - `"mean"`: Replace with column arithmetic mean.
+     * - `"zero"`: Replace with 0.
+     * - `"one"`: Replace with 1.
+     */
     strategy?: FillNullStrategy;
+    /**
+     * Maximum number of consecutive target values to fill when using directional strategies ("forward", "backward").
+     */
     limit?: number;
 }
 
 export interface FillNullOptions {
-    value?: any;
+    /**
+     * Replacement scalar value or column expression to substitute in place of null values.
+     */
+    value?: IExpr | ValidScalarTypes | null;
+    /**
+     * Filling strategy to calculate or propagate replacement values.
+     */
     strategy?: FillNullStrategy;
+    /**
+     * Maximum number of consecutive null values to fill when using directional strategies ("forward", "backward").
+     */
     limit?: number;
 }
 

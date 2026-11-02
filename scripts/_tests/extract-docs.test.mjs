@@ -5,6 +5,7 @@ import {
   parseJSDocComment,
   extractSignatureAndEnd,
   extractTypesFromContent,
+  extractTypeProperties,
   extractSubTypes,
   extractRawDocsFromContent,
   extractRawDocs
@@ -643,6 +644,96 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
       }
     }
   }
+});
+
+// ─── 7. extractTypeProperties Comprehensive Edge Cases ───────────────────────
+
+test("extractTypeProperties: basic properties, optional flags, JSDoc desc, and @default tags", () => {
+  const sig = `export interface CastOptions {
+    /**
+     * Whether cast errors should throw or produce null values.
+     * @default true
+     */
+    strict?: boolean;
+    targetType: RegisteredDataType;
+}`;
+
+  const props = extractTypeProperties(sig);
+  assert.ok(props);
+  assert.deepStrictEqual(props.strict, {
+    type: "boolean",
+    optional: true,
+    desc: "Whether cast errors should throw or produce null values.",
+    default: "true"
+  });
+  assert.deepStrictEqual(props.targetType, {
+    type: "RegisteredDataType",
+    optional: false,
+    desc: ""
+  });
+});
+
+test("extractTypeProperties: nested object types with internal braces and string literals", () => {
+  const sig = `export type ComplexOptions = {
+    mode?: "both" | "start" | "end";
+    /**
+     * String options dictionary.
+     */
+    nestedConfig?: {
+        literal?: boolean;
+        caseInsensitive?: boolean;
+    };
+    "quoted-prop"?: string | number;
+    'single-quoted': boolean;
+    _internalFn?: (val: any) => void;
+};`;
+
+  const props = extractTypeProperties(sig);
+  assert.ok(props);
+  assert.strictEqual(props.mode.type, '"both" | "start" | "end"');
+  assert.strictEqual(props.mode.optional, true);
+
+  assert.strictEqual(
+    props.nestedConfig.type,
+    "{ literal?: boolean; caseInsensitive?: boolean; }"
+  );
+  assert.strictEqual(props.nestedConfig.desc, "String options dictionary.");
+  assert.strictEqual(props.nestedConfig.optional, true);
+
+  assert.strictEqual(props["quoted-prop"].type, "string | number");
+  assert.strictEqual(props["quoted-prop"].optional, true);
+
+  assert.strictEqual(props["single-quoted"].type, "boolean");
+  assert.strictEqual(props["single-quoted"].optional, false);
+
+  assert.strictEqual(props._internalFn.type, "(val: any) => void");
+});
+
+test("extractTypeProperties: interface with methods skips method declarations", () => {
+  const sig = `export interface IExpr {
+    _ops: OpFn[];
+    _colName?: string;
+    alias(name: string): this;
+    cast(dataType: RegisteredDataType, options?: CastOptions): this;
+    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
+}`;
+
+  const props = extractTypeProperties(sig);
+  assert.ok(props);
+  assert.strictEqual(Object.keys(props).length, 2);
+  assert.strictEqual(props._ops.type, "OpFn[]");
+  assert.strictEqual(props._ops.optional, false);
+  assert.strictEqual(props._colName.type, "string");
+  assert.strictEqual(props._colName.optional, true);
+  assert.strictEqual(props.alias, undefined);
+  assert.strictEqual(props.cast, undefined);
+  assert.strictEqual(props._resolve, undefined);
+});
+
+test("extractTypeProperties: union or non-object signatures return undefined", () => {
+  assert.strictEqual(extractTypeProperties("export type TimeUnit = 's' | 'ms' | 'us' | 'ns';"), undefined);
+  assert.strictEqual(extractTypeProperties(""), undefined);
+  assert.strictEqual(extractTypeProperties(null), undefined);
 });
 
 console.log(`✅ All ${passed} test suites in scripts/_tests/extract-docs.test.mjs passed!`);
