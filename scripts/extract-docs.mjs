@@ -555,8 +555,17 @@ function _substituteGenerics(str, genericParams, rawArgs = []) {
     const gp = genericParams[i];
     const replacement = rawArgs[i] !== undefined ? rawArgs[i].trim() : gp.defaultType;
     if (replacement) {
+      const needsParensInArray =
+        _splitTopLevel(replacement, "|").length > 1 ||
+        _splitTopLevel(replacement, "&").length > 1;
       const paramRegex = new RegExp(`\\b${gp.name}\\b(?!\\s*\\??:)`, "g");
-      result = result.replace(paramRegex, replacement);
+      result = result.replace(paramRegex, (_match, offset, fullStr) => {
+        const after = fullStr.slice(offset + gp.name.length);
+        if (needsParensInArray && after.startsWith("[")) {
+          return `(${replacement})`;
+        }
+        return replacement;
+      });
     }
   }
   return result;
@@ -644,8 +653,7 @@ export function extractTypesFromContent(rawContent, filePath = "", typesMap = {}
       ...(desc ? { desc } : {}),
       ...(isInternal ? { internal: true } : {}),
       signature,
-      ...(properties ? { properties } : {}),
-      subTypes: []
+      ...(properties ? { properties } : {})
     };
 
     declRegex.lastIndex = declEnd + 1;
@@ -819,33 +827,6 @@ export function extractTypeProperties(signature) {
   }
 
   return Object.keys(properties).length > 0 ? properties : undefined;
-}
-
-/**
- * Extracts all referenced project type keys from a signature string.
- */
-export function extractSubTypes(signature, typesMap, selfName = null) {
-  if (!signature || !typesMap) return [];
-  const masked = _maskCommentsAndStrings(signature);
-  const subTypes = [];
-  const idRegex = /\b([A-Za-z_$][A-Za-z0-9_$]*)\b/g;
-
-  let m;
-  while ((m = idRegex.exec(masked)) !== null) {
-    const id = m[1];
-    if (id === selfName) continue;
-    if (!Object.prototype.hasOwnProperty.call(typesMap, id)) continue;
-
-    // Skip if this identifier is a parameter or property name immediately followed by ':' or '?:'
-    const afterStr = masked.slice(m.index + id.length);
-    if (/^\s*\??\s*:/.test(afterStr)) continue;
-
-    if (!subTypes.includes(id)) {
-      subTypes.push(id);
-    }
-  }
-
-  return subTypes;
 }
 
 /**
@@ -1319,6 +1300,75 @@ export function buildFunctionTypeTree(rawSignature, jsdocParams = [], typesMap =
   return Object.keys(typeTree).length > 0 ? typeTree : undefined;
 }
 
+/**
+ * Formats a nested properties map into an indented `{ ... }` object block for `signatureDetailed`.
+ */
+function _formatPropertiesBlock(properties, indent = "  ") {
+  const entries = Object.entries(properties);
+  if (entries.length === 0) return "{}";
+
+  const propIndent = indent + "  ";
+  const lines = entries.map(([propKey, propNode]) => {
+    const optMark = propNode.optional ? "?" : "";
+    let typePart;
+    if (propNode.properties && Object.keys(propNode.properties).length > 0) {
+      typePart = _formatPropertiesBlock(propNode.properties, propIndent);
+    } else {
+      typePart = propNode.resolvedType || propNode.type || "any";
+    }
+    const defaultPart = propNode.default !== undefined ? ` = ${propNode.default}` : "";
+    return `${propIndent}${propKey}${optMark}: ${typePart}${defaultPart}`;
+  });
+
+  return `{\n${lines.join(",\n")}\n${indent}}`;
+}
+
+/**
+ * Builds a detailed, expanded signature string from a formatted signature and its `typeTree`.
+ * Expands nested option properties and resolved type aliases inline into a single contiguous code statement.
+ */
+export function buildDetailedSignature(formattedSignature, typeTree) {
+  if (!formattedSignature) return formattedSignature;
+  if (!typeTree || Object.keys(typeTree).length === 0) return formattedSignature;
+
+  // Skip any caller prefix like `$df.col(<column_name>).` before locating the operation's `(`
+  const callerPrefixEnd = formattedSignature.indexOf("<column_name>)");
+  const searchStart = callerPrefixEnd !== -1 ? callerPrefixEnd + "<column_name>)".length : 0;
+
+  const openParen = _findTopLevelChar(formattedSignature, "(", searchStart);
+  if (openParen === -1) return formattedSignature;
+  const closeParen = _findMatchingClose(formattedSignature, openParen, "(", ")");
+  if (closeParen === -1) return formattedSignature;
+
+  const prefix = formattedSignature.slice(0, openParen);
+  const suffix = formattedSignature.slice(closeParen + 1);
+  const entries = Object.entries(typeTree);
+
+  if (entries.length === 0) {
+    return `${prefix}()${suffix}`;
+  }
+
+  const formattedParams = entries.map(([paramKey, node]) => {
+    const varPrefix = node.variadic ? "..." : "";
+    const hasDefault = node.default !== undefined;
+    const optMark = node.optional && !hasDefault ? "?" : "";
+    let typePart;
+    if (node.properties && Object.keys(node.properties).length > 0) {
+      typePart = _formatPropertiesBlock(node.properties, "  ");
+    } else {
+      typePart = node.resolvedType || node.type || "any";
+    }
+    const defaultPart = hasDefault ? ` = ${node.default}` : "";
+    return `  ${varPrefix}${paramKey}${optMark}: ${typePart}${defaultPart}`;
+  });
+
+  if (formattedParams.length === 1 && !formattedParams[0].includes("\n")) {
+    return `${prefix}(${formattedParams[0].trim()})${suffix}`;
+  }
+
+  return `${prefix}(\n${formattedParams.join(",\n")}\n)${suffix}`;
+}
+
 export function extractAllProjectTypes() {
   const typesMap = {};
   const sourceFiles = getSourceFiles(srcDir);
@@ -1330,7 +1380,6 @@ export function extractAllProjectTypes() {
   }
 
   for (const [typeName, typeEntry] of Object.entries(typesMap)) {
-    typeEntry.subTypes = extractSubTypes(typeEntry.signature, typesMap, typeName);
     const resolvedProps = resolveTypeProperties(typeName, typesMap);
     if (resolvedProps) {
       typeEntry.properties = resolvedProps;
@@ -1485,17 +1534,33 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
     }
     parsed.lineStart = rawContent.substring(0, match.index + match[0].length).split("\n").length;
     parsed.lineEnd = rawContent.substring(0, endIndex + 1).split("\n").length;
-    parsed.subTypes = typesMap ? extractSubTypes(parsed.signature, typesMap, symbolName) : [];
     const typeTree = typesMap ? buildFunctionTypeTree(rawSignature, parsed.params || [], typesMap) : undefined;
-    if (typeTree) {
-      parsed.typeTree = typeTree;
-    }
+    const signatureDetailed = buildDetailedSignature(parsed.signature, typeTree);
+
+    const orderedParsed = {
+      ...(parsed.desc ? { desc: parsed.desc } : {}),
+      ...(parsed.examples ? { examples: parsed.examples } : {}),
+      ...(parsed.params ? { params: parsed.params } : {}),
+      ...(parsed.returns ? { returns: parsed.returns } : {}),
+      ...(parsed.notes ? { notes: parsed.notes } : {}),
+      ...(parsed.namespace ? { namespace: parsed.namespace } : {}),
+      ...(parsed.accessor ? { accessor: parsed.accessor } : {}),
+      category: parsed.category,
+      propertyAccess: parsed.propertyAccess,
+      callExpression: parsed.callExpression,
+      signature: parsed.signature,
+      signatureDetailed,
+      ...(parsed.filePath ? { filePath: parsed.filePath } : {}),
+      lineStart: parsed.lineStart,
+      lineEnd: parsed.lineEnd,
+      ...(typeTree ? { typeTree } : {})
+    };
 
     if (parsed.desc || parsed.params || parsed.returns || parsed.examples || parsed.notes) {
       if (!fileDocs) {
         fileDocs = {};
       }
-      fileDocs[symbolName] = parsed;
+      fileDocs[symbolName] = orderedParsed;
     }
   }
 

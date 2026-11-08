@@ -58,10 +58,10 @@ export function buildLlmsFullTxt({ pkg, docs }) {
       lines.push(op.desc);
       lines.push("");
     }
-    if (op.signature) {
+    if (op.signatureDetailed || op.signature) {
       lines.push("### Signature");
       lines.push("```typescript");
-      lines.push(op.signature);
+      lines.push(op.signatureDetailed || op.signature);
       lines.push("```");
       lines.push("");
     }
@@ -76,18 +76,6 @@ export function buildLlmsFullTxt({ pkg, docs }) {
     }
     if (op.returns) {
       lines.push(`### Returns: \`${op.returns}\``);
-      lines.push("");
-    }
-    if (op.subTypes && op.subTypes.length > 0) {
-      lines.push("### Types Referenced");
-      lines.push(
-        op.subTypes
-          .map((t) => {
-            const anchor = t.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-            return `- [\`${t}\`](#${anchor})`;
-          })
-          .join("\n")
-      );
       lines.push("");
     }
     if (op.examples && op.examples.length > 0) {
@@ -150,15 +138,6 @@ export function buildLlmsFullTxt({ pkg, docs }) {
       lines.push("```typescript");
       lines.push(typeDef.signature);
       lines.push("```");
-      if (typeDef.subTypes && typeDef.subTypes.length > 0) {
-        const refLinks = typeDef.subTypes
-          .map((s) => {
-            const anchor = s.toLowerCase().replace(/[^a-z0-9_-]/g, "");
-            return `[\`${s}\`](#${anchor})`;
-          })
-          .join(", ");
-        lines.push(`References: ${refLinks}`);
-      }
       lines.push("");
     }
   }

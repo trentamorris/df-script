@@ -6,10 +6,10 @@ import {
   extractSignatureAndEnd,
   extractTypesFromContent,
   extractTypeProperties,
-  extractSubTypes,
   resolveTypeAliasString,
   resolveTypeProperties,
   buildFunctionTypeTree,
+  buildDetailedSignature,
   extractRawDocsFromContent,
   extractRawDocs
 } from "../extract-docs.mjs";
@@ -281,9 +281,9 @@ test("extractSignatureAndEnd: handles braces inside strings and default paramete
   assert.strictEqual(endIndex, code.length - 1);
 });
 
-// ─── 5. Objective TypeScript Type & SubType Extraction ────────────────────────
+// ─── 5. Objective TypeScript Type Extraction ──────────────────────────────────
 
-test("extractTypesFromContent & extractSubTypes: complex intersections, unions, and generic defaults", () => {
+test("extractTypesFromContent: complex intersections, unions, and generic defaults", () => {
   const sampleCode = `
 export type RegisteredDataType = string | number;
 
@@ -310,20 +310,12 @@ export type MappedOps<T extends Record<string, any> = any> = {
 `;
 
   const typesMap = extractTypesFromContent(sampleCode, "functions/seqRange.ts");
-  for (const [k, v] of Object.entries(typesMap)) {
-    v.subTypes = extractSubTypes(v.signature, typesMap, k);
-  }
 
   assert.ok(typesMap.RegisteredDataType);
   assert.ok(typesMap.CumulativeStepContext);
   assert.ok(typesMap.SeqRangeOptions);
   assert.ok(typesMap.MappedOps);
 
-  assert.deepStrictEqual(typesMap.SeqRangeOptions.subTypes, [
-    "RegisteredDataType",
-    "CumulativeStepContext"
-  ]);
-  assert.deepStrictEqual(typesMap.MappedOps.subTypes, ["CumulativeStepContext"]);
   assert.strictEqual(typesMap.SeqRangeOptions.filePath, "functions/seqRange.ts");
   assert.strictEqual(typesMap.SeqRangeOptions.lineStart, 10);
   assert.strictEqual(typesMap.SeqRangeOptions.lineEnd, 19);
@@ -348,7 +340,6 @@ test("extractRawDocs: top-level domain keys, columnExpressions hierarchy, and fl
     ["arrayExpr", "standardExpr", "stringExpr", "structExpr", "temporalExpr"]
   );
 
-  // VerifySeqRange & its subTypes chain
   const seqRange = allDocs.functions.seqRange;
   assert.ok(seqRange, "Missing functions.seqRange");
   assert.strictEqual(seqRange.filePath, "functions/seqRange.ts");
@@ -356,21 +347,11 @@ test("extractRawDocs: top-level domain keys, columnExpressions hierarchy, and fl
     seqRange.signature,
     "$df.seqRange(\n  value: any,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<any>"
   );
-  assert.deepStrictEqual(seqRange.subTypes, ["SeqRangeOptions", "ColumnExpr"]);
 
   const seqRangeOpts = allDocs.types.SeqRangeOptions;
   assert.ok(seqRangeOpts, "Missing types.SeqRangeOptions");
   assert.strictEqual(seqRangeOpts.filePath, "functions/types.ts");
-  assert.deepStrictEqual(seqRangeOpts.subTypes, [
-    "RegisteredDataType",
-    "CumulativeStepContext",
-    "IndependentStepContext"
-  ]);
   assert.ok(seqRangeOpts.signature.startsWith("export interface SeqRangeOptions {"));
-
-  for (const subKey of seqRangeOpts.subTypes) {
-    assert.ok(allDocs.types[subKey], `Missing subType '${subKey}' in docs.types`);
-  }
 });
 
 test("Top-level functions (docs.functions): category, namespace, syntax, and signatures", () => {
@@ -379,98 +360,82 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     all: {
       filePath: "functions/all.ts",
       signature: "$df.all(): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     coalesce: {
       filePath: "functions/coalesce.ts",
       signature: "$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["CoalesceArg", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     col: {
       filePath: "functions/col.ts",
       signature: "$df.col<T = any>(name: ColumnSelector<T>): ColumnExpr<T>",
-      returns: "ColumnExpr<T>",
-      subTypes: ["ColumnSelector", "ColumnExpr"]
+      returns: "ColumnExpr<T>"
     },
     concat: {
       filePath: "functions/concat.ts",
       signature: "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItemsArg,\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>",
-      returns: "DataFrame",
-      subTypes: ["RowRecord", "ConcatItemsArg", "ConcatOptions"]
+      returns: "DataFrame"
     },
     data: {
       filePath: "functions/data.ts",
       signature: "$df.data<T extends RowRecord = any>(\n  data: DataFrameDataArg<T>,\n  schema?: DataFrameSchema\n): DataFrame<T>",
-      returns: "DataFrame<T>",
-      subTypes: ["RowRecord", "DataFrameDataArg", "DataFrameSchema"]
+      returns: "DataFrame<T>"
     },
     duration: {
       filePath: "functions/duration.ts",
       signature: "$df.duration(options: DurationArg = {}): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["DurationArg", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     element: {
       filePath: "functions/element.ts",
       signature: "$df.element<T = any>(): ColumnExpr<T>",
-      returns: "ColumnExpr<T>",
-      subTypes: ["ColumnExpr"]
+      returns: "ColumnExpr<T>"
     },
     exclude: {
       filePath: "functions/exclude.ts",
       signature: "$df.exclude(columns: ColumnKeyArg): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["ColumnKeyArg", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     horizontal: {
       filePath: "functions/horizontal.ts",
       signature: "$df.horizontal(...exprs: IntoExprArg[]): HorizontalExpr",
-      returns: "HorizontalExpr",
-      subTypes: ["IntoExprArg", "HorizontalExpr"]
+      returns: "HorizontalExpr"
     },
     implode: {
       filePath: "functions/implode.ts",
       signature: "$df.implode(column: IntoExprArg): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["IntoExprArg", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     lit: {
       filePath: "functions/lit.ts",
       signature: "$df.lit(\n  value: any,\n  options: LitOptions = {}\n): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["LitOptions", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     readCsv: {
       filePath: "functions/readCsv.ts",
       signature: "$df.readCsv<T extends RowRecord = any>(\n  content: string,\n  options: ReadCSVOptions = {}\n): DataFrame<T>",
-      returns: "DataFrame",
-      subTypes: ["RowRecord", "ReadCSVOptions"]
+      returns: "DataFrame"
     },
     readJson: {
       filePath: "functions/readJson.ts",
       signature: '$df.readJson(\n  content: string,\n  {\n    format = "json",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<any>',
-      returns: "A new DataFrame instance populated with the parsed records.",
-      subTypes: ["ReadJSONOptions"]
+      returns: "A new DataFrame instance populated with the parsed records."
     },
     seqRange: {
       filePath: "functions/seqRange.ts",
       signature: "$df.seqRange(\n  value: any,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["SeqRangeOptions", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     struct: {
       filePath: "functions/struct.ts",
       signature: "$df.struct(\n  fields: StructArg,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
-      returns: "ColumnExpr<any>",
-      subTypes: ["StructArg", "IntoExpr", "ColumnExpr"]
+      returns: "ColumnExpr<any>"
     },
     when: {
       filePath: "functions/when.ts",
       signature: "$df.when(predicate: WhenArg): WhenThenChain",
-      returns: "WhenThenChain",
-      subTypes: ["WhenArg"]
+      returns: "WhenThenChain"
     }
   };
 
@@ -484,14 +449,13 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     assert.strictEqual(fnDoc.callExpression, `${fnName}()`, `Unexpected callExpression for ${fnName}: ${fnDoc.callExpression}`);
     assert.strictEqual(fnDoc.signature, expected.signature, `Signature mismatch for ${fnName}`);
     assert.strictEqual(fnDoc.returns, expected.returns, `Returns mismatch for ${fnName}`);
-    assert.deepStrictEqual(fnDoc.subTypes, expected.subTypes, `subTypes mismatch for ${fnName}`);
     assert.ok(fnDoc.examples && fnDoc.examples.length > 0, `Missing examples for ${fnName}`);
   }
 });
 
 // ─── 7. Full Codebase Invariant Audit on extractRawDocs() ─────────────────────
 
-test("Full codebase invariant check: all symbols and types have valid signatures and subTypes", () => {
+test("Full codebase invariant check: all symbols and types have valid signatures", () => {
   const allDocs = extractRawDocs();
   const typeKeys = Object.keys(allDocs.types);
   assert.ok(typeKeys.length >= 150, `Expected at least 150 extracted types, got ${typeKeys.length}`);
@@ -502,10 +466,7 @@ test("Full codebase invariant check: all symbols and types have valid signatures
     assert.ok(typeObj.lineStart >= 1, `Invalid lineStart in types.${typeName}`);
     assert.ok(typeObj.lineEnd >= typeObj.lineStart, `Invalid lineEnd in types.${typeName}`);
     assert.ok(typeObj.signature, `Missing signature in types.${typeName}`);
-    assert.ok(Array.isArray(typeObj.subTypes), `Missing subTypes array in types.${typeName}`);
-    for (const st of typeObj.subTypes) {
-      assert.ok(allDocs.types[st], `Dangling subType '${st}' referenced by types.${typeName}`);
-    }
+    assert.strictEqual(typeObj.subTypes, undefined, `Unexpected subTypes in types.${typeName}`);
   }
 
   // 2. Validate all operations across all categories
@@ -524,14 +485,12 @@ test("Full codebase invariant check: all symbols and types have valid signatures
       const ctx = `${groupName} -> ${sym}`;
       assert.ok(data.filePath, `Missing filePath in ${ctx}`);
       assert.ok(data.signature, `Missing signature in ${ctx}`);
+      assert.ok(data.signatureDetailed, `Missing signatureDetailed in ${ctx}`);
       assert.ok(!data.signature.includes("get get("), `Duplicate 'get get(' in ${ctx}: ${data.signature}`);
       assert.ok(!data.signature.includes("Errorextends"), `Corrupted class signature in ${ctx}: ${data.signature}`);
       assert.ok(!data.signature.includes(".get "), `Invalid '.get ' getter syntax in ${ctx}: ${data.signature}`);
       assert.ok(!data.signature.includes('=\n  "'), `Broken string literal split in ${ctx}: ${data.signature}`);
-      assert.ok(Array.isArray(data.subTypes), `Missing subTypes array in ${ctx}`);
-      for (const st of data.subTypes) {
-        assert.ok(allDocs.types[st], `Dangling subType '${st}' referenced by ${ctx}`);
-      }
+      assert.strictEqual(data.subTypes, undefined, `Unexpected subTypes in ${ctx}`);
       if (data.desc) {
         assert.ok(!data.desc.includes("/**"), `Leaked JSDoc opener in desc of ${ctx}: ${data.desc}`);
         assert.ok(!data.desc.includes("*/"), `Leaked JSDoc closer in desc of ${ctx}: ${data.desc}`);
@@ -1133,6 +1092,236 @@ test("Full codebase typeTree invariant audit: 0 missing descriptions, 0 leaked i
   }
 
   assert.ok(treeCount >= 210, `Expected at least 210 operations with typeTree, got ${treeCount}`);
+});
+
+// ─── 10. buildDetailedSignature & signatureDetailed Edge Cases ────────────────
+
+test("buildDetailedSignature: 0-param, getters, and simple 1-param methods stay on 1 line", () => {
+  assert.strictEqual(
+    buildDetailedSignature("df.width: number", undefined),
+    "df.width: number"
+  );
+  assert.strictEqual(
+    buildDetailedSignature("$df.col(<column_name>).sum()", undefined),
+    "$df.col(<column_name>).sum()"
+  );
+  assert.strictEqual(
+    buildDetailedSignature("df.head(n: number = 5): DataFrame<T>", {
+      n: {
+        type: "number",
+        optional: true,
+        default: "5",
+        desc: "Number of rows."
+      }
+    }),
+    "df.head(n: number = 5): DataFrame<T>"
+  );
+  // Single optional param without default keeps `?`
+  assert.strictEqual(
+    buildDetailedSignature("df.limit(n?: number): DataFrame<T>", {
+      n: {
+        type: "number",
+        optional: true,
+        desc: "Row limit."
+      }
+    }),
+    "df.limit(n?: number): DataFrame<T>"
+  );
+  // Single variadic param with resolvedType
+  assert.strictEqual(
+    buildDetailedSignature("$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>", {
+      exprs: {
+        type: "CoalesceArg[]",
+        optional: false,
+        variadic: true,
+        resolvedType: "(IntoExprArg | ValidScalarTypes)[]",
+        desc: "Expressions."
+      }
+    }),
+    "$df.coalesce(...exprs: (IntoExprArg | ValidScalarTypes)[]): ColumnExpr<any>"
+  );
+});
+
+test("buildDetailedSignature: expands 1-level and multi-level nested option properties with defaults and resolved types", () => {
+  const allDocs = extractRawDocs();
+
+  // 1. arrayExpr.join (separator + JoinArrayOptions)
+  const arrJoin = allDocs.columnExpressions.arrayExpr.join;
+  assert.strictEqual(
+    arrJoin.signature,
+    '$df.col(<column_name>).arr.join(\n  separator: string = ",",\n  options: JoinArrayOptions = {}\n)'
+  );
+  assert.strictEqual(
+    arrJoin.signatureDetailed,
+    [
+      "$df.col(<column_name>).arr.join(",
+      '  separator: string = ",",',
+      "  options: {",
+      "    ignoreNulls?: boolean = false,",
+      "    limit?: number,",
+      '    nullValue?: string = "",',
+      '    prefix?: string = "",',
+      '    suffix?: string = "",',
+      '    truncationMarker?: string = "...",',
+      "    valueFormatter?: (val: any, index: number) => string",
+      "  } = {}",
+      ")"
+    ].join("\n")
+  );
+
+  // 2. standardExpr.ewmKurt (single options param without default `= {}` expands across multiple lines)
+  const ewmKurt = allDocs.columnExpressions.standardExpr.ewmKurt;
+  assert.strictEqual(
+    ewmKurt.signature,
+    "$df.col(<column_name>).ewmKurt(options: EwmKurtOptions)"
+  );
+  assert.strictEqual(
+    ewmKurt.signatureDetailed,
+    [
+      "$df.col(<column_name>).ewmKurt(",
+      "  options: {",
+      "    adjust?: boolean = true,",
+      "    alpha?: number,",
+      "    bias?: boolean = false,",
+      "    by?: string | IExpr,",
+      "    com?: number,",
+      "    fisher?: boolean = true,",
+      "    halfLife?: number | string,",
+      "    ignoreNulls?: boolean = false,",
+      "    minSamples?: number = 1,",
+      "    span?: number",
+      "  }",
+      ")"
+    ].join("\n")
+  );
+
+  // 3. dataframe.concat (destructured options in raw TS normalized to `options: { ... } = {}` with 2-level nested `horizontal`)
+  const dfConcat = allDocs.dataframe.concat;
+  assert.strictEqual(
+    dfConcat.signatureDetailed,
+    [
+      "df.concat<U extends RowRecord = any>(",
+      "  items: ConcatItem | ConcatItem[],",
+      "  options: {",
+      "    horizontal?: {",
+      "      strict?: boolean = true",
+      "    },",
+      '    how?: "vertical" | "horizontal" | "diagonal" = "vertical"',
+      "  } = {}",
+      "): DataFrame<U>"
+    ].join("\n")
+  );
+
+  // 4. functions.concat (preserves generics `<U extends RowRecord = any>` and return type `: DataFrame<U>`)
+  const fnConcat = allDocs.functions.concat;
+  assert.strictEqual(
+    fnConcat.signatureDetailed,
+    [
+      "$df.concat<U extends RowRecord = any>(",
+      "  rawItems: ConcatItem | ConcatItem[],",
+      "  options: {",
+      "    horizontal?: {",
+      "      strict?: boolean = true",
+      "    },",
+      '    how?: "vertical" | "horizontal" | "diagonal" = "vertical"',
+      "  } = {}",
+      "): DataFrame<U>"
+    ].join("\n")
+  );
+});
+
+test("buildDetailedSignature: synthetic 3-level deep nesting, callbacks with '=>' in generics, and internal suppression", () => {
+  const src = `
+    export type ValueOrList<T = string> = T | T[];
+    export interface Level3Opts {
+      /** Deep flag @default true */
+      deepFlag?: boolean;
+      /** Transform callback */
+      transform?: (x: number) => ValueOrList<string>;
+    }
+    export interface Level2Opts {
+      /** Level 3 config */
+      level3?: Level3Opts;
+      /** Retries @default 3 */
+      retries?: number;
+    }
+    export interface Level1Opts {
+      /** Level 2 config */
+      level2?: Level2Opts;
+      /** Mode @default "auto" */
+      mode?: ValueOrList<"auto" | "manual">;
+      /** @internal */
+      hiddenSecret?: string;
+    }
+  `;
+  const typesMap = extractTypesFromContent(src, "deep.ts");
+  for (const [k, v] of Object.entries(typesMap)) {
+    const props = resolveTypeProperties(k, typesMap);
+    if (props) v.properties = props;
+  }
+
+  const rawSig = "execute<T extends (a: number) => boolean>(target: ValueOrList<number>, { mode = \"auto\" }: Level1Opts = {}, ...tags: string[]): Promise<boolean>";
+  const formattedSig = formatSignature(rawSig);
+  const tree = buildFunctionTypeTree(
+    rawSig,
+    [
+      { name: "target", desc: "Target input." },
+      { name: "[options]", desc: "Execution options." },
+      { name: "...tags", desc: "Extra tags." }
+    ],
+    typesMap
+  );
+
+  const detailed = buildDetailedSignature(formattedSig, tree);
+  assert.strictEqual(
+    detailed,
+    [
+      "execute<T extends (a: number) => boolean>(",
+      "  target: number | number[],",
+      "  options: {",
+      "    level2?: {",
+      "      level3?: {",
+      "        deepFlag?: boolean = true,",
+      "        transform?: (x: number) => ValueOrList<string>",
+      "      },",
+      "      retries?: number = 3",
+      "    },",
+      '    mode?: "auto" | "manual" | ("auto" | "manual")[] = "auto"',
+      "  } = {},",
+      "  ...tags: string[]",
+      "): Promise<boolean>"
+    ].join("\n")
+  );
+});
+
+test("Full codebase signatureDetailed invariant audit: balanced delimiters and no leaked internal properties", () => {
+  const allDocs = extractRawDocs();
+  const opGroups = [
+    ...Object.entries(allDocs.columnExpressions).map(([k, v]) => [`columnExpressions.${k}`, v]),
+    ["dataframe", allDocs.dataframe],
+    ["datatypes", allDocs.datatypes],
+    ["exceptions", allDocs.exceptions],
+    ["functions", allDocs.functions]
+  ];
+
+  for (const [groupName, symbols] of opGroups) {
+    for (const [sym, data] of Object.entries(symbols)) {
+      const ctx = `${groupName}.${sym}`;
+      const sig = data.signatureDetailed;
+      assert.ok(typeof sig === "string" && sig.length > 0, `Empty signatureDetailed in ${ctx}`);
+
+      if (!data.typeTree) {
+        assert.strictEqual(sig, data.signature, `Expected signatureDetailed === signature when no typeTree in ${ctx}`);
+      } else {
+        // Ensure top-level parentheses are balanced
+        const openIdx = sig.indexOf("(");
+        assert.ok(openIdx !== -1, `Missing '(' in signatureDetailed of ${ctx}`);
+        assert.ok(!sig.includes(": undefined ="), `Unexpected ': undefined =' in signatureDetailed of ${ctx}: ${sig}`);
+        assert.ok(!sig.includes("= undefined"), `Unexpected '= undefined' in signatureDetailed of ${ctx}: ${sig}`);
+        assert.ok(!sig.includes("?: ") || !sig.match(/\?:\s*[^,\n]+=\s*[^,\n]+\s*\?/), `Malformed optional default in ${ctx}`);
+      }
+    }
+  }
 });
 
 console.log(`✅ All ${passed} test suites in scripts/_tests/extract-docs.test.mjs passed!`);

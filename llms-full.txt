@@ -26,9 +26,6 @@ $df.col(<column_name>).arr.agg(expr: IExpr)
 
 ### Returns: `ColumnExpression`
 
-### Types Referenced
-- [`IExpr`](#iexpr)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })
@@ -194,16 +191,13 @@ Checks if nested lists contain item.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.contains(item: ScalarArg)
+$df.col(<column_name>).arr.contains(item: IExpr | ValidScalarTypes)
 ```
 
 ### Parameters
 - `item` (any): The element to search for.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ScalarArg`](#scalararg)
 
 ### Examples
 ```typescript
@@ -234,16 +228,13 @@ Checks if nested lists contain all elements in items.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.containsAll(items: ArrayArg)
+$df.col(<column_name>).arr.containsAll(items: IExpr | ValidScalarTypes[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `items` (any): Array of elements or column expression that must all be present.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ArrayArg`](#arrayarg)
 
 ### Examples
 ```typescript
@@ -274,16 +265,13 @@ Checks if nested lists contain any element in items.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.containsAny(items: ArrayArg)
+$df.col(<column_name>).arr.containsAny(items: IExpr | ValidScalarTypes[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `items` (any): Array of elements or column expression where at least one must be present.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ArrayArg`](#arrayarg)
 
 ### Examples
 ```typescript
@@ -315,8 +303,11 @@ Counts occurrence frequency of item inside nested lists.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.countMatches(
-  item: ScalarArg,
-  options: UniqueArrayStatsOptions = {}
+  item: IExpr | ValidScalarTypes,
+  options: {
+    keySelector?: (val: any) => any,
+    strict?: boolean = false
+  } = {}
 )
 ```
 
@@ -325,10 +316,6 @@ $df.col(<column_name>).arr.countMatches(
 - `options` (any): Statistics and matching options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ScalarArg`](#scalararg)
-- [`UniqueArrayStatsOptions`](#uniquearraystatsoptions)
 
 ### Examples
 ```typescript
@@ -367,9 +354,6 @@ $df.col(<column_name>).arr.eval(expr: IExpr)
 
 ### Returns: `ColumnExpression`
 
-### Types Referenced
-- [`IExpr`](#iexpr)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })
@@ -400,10 +384,10 @@ Expands lists into row-wise elements and produces an index mapping for DataFrame
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.explode(
-  {
-    emptyAsNull = true,
-    keepNulls = true
-  }: ExplodeOptions = {}
+  options: {
+    emptyAsNull?: boolean = true,
+    keepNulls?: boolean = true
+  } = {}
 )
 ```
 
@@ -411,9 +395,6 @@ $df.col(<column_name>).arr.explode(
 - `options` (any): Config options including handling of empty arrays and nulls.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ExplodeOptions`](#explodeoptions)
 
 ### Examples
 ```typescript
@@ -451,9 +432,6 @@ $df.col(<column_name>).arr.filter(expr: IExpr)
 - `expr` (any): The boolean column expression to filter by.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`IExpr`](#iexpr)
 
 ### Examples
 ```typescript
@@ -522,7 +500,7 @@ Gathers specific indices from each nested list.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.gather(
-  indices: NumericSeriesArg,
+  indices: NumericArg | number[] | AnyTypedArray,
   nullOnOob: boolean = true
 )
 ```
@@ -532,9 +510,6 @@ $df.col(<column_name>).arr.gather(
 - `nullOnOob` (any): If true, returns null for indices out of bounds (default: true).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -565,16 +540,21 @@ Gather element slices with custom steps.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.gatherEvery(options: StepSliceArrayOptions = {})
+$df.col(<column_name>).arr.gatherEvery(
+  options: {
+    maxItemsGathered?: number,
+    nullOnOob?: boolean = true,
+    offsetEnd?: number,
+    offsetStart?: number = 0,
+    step?: number = 1
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Config options including offset, limit, and step size.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StepSliceArrayOptions`](#stepslicearrayoptions)
 
 ### Examples
 ```typescript
@@ -606,7 +586,7 @@ Extracts a single list element by its index position.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.get(
-  index: NumericArg,
+  index: number | bigint | IExpr | null,
   nullOnOob: boolean = true
 )
 ```
@@ -616,9 +596,6 @@ $df.col(<column_name>).arr.get(
 - `nullOnOob` (any): If true, returns null if index is out of bounds (default: true).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -651,7 +628,15 @@ Joins elements of list columns into a single string column.
 ```typescript
 $df.col(<column_name>).arr.join(
   separator: string = ",",
-  options: JoinArrayOptions = {}
+  options: {
+    ignoreNulls?: boolean = false,
+    limit?: number,
+    nullValue?: string = "",
+    prefix?: string = "",
+    suffix?: string = "",
+    truncationMarker?: string = "...",
+    valueFormatter?: (val: any, index: number) => string
+  } = {}
 )
 ```
 
@@ -660,9 +645,6 @@ $df.col(<column_name>).arr.join(
 - `options` (any): String conversion options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`JoinArrayOptions`](#joinarrayoptions)
 
 ### Examples
 ```typescript
@@ -945,16 +927,18 @@ Returns the unique count of elements inside each list.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.nUnique(options: UniqueArrayStatsOptions = {})
+$df.col(<column_name>).arr.nUnique(
+  options: {
+    keySelector?: (val: any) => any,
+    strict?: boolean = false
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Formatting/statistics parameters.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`UniqueArrayStatsOptions`](#uniquearraystatsoptions)
 
 ### Examples
 ```typescript
@@ -1021,7 +1005,9 @@ Shifts elements of list columns by N offsets.
 ```typescript
 $df.col(<column_name>).arr.shift(
   n: number = 1,
-  options: ShiftOptions = {}
+  options: {
+    fillValue?: any = null
+  } = {}
 )
 ```
 
@@ -1029,9 +1015,6 @@ $df.col(<column_name>).arr.shift(
 - `n` (any): Positive or negative offsets shift amount (default: 1).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ShiftOptions`](#shiftoptions)
 
 ### Examples
 ```typescript
@@ -1103,16 +1086,19 @@ Sorts elements inside each list.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.sort(options?: SortArrayOptions)
+$df.col(<column_name>).arr.sort(
+  options?: {
+    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,
+    descending?: boolean | boolean[] = false,
+    nullsLast?: boolean = true
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Sort customization parameters (e.g. descending flag).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`SortArrayOptions`](#sortarrayoptions)
 
 ### Examples
 ```typescript
@@ -1146,7 +1132,7 @@ Splices elements in list cells.
 $df.col(<column_name>).arr.splice(
   start: number,
   deleteCount?: number,
-  ...items: ValidScalarTypes[]
+  ...items: (Exclude<ValidPrimitiveTypes, symbol> | Date | AnyTypedArray)[]
 )
 ```
 
@@ -1156,9 +1142,6 @@ $df.col(<column_name>).arr.splice(
 - `items` (any): The elements to insert.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ValidScalarTypes`](#validscalartypes)
 
 ### Examples
 ```typescript
@@ -1258,10 +1241,10 @@ Converts list column elements to struct columns.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.toStruct(
-  {
-    upperBound,
-    fields
-  }: ToStructOptions = {}
+  options: {
+    fields?: string[] | ((idx: number) => string) = `"field_0"`, `"field_1"`, etc,
+    upperBound?: number = the maximum array length in the column
+  } = {}
 )
 ```
 
@@ -1269,9 +1252,6 @@ $df.col(<column_name>).arr.toStruct(
 - `options` (any): Config flags including custom field names or upper bound size.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ToStructOptions`](#tostructoptions)
 
 ### Examples
 ```typescript
@@ -1302,16 +1282,18 @@ Fills each list with unique elements only.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.unique(options: UniqueArrayStatsOptions = {})
+$df.col(<column_name>).arr.unique(
+  options: {
+    keySelector?: (val: any) => any,
+    strict?: boolean = false
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Custom uniqueness matching configuration.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`UniqueArrayStatsOptions`](#uniquearraystatsoptions)
 
 ### Examples
 ```typescript
@@ -1414,16 +1396,13 @@ Adds a scalar value or another column expression.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).add(val: NumericArg)
+$df.col(<column_name>).add(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The number or column expression to add.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -1566,16 +1545,13 @@ In Kleene 3-valued logic: - `false` AND anything is `false`. - `true` AND `true`
 
 ### Signature
 ```typescript
-$df.col(<column_name>).and(other: BooleanArg)
+$df.col(<column_name>).and(other: boolean | boolean[] | IExpr | null | undefined)
 ```
 
 ### Parameters
 - `other` (any): The boolean column expression or literal value to compare.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`BooleanArg`](#booleanarg)
 
 ### Examples
 ```typescript
@@ -1859,16 +1835,13 @@ Computes the quadrant-aware arctangent of two values.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arctan2(val: NumericArg)
+$df.col(<column_name>).arctan2(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The x denominator number or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -2041,9 +2014,11 @@ Checks if values fall inside lower and upper boundaries.
 ### Signature
 ```typescript
 $df.col(<column_name>).between(
-  lower: ComparisonArg,
-  upper: ComparisonArg,
-  options: BetweenOptions = {}
+  lower: ScalarArg | ArrayArg,
+  upper: ScalarArg | ArrayArg,
+  options: {
+    closed?: "both" | "left" | "right" | "none" = "both"
+  } = {}
 )
 ```
 
@@ -2053,10 +2028,6 @@ $df.col(<column_name>).between(
 - `[options]` (any): Boundary configuration options (see `BetweenOptions`).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
-- [`BetweenOptions`](#betweenoptions)
 
 ### Examples
 ```typescript
@@ -2192,8 +2163,10 @@ Coerces the column data type to another type.
 ### Signature
 ```typescript
 $df.col(<column_name>).cast(
-  dataType: RegisteredDataType,
-  options: CastOptions = {}
+  dataType: Int8Type | Int16Type | Int32Type | Int64Type | UInt8Type | UInt16Type | UInt32Type | UInt64Type | Float32Type | Float64Type | DecimalType | BooleanType | Utf8Type | BinaryType | NullType | ObjectType | DateType | DatetimeType | TimeType | DurationType | ArrayType<any> | StructType<any>,
+  options: {
+    strict?: boolean = true
+  } = {}
 ): this
 ```
 
@@ -2202,10 +2175,6 @@ $df.col(<column_name>).cast(
 - `[options]` (any): Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegisteredDataType`](#registereddatatype)
-- [`CastOptions`](#castoptions)
 
 ### Examples
 ```typescript
@@ -2353,16 +2322,13 @@ Returns absolute value of expr with the sign of other.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).copysign(val: NumericArg)
+$df.col(<column_name>).copysign(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The sign source value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -2397,16 +2363,13 @@ Computes the sample Pearson product-moment correlation coefficient $r \in [-1, 1
 
 ### Signature
 ```typescript
-$df.col(<column_name>).corr(other: NumericSeriesArg)
+$df.col(<column_name>).corr(other: NumericArg | number[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `other` (NumericSeriesArg): The target column expression, numeric literal, or numeric array to correlate with.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -2545,16 +2508,17 @@ Aggregation: Returns the count of records inside the group or column.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).count(options: CountOptions = {})
+$df.col(<column_name>).count(
+  options: {
+    includeNulls?: boolean = false
+  } = {}
+)
 ```
 
 ### Parameters
 - `[options]` (CountOptions, default: {}): Configuration options for counting.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`CountOptions`](#countoptions)
 
 ### Examples
 ```typescript
@@ -2588,16 +2552,13 @@ Computes sample covariance with $N - 1$ degrees of freedom using a single-pass, 
 
 ### Signature
 ```typescript
-$df.col(<column_name>).cov(other: NumericSeriesArg)
+$df.col(<column_name>).cov(other: NumericArg | number[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `other` (NumericSeriesArg): The target column expression, numeric literal, or numeric array to compute covariance with.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -2895,16 +2856,13 @@ Divides column values by a scalar or another column expression.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).div(val: NumericArg)
+$df.col(<column_name>).div(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The denominator value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -2939,16 +2897,13 @@ Computes $\mathbf{x} \cdot \mathbf{y} = \sum_{i} x_i y_i$. Pairs containing `nul
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dot(other: NumericSeriesArg)
+$df.col(<column_name>).dot(other: NumericArg | number[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `other` (NumericSeriesArg): The other column expression, numeric literal, or numeric array to compute the dot product with.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -2979,16 +2934,18 @@ Aggregation: Computes the Shannon entropy of a column or group.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).entropy(options: EntropyOptions = { base: Math.E, normalize: true })
+$df.col(<column_name>).entropy(
+  options: {
+    base?: number = Math.E,
+    normalize?: boolean = true
+  } = { base: Math.E, normalize: true }
+)
 ```
 
 ### Parameters
 - `options` (any): Entropy options ({ base?: number, normalize?: boolean }, default base=Math.E, normalize=true).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EntropyOptions`](#entropyoptions)
 
 ### Examples
 ```typescript
@@ -3021,16 +2978,13 @@ Evaluates strict equality (`===`) between this column and `val`. Under standard 
 
 ### Signature
 ```typescript
-$df.col(<column_name>).eq(val: ComparisonArg)
+$df.col(<column_name>).eq(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (ComparisonArg): The value, literal array, or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3065,16 +3019,13 @@ Returns `true` if both values are identical, or if both values are nullish (`nul
 
 ### Signature
 ```typescript
-$df.col(<column_name>).eqMissing(val: ComparisonArg)
+$df.col(<column_name>).eqMissing(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (ComparisonArg): The value, literal array, or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3107,16 +3058,26 @@ Window: Computes exponentially weighted moving kurtosis.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ewmKurt(options: EwmKurtOptions)
+$df.col(<column_name>).ewmKurt(
+  options: {
+    adjust?: boolean = true,
+    alpha?: number,
+    bias?: boolean = false,
+    by?: string | IExpr,
+    com?: number,
+    fisher?: boolean = true,
+    halfLife?: number | string,
+    ignoreNulls?: boolean = false,
+    minSamples?: number = 1,
+    span?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EwmKurtOptions`](#ewmkurtoptions)
 
 ### Examples
 ```typescript
@@ -3141,16 +3102,24 @@ Window: Computes exponentially weighted moving average (mean).
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ewmMean(options: EwmMeanOptions)
+$df.col(<column_name>).ewmMean(
+  options: {
+    adjust?: boolean = true,
+    alpha?: number,
+    by?: string | IExpr,
+    com?: number,
+    halfLife?: number | string,
+    ignoreNulls?: boolean = false,
+    minSamples?: number = 1,
+    span?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EwmMeanOptions`](#ewmmeanoptions)
 
 ### Examples
 ```typescript
@@ -3183,16 +3152,25 @@ Window: Computes exponentially weighted moving skewness.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ewmSkew(options: EwmSkewOptions)
+$df.col(<column_name>).ewmSkew(
+  options: {
+    adjust?: boolean = true,
+    alpha?: number,
+    bias?: boolean = false,
+    by?: string | IExpr,
+    com?: number,
+    halfLife?: number | string,
+    ignoreNulls?: boolean = false,
+    minSamples?: number = 1,
+    span?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, optional `bias`, and optional `by`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EwmSkewOptions`](#ewmskewoptions)
 
 ### Examples
 ```typescript
@@ -3217,16 +3195,24 @@ Window: Computes exponentially weighted moving standard deviation.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ewmStd(options: EwmStdOptions)
+$df.col(<column_name>).ewmStd(
+  options: {
+    adjust?: boolean = true,
+    alpha?: number,
+    by?: string | IExpr,
+    com?: number,
+    halfLife?: number | string,
+    ignoreNulls?: boolean = false,
+    minSamples?: number = 1,
+    span?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EwmStdOptions`](#ewmstdoptions)
 
 ### Examples
 ```typescript
@@ -3251,16 +3237,23 @@ Window: Computes exponentially weighted moving sum.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ewmSum(options: EwmSumOptions)
+$df.col(<column_name>).ewmSum(
+  options: {
+    alpha?: number,
+    by?: string | IExpr,
+    com?: number,
+    halfLife?: number | string,
+    ignoreNulls?: boolean = false,
+    minSamples?: number = 1,
+    span?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `minSamples`, `ignoreNulls`, and optional `by`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EwmSumOptions`](#ewmsumoptions)
 
 ### Examples
 ```typescript
@@ -3285,16 +3278,24 @@ Window: Computes exponentially weighted moving variance.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ewmVar(options: EwmVarOptions)
+$df.col(<column_name>).ewmVar(
+  options: {
+    adjust?: boolean = true,
+    alpha?: number,
+    by?: string | IExpr,
+    com?: number,
+    halfLife?: number | string,
+    ignoreNulls?: boolean = false,
+    minSamples?: number = 1,
+    span?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration specifying decay rate (`alpha`, `span`, `com`, `halfLife`), `adjust`, `minSamples`, `ignoreNulls`, and optional `by`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EwmVarOptions`](#ewmvaroptions)
 
 ### Examples
 ```typescript
@@ -3392,8 +3393,12 @@ Replaces targeted values ("null", "nan", or "all") with a specified value or str
 ### Signature
 ```typescript
 $df.col(<column_name>).fill(
-  target: FillTarget,
-  options: FillOptions = {}
+  target: "null" | "nan" | "all" | ScalarArg,
+  options: {
+    limit?: number,
+    strategy?: "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one",
+    value?: IExpr | ValidScalarTypes
+  } = {}
 ): this
 ```
 
@@ -3402,10 +3407,6 @@ $df.col(<column_name>).fill(
 - `[options]` (FillOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`FillTarget`](#filltarget)
-- [`FillOptions`](#filloptions)
 
 ### Examples
 ```typescript
@@ -3438,16 +3439,19 @@ Replaces NaN values with a specified value or strategy.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).fillNan(options: FillNullOptions = {}): this
+$df.col(<column_name>).fillNan(
+  options: {
+    limit?: number,
+    strategy?: "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one",
+    value?: IExpr | ValidScalarTypes
+  } = {}
+): this
 ```
 
 ### Parameters
 - `[options]` (FillNullOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`FillNullOptions`](#fillnulloptions)
 
 ### Examples
 ```typescript
@@ -3480,16 +3484,19 @@ Replaces null, undefined, or missing values with a specified value or strategy.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).fillNull(options: FillNullOptions = {}): this
+$df.col(<column_name>).fillNull(
+  options: {
+    limit?: number,
+    strategy?: "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one",
+    value?: IExpr | ValidScalarTypes
+  } = {}
+): this
 ```
 
 ### Parameters
 - `options` (any): Configuration options including fill value, strategy ("forward", "backward", "zero", "one", "mean", "min", "max"), and optional limit.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`FillNullOptions`](#fillnulloptions)
 
 ### Examples
 ```typescript
@@ -3529,9 +3536,6 @@ $df.col(<column_name>).filter(predicate: IExpr): this
 - `predicate` (any): Boolean column expression used to filter values.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`IExpr`](#iexpr)
 
 ### Examples
 ```typescript
@@ -3634,16 +3638,13 @@ Performs integer division floor(x / y) on column values.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).floordiv(val: NumericArg)
+$df.col(<column_name>).floordiv(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The divisor value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -3676,16 +3677,13 @@ Boolean comparison: Returns true if greater than or equal to argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ge(val: ComparisonArg)
+$df.col(<column_name>).ge(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3718,16 +3716,13 @@ Boolean comparison: Returns true if column value is greater than argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).gt(val: ComparisonArg)
+$df.col(<column_name>).gt(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -3794,16 +3789,13 @@ Computes the hypotenuse sqrt(x^2 + y^2) of two values.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).hypot(val: NumericArg)
+$df.col(<column_name>).hypot(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The other numeric value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -3873,11 +3865,11 @@ Determines if floating-point values are approximately equal within tolerances.
 ```typescript
 $df.col(<column_name>).isClose(
   other: any,
-  {
-    absTol = 1e-8,
-    relTol = 1e-8,
-    nansEqual = false
-  }: IsCloseOptions = {}
+  options: {
+    absTol?: number = 1e-8,
+    nansEqual?: boolean = false,
+    relTol?: number = 1e-8
+  } = {}
 )
 ```
 
@@ -3886,9 +3878,6 @@ $df.col(<column_name>).isClose(
 - `options` (any): Tolerance values absolute (absTol) and relative (relTol), and NaN options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`IsCloseOptions`](#iscloseoptions)
 
 ### Examples
 ```typescript
@@ -3993,16 +3982,13 @@ Checks if column values are members of a specified array or list.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).isIn(values: ComparisonArg)
+$df.col(<column_name>).isIn(values: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `values` (any): An array of candidate values or a single value to match against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4109,7 +4095,9 @@ Checks if column values match the N-th distinct value by positive or negative in
 ```typescript
 $df.col(<column_name>).isNDistinct(
   index: number,
-  options: IsNDistinctOptions = {}
+  options: {
+    nullOnOob?: boolean = true
+  } = {}
 )
 ```
 
@@ -4118,9 +4106,6 @@ $df.col(<column_name>).isNDistinct(
 - `nullOnOob` (any): If true, returns null if index is out of bounds (default: true).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`IsNDistinctOptions`](#isndistinctoptions)
 
 ### Examples
 ```typescript
@@ -4297,16 +4282,18 @@ Aggregation: Computes the kurtosis (peakedness/tailedness) of a numeric column.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).kurtosis(options: KurtosisOptions = {})
+$df.col(<column_name>).kurtosis(
+  options: {
+    bias?: boolean = true,
+    fisher?: boolean = true
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Kurtosis calculation options ({ fisher?: boolean, bias?: boolean }, default fisher=true, bias=true).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`KurtosisOptions`](#kurtosisoptions)
 
 ### Examples
 ```typescript
@@ -4339,7 +4326,9 @@ Window: Shifts values down by offset, filling missing slots with default value.
 ```typescript
 $df.col(<column_name>).lag(
   offset: number = 1,
-  options: ShiftOptions = {}
+  options: {
+    fillValue?: any = null
+  } = {}
 )
 ```
 
@@ -4348,9 +4337,6 @@ $df.col(<column_name>).lag(
 - `options` (any): Shift options configuring fallback fillValue (default null).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ShiftOptions`](#shiftoptions)
 
 ### Examples
 ```typescript
@@ -4418,16 +4404,13 @@ Boolean comparison: Returns true if less than or equal to argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).le(val: ComparisonArg)
+$df.col(<column_name>).le(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4462,7 +4445,9 @@ Window: Shifts values up by offset, filling missing slots with default value.
 ```typescript
 $df.col(<column_name>).lead(
   offset: number = 1,
-  options: ShiftOptions = {}
+  options: {
+    fillValue?: any = null
+  } = {}
 )
 ```
 
@@ -4471,9 +4456,6 @@ $df.col(<column_name>).lead(
 - `options` (any): Shift options configuring fallback fillValue (default null).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ShiftOptions`](#shiftoptions)
 
 ### Examples
 ```typescript
@@ -4581,16 +4563,13 @@ Boolean comparison: Returns true if less than argument.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).lt(val: ComparisonArg)
+$df.col(<column_name>).lt(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4658,16 +4637,13 @@ Aggregation: Finds the value in this column corresponding to the maximum value i
 
 ### Signature
 ```typescript
-$df.col(<column_name>).maxBy(by: ComparisonArg)
+$df.col(<column_name>).maxBy(by: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `by` (any): Column or expression to order by.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4803,16 +4779,13 @@ Aggregation: Finds the value in this column corresponding to the minimum value i
 
 ### Signature
 ```typescript
-$df.col(<column_name>).minBy(by: ComparisonArg)
+$df.col(<column_name>).minBy(by: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `by` (any): Column or expression to order by.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -4843,16 +4816,13 @@ Computes modulo remainder (x % y) of column values.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).mod(val: NumericArg)
+$df.col(<column_name>).mod(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The divisor value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -4919,16 +4889,13 @@ Multiplies column values by a scalar or another column expression.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).mul(val: NumericArg)
+$df.col(<column_name>).mul(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The multiplier value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -5029,16 +4996,13 @@ Boolean comparison: Returns true if values do not match.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).ne(val: ComparisonArg)
+$df.col(<column_name>).ne(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -5107,16 +5071,13 @@ Difference check that treats null values as equal to each other.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).neMissing(val: ComparisonArg)
+$df.col(<column_name>).neMissing(val: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to compare against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -5187,16 +5148,13 @@ Checks if values are not elements of a specific array or set list.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).notIn(values: ComparisonArg)
+$df.col(<column_name>).notIn(values: ScalarArg | ArrayArg)
 ```
 
 ### Parameters
 - `values` (any): An array of candidate values or a single value to match against.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ComparisonArg`](#comparisonarg)
 
 ### Examples
 ```typescript
@@ -5263,16 +5221,18 @@ Aggregation: Computes number of unique elements.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).nUnique(options: UniqueArrayStatsOptions = {})
+$df.col(<column_name>).nUnique(
+  options: {
+    keySelector?: (val: any) => any,
+    strict?: boolean = false
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Uniqueness options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`UniqueArrayStatsOptions`](#uniquearraystatsoptions)
 
 ### Examples
 ```typescript
@@ -5303,16 +5263,13 @@ Logical OR check supporting Kleene logic.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).or(other: BooleanArg)
+$df.col(<column_name>).or(other: boolean | boolean[] | IExpr | null | undefined)
 ```
 
 ### Parameters
 - `other` (any): The other boolean column expression or literal value to compare.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`BooleanArg`](#booleanarg)
 
 ### Examples
 ```typescript
@@ -5355,9 +5312,6 @@ $df.col(<column_name>).over(columns: string | IExpr | (string | IExpr)[])
 
 ### Returns: `ColumnExpression`
 
-### Types Referenced
-- [`IExpr`](#iexpr)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ group: ["A", "A", "B"], val: [10, 20, 30] })
@@ -5389,16 +5343,13 @@ Raises column values to the specified power.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).pow(val: NumericArg)
+$df.col(<column_name>).pow(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The exponent power value or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -5541,11 +5492,11 @@ Fills sequence with pseudo-random generated floats or integers.
 ```typescript
 $df.col(<column_name>).rand(
   seed?: number,
-  {
-    min = 0,
-    max = 1,
-    integer = false
-  }: RandomOptions = {}
+  options: {
+    integer?: boolean = false,
+    max?: number = 1,
+    min?: number = 0
+  } = {}
 )
 ```
 
@@ -5554,9 +5505,6 @@ $df.col(<column_name>).rand(
 - `options` (any): Config options including min, max, and integer flag.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RandomOptions`](#randomoptions)
 
 ### Examples
 ```typescript
@@ -5589,13 +5537,14 @@ Window: Computes rank within group partition.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).rank(options: RankOptions = {})
+$df.col(<column_name>).rank(
+  options: {
+    dense?: boolean = false
+  } = {}
+)
 ```
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RankOptions`](#rankoptions)
 
 ### Examples
 ```typescript
@@ -5664,7 +5613,9 @@ Window: Computes a rolling window reduction using a ColumnExpression or a custom
 ### Signature
 ```typescript
 $df.col(<column_name>).rolling(
-  optionsOrWindowSize: number | RollingOptions,
+  optionsOrWindowSize: {
+    windowSize: number
+  },
   exprOrFn: IExpr | ((vals: any[]) => any)
 )
 ```
@@ -5674,10 +5625,6 @@ $df.col(<column_name>).rolling(
 - `exprOrFn` (any): ColumnExpression to evaluate over each window slice, or a custom reducer function.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RollingOptions`](#rollingoptions)
-- [`IExpr`](#iexpr)
 
 ### Examples
 ```typescript
@@ -6144,7 +6091,9 @@ Supports windowing and partition grouping via `.over(...)`.
 ```typescript
 $df.col(<column_name>).shift(
   n: number = 1,
-  options: ShiftOptions = {}
+  options: {
+    fillValue?: any = null
+  } = {}
 )
 ```
 
@@ -6152,9 +6101,6 @@ $df.col(<column_name>).shift(
 - `n` (any): Number of rows to shift (positive for down, negative for up). Default 1.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ShiftOptions`](#shiftoptions)
 
 ### Examples
 ```typescript
@@ -6295,16 +6241,17 @@ Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of s
 
 ### Signature
 ```typescript
-$df.col(<column_name>).skew(options: SkewOptions = {})
+$df.col(<column_name>).skew(
+  options: {
+    bias?: boolean = true
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Skew calculation options ({ bias?: boolean }, default bias=true).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`SkewOptions`](#skewoptions)
 
 ### Examples
 ```typescript
@@ -6335,16 +6282,13 @@ Aggregation: Computes the Spearman rank correlation coefficient.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).spearmanCorr(other: NumericSeriesArg)
+$df.col(<column_name>).spearmanCorr(other: NumericArg | number[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `other` (any): The other column expression to correlate with.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -6445,16 +6389,13 @@ Subtracts a scalar or another column expression.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).sub(val: NumericArg)
+$df.col(<column_name>).sub(val: number | bigint | IExpr | null)
 ```
 
 ### Parameters
 - `val` (any): The value or column expression to subtract.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -6664,16 +6605,13 @@ Aggregation: Computes weighted average.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).wAvg(weights: NumericSeriesArg)
+$df.col(<column_name>).wAvg(weights: NumericArg | number[] | AnyTypedArray)
 ```
 
 ### Parameters
 - `weights` (any): The weight values or column expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -6704,16 +6642,13 @@ Logical XOR check.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).xor(other: BooleanArg)
+$df.col(<column_name>).xor(other: boolean | boolean[] | IExpr | null | undefined)
 ```
 
 ### Parameters
 - `other` (any): The other boolean column expression or literal value to compare.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`BooleanArg`](#booleanarg)
 
 ### Examples
 ```typescript
@@ -6750,16 +6685,13 @@ Concatenates string elements with another string value or expression.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.concat(other: StringArg)
+$df.col(<column_name>).str.concat(other: string | IExpr)
 ```
 
 ### Parameters
 - `other` (any): The string value or column expression to concatenate.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StringArg`](#stringarg)
 
 ### Examples
 ```typescript
@@ -6792,16 +6724,13 @@ Checks if a string contains the search substring pattern (supports Regex).
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.contains(pattern: RegexPatternArg)
+$df.col(<column_name>).str.contains(pattern: string | RegExp)
 ```
 
 ### Parameters
 - `pattern` (any): The search substring or regular expression pattern.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
 
 ### Examples
 ```typescript
@@ -6833,16 +6762,13 @@ Checks if a string contains any of the search patterns.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.containsAny(patterns: RegexPatternSeriesArg)
+$df.col(<column_name>).str.containsAny(patterns: (string | RegExp)[])
 ```
 
 ### Parameters
 - `patterns` (any): Array of substring or regular expression search patterns.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
 
 ### Examples
 ```typescript
@@ -6875,8 +6801,10 @@ Counts occurrences of a substring or regular expression match in each string ele
 ### Signature
 ```typescript
 $df.col(<column_name>).str.countMatches(
-  pattern: RegexPatternArg,
-  options: CountMatchesOptions = {}
+  pattern: string | RegExp,
+  options: {
+    literal?: boolean = false
+  } = {}
 )
 ```
 
@@ -6884,10 +6812,6 @@ $df.col(<column_name>).str.countMatches(
 - `pattern` (any): Search substring or regular expression.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`CountMatchesOptions`](#countmatchesoptions)
 
 ### Examples
 ```typescript
@@ -6920,16 +6844,18 @@ Decodes hex or base64 encoded string column values into string.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.decode(options: StringDecodeOptions)
+$df.col(<column_name>).str.decode(
+  options: {
+    encoding: "hex" | "base64",
+    strict?: boolean = true
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Object containing encoding ("hex" | "base64") and optional strict flag
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StringDecodeOptions`](#stringdecodeoptions)
 
 ### Examples
 ```typescript
@@ -6997,16 +6923,17 @@ Encodes string column values into hex or base64.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.encode(options: StringEncodeOptions)
+$df.col(<column_name>).str.encode(
+  options: {
+    encoding: "hex" | "base64"
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Object containing encoding ("hex" | "base64")
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StringEncodeOptions`](#stringencodeoptions)
 
 ### Examples
 ```typescript
@@ -7112,13 +7039,14 @@ Escapes special regular expression characters in string elements.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.escapeRegex(options: EscapeRegexOptions = {})
+$df.col(<column_name>).str.escapeRegex(
+  options: {
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39"
+  } = {}
+)
 ```
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`EscapeRegexOptions`](#escaperegexoptions)
 
 ### Examples
 ```typescript
@@ -7188,8 +7116,12 @@ Extracts a captured group from the first regex match.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extract(
-  pattern: RegexPatternArg,
-  options?: ExtractRegexEngineOptions
+  pattern: string | RegExp,
+  options?: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 1
+  }
 )
 ```
 
@@ -7198,10 +7130,6 @@ $df.col(<column_name>).str.extract(
 - `options` (any): Options object. Use `groupIndex` to select the group (default 1).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`ExtractRegexEngineOptions`](#extractregexengineoptions)
 
 ### Examples
 ```typescript
@@ -7234,8 +7162,12 @@ Extracts all occurrences matching a regular expression pattern.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extractAll(
-  pattern: RegexPatternArg,
-  options?: ExtractRegexEngineOptions
+  pattern: string | RegExp,
+  options?: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 1
+  }
 )
 ```
 
@@ -7244,10 +7176,6 @@ $df.col(<column_name>).str.extractAll(
 - `options` (any): Options object. Use `groupIndex` to select the group (default 0).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`ExtractRegexEngineOptions`](#extractregexengineoptions)
 
 ### Examples
 ```typescript
@@ -7281,8 +7209,12 @@ Extracts all captured groups from the first regex match into a structured object
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extractGroups(
-  pattern: RegexPatternArg,
-  options: ExtractRegexEngineOptions = {}
+  pattern: string | RegExp,
+  options: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 1
+  } = {}
 )
 ```
 
@@ -7290,10 +7222,6 @@ $df.col(<column_name>).str.extractGroups(
 - `pattern` (any): Search pattern containing capture groups.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`ExtractRegexEngineOptions`](#extractregexengineoptions)
 
 ### Examples
 ```typescript
@@ -7326,8 +7254,14 @@ Extracts the first regex match for each pattern in a list of patterns.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extractMany(
-  patterns: RegexPatternSeriesArg,
-  options: ExtractManyOptions = {}
+  patterns: (string | RegExp)[],
+  options: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 0,
+    leftmost?: boolean = false,
+    overlapping?: boolean = false
+  } = {}
 )
 ```
 
@@ -7336,10 +7270,6 @@ $df.col(<column_name>).str.extractMany(
 - `options` (any): Named options object ({ asciiCaseInsensitive, overlapping }).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
-- [`ExtractManyOptions`](#extractmanyoptions)
 
 ### Examples
 ```typescript
@@ -7373,8 +7303,14 @@ Return the byte offset of the first substring matching a pattern. Returns null i
 ### Signature
 ```typescript
 $df.col(<column_name>).str.find(
-  value: RegexPatternArg,
-  options: FindOptions = {}
+  value: string | RegExp,
+  options: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 0,
+    literal?: boolean = false,
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39"
+  } = {}
 )
 ```
 
@@ -7383,10 +7319,6 @@ $df.col(<column_name>).str.find(
 - `options` (any): Configuration options ({ literal, asciiCaseInsensitive }).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`FindOptions`](#findoptions)
 
 ### Examples
 ```typescript
@@ -7420,8 +7352,16 @@ Return the starting byte offset of each match for multiple patterns.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.findMany(
-  patterns: RegexPatternSeriesArg,
-  options: FindManyOptions = {}
+  patterns: (string | RegExp)[],
+  options: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 0,
+    leftmost?: boolean = false,
+    literal?: boolean = false,
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39",
+    overlapping?: boolean = false
+  } = {}
 )
 ```
 
@@ -7430,10 +7370,6 @@ $df.col(<column_name>).str.findMany(
 - `options` (any): Configuration options ({ literal, asciiCaseInsensitive, overlapping, leftmost }).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
-- [`FindManyOptions`](#findmanyoptions)
 
 ### Examples
 ```typescript
@@ -7507,7 +7443,15 @@ Joins a list of string elements into a single string using a delimiter. Accepts 
 ```typescript
 $df.col(<column_name>).str.join(
   delimiter: string = "",
-  options: JoinArrayOptions = {}
+  options: {
+    ignoreNulls?: boolean = false,
+    limit?: number,
+    nullValue?: string = "",
+    prefix?: string = "",
+    suffix?: string = "",
+    truncationMarker?: string = "...",
+    valueFormatter?: (val: any, index: number) => string
+  } = {}
 )
 ```
 
@@ -7516,9 +7460,6 @@ $df.col(<column_name>).str.join(
 - `options` (any): Formatting configuration options (`JoinArrayOptions`).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`JoinArrayOptions`](#joinarrayoptions)
 
 ### Examples
 ```typescript
@@ -7549,16 +7490,28 @@ Decodes JSON string elements into parsed objects or arrays. Reuses safeJsonParse
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.jsonDecode(options: SafeJsonParseOptions = {})
+$df.col(<column_name>).str.jsonDecode(
+  options: {
+    allowPrimitives?: boolean = false,
+    fallback?: unknown,
+    format?: "json" | "ndjson" = "json",
+    guard?: ((value: unknown) => value is unknown) | ((value: unknown) => boolean),
+    ndjson?: {
+      maxLines?: number,
+      skipInvalidLines?: boolean = false,
+      skipLines?: number = 0
+    },
+    onError?: (err: unknown) => void,
+    reviver?: Parameters<typeof JSON.parse>[1],
+    trimBeforeParse?: boolean = false
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Configuration options for parsing (`SafeJsonParseOptions`).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`SafeJsonParseOptions`](#safejsonparseoptions)
 
 ### Examples
 ```typescript
@@ -7815,16 +7768,13 @@ Normalizes Unicode strings using standard normalization forms (NFC, NFD, NFKC, N
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.normalize(form: UnicodeNormalizeForm = "NFC")
+$df.col(<column_name>).str.normalize(form: "NFC" | "NFD" | "NFKC" | "NFKD" = "NFC")
 ```
 
 ### Parameters
 - `form` (any): The Unicode normalization form to apply ("NFC", "NFD", "NFKC", or "NFKD"). Default is "NFC".
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`UnicodeNormalizeForm`](#unicodenormalizeform)
 
 ### Examples
 ```typescript
@@ -7944,9 +7894,15 @@ Replaces the first occurrence matching a string pattern.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.replace(
-  pattern: RegexPatternArg,
-  replacement: StringReplacementArg,
-  options?: ReplaceOptions
+  pattern: string | RegExp,
+  replacement: string | StringReplacerFn,
+  options?: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    literal?: boolean = false,
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39",
+    n?: number = 1
+  }
 )
 ```
 
@@ -7956,11 +7912,6 @@ $df.col(<column_name>).str.replace(
 - `options` (any): Optional replace options (literal, asciiCaseInsensitive, n).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`StringReplacementArg`](#stringreplacementarg)
-- [`ReplaceOptions`](#replaceoptions)
 
 ### Examples
 ```typescript
@@ -7993,9 +7944,14 @@ Replaces all occurrences matching a string pattern or global regular expression.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.replaceAll(
-  pattern: RegexPatternArg,
-  replacement: StringReplacementArg,
-  options: ReplaceAllOptions = {}
+  pattern: string | RegExp,
+  replacement: string | StringReplacerFn,
+  options: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    literal?: boolean = false,
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39"
+  } = {}
 )
 ```
 
@@ -8005,11 +7961,6 @@ $df.col(<column_name>).str.replaceAll(
 - `options` (any): Optional replace options (literal, asciiCaseInsensitive).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`StringReplacementArg`](#stringreplacementarg)
-- [`ReplaceAllOptions`](#replacealloptions)
 
 ### Examples
 ```typescript
@@ -8044,8 +7995,16 @@ Replaces multiple string patterns simultaneously or sequentially with their resp
 ```typescript
 $df.col(<column_name>).str.replaceMany(
   patterns: RegexPatternSeriesArg | Record<string, string>,
-  replacements?: StringReplacementSeriesArg,
-  options?: ReplaceManyOptions
+  replacements?: (string | StringReplacerFn)[],
+  options?: {
+    asciiCaseInsensitive?: boolean = false,
+    global?: boolean = false,
+    groupIndex?: number | string = 0,
+    leftmost?: boolean = false,
+    literal?: boolean = false,
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39",
+    overlapping?: boolean = false
+  }
 )
 ```
 
@@ -8055,11 +8014,6 @@ $df.col(<column_name>).str.replaceMany(
 - `options` (any): Configuration options ({ literal, asciiCaseInsensitive, mode }).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
-- [`StringReplacementSeriesArg`](#stringreplacementseriesarg)
-- [`ReplaceManyOptions`](#replacemanyoptions)
 
 ### Examples
 ```typescript
@@ -8216,7 +8170,16 @@ Splits strings into lists by delimiter with optional limit and exact padding.
 ```typescript
 $df.col(<column_name>).str.split(
   delimiter: string,
-  options?: SplitOptions
+  options?: {
+    asciiCaseInsensitive?: boolean = false,
+    exact?: boolean = false,
+    global?: boolean = false,
+    inclusive?: boolean = false,
+    limit?: number,
+    literal?: boolean = true,
+    mode?: "tc39" | "nonAlphanumericAscii" = "tc39",
+    strict?: boolean = false
+  }
 )
 ```
 
@@ -8225,9 +8188,6 @@ $df.col(<column_name>).str.split(
 - `options` (any): Options for controlling limit and exact padding.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`SplitOptions`](#splitoptions)
 
 ### Examples
 ```typescript
@@ -8299,8 +8259,20 @@ Strips matching characters from start and end of string.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.stripChars(
-  characters?: RegexPatternArg,
-  options?: StripCharsOptions
+  characters?: string | RegExp,
+  options?: {
+    maxMatchesEnd?: number | null,
+    maxMatchesStart?: number | null,
+    maxScanEnd?: number | null,
+    maxScanStart?: number | null,
+    mode?: "both" | "start" | "end" = "both",
+    returnStringOnNull?: boolean = false,
+    stringOptions?: {
+      caseInsensitive?: boolean = false,
+      literal?: boolean = false
+    },
+    trimFirst?: boolean = false
+  }
 )
 ```
 
@@ -8309,10 +8281,6 @@ $df.col(<column_name>).str.stripChars(
 - `options` (any): Configuration options for strip operation.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`StripCharsOptions`](#stripcharsoptions)
 
 ### Examples
 ```typescript
@@ -8345,8 +8313,20 @@ Strips matching characters from end of string.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.stripCharsEnd(
-  characters?: RegexPatternArg,
-  options?: StripCharsOptions
+  characters?: string | RegExp,
+  options?: {
+    maxMatchesEnd?: number | null,
+    maxMatchesStart?: number | null,
+    maxScanEnd?: number | null,
+    maxScanStart?: number | null,
+    mode?: "both" | "start" | "end" = "both",
+    returnStringOnNull?: boolean = false,
+    stringOptions?: {
+      caseInsensitive?: boolean = false,
+      literal?: boolean = false
+    },
+    trimFirst?: boolean = false
+  }
 )
 ```
 
@@ -8355,10 +8335,6 @@ $df.col(<column_name>).str.stripCharsEnd(
 - `options` (any): Configuration options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`StripCharsOptions`](#stripcharsoptions)
 
 ### Examples
 ```typescript
@@ -8391,8 +8367,20 @@ Strips matching characters from start of string.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.stripCharsStart(
-  characters?: RegexPatternArg,
-  options?: StripCharsOptions
+  characters?: string | RegExp,
+  options?: {
+    maxMatchesEnd?: number | null,
+    maxMatchesStart?: number | null,
+    maxScanEnd?: number | null,
+    maxScanStart?: number | null,
+    mode?: "both" | "start" | "end" = "both",
+    returnStringOnNull?: boolean = false,
+    stringOptions?: {
+      caseInsensitive?: boolean = false,
+      literal?: boolean = false
+    },
+    trimFirst?: boolean = false
+  }
 )
 ```
 
@@ -8401,10 +8389,6 @@ $df.col(<column_name>).str.stripCharsStart(
 - `options` (any): Configuration options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegexPatternArg`](#regexpatternarg)
-- [`StripCharsOptions`](#stripcharsoptions)
 
 ### Examples
 ```typescript
@@ -8513,16 +8497,19 @@ Parses date/time string into Datetime.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.strptime(options: StrptimeOptions)
+$df.col(<column_name>).str.strptime(
+  options: {
+    defaultTimeZone?: string = "UTC",
+    format: string,
+    strict?: boolean = true
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Parsing configuration options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StrptimeOptions`](#strptimeoptions)
 
 ### Examples
 ```typescript
@@ -9246,9 +9233,6 @@ $df.col(<column_name>).struct.renameFields(mapping: RenameMappingArg)
 
 ### Returns: `ColumnExpression`
 
-### Types Referenced
-- [`RenameMappingArg`](#renamemappingarg)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ user: [{ name: "Alice", age: 30 }] })
@@ -9276,16 +9260,13 @@ Inserts or updates fields inside structured object columns.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).struct.withFields(fields: StructFieldsArg)
+$df.col(<column_name>).struct.withFields(fields: IntoExprSeriesArg | ExprDict)
 ```
 
 ### Parameters
 - `fields` (any): Expressions or field map defining new or updated fields.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StructFieldsArg`](#structfieldsarg)
 
 ### Examples
 ```typescript
@@ -9348,16 +9329,13 @@ Casts the schema time unit of a Datetime column (`"ms"`, `"us"`, `"ns"`). This i
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dt.castTimeUnit(unit: DatetimeTimeUnit)
+$df.col(<column_name>).dt.castTimeUnit(unit: "ms" | "us" | "ns")
 ```
 
 ### Parameters
 - `unit` (any): Target time unit: `"ms"` (milliseconds), `"us"` (microseconds), or `"ns"` (nanoseconds).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`DatetimeTimeUnit`](#datetimetimeunit)
 
 ### Examples
 ```typescript
@@ -9558,16 +9536,13 @@ Returns the epoch duration timestamp offset in the specified time resolution uni
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dt.epoch(unit: TimeUnit = "ms")
+$df.col(<column_name>).dt.epoch(unit: "s" | "ms" | "us" | "ns" = "ms")
 ```
 
 ### Parameters
 - `unit` (any): Time resolution unit (`"ms"`, `"us"`, `"ns"`, `"s"`). Defaults to `"ms"`.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`TimeUnit`](#timeunit)
 
 ### Examples
 ```typescript
@@ -9631,16 +9606,18 @@ Evaluates whether each Datetime value falls on a business day. Supports custom w
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dt.isBusinessDay(options: IsBusinessDayOptions = {})
+$df.col(<column_name>).dt.isBusinessDay(
+  options: {
+    excludeWeekdays?: number[] = [6, 7],
+    holidays?: (Date | string | number)[] | Set<number>
+  } = {}
+)
 ```
 
 ### Parameters
 - `options` (any): Business day rules and custom holiday configuration options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`IsBusinessDayOptions`](#isbusinessdayoptions)
 
 ### Examples
 ```typescript
@@ -10014,8 +9991,12 @@ Offsets a Datetime column by N calendar days (numeric constant, column reference
 ### Signature
 ```typescript
 $df.col(<column_name>).dt.offsetDay(
-  n: NumericArg,
-  options: DayOffsetOptions = {}
+  n: number | bigint | IExpr | null,
+  options: {
+    excludeWeekdays?: number[] = [6, 7],
+    holidays?: (Date | string | number)[] | Set<number>,
+    roll?: "raise" | "forward" | "backward" = "raise"
+  } = {}
 )
 ```
 
@@ -10024,10 +10005,6 @@ $df.col(<column_name>).dt.offsetDay(
 - `options` (any): Day offset configuration options.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`NumericArg`](#numericarg)
-- [`DayOffsetOptions`](#dayoffsetoptions)
 
 ### Examples
 ```typescript
@@ -10126,16 +10103,24 @@ Replaces specific date and time components (`year`, `month`, `day`, `hour`, `min
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dt.replace(options: ReplaceDateOptions)
+$df.col(<column_name>).dt.replace(
+  options: {
+    day?: number,
+    hour?: number,
+    minute?: number,
+    month?: number,
+    ms?: number,
+    second?: number,
+    timeZone?: string | null,
+    year?: number
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Object specifying which components to replace.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`ReplaceDateOptions`](#replacedateoptions)
 
 ### Examples
 ```typescript
@@ -10196,16 +10181,19 @@ Formats Datetime values into custom formatted strings using strftime directive p
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dt.strftime(options: StrftimeOptions)
+$df.col(<column_name>).dt.strftime(
+  options: {
+    format: string,
+    locale?: string = "en-US",
+    timeZone?: string = "UTC"
+  }
+)
 ```
 
 ### Parameters
 - `options` (any): Formatting pattern string (e.g. `"%Y-%m-%d %H:%M:%S"`) or configuration object.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`StrftimeOptions`](#strftimeoptions)
 
 ### Examples
 ```typescript
@@ -10266,16 +10254,13 @@ Returns numeric timestamp relative to Epoch. Alias for epoch.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).dt.timestamp(unit: TimeUnit = "ms")
+$df.col(<column_name>).dt.timestamp(unit: "s" | "ms" | "us" | "ns" = "ms")
 ```
 
 ### Parameters
 - `unit` (any): Time unit resolution.
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`TimeUnit`](#timeunit)
 
 ### Examples
 ```typescript
@@ -10537,7 +10522,10 @@ Returns the UTC offset of a timezone for a given Datetime value. Supports return
 ```typescript
 $df.col(<column_name>).dt.utcOffset(
   timeZone?: string,
-  options: UtcOffsetOptions = {}
+  options: {
+    format?: "milliseconds" | "minutes" | "hours" | "iso" | "basic" = "milliseconds",
+    type?: "base" | "total" | "daylightSavingTime" = "total"
+  } = {}
 )
 ```
 
@@ -10546,9 +10534,6 @@ $df.col(<column_name>).dt.utcOffset(
 - `options` (any): Output configuration: `type` selects which offset component to return (`"total"` | `"standardTime"` | `"daylightSavingTime"`), and `format` controls the output unit (`"milliseconds"` | `"minutes"` | `"hours"` | `"iso"` | `"basic"`).
 
 ### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`UtcOffsetOptions`](#utcoffsetoptions)
 
 ### Examples
 ```typescript
@@ -10685,8 +10670,10 @@ Casts columns in the DataFrame to the specified data type(s).
 ### Signature
 ```typescript
 df.cast(
-  dtypes: CastTargetArg,
-  options: CastOptions = {}
+  dtypes: RegisteredDataType | DataFrameSchema,
+  options: {
+    strict?: boolean = true
+  } = {}
 ): DataFrame<any>
 ```
 
@@ -10695,10 +10682,6 @@ df.cast(
 - `[options]` (CastOptions): Casting options (e.g. strict).
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`CastTargetArg`](#casttargetarg)
-- [`CastOptions`](#castoptions)
 
 ### Examples
 ```typescript
@@ -10779,8 +10762,13 @@ Concatenates items vertically, horizontally, or diagonally.
 ### Signature
 ```typescript
 df.concat<U extends RowRecord = any>(
-  items: ConcatItemsArg,
-  options: ConcatOptions = {}
+  items: ConcatItem | ConcatItem[],
+  options: {
+    horizontal?: {
+      strict?: boolean = true
+    },
+    how?: "vertical" | "horizontal" | "diagonal" = "vertical"
+  } = {}
 ): DataFrame<U>
 ```
 
@@ -10789,11 +10777,6 @@ df.concat<U extends RowRecord = any>(
 - `[options]` (ConcatOptions): Configuration options for concatenation layout and strictness.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`ConcatItemsArg`](#concatitemsarg)
-- [`ConcatOptions`](#concatoptions)
 
 ### Examples
 ```typescript
@@ -10894,16 +10877,13 @@ Drops specified columns from the DataFrame.
 
 ### Signature
 ```typescript
-df.drop<K extends keyof T>(...args: ColumnKeyArg<K>[]): DataFrame<Omit<T, K>>
+df.drop<K extends keyof T>(...args: (K | K[])[]): DataFrame<Omit<T, K>>
 ```
 
 ### Parameters
 - `args` (ColumnKeyArg<K>[]): Column names or arrays of column names to remove.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`ColumnKeyArg`](#columnkeyarg)
 
 ### Examples
 ```typescript
@@ -10934,16 +10914,13 @@ Drops rows with null or undefined values.
 
 ### Signature
 ```typescript
-df.dropNulls(subset?: ColumnKeyArg<string>): DataFrame<T>
+df.dropNulls(subset?: string | string[]): DataFrame<T>
 ```
 
 ### Parameters
 - `[subset]` (ColumnKeyArg<string>): Column name or array of column names to check for nulls.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`ColumnKeyArg`](#columnkeyarg)
 
 ### Examples
 ```typescript
@@ -10980,9 +10957,6 @@ df.dtypes: RegisteredDataType[]
 
 ### Returns: `Array of RegisteredDataType definitions.`
 
-### Types Referenced
-- [`RegisteredDataType`](#registereddatatype)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
@@ -11008,9 +10982,9 @@ Compares this DataFrame with another for equality. Checks shape, column names, c
 ```typescript
 df.equals<U extends RowRecord = any>(
   other: DataFrame<U>,
-  {
-    nullsEqual = true
-  }: EqualsOptions = {}
+  options: {
+    nullsEqual?: boolean = true
+  } = {}
 ): boolean
 ```
 
@@ -11019,10 +10993,6 @@ df.equals<U extends RowRecord = any>(
 - `[options]` (EqualsOptions): Comparison configuration options.
 
 ### Returns: `boolean`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`EqualsOptions`](#equalsoptions)
 
 ### Examples
 ```typescript
@@ -11048,8 +11018,11 @@ Explodes an array column into multiple rows, replicating non-target row attribut
 ### Signature
 ```typescript
 df.explode(
-  columns: IntoExprArg,
-  options?: ExplodeOptions
+  columns: IntoExpr | IntoExpr[],
+  options?: {
+    emptyAsNull?: boolean = true,
+    keepNulls?: boolean = true
+  }
 ): DataFrame<any>
 ```
 
@@ -11058,10 +11031,6 @@ df.explode(
 - `[options]` (ExplodeOptions): Configuration options for empty array and null handling.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`IntoExprArg`](#intoexprarg)
-- [`ExplodeOptions`](#explodeoptions)
 
 ### Examples
 ```typescript
@@ -11093,8 +11062,12 @@ Fills targeted values ("null", "nan", or "all") across columns using scalar valu
 ### Signature
 ```typescript
 df.fill(
-  target: FillTarget,
-  options: FillOptions = {}
+  target: "null" | "nan" | "all" | ScalarArg,
+  options: {
+    limit?: number,
+    strategy?: "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one",
+    value?: IExpr | ValidScalarTypes
+  } = {}
 ): DataFrame<T>
 ```
 
@@ -11103,10 +11076,6 @@ df.fill(
 - `[options]` (FillOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`FillTarget`](#filltarget)
-- [`FillOptions`](#filloptions)
 
 ### Examples
 ```typescript
@@ -11139,16 +11108,19 @@ Fills NaN values across numeric columns using scalar values or statistical strat
 
 ### Signature
 ```typescript
-df.fillNan(options: FillNullOptions = {}): DataFrame<T>
+df.fillNan(
+  options: {
+    limit?: number,
+    strategy?: "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one",
+    value?: IExpr | ValidScalarTypes
+  } = {}
+): DataFrame<T>
 ```
 
 ### Parameters
 - `[options]` (FillNullOptions, default: {}): Configuration options specifying replacement value, strategy, and optional limit.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`FillNullOptions`](#fillnulloptions)
 
 ### Examples
 ```typescript
@@ -11181,16 +11153,19 @@ Fills null values across columns using scalar values or statistical strategies.
 
 ### Signature
 ```typescript
-df.fillNull(options: FillNullOptions = {}): DataFrame<T>
+df.fillNull(
+  options: {
+    limit?: number,
+    strategy?: "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one",
+    value?: IExpr | ValidScalarTypes
+  } = {}
+): DataFrame<T>
 ```
 
 ### Parameters
 - `[options]` (FillNullOptions): Configuration options for null replacement.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`FillNullOptions`](#fillnulloptions)
 
 ### Examples
 ```typescript
@@ -11223,16 +11198,13 @@ Filters rows matching boolean column expressions or predicate callbacks.
 
 ### Signature
 ```typescript
-df.filter(...exprs: FilterPredicateArg<T>[]): DataFrame<T>
+df.filter(...exprs: (IExpr | (row: T) => any | FilterPredicate<T>[])[]): DataFrame<T>
 ```
 
 ### Parameters
 - `exprs` (FilterPredicateArg<T>[]): Expressions or predicate functions evaluated per row.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`FilterPredicateArg`](#filterpredicatearg)
 
 ### Examples
 ```typescript
@@ -11264,17 +11236,13 @@ Groups rows by key columns to prepare for aggregations.
 
 ### Signature
 ```typescript
-df.groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K>
+df.groupBy<K extends keyof T>(keys: K | K[]): GroupedData<T, K>
 ```
 
 ### Parameters
 - `keys` (ColumnKeyArg<K>): Column name or array of key column names.
 
 ### Returns: `GroupedData`
-
-### Types Referenced
-- [`ColumnKeyArg`](#columnkeyarg)
-- [`GroupedData`](#groupeddata)
 
 ### Examples
 ```typescript
@@ -11307,8 +11275,20 @@ Groups dynamically based on a time or integer index column over sliding / steppi
 ### Signature
 ```typescript
 df.groupByDynamic<K extends keyof T & string>(
-  indexColumn: DynamicIndexColumnArg<K>,
-  options: GroupByDynamicOptions<T>
+  indexColumn: K | IntoExpr,
+  options: {
+    by?: keyof any | keyof any[],
+    checkSorted?: boolean = true,
+    closed?: "both" | "left" | "right" | "none" = "left",
+    every: number | string,
+    groupBy?: keyof any | keyof any[],
+    includeBoundaries?: boolean = false,
+    label?: "left" | "right" | "datapoint" = "left",
+    offset?: number | string = 0,
+    period?: number | string = `every` if omitted,
+    startBy?: "window" | "datapoint" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday" = "window",
+    truncate?: boolean = true
+  }
 ): GroupedData<T, K>
 ```
 
@@ -11317,11 +11297,6 @@ df.groupByDynamic<K extends keyof T & string>(
 - `options` (any): Dynamic grouping configuration options (`every`, `period`, `offset`, `truncate`, `includeBoundaries`, `closed`, `label`, `by`, `startBy`, `checkSorted`).
 
 ### Returns: `GroupedData`
-
-### Types Referenced
-- [`DynamicIndexColumnArg`](#dynamicindexcolumnarg)
-- [`GroupByDynamicOptions`](#groupbydynamicoptions)
-- [`GroupedData`](#groupeddata)
 
 ### Examples
 ```typescript
@@ -11426,7 +11401,7 @@ Inserts a new column at a specific ordinal index position.
 df.insertColumn(
   index: number,
   name: string,
-  expr: InsertColumnArg
+  expr: IntoExpr | ArrayLike<any>
 ): DataFrame<any>
 ```
 
@@ -11436,9 +11411,6 @@ df.insertColumn(
 - `expr` (InsertColumnArg): Value expression, column definition, or raw column values array.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`InsertColumnArg`](#insertcolumnarg)
 
 ### Examples
 ```typescript
@@ -11471,7 +11443,7 @@ Retrieves a single scalar cell value by row and column position or name.
 ```typescript
 df.item(
   row?: number,
-  column?: ColumnIndexOrNameArg
+  column?: number | string
 ): any
 ```
 
@@ -11480,9 +11452,6 @@ df.item(
 - `[column]` (ColumnIndexOrNameArg): Column index or column name string.
 
 ### Returns: `any`
-
-### Types Referenced
-- [`ColumnIndexOrNameArg`](#columnindexornamearg)
 
 ### Examples
 ```typescript
@@ -11512,9 +11481,6 @@ df.iterColumns(): Generator<ColumnData>
 
 ### Returns: `Generator of ColumnData arrays.`
 
-### Types Referenced
-- [`ColumnData`](#columndata)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
@@ -11537,9 +11503,9 @@ Yields a generator iterating over rows as tuples or named objects.
 ### Signature
 ```typescript
 df.iterRows(
-  {
-    named = false
-  }: IterRowsOptions = {}
+  config: {
+    named?: boolean = false
+  } = {}
 ): Generator<IterRowResult<T>>
 ```
 
@@ -11547,10 +11513,6 @@ df.iterRows(
 - `[config]` (any): Iteration format configuration.
 
 ### Returns: `Generator of rows.`
-
-### Types Referenced
-- [`IterRowsOptions`](#iterrowsoptions)
-- [`IterRowResult`](#iterrowresult)
 
 ### Examples
 ```typescript
@@ -11575,7 +11537,16 @@ Joins two DataFrames on key columns using a specified join strategy.
 ```typescript
 df.join<U extends RowRecord = any, R extends RowRecord = any>(
   other: DataFrame<U>,
-  options: JoinOptions<T, U> = {}
+  options: {
+    coalesce?: boolean = true,
+    how?: "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross" = "inner",
+    joinNulls?: boolean = false,
+    leftOn?: keyof any | keyof any[],
+    maintainOrder?: JoinMaintainOrder | boolean = "none",
+    on?: keyof any & keyof any | (keyof any & keyof any)[],
+    rightOn?: keyof any | keyof any[],
+    suffixes?: [string, string] = ["", "_right"]
+  } = {}
 ): DataFrame<R>
 ```
 
@@ -11584,10 +11555,6 @@ df.join<U extends RowRecord = any, R extends RowRecord = any>(
 - `[options]` (JoinOptions, default: {}): Join configuration object.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`JoinOptions`](#joinoptions)
 
 ### Examples
 ```typescript
@@ -11631,7 +11598,20 @@ Similar to a left join, but instead of exact key equality, matches the nearest k
 ```typescript
 df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(
   other: DataFrame<U>,
-  options: JoinAsofOptions<T, U>
+  options: {
+    allowExactMatches?: boolean = true,
+    by?: keyof any & keyof any | (keyof any & keyof any)[],
+    checkSorted?: boolean = true,
+    coalesce?: boolean = true,
+    leftBy?: keyof any | keyof any[],
+    leftOn?: (keyof any),
+    on?: (keyof any & keyof any),
+    rightBy?: keyof any | keyof any[],
+    rightOn?: (keyof any),
+    strategy?: "backward" | "forward" | "nearest" = "backward",
+    suffixes?: [string, string] = ["", "_right"],
+    tolerance?: number | string
+  }
 ): DataFrame<R>
 ```
 
@@ -11640,10 +11620,6 @@ df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(
 - `options` (JoinAsofOptions): Asof join configuration options.
 
 ### Returns: `A new DataFrame containing the joined results.`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`JoinAsofOptions`](#joinasofoptions)
 
 ### Examples
 ```typescript
@@ -11698,7 +11674,10 @@ Evaluates one or more boolean expressions across combined rows from both DataFra
 ```typescript
 df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
   other: DataFrame<U>,
-  ...args: JoinWhereArg[]
+  ...args: {
+    how?: "inner" | "left" | "right" = "inner",
+    suffixes?: [string, string] = ["", "_right"]
+  }
 ): DataFrame<R>
 ```
 
@@ -11707,10 +11686,6 @@ df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
 - `args` (...JoinWhereArg): Predicate expression(s), arrays of expressions, and an optional configuration options object (`{ how, suffixes }`).
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`JoinWhereArg`](#joinwherearg)
 
 ### Examples
 ```typescript
@@ -11756,10 +11731,10 @@ Limits the output to N rows starting from offset.
 ```typescript
 df.limit(
   n: number,
-  {
-    offset = 0,
-    from = "start"
-  }: LimitOptions = {}
+  options: {
+    from?: "start" | "end" = "start",
+    offset?: number = 0
+  } = {}
 ): DataFrame<T>
 ```
 
@@ -11768,9 +11743,6 @@ df.limit(
 - `[options]` (LimitOptions): Offset and slice direction options.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`LimitOptions`](#limitoptions)
 
 ### Examples
 ```typescript
@@ -11803,8 +11775,11 @@ Splits a DataFrame into sub-DataFrames partitioned by column names or expression
 ### Signature
 ```typescript
 df.partitionBy<K extends PartitionByKey<T>>(
-  by: ColumnKeyArg<K>,
-  options: PartitionByOptions = {}
+  by: K | K[],
+  options: {
+    asDict?: boolean = false,
+    maintainOrder?: boolean = true
+  } = {}
 ): PartitionByResult<T>
 ```
 
@@ -11813,12 +11788,6 @@ df.partitionBy<K extends PartitionByKey<T>>(
 - `[options]` (PartitionByOptions, default: {}): Partition configuration options.
 
 ### Returns: `PartitionByResult<T>`
-
-### Types Referenced
-- [`PartitionByKey`](#partitionbykey)
-- [`ColumnKeyArg`](#columnkeyarg)
-- [`PartitionByOptions`](#partitionbyoptions)
-- [`PartitionByResult`](#partitionbyresult)
 
 ### Examples
 ```typescript
@@ -11833,17 +11802,20 @@ Pivots columns from long format to a wide datagrid structure.
 
 ### Signature
 ```typescript
-df.pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U>
+df.pivot<U extends RowRecord = any>(
+  config: {
+    agg?: (values: any[]) => any | string,
+    columns: keyof T,
+    index: keyof T | keyof T[],
+    values: keyof T
+  }
+): DataFrame<U>
 ```
 
 ### Parameters
 - `config` (any): Pivot table configuration options.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`PivotOptions`](#pivotoptions)
 
 ### Examples
 ```typescript
@@ -11883,9 +11855,6 @@ df.rename(mapping: RenameMappingArg<T> = {}): DataFrame<any>
 - `[mapping]` (RenameMappingArg<T>): Dictionary mapping old column names to new names.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RenameMappingArg`](#renamemappingarg)
 
 ### Examples
 ```typescript
@@ -11955,9 +11924,6 @@ df.schema: DataFrameSchema
 
 ### Returns: `DataFrameSchema mapping.`
 
-### Types Referenced
-- [`DataFrameSchema`](#dataframeschema)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
@@ -11981,17 +11947,13 @@ Selects specific columns or evaluates column expressions.
 
 ### Signature
 ```typescript
-df.select<U extends RowRecord = any>(...args: SelectArg[]): DataFrame<U>
+df.select<U extends RowRecord = any>(...args: (SelectItem | SelectItem[])[]): DataFrame<U>
 ```
 
 ### Parameters
 - `args` (SelectArg[]): Column names, column expressions, or object maps to evaluate.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`SelectArg`](#selectarg)
 
 ### Examples
 ```typescript
@@ -12026,9 +11988,6 @@ df.shape: DataFrameShape
 ```
 
 ### Returns: `Tuple [height, width].`
-
-### Types Referenced
-- [`DataFrameShape`](#dataframeshape)
 
 ### Examples
 ```typescript
@@ -12095,16 +12054,20 @@ Sorts DataFrame rows by one or more column expressions or custom sorters.
 
 ### Signature
 ```typescript
-df.sort(config?: SortOptions<T>): DataFrame<T>
+df.sort(
+  config?: {
+    by: keyof any | keyof any[] | IExpr | IExpr[],
+    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,
+    descending?: boolean | boolean[] = false,
+    nullsLast?: boolean = true
+  }
+): DataFrame<T>
 ```
 
 ### Parameters
 - `[config]` (SortOptions<T>): Sort configuration options.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`SortOptions`](#sortoptions)
 
 ### Examples
 ```typescript
@@ -12175,16 +12138,13 @@ Evaluates a column expression or retrieves column values as a raw JavaScript arr
 
 ### Signature
 ```typescript
-df.toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[]
+df.toArray<K extends keyof T>(nameOrExpr: K | IExpr): any[]
 ```
 
 ### Parameters
 - `nameOrExpr` (ColumnOrExprArg<K>): Target column name or column expression.
 
 ### Returns: `any[]`
-
-### Types Referenced
-- [`ColumnOrExprArg`](#columnorexprarg)
 
 ### Examples
 ```typescript
@@ -12213,9 +12173,6 @@ df.toDict(): DataFrameColumns<T>
 ```
 
 ### Returns: `Column dictionary map.`
-
-### Types Referenced
-- [`DataFrameColumns`](#dataframecolumns)
 
 ### Examples
 ```typescript
@@ -12269,11 +12226,11 @@ Transposes rows into columns and columns into rows.
 ### Signature
 ```typescript
 df.transpose(
-  {
-    includeHeader = false,
-    headerName = "column",
-    columnNames
-  }: TransposeOptions = {}
+  options: {
+    columnNames?: string | Iterable<string>,
+    headerName?: string = "column",
+    includeHeader?: boolean = false
+  } = {}
 ): DataFrame<any>
 ```
 
@@ -12281,9 +12238,6 @@ df.transpose(
 - `[options]` (TransposeOptions): Transpose layout options.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`TransposeOptions`](#transposeoptions)
 
 ### Examples
 ```typescript
@@ -12316,16 +12270,13 @@ Filters distinct unique rows matching target key columns.
 
 ### Signature
 ```typescript
-df.unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T>
+df.unique<K extends keyof T>(columns?: K | K[]): DataFrame<T>
 ```
 
 ### Parameters
 - `[columns]` (ColumnKeyArg<K>): Target column or array of column names to evaluate uniqueness.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`ColumnKeyArg`](#columnkeyarg)
 
 ### Examples
 ```typescript
@@ -12356,17 +12307,20 @@ Unpivots a wide DataFrame into a long format structure.
 
 ### Signature
 ```typescript
-df.unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U>
+df.unpivot<U extends RowRecord = any>(
+  config: {
+    idVars: keyof T | keyof T[],
+    valueName?: string = "value",
+    valueVars: keyof T | keyof T[],
+    varName?: string = "variable"
+  }
+): DataFrame<U>
 ```
 
 ### Parameters
 - `config` (UnpivotOptions<T>): Unpivot configuration options.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`UnpivotOptions`](#unpivotoptions)
 
 ### Examples
 ```typescript
@@ -12402,8 +12356,12 @@ Unstacks selected columns into multiple wide columns of size `step`. Reshapes da
 ### Signature
 ```typescript
 df.unstack(
-  columns: IntoExprArg,
-  options: UnstackOptions
+  columns: IntoExpr | IntoExpr[],
+  options: {
+    fillValues?: any = null,
+    how?: "vertical" | "horizontal" = "vertical",
+    step: number
+  }
 ): DataFrame<any>
 ```
 
@@ -12412,10 +12370,6 @@ df.unstack(
 - `options` (any): Unstack configuration options (`step`, `how`, `fillValues`).
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`IntoExprArg`](#intoexprarg)
-- [`UnstackOptions`](#unstackoptions)
 
 ### Examples
 ```typescript
@@ -12475,16 +12429,13 @@ Adds new columns or updates existing ones using column expressions.
 
 ### Signature
 ```typescript
-df.withColumns(...args: SelectArg[]): DataFrame<any>
+df.withColumns(...args: (SelectItem | SelectItem[])[]): DataFrame<any>
 ```
 
 ### Parameters
 - `args` (SelectArg[]): Expressions or field objects defining column calculations.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`SelectArg`](#selectarg)
 
 ### Examples
 ```typescript
@@ -12557,8 +12508,49 @@ Writes DataFrame to CSV format string or file/stream target.
 ### Signature
 ```typescript
 df.writeCsv(
-  file?: WriteFileTargetArg,
-  options: WriteCSVOptions = {}
+  file?: {
+    write: (str: string) => void
+  },
+  options: {
+    dateFormat?: string,
+    datetimeFormat?: string,
+    includeBom?: boolean = false,
+    includeHeader?: boolean = true,
+    lineTerminator?: string = "\n",
+    nullValue?: string = "",
+    numericFormatOptions?: {
+      accountingNegatives?: boolean = false,
+      fallback?: string = "NaN",
+      formatNonFinite?: boolean = false,
+      locale?: string = "en-US"
+    },
+    quoteChar?: string = '"',
+    quoteStyle?: "necessary" | "always" | "never" | "non_numeric" = "necessary",
+    replacerOptions?: {
+      bigintStrategy?: "string" | "number" = "string",
+      formatDate?: (v: Date) => string,
+      handleCircular?: boolean = false,
+      onBigInt?: (v: bigint) => any,
+      onCircular?: (this: any, k: string, v: any) => any,
+      onCustom?: (this: any, k: string, v: any) => any,
+      onDate?: (v: Date) => any,
+      onError?: (v: Error) => any,
+      onMap?: (v: Map<any, any>) => any,
+      onRegExp?: (v: RegExp) => any,
+      onSet?: (v: Set<any>) => any,
+      onTypedArray?: (v: any) => any,
+      onURLSearchParams?: (v: URLSearchParams) => any,
+      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,
+      voidBigIntReplacement?: boolean = false,
+      voidDateReplacement?: boolean = false,
+      voidMapReplacement?: boolean = false,
+      voidRegExpReplacement?: boolean = false,
+      voidSetReplacement?: boolean = false,
+      voidTypedArrayReplacement?: boolean = false
+    },
+    separator?: string = ",",
+    timeFormat?: string
+  } = {}
 ): string
 ```
 
@@ -12567,10 +12559,6 @@ df.writeCsv(
 - `[options]` (WriteCSVOptions): CSV formatting options.
 
 ### Returns: `string`
-
-### Types Referenced
-- [`WriteFileTargetArg`](#writefiletargetarg)
-- [`WriteCSVOptions`](#writecsvoptions)
 
 ### Examples
 ```typescript
@@ -12596,11 +12584,34 @@ Writes DataFrame rows to JSON format string or file/stream target.
 ### Signature
 ```typescript
 df.writeJson(
-  file?: WriteFileTargetArg,
-  {
-    format = "json",
-    replacerOptions
-  }: WriteJSONOptions = {}
+  file?: {
+    write: (str: string) => void
+  },
+  options: {
+    format?: "json" | "ndjson" = "json",
+    replacerOptions?: {
+      bigintStrategy?: "string" | "number" = "string",
+      formatDate?: (v: Date) => string,
+      handleCircular?: boolean = false,
+      onBigInt?: (v: bigint) => any,
+      onCircular?: (this: any, k: string, v: any) => any,
+      onCustom?: (this: any, k: string, v: any) => any,
+      onDate?: (v: Date) => any,
+      onError?: (v: Error) => any,
+      onMap?: (v: Map<any, any>) => any,
+      onRegExp?: (v: RegExp) => any,
+      onSet?: (v: Set<any>) => any,
+      onTypedArray?: (v: any) => any,
+      onURLSearchParams?: (v: URLSearchParams) => any,
+      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,
+      voidBigIntReplacement?: boolean = false,
+      voidDateReplacement?: boolean = false,
+      voidMapReplacement?: boolean = false,
+      voidRegExpReplacement?: boolean = false,
+      voidSetReplacement?: boolean = false,
+      voidTypedArrayReplacement?: boolean = false
+    }
+  } = {}
 ): string
 ```
 
@@ -12609,10 +12620,6 @@ df.writeJson(
 - `[options]` (WriteJSONOptions): JSON formatting and replacer options.
 
 ### Returns: `string`
-
-### Types Referenced
-- [`WriteFileTargetArg`](#writefiletargetarg)
-- [`WriteJSONOptions`](#writejsonoptions)
 
 ### Examples
 ```typescript
@@ -12637,17 +12644,13 @@ Aggregates grouped partitions using aggregation column expressions.
 
 ### Signature
 ```typescript
-df.groupBy(...).agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U>
+df.groupBy(...exprs: (SelectItem | SelectItem[])[]).agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U>
 ```
 
 ### Parameters
 - `exprs` (any): One or more aggregation column expressions.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`SelectArg`](#selectarg)
 
 ### Examples
 ```typescript
@@ -12683,9 +12686,6 @@ df.groupBy(...).toDataframe<U extends RowRecord = any>(): DataFrame<U>
 ```
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
 
 ### Examples
 ```typescript
@@ -12724,9 +12724,6 @@ $df.all(): ColumnExpr<any>
 
 ### Returns: `ColumnExpr<any>`
 
-### Types Referenced
-- [`ColumnExpr`](#columnexpr)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
@@ -12756,17 +12753,13 @@ Returns the first non-null value among the specified expressions.
 
 ### Signature
 ```typescript
-$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>
+$df.coalesce(...exprs: (ScalarArg | ScalarArg[])[]): ColumnExpr<any>
 ```
 
 ### Parameters
 - `exprs` (...CoalesceArg): The list of expressions or columns to coalesce.
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`CoalesceArg`](#coalescearg)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -12799,17 +12792,13 @@ Creates a column expression referencing one or more columns by name, regular exp
 
 ### Signature
 ```typescript
-$df.col<T = any>(name: ColumnSelector<T>): ColumnExpr<T>
+$df.col<T = any>(name: keyof T | RegexPatternArg | (keyof T | RegexPatternArg)[] | DataType | Function | (DataType | Function)[]): ColumnExpr<T>
 ```
 
 ### Parameters
 - `name` (ColumnSelector<T>): Column name, array of names, RegExp pattern, or DataType selector.
 
 ### Returns: `ColumnExpr<T>`
-
-### Types Referenced
-- [`ColumnSelector`](#columnselector)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -12841,11 +12830,13 @@ Concatenates items vertically, horizontally, or diagonally.
 ### Signature
 ```typescript
 $df.concat<U extends RowRecord = any>(
-  rawItems: ConcatItemsArg,
-  {
-    how = 'vertical',
-    horizontal
-  }: ConcatOptions = {}
+  rawItems: ConcatItem | ConcatItem[],
+  options: {
+    horizontal?: {
+      strict?: boolean = true
+    },
+    how?: "vertical" | "horizontal" | "diagonal" = "vertical"
+  } = {}
 ): DataFrame<U>
 ```
 
@@ -12854,11 +12845,6 @@ $df.concat<U extends RowRecord = any>(
 - `[options]` (any): Configuration options for concatenation layout and strictness.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`ConcatItemsArg`](#concatitemsarg)
-- [`ConcatOptions`](#concatoptions)
 
 ### Examples
 ```typescript
@@ -12960,8 +12946,8 @@ Constructs a new DataFrame from an array of row records or a column dictionary.
 ### Signature
 ```typescript
 $df.data<T extends RowRecord = any>(
-  data: DataFrameDataArg<T>,
-  schema?: DataFrameSchema
+  data: T[] | ColumnDict,
+  schema?: Record<string, RegisteredDataType>
 ): DataFrame<T>
 ```
 
@@ -12970,11 +12956,6 @@ $df.data<T extends RowRecord = any>(
 - `[schema]` (DataFrameSchema): Optional explicit column schema mapping.
 
 ### Returns: `DataFrame<T>`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`DataFrameDataArg`](#dataframedataarg)
-- [`DataFrameSchema`](#dataframeschema)
 
 ### Examples
 ```typescript
@@ -12997,17 +12978,24 @@ Constructs a Duration expression column from numeric values, string intervals, c
 
 ### Signature
 ```typescript
-$df.duration(options: DurationArg = {}): ColumnExpr<any>
+$df.duration(
+  options: {
+    days?: IntoExpr | number,
+    hours?: IntoExpr | number,
+    microseconds?: IntoExpr | number,
+    milliseconds?: IntoExpr | number,
+    minutes?: IntoExpr | number,
+    nanoseconds?: IntoExpr | number,
+    seconds?: IntoExpr | number,
+    weeks?: IntoExpr | number
+  } = {}
+): ColumnExpr<any>
 ```
 
 ### Parameters
 - `[options]` (DurationArg): Duration component options or string interval (e.g. "1d 12h").
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`DurationArg`](#durationarg)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -13041,9 +13029,6 @@ $df.element<T = any>(): ColumnExpr<T>
 
 ### Returns: `ColumnExpr<T>`
 
-### Types Referenced
-- [`ColumnExpr`](#columnexpr)
-
 ### Examples
 ```typescript
 >>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })
@@ -13073,17 +13058,13 @@ Creates an expression targeting all columns except the specified ones.
 
 ### Signature
 ```typescript
-$df.exclude(columns: ColumnKeyArg): ColumnExpr<any>
+$df.exclude(columns: string | string[]): ColumnExpr<any>
 ```
 
 ### Parameters
 - `columns` (ColumnKeyArg): The name or names of columns to exclude.
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`ColumnKeyArg`](#columnkeyarg)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -13114,17 +13095,13 @@ Combines multiple columns or expressions horizontally into an array per row, all
 
 ### Signature
 ```typescript
-$df.horizontal(...exprs: IntoExprArg[]): HorizontalExpr
+$df.horizontal(...exprs: (IntoExpr | IntoExpr[])[]): HorizontalExpr
 ```
 
 ### Parameters
 - `exprs` (...IntoExprArg): Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
 
 ### Returns: `HorizontalExpr`
-
-### Types Referenced
-- [`IntoExprArg`](#intoexprarg)
-- [`HorizontalExpr`](#horizontalexpr)
 
 ### Examples
 ```typescript
@@ -13155,17 +13132,13 @@ Aggregates values of a column into a list within each group.
 
 ### Signature
 ```typescript
-$df.implode(column: IntoExprArg): ColumnExpr<any>
+$df.implode(column: IntoExpr | IntoExpr[]): ColumnExpr<any>
 ```
 
 ### Parameters
 - `column` (IntoExprArg): The column or expression to implode.
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`IntoExprArg`](#intoexprarg)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -13199,7 +13172,10 @@ Creates a literal column expression that repeats the given value for all rows.
 ```typescript
 $df.lit(
   value: any,
-  options: LitOptions = {}
+  options: {
+    dtype?: Int8Type | Int16Type | Int32Type | Int64Type | UInt8Type | UInt16Type | UInt32Type | UInt64Type | Float32Type | Float64Type | DecimalType | BooleanType | Utf8Type | BinaryType | NullType | ObjectType | DateType | DatetimeType | TimeType | DurationType | ArrayType<any> | StructType<any>,
+    name?: string
+  } = {}
 ): ColumnExpr<any>
 ```
 
@@ -13208,10 +13184,6 @@ $df.lit(
 - `[options]` (any): Configuration options.
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`LitOptions`](#litoptions)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -13244,7 +13216,14 @@ Reads a CSV string and constructs a DataFrame. Automatically infers column data 
 ```typescript
 $df.readCsv<T extends RowRecord = any>(
   content: string,
-  options: ReadCSVOptions = {}
+  options: {
+    hasHeader?: boolean = true,
+    inferSchema?: boolean = true,
+    nullValues?: string[] = ["", "NA", "null", "NaN"],
+    quoteChar?: string = '"',
+    schema?: Record<string, RegisteredDataType>,
+    separator?: string = ","
+  } = {}
 ): DataFrame<T>
 ```
 
@@ -13253,10 +13232,6 @@ $df.readCsv<T extends RowRecord = any>(
 - `[options]` (any): Parse and configuration options.
 
 ### Returns: `DataFrame`
-
-### Types Referenced
-- [`RowRecord`](#rowrecord)
-- [`ReadCSVOptions`](#readcsvoptions)
 
 ### Examples
 ```typescript
@@ -13289,12 +13264,18 @@ Parses JSON content (JSON or NDJSON) and loads it into a new DataFrame.
 ```typescript
 $df.readJson(
   content: string,
-  {
-    format = "json",
-    trimBeforeParse = true,
-    schema,
-    ...parseOpts
-  }: ReadJSONOptions = {}
+  options: {
+    allowPrimitives?: boolean = false,
+    format?: "json" | "ndjson" = "json",
+    ndjson?: {
+      maxLines?: number,
+      skipInvalidLines?: boolean = false,
+      skipLines?: number = 0
+    },
+    reviver?: Parameters<typeof JSON.parse>[1],
+    schema?: Record<string, RegisteredDataType>,
+    trimBeforeParse?: boolean = false
+  } = {}
 ): DataFrame<any>
 ```
 
@@ -13303,9 +13284,6 @@ $df.readJson(
 - `[options]` (any): Parse and configuration options.
 
 ### Returns: `A new DataFrame instance populated with the parsed records.`
-
-### Types Referenced
-- [`ReadJSONOptions`](#readjsonoptions)
 
 ### Examples
 ```typescript
@@ -13338,7 +13316,19 @@ Creates a column expression that generates a range of values. If mode is "cumula
 ```typescript
 $df.seqRange(
   value: any,
-  options: SeqRangeOptions = { strict: true }
+  options: {
+    dtype?: Int8Type | Int16Type | Int32Type | Int64Type | UInt8Type | UInt16Type | UInt32Type | UInt64Type | Float32Type | Float64Type | DecimalType | BooleanType | Utf8Type | BinaryType | NullType | ObjectType | DateType | DatetimeType | TimeType | DurationType | ArrayType<any> | StructType<any>,
+    endIndex?: number,
+    mode?: "constant" | "cumulative" | "independent" = "cumulative",
+    n?: number = the slice or DataFrame height,
+    name?: string,
+    pad?: boolean = false,
+    padValue?: any = null,
+    startIndex?: number = 0,
+    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any) = 1,
+    strict?: boolean = true,
+    truncate?: boolean = false
+  } = { strict: true }
 ): ColumnExpr<any>
 ```
 
@@ -13347,10 +13337,6 @@ $df.seqRange(
 - `[options]` (any): Configuration options.
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`SeqRangeOptions`](#seqrangeoptions)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -13384,8 +13370,8 @@ Packages multiple expressions into a structured object column.
 ### Signature
 ```typescript
 $df.struct(
-  fields: StructArg,
-  ...moreFields: IntoExpr[]
+  fields: StructFieldsArg | IntoExpr,
+  ...moreFields: (RegexPatternArg | IExpr)[]
 ): ColumnExpr<any>
 ```
 
@@ -13394,11 +13380,6 @@ $df.struct(
 - `moreFields` (...IntoExpr[]): Additional fields when a single expression is passed as the first parameter.
 
 ### Returns: `ColumnExpr<any>`
-
-### Types Referenced
-- [`StructArg`](#structarg)
-- [`IntoExpr`](#intoexpr)
-- [`ColumnExpr`](#columnexpr)
 
 ### Examples
 ```typescript
@@ -13429,16 +13410,13 @@ Provides conditional branch evaluations inside column expressions.
 
 ### Signature
 ```typescript
-$df.when(predicate: WhenArg): WhenThenChain
+$df.when(predicate: ComparisonArg | RowRecord | any[]): WhenThenChain
 ```
 
 ### Parameters
 - `predicate` (WhenArg): The boolean condition or expression.
 
 ### Returns: `WhenThenChain`
-
-### Types Referenced
-- [`WhenArg`](#whenarg)
 
 ### Examples
 ```typescript
@@ -13494,7 +13472,6 @@ export interface StructExprNamespace {
 ```typescript
 export type ArrayArg = IExpr | ValidScalarTypes[] | AnyTypedArray;
 ```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`AnyTypedArray`](#anytypedarray)
 
 ### BetweenOptions
 ```typescript
@@ -13510,19 +13487,16 @@ export interface BetweenOptions {
     closed?: ClosedBoundary;
 }
 ```
-References: [`ClosedBoundary`](#closedboundary)
 
 ### BooleanArg
 ```typescript
 export type BooleanArg = ColumnKeyArg<boolean> | IExpr | null | undefined;
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`IExpr`](#iexpr)
 
 ### ComparisonArg
 ```typescript
 export type ComparisonArg = ScalarArg | ArrayArg;
 ```
-References: [`ScalarArg`](#scalararg), [`ArrayArg`](#arrayarg)
 
 ### CountMatchesOptions
 ```typescript
@@ -13551,13 +13525,11 @@ export interface CountOptions {
 ```typescript
 export type EwmKurtOptions = EwmOptions;
 ```
-References: [`EwmOptions`](#ewmoptions)
 
 ### EwmMeanOptions
 ```typescript
 export type EwmMeanOptions = Omit<EwmOptions, "bias" | "fisher">;
 ```
-References: [`EwmOptions`](#ewmoptions)
 
 ### EwmOptions
 ```typescript
@@ -13609,31 +13581,26 @@ export interface EwmOptions extends CentralMomentsOptions, KurtosisOptions {
     span?: number;
 }
 ```
-References: [`CentralMomentsOptions`](#centralmomentsoptions), [`KurtosisOptions`](#kurtosisoptions), [`ColumnOrExprArg`](#columnorexprarg), [`DurationValueArg`](#durationvaluearg)
 
 ### EwmSkewOptions
 ```typescript
 export type EwmSkewOptions = Omit<EwmOptions, "fisher">;
 ```
-References: [`EwmOptions`](#ewmoptions)
 
 ### EwmStdOptions
 ```typescript
 export type EwmStdOptions = Omit<EwmOptions, "bias" | "fisher">;
 ```
-References: [`EwmOptions`](#ewmoptions)
 
 ### EwmSumOptions
 ```typescript
 export type EwmSumOptions = Omit<EwmOptions, "adjust" | "bias" | "fisher">;
 ```
-References: [`EwmOptions`](#ewmoptions)
 
 ### EwmVarOptions
 ```typescript
 export type EwmVarOptions = Omit<EwmOptions, "bias" | "fisher">;
 ```
-References: [`EwmOptions`](#ewmoptions)
 
 ### IsCloseOptions
 ```typescript
@@ -13672,13 +13639,11 @@ export interface IsNDistinctOptions {
 ```typescript
 export type NumericArg = number | bigint | IExpr | null;
 ```
-References: [`IExpr`](#iexpr)
 
 ### NumericSeriesArg
 ```typescript
 export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;
 ```
-References: [`NumericArg`](#numericarg), [`AnyTypedArray`](#anytypedarray)
 
 ### ProxyPropertyResolver
 ```typescript
@@ -13722,7 +13687,6 @@ export interface RankOptions {
 ```typescript
 export type ReplaceAllOptions = Omit<ReplaceOptions, "n">;
 ```
-References: [`ReplaceOptions`](#replaceoptions)
 
 ### RollingOptions
 ```typescript
@@ -13749,7 +13713,6 @@ export interface ShiftOptions {
 ```typescript
 export type StringArg = ColumnOrExprArg<string>;
 ```
-References: [`ColumnOrExprArg`](#columnorexprarg)
 
 ### StringDecodeOptions
 ```typescript
@@ -13761,7 +13724,6 @@ export interface StringDecodeOptions extends StringEncodeOptions {
     strict?: boolean;
 }
 ```
-References: [`StringEncodeOptions`](#stringencodeoptions)
 
 ### StringEncodeOptions
 ```typescript
@@ -13772,31 +13734,26 @@ export interface StringEncodeOptions {
     encoding: StringEncoding;
 }
 ```
-References: [`StringEncoding`](#stringencoding)
 
 ### StringReplacementArg
 ```typescript
 export type StringReplacementArg = string | StringReplacerFn;
 ```
-References: [`StringReplacerFn`](#stringreplacerfn)
 
 ### StringReplacementSeriesArg
 ```typescript
 export type StringReplacementSeriesArg = StringReplacementArg[];
 ```
-References: [`StringReplacementArg`](#stringreplacementarg)
 
 ### StringReplacerArg
 ```typescript
 export type StringReplacerArg = ValidScalarTypes | RowRecord;
 ```
-References: [`ValidScalarTypes`](#validscalartypes), [`RowRecord`](#rowrecord)
 
 ### StringReplacerFn
 ```typescript
 export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => string;
 ```
-References: [`StringReplacerArg`](#stringreplacerarg)
 
 ### ToStructOptions
 ```typescript
@@ -13821,13 +13778,11 @@ export type UnicodeNormalizeForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 ```typescript
 export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
 ```
-References: [`RowRecord`](#rowrecord), [`GroupedAggDelegatedOps`](#groupedaggdelegatedops)
 
 ### CastTargetArg
 ```typescript
 export type CastTargetArg = RegisteredDataType | DataFrameSchema;
 ```
-References: [`RegisteredDataType`](#registereddatatype), [`DataFrameSchema`](#dataframeschema)
 
 ### DataFrameColumns
 ```typescript
@@ -13838,7 +13793,6 @@ export type DataFrameColumns<T extends RowRecord> = {
     [K in keyof T]: ColumnData<T[K]>;
 };
 ```
-References: [`RowRecord`](#rowrecord), [`ColumnData`](#columndata)
 
 ### DataFrameShape
 ```typescript
@@ -13849,7 +13803,6 @@ export type DataFrameShape = [number, number];
 ```typescript
 export type DynamicIndexColumnArg<K extends string = string> = K | IntoExpr;
 ```
-References: [`IntoExpr`](#intoexpr)
 
 ### DynamicLabel
 ```typescript
@@ -13876,13 +13829,11 @@ export interface EqualsOptions {
 ```typescript
 export type FilterPredicate<T extends RowRecord = RowRecord> = IExpr | RowPredicateFn<T>;
 ```
-References: [`RowRecord`](#rowrecord), [`IExpr`](#iexpr), [`RowPredicateFn`](#rowpredicatefn)
 
 ### FilterPredicateArg
 ```typescript
 export type FilterPredicateArg<T extends RowRecord = RowRecord> = ColumnKeyArg<FilterPredicate<T>>;
 ```
-References: [`RowRecord`](#rowrecord), [`ColumnKeyArg`](#columnkeyarg), [`FilterPredicate`](#filterpredicate)
 
 ### GroupByDynamicOptions
 ```typescript
@@ -13940,7 +13891,6 @@ export interface GroupByDynamicOptions<T = any> {
     truncate?: boolean;
 }
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`ClosedBoundary`](#closedboundary), [`DurationValueArg`](#durationvaluearg), [`DynamicLabel`](#dynamiclabel), [`DynamicStartBy`](#dynamicstartby)
 
 ### GroupedAggDelegatedMethodNames
 ```typescript
@@ -13971,7 +13921,6 @@ export type GroupedAggDelegatedOps<T extends RowRecord = any> = {
     [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>;
 };
 ```
-References: [`RowRecord`](#rowrecord), [`GroupedAggDelegatedMethodNames`](#groupedaggdelegatedmethodnames), [`ColumnExpr`](#columnexpr)
 
 ### GroupMap
 ```typescript
@@ -13982,13 +13931,11 @@ export type GroupMap = Map<string, number[]>;
 ```typescript
 export type InsertColumnArg = IntoExpr | ArrayLike<any>;
 ```
-References: [`IntoExpr`](#intoexpr)
 
 ### IterRowResult
 ```typescript
 export type IterRowResult<T extends RowRecord = RowRecord> = any[] | T;
 ```
-References: [`RowRecord`](#rowrecord)
 
 ### IterRowsOptions
 ```typescript
@@ -14060,7 +14007,6 @@ export interface JoinAsofOptions<T = any, U extends RowRecord = any> {
     tolerance?: DurationValueArg;
 }
 ```
-References: [`RowRecord`](#rowrecord), [`ColumnKeyArg`](#columnkeyarg), [`JoinAsofStrategy`](#joinasofstrategy), [`JoinSuffixes`](#joinsuffixes), [`DurationValueArg`](#durationvaluearg)
 
 ### JoinAsofStrategy
 ```typescript
@@ -14114,7 +14060,6 @@ export interface JoinOptions<T = any, U extends RowRecord = any> {
     suffixes?: JoinSuffixes;
 }
 ```
-References: [`RowRecord`](#rowrecord), [`JoinType`](#jointype), [`ColumnKeyArg`](#columnkeyarg), [`JoinMaintainOrder`](#joinmaintainorder), [`JoinSuffixes`](#joinsuffixes)
 
 ### JoinSuffixes
 ```typescript
@@ -14130,7 +14075,6 @@ export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | 
 ```typescript
 export type JoinWhereArg = IntoExprArg | JoinWhereOptions;
 ```
-References: [`IntoExprArg`](#intoexprarg), [`JoinWhereOptions`](#joinwhereoptions)
 
 ### JoinWhereOptions
 ```typescript
@@ -14147,7 +14091,6 @@ export interface JoinWhereOptions {
     suffixes?: JoinSuffixes;
 }
 ```
-References: [`JoinWhereStrategy`](#joinwherestrategy), [`JoinSuffixes`](#joinsuffixes)
 
 ### JoinWhereStrategy
 ```typescript
@@ -14169,7 +14112,6 @@ export interface LimitOptions {
     offset?: number;
 }
 ```
-References: [`LimitPosition`](#limitposition)
 
 ### LimitPosition
 ```typescript
@@ -14180,7 +14122,6 @@ export type LimitPosition = "start" | "end";
 ```typescript
 export type PartitionByKey<T extends RowRecord = RowRecord> = ColumnOrExprArg<keyof T & string>;
 ```
-References: [`RowRecord`](#rowrecord), [`ColumnOrExprArg`](#columnorexprarg)
 
 ### PartitionByOptions
 ```typescript
@@ -14203,7 +14144,6 @@ export interface PartitionByOptions {
 ```typescript
 export type PartitionByResult<T extends RowRecord = RowRecord> = DataFrame<T>[] | Record<string, DataFrame<T>>;
 ```
-References: [`RowRecord`](#rowrecord)
 
 ### PivotOptions
 ```typescript
@@ -14226,25 +14166,21 @@ export interface PivotOptions<T> {
     values: keyof T;
 }
 ```
-References: [`AggFn`](#aggfn), [`ColumnKeyArg`](#columnkeyarg)
 
 ### RowPredicateFn
 ```typescript
 export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => any;
 ```
-References: [`RowRecord`](#rowrecord)
 
 ### SelectArg
 ```typescript
 export type SelectArg = ColumnKeyArg<SelectItem>;
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`SelectItem`](#selectitem)
 
 ### SelectItem
 ```typescript
 export type SelectItem = ColumnOrExprArg | RowRecord;
 ```
-References: [`ColumnOrExprArg`](#columnorexprarg), [`RowRecord`](#rowrecord)
 
 ### SortOptions
 ```typescript
@@ -14269,7 +14205,6 @@ export interface SortOptions<T = any> extends SortArrayOptions<T> {
     nullsLast?: boolean;
 }
 ```
-References: [`SortArrayOptions`](#sortarrayoptions), [`ColumnKeyArg`](#columnkeyarg), [`IExpr`](#iexpr)
 
 ### TransposeColumnNamesArg
 ```typescript
@@ -14295,7 +14230,6 @@ export interface TransposeOptions {
     includeHeader?: boolean;
 }
 ```
-References: [`TransposeColumnNamesArg`](#transposecolumnnamesarg)
 
 ### UnpivotOptions
 ```typescript
@@ -14320,7 +14254,6 @@ export interface UnpivotOptions<T> {
     varName?: string;
 }
 ```
-References: [`ColumnKeyArg`](#columnkeyarg)
 
 ### UnstackDirection
 ```typescript
@@ -14348,7 +14281,6 @@ export interface UnstackOptions {
     step: number;
 }
 ```
-References: [`UnstackDirection`](#unstackdirection)
 
 ### WritableStreamTarget
 ```typescript
@@ -14364,7 +14296,6 @@ export interface WritableStreamTarget {
 ```typescript
 export type WriteFileTargetArg = string | WritableStreamTarget;
 ```
-References: [`WritableStreamTarget`](#writablestreamtarget)
 
 ### WriteJSONOptions
 ```typescript
@@ -14380,7 +14311,6 @@ export interface WriteJSONOptions {
     replacerOptions?: SafeJsonReplacerOptions;
 }
 ```
-References: [`JSONFormat`](#jsonformat), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)
 
 ### RegisteredDataType
 ```typescript
@@ -14397,19 +14327,16 @@ export type RegisteredDataType =
 ```typescript
 export type CoalesceArg = ColumnKeyArg<ScalarArg>;
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`ScalarArg`](#scalararg)
 
 ### DurationArg
 ```typescript
 export type DurationArg = DurationOptions | string;
 ```
-References: [`DurationOptions`](#durationoptions)
 
 ### DurationComponentArg
 ```typescript
 export type DurationComponentArg = IntoExpr | number;
 ```
-References: [`IntoExpr`](#intoexpr)
 
 ### DurationOptions
 ```typescript
@@ -14432,13 +14359,11 @@ export interface DurationOptions {
     weeks?: DurationComponentArg;
 }
 ```
-References: [`DurationComponentArg`](#durationcomponentarg)
 
 ### HorizontalExpr
 ```typescript
 export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
 ```
-References: [`ColumnExpr`](#columnexpr)
 
 ### LitOptions
 ```typescript
@@ -14453,7 +14378,6 @@ export interface LitOptions {
     name?: string;
 }
 ```
-References: [`RegisteredDataType`](#registereddatatype)
 
 ### SeqRangeOptions
 ```typescript
@@ -14511,19 +14435,16 @@ export interface SeqRangeOptions {
     truncate?: boolean;
 }
 ```
-References: [`RegisteredDataType`](#registereddatatype), [`CumulativeStepContext`](#cumulativestepcontext), [`IndependentStepContext`](#independentstepcontext)
 
 ### StructArg
 ```typescript
 export type StructArg = StructFieldsArg | IntoExpr;
 ```
-References: [`StructFieldsArg`](#structfieldsarg), [`IntoExpr`](#intoexpr)
 
 ### WhenArg
 ```typescript
 export type WhenArg = ComparisonArg | RowRecord | any[];
 ```
-References: [`ComparisonArg`](#comparisonarg), [`RowRecord`](#rowrecord)
 
 ### AggFn
 ```typescript
@@ -14616,7 +14537,6 @@ export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
 ```typescript
 export type ColumnDict = Record<string, ColumnData>;
 ```
-References: [`ColumnData`](#columndata)
 
 ### ColumnIndexOrNameArg
 ```typescript
@@ -14632,7 +14552,6 @@ export type ColumnKeyArg<K = string> = K | K[];
 ```typescript
 export type ColumnOrExprArg<K = string> = K | IExpr;
 ```
-References: [`IExpr`](#iexpr)
 
 ### ColumnSelector
 ```typescript
@@ -14640,7 +14559,6 @@ export type ColumnSelector<T = any> =
     | ColumnKeyArg<keyof T | RegexPatternArg>
     | ColumnKeyArg<DataType | Function>;
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`RegexPatternArg`](#regexpatternarg)
 
 ### ConcatHow
 ```typescript
@@ -14651,13 +14569,11 @@ export type ConcatHow = "vertical" | "horizontal" | "diagonal";
 ```typescript
 export type ConcatItem = DataFrame<any> | DataFrameDataArg;
 ```
-References: [`DataFrameDataArg`](#dataframedataarg)
 
 ### ConcatItemsArg
 ```typescript
 export type ConcatItemsArg = ColumnKeyArg<ConcatItem>;
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`ConcatItem`](#concatitem)
 
 ### ConcatOptions
 ```typescript
@@ -14673,19 +14589,16 @@ export interface ConcatOptions {
     how?: ConcatHow;
 }
 ```
-References: [`HorizontalConcatOptions`](#horizontalconcatoptions), [`ConcatHow`](#concathow)
 
 ### DataFrameDataArg
 ```typescript
 export type DataFrameDataArg<T extends RowRecord = RowRecord> = T[] | ColumnDict;
 ```
-References: [`RowRecord`](#rowrecord), [`ColumnDict`](#columndict)
 
 ### DataFrameSchema
 ```typescript
 export type DataFrameSchema = Record<string, RegisteredDataType>;
 ```
-References: [`RegisteredDataType`](#registereddatatype)
 
 ### DateTimeParts
 ```typescript
@@ -14735,7 +14648,6 @@ export interface DayOffsetOptions extends IsBusinessDayOptions {
     roll?: BusinessDayRollType;
 }
 ```
-References: [`IsBusinessDayOptions`](#isbusinessdayoptions), [`BusinessDayRollType`](#businessdayrolltype)
 
 ### DurationValueArg
 ```typescript
@@ -14773,7 +14685,6 @@ export interface EscapeRegexOptions {
     mode?: EscapeRegexMode;
 }
 ```
-References: [`EscapeRegexMode`](#escaperegexmode)
 
 ### ExplodeOptions
 ```typescript
@@ -14795,7 +14706,6 @@ export interface ExplodeOptions {
 ```typescript
 export type ExprDict = Record<string, IntoExpr>;
 ```
-References: [`IntoExpr`](#intoexpr)
 
 ### ExtractManyOptions
 ```typescript
@@ -14827,7 +14737,6 @@ export interface ExtractManyOptions extends ExtractRegexEngineOptions {
     overlapping?: boolean;
 }
 ```
-References: [`ExtractRegexEngineOptions`](#extractregexengineoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg)
 
 ### ExtractRegexEngineOptions
 ```typescript
@@ -14849,13 +14758,11 @@ export interface ExtractRegexEngineOptions {
     groupIndex?: ColumnIndexOrNameArg;
 }
 ```
-References: [`ColumnIndexOrNameArg`](#columnindexornamearg)
 
 ### FillNullOptions
 ```typescript
 export type FillNullOptions = FillOptions;
 ```
-References: [`FillOptions`](#filloptions)
 
 ### FillNullStrategy
 ```typescript
@@ -14879,13 +14786,11 @@ export interface FillOptions {
     value?: ScalarArg;
 }
 ```
-References: [`FillNullStrategy`](#fillnullstrategy), [`ScalarArg`](#scalararg)
 
 ### FillTarget
 ```typescript
 export type FillTarget = "null" | "nan" | "all" | ScalarArg;
 ```
-References: [`ScalarArg`](#scalararg)
 
 ### FindManyOptions
 ```typescript
@@ -14927,7 +14832,6 @@ export interface FindManyOptions extends ExtractManyOptions, EscapeRegexOptions 
     overlapping?: boolean;
 }
 ```
-References: [`ExtractManyOptions`](#extractmanyoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg), [`EscapeRegexMode`](#escaperegexmode)
 
 ### FindOptions
 ```typescript
@@ -14959,7 +14863,6 @@ export interface FindOptions extends ExtractRegexEngineOptions, EscapeRegexOptio
     mode?: EscapeRegexMode;
 }
 ```
-References: [`ExtractRegexEngineOptions`](#extractregexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg), [`EscapeRegexMode`](#escaperegexmode)
 
 ### HorizontalConcatOptions
 ```typescript
@@ -15025,25 +14928,21 @@ export interface IExpr {
     _windowOp?: { type: string;[key: string]: any } | null;
 }
 ```
-References: [`AggFn`](#aggfn), [`RegisteredDataType`](#registereddatatype), [`ColumnDict`](#columndict), [`ColumnData`](#columndata), [`OpFn`](#opfn), [`ColumnOrExprArg`](#columnorexprarg)
 
 ### IntoExpr
 ```typescript
 export type IntoExpr = RegexPatternArg | IExpr;
 ```
-References: [`RegexPatternArg`](#regexpatternarg), [`IExpr`](#iexpr)
 
 ### IntoExprArg
 ```typescript
 export type IntoExprArg = ColumnKeyArg<IntoExpr>;
 ```
-References: [`ColumnKeyArg`](#columnkeyarg), [`IntoExpr`](#intoexpr)
 
 ### IntoExprSeriesArg
 ```typescript
 export type IntoExprSeriesArg = IntoExpr[];
 ```
-References: [`IntoExpr`](#intoexpr)
 
 ### IsBusinessDayOptions
 ```typescript
@@ -15084,13 +14983,11 @@ export interface KurtosisOptions extends SkewOptions {
     fisher?: boolean;
 }
 ```
-References: [`SkewOptions`](#skewoptions)
 
 ### OpFn
 ```typescript
 export type OpFn = (vals: ColumnData, columns: ColumnDict) => ColumnData;
 ```
-References: [`ColumnData`](#columndata), [`ColumnDict`](#columndict)
 
 ### ReadCSVOptions
 ```typescript
@@ -15126,7 +15023,6 @@ export interface ReadCSVOptions {
     separator?: string;
 }
 ```
-References: [`DataFrameSchema`](#dataframeschema)
 
 ### ReadJSONOptions
 ```typescript
@@ -15160,7 +15056,6 @@ export interface ReadJSONOptions extends JSONParseOptions {
     trimBeforeParse?: boolean;
 }
 ```
-References: [`JSONParseOptions`](#jsonparseoptions), [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions), [`DataFrameSchema`](#dataframeschema)
 
 ### RegexEngineOptions
 ```typescript
@@ -15187,13 +15082,11 @@ export type RegexPatternArg = string | RegExp;
 ```typescript
 export type RegexPatternSeriesArg = RegexPatternArg[];
 ```
-References: [`RegexPatternArg`](#regexpatternarg)
 
 ### RenameMappingArg
 ```typescript
 export type RenameMappingArg<T extends RowRecord = RowRecord> = Partial<Record<keyof T, string>>;
 ```
-References: [`RowRecord`](#rowrecord)
 
 ### ReplaceDateOptions
 ```typescript
@@ -15257,7 +15150,6 @@ export interface ReplaceManyOptions extends FindManyOptions {
     overlapping?: boolean;
 }
 ```
-References: [`FindManyOptions`](#findmanyoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg), [`EscapeRegexMode`](#escaperegexmode)
 
 ### ReplaceOptions
 ```typescript
@@ -15289,7 +15181,6 @@ export interface ReplaceOptions extends RegexEngineOptions, EscapeRegexOptions {
     n?: number;
 }
 ```
-References: [`RegexEngineOptions`](#regexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`EscapeRegexMode`](#escaperegexmode)
 
 ### RowRecord
 ```typescript
@@ -15300,7 +15191,6 @@ export type RowRecord = Record<string, any>;
 ```typescript
 export type ScalarArg = IExpr | ValidScalarTypes;
 ```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
 
 ### SkewOptions
 ```typescript
@@ -15332,7 +15222,6 @@ export interface SortArrayOptions<T = any> {
     nullsLast?: boolean;
 }
 ```
-References: [`ColumnKeyArg`](#columnkeyarg)
 
 ### SplitOptions
 ```typescript
@@ -15378,7 +15267,6 @@ export interface SplitOptions extends RegexEngineOptions, EscapeRegexOptions {
     strict?: boolean;
 }
 ```
-References: [`RegexEngineOptions`](#regexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`EscapeRegexMode`](#escaperegexmode)
 
 ### StrftimeOptions
 ```typescript
@@ -15429,7 +15317,6 @@ export interface StrptimeOptions {
 ```typescript
 export type StructFieldsArg = IntoExprSeriesArg | ExprDict;
 ```
-References: [`IntoExprSeriesArg`](#intoexprseriesarg), [`ExprDict`](#exprdict)
 
 ### TimeUnit
 ```typescript
@@ -15456,7 +15343,6 @@ export interface UtcOffsetOptions {
     type?: UtcOffsetType;
 }
 ```
-References: [`UtcOffsetFormat`](#utcoffsetformat), [`UtcOffsetType`](#utcoffsettype)
 
 ### UtcOffsetType
 ```typescript
@@ -15472,7 +15358,6 @@ export type ValidPrimitiveTypes = string | number | boolean | bigint | symbol | 
 ```typescript
 export type ValidScalarTypes = Exclude<ValidPrimitiveTypes, symbol> | Date | AnyTypedArray;
 ```
-References: [`ValidPrimitiveTypes`](#validprimitivetypes), [`AnyTypedArray`](#anytypedarray)
 
 ### ArrayCheckMode
 ```typescript
@@ -15511,7 +15396,6 @@ export type BigIntRange =
     }
     | BigIntRangeType;
 ```
-References: [`BigIntRangeType`](#bigintrangetype)
 
 ### BigIntRangeType
 ```typescript
@@ -15532,7 +15416,6 @@ export interface BinarySearchOptions<T = any> {
     side?: BinarySearchSide;
 }
 ```
-References: [`BinarySearchSide`](#binarysearchside)
 
 ### BinarySearchSide
 ```typescript
@@ -15603,7 +15486,6 @@ export interface DateDirective {
     _parseRegex?: string;
 }
 ```
-References: [`DateTimeParts`](#datetimeparts)
 
 ### DecimalOptions
 ```typescript
@@ -15709,7 +15591,6 @@ export interface FillSeqOptions extends FillSeqBaseOptions {
     step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);
 }
 ```
-References: [`FillSeqBaseOptions`](#fillseqbaseoptions), [`CumulativeStepContext`](#cumulativestepcontext), [`IndependentStepContext`](#independentstepcontext)
 
 ### FilterByMaskOptions
 ```typescript
@@ -15751,7 +15632,6 @@ export interface FloatOptions extends ParseNumberOptions {
     strictNumericString?: boolean;
 }
 ```
-References: [`ParseNumberOptions`](#parsenumberoptions), [`FloatPrecision`](#floatprecision)
 
 ### FloatPrecision
 ```typescript
@@ -15788,7 +15668,6 @@ export interface FormatCSVValueOptions {
     timeFormat?: string;
 }
 ```
-References: [`NumericFormatOptions`](#numericformatoptions), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)
 
 ### IndependentStepContext
 ```typescript
@@ -15824,7 +15703,6 @@ export interface IntOptions {
     range?: IntRange;
 }
 ```
-References: [`IntCoerceType`](#intcoercetype), [`IntRange`](#intrange)
 
 ### IntRange
 ```typescript
@@ -15837,7 +15715,6 @@ export type IntRange =
     }
     | IntRangeType;
 ```
-References: [`IntRangeType`](#intrangetype)
 
 ### IntRangeType
 ```typescript
@@ -15868,7 +15745,6 @@ export interface IsArrayOfTypeOptionsParams {
     mode?: ArrayCheckMode;
 }
 ```
-References: [`ArrayCheckMode`](#arraycheckmode)
 
 ### IsUnicodeSurrogateOptions
 ```typescript
@@ -15880,7 +15756,6 @@ export interface IsUnicodeSurrogateOptions {
     type?: UnicodeSurrogateType;
 }
 ```
-References: [`UnicodeSurrogateType`](#unicodesurrogatetype)
 
 ### IsValidBigIntOptions
 ```typescript
@@ -15892,7 +15767,6 @@ export interface IsValidBigIntOptions {
     range?: BigIntRange;
 }
 ```
-References: [`BigIntRange`](#bigintrange)
 
 ### JoinArrayOptions
 ```typescript
@@ -15961,7 +15835,6 @@ export interface JSONParseOptions {
     trimBeforeParse?: boolean;
 }
 ```
-References: [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions)
 
 ### JsonToken
 ```typescript
@@ -15980,7 +15853,6 @@ export interface JsonToken {
     type: JsonTokenType;
 }
 ```
-References: [`JsonTokenType`](#jsontokentype)
 
 ### JsonTokenType
 ```typescript
@@ -16069,7 +15941,6 @@ export interface ParseDurationStringOptions {
     to?: DurationUnit;
 }
 ```
-References: [`DurationUnit`](#durationunit)
 
 ### ParseNumberOptions
 ```typescript
@@ -16096,7 +15967,6 @@ export interface ParseNumberOptions extends NumericValidationOptions {
     strictNumericString?: boolean;
 }
 ```
-References: [`NumericValidationOptions`](#numericvalidationoptions)
 
 ### SafeJsonParseOptions
 ```typescript
@@ -16138,7 +16008,6 @@ export interface SafeJsonParseOptions<T = unknown, F = T> extends JSONParseOptio
     trimBeforeParse?: boolean;
 }
 ```
-References: [`JSONParseOptions`](#jsonparseoptions), [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions)
 
 ### SafeJsonReplacerOptions
 ```typescript
@@ -16290,7 +16159,6 @@ export interface StripCharsOptions {
     trimFirst?: boolean;
 }
 ```
-References: [`StripMode`](#stripmode)
 
 ### StripMode
 ```typescript
@@ -16311,7 +16179,6 @@ export interface ToDurationOptions extends ParseDurationStringOptions {
     to?: DurationUnit;
 }
 ```
-References: [`ParseDurationStringOptions`](#parsedurationstringoptions), [`DurationUnit`](#durationunit)
 
 ### ToValidArrayOptions
 ```typescript
@@ -16344,13 +16211,11 @@ export interface toValidBigIntOptions extends IsValidBigIntOptions {
     truncate?: boolean;
 }
 ```
-References: [`IsValidBigIntOptions`](#isvalidbigintoptions), [`BigIntRange`](#bigintrange)
 
 ### TypedArrayConstructor
 ```typescript
 export type TypedArrayConstructor<T extends AnyTypedArray = AnyTypedArray> = new (length: number) => T;
 ```
-References: [`AnyTypedArray`](#anytypedarray)
 
 ### UnicodeSurrogateType
 ```typescript
@@ -16432,4 +16297,3 @@ export interface WriteCSVOptions extends FormatCSVValueOptions {
     timeFormat?: string;
 }
 ```
-References: [`FormatCSVValueOptions`](#formatcsvvalueoptions), [`NumericFormatOptions`](#numericformatoptions), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)
