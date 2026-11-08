@@ -73,8 +73,8 @@
         "callExpression": ".arr.agg()",
         "signature": "$df.col(<column_name>).arr.agg(expr: IExpr)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 88,
-        "lineEnd": 90,
+        "lineStart": 100,
+        "lineEnd": 102,
         "subTypes": [
           "IExpr"
         ]
@@ -92,8 +92,8 @@
         "callExpression": ".arr.all()",
         "signature": "$df.col(<column_name>).arr.all()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 106,
-        "lineEnd": 108,
+        "lineStart": 118,
+        "lineEnd": 120,
         "subTypes": []
       },
       "any": {
@@ -109,8 +109,8 @@
         "callExpression": ".arr.any()",
         "signature": "$df.col(<column_name>).arr.any()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 124,
-        "lineEnd": 126,
+        "lineStart": 136,
+        "lineEnd": 138,
         "subTypes": []
       },
       "argMax": {
@@ -126,8 +126,8 @@
         "callExpression": ".arr.argMax()",
         "signature": "$df.col(<column_name>).arr.argMax()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 142,
-        "lineEnd": 144,
+        "lineStart": 154,
+        "lineEnd": 156,
         "subTypes": []
       },
       "argMin": {
@@ -143,8 +143,8 @@
         "callExpression": ".arr.argMin()",
         "signature": "$df.col(<column_name>).arr.argMin()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 160,
-        "lineEnd": 162,
+        "lineStart": 172,
+        "lineEnd": 174,
         "subTypes": []
       },
       "contains": {
@@ -164,11 +164,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "contains",
         "callExpression": ".arr.contains()",
-        "signature": "$df.col(<column_name>).arr.contains(item: any)",
+        "signature": "$df.col(<column_name>).arr.contains(item: ScalarArg)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 179,
-        "lineEnd": 181,
-        "subTypes": []
+        "lineStart": 191,
+        "lineEnd": 193,
+        "subTypes": [
+          "ScalarArg"
+        ]
       },
       "containsAll": {
         "desc": "Checks if nested lists contain all elements in items.",
@@ -178,7 +180,7 @@
         "params": [
           {
             "name": "items",
-            "desc": "Array of elements that must all be present."
+            "desc": "Array of elements or column expression that must all be present."
           }
         ],
         "returns": "ColumnExpression",
@@ -187,11 +189,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "containsAll",
         "callExpression": ".arr.containsAll()",
-        "signature": "$df.col(<column_name>).arr.containsAll(items: ArrayLike<any>)",
+        "signature": "$df.col(<column_name>).arr.containsAll(items: ArrayArg)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 198,
-        "lineEnd": 200,
-        "subTypes": []
+        "lineStart": 210,
+        "lineEnd": 215,
+        "subTypes": [
+          "ArrayArg"
+        ]
       },
       "containsAny": {
         "desc": "Checks if nested lists contain any element in items.",
@@ -201,7 +205,7 @@
         "params": [
           {
             "name": "items",
-            "desc": "Array of elements where at least one must be present."
+            "desc": "Array of elements or column expression where at least one must be present."
           }
         ],
         "returns": "ColumnExpression",
@@ -210,11 +214,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "containsAny",
         "callExpression": ".arr.containsAny()",
-        "signature": "$df.col(<column_name>).arr.containsAny(items: ArrayLike<any>)",
+        "signature": "$df.col(<column_name>).arr.containsAny(items: ArrayArg)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 217,
-        "lineEnd": 219,
-        "subTypes": []
+        "lineStart": 232,
+        "lineEnd": 237,
+        "subTypes": [
+          "ArrayArg"
+        ]
       },
       "countMatches": {
         "desc": "Counts occurrence frequency of item inside nested lists.",
@@ -237,11 +243,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "countMatches",
         "callExpression": ".arr.countMatches()",
-        "signature": "$df.col(<column_name>).arr.countMatches(\n  item: any,\n  options: UniqueArrayStatsOptions = {}\n)",
+        "signature": "$df.col(<column_name>).arr.countMatches(\n  item: ScalarArg,\n  options: UniqueArrayStatsOptions = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 237,
-        "lineEnd": 239,
+        "lineStart": 255,
+        "lineEnd": 257,
         "subTypes": [
+          "ScalarArg",
           "UniqueArrayStatsOptions"
         ]
       },
@@ -264,8 +271,8 @@
         "callExpression": ".arr.eval()",
         "signature": "$df.col(<column_name>).arr.eval(expr: IExpr)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 256,
-        "lineEnd": 266,
+        "lineStart": 274,
+        "lineEnd": 284,
         "subTypes": [
           "IExpr"
         ]
@@ -289,8 +296,8 @@
         "callExpression": ".arr.explode()",
         "signature": "$df.col(<column_name>).arr.explode(\n  {\n    emptyAsNull = true,\n    keepNulls = true\n  }: ExplodeOptions = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 283,
-        "lineEnd": 339,
+        "lineStart": 301,
+        "lineEnd": 357,
         "subTypes": [
           "ExplodeOptions"
         ]
@@ -314,8 +321,8 @@
         "callExpression": ".arr.filter()",
         "signature": "$df.col(<column_name>).arr.filter(expr: IExpr)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 356,
-        "lineEnd": 358,
+        "lineStart": 374,
+        "lineEnd": 376,
         "subTypes": [
           "IExpr"
         ]
@@ -339,8 +346,8 @@
         "callExpression": ".arr.first()",
         "signature": "$df.col(<column_name>).arr.first(nullOnOob: boolean = true)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 375,
-        "lineEnd": 377,
+        "lineStart": 393,
+        "lineEnd": 395,
         "subTypes": []
       },
       "gather": {
@@ -364,11 +371,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "gather",
         "callExpression": ".arr.gather()",
-        "signature": "$df.col(<column_name>).arr.gather(\n  indices: number | ArrayLike<number>,\n  nullOnOob: boolean = true\n)",
+        "signature": "$df.col(<column_name>).arr.gather(\n  indices: NumericSeriesArg,\n  nullOnOob: boolean = true\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 395,
-        "lineEnd": 408,
-        "subTypes": []
+        "lineStart": 413,
+        "lineEnd": 428,
+        "subTypes": [
+          "NumericSeriesArg"
+        ]
       },
       "gatherEvery": {
         "desc": "Gather element slices with custom steps.",
@@ -389,8 +398,8 @@
         "callExpression": ".arr.gatherEvery()",
         "signature": "$df.col(<column_name>).arr.gatherEvery(options: StepSliceArrayOptions = {})",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 425,
-        "lineEnd": 427,
+        "lineStart": 445,
+        "lineEnd": 447,
         "subTypes": [
           "StepSliceArrayOptions"
         ]
@@ -416,11 +425,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "get",
         "callExpression": ".arr.get()",
-        "signature": "$df.col(<column_name>).arr.get(\n  index: number,\n  nullOnOob: boolean = true\n)",
+        "signature": "$df.col(<column_name>).arr.get(\n  index: NumericArg,\n  nullOnOob: boolean = true\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 445,
-        "lineEnd": 447,
-        "subTypes": []
+        "lineStart": 465,
+        "lineEnd": 470,
+        "subTypes": [
+          "NumericArg"
+        ]
       },
       "join": {
         "desc": "Joins elements of list columns into a single string column.",
@@ -445,8 +456,8 @@
         "callExpression": ".arr.join()",
         "signature": "$df.col(<column_name>).arr.join(\n  separator: string = \",\",\n  options: JoinArrayOptions = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 465,
-        "lineEnd": 467,
+        "lineStart": 488,
+        "lineEnd": 490,
         "subTypes": [
           "JoinArrayOptions"
         ]
@@ -470,8 +481,8 @@
         "callExpression": ".arr.last()",
         "signature": "$df.col(<column_name>).arr.last(nullOnOob: boolean = true)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 484,
-        "lineEnd": 486,
+        "lineStart": 507,
+        "lineEnd": 509,
         "subTypes": []
       },
       "len": {
@@ -483,8 +494,8 @@
         "callExpression": ".arr.len()",
         "signature": "$df.col(<column_name>).arr.len()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 491,
-        "lineEnd": 493,
+        "lineStart": 514,
+        "lineEnd": 516,
         "subTypes": []
       },
       "lengths": {
@@ -500,8 +511,8 @@
         "callExpression": ".arr.lengths()",
         "signature": "$df.col(<column_name>).arr.lengths()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 509,
-        "lineEnd": 511,
+        "lineStart": 532,
+        "lineEnd": 534,
         "subTypes": []
       },
       "max": {
@@ -517,8 +528,8 @@
         "callExpression": ".arr.max()",
         "signature": "$df.col(<column_name>).arr.max()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 527,
-        "lineEnd": 529,
+        "lineStart": 550,
+        "lineEnd": 552,
         "subTypes": []
       },
       "mean": {
@@ -534,8 +545,8 @@
         "callExpression": ".arr.mean()",
         "signature": "$df.col(<column_name>).arr.mean()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 545,
-        "lineEnd": 547,
+        "lineStart": 568,
+        "lineEnd": 570,
         "subTypes": []
       },
       "median": {
@@ -551,8 +562,8 @@
         "callExpression": ".arr.median()",
         "signature": "$df.col(<column_name>).arr.median()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 563,
-        "lineEnd": 565,
+        "lineStart": 586,
+        "lineEnd": 588,
         "subTypes": []
       },
       "min": {
@@ -568,8 +579,8 @@
         "callExpression": ".arr.min()",
         "signature": "$df.col(<column_name>).arr.min()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 581,
-        "lineEnd": 583,
+        "lineStart": 604,
+        "lineEnd": 606,
         "subTypes": []
       },
       "mode": {
@@ -585,8 +596,8 @@
         "callExpression": ".arr.mode()",
         "signature": "$df.col(<column_name>).arr.mode()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 599,
-        "lineEnd": 601,
+        "lineStart": 622,
+        "lineEnd": 624,
         "subTypes": []
       },
       "nUnique": {
@@ -608,8 +619,8 @@
         "callExpression": ".arr.nUnique()",
         "signature": "$df.col(<column_name>).arr.nUnique(options: UniqueArrayStatsOptions = {})",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 618,
-        "lineEnd": 620,
+        "lineStart": 641,
+        "lineEnd": 643,
         "subTypes": [
           "UniqueArrayStatsOptions"
         ]
@@ -627,8 +638,8 @@
         "callExpression": ".arr.reverse()",
         "signature": "$df.col(<column_name>).arr.reverse()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 636,
-        "lineEnd": 638,
+        "lineStart": 659,
+        "lineEnd": 661,
         "subTypes": []
       },
       "shift": {
@@ -650,8 +661,8 @@
         "callExpression": ".arr.shift()",
         "signature": "$df.col(<column_name>).arr.shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 655,
-        "lineEnd": 657,
+        "lineStart": 678,
+        "lineEnd": 680,
         "subTypes": [
           "ShiftOptions"
         ]
@@ -679,8 +690,8 @@
         "callExpression": ".arr.slice()",
         "signature": "$df.col(<column_name>).arr.slice(\n  start?: number,\n  end?: number\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 675,
-        "lineEnd": 677,
+        "lineStart": 698,
+        "lineEnd": 700,
         "subTypes": []
       },
       "sort": {
@@ -702,8 +713,8 @@
         "callExpression": ".arr.sort()",
         "signature": "$df.col(<column_name>).arr.sort(options?: SortArrayOptions)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 694,
-        "lineEnd": 696,
+        "lineStart": 717,
+        "lineEnd": 719,
         "subTypes": [
           "SortArrayOptions"
         ]
@@ -733,11 +744,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "splice",
         "callExpression": ".arr.splice()",
-        "signature": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: any[]\n)",
+        "signature": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: ValidScalarTypes[]\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 715,
-        "lineEnd": 721,
-        "subTypes": []
+        "lineStart": 738,
+        "lineEnd": 745,
+        "subTypes": [
+          "ValidScalarTypes"
+        ]
       },
       "std": {
         "desc": "Returns sample standard deviation of elements inside each list.",
@@ -752,8 +765,8 @@
         "callExpression": ".arr.std()",
         "signature": "$df.col(<column_name>).arr.std()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 737,
-        "lineEnd": 739,
+        "lineStart": 761,
+        "lineEnd": 763,
         "subTypes": []
       },
       "sum": {
@@ -769,8 +782,8 @@
         "callExpression": ".arr.sum()",
         "signature": "$df.col(<column_name>).arr.sum()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 755,
-        "lineEnd": 757,
+        "lineStart": 779,
+        "lineEnd": 781,
         "subTypes": []
       },
       "toStruct": {
@@ -792,8 +805,8 @@
         "callExpression": ".arr.toStruct()",
         "signature": "$df.col(<column_name>).arr.toStruct(\n  {\n    upperBound,\n    fields\n  }: ToStructOptions = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 774,
-        "lineEnd": 820,
+        "lineStart": 798,
+        "lineEnd": 844,
         "subTypes": [
           "ToStructOptions"
         ]
@@ -817,8 +830,8 @@
         "callExpression": ".arr.unique()",
         "signature": "$df.col(<column_name>).arr.unique(options: UniqueArrayStatsOptions = {})",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 837,
-        "lineEnd": 839,
+        "lineStart": 861,
+        "lineEnd": 863,
         "subTypes": [
           "UniqueArrayStatsOptions"
         ]
@@ -836,8 +849,8 @@
         "callExpression": ".arr.variance()",
         "signature": "$df.col(<column_name>).arr.variance()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 855,
-        "lineEnd": 857,
+        "lineStart": 879,
+        "lineEnd": 881,
         "subTypes": []
       }
     },
@@ -3654,12 +3667,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "concat",
         "callExpression": ".str.concat()",
-        "signature": "$df.col(<column_name>).str.concat(other: string | IExpr)",
+        "signature": "$df.col(<column_name>).str.concat(other: StringArg)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 94,
         "lineEnd": 96,
         "subTypes": [
-          "IExpr"
+          "StringArg"
         ]
       },
       "contains": {
@@ -3679,11 +3692,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "contains",
         "callExpression": ".str.contains()",
-        "signature": "$df.col(<column_name>).str.contains(pattern: string | RegExp)",
+        "signature": "$df.col(<column_name>).str.contains(pattern: RegexPatternArg)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 113,
         "lineEnd": 115,
-        "subTypes": []
+        "subTypes": [
+          "RegexPatternArg"
+        ]
       },
       "containsAny": {
         "desc": "Checks if a string contains any of the search patterns.",
@@ -3702,11 +3717,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "containsAny",
         "callExpression": ".str.containsAny()",
-        "signature": "$df.col(<column_name>).str.containsAny(patterns: (string | RegExp)[])",
+        "signature": "$df.col(<column_name>).str.containsAny(patterns: RegexPatternSeriesArg)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 132,
         "lineEnd": 139,
-        "subTypes": []
+        "subTypes": [
+          "RegexPatternSeriesArg"
+        ]
       },
       "countMatches": {
         "desc": "Counts occurrences of a substring or regular expression match in each string element.",
@@ -3725,11 +3742,14 @@
         "category": "ColumnExpression",
         "propertyAccess": "countMatches",
         "callExpression": ".str.countMatches()",
-        "signature": "$df.col(<column_name>).str.countMatches(\n  pattern: string | RegExp | any,\n  options: { literal?: boolean } | boolean = {}\n)",
+        "signature": "$df.col(<column_name>).str.countMatches(\n  pattern: RegexPatternArg,\n  options: CountMatchesOptions = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 157,
         "lineEnd": 168,
-        "subTypes": []
+        "subTypes": [
+          "RegexPatternArg",
+          "CountMatchesOptions"
+        ]
       },
       "decode": {
         "desc": "Decodes hex or base64 encoded string column values into string.",
@@ -3901,11 +3921,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "extract",
         "callExpression": ".str.extract()",
-        "signature": "$df.col(<column_name>).str.extract(\n  pattern: RegExp | string,\n  options?: ExtractRegexEngineOptions\n)",
+        "signature": "$df.col(<column_name>).str.extract(\n  pattern: RegexPatternArg,\n  options?: ExtractRegexEngineOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 327,
         "lineEnd": 329,
         "subTypes": [
+          "RegexPatternArg",
           "ExtractRegexEngineOptions"
         ]
       },
@@ -3930,11 +3951,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "extractAll",
         "callExpression": ".str.extractAll()",
-        "signature": "$df.col(<column_name>).str.extractAll(\n  pattern: string | RegExp,\n  options?: ExtractRegexEngineOptions\n)",
+        "signature": "$df.col(<column_name>).str.extractAll(\n  pattern: RegexPatternArg,\n  options?: ExtractRegexEngineOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 348,
         "lineEnd": 350,
         "subTypes": [
+          "RegexPatternArg",
           "ExtractRegexEngineOptions"
         ]
       },
@@ -3955,11 +3977,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "extractGroups",
         "callExpression": ".str.extractGroups()",
-        "signature": "$df.col(<column_name>).str.extractGroups(\n  pattern: string | RegExp,\n  options: ExtractRegexEngineOptions = {}\n)",
+        "signature": "$df.col(<column_name>).str.extractGroups(\n  pattern: RegexPatternArg,\n  options: ExtractRegexEngineOptions = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 367,
         "lineEnd": 369,
         "subTypes": [
+          "RegexPatternArg",
           "ExtractRegexEngineOptions"
         ]
       },
@@ -3984,11 +4007,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "extractMany",
         "callExpression": ".str.extractMany()",
-        "signature": "$df.col(<column_name>).str.extractMany(\n  patterns: (string | RegExp)[],\n  options: ExtractManyOptions = {}\n)",
+        "signature": "$df.col(<column_name>).str.extractMany(\n  patterns: RegexPatternSeriesArg,\n  options: ExtractManyOptions = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 388,
         "lineEnd": 390,
         "subTypes": [
+          "RegexPatternSeriesArg",
           "ExtractManyOptions"
         ]
       },
@@ -4013,11 +4037,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "find",
         "callExpression": ".str.find()",
-        "signature": "$df.col(<column_name>).str.find(\n  value: string | RegExp,\n  options: FindOptions = {}\n)",
+        "signature": "$df.col(<column_name>).str.find(\n  value: RegexPatternArg,\n  options: FindOptions = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 410,
         "lineEnd": 412,
         "subTypes": [
+          "RegexPatternArg",
           "FindOptions"
         ]
       },
@@ -4042,11 +4067,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "findMany",
         "callExpression": ".str.findMany()",
-        "signature": "$df.col(<column_name>).str.findMany(\n  patterns: (string | RegExp)[],\n  options: FindManyOptions = {}\n)",
+        "signature": "$df.col(<column_name>).str.findMany(\n  patterns: RegexPatternSeriesArg,\n  options: FindManyOptions = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 431,
         "lineEnd": 433,
         "subTypes": [
+          "RegexPatternSeriesArg",
           "FindManyOptions"
         ]
       },
@@ -4262,11 +4288,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "normalize",
         "callExpression": ".str.normalize()",
-        "signature": "$df.col(<column_name>).str.normalize(form?: Parameters<typeof String.prototype.normalize>[0])",
+        "signature": "$df.col(<column_name>).str.normalize(form: UnicodeNormalizeForm = \"NFC\")",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 631,
         "lineEnd": 633,
-        "subTypes": []
+        "subTypes": [
+          "UnicodeNormalizeForm"
+        ]
       },
       "padEnd": {
         "desc": "Pads end of strings to specified width. Alias for rpad.",
@@ -4347,11 +4375,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "replace",
         "callExpression": ".str.replace()",
-        "signature": "$df.col(<column_name>).str.replace(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string),\n  options?: ReplaceOptions\n)",
+        "signature": "$df.col(<column_name>).str.replace(\n  pattern: RegexPatternArg,\n  replacement: StringReplacementArg,\n  options?: ReplaceOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 694,
         "lineEnd": 700,
         "subTypes": [
+          "RegexPatternArg",
+          "StringReplacementArg",
           "ReplaceOptions"
         ]
       },
@@ -4380,12 +4410,14 @@
         "category": "ColumnExpression",
         "propertyAccess": "replaceAll",
         "callExpression": ".str.replaceAll()",
-        "signature": "$df.col(<column_name>).str.replaceAll(\n  pattern: string | RegExp,\n  replacement: string | ((match: string, ...args: any[]) => string),\n  options?: Omit<ReplaceOptions, \"n\">\n)",
+        "signature": "$df.col(<column_name>).str.replaceAll(\n  pattern: RegexPatternArg,\n  replacement: StringReplacementArg,\n  options: ReplaceAllOptions = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 720,
         "lineEnd": 726,
         "subTypes": [
-          "ReplaceOptions"
+          "RegexPatternArg",
+          "StringReplacementArg",
+          "ReplaceAllOptions"
         ]
       },
       "replaceMany": {
@@ -4413,11 +4445,13 @@
         "category": "ColumnExpression",
         "propertyAccess": "replaceMany",
         "callExpression": ".str.replaceMany()",
-        "signature": "$df.col(<column_name>).str.replaceMany(\n  patterns: (string | RegExp)[] | Record<string, string>,\n  replacements?: (string | ((match: string, ...args: any[]) => string))[],\n  options?: ReplaceManyOptions\n)",
+        "signature": "$df.col(<column_name>).str.replaceMany(\n  patterns: RegexPatternSeriesArg | Record<string, string>,\n  replacements?: StringReplacementSeriesArg,\n  options?: ReplaceManyOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 747,
         "lineEnd": 753,
         "subTypes": [
+          "RegexPatternSeriesArg",
+          "StringReplacementSeriesArg",
           "ReplaceManyOptions"
         ]
       },
@@ -4565,11 +4599,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "stripChars",
         "callExpression": ".str.stripChars()",
-        "signature": "$df.col(<column_name>).str.stripChars(\n  characters?: string | RegExp,\n  options?: StripCharsOptions\n)",
+        "signature": "$df.col(<column_name>).str.stripChars(\n  characters?: RegexPatternArg,\n  options?: StripCharsOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 876,
         "lineEnd": 878,
         "subTypes": [
+          "RegexPatternArg",
           "StripCharsOptions"
         ]
       },
@@ -4594,11 +4629,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "stripCharsEnd",
         "callExpression": ".str.stripCharsEnd()",
-        "signature": "$df.col(<column_name>).str.stripCharsEnd(\n  characters?: string | RegExp,\n  options?: StripCharsOptions\n)",
+        "signature": "$df.col(<column_name>).str.stripCharsEnd(\n  characters?: RegexPatternArg,\n  options?: StripCharsOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 896,
         "lineEnd": 898,
         "subTypes": [
+          "RegexPatternArg",
           "StripCharsOptions"
         ]
       },
@@ -4623,11 +4659,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "stripCharsStart",
         "callExpression": ".str.stripCharsStart()",
-        "signature": "$df.col(<column_name>).str.stripCharsStart(\n  characters?: string | RegExp,\n  options?: StripCharsOptions\n)",
+        "signature": "$df.col(<column_name>).str.stripCharsStart(\n  characters?: RegexPatternArg,\n  options?: StripCharsOptions\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
         "lineStart": 916,
         "lineEnd": 918,
         "subTypes": [
+          "RegexPatternArg",
           "StripCharsOptions"
         ]
       },
@@ -5098,12 +5135,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "withFields",
         "callExpression": ".struct.withFields()",
-        "signature": "$df.col(<column_name>).struct.withFields(fields: IntoExpr[] | Record<string, IntoExpr>)",
+        "signature": "$df.col(<column_name>).struct.withFields(fields: StructFieldsArg)",
         "filePath": "columnExpressions/mixins/structExpr.ts",
         "lineStart": 86,
         "lineEnd": 131,
         "subTypes": [
-          "IntoExpr"
+          "StructFieldsArg"
         ]
       },
       "unnest": {
@@ -5144,8 +5181,8 @@
         "callExpression": ".dt.castTimeUnit()",
         "signature": "$df.col(<column_name>).dt.castTimeUnit(unit: DatetimeTimeUnit)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 68,
-        "lineEnd": 70,
+        "lineStart": 69,
+        "lineEnd": 71,
         "subTypes": [
           "DatetimeTimeUnit"
         ]
@@ -5163,8 +5200,8 @@
         "callExpression": ".dt.century()",
         "signature": "$df.col(<column_name>).dt.century(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 85,
-        "lineEnd": 87,
+        "lineStart": 86,
+        "lineEnd": 88,
         "subTypes": []
       },
       "convertTimeZone": {
@@ -5189,8 +5226,8 @@
         "callExpression": ".dt.convertTimeZone()",
         "signature": "$df.col(<column_name>).dt.convertTimeZone(timeZone: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 109,
-        "lineEnd": 118,
+        "lineStart": 110,
+        "lineEnd": 119,
         "subTypes": []
       },
       "date": {
@@ -5206,8 +5243,8 @@
         "callExpression": ".dt.date()",
         "signature": "$df.col(<column_name>).dt.date()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 133,
-        "lineEnd": 135,
+        "lineStart": 134,
+        "lineEnd": 136,
         "subTypes": []
       },
       "day": {
@@ -5229,8 +5266,8 @@
         "callExpression": ".dt.day()",
         "signature": "$df.col(<column_name>).dt.day(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 151,
-        "lineEnd": 153,
+        "lineStart": 152,
+        "lineEnd": 154,
         "subTypes": []
       },
       "daysInMonth": {
@@ -5252,8 +5289,8 @@
         "callExpression": ".dt.daysInMonth()",
         "signature": "$df.col(<column_name>).dt.daysInMonth(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 169,
-        "lineEnd": 171,
+        "lineStart": 170,
+        "lineEnd": 172,
         "subTypes": []
       },
       "epoch": {
@@ -5275,8 +5312,8 @@
         "callExpression": ".dt.epoch()",
         "signature": "$df.col(<column_name>).dt.epoch(unit: TimeUnit = \"ms\")",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 187,
-        "lineEnd": 189,
+        "lineStart": 188,
+        "lineEnd": 190,
         "subTypes": [
           "TimeUnit"
         ]
@@ -5300,8 +5337,8 @@
         "callExpression": ".dt.hour()",
         "signature": "$df.col(<column_name>).dt.hour(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 205,
-        "lineEnd": 207,
+        "lineStart": 206,
+        "lineEnd": 208,
         "subTypes": []
       },
       "isBusinessDay": {
@@ -5323,8 +5360,8 @@
         "callExpression": ".dt.isBusinessDay()",
         "signature": "$df.col(<column_name>).dt.isBusinessDay(options: IsBusinessDayOptions = {})",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 224,
-        "lineEnd": 226,
+        "lineStart": 225,
+        "lineEnd": 227,
         "subTypes": [
           "IsBusinessDayOptions"
         ]
@@ -5348,8 +5385,8 @@
         "callExpression": ".dt.isLeapYear()",
         "signature": "$df.col(<column_name>).dt.isLeapYear(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 242,
-        "lineEnd": 245,
+        "lineStart": 243,
+        "lineEnd": 246,
         "subTypes": []
       },
       "isoYear": {
@@ -5371,8 +5408,8 @@
         "callExpression": ".dt.isoYear()",
         "signature": "$df.col(<column_name>).dt.isoYear(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 262,
-        "lineEnd": 264,
+        "lineStart": 263,
+        "lineEnd": 265,
         "subTypes": []
       },
       "microsecond": {
@@ -5394,8 +5431,8 @@
         "callExpression": ".dt.microsecond()",
         "signature": "$df.col(<column_name>).dt.microsecond(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 280,
-        "lineEnd": 282,
+        "lineStart": 281,
+        "lineEnd": 283,
         "subTypes": []
       },
       "millennium": {
@@ -5411,8 +5448,8 @@
         "callExpression": ".dt.millennium()",
         "signature": "$df.col(<column_name>).dt.millennium(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 297,
-        "lineEnd": 299,
+        "lineStart": 298,
+        "lineEnd": 300,
         "subTypes": []
       },
       "millisecond": {
@@ -5434,8 +5471,8 @@
         "callExpression": ".dt.millisecond()",
         "signature": "$df.col(<column_name>).dt.millisecond(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 315,
-        "lineEnd": 317,
+        "lineStart": 316,
+        "lineEnd": 318,
         "subTypes": []
       },
       "minute": {
@@ -5457,8 +5494,8 @@
         "callExpression": ".dt.minute()",
         "signature": "$df.col(<column_name>).dt.minute(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 333,
-        "lineEnd": 335,
+        "lineStart": 334,
+        "lineEnd": 336,
         "subTypes": []
       },
       "month": {
@@ -5480,8 +5517,8 @@
         "callExpression": ".dt.month()",
         "signature": "$df.col(<column_name>).dt.month(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 351,
-        "lineEnd": 353,
+        "lineStart": 352,
+        "lineEnd": 354,
         "subTypes": []
       },
       "monthEnd": {
@@ -5497,8 +5534,8 @@
         "callExpression": ".dt.monthEnd()",
         "signature": "$df.col(<column_name>).dt.monthEnd()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 368,
-        "lineEnd": 370,
+        "lineStart": 369,
+        "lineEnd": 371,
         "subTypes": []
       },
       "monthStart": {
@@ -5514,8 +5551,8 @@
         "callExpression": ".dt.monthStart()",
         "signature": "$df.col(<column_name>).dt.monthStart()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 385,
-        "lineEnd": 387,
+        "lineStart": 386,
+        "lineEnd": 388,
         "subTypes": []
       },
       "nanosecond": {
@@ -5537,8 +5574,8 @@
         "callExpression": ".dt.nanosecond()",
         "signature": "$df.col(<column_name>).dt.nanosecond(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 403,
-        "lineEnd": 405,
+        "lineStart": 404,
+        "lineEnd": 406,
         "subTypes": []
       },
       "offsetDay": {
@@ -5562,11 +5599,12 @@
         "category": "ColumnExpression",
         "propertyAccess": "offsetDay",
         "callExpression": ".dt.offsetDay()",
-        "signature": "$df.col(<column_name>).dt.offsetDay(\n  n: number | any,\n  options: DayOffsetOptions = {}\n)",
+        "signature": "$df.col(<column_name>).dt.offsetDay(\n  n: NumericArg,\n  options: DayOffsetOptions = {}\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 423,
-        "lineEnd": 430,
+        "lineStart": 424,
+        "lineEnd": 431,
         "subTypes": [
+          "NumericArg",
           "DayOffsetOptions"
         ]
       },
@@ -5589,8 +5627,8 @@
         "callExpression": ".dt.ordinalDay()",
         "signature": "$df.col(<column_name>).dt.ordinalDay(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 446,
-        "lineEnd": 448,
+        "lineStart": 447,
+        "lineEnd": 449,
         "subTypes": []
       },
       "quarter": {
@@ -5612,8 +5650,8 @@
         "callExpression": ".dt.quarter()",
         "signature": "$df.col(<column_name>).dt.quarter(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 464,
-        "lineEnd": 466,
+        "lineStart": 465,
+        "lineEnd": 467,
         "subTypes": []
       },
       "replace": {
@@ -5635,8 +5673,8 @@
         "callExpression": ".dt.replace()",
         "signature": "$df.col(<column_name>).dt.replace(options: ReplaceDateOptions)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 485,
-        "lineEnd": 487,
+        "lineStart": 486,
+        "lineEnd": 488,
         "subTypes": [
           "ReplaceDateOptions"
         ]
@@ -5654,8 +5692,8 @@
         "callExpression": ".dt.second()",
         "signature": "$df.col(<column_name>).dt.second()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 502,
-        "lineEnd": 504,
+        "lineStart": 503,
+        "lineEnd": 505,
         "subTypes": []
       },
       "strftime": {
@@ -5680,8 +5718,8 @@
         "callExpression": ".dt.strftime()",
         "signature": "$df.col(<column_name>).dt.strftime(options: StrftimeOptions)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 523,
-        "lineEnd": 529,
+        "lineStart": 524,
+        "lineEnd": 530,
         "subTypes": [
           "StrftimeOptions"
         ]
@@ -5699,8 +5737,8 @@
         "callExpression": ".dt.time()",
         "signature": "$df.col(<column_name>).dt.time()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 544,
-        "lineEnd": 546,
+        "lineStart": 545,
+        "lineEnd": 547,
         "subTypes": []
       },
       "timestamp": {
@@ -5722,8 +5760,8 @@
         "callExpression": ".dt.timestamp()",
         "signature": "$df.col(<column_name>).dt.timestamp(unit: TimeUnit = \"ms\")",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 562,
-        "lineEnd": 564,
+        "lineStart": 563,
+        "lineEnd": 565,
         "subTypes": [
           "TimeUnit"
         ]
@@ -5741,8 +5779,8 @@
         "callExpression": ".dt.totalDays()",
         "signature": "$df.col(<column_name>).dt.totalDays()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 581,
-        "lineEnd": 583,
+        "lineStart": 582,
+        "lineEnd": 584,
         "subTypes": []
       },
       "totalHours": {
@@ -5758,8 +5796,8 @@
         "callExpression": ".dt.totalHours()",
         "signature": "$df.col(<column_name>).dt.totalHours()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 599,
-        "lineEnd": 601,
+        "lineStart": 600,
+        "lineEnd": 602,
         "subTypes": []
       },
       "totalMicroseconds": {
@@ -5775,8 +5813,8 @@
         "callExpression": ".dt.totalMicroseconds()",
         "signature": "$df.col(<column_name>).dt.totalMicroseconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 617,
-        "lineEnd": 619,
+        "lineStart": 618,
+        "lineEnd": 620,
         "subTypes": []
       },
       "totalMilliseconds": {
@@ -5792,8 +5830,8 @@
         "callExpression": ".dt.totalMilliseconds()",
         "signature": "$df.col(<column_name>).dt.totalMilliseconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 635,
-        "lineEnd": 637,
+        "lineStart": 636,
+        "lineEnd": 638,
         "subTypes": []
       },
       "totalMinutes": {
@@ -5809,8 +5847,8 @@
         "callExpression": ".dt.totalMinutes()",
         "signature": "$df.col(<column_name>).dt.totalMinutes()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 653,
-        "lineEnd": 655,
+        "lineStart": 654,
+        "lineEnd": 656,
         "subTypes": []
       },
       "totalNanoseconds": {
@@ -5826,8 +5864,8 @@
         "callExpression": ".dt.totalNanoseconds()",
         "signature": "$df.col(<column_name>).dt.totalNanoseconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 671,
-        "lineEnd": 673,
+        "lineStart": 672,
+        "lineEnd": 674,
         "subTypes": []
       },
       "totalSeconds": {
@@ -5843,8 +5881,8 @@
         "callExpression": ".dt.totalSeconds()",
         "signature": "$df.col(<column_name>).dt.totalSeconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 689,
-        "lineEnd": 691,
+        "lineStart": 690,
+        "lineEnd": 692,
         "subTypes": []
       },
       "utcOffset": {
@@ -5870,8 +5908,8 @@
         "callExpression": ".dt.utcOffset()",
         "signature": "$df.col(<column_name>).dt.utcOffset(\n  timeZone?: string,\n  options: UtcOffsetOptions = {}\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 712,
-        "lineEnd": 714,
+        "lineStart": 713,
+        "lineEnd": 715,
         "subTypes": [
           "UtcOffsetOptions"
         ]
@@ -5895,8 +5933,8 @@
         "callExpression": ".dt.week()",
         "signature": "$df.col(<column_name>).dt.week(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 730,
-        "lineEnd": 732,
+        "lineStart": 731,
+        "lineEnd": 733,
         "subTypes": []
       },
       "weekday": {
@@ -5918,8 +5956,8 @@
         "callExpression": ".dt.weekday()",
         "signature": "$df.col(<column_name>).dt.weekday(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 748,
-        "lineEnd": 750,
+        "lineStart": 749,
+        "lineEnd": 751,
         "subTypes": []
       },
       "year": {
@@ -5941,8 +5979,8 @@
         "callExpression": ".dt.year()",
         "signature": "$df.col(<column_name>).dt.year(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 766,
-        "lineEnd": 768,
+        "lineStart": 767,
+        "lineEnd": 769,
         "subTypes": []
       }
     }
@@ -8274,10 +8312,11 @@
       "filePath": "columnExpressions/types.ts",
       "lineStart": 22,
       "lineEnd": 22,
-      "desc": "Operand for bivariate or series-level operations (corr, cov, dot, etc.). Accepts a numeric column expression, numeric literal, or numeric array.",
-      "signature": "export type NumericSeriesArg = NumericArg | number[];",
+      "desc": "Operand for bivariate or series-level operations (corr, cov, dot, etc.). Accepts a numeric column expression, numeric literal, numeric array, or numeric typed array.",
+      "signature": "export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;",
       "subTypes": [
-        "NumericArg"
+        "NumericArg",
+        "AnyTypedArray"
       ]
     },
     "BooleanArg": {
@@ -8290,21 +8329,158 @@
         "IExpr"
       ]
     },
-    "ComparisonArg": {
+    "ScalarArg": {
       "filePath": "columnExpressions/types.ts",
       "lineStart": 34,
       "lineEnd": 34,
-      "desc": "Operand for equality and comparison expressions (eq, ne, eqMissing, neMissing). Accepts another column expression, valid primitive scalar, or an array of scalar values.",
-      "signature": "export type ComparisonArg = IExpr | ValidScalarTypes | ValidScalarTypes[] | null | undefined;",
+      "desc": "Operand for scalar-level operations (contains, countMatches, etc.). Accepts another column expression or any valid scalar value.",
+      "signature": "export type ScalarArg = IExpr | ValidScalarTypes;",
       "subTypes": [
         "IExpr",
         "ValidScalarTypes"
       ]
     },
+    "ArrayArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 40,
+      "lineEnd": 40,
+      "desc": "Operand for array-level operations (containsAll, containsAny, etc.). Accepts an array of scalar values, a typed array, or another column expression.",
+      "signature": "export type ArrayArg = IExpr | ValidScalarTypes[] | AnyTypedArray;",
+      "subTypes": [
+        "IExpr",
+        "ValidScalarTypes",
+        "AnyTypedArray"
+      ]
+    },
+    "ComparisonArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 46,
+      "lineEnd": 46,
+      "desc": "Operand for equality and comparison expressions (eq, ne, eqMissing, neMissing). Accepts another column expression, valid primitive scalar, or an array of scalar values.",
+      "signature": "export type ComparisonArg = ScalarArg | ArrayArg;",
+      "subTypes": [
+        "ScalarArg",
+        "ArrayArg"
+      ]
+    },
+    "StringArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 52,
+      "lineEnd": 52,
+      "desc": "Operand for string concatenation or text operations. Accepts a string literal or another column expression.",
+      "signature": "export type StringArg = string | IExpr;",
+      "subTypes": [
+        "IExpr"
+      ]
+    },
+    "RegexPatternArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 58,
+      "lineEnd": 58,
+      "desc": "Operand for substring matching or regular expression evaluation. Accepts a substring string or a compiled RegExp object.",
+      "signature": "export type RegexPatternArg = string | RegExp;",
+      "subTypes": []
+    },
+    "RegexPatternSeriesArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 64,
+      "lineEnd": 64,
+      "desc": "Operand for multi-pattern regular expression matching. Accepts an array of substring strings or compiled RegExp objects.",
+      "signature": "export type RegexPatternSeriesArg = RegexPatternArg[];",
+      "subTypes": [
+        "RegexPatternArg"
+      ]
+    },
+    "StringReplacerArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 70,
+      "lineEnd": 70,
+      "desc": "Arguments passed to an ECMAScript string replacer callback after the matched substring. Reuses RowRecord for named groups object, with scalar types for capture strings and offsets.",
+      "signature": "export type StringReplacerArg = ValidScalarTypes | RowRecord;",
+      "subTypes": [
+        "ValidScalarTypes",
+        "RowRecord"
+      ]
+    },
+    "StringReplacerFn": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 75,
+      "lineEnd": 75,
+      "desc": "Dynamic callback for string replacements following ECMAScript String.prototype.replace standards.",
+      "signature": "export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => string;",
+      "subTypes": [
+        "StringReplacerArg"
+      ]
+    },
+    "StringReplacementArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 81,
+      "lineEnd": 81,
+      "desc": "Operand for string replacement operations (replace, replaceAll). Accepts a static replacement string or a dynamic replacer callback function.",
+      "signature": "export type StringReplacementArg = string | StringReplacerFn;",
+      "subTypes": [
+        "StringReplacerFn"
+      ]
+    },
+    "StringReplacementSeriesArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 87,
+      "lineEnd": 87,
+      "desc": "Operand for multiple string replacements (replaceMany). Accepts an array of replacement strings or dynamic replacer callback functions.",
+      "signature": "export type StringReplacementSeriesArg = StringReplacementArg[];",
+      "subTypes": [
+        "StringReplacementArg"
+      ]
+    },
+    "ReplaceAllOptions": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 93,
+      "lineEnd": 93,
+      "desc": "Configuration options for replacing all matching occurrences in a string. Omits the count limit `n` option present in `ReplaceOptions`.",
+      "signature": "export type ReplaceAllOptions = Omit<ReplaceOptions, \"n\">;",
+      "subTypes": [
+        "ReplaceOptions"
+      ]
+    },
+    "CountMatchesOptions": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 98,
+      "lineEnd": 104,
+      "desc": "Configuration options for counting matching pattern occurrences in a string.",
+      "signature": "export interface CountMatchesOptions {\n    /**\n     * If true, treats the pattern as a literal string rather than a regular expression.\n     * @default false\n     */\n    literal?: boolean;\n}",
+      "properties": {
+        "literal": {
+          "type": "boolean",
+          "optional": true,
+          "desc": "If true, treats the pattern as a literal string rather than a regular expression.",
+          "default": "false"
+        }
+      },
+      "subTypes": []
+    },
+    "UnicodeNormalizeForm": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 113,
+      "lineEnd": 113,
+      "desc": "Unicode normalization form. - `\"NFC\"`: Canonical Decomposition, followed by Canonical Composition (default) - `\"NFD\"`: Canonical Decomposition - `\"NFKC\"`: Compatibility Decomposition, followed by Canonical Composition - `\"NFKD\"`: Compatibility Decomposition",
+      "signature": "export type UnicodeNormalizeForm = \"NFC\" | \"NFD\" | \"NFKC\" | \"NFKD\";",
+      "subTypes": []
+    },
+    "StructFieldsArg": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 119,
+      "lineEnd": 119,
+      "desc": "Operand for struct field updates and additions (struct.withFields, $df.struct). Accepts an array of named expressions or an object dictionary mapping field names to expressions.",
+      "signature": "export type StructFieldsArg = IntoExprSeriesArg | ExprDict;",
+      "subTypes": [
+        "IntoExprSeriesArg",
+        "ExprDict"
+      ]
+    },
     "IsNDistinctOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 38,
-      "lineEnd": 45,
+      "lineStart": 124,
+      "lineEnd": 131,
       "signature": "export interface IsNDistinctOptions {\n    /**\n     * If true (default), returns null when index is out of bounds.\n     * If false, throws an error if index is out of bounds.\n     * @default true\n     */\n    nullOnOob?: boolean;\n}",
       "properties": {
         "nullOnOob": {
@@ -8318,8 +8494,8 @@
     },
     "RankOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 47,
-      "lineEnd": 54,
+      "lineStart": 133,
+      "lineEnd": 140,
       "signature": "export interface RankOptions {\n    /**\n     * When true, ranks are consecutive integers without gaps between tied values (1, 2, 2, 3).\n     * When false (default), ranks have gaps for tied values (1, 2, 2, 4).\n     * @default false\n     */\n    dense?: boolean;\n}",
       "properties": {
         "dense": {
@@ -8333,8 +8509,8 @@
     },
     "IsCloseOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 56,
-      "lineEnd": 60,
+      "lineStart": 142,
+      "lineEnd": 146,
       "signature": "export interface IsCloseOptions {\n    absTol?: number;\n    relTol?: number;\n    nansEqual?: boolean;\n}",
       "properties": {
         "absTol": {
@@ -8357,8 +8533,8 @@
     },
     "CountOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 63,
-      "lineEnd": 70,
+      "lineStart": 148,
+      "lineEnd": 155,
       "signature": "export interface CountOptions {\n    /**\n     * Whether to include `null`, `undefined`, or `NaN` values in the count.\n     * When `false`, counts only non-null, valid elements.\n     * @default false\n     */\n    includeNulls?: boolean;\n}",
       "properties": {
         "includeNulls": {
@@ -8372,16 +8548,16 @@
     },
     "ClosedBoundary": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 75,
-      "lineEnd": 75,
+      "lineStart": 160,
+      "lineEnd": 160,
       "desc": "Inclusivity mode for interval boundaries.",
       "signature": "export type ClosedBoundary = \"both\" | \"left\" | \"right\" | \"none\";",
       "subTypes": []
     },
     "BetweenOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 77,
-      "lineEnd": 87,
+      "lineStart": 162,
+      "lineEnd": 172,
       "signature": "export interface BetweenOptions {\n    /**\n     * Controls boundary inclusivity:\n     * - `\"both\"`: `lower <= x <= upper` (default)\n     * - `\"left\"`: `lower <= x < upper`\n     * - `\"right\"`: `lower < x <= upper`\n     * - `\"none\"`: `lower < x < upper`\n     * @default \"both\"\n     */\n    closed?: ClosedBoundary;\n}",
       "properties": {
         "closed": {
@@ -8397,8 +8573,8 @@
     },
     "ProxyPropertyResolver": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 89,
-      "lineEnd": 89,
+      "lineStart": 174,
+      "lineEnd": 174,
       "signature": "export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => any;",
       "subTypes": []
     },
@@ -9227,17 +9403,37 @@
         "IExpr"
       ]
     },
+    "IntoExprSeriesArg": {
+      "filePath": "types.ts",
+      "lineStart": 56,
+      "lineEnd": 56,
+      "desc": "Operand for multiple column expressions. Accepts an array of column expressions, names, or regex selectors.",
+      "signature": "export type IntoExprSeriesArg = IntoExpr[];",
+      "subTypes": [
+        "IntoExpr"
+      ]
+    },
+    "ExprDict": {
+      "filePath": "types.ts",
+      "lineStart": 61,
+      "lineEnd": 61,
+      "desc": "Dictionary mapping field or column names to column expressions.",
+      "signature": "export type ExprDict = Record<string, IntoExpr>;",
+      "subTypes": [
+        "IntoExpr"
+      ]
+    },
     "ColumnSelector": {
       "filePath": "types.ts",
-      "lineStart": 52,
-      "lineEnd": 59,
+      "lineStart": 63,
+      "lineEnd": 70,
       "signature": "export type ColumnSelector<T = any> =\n    | keyof T\n    | string\n    | RegExp\n    | DataType\n    | Function\n    | (keyof T | string | RegExp)[]\n    | (DataType | Function)[];",
       "subTypes": []
     },
     "IExpr": {
       "filePath": "types.ts",
-      "lineStart": 61,
-      "lineEnd": 88,
+      "lineStart": 72,
+      "lineEnd": 99,
       "signature": "export interface IExpr {\n    _ops: OpFn[];\n    _colName?: string;\n    _outputName?: string;\n    _isLiteral?: boolean;\n    _literalValue?: any;\n    _aggFn?: AggFn<any> | null;\n    _castType?: RegisteredDataType;\n    _binaryMeta?: { _left: any; _right: any };\n    _groupingOpsIndex?: number;\n    _partitionOpsIndex?: number;\n    _partitionBy?: (string | IExpr)[] | null;\n    _windowOp?: { type: string;[key: string]: any } | null;\n    _isWindow?: boolean;\n    _baseExpr?: IExpr;\n    _fieldName?: string;\n    _isUnnest?: boolean;\n    _branchOperands?: any[];\n    _isGlobalAgg?(): boolean;\n    alias(name: string): this;\n    cast(dataType: RegisteredDataType, options?: CastOptions): this;\n    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;\n    _evaluate(columns: ColumnDict, height: number): ColumnData;\n    _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;\n    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;\n    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;\n    _debug(label?: string): this;\n}",
       "properties": {
         "_ops": {
@@ -9337,29 +9533,29 @@
     },
     "TimeUnit": {
       "filePath": "types.ts",
-      "lineStart": 90,
-      "lineEnd": 90,
+      "lineStart": 101,
+      "lineEnd": 101,
       "signature": "export type TimeUnit = \"s\" | \"ms\" | \"us\" | \"ns\";",
       "subTypes": []
     },
     "DatetimeTimeUnit": {
       "filePath": "types.ts",
-      "lineStart": 91,
-      "lineEnd": 91,
+      "lineStart": 102,
+      "lineEnd": 102,
       "signature": "export type DatetimeTimeUnit = \"ms\" | \"us\" | \"ns\";",
       "subTypes": []
     },
     "DurationUnit": {
       "filePath": "types.ts",
-      "lineStart": 92,
-      "lineEnd": 92,
+      "lineStart": 103,
+      "lineEnd": 103,
       "signature": "export type DurationUnit = \"ns\" | \"us\" | \"ms\" | \"s\" | \"m\" | \"h\" | \"d\" | \"w\" | \"mo\" | \"q\" | \"y\" | \"i\";",
       "subTypes": []
     },
     "DurationInterval": {
       "filePath": "types.ts",
-      "lineStart": 95,
-      "lineEnd": 102,
+      "lineStart": 106,
+      "lineEnd": 113,
       "signature": "export interface DurationInterval {\n    months: number;\n    days: number;\n    ms: number;\n    indexUnits: number;\n    isCalendar: boolean;\n    isIndex: boolean;\n}",
       "properties": {
         "months": {
@@ -9397,8 +9593,8 @@
     },
     "DurationOptions": {
       "filePath": "types.ts",
-      "lineStart": 104,
-      "lineEnd": 113,
+      "lineStart": 115,
+      "lineEnd": 124,
       "signature": "export interface DurationOptions {\n    weeks?: IntoExpr | number;\n    days?: IntoExpr | number;\n    hours?: IntoExpr | number;\n    minutes?: IntoExpr | number;\n    seconds?: IntoExpr | number;\n    milliseconds?: IntoExpr | number;\n    microseconds?: IntoExpr | number;\n    nanoseconds?: IntoExpr | number;\n}",
       "properties": {
         "weeks": {
@@ -9448,8 +9644,8 @@
     },
     "ParseDurationStringOptions": {
       "filePath": "types.ts",
-      "lineStart": 115,
-      "lineEnd": 117,
+      "lineStart": 126,
+      "lineEnd": 128,
       "signature": "export interface ParseDurationStringOptions {\n    to?: DurationUnit;\n}",
       "properties": {
         "to": {
@@ -9464,8 +9660,8 @@
     },
     "ToDurationOptions": {
       "filePath": "types.ts",
-      "lineStart": 119,
-      "lineEnd": 121,
+      "lineStart": 130,
+      "lineEnd": 132,
       "signature": "export interface ToDurationOptions extends ParseDurationStringOptions {\n    fallback?: number;\n}",
       "properties": {
         "fallback": {
@@ -9480,8 +9676,8 @@
     },
     "StrptimeOptions": {
       "filePath": "types.ts",
-      "lineStart": 123,
-      "lineEnd": 127,
+      "lineStart": 134,
+      "lineEnd": 138,
       "signature": "export interface StrptimeOptions {\n    format: string;\n    strict?: boolean;\n    defaultTimeZone?: string;\n}",
       "properties": {
         "format": {
@@ -9504,8 +9700,8 @@
     },
     "StrftimeOptions": {
       "filePath": "types.ts",
-      "lineStart": 129,
-      "lineEnd": 133,
+      "lineStart": 140,
+      "lineEnd": 144,
       "signature": "export interface StrftimeOptions {\n    format: string;\n    locale?: string;\n    timeZone?: string;\n}",
       "properties": {
         "format": {
@@ -9528,15 +9724,15 @@
     },
     "StringEncoding": {
       "filePath": "types.ts",
-      "lineStart": 135,
-      "lineEnd": 135,
+      "lineStart": 146,
+      "lineEnd": 146,
       "signature": "export type StringEncoding = \"hex\" | \"base64\";",
       "subTypes": []
     },
     "StringEncodeOptions": {
       "filePath": "types.ts",
-      "lineStart": 137,
-      "lineEnd": 139,
+      "lineStart": 148,
+      "lineEnd": 150,
       "signature": "export interface StringEncodeOptions {\n    encoding: StringEncoding;\n}",
       "properties": {
         "encoding": {
@@ -9551,8 +9747,8 @@
     },
     "StringDecodeOptions": {
       "filePath": "types.ts",
-      "lineStart": 141,
-      "lineEnd": 143,
+      "lineStart": 152,
+      "lineEnd": 154,
       "signature": "export interface StringDecodeOptions extends StringEncodeOptions {\n    strict?: boolean;\n}",
       "properties": {
         "strict": {
@@ -9567,15 +9763,15 @@
     },
     "EscapeRegexMode": {
       "filePath": "types.ts",
-      "lineStart": 145,
-      "lineEnd": 145,
+      "lineStart": 156,
+      "lineEnd": 156,
       "signature": "export type EscapeRegexMode = \"tc39\" | \"nonAlphanumericAscii\";",
       "subTypes": []
     },
     "EscapeRegexOptions": {
       "filePath": "types.ts",
-      "lineStart": 147,
-      "lineEnd": 154,
+      "lineStart": 158,
+      "lineEnd": 165,
       "signature": "export interface EscapeRegexOptions {\n    /**\n     * Escaping mode:\n     * - \"tc39\" (default): TC39 ECMAScript standard specification (syntax metacharacters + set operators).\n     * - \"nonAlphanumericAscii\": Escapes all non-alphanumeric ASCII characters ([^A-Za-z0-9]) matching Polars / Rust regex::escape.\n     */\n    mode?: EscapeRegexMode;\n}",
       "properties": {
         "mode": {
@@ -9590,8 +9786,8 @@
     },
     "ExtractRegexEngineOptions": {
       "filePath": "types.ts",
-      "lineStart": 157,
-      "lineEnd": 170,
+      "lineStart": 168,
+      "lineEnd": 181,
       "signature": "export interface ExtractRegexEngineOptions {\n    /**\n     * Index or name of the capture group to extract.\n     */\n    groupIndex?: number | string;\n    /**\n     * Whether matching should be case-insensitive for ASCII characters.\n     */\n    asciiCaseInsensitive?: boolean;\n    /**\n     * Whether to return all matches (global flag). Defaults to false.\n     */\n    global?: boolean;\n}",
       "properties": {
         "groupIndex": {
@@ -9615,8 +9811,8 @@
     },
     "RegexEngineOptions": {
       "filePath": "types.ts",
-      "lineStart": 172,
-      "lineEnd": 172,
+      "lineStart": 183,
+      "lineEnd": 183,
       "signature": "export type RegexEngineOptions = Omit<ExtractRegexEngineOptions, \"groupIndex\">;",
       "subTypes": [
         "ExtractRegexEngineOptions"
@@ -9624,8 +9820,8 @@
     },
     "ExtractManyOptions": {
       "filePath": "types.ts",
-      "lineStart": 174,
-      "lineEnd": 185,
+      "lineStart": 185,
+      "lineEnd": 196,
       "signature": "export interface ExtractManyOptions extends ExtractRegexEngineOptions {\n    /**\n     * Whether overlapping matches are allowed.\n     */\n    overlapping?: boolean;\n    /**\n     * Guarantees in case there are overlapping matches that the leftmost match is used.\n     * In case there are multiple candidates for the leftmost match, the pattern which comes\n     * first in patterns is used. May not be used together with overlapping = true.\n     */\n    leftmost?: boolean;\n}",
       "properties": {
         "overlapping": {
@@ -9645,8 +9841,8 @@
     },
     "FindOptions": {
       "filePath": "types.ts",
-      "lineStart": 187,
-      "lineEnd": 192,
+      "lineStart": 198,
+      "lineEnd": 203,
       "signature": "export interface FindOptions extends ExtractRegexEngineOptions, EscapeRegexOptions {\n    /**\n     * Treat pattern as literal string instead of regex.\n     */\n    literal?: boolean;\n}",
       "properties": {
         "literal": {
@@ -9662,8 +9858,8 @@
     },
     "FindManyOptions": {
       "filePath": "types.ts",
-      "lineStart": 194,
-      "lineEnd": 199,
+      "lineStart": 205,
+      "lineEnd": 210,
       "signature": "export interface FindManyOptions extends ExtractManyOptions, EscapeRegexOptions {\n    /**\n     * Treat patterns as literal strings instead of regex.\n     */\n    literal?: boolean;\n}",
       "properties": {
         "literal": {
@@ -9679,8 +9875,8 @@
     },
     "ReplaceOptions": {
       "filePath": "types.ts",
-      "lineStart": 201,
-      "lineEnd": 210,
+      "lineStart": 212,
+      "lineEnd": 221,
       "signature": "export interface ReplaceOptions extends RegexEngineOptions, EscapeRegexOptions {\n    /**\n     * Treat pattern as a literal string instead of regex.\n     */\n    literal?: boolean;\n    /**\n     * Number of occurrences to replace. Use -1 or Infinity to replace all. Defaults to 1.\n     */\n    n?: number;\n}",
       "properties": {
         "literal": {
@@ -9702,8 +9898,8 @@
     },
     "ReplaceManyOptions": {
       "filePath": "types.ts",
-      "lineStart": 212,
-      "lineEnd": 212,
+      "lineStart": 223,
+      "lineEnd": 223,
       "signature": "export interface ReplaceManyOptions extends FindManyOptions { }",
       "subTypes": [
         "FindManyOptions"
@@ -9711,8 +9907,8 @@
     },
     "SplitOptions": {
       "filePath": "types.ts",
-      "lineStart": 214,
-      "lineEnd": 235,
+      "lineStart": 225,
+      "lineEnd": 246,
       "signature": "export interface SplitOptions extends RegexEngineOptions, EscapeRegexOptions {\n    /**\n     * Treat delimiter as literal string (default: true). Set to false for regex matching.\n     */\n    literal?: boolean;\n    /**\n     * Include delimiter in the split results.\n     */\n    inclusive?: boolean;\n    /**\n     * Maximum number of splits to perform.\n     */\n    limit?: number;\n    /**\n     * If true, pads missing splits with null to guarantee exact limit + 1 parts.\n     */\n    exact?: boolean;\n    /**\n     * If true, throws an InvalidArgumentError if the split does not yield at least limit + 1 parts.\n     */\n    strict?: boolean;\n}",
       "properties": {
         "literal": {
@@ -9749,15 +9945,15 @@
     },
     "BusinessDayRollType": {
       "filePath": "types.ts",
-      "lineStart": 237,
-      "lineEnd": 237,
+      "lineStart": 248,
+      "lineEnd": 248,
       "signature": "export type BusinessDayRollType = \"raise\" | \"forward\" | \"backward\";",
       "subTypes": []
     },
     "IsBusinessDayOptions": {
       "filePath": "types.ts",
-      "lineStart": 239,
-      "lineEnd": 242,
+      "lineStart": 250,
+      "lineEnd": 253,
       "signature": "export interface IsBusinessDayOptions {\n    holidays?: (Date | string | number)[] | Set<number>;\n    excludeWeekdays?: number[];\n}",
       "properties": {
         "holidays": {
@@ -9775,8 +9971,8 @@
     },
     "DayOffsetOptions": {
       "filePath": "types.ts",
-      "lineStart": 244,
-      "lineEnd": 246,
+      "lineStart": 255,
+      "lineEnd": 257,
       "signature": "export interface DayOffsetOptions extends IsBusinessDayOptions {\n    roll?: BusinessDayRollType;\n}",
       "properties": {
         "roll": {
@@ -9792,22 +9988,22 @@
     },
     "UtcOffsetType": {
       "filePath": "types.ts",
-      "lineStart": 248,
-      "lineEnd": 248,
+      "lineStart": 259,
+      "lineEnd": 259,
       "signature": "export type UtcOffsetType = \"base\" | \"total\" | \"daylightSavingTime\";",
       "subTypes": []
     },
     "UtcOffsetFormat": {
       "filePath": "types.ts",
-      "lineStart": 249,
-      "lineEnd": 249,
+      "lineStart": 260,
+      "lineEnd": 260,
       "signature": "export type UtcOffsetFormat = \"milliseconds\" | \"minutes\" | \"hours\" | \"iso\" | \"basic\";",
       "subTypes": []
     },
     "UtcOffsetOptions": {
       "filePath": "types.ts",
-      "lineStart": 251,
-      "lineEnd": 254,
+      "lineStart": 262,
+      "lineEnd": 265,
       "signature": "export interface UtcOffsetOptions {\n    type?: UtcOffsetType;\n    format?: UtcOffsetFormat;\n}",
       "properties": {
         "type": {
@@ -9828,8 +10024,8 @@
     },
     "DateTimeParts": {
       "filePath": "types.ts",
-      "lineStart": 256,
-      "lineEnd": 275,
+      "lineStart": 267,
+      "lineEnd": 286,
       "signature": "export interface DateTimeParts {\n    /** Calendar year (e.g. 2026). */\n    year: number;\n    /** 1-indexed calendar month from 1 to 12 (1 = January, 12 = December). */\n    month: number;\n    /** 1-indexed day of the month from 1 to 31. */\n    day: number;\n    /** 0-indexed hour of day from 0 to 23 (0 = Midnight). */\n    hour: number;\n    /** 0-indexed minute of hour from 0 to 59. */\n    minute: number;\n    /** 0-indexed second of minute from 0 to 59. */\n    second: number;\n    /** 0-indexed millisecond from 0 to 999. */\n    ms: number;\n    /** 0-indexed day of week (0 = Sunday, 6 = Saturday). */\n    dayOfWeek?: number;\n    /** Optional target timezone identifier (e.g. \"UTC\", \"America/New_York\"). */\n    timeZone?: string | null;\n}",
       "properties": {
         "year": {
@@ -9882,8 +10078,8 @@
     },
     "ReplaceDateOptions": {
       "filePath": "types.ts",
-      "lineStart": 277,
-      "lineEnd": 277,
+      "lineStart": 288,
+      "lineEnd": 288,
       "signature": "export type ReplaceDateOptions = Partial<Omit<DateTimeParts, \"dayOfWeek\">>;",
       "subTypes": [
         "DateTimeParts"
@@ -9891,8 +10087,8 @@
     },
     "RollingOptions": {
       "filePath": "types.ts",
-      "lineStart": 280,
-      "lineEnd": 282,
+      "lineStart": 291,
+      "lineEnd": 293,
       "desc": "Rolling Window Configuration",
       "signature": "export interface RollingOptions {\n    windowSize: number;\n}",
       "properties": {
@@ -9906,16 +10102,16 @@
     },
     "EwmOperation": {
       "filePath": "types.ts",
-      "lineStart": 285,
-      "lineEnd": 285,
+      "lineStart": 296,
+      "lineEnd": 296,
       "desc": "Exponentially Weighted Moving Reduction Operation",
       "signature": "export type EwmOperation = \"mean\" | \"sum\" | \"std\" | \"var\" | \"skew\" | \"kurt\";",
       "subTypes": []
     },
     "EwmOptions": {
       "filePath": "types.ts",
-      "lineStart": 288,
-      "lineEnd": 299,
+      "lineStart": 299,
+      "lineEnd": 310,
       "desc": "Exponentially Weighted Moving Window Configuration",
       "signature": "export interface EwmOptions {\n    alpha?: number;\n    span?: number;\n    halfLife?: number | string;\n    com?: number;\n    minSamples?: number;\n    adjust?: boolean;\n    ignoreNulls?: boolean;\n    by?: string | IExpr;\n    bias?: boolean;\n    fisher?: boolean;\n}",
       "properties": {
@@ -9976,8 +10172,8 @@
     },
     "EwmSumOptions": {
       "filePath": "types.ts",
-      "lineStart": 301,
-      "lineEnd": 301,
+      "lineStart": 312,
+      "lineEnd": 312,
       "signature": "export type EwmSumOptions = Omit<EwmOptions, \"adjust\" | \"bias\" | \"fisher\">;",
       "subTypes": [
         "EwmOptions"
@@ -9985,8 +10181,8 @@
     },
     "EwmMeanOptions": {
       "filePath": "types.ts",
-      "lineStart": 302,
-      "lineEnd": 302,
+      "lineStart": 313,
+      "lineEnd": 313,
       "signature": "export type EwmMeanOptions = Omit<EwmOptions, \"bias\" | \"fisher\">;",
       "subTypes": [
         "EwmOptions"
@@ -9994,8 +10190,8 @@
     },
     "EwmVarOptions": {
       "filePath": "types.ts",
-      "lineStart": 303,
-      "lineEnd": 303,
+      "lineStart": 314,
+      "lineEnd": 314,
       "signature": "export type EwmVarOptions = Omit<EwmOptions, \"bias\" | \"fisher\">;",
       "subTypes": [
         "EwmOptions"
@@ -10003,8 +10199,8 @@
     },
     "EwmStdOptions": {
       "filePath": "types.ts",
-      "lineStart": 304,
-      "lineEnd": 304,
+      "lineStart": 315,
+      "lineEnd": 315,
       "signature": "export type EwmStdOptions = Omit<EwmOptions, \"bias\" | \"fisher\">;",
       "subTypes": [
         "EwmOptions"
@@ -10012,8 +10208,8 @@
     },
     "EwmSkewOptions": {
       "filePath": "types.ts",
-      "lineStart": 305,
-      "lineEnd": 305,
+      "lineStart": 316,
+      "lineEnd": 316,
       "signature": "export type EwmSkewOptions = Omit<EwmOptions, \"fisher\">;",
       "subTypes": [
         "EwmOptions"
@@ -10021,8 +10217,8 @@
     },
     "EwmKurtOptions": {
       "filePath": "types.ts",
-      "lineStart": 306,
-      "lineEnd": 306,
+      "lineStart": 317,
+      "lineEnd": 317,
       "signature": "export type EwmKurtOptions = EwmOptions;",
       "subTypes": [
         "EwmOptions"
@@ -10030,8 +10226,8 @@
     },
     "SortArrayOptions": {
       "filePath": "types.ts",
-      "lineStart": 309,
-      "lineEnd": 313,
+      "lineStart": 320,
+      "lineEnd": 324,
       "desc": "Sorting Configuration",
       "signature": "export interface SortArrayOptions<T = any> {\n    descending?: boolean | boolean[];\n    nullsLast?: boolean;\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;\n}",
       "properties": {
@@ -10055,8 +10251,8 @@
     },
     "SortOptions": {
       "filePath": "types.ts",
-      "lineStart": 315,
-      "lineEnd": 317,
+      "lineStart": 326,
+      "lineEnd": 328,
       "signature": "export interface SortOptions<T = any> extends SortArrayOptions<T> {\n    by: keyof T | (keyof T)[] | IExpr | IExpr[];\n}",
       "properties": {
         "by": {
@@ -10072,16 +10268,16 @@
     },
     "ConcatHow": {
       "filePath": "types.ts",
-      "lineStart": 320,
-      "lineEnd": 320,
+      "lineStart": 331,
+      "lineEnd": 331,
       "desc": "Concatenation Configuration",
       "signature": "export type ConcatHow = \"vertical\" | \"horizontal\" | \"diagonal\";",
       "subTypes": []
     },
     "HorizontalConcatOptions": {
       "filePath": "types.ts",
-      "lineStart": 321,
-      "lineEnd": 323,
+      "lineStart": 332,
+      "lineEnd": 334,
       "signature": "export interface HorizontalConcatOptions {\n    strict?: boolean;\n}",
       "properties": {
         "strict": {
@@ -10094,8 +10290,8 @@
     },
     "ConcatOptions": {
       "filePath": "types.ts",
-      "lineStart": 324,
-      "lineEnd": 327,
+      "lineStart": 335,
+      "lineEnd": 338,
       "signature": "export interface ConcatOptions {\n    how?: ConcatHow;\n    horizontal?: HorizontalConcatOptions;\n}",
       "properties": {
         "how": {
@@ -10116,8 +10312,8 @@
     },
     "ConcatItem": {
       "filePath": "types.ts",
-      "lineStart": 328,
-      "lineEnd": 328,
+      "lineStart": 339,
+      "lineEnd": 339,
       "signature": "export type ConcatItem = DataFrame<any> | ColumnDict | RowRecord[];",
       "subTypes": [
         "ColumnDict",
@@ -10126,8 +10322,8 @@
     },
     "ExplodeOptions": {
       "filePath": "types.ts",
-      "lineStart": 330,
-      "lineEnd": 333,
+      "lineStart": 341,
+      "lineEnd": 344,
       "signature": "export interface ExplodeOptions {\n    emptyAsNull?: boolean;\n    keepNulls?: boolean;\n}",
       "properties": {
         "emptyAsNull": {
@@ -10145,15 +10341,15 @@
     },
     "InferDataType": {
       "filePath": "types.ts",
-      "lineStart": 338,
-      "lineEnd": 338,
+      "lineStart": 349,
+      "lineEnd": 349,
       "signature": "export type InferDataType<T> = T extends DataType<infer U> ? U : any;",
       "subTypes": []
     },
     "InferSchema": {
       "filePath": "types.ts",
-      "lineStart": 340,
-      "lineEnd": 342,
+      "lineStart": 351,
+      "lineEnd": 353,
       "signature": "export type InferSchema<S extends DataFrameSchema> = {\n    [K in keyof S]: InferDataType<S[K]>;\n};",
       "properties": {
         "[K in keyof S]": {
@@ -10169,8 +10365,8 @@
     },
     "FlattenUnion": {
       "filePath": "types.ts",
-      "lineStart": 344,
-      "lineEnd": 346,
+      "lineStart": 355,
+      "lineEnd": 357,
       "signature": "export type FlattenUnion<T> = {\n    [K in (T extends any ? keyof T : never)]?: T extends any ? (K extends keyof T ? T[K] : never) : never;\n};",
       "properties": {
         "[K in (T extends any ? keyof T : never)]": {
@@ -10183,15 +10379,15 @@
     },
     "FillNullStrategy": {
       "filePath": "types.ts",
-      "lineStart": 348,
-      "lineEnd": 348,
+      "lineStart": 359,
+      "lineEnd": 359,
       "signature": "export type FillNullStrategy = \"forward\" | \"backward\" | \"min\" | \"max\" | \"mean\" | \"zero\" | \"one\";",
       "subTypes": []
     },
     "FillTarget": {
       "filePath": "types.ts",
-      "lineStart": 350,
-      "lineEnd": 350,
+      "lineStart": 361,
+      "lineEnd": 361,
       "signature": "export type FillTarget = \"null\" | \"nan\" | \"all\" | IExpr | ValidScalarTypes;",
       "subTypes": [
         "IExpr",
@@ -10200,8 +10396,8 @@
     },
     "FillOptions": {
       "filePath": "types.ts",
-      "lineStart": 352,
-      "lineEnd": 372,
+      "lineStart": 363,
+      "lineEnd": 383,
       "signature": "export interface FillOptions {\n    /**\n     * Replacement scalar value or column expression to substitute in place of target values.\n     */\n    value?: IExpr | ValidScalarTypes | null;\n    /**\n     * Filling strategy to calculate or propagate replacement values.\n     * - `\"forward\"`: Propagate last valid value forward.\n     * - `\"backward\"`: Propagate next valid value backward.\n     * - `\"min\"`: Replace with column minimum.\n     * - `\"max\"`: Replace with column maximum.\n     * - `\"mean\"`: Replace with column arithmetic mean.\n     * - `\"zero\"`: Replace with 0.\n     * - `\"one\"`: Replace with 1.\n     */\n    strategy?: FillNullStrategy;\n    /**\n     * Maximum number of consecutive target values to fill when using directional strategies (\"forward\", \"backward\").\n     */\n    limit?: number;\n}",
       "properties": {
         "value": {
@@ -10228,8 +10424,8 @@
     },
     "FillNullOptions": {
       "filePath": "types.ts",
-      "lineStart": 374,
-      "lineEnd": 387,
+      "lineStart": 385,
+      "lineEnd": 398,
       "signature": "export interface FillNullOptions {\n    /**\n     * Replacement scalar value or column expression to substitute in place of null values.\n     */\n    value?: IExpr | ValidScalarTypes | null;\n    /**\n     * Filling strategy to calculate or propagate replacement values.\n     */\n    strategy?: FillNullStrategy;\n    /**\n     * Maximum number of consecutive null values to fill when using directional strategies (\"forward\", \"backward\").\n     */\n    limit?: number;\n}",
       "properties": {
         "value": {
@@ -10256,8 +10452,8 @@
     },
     "ToStructOptions": {
       "filePath": "types.ts",
-      "lineStart": 389,
-      "lineEnd": 392,
+      "lineStart": 400,
+      "lineEnd": 403,
       "signature": "export interface ToStructOptions {\n    fields?: string[] | ((idx: number) => string);\n    upperBound?: number;\n}",
       "properties": {
         "fields": {
@@ -10275,8 +10471,8 @@
     },
     "SkewOptions": {
       "filePath": "types.ts",
-      "lineStart": 394,
-      "lineEnd": 396,
+      "lineStart": 405,
+      "lineEnd": 407,
       "signature": "export interface SkewOptions {\n    bias?: boolean;\n}",
       "properties": {
         "bias": {
@@ -10289,8 +10485,8 @@
     },
     "KurtosisOptions": {
       "filePath": "types.ts",
-      "lineStart": 398,
-      "lineEnd": 401,
+      "lineStart": 409,
+      "lineEnd": 412,
       "signature": "export interface KurtosisOptions {\n    fisher?: boolean;\n    bias?: boolean;\n}",
       "properties": {
         "fisher": {
@@ -10308,8 +10504,8 @@
     },
     "CentralMomentsOptions": {
       "filePath": "types.ts",
-      "lineStart": 403,
-      "lineEnd": 406,
+      "lineStart": 414,
+      "lineEnd": 417,
       "signature": "export interface CentralMomentsOptions {\n    adjust?: boolean;\n    minSamples?: number;\n}",
       "properties": {
         "adjust": {
@@ -10327,8 +10523,8 @@
     },
     "CentralMomentsResult": {
       "filePath": "types.ts",
-      "lineStart": 408,
-      "lineEnd": 418,
+      "lineStart": 419,
+      "lineEnd": 429,
       "signature": "export interface CentralMomentsResult {\n    count: number;\n    sumW: number;\n    weightedSum: number;\n    mean: number | null;\n    m2Sum: number;\n    m3Sum: number;\n    m4Sum: number;\n    variance: number | null;\n    std: number | null;\n}",
       "properties": {
         "count": {
@@ -10381,8 +10577,8 @@
     },
     "EntropyOptions": {
       "filePath": "types.ts",
-      "lineStart": 420,
-      "lineEnd": 423,
+      "lineStart": 431,
+      "lineEnd": 434,
       "signature": "export interface EntropyOptions {\n    base?: number;\n    normalize?: boolean;\n}",
       "properties": {
         "base": {
@@ -10400,8 +10596,8 @@
     },
     "ShiftOptions": {
       "filePath": "types.ts",
-      "lineStart": 425,
-      "lineEnd": 431,
+      "lineStart": 436,
+      "lineEnd": 442,
       "signature": "export interface ShiftOptions {\n    /**\n     * Fallback fill value for empty slots introduced by shift/lag/lead.\n     * @default null\n     */\n    fillValue?: any;\n}",
       "properties": {
         "fillValue": {
@@ -10415,8 +10611,8 @@
     },
     "ToValidArrayOptions": {
       "filePath": "types.ts",
-      "lineStart": 433,
-      "lineEnd": 446,
+      "lineStart": 444,
+      "lineEnd": 457,
       "signature": "export interface ToValidArrayOptions {\n    /**\n     * If true, returns a shallow copy of an existing array.\n     * If false, returns the input array directly without cloning.\n     * @default true\n     */\n    clone?: boolean;\n    /**\n     * If true, wraps null or undefined into an array containing that single element.\n     * If false, returns an empty array [].\n     * @default false\n     */\n    wrapNull?: boolean;\n}",
       "properties": {
         "clone": {

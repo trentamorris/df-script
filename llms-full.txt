@@ -282,13 +282,16 @@ Checks if nested lists contain item.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.contains(item: any)
+$df.col(<column_name>).arr.contains(item: ScalarArg)
 ```
 
 ### Parameters
 - `item` (any): The element to search for.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ScalarArg`](#scalararg)
 
 ### Examples
 ```typescript
@@ -319,13 +322,16 @@ Checks if nested lists contain all elements in items.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.containsAll(items: ArrayLike<any>)
+$df.col(<column_name>).arr.containsAll(items: ArrayArg)
 ```
 
 ### Parameters
-- `items` (any): Array of elements that must all be present.
+- `items` (any): Array of elements or column expression that must all be present.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ArrayArg`](#arrayarg)
 
 ### Examples
 ```typescript
@@ -356,13 +362,16 @@ Checks if nested lists contain any element in items.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).arr.containsAny(items: ArrayLike<any>)
+$df.col(<column_name>).arr.containsAny(items: ArrayArg)
 ```
 
 ### Parameters
-- `items` (any): Array of elements where at least one must be present.
+- `items` (any): Array of elements or column expression where at least one must be present.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ArrayArg`](#arrayarg)
 
 ### Examples
 ```typescript
@@ -394,7 +403,7 @@ Counts occurrence frequency of item inside nested lists.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.countMatches(
-  item: any,
+  item: ScalarArg,
   options: UniqueArrayStatsOptions = {}
 )
 ```
@@ -406,6 +415,7 @@ $df.col(<column_name>).arr.countMatches(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`ScalarArg`](#scalararg)
 - [`UniqueArrayStatsOptions`](#uniquearraystatsoptions)
 
 ### Examples
@@ -600,7 +610,7 @@ Gathers specific indices from each nested list.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.gather(
-  indices: number | ArrayLike<number>,
+  indices: NumericSeriesArg,
   nullOnOob: boolean = true
 )
 ```
@@ -610,6 +620,9 @@ $df.col(<column_name>).arr.gather(
 - `nullOnOob` (any): If true, returns null for indices out of bounds (default: true).
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericSeriesArg`](#numericseriesarg)
 
 ### Examples
 ```typescript
@@ -681,7 +694,7 @@ Extracts a single list element by its index position.
 ### Signature
 ```typescript
 $df.col(<column_name>).arr.get(
-  index: number,
+  index: NumericArg,
   nullOnOob: boolean = true
 )
 ```
@@ -691,6 +704,9 @@ $df.col(<column_name>).arr.get(
 - `nullOnOob` (any): If true, returns null if index is out of bounds (default: true).
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`NumericArg`](#numericarg)
 
 ### Examples
 ```typescript
@@ -1218,7 +1234,7 @@ Splices elements in list cells.
 $df.col(<column_name>).arr.splice(
   start: number,
   deleteCount?: number,
-  ...items: any[]
+  ...items: ValidScalarTypes[]
 )
 ```
 
@@ -1228,6 +1244,9 @@ $df.col(<column_name>).arr.splice(
 - `items` (any): The elements to insert.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`ValidScalarTypes`](#validscalartypes)
 
 ### Examples
 ```typescript
@@ -6733,7 +6752,7 @@ Concatenates string elements with another string value or expression.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.concat(other: string | IExpr)
+$df.col(<column_name>).str.concat(other: StringArg)
 ```
 
 ### Parameters
@@ -6742,7 +6761,7 @@ $df.col(<column_name>).str.concat(other: string | IExpr)
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
-- [`IExpr`](#iexpr)
+- [`StringArg`](#stringarg)
 
 ### Examples
 ```typescript
@@ -6775,13 +6794,16 @@ Checks if a string contains the search substring pattern (supports Regex).
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.contains(pattern: string | RegExp)
+$df.col(<column_name>).str.contains(pattern: RegexPatternArg)
 ```
 
 ### Parameters
 - `pattern` (any): The search substring or regular expression pattern.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 
 ### Examples
 ```typescript
@@ -6813,13 +6835,16 @@ Checks if a string contains any of the search patterns.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.containsAny(patterns: (string | RegExp)[])
+$df.col(<column_name>).str.containsAny(patterns: RegexPatternSeriesArg)
 ```
 
 ### Parameters
 - `patterns` (any): Array of substring or regular expression search patterns.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
 
 ### Examples
 ```typescript
@@ -6852,8 +6877,8 @@ Counts occurrences of a substring or regular expression match in each string ele
 ### Signature
 ```typescript
 $df.col(<column_name>).str.countMatches(
-  pattern: string | RegExp | any,
-  options: { literal?: boolean } | boolean = {}
+  pattern: RegexPatternArg,
+  options: CountMatchesOptions = {}
 )
 ```
 
@@ -6861,6 +6886,10 @@ $df.col(<column_name>).str.countMatches(
 - `pattern` (any): Search substring or regular expression.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
+- [`CountMatchesOptions`](#countmatchesoptions)
 
 ### Examples
 ```typescript
@@ -7161,7 +7190,7 @@ Extracts a captured group from the first regex match.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extract(
-  pattern: RegExp | string,
+  pattern: RegexPatternArg,
   options?: ExtractRegexEngineOptions
 )
 ```
@@ -7173,6 +7202,7 @@ $df.col(<column_name>).str.extract(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`ExtractRegexEngineOptions`](#extractregexengineoptions)
 
 ### Examples
@@ -7206,7 +7236,7 @@ Extracts all occurrences matching a regular expression pattern.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extractAll(
-  pattern: string | RegExp,
+  pattern: RegexPatternArg,
   options?: ExtractRegexEngineOptions
 )
 ```
@@ -7218,6 +7248,7 @@ $df.col(<column_name>).str.extractAll(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`ExtractRegexEngineOptions`](#extractregexengineoptions)
 
 ### Examples
@@ -7252,7 +7283,7 @@ Extracts all captured groups from the first regex match into a structured object
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extractGroups(
-  pattern: string | RegExp,
+  pattern: RegexPatternArg,
   options: ExtractRegexEngineOptions = {}
 )
 ```
@@ -7263,6 +7294,7 @@ $df.col(<column_name>).str.extractGroups(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`ExtractRegexEngineOptions`](#extractregexengineoptions)
 
 ### Examples
@@ -7296,7 +7328,7 @@ Extracts the first regex match for each pattern in a list of patterns.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.extractMany(
-  patterns: (string | RegExp)[],
+  patterns: RegexPatternSeriesArg,
   options: ExtractManyOptions = {}
 )
 ```
@@ -7308,6 +7340,7 @@ $df.col(<column_name>).str.extractMany(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
 - [`ExtractManyOptions`](#extractmanyoptions)
 
 ### Examples
@@ -7342,7 +7375,7 @@ Return the byte offset of the first substring matching a pattern. Returns null i
 ### Signature
 ```typescript
 $df.col(<column_name>).str.find(
-  value: string | RegExp,
+  value: RegexPatternArg,
   options: FindOptions = {}
 )
 ```
@@ -7354,6 +7387,7 @@ $df.col(<column_name>).str.find(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`FindOptions`](#findoptions)
 
 ### Examples
@@ -7388,7 +7422,7 @@ Return the starting byte offset of each match for multiple patterns.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.findMany(
-  patterns: (string | RegExp)[],
+  patterns: RegexPatternSeriesArg,
   options: FindManyOptions = {}
 )
 ```
@@ -7400,6 +7434,7 @@ $df.col(<column_name>).str.findMany(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
 - [`FindManyOptions`](#findmanyoptions)
 
 ### Examples
@@ -7782,13 +7817,16 @@ Normalizes Unicode strings using standard normalization forms (NFC, NFD, NFKC, N
 
 ### Signature
 ```typescript
-$df.col(<column_name>).str.normalize(form?: Parameters<typeof String.prototype.normalize>[0])
+$df.col(<column_name>).str.normalize(form: UnicodeNormalizeForm = "NFC")
 ```
 
 ### Parameters
 - `form` (any): The Unicode normalization form to apply ("NFC", "NFD", "NFKC", or "NFKD"). Default is "NFC".
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`UnicodeNormalizeForm`](#unicodenormalizeform)
 
 ### Examples
 ```typescript
@@ -7908,8 +7946,8 @@ Replaces the first occurrence matching a string pattern.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.replace(
-  pattern: string | RegExp,
-  replacement: string | ((match: string, ...args: any[]) => string),
+  pattern: RegexPatternArg,
+  replacement: StringReplacementArg,
   options?: ReplaceOptions
 )
 ```
@@ -7922,6 +7960,8 @@ $df.col(<column_name>).str.replace(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
+- [`StringReplacementArg`](#stringreplacementarg)
 - [`ReplaceOptions`](#replaceoptions)
 
 ### Examples
@@ -7955,9 +7995,9 @@ Replaces all occurrences matching a string pattern or global regular expression.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.replaceAll(
-  pattern: string | RegExp,
-  replacement: string | ((match: string, ...args: any[]) => string),
-  options?: Omit<ReplaceOptions, "n">
+  pattern: RegexPatternArg,
+  replacement: StringReplacementArg,
+  options: ReplaceAllOptions = {}
 )
 ```
 
@@ -7969,7 +8009,9 @@ $df.col(<column_name>).str.replaceAll(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
-- [`ReplaceOptions`](#replaceoptions)
+- [`RegexPatternArg`](#regexpatternarg)
+- [`StringReplacementArg`](#stringreplacementarg)
+- [`ReplaceAllOptions`](#replacealloptions)
 
 ### Examples
 ```typescript
@@ -8003,8 +8045,8 @@ Replaces multiple string patterns simultaneously or sequentially with their resp
 ### Signature
 ```typescript
 $df.col(<column_name>).str.replaceMany(
-  patterns: (string | RegExp)[] | Record<string, string>,
-  replacements?: (string | ((match: string, ...args: any[]) => string))[],
+  patterns: RegexPatternSeriesArg | Record<string, string>,
+  replacements?: StringReplacementSeriesArg,
   options?: ReplaceManyOptions
 )
 ```
@@ -8017,6 +8059,8 @@ $df.col(<column_name>).str.replaceMany(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternSeriesArg`](#regexpatternseriesarg)
+- [`StringReplacementSeriesArg`](#stringreplacementseriesarg)
 - [`ReplaceManyOptions`](#replacemanyoptions)
 
 ### Examples
@@ -8257,7 +8301,7 @@ Strips matching characters from start and end of string.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.stripChars(
-  characters?: string | RegExp,
+  characters?: RegexPatternArg,
   options?: StripCharsOptions
 )
 ```
@@ -8269,6 +8313,7 @@ $df.col(<column_name>).str.stripChars(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`StripCharsOptions`](#stripcharsoptions)
 
 ### Examples
@@ -8302,7 +8347,7 @@ Strips matching characters from end of string.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.stripCharsEnd(
-  characters?: string | RegExp,
+  characters?: RegexPatternArg,
   options?: StripCharsOptions
 )
 ```
@@ -8314,6 +8359,7 @@ $df.col(<column_name>).str.stripCharsEnd(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`StripCharsOptions`](#stripcharsoptions)
 
 ### Examples
@@ -8347,7 +8393,7 @@ Strips matching characters from start of string.
 ### Signature
 ```typescript
 $df.col(<column_name>).str.stripCharsStart(
-  characters?: string | RegExp,
+  characters?: RegexPatternArg,
   options?: StripCharsOptions
 )
 ```
@@ -8359,6 +8405,7 @@ $df.col(<column_name>).str.stripCharsStart(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`RegexPatternArg`](#regexpatternarg)
 - [`StripCharsOptions`](#stripcharsoptions)
 
 ### Examples
@@ -9228,7 +9275,7 @@ Inserts or updates fields inside structured object columns.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).struct.withFields(fields: IntoExpr[] | Record<string, IntoExpr>)
+$df.col(<column_name>).struct.withFields(fields: StructFieldsArg)
 ```
 
 ### Parameters
@@ -9237,7 +9284,7 @@ $df.col(<column_name>).struct.withFields(fields: IntoExpr[] | Record<string, Int
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`StructFieldsArg`](#structfieldsarg)
 
 ### Examples
 ```typescript
@@ -9960,7 +10007,7 @@ Offsets a Datetime column by N calendar days (numeric constant, column reference
 ### Signature
 ```typescript
 $df.col(<column_name>).dt.offsetDay(
-  n: number | any,
+  n: NumericArg,
   options: DayOffsetOptions = {}
 )
 ```
@@ -9972,6 +10019,7 @@ $df.col(<column_name>).dt.offsetDay(
 ### Returns: `ColumnExpression`
 
 ### Types Referenced
+- [`NumericArg`](#numericarg)
 - [`DayOffsetOptions`](#dayoffsetoptions)
 
 ### Examples
@@ -13523,9 +13571,9 @@ References: [`IExpr`](#iexpr)
 
 ### NumericSeriesArg
 ```typescript
-export type NumericSeriesArg = NumericArg | number[];
+export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;
 ```
-References: [`NumericArg`](#numericarg)
+References: [`NumericArg`](#numericarg), [`AnyTypedArray`](#anytypedarray)
 
 ### BooleanArg
 ```typescript
@@ -13533,11 +13581,92 @@ export type BooleanArg = boolean | boolean[] | IExpr | null | undefined;
 ```
 References: [`IExpr`](#iexpr)
 
-### ComparisonArg
+### ScalarArg
 ```typescript
-export type ComparisonArg = IExpr | ValidScalarTypes | ValidScalarTypes[] | null | undefined;
+export type ScalarArg = IExpr | ValidScalarTypes;
 ```
 References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
+
+### ArrayArg
+```typescript
+export type ArrayArg = IExpr | ValidScalarTypes[] | AnyTypedArray;
+```
+References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`AnyTypedArray`](#anytypedarray)
+
+### ComparisonArg
+```typescript
+export type ComparisonArg = ScalarArg | ArrayArg;
+```
+References: [`ScalarArg`](#scalararg), [`ArrayArg`](#arrayarg)
+
+### StringArg
+```typescript
+export type StringArg = string | IExpr;
+```
+References: [`IExpr`](#iexpr)
+
+### RegexPatternArg
+```typescript
+export type RegexPatternArg = string | RegExp;
+```
+
+### RegexPatternSeriesArg
+```typescript
+export type RegexPatternSeriesArg = RegexPatternArg[];
+```
+References: [`RegexPatternArg`](#regexpatternarg)
+
+### StringReplacerArg
+```typescript
+export type StringReplacerArg = ValidScalarTypes | RowRecord;
+```
+References: [`ValidScalarTypes`](#validscalartypes), [`RowRecord`](#rowrecord)
+
+### StringReplacerFn
+```typescript
+export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => string;
+```
+References: [`StringReplacerArg`](#stringreplacerarg)
+
+### StringReplacementArg
+```typescript
+export type StringReplacementArg = string | StringReplacerFn;
+```
+References: [`StringReplacerFn`](#stringreplacerfn)
+
+### StringReplacementSeriesArg
+```typescript
+export type StringReplacementSeriesArg = StringReplacementArg[];
+```
+References: [`StringReplacementArg`](#stringreplacementarg)
+
+### ReplaceAllOptions
+```typescript
+export type ReplaceAllOptions = Omit<ReplaceOptions, "n">;
+```
+References: [`ReplaceOptions`](#replaceoptions)
+
+### CountMatchesOptions
+```typescript
+export interface CountMatchesOptions {
+    /**
+     * If true, treats the pattern as a literal string rather than a regular expression.
+     * @default false
+     */
+    literal?: boolean;
+}
+```
+
+### UnicodeNormalizeForm
+```typescript
+export type UnicodeNormalizeForm = "NFC" | "NFD" | "NFKC" | "NFKD";
+```
+
+### StructFieldsArg
+```typescript
+export type StructFieldsArg = IntoExprSeriesArg | ExprDict;
+```
+References: [`IntoExprSeriesArg`](#intoexprseriesarg), [`ExprDict`](#exprdict)
 
 ### IsNDistinctOptions
 ```typescript
@@ -14085,6 +14214,18 @@ export interface CastOptions {
 export type IntoExpr = string | RegExp | IExpr;
 ```
 References: [`IExpr`](#iexpr)
+
+### IntoExprSeriesArg
+```typescript
+export type IntoExprSeriesArg = IntoExpr[];
+```
+References: [`IntoExpr`](#intoexpr)
+
+### ExprDict
+```typescript
+export type ExprDict = Record<string, IntoExpr>;
+```
+References: [`IntoExpr`](#intoexpr)
 
 ### ColumnSelector
 ```typescript

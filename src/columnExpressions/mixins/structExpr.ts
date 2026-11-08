@@ -1,5 +1,5 @@
 import { ExprBase } from "../exprBase";
-import type { IntoExpr } from "../../types";
+import type { StructFieldsArg } from "../types";
 import { InvalidArgumentError } from "../../exceptions";
 import { LITERAL_MARKER } from "../constants";
 import { createDelegatingProxy } from "../utils";
@@ -83,7 +83,7 @@ export class StructExprNamespace {
      * | { name: "Alice", age: 30 }   | { name: "Alice", age: 30, is_active: true }|
      * +------------------------------+-------------------------------------------+
      */
-    withFields(fields: IntoExpr[] | Record<string, IntoExpr>) {
+    withFields(fields: StructFieldsArg) {
         return this._expr._derive((vArray: any[], columns: any) => {
             const height = vArray.length;
             const result = new Array(height);

@@ -22,7 +22,6 @@ const rootDir = path.resolve(__dirname, "..");
 const docsJsonPath = path.resolve(rootDir, "docs.json");
 const packageJsonPath = path.resolve(rootDir, "package.json");
 const readmePath = path.resolve(rootDir, "README.md");
-const websitePublicDir = path.resolve(__dirname, "../../df-script-website/public");
 
 // ─── 1. Generate llms.txt from README.md ──────────────────────────────────────
 
@@ -191,14 +190,6 @@ function main() {
   fs.writeFileSync(llmsFullTxtDest, llmsFullTxt, "utf-8");
   console.log(`✓ Generated ${path.relative(rootDir, llmsTxtDest)} (from README.md)`);
   console.log(`✓ Generated ${path.relative(rootDir, llmsFullTxtDest)}`);
-
-  // 3. Sync to df-script-website/public
-  if (fs.existsSync(websitePublicDir)) {
-    fs.writeFileSync(path.join(websitePublicDir, "llms.txt"), llmsTxt, "utf-8");
-    fs.writeFileSync(path.join(websitePublicDir, "llms-full.txt"), llmsFullTxt, "utf-8");
-    fs.copyFileSync(docsJsonPath, path.join(websitePublicDir, "docs.json"));
-    console.log(`✓ Synced llms.txt, llms-full.txt, and docs.json to website public directory`);
-  }
 
   console.log("Done.");
 }

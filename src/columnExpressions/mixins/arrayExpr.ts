@@ -1,4 +1,4 @@
-import { ExprBase } from "../exprBase";
+import { ExprBase, isExpr } from "../exprBase";
 import { evaluateExpression } from "../utils";
 import {
     isArrayOrTypedArray,
@@ -17,9 +17,18 @@ import {
     filterByMask,
     shiftArray
 } from "../../utils";
-import type { SortArrayOptions, ExplodeOptions, IExpr, AnyTypedArray, ToStructOptions, ShiftOptions } from "../../types";
+import type {
+    SortArrayOptions,
+    ExplodeOptions,
+    IExpr,
+    AnyTypedArray,
+    ToStructOptions,
+    ShiftOptions,
+    ValidScalarTypes
+} from "../../types";
 import { ELEMENT_MARKER } from "../constants";
 import { ComputeError } from "../../exceptions";
+import type { ScalarArg, ArrayArg, NumericArg, NumericSeriesArg } from "../types";
 
 
 /**
@@ -39,6 +48,9 @@ export class ArrayExprNamespace {
     }
 
     _deriveArrayBinary(other: any, fn: (arr: any[] | AnyTypedArray, val: any) => any) {
+        if (!isExpr(other)) {
+            return this._deriveArray((arr) => fn(arr, other));
+        }
         const result = this._expr._deriveBinary(other, (arr: any, val: any) => {
             return isArrayOrTypedArray(arr) ? fn(arr as any, val) : null;
         });
@@ -176,13 +188,13 @@ export class ArrayExprNamespace {
      * | [4, 5]    | false     |
      * +-----------+-----------+
      */
-    contains(item: any) {
+    contains(item: ScalarArg) {
         return this._deriveArrayBinary(item, (arr, val) => Array.prototype.includes.call(arr, val));
     }
 
     /**
      * Checks if nested lists contain all elements in items.
-     * @param items Array of elements that must all be present.
+     * @param items Array of elements or column expression that must all be present.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_array_nested_2rows -->
@@ -195,13 +207,16 @@ export class ArrayExprNamespace {
      * | [4, 5]    | false   |
      * +-----------+---------+
      */
-    containsAll(items: ArrayLike<any>) {
-        return this._deriveArray((arr) => isArrayOfType(items, (x) => Array.prototype.includes.call(arr, x), { mode: "every" }));
+    containsAll(items: ArrayArg) {
+        return this._deriveArrayBinary(items, (arr, val) => {
+            if (!isArrayOrTypedArray(val)) return false;
+            return isArrayOfType(val, (x) => Array.prototype.includes.call(arr, x), { mode: "every" });
+        });
     }
 
     /**
      * Checks if nested lists contain any element in items.
-     * @param items Array of elements where at least one must be present.
+     * @param items Array of elements or column expression where at least one must be present.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_array_nested_2rows -->
@@ -214,8 +229,11 @@ export class ArrayExprNamespace {
      * | [3, 4] | true    |
      * +--------+---------+
      */
-    containsAny(items: ArrayLike<any>) {
-        return this._deriveArray((arr) => isArrayOfType(items, (x) => Array.prototype.includes.call(arr, x), { mode: "some" }));
+    containsAny(items: ArrayArg) {
+        return this._deriveArrayBinary(items, (arr, val) => {
+            if (!isArrayOrTypedArray(val)) return false;
+            return isArrayOfType(val, (x) => Array.prototype.includes.call(arr, x), { mode: "some" });
+        });
     }
 
     /**
@@ -234,7 +252,7 @@ export class ArrayExprNamespace {
      * | [4, 5]    | 0    |
      * +-----------+------+
      */
-    countMatches(item: any, options: UniqueArrayStatsOptions = {}) {
+    countMatches(item: ScalarArg, options: UniqueArrayStatsOptions = {}) {
         return this._deriveArrayBinary(item, (arr, val) => getUniqueArrayStats(arr, options).frequencies.get(val) ?? 0);
     }
 
@@ -393,15 +411,17 @@ export class ArrayExprNamespace {
      * +-----------+----------+
      */
     gather(
-        indices: number | ArrayLike<number>,
+        indices: NumericSeriesArg,
         nullOnOob: boolean = true
     ) {
-        return this._deriveArray((arr) => {
-            const idxs = typeof indices === "number" ? [indices] : indices;
+        return this._deriveArrayBinary(indices, (arr, val) => {
+            if (val == null) return null;
+            const idxs = typeof val === "number" || typeof val === "bigint" ? [Number(val)] : val;
+            if (!isArrayOrTypedArray(idxs)) return null;
             const numIndices = idxs.length;
             const res = new Array(numIndices);
             for (let i = 0; i < numIndices; i++) {
-                res[i] = getArrayElement(arr, idxs[i], nullOnOob);
+                res[i] = getArrayElement(arr, Number(idxs[i]), nullOnOob);
             }
             return res;
         });
@@ -442,8 +462,11 @@ export class ArrayExprNamespace {
      * | [4, 5]    | 5      |
      * +-----------+--------+
      */
-    get(index: number, nullOnOob: boolean = true) {
-        return this._deriveArray((arr) => getArrayElement(arr, index, nullOnOob));
+    get(index: NumericArg, nullOnOob: boolean = true) {
+        return this._deriveArrayBinary(index, (arr, val) => {
+            if (val == null) return null;
+            return getArrayElement(arr, Number(val), nullOnOob);
+        });
     }
 
     /**
@@ -712,10 +735,11 @@ export class ArrayExprNamespace {
      * | [4, 5]    | [4, 10, 20]     |
      * +-----------+-----------------+
      */
-    splice(start: number, deleteCount?: number, ...items: any[]) {
+    splice(start: number, deleteCount?: number, ...items: ValidScalarTypes[]) {
         return this._deriveArray((arr) => {
             const copy = Array.from(arr);
-            copy.splice(start, deleteCount ?? copy.length, ...items);
+            const count = deleteCount !== undefined ? deleteCount : copy.length;
+            copy.splice(start, count, ...items);
             return copy;
         });
     }

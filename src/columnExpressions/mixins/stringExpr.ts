@@ -1,5 +1,4 @@
 import type {
-    IExpr,
     StrptimeOptions,
     StringDecodeOptions,
     StringEncodeOptions,
@@ -10,9 +9,10 @@ import type {
     FindManyOptions,
     SplitOptions,
     ReplaceOptions,
-    ReplaceManyOptions
+    ReplaceManyOptions,
 } from "../../types";
 import { ExprBase } from "../exprBase";
+import type { StringArg, RegexPatternArg, RegexPatternSeriesArg, StringReplacementArg, StringReplacementSeriesArg , ReplaceAllOptions, CountMatchesOptions, UnicodeNormalizeForm } from "../types";
 import { TEXT_ENCODER } from "../../constants";
 import {
     toValidDate,
@@ -68,7 +68,7 @@ export class StringExprNamespace {
         return this._deriveString(fn);
     }
 
-    _matchPattern(str: string, pattern: string | RegExp): boolean {
+    _matchPattern(str: string, pattern: RegexPatternArg): boolean {
         if (pattern == null) return false;
         if (!isRegExp(pattern)) return str.includes(pattern);
         pattern.lastIndex = 0;
@@ -91,7 +91,7 @@ export class StringExprNamespace {
      * | "cherry" | cherry!   |
      * +----------+-----------+
      */
-    concat(other: string | IExpr) {
+    concat(other: StringArg) {
         return this._expr._deriveBinary(other, (v: any, o: any) => String(v) + String(o));
     }
 
@@ -110,7 +110,7 @@ export class StringExprNamespace {
      * | admin@test.org   | false      |
      * +------------------+------------+
      */
-    contains(pattern: string | RegExp) {
+    contains(pattern: RegexPatternArg) {
         return this._derivePattern(pattern, (str) => this._matchPattern(str, pattern));
     }
 
@@ -129,7 +129,7 @@ export class StringExprNamespace {
      * | admin@test.org   | true      |
      * +------------------+-----------+
      */
-    containsAny(patterns: (string | RegExp)[]) {
+    containsAny(patterns: RegexPatternSeriesArg) {
         return this._derivePattern(patterns, (str) => {
             for (let i = 0; i < patterns.length; i++) {
                 if (this._matchPattern(str, patterns[i])) return true;
@@ -154,8 +154,8 @@ export class StringExprNamespace {
      * | "cherry" | 0       |
      * +----------+---------+
      */
-    countMatches(pattern: string | RegExp | any, options: { literal?: boolean } | boolean = {}) {
-        const literal = typeof options === "boolean" ? options : (options?.literal ?? false);
+    countMatches(pattern: RegexPatternArg, options: CountMatchesOptions = {}) {
+        const literal = options.literal ?? false;
         return this._derivePattern(pattern, (str) => {
             const patStr = literal ? escapeRegExp(pattern) : pattern;
 
@@ -324,7 +324,7 @@ export class StringExprNamespace {
      * | admin@test.org   | test    |
      * +------------------+---------+
      */
-    extract(pattern: RegExp | string, options?: ExtractRegexEngineOptions) {
+    extract(pattern: RegexPatternArg, options?: ExtractRegexEngineOptions) {
         return this._derivePattern(pattern, (str) => extractRegex(str, pattern, options));
     }
 
@@ -345,7 +345,7 @@ export class StringExprNamespace {
      * | "cherry" | ["e"]           |
      * +----------+-----------------+
      */
-    extractAll(pattern: string | RegExp, options?: ExtractRegexEngineOptions) {
+    extractAll(pattern: RegexPatternArg, options?: ExtractRegexEngineOptions) {
         return this._derivePattern(pattern, (str) => extractRegexAll(str, pattern, options) ?? []);
     }
 
@@ -364,7 +364,7 @@ export class StringExprNamespace {
      * | admin@test.org   | { user: "admin", domain: "test" }  |
      * +------------------+------------------------------------+
      */
-    extractGroups(pattern: string | RegExp, options: ExtractRegexEngineOptions = {}) {
+    extractGroups(pattern: RegexPatternArg, options: ExtractRegexEngineOptions = {}) {
         return this._derivePattern(pattern, (str) => extractRegexEngine(str, pattern, options)?.[0] ?? null);
     }
 
@@ -385,7 +385,7 @@ export class StringExprNamespace {
      * | "cherry" | ["che"]     |
      * +----------+-------------+
      */
-    extractMany(patterns: (string | RegExp)[], options: ExtractManyOptions = {}) {
+    extractMany(patterns: RegexPatternSeriesArg, options: ExtractManyOptions = {}) {
         return this._derivePattern(patterns, (str) => extractRegexMany(str, patterns, options));
     }
 
@@ -407,7 +407,7 @@ export class StringExprNamespace {
      * | "cherry" | null |
      * +----------+------+
      */
-    find(value: string | RegExp, options: FindOptions = {}) {
+    find(value: RegexPatternArg, options: FindOptions = {}) {
         return this._derivePattern(value, (str) => findRegex(str, value, options));
     }
 
@@ -428,7 +428,7 @@ export class StringExprNamespace {
      * | "cherry" | [2]       |
      * +----------+-----------+
      */
-    findMany(patterns: (string | RegExp)[], options: FindManyOptions = {}) {
+    findMany(patterns: RegexPatternSeriesArg, options: FindManyOptions = {}) {
         return this._derivePattern(patterns, (str) => findManyRegex(str, patterns, options));
     }
 
@@ -628,7 +628,7 @@ export class StringExprNamespace {
      * | "df-script" | df-script  |
      * +-------------+------------+
      */
-    normalize(form?: Parameters<typeof String.prototype.normalize>[0]) {
+    normalize(form: UnicodeNormalizeForm = "NFC") {
         return this._deriveString((str) => str.normalize(form));
     }
 
@@ -692,8 +692,8 @@ export class StringExprNamespace {
      * +------------------+---------------+
      */
     replace(
-        pattern: string | RegExp,
-        replacement: string | ((match: string, ...args: any[]) => string),
+        pattern: RegexPatternArg,
+        replacement: StringReplacementArg,
         options?: ReplaceOptions
     ) {
         return this._derivePattern(pattern, (str) => replaceString(str, pattern, replacement, { n: 1, ...options }) ?? str);
@@ -718,9 +718,9 @@ export class StringExprNamespace {
      * +----------+----------+
      */
     replaceAll(
-        pattern: string | RegExp,
-        replacement: string | ((match: string, ...args: any[]) => string),
-        options?: Omit<ReplaceOptions, "n">
+        pattern: RegexPatternArg,
+        replacement: StringReplacementArg,
+        options: ReplaceAllOptions = {}
     ) {
         return this._derivePattern(pattern, (str) => replaceString(str, pattern, replacement, { ...options, n: -1 }) ?? str);
     }
@@ -745,8 +745,8 @@ export class StringExprNamespace {
      * +----------+--------+
      */
     replaceMany(
-        patterns: (string | RegExp)[] | Record<string, string>,
-        replacements?: (string | ((match: string, ...args: any[]) => string))[],
+        patterns: RegexPatternSeriesArg | Record<string, string>,
+        replacements?: StringReplacementSeriesArg,
         options?: ReplaceManyOptions
     ) {
         return this._derivePattern(patterns, (str) => replaceManyString(str, patterns, replacements, options) ?? str);
@@ -873,7 +873,7 @@ export class StringExprNamespace {
      * | "  world  " | world    |
      * +-------------+----------+
      */
-    stripChars(characters?: string | RegExp, options?: StripCharsOptions) {
+    stripChars(characters?: RegexPatternArg, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "both", ...options }));
     }
 
@@ -893,7 +893,7 @@ export class StringExprNamespace {
      * | "  world  " | "  world" |
      * +-------------+----------+
      */
-    stripCharsEnd(characters?: string | RegExp, options?: StripCharsOptions) {
+    stripCharsEnd(characters?: RegexPatternArg, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "end", ...options }));
     }
 
@@ -913,7 +913,7 @@ export class StringExprNamespace {
      * | "  world  " | "world  " |
      * +-------------+----------+
      */
-    stripCharsStart(characters?: string | RegExp, options?: StripCharsOptions) {
+    stripCharsStart(characters?: RegexPatternArg, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "start", ...options }));
     }
 

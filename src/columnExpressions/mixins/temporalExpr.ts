@@ -2,6 +2,7 @@ import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions,
 import { DatetimeType, Int32, BooleanDataType } from "../../datatypes/types";
 import { InvalidArgumentError } from "../../exceptions";
 import { ExprBase } from "../exprBase";
+import type { NumericArg } from "../types";
 import {
     toValidDate,
     toEpoch,
@@ -420,7 +421,7 @@ export class DateTimeExprNamespace {
      * | 2026-05-20 | 2026-05-25T00:00:00.000Z |
      * +------------+--------------------------+
      */
-    offsetDay(n: number | any, options: DayOffsetOptions = {}) {
+    offsetDay(n: NumericArg, options: DayOffsetOptions = {}) {
         return this._expr._deriveBinary(n, (v: any, nVal: any) => {
             const d = toValidDate(v);
             if (!d || nVal == null) return null;

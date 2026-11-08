@@ -49,6 +49,17 @@ export interface CastOptions {
 
 export type IntoExpr = string | RegExp | IExpr;
 
+/**
+ * Operand for multiple column expressions.
+ * Accepts an array of column expressions, names, or regex selectors.
+ */
+export type IntoExprSeriesArg = IntoExpr[];
+
+/**
+ * Dictionary mapping field or column names to column expressions.
+ */
+export type ExprDict = Record<string, IntoExpr>;
+
 export type ColumnSelector<T = any> =
     | keyof T
     | string

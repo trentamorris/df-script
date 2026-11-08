@@ -224,7 +224,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 // Test 27: Rolling with Options Object { windowSize: 3 }
 {
     const df = $df.data({ a: [2, 4, 6, 8] });
-    const res = df.select($df.col("a").rolling({ windowSize: 3 }, $df.col("a").mean()).alias("r")).toDicts() as any[];
+    const res = df.select($df.col("a").rolling(3, $df.col("a").mean()).alias("r")).toDicts() as any[];
     if (res[2].r !== 4 || res[3].r !== 6) throw new Error(`Test 27 Failed: ${JSON.stringify(res)}`);
 }
 
@@ -509,7 +509,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 {
     let caughtEmptyObj = false;
     try {
-        $df.col("a").rolling({} as any, $df.col("a").sum());
+        $df.col("a").rolling(undefined as any, $df.col("a").sum());
     } catch (e: any) {
         if (e.message.includes("windowSize must be a positive number")) caughtEmptyObj = true;
     }
@@ -642,5 +642,152 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
     }
 }
 
-console.log("✓ All 62 exhaustive StandardExpr.rolling tests passed successfully!");
+// Test 63: Rolling over empty dataframe (0 rows)
+{
+    const df = $df.data({ a: [] as number[] });
+    const res = df.select($df.col("a").rolling(3, $df.col("a").sum()).alias("r")).toDicts();
+    if (res.length !== 0) throw new Error(`Test 63 Failed: expected empty, got ${res.length}`);
+}
+
+// Test 64: Rolling over single row dataframe (1 row, windowSize 5 > length)
+{
+    const df = $df.data({ a: [42] });
+    const res = df.select($df.col("a").rolling(5, $df.col("a").sum()).alias("r")).toDicts() as any[];
+    if (res.length !== 1 || res[0].r !== 42) throw new Error(`Test 64 Failed: ${JSON.stringify(res)}`);
+}
+
+// Test 65: Rolling with windowSize 1 (identity reduction)
+{
+    const df = $df.data({ a: [10, -20, 30, -40] });
+    const res = df.select($df.col("a").rolling(1, (v) => v[0]).alias("r")).toDicts() as any[];
+    if (res[0].r !== 10 || res[1].r !== -20 || res[2].r !== 30 || res[3].r !== -40) {
+        throw new Error(`Test 65 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 66: Rolling over all null/undefined values
+{
+    const df = $df.data({ a: [null, undefined, null, null] });
+    const res = df.select($df.col("a").rolling(2, (v) => v.filter(x => x == null).length).alias("null_cnt")).toDicts() as any[];
+    if (res[0].null_cnt !== 1 || res[1].null_cnt !== 2 || res[2].null_cnt !== 2 || res[3].null_cnt !== 2) {
+        throw new Error(`Test 66 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 67: Rolling with mixed special float values (Infinity, -Infinity, NaN)
+{
+    const df = $df.data({ a: [Infinity, 10, -Infinity, NaN] });
+    const res = df.select($df.col("a").rolling(2, (v) => v.some(x => x === Infinity)).alias("has_inf")).toDicts() as any[];
+    if (res[0].has_inf !== true || res[1].has_inf !== true || res[2].has_inf !== false || res[3].has_inf !== false) {
+        throw new Error(`Test 67 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 68: Rolling with BigInt values and custom accumulator
+{
+    const df = $df.data({ n: [100n, 200n, 300n, 400n] });
+    const res = df.select($df.col("n").rolling(2, (v: unknown[]) => (v as bigint[]).reduce((a, b) => a + b, 0n)).alias("r")).toDicts() as any[];
+    if (res[0].r !== 100n || res[1].r !== 300n || res[2].r !== 500n || res[3].r !== 700n) {
+        throw new Error(`Test 68 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 69: Rolling with Date objects calculating time span within window
+{
+    const df = $df.data({
+        d: [new Date("2026-01-01T00:00:00Z"), new Date("2026-01-02T00:00:00Z"), new Date("2026-01-05T00:00:00Z")]
+    });
+    const res = df.select($df.col("d").rolling(2, (v: unknown[]) => {
+        const dates = v as Date[];
+        return (dates[dates.length - 1].getTime() - dates[0].getTime()) / (1000 * 60 * 60 * 24);
+    }).alias("day_gap")).toDicts() as any[];
+    if (res[0].day_gap !== 0 || res[1].day_gap !== 1 || res[2].day_gap !== 3) {
+        throw new Error(`Test 69 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 70: Rolling with nested complex objects (struct / JSON record windows)
+{
+    const df = $df.data({
+        items: [{ score: 10 }, { score: 20 }, { score: 30 }]
+    });
+    const res = df.select($df.col("items").rolling(2, (v: unknown[]) => {
+        return (v as { score: number }[]).reduce((sum, item) => sum + item.score, 0);
+    }).alias("total_score")).toDicts() as any[];
+    if (res[0].total_score !== 10 || res[1].total_score !== 30 || res[2].total_score !== 50) {
+        throw new Error(`Test 70 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 71: Extreme edge-case - window size equals exact DataFrame height
+{
+    const df = $df.data({ val: [1, 2, 3, 4, 5] });
+    const res = df.select($df.col("val").rolling(5, $df.col("val").sum()).alias("r")).toDicts() as any[];
+    if (res[0].r !== 1 || res[1].r !== 3 || res[2].r !== 6 || res[3].r !== 10 || res[4].r !== 15) {
+        throw new Error(`Test 71 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 72: Extreme edge-case - window size significantly exceeds DataFrame height (100 > 3)
+{
+    const df = $df.data({ val: [5, 10, 15] });
+    const res = df.select($df.col("val").rolling(100, $df.col("val").sum()).alias("r")).toDicts() as any[];
+    if (res[0].r !== 5 || res[1].r !== 15 || res[2].r !== 30) {
+        throw new Error(`Test 72 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 73: Extreme edge-case - sequential rolling via withColumns
+{
+    const df = $df.data({ val: [1, 2, 3, 4, 5] });
+    const step1 = df.withColumns($df.col("val").rolling(2, $df.col("val").sum()).alias("r1"));
+    const res = step1.select($df.col("r1").rolling(2, (v) => Math.max(...(v as number[]))).alias("r")).toDicts() as any[];
+    if (res[0].r !== 1 || res[1].r !== 3 || res[2].r !== 5 || res[3].r !== 7 || res[4].r !== 9) {
+        throw new Error(`Test 73 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 74: Extreme edge-case - multiple partitions with uneven partition lengths under .over()
+{
+    const df = $df.data({
+        dept: ["A", "B", "B", "B", "C"],
+        salary: [100, 200, 300, 400, 500]
+    });
+    const res = df.select([
+        $df.col("dept"),
+        $df.col("salary").rolling(2, $df.col("salary").mean()).over("dept").alias("roll_mean")
+    ]).toDicts() as any[];
+    if (res[0].roll_mean !== 100 || res[1].roll_mean !== 200 || res[2].roll_mean !== 250 || res[3].roll_mean !== 350 || res[4].roll_mean !== 500) {
+        throw new Error(`Test 74 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 75: Extreme edge-case - reducer returning non-primitive array / list (implosion per window)
+{
+    const df = $df.data({ v: [1, 2, 3] });
+    const res = df.select(
+        $df.col("v").rolling(2, (vals) => vals.slice()).alias("slices")
+    ).toDicts() as any[];
+    if (JSON.stringify(res[0].slices) !== "[1]" || JSON.stringify(res[1].slices) !== "[1,2]" || JSON.stringify(res[2].slices) !== "[2,3]") {
+        throw new Error(`Test 75 Failed: ${JSON.stringify(res)}`);
+    }
+}
+
+// Test 76: Extreme edge-case - invalid inputs throw InvalidArgumentError
+{
+    const invalidInputs = [0, -1, -100, NaN, null, undefined, false, true, "3", {}];
+    for (const badInput of invalidInputs) {
+        let threw = false;
+        try {
+            $df.col("v").rolling(badInput as any, (v) => v[0]);
+        } catch (e: any) {
+            if (e.message.includes("windowSize must be a positive number")) {
+                threw = true;
+            }
+        }
+        if (!threw) throw new Error(`Test 76 Failed: input ${badInput} did not throw InvalidArgumentError`);
+    }
+}
+
+console.log("✓ All 76 exhaustive StandardExpr.rolling tests passed successfully!");
 

@@ -479,7 +479,7 @@ function _isDateExcluded(d: Date, excludeWeekdays: number[], holidayTimestamps: 
 
 export function offsetDay(
     d: Date,
-    n: number | any,
+    n: number,
     {
         excludeWeekdays = [],
         holidays = [],
