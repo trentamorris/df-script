@@ -28,6 +28,16 @@ try {
         throw new Error("Group B implode failed: " + JSON.stringify(groupB));
     }
 
+    // 2. Implode with ColumnExpr and array of column names via IntoExprArg
+    const res2 = df.groupBy("group").agg([
+        $df.implode($df.col("val")).alias("expr_imploded"),
+        $df.implode(["val"]).alias("arr_imploded")
+    ]).toDicts();
+    const groupA2 = res2.find(r => r.group === "A");
+    if (!groupA2 || groupA2.expr_imploded[0] !== 10 || groupA2.arr_imploded[1] !== 20) {
+        throw new Error("Implode with IntoExprArg variants failed: " + JSON.stringify(groupA2));
+    }
+
     console.log("✓ $df.implode() tests passed successfully!");
 } catch (err) {
     console.error("❌ $df.implode() tests failed:", err);

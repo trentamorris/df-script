@@ -1,18 +1,16 @@
 import { ColumnExpr, resolveColumnSelectors } from "../columnExpressions/columnExpr";
 import { toColExpr } from "../columnExpressions/exprBase";
-import type { IntoExpr } from "../types";
-import { ArrayExprNamespace } from "../columnExpressions/mixins/arrayExpr";
+import type { IntoExpr, IntoExprArg } from "../types";
+import type { HorizontalExpr } from "./types";
 import { evaluateArgsMatrix, createDelegatingProxy } from "../columnExpressions/utils";
 import { HORIZONTAL_MARKER } from "../columnExpressions/constants";
-
-export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
 
 /**
  * Combines multiple columns or expressions horizontally into an array per row,
  * allowing expression evaluation with `.eval($df.element()...)`, direct horizontal
  * aggregations (`.sum()`, `.min()`, `.max()`, `.mean()`), or `.arr` operations across columns.
  *
- * @param {...(IntoExpr | IntoExpr[])[]} exprs Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
+ * @param {...IntoExprArg} exprs Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
  * @returns {HorizontalExpr} A column expression representing the horizontal row arrays.
  * @namespace $df
  * @category Function
@@ -29,7 +27,7 @@ export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
  * +---------+
  */
 export function horizontal(
-    ...exprs: (IntoExpr | IntoExpr[])[]
+    ...exprs: IntoExprArg[]
 ): HorizontalExpr {
     const flat = (exprs.length === 1 && Array.isArray(exprs[0]))
         ? (exprs[0] as IntoExpr[])

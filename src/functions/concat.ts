@@ -1,7 +1,7 @@
 import { DataFrame } from "../dataframe/dataframe"
-import { DataTypeRegistry } from "../datatypes"
+import { DataTypeRegistry, type RegisteredDataType } from "../datatypes"
 import { isTypedArray, isPlainObj, isArrayOfType, isArrayOrTypedArray, toValidArray } from "../utils"
-import type { ColumnDict, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType } from "../types"
+import type { ColumnDict, ConcatOptions, ConcatItemsArg, RowRecord, DataFrameSchema } from "../types"
 import { DataFrameError, SchemaError, ShapeError } from "../exceptions"
 
 function _copyElements(src: ArrayLike<any>, dest: ArrayLike<any> | any[], offset: number, count: number): void {
@@ -95,8 +95,6 @@ function _blitStackedColumns<U extends RowRecord>(
  * @syntax $df.{symbol}(...)
  * @param rawItems Single DataFrame or array of DataFrames/rows to concatenate.
  * @param [options] Configuration options for concatenation layout and strictness.
- * @param [options.how] Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
- * @param [options.horizontal.strict] When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
  * @returns DataFrame
  * 
  * @example
@@ -140,7 +138,7 @@ function _blitStackedColumns<U extends RowRecord>(
  * +------+------+
  */
 export function concat<U extends RowRecord = any>(
-    rawItems: ConcatItem | ConcatItem[],
+    rawItems: ConcatItemsArg,
     { how = 'vertical', horizontal }: ConcatOptions = {}
 ): DataFrame<U> {
     if (rawItems == null) {

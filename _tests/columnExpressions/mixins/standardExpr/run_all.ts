@@ -4,6 +4,7 @@ console.log("=========================================");
 
 import "./abs.test";
 import "./add.test";
+import "./alias.test";
 import "./all.test";
 import "./allNull.test";
 import "./and.test";
@@ -23,6 +24,7 @@ import "./between.test";
 import "./bitwiseAnd.test";
 import "./bitwiseOr.test";
 import "./bitwiseXor.test";
+import "./cast.test";
 import "./cbrt.test";
 import "./ceil.test";
 import "./clip.test";

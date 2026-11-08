@@ -1,5 +1,5 @@
 import { DataFrame } from "../dataframe/dataframe";
-import type { ReadJSONOptions } from "../dataframe/types";
+import type { ReadJSONOptions } from "../types";
 import { safeJsonParse, isObj } from "../utils";
 import { DataFrameError } from "../exceptions";
 
@@ -10,9 +10,6 @@ import { DataFrameError } from "../exceptions";
  * @syntax $df.{symbol}(...)
  * @param content The JSON or NDJSON content string.
  * @param [options] Parse and configuration options.
- * @param [options.format] Input format (`"json"` or `"ndjson"`). Default `"json"`.
- * @param [options.trimBeforeParse] When `true` (default), trims whitespace before parsing.
- * @param [options.schema] Optional column schema to coerce types.
  * @returns A new DataFrame instance populated with the parsed records.
  * @example
  * <!-- doc:base_2x2 -->

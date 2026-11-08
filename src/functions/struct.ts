@@ -1,13 +1,14 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { isColExpr } from "../columnExpressions/exprBase";
 import { lit } from "./lit";
-import type { IntoExpr } from "../types";
+import type { IntoExpr, StructFieldsArg } from "../types";
+import type { StructArg } from "./types";
 import { STRUCT_MARKER } from "../columnExpressions/constants";
 
 /**
  * Packages multiple expressions into a structured object column.
  *
- * @param {IntoExpr[] | Record<string, IntoExpr> | IntoExpr} fields An array of expressions, a record of field names to expressions, or a single expression.
+ * @param {StructArg} fields An array of expressions, a record of field names to expressions, or a single expression.
  * @param {...IntoExpr[]} moreFields Additional fields when a single expression is passed as the first parameter.
  * @returns {ColumnExpr<any>} A column expression packaging the specified fields.
  * @namespace $df
@@ -25,10 +26,10 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  * +------------------+
  */
 export function struct(
-    fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,
+    fields: StructArg,
     ...moreFields: IntoExpr[]
 ): ColumnExpr<any> {
-    let resolvedFields: IntoExpr[] | Record<string, IntoExpr>;
+    let resolvedFields: StructFieldsArg;
 
     if (Array.isArray(fields)) {
         resolvedFields = fields;

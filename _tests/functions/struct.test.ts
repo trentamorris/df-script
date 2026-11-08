@@ -26,6 +26,14 @@ try {
         throw new Error("Struct row 0 score_info failed: " + JSON.stringify(res[0]));
     }
 
+    // 2. Struct creation with variadic IntoExpr arguments via StructArg
+    const resVar = df.select([
+        $df.struct("user_id", "user_name", $df.col("score")).alias("var_struct")
+    ]).toDicts();
+    if (resVar[0].var_struct.user_id !== 1 || resVar[0].var_struct.user_name !== "Alice" || resVar[0].var_struct.score !== 95) {
+        throw new Error("Variadic struct failed: " + JSON.stringify(resVar[0]));
+    }
+
     console.log("✓ $df.struct() tests passed successfully!");
 } catch (err) {
     console.error("❌ $df.struct() tests failed:", err);

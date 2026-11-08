@@ -1,11 +1,11 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { toColExpr } from "../columnExpressions/exprBase";
-import type { IntoExpr } from "../types";
+import type { IntoExprArg } from "../types";
 
 /**
  * Aggregates values of a column into a list within each group.
  *
- * @param {IntoExpr | IntoExpr[]} column The column or expression to implode.
+ * @param {IntoExprArg} column The column or expression to implode.
  * @returns {ColumnExpr<any>} A column expression representing the list of values.
  * @namespace $df
  * @category Function
@@ -21,6 +21,6 @@ import type { IntoExpr } from "../types";
  * | B     | [30]     |
  * +-------+----------+
  */
-export function implode(column: IntoExpr | IntoExpr[]): ColumnExpr<any> {
+export function implode(column: IntoExprArg): ColumnExpr<any> {
     return (toColExpr(column, ColumnExpr) as ColumnExpr<any>).implode();
 }

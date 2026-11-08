@@ -72,6 +72,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the 1-indexed century component (e.g. 21 for 2026) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_temporal_single -->
@@ -284,6 +285,7 @@ export class DateTimeExprNamespace {
 
     /**
      * Extracts the 1-indexed millennium component index (e.g. 3 for the year 2026) from a Datetime column.
+     * @param timeZone Optional IANA timezone identifier. Defaults to the column timezone or UTC.
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_temporal_single -->

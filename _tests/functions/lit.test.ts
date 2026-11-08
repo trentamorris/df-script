@@ -15,7 +15,7 @@ try {
         $df.lit("constant_string").alias("lit_str"),
         $df.lit(42).alias("lit_num"),
         $df.lit([1, 2]).alias("lit_arr"),
-        $df.lit(123, $df.Int32).alias("lit_int32")
+        $df.lit(123, { dtype: $df.Int32, name: "lit_int32" })
     ).toDicts();
 
     if (res.length !== 2) throw new Error("Length mismatch");

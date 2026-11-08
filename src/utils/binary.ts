@@ -8,14 +8,11 @@ import {
     isUint8Array,
     isUint8ClampedArray,
 } from "./object";
-import { isValidInt, type IntOptions } from "./number";
+import { isValidInt } from "./number";
 import { isArrayOfType } from "./array";
 import type { AnyTypedArray } from "../types";
+import type { BinaryValidationOptions, IntOptions } from "./types";
 import { TEXT_ENCODER } from "../constants";
-
-export interface BinaryValidationOptions {
-    strict?: boolean;
-}
 
 export function isBinaryObj(
     v: unknown

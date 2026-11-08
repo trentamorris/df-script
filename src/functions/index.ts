@@ -14,3 +14,4 @@ export * from "./readJson";
 export * from "./seqRange";
 export * from "./struct";
 export * from "./when";
+export * from "./types";

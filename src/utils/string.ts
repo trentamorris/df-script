@@ -18,6 +18,7 @@ import {
 } from "../constants";
 import { InvalidArgumentError } from "../exceptions";
 import type { StringEncoding, EscapeRegexOptions, ExtractManyOptions, ExtractRegexEngineOptions, RegexEngineOptions, FindOptions, FindManyOptions, SplitOptions, ReplaceOptions, ReplaceManyOptions } from "../types";
+import type { StripMode, StripCharsOptions, ChangeCaseOptions, IsUnicodeSurrogateOptions, CandidateMatch } from "./types";
 
 
 export function isBlankString(v: unknown): v is string {
@@ -27,56 +28,6 @@ export function isBlankString(v: unknown): v is string {
     }
     return false;
 }
-
-export type StripMode = "both" | "start" | "end";
-
-export type StripCharsOptions = {
-    /**
-     * The strip mode: "both" (default), "start", or "end".
-     */
-    mode?: StripMode;
-    /**
-     * If true, returns an empty string instead of null when the result is empty or input is null.
-     */
-    returnStringOnNull?: boolean;
-    /**
-     * The maximum number of non-matching characters allowed to be skipped from the start
-     * before a match block is found. Passing -1 or null means scan the full length.
-     */
-    maxScanStart?: number | null;
-    /**
-     * The maximum number of non-matching characters allowed to be skipped from the end
-     * before a match block is found. Passing -1 or null means scan the full length.
-     */
-    maxScanEnd?: number | null;
-    /**
-     * The maximum number of non-contiguous matching blocks allowed to be stripped from the start.
-     * Passing -1 or null means strip all matching blocks.
-     */
-    maxMatchesStart?: number | null;
-    /**
-     * The maximum number of non-contiguous matching blocks allowed to be stripped from the end.
-     * Passing -1 or null means strip all matching blocks.
-     */
-    maxMatchesEnd?: number | null;
-    /**
-     * If true, trims standard whitespace first before performing character stripping.
-     */
-    trimFirst?: boolean;
-    /**
-     * Options that apply only when the characters parameter is a string (and not a RegExp).
-     */
-    stringOptions?: {
-        /**
-         * If true, treats the characters string as a literal substring rather than a set of characters.
-         */
-        literal?: boolean;
-        /**
-         * If true, performs case-insensitive character and substring matching.
-         */
-        caseInsensitive?: boolean;
-    };
-};
 
 function _trimByMode(str: string, mode: StripMode = "both"): string {
     if (mode === "start") return str.trimStart();
@@ -269,10 +220,6 @@ export function toCanonicalString(
 
     const s = String(val);
     return `${type}:${s.length}:${s}`;
-}
-
-export interface ChangeCaseOptions {
-    format: "camel" | "kebab" | "pascal" | "snake" | "title";
 }
 
 const _CONTRACTION_REGEX = /(\p{L})['’]+(?=\p{L})/gu;
@@ -471,12 +418,6 @@ const _TC39_REGEX = new RegExp(`[${_BASE_CONTROL_PATTERN}\\\\^$*+?.()|[\\]{}/#,=
 // nonAlphanumeric mode: C0 controls/surrogates + ASCII non-alphanumerics (< 0x80)
 const _NON_ALPHANUMERIC_ASCII_REGEX = new RegExp(`[${_BASE_CONTROL_PATTERN}]|[\\x20-\\x2F\\x3A-\\x40\\x5B-\\x5E\\x5F\\x60\\x7B-\\x7E]`, "gu");
 
-export type UnicodeSurrogateType = "all" | "high" | "low";
-
-export type IsUnicodeSurrogateOptions = {
-    type?: UnicodeSurrogateType;
-};
-
 /**
  * Checks whether a 16-bit code unit is a Unicode surrogate.
  * @internal
@@ -597,13 +538,6 @@ function _resolveGroupRecord(
     const targetIndex = count + index;
     return targetIndex >= 1 ? (record[String(targetIndex)] ?? null) : null;
 }
-
-type CandidateMatch<T = unknown> = {
-    _i: number;
-    _start: number;
-    _end: number;
-    _payload: T;
-};
 
 function _collectPatternCandidates<T>(
     input: string,

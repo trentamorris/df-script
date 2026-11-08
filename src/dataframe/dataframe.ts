@@ -2,10 +2,10 @@ import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER,
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
-import type { IExpr, ColumnData, ColumnDict, DataFrameColumns, ConcatOptions, ConcatItem, RowRecord, DataFrameSchema, RegisteredDataType, ExplodeOptions, IntoExpr, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
-import type { EqualsOptions, LimitOptions, SortOptions, PivotOptions, PartitionByOptions, JoinOptions, JoinMaintainOrder, JoinAsofOptions, JoinWhereOptions, GroupByDynamicOptions, UnpivotOptions, TransposeOptions, UnstackOptions, WriteJSONOptions, WriteCSVOptions } from "./types"
-import { DataTypeRegistry, DataType } from "../datatypes"
-import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate } from "../utils"
+import type { IExpr, ColumnData, ColumnDict, ColumnIndexOrNameArg, ColumnKeyArg, ColumnOrExprArg, ConcatOptions, ConcatItemsArg, DataFrameDataArg, RenameMappingArg, RowRecord, DataFrameSchema, ExplodeOptions, IntoExpr, IntoExprArg, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
+import type { CastTargetArg, DataFrameColumns, DataFrameShape, DynamicIndexColumnArg, EqualsOptions, FilterPredicateArg, GroupByDynamicOptions, InsertColumnArg, IterRowResult, IterRowsOptions, JoinAsofOptions, JoinMaintainOrder, JoinOptions, JoinWhereArg, JoinWhereOptions, LimitOptions, PartitionByKey, PartitionByOptions, PartitionByResult, PivotOptions, RowPredicateFn, SelectArg, SortOptions, TransposeOptions, UnpivotOptions, UnstackOptions, WriteFileTargetArg, WriteJSONOptions } from "./types"
+import { DataTypeRegistry, DataType, type RegisteredDataType } from "../datatypes"
+import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate, type WriteCSVOptions } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, InvalidArgumentError, IOStreamError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
@@ -67,7 +67,7 @@ export class DataFrame<T extends RowRecord = any> {
      * | 2   | y   |
      * +-----+-----+
      */
-    constructor(data: T[] | ColumnDict, schema?: DataFrameSchema, height?: number) {
+    constructor(data: DataFrameDataArg<T>, schema?: DataFrameSchema, height?: number) {
         if (Array.isArray(data)) {
             const { columns, height: h } = rowsToColumns(data);
             this._columns = columns as DataFrameColumns<T>;
@@ -126,7 +126,7 @@ export class DataFrame<T extends RowRecord = any> {
                 for (let j = 0; j < numKeys; j++) {
                     const key = keys[j];
                     const val = (arg as Record<string, any>)[key];
-                    exprs.push(isColExpr(val) ? val.alias(key) : lit(val).alias(key));
+                    exprs.push(isColExpr(val) ? (val as any).alias(key) : lit(val).alias(key));
                 }
             }
         }
@@ -134,7 +134,7 @@ export class DataFrame<T extends RowRecord = any> {
     }
 
     private _resolveTargetColumns(
-        columns: IntoExpr | IntoExpr[],
+        columns: IntoExprArg,
         contextName: string = "Target column"
     ): string[] {
         const rawArgs = toValidArray(columns, { clone: false });
@@ -168,7 +168,7 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Casts columns in the DataFrame to the specified data type(s).
      *
-     * @param {RegisteredDataType | Record<string, RegisteredDataType>} dtypes Target data type for all columns, or mapping of column names to target data types.
+     * @param {CastTargetArg} dtypes Target data type for all columns, or mapping of column names to target data types.
      * @param {CastOptions} [options] Casting options (e.g. strict).
      * @returns {DataFrame}
      *
@@ -179,7 +179,7 @@ export class DataFrame<T extends RowRecord = any> {
      * >>> df.cast({ num_str: $df.Int64 }, { strict: false })
      */
     cast(
-        dtypes: RegisteredDataType | Record<string, RegisteredDataType>,
+        dtypes: CastTargetArg,
         options: CastOptions = {}
     ): DataFrame<any> {
         if (this._height === 0) return this;
@@ -236,10 +236,8 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Concatenates items vertically, horizontally, or diagonally.
      * 
-     * @param {ConcatItem | ConcatItem[]} items Single DataFrame or array of DataFrames/rows to concatenate.
+     * @param {ConcatItemsArg} items Single DataFrame or array of DataFrames/rows to concatenate.
      * @param {ConcatOptions} [options] Configuration options for concatenation layout and strictness.
-     * @param {ConcatHow} [options.how] Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
-     * @param {boolean} [options.horizontal.strict] When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
      * @returns {DataFrame}
      * 
      * @example
@@ -283,7 +281,7 @@ export class DataFrame<T extends RowRecord = any> {
      * +------+------+
      */
     concat<U extends RowRecord = any>(
-        items: ConcatItem | ConcatItem[],
+        items: ConcatItemsArg,
         options: ConcatOptions = {}
     ): DataFrame<U> {
         const arrayItems = isArrayOfType(items, DataFrame, { mode: "every", allowEmpty: false })
@@ -294,7 +292,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Drops specified columns from the DataFrame.
-     * @param {(K | K[])[]} args Column names or arrays of column names to remove.
+     * @param {ColumnKeyArg<K>[]} args Column names or arrays of column names to remove.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -307,13 +305,13 @@ export class DataFrame<T extends RowRecord = any> {
      * | 2 |
      * +---+
      */
-    drop<K extends keyof T>(...args: (K | K[])[]): DataFrame<Omit<T, K>> {
+    drop<K extends keyof T>(...args: ColumnKeyArg<K>[]): DataFrame<Omit<T, K>> {
         return this.select<Omit<T, K>>(exclude(args.flat() as any));
     }
 
     /**
      * Drops rows with null or undefined values.
-     * @param {string | string[]} [subset] Column name or array of column names to check for nulls.
+     * @param {ColumnKeyArg<string>} [subset] Column name or array of column names to check for nulls.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_nulls_3x2 -->
@@ -326,7 +324,7 @@ export class DataFrame<T extends RowRecord = any> {
      * | 3 |
      * +---+
      */
-    dropNulls(subset?: string | string[]): DataFrame<T> {
+    dropNulls(subset?: ColumnKeyArg<string>): DataFrame<T> {
         return this.filter(subset ? new ColumnExpr(subset).isNotNull() : all().isNotNull());
     }
 
@@ -353,7 +351,6 @@ export class DataFrame<T extends RowRecord = any> {
      * Checks shape, column names, column order, schemas, and row values.
      * @param {DataFrame} other The other DataFrame to compare with.
      * @param {EqualsOptions} [options] Comparison configuration options.
-     * @param {boolean} [options.nullsEqual] Whether nulls / NaNs compare as equal. Default: `true`.
      * @returns {boolean} `true` if both DataFrames are equal, `false` otherwise.
      * @example
      * <!-- doc:base_2x2 -->
@@ -407,10 +404,8 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Explodes an array column into multiple rows, replicating non-target row attributes.
-     * @param {IntoExpr | IntoExpr[]} columns Target column expression or array column name to explode.
+     * @param {IntoExprArg} columns Target column expression or array column name to explode.
      * @param {ExplodeOptions} [options] Configuration options for empty array and null handling.
-     * @param {boolean} [options.emptyAsNull] When `true`, converts empty arrays to `null` rows.
-     * @param {boolean} [options.keepNulls] When `true`, retains `null` array values during explosion.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_array_nested_2rows -->
@@ -424,7 +419,7 @@ export class DataFrame<T extends RowRecord = any> {
      * +-------+--------+
      */
     explode(
-        columns: IntoExpr | IntoExpr[],
+        columns: IntoExprArg,
         options?: ExplodeOptions
     ): DataFrame<any> {
         const targetCols = this._resolveTargetColumns(columns, "Explode column");
@@ -493,9 +488,6 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Fills null values across columns using scalar values or statistical strategies.
      * @param {FillNullOptions} [options] Configuration options for null replacement.
-     * @param {any} [options.value] Scalar replacement value or dict mapping column names to values.
-     * @param {FillNullStrategy} [options.strategy] Statistical filling strategy (`"zero"`, `"mean"`, `"min"`, `"max"`, `"forward"`, `"backward"`).
-     * @param {number} [options.limit] Maximum consecutive nulls to fill when using propagation strategies.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_nulls_3x2 -->
@@ -516,7 +508,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Filters rows matching boolean column expressions or predicate callbacks.
-     * @param {(IExpr | ((row: T) => any))[]} exprs Expressions or predicate functions evaluated per row.
+     * @param {FilterPredicateArg<T>[]} exprs Expressions or predicate functions evaluated per row.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_numbers_3x2 -->
@@ -529,18 +521,18 @@ export class DataFrame<T extends RowRecord = any> {
      * | 3 |
      * +---+
      */
-    filter(...exprs: (IExpr | ((row: T) => any) | (IExpr | ((row: T) => any))[])[]): DataFrame<T> {
+    filter(...exprs: FilterPredicateArg<T>[]): DataFrame<T> {
         const height = this._height;
         if (height === 0) return this;
 
         const flatExprs = exprs.flat(Infinity);
         const keys = Object.keys(this._columns);
         const exprSelectors: IExpr[] = [];
-        const funcPredicates: ((row: T) => any)[] = [];
+        const funcPredicates: RowPredicateFn<T>[] = [];
 
         for (let i = 0; i < flatExprs.length; i++) {
             const expr = flatExprs[i];
-            if (typeof expr === "function") funcPredicates.push(expr as (row: T) => any);
+            if (typeof expr === "function") funcPredicates.push(expr as RowPredicateFn<T>);
             else exprSelectors.push(expr as IExpr);
         }
 
@@ -605,7 +597,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Groups rows by key columns to prepare for aggregations.
-     * @param {K | K[]} keys Column name or array of key column names.
+     * @param {ColumnKeyArg<K>} keys Column name or array of key column names.
      * @returns {GroupedData}
      * @example
      * <!-- doc:base_grouped_3x2 -->
@@ -618,7 +610,7 @@ export class DataFrame<T extends RowRecord = any> {
      * | B   | 30  |
      * +-----+-----+
      */
-    groupBy<K extends keyof T>(keys: K | K[]): GroupedData<T, K> {
+    groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K> {
         const keysStr = toArrayOfType<string>(keys, "string");
 
         for (let j = 0; j < keysStr.length; j++) {
@@ -648,7 +640,7 @@ export class DataFrame<T extends RowRecord = any> {
      * +--------------------------+-----------+
      */
     groupByDynamic<K extends keyof T & string>(
-        indexColumn: K | IntoExpr,
+        indexColumn: DynamicIndexColumnArg<K>,
         options: GroupByDynamicOptions<T>
     ): GroupedData<T, K> {
         if (!options || options.every == null) throw new InvalidArgumentError('groupByDynamic requires "every" option');
@@ -882,7 +874,7 @@ export class DataFrame<T extends RowRecord = any> {
      * Inserts a new column at a specific ordinal index position.
      * @param {number} index Target column index position.
      * @param {string} name Name of the inserted column.
-     * @param {IntoExpr | ArrayLike<any>} expr Value expression, column definition, or raw column values array.
+     * @param {InsertColumnArg} expr Value expression, column definition, or raw column values array.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -895,7 +887,7 @@ export class DataFrame<T extends RowRecord = any> {
      * | 2 | 20 | y |
      * +---+----+---+
      */
-    insertColumn(index: number, name: string, expr: IntoExpr | ArrayLike<any>): DataFrame<any> {
+    insertColumn(index: number, name: string, expr: InsertColumnArg): DataFrame<any> {
         const colExpr = isArrayOrTypedArray(expr)
             ? (toColExpr(LITERAL_MARKER, ColumnExpr) as ColumnExpr<any>)._derive(() => expr as any).alias(name)
             : (toColExpr(expr, ColumnExpr) as ColumnExpr<any>).alias(name);
@@ -921,7 +913,7 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Retrieves a single scalar cell value by row and column position or name.
      * @param {number} [row] Row index position.
-     * @param {number | string} [column] Column index or column name string.
+     * @param {ColumnIndexOrNameArg} [column] Column index or column name string.
      * @returns {any} Cell scalar value.
      * @throws {DataFrameError} If shape is not (1, 1) when called without arguments.
      * @throws {ShapeError} If row or column index is out of bounds.
@@ -930,7 +922,7 @@ export class DataFrame<T extends RowRecord = any> {
      * >>> df.item(0, "val")
      * 42
      */
-    item(row?: number, column?: number | string): any {
+    item(row?: number, column?: ColumnIndexOrNameArg): any {
         const height = this._height;
         const keys = Object.keys(this._columns);
         const width = keys.length;
@@ -978,14 +970,13 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Yields a generator iterating over rows as tuples or named objects.
      * @param [config] Iteration format configuration.
-     * @param [config.named] When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`).
      * @returns Generator of rows.
      * @example
      * <!-- doc:base_2x2 -->
      * >>> Array.from(df.iterRows({ named: true }))
      * [ { a: 1, b: "x" }, { a: 2, b: "y" } ]
      */
-    *iterRows({ named = false }: { named?: boolean } = {}): Generator<any[] | Record<string, any>> {
+    *iterRows({ named = false }: IterRowsOptions = {}): Generator<IterRowResult<T>> {
         const height = this._height;
         if (height === 0) return;
 
@@ -1013,28 +1004,6 @@ export class DataFrame<T extends RowRecord = any> {
      * Joins two DataFrames on key columns using a specified join strategy.
      * @param {DataFrame} other Right DataFrame to join with.
      * @param {JoinOptions} [options={}] Join configuration object.
-     * @param {string | string[]} [options.on] Join key column name or array of key column names that exist in both DataFrames.
-     * @param {string | string[]} [options.leftOn] Join key column(s) in the left DataFrame when key names differ.
-     * @param {string | string[]} [options.rightOn] Join key column(s) in the right DataFrame when key names differ.
-     * @param {JoinType} [options.how] Join strategy. Default `"inner"`.
-     *   - `"inner"` — Only rows with matching keys in both DataFrames.
-     *   - `"left"` — All left rows; unmatched right values are `null`.
-     *   - `"right"` — All right rows; unmatched left values are `null`.
-     *   - `"outer"` — All rows from both sides; unmatched values are `null`.
-     *   - `"semi"` — Left rows that have a match in the right DataFrame (only left columns retained).
-     *   - `"anti"` — Left rows that have **no** match in the right DataFrame (only left columns retained).
-     *   - `"cross"` — Cartesian product pairing every left row with every right row (keyless).
-     * @param {[string, string]} [options.suffixes] Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping
-     *   non-key column names (default `["", "_right"]`). Ignored for `"semi"` and `"anti"` joins.
-     * @param {boolean} [options.joinNulls] If `true`, null key values are treated as equal and will match each other
-     *   across DataFrames. Default `false` (SQL-standard: `NULL != NULL`).
-     * @param {boolean} [options.coalesce] Coalescing behavior for join key columns. Default `true`. If `true`, coalesces join key values into left key columns and drops right key columns. If `false`, keeps join key columns separate.
-     * @param {JoinMaintainOrder | boolean} [options.maintainOrder] Row order preservation strategy. Default `"none"`.
-     *   - `"none"` (or `false`) — No specific ordering is desired.
-     *   - `"left"` (or `true`) — Preserves the order of the left DataFrame.
-     *   - `"right"` — Preserves the order of the right DataFrame.
-     *   - `"left_right"` — Preserves the order of the left DataFrame first, then the right.
-     *   - `"right_left"` — Preserves the order of the right DataFrame first, then the left.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_join_pair -->
@@ -1153,21 +1122,6 @@ export class DataFrame<T extends RowRecord = any> {
      *
      * @param {DataFrame} other The right DataFrame to join with.
      * @param {JoinAsofOptions} options Asof join configuration options.
-     * @param {string} [options.on] Column name to join on (must exist in both DataFrames and be sorted ascending).
-     * @param {string} [options.leftOn] Left DataFrame join key column name.
-     * @param {string} [options.rightOn] Right DataFrame join key column name.
-     * @param {string | string[]} [options.by] Optional exact-match group column(s) present in both DataFrames.
-     * @param {string | string[]} [options.leftBy] Group column(s) for exact key matching in left DataFrame.
-     * @param {string | string[]} [options.rightBy] Group column(s) for exact key matching in right DataFrame.
-     * @param {JoinAsofStrategy} [options.strategy] Match search strategy. Default `"backward"`.
-     *   - `"backward"` — Matches the latest right row where `rightKey <= leftKey`.
-     *   - `"forward"` — Matches the earliest right row where `rightKey >= leftKey`.
-     *   - `"nearest"` — Matches the right row with the absolute nearest key value to `leftKey`.
-     * @param {number | string} [options.tolerance] Maximum allowed distance between left key and right key.
-     * @param {boolean} [options.allowExactMatches] Whether exact key matches are permitted. Default `true`.
-     * @param {[string, string]} [options.suffixes] Column name suffixes `[leftSuffix, rightSuffix]` to resolve name collisions. Default `["", "_right"]`.
-     * @param {boolean} [options.coalesce] Coalescing behavior for join key columns. Default `true`.
-     * @param {boolean} [options.checkSorted] Whether to verify that join keys are sorted ascending prior to matching. Default `true`.
      * @returns A new DataFrame containing the joined results.
      * @example
      * <!-- doc:base_asof_pair -->
@@ -1270,7 +1224,7 @@ export class DataFrame<T extends RowRecord = any> {
      * `options.suffixes` (default `["", "_right"]`).
      *
      * @param {DataFrame} other The right DataFrame to join with.
-     * @param {...(IntoExpr | IntoExpr[] | JoinWhereOptions)} args Predicate expression(s), arrays of expressions,
+     * @param {...JoinWhereArg} args Predicate expression(s), arrays of expressions,
      *   and an optional configuration options object (`{ how, suffixes }`).
      * @returns {DataFrame} A new DataFrame containing the joined results.
      * @example
@@ -1293,7 +1247,7 @@ export class DataFrame<T extends RowRecord = any> {
      */
     joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
         other: DataFrame<U>,
-        ...args: (IntoExpr | IntoExpr[] | JoinWhereOptions)[]
+        ...args: JoinWhereArg[]
     ): DataFrame<R> {
         if (!other || !(other instanceof DataFrame)) {
             throw new InvalidArgumentError('joinWhere() requires a valid DataFrame in "other"');
@@ -1350,8 +1304,6 @@ export class DataFrame<T extends RowRecord = any> {
      * Limits the output to N rows starting from offset.
      * @param {number} n Maximum number of rows to take.
      * @param {LimitOptions} [options] Offset and slice direction options.
-     * @param {number} [options.offset] Number of rows to skip before taking `n` rows (default 0).
-     * @param {LimitPosition} [options.from] Slice direction starting point (`"start"` or `"end"`). Default `"start"`.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_numbers_3x1 -->
@@ -1393,18 +1345,17 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Splits a DataFrame into sub-DataFrames partitioned by column names or expressions (reusing `.over()` partition semantics).
      *
-     * @param {K | K[]} by Key column(s) or column expressions to partition by.
+     * @param {ColumnKeyArg<K>} by Key column(s) or column expressions to partition by.
      * @param {PartitionByOptions} [options={}] Partition configuration options.
-     * @param {boolean} [options.asDict=false] If `true`, returns a dictionary mapping partition keys to sub-DataFrames.
-     * @returns {DataFrame<T>[] | Record<string, DataFrame<T>>}
+     * @returns {PartitionByResult<T>}
      * @example
      * <!-- doc:base_dataframe_partition -->
      * >>> const [groupA, groupB] = df.partitionBy("category")
      */
-    partitionBy<K extends (keyof T & string) | IExpr>(
-        by: K | K[],
+    partitionBy<K extends PartitionByKey<T>>(
+        by: ColumnKeyArg<K>,
         options: PartitionByOptions = {}
-    ): DataFrame<T>[] | Record<string, DataFrame<T>> {
+    ): PartitionByResult<T> {
         const partitionKeys = toValidArray(by, { clone: false }) as (string | IExpr)[];
         const groups = partitionByColumns(this._columns, this._height, partitionKeys);
 
@@ -1423,10 +1374,6 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Pivots columns from long format to a wide datagrid structure.
      * @param config Pivot table configuration options.
-     * @param {string | string[]} config.index Key column(s) to use as new DataFrame rows.
-     * @param {string} config.columns Column whose distinct values become new wide column headers.
-     * @param {string} config.values Column whose cell values populate the pivoted grid cells.
-     * @param {AggFn | string} [config.agg] Aggregation function to apply when multiple values exist for a cell.
      * @returns DataFrame
      * @example
      * <!-- doc:base_pivot_table -->
@@ -1497,7 +1444,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Renames columns based on a key-value mapping dictionary.
-     * @param {Partial<Record<keyof T, string>>} [mapping] Dictionary mapping old column names to new names.
+     * @param {RenameMappingArg<T>} [mapping] Dictionary mapping old column names to new names.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -1510,7 +1457,7 @@ export class DataFrame<T extends RowRecord = any> {
      * | 2  | y     |
      * +----+-------+
      */
-    rename(mapping: Partial<Record<keyof T, string>> = {}): DataFrame<any> {
+    rename(mapping: RenameMappingArg<T> = {}): DataFrame<any> {
         const keys = Object.keys(this._columns);
         const len = keys.length;
         const selectList: any[] = new Array(len);
@@ -1556,7 +1503,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Selects specific columns or evaluates column expressions.
-     * @param {(string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]} args Column names, column expressions, or object maps to evaluate.
+     * @param {SelectArg[]} args Column names, column expressions, or object maps to evaluate.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -1570,7 +1517,7 @@ export class DataFrame<T extends RowRecord = any> {
      * +---+--------+
      */
     select<U extends RowRecord = any>(
-        ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
+        ...args: SelectArg[]
     ): DataFrame<U> {
         const exprs = DataFrame._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
@@ -1676,7 +1623,7 @@ export class DataFrame<T extends RowRecord = any> {
      * >>> df.shape
      * [2, 2]
      */
-    get shape(): [number, number] {
+    get shape(): DataFrameShape {
         return [this.height, this.width];
     }
 
@@ -1710,10 +1657,6 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Sorts DataFrame rows by one or more column expressions or custom sorters.
      * @param {SortOptions<T>} [config] Sort configuration options.
-     * @param {keyof T | (keyof T)[] | IExpr | IExpr[]} config.by Column name(s) or expression(s) to sort by.
-     * @param {boolean | boolean[]} [config.descending] Sort order boolean or array of booleans per key (default `false`).
-     * @param {boolean} [config.nullsLast] When `true` (default), places nulls at the end of sorted output.
-     * @param {Partial<Record<keyof T, (a: any, b: any) => number>>} [config.custom] Optional dictionary mapping column names to custom comparator functions.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_numbers_3x2 -->
@@ -1785,14 +1728,14 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Evaluates a column expression or retrieves column values as a raw JavaScript array.
-     * @param {K | IExpr} nameOrExpr Target column name or column expression.
+     * @param {ColumnOrExprArg<K>} nameOrExpr Target column name or column expression.
      * @returns {any[]} Array of column scalar values.
      * @example
      * <!-- doc:base_2x2 -->
      * >>> df.toArray("a")
      * [10, 20]
      */
-    toArray<K extends keyof T>(nameOrExpr: K | IExpr): any[] {
+    toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[] {
         return toValidArray(Object.values(this.select(nameOrExpr as any)._columns)?.[0] ?? []);
     }
 
@@ -1823,9 +1766,6 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Transposes rows into columns and columns into rows.
      * @param {TransposeOptions} [options] Transpose layout options.
-     * @param {boolean} [options.includeHeader] When `true`, includes original column names as a new header column (default `false`).
-     * @param {string} [options.headerName] Name of the header column when `includeHeader` is `true` (default `"column"`).
-     * @param {string | Iterable<string>} [options.columnNames] Column name or iterable of strings to use as transposed column headers.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_pivot_table -->
@@ -1898,7 +1838,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Filters distinct unique rows matching target key columns.
-     * @param {K | K[]} [columns] Target column or array of column names to evaluate uniqueness.
+     * @param {ColumnKeyArg<K>} [columns] Target column or array of column names to evaluate uniqueness.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -1911,7 +1851,7 @@ export class DataFrame<T extends RowRecord = any> {
      * | 2 | y |
      * +---+---+
      */
-    unique<K extends keyof T>(columns?: K | K[]): DataFrame<T> {
+    unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T> {
         const keys = columns !== undefined ? toValidArray(columns) : (Object.keys(this._columns) as any);
         return this.groupBy(keys).agg(exclude(keys).first());
     }
@@ -1919,10 +1859,6 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Unpivots a wide DataFrame into a long format structure.
      * @param {UnpivotOptions<T>} config Unpivot configuration options.
-     * @param {keyof T | (keyof T)[]} config.idVars Key column(s) to retain as identifier variables.
-     * @param {keyof T | (keyof T)[]} config.valueVars Column(s) to unpivot into variable-value pairs.
-     * @param {string} [config.varName] Name for the new variable column holding old column headers (default `"variable"`).
-     * @param {string} [config.valueName] Name for the new value column holding cell values (default `"value"`).
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_pivot_table -->
@@ -2005,7 +1941,7 @@ export class DataFrame<T extends RowRecord = any> {
      * +-----+------+
      */
     unstack(
-        columns: IntoExpr | IntoExpr[],
+        columns: IntoExprArg,
         options: UnstackOptions
     ): DataFrame<any> {
         if (!isValidNumber(options?.step) || options.step < 1) {
@@ -2076,7 +2012,7 @@ export class DataFrame<T extends RowRecord = any> {
 
     /**
      * Adds new columns or updates existing ones using column expressions.
-     * @param {(string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]} args Expressions or field objects defining column calculations.
+     * @param {SelectArg[]} args Expressions or field objects defining column calculations.
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
@@ -2090,7 +2026,7 @@ export class DataFrame<T extends RowRecord = any> {
      * +---+---+-------+
      */
     withColumns(
-        ...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]
+        ...args: SelectArg[]
     ): DataFrame<any> {
         if (args.length === 0) return this;
 
@@ -2154,11 +2090,8 @@ export class DataFrame<T extends RowRecord = any> {
      * Writes DataFrame to CSV format string or file/stream target.
      * @note [Environment]: When `file` is provided as a string file path, execution requires a Node.js-compatible
      * environment with `fs` access. In browser environments, omit `file` to receive a string or supply a custom writable stream object.
-     * @param {string | { write: (str: string) => void }} [file] Target file path or writable stream target (optional).
+     * @param {WriteFileTargetArg} [file] Target file path or writable stream target (optional).
      * @param {WriteCSVOptions} [options] CSV formatting options.
-     * @param {string} [options.delimiter] Column delimiter character (default `","`).
-     * @param {boolean} [options.header] When `true` (default), includes column header row.
-     * @param {string} [options.quoteChar] Character used to enclose fields containing special characters (default `'"'`).
      * @returns {string} CSV string output.
      * @example
      * <!-- doc:base_2x2 -->
@@ -2166,7 +2099,7 @@ export class DataFrame<T extends RowRecord = any> {
      * "a,b\n1,x"
      */
     writeCsv(
-        file?: string | { write: (str: string) => void },
+        file?: WriteFileTargetArg,
         options: WriteCSVOptions = {}
     ): string {
         if (file) {
@@ -2206,30 +2139,8 @@ export class DataFrame<T extends RowRecord = any> {
      * Writes DataFrame rows to JSON format string or file/stream target.
      * @note [Environment]: When `file` is provided as a string file path, execution requires a Node.js-compatible
      * environment with `fs` access. In browser environments, omit `file` to receive a string or supply a custom writable stream object.
-     * @param {string | { write: (str: string) => void }} [file] Target file path or writable stream target (optional).
+     * @param {WriteFileTargetArg} [file] Target file path or writable stream target (optional).
      * @param {WriteJSONOptions} [options] JSON formatting and replacer options.
-     * @param {JSONFormat} [options.format] JSON output format structure (`"json"` or `"ndjson"`). Default `"json"`.
-     * @param {SafeJsonReplacerOptions} [options.replacerOptions] Serialization options for custom type handling.
-     * @param {(v: Date) => string} [options.replacerOptions.formatDate] Custom formatter function for Date objects. Ignored if `onDate` is specified.
-     * @param {"string" | "number"} [options.replacerOptions.bigintStrategy] Convert BigInts to numeric strings or numbers if safe. Default `"string"`.
-     * @param {(v: bigint) => any} [options.replacerOptions.onBigInt] Custom serialization override for BigInt values.
-     * @param {(v: any) => any} [options.replacerOptions.onTypedArray] Custom serialization override for TypedArray values.
-     * @param {(v: Set<any>) => any} [options.replacerOptions.onSet] Custom serialization override for Set objects.
-     * @param {(v: Map<any, any>) => any} [options.replacerOptions.onMap] Custom serialization override for Map objects.
-     * @param {(v: RegExp) => any} [options.replacerOptions.onRegExp] Custom serialization override for RegExp objects.
-     * @param {(v: Date) => any} [options.replacerOptions.onDate] Custom serialization override for Date objects. Takes precedence over `formatDate`.
-     * @param {(v: Error) => any} [options.replacerOptions.onError] Custom serialization override for Error objects. Prevents empty `{}` output.
-     * @param {(v: URLSearchParams) => any} [options.replacerOptions.onURLSearchParams] Custom serialization override for URLSearchParams objects.
-     * @param {(this: any, k: string, v: any) => any} [options.replacerOptions.onCustom] Catch-all serialization override for custom types. Runs after native type checks.
-     * @param {boolean} [options.replacerOptions.handleCircular] If `true`, handles circular references by replacing them instead of throwing.
-     * @param {(this: any, k: string, v: any) => any} [options.replacerOptions.onCircular] Custom fallback when a circular reference is found. Default `"[Circular]"`.
-     * @param {boolean} [options.replacerOptions.voidBigIntReplacement] If `true`, disables the default safe serialization for BigInt values.
-     * @param {boolean} [options.replacerOptions.voidTypedArrayReplacement] If `true`, disables the default safe serialization for TypedArray values.
-     * @param {boolean} [options.replacerOptions.voidSetReplacement] If `true`, disables the default safe serialization for Set objects.
-     * @param {boolean} [options.replacerOptions.voidMapReplacement] If `true`, disables the default safe serialization for Map objects.
-     * @param {boolean} [options.replacerOptions.voidRegExpReplacement] If `true`, disables the default safe serialization for RegExp objects.
-     * @param {boolean} [options.replacerOptions.voidDateReplacement] If `true`, disables the default safe serialization for Date objects.
-     * @param {((this: any, k: string, v: any) => any) | (string | number)[] | null} [options.replacerOptions.replacer] Custom replacer function or array whitelist that runs first for pre-processing.
      * @returns {string} JSON string representation.
      * @example
      * <!-- doc:base_2x2 -->
@@ -2237,7 +2148,7 @@ export class DataFrame<T extends RowRecord = any> {
      * '[{"a":1,"b":"x"}]'
      */
     writeJson(
-        file?: string | { write: (str: string) => void },
+        file?: WriteFileTargetArg,
         { format = "json", replacerOptions }: WriteJSONOptions = {}
     ): string {
         if (format !== "json" && format !== "ndjson") {

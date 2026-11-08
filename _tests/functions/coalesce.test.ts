@@ -31,6 +31,14 @@ try {
         throw new Error("Coalesce array syntax failed: " + JSON.stringify(res2));
     }
 
+    // 3. Coalesce with string column names via CoalesceArg
+    const res3 = df.select([
+        $df.coalesce([$df.col("a"), $df.col("b"), $df.col("c"), 777]).alias("coalesced_names")
+    ]).toDicts();
+    if (res3[0].coalesced_names !== 1 || res3[1].coalesced_names !== 20 || res3[2].coalesced_names !== 300 || res3[3].coalesced_names !== 777) {
+        throw new Error("Coalesce string column names failed: " + JSON.stringify(res3));
+    }
+
     console.log("✓ $df.coalesce() tests passed successfully!");
 } catch (err) {
     console.error("❌ $df.coalesce() tests failed:", err);

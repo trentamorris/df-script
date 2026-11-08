@@ -1,16 +1,13 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { seqRange } from "./seqRange";
-import type { SeqRangeOptions } from "./seqRange";
+import type { LitOptions } from "./types";
 
-export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
 
 /**
  * Creates a literal column expression that repeats the given value for all rows.
  *
  * @param value The literal value (number, string, boolean, etc.).
  * @param [options] Configuration options.
- * @param [options.dtype] The data type to allocate for the literal values.
- * @param [options.name] The name of the output column.
  * @returns {ColumnExpr<any>} A column expression with the literal value.
  * @namespace $df
  * @category Function
@@ -32,4 +29,3 @@ export function lit(value: any, options: LitOptions = {}): ColumnExpr<any> {
     expr._literalValue = value;
     return expr;
 }
-

@@ -346,6 +346,9 @@ export class StructType<TFields extends RowRecord = any> extends NestedDataType<
 }
 export const Struct = <TFields extends RowRecord>(fields: { [K in keyof TFields]: RegisteredDataType & DataType<TFields[K]> }) => new StructType<TFields>(fields);
 
+/**
+ * Union of all concrete registered DataType instances supported in a DataFrame schema.
+ */
 export type RegisteredDataType =
     | Int8Type | Int16Type | Int32Type | Int64Type
     | UInt8Type | UInt16Type | UInt32Type | UInt64Type

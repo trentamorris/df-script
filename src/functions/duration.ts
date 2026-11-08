@@ -4,12 +4,13 @@ import { lit } from "./lit";
 import { DurationType } from "../datatypes/types";
 import { InvalidArgumentError } from "../exceptions";
 import { isValidNumber, parseDurationString, FIXED_DURATION_UNITS } from "../utils";
-import type { IntoExpr, DurationOptions } from "../types";
+import type { IntoExpr } from "../types";
+import type { DurationArg, DurationComponentArg } from "./types";
 
 /**
  * Constructs a Duration expression column from numeric values, string intervals, column references, or expressions.
  *
- * @param {DurationOptions | string} [options] Duration component options or string interval (e.g. "1d 12h").
+ * @param {DurationArg} [options] Duration component options or string interval (e.g. "1d 12h").
  * @returns {ColumnExpr<any>} A column expression with the calculated duration values.
  * @namespace $df
  * @category Function
@@ -24,7 +25,7 @@ import type { IntoExpr, DurationOptions } from "../types";
  * | 2026-05-21T10:00:00.123Z |
  * +--------------------------+
  */
-export function duration(options: DurationOptions | string = {}): ColumnExpr<any> {
+export function duration(options: DurationArg = {}): ColumnExpr<any> {
     if (typeof options === "string") {
         const ms = parseDurationString(options, { to: "ms" });
         const expr = lit(ms).alias("duration");
@@ -35,7 +36,7 @@ export function duration(options: DurationOptions | string = {}): ColumnExpr<any
     let constantMs = 0;
     let exprTotal: ColumnExpr<any> | null = null;
     let hasComponent = false;
-    const opts = options as Record<string, IntoExpr | number | undefined>;
+    const opts = options as Record<string, DurationComponentArg | undefined>;
 
     for (const key in opts) {
         const mult = FIXED_DURATION_UNITS[key];

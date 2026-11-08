@@ -1,6 +1,6 @@
 /** @internalfile */
 import { DANGEROUS_OBJ_PROPERTIES } from "../constants";
-import type { TypedArrayConstructor } from "../types";
+import type { TypedArrayConstructor } from "./types";
 const _TAG_DATE = "[object Date]";
 const _TAG_REGEXP = "[object RegExp]";
 const _TAG_SET = "[object Set]";

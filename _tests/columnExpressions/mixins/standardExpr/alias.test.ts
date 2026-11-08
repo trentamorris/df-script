@@ -1,7 +1,7 @@
 declare const process: any;
-import { $df } from "../../../src/index";
+import { $df } from "../../../../src/index";
 
-console.log("Running ExprBase.alias edge-case tests...");
+console.log("Running StandardExpr.alias edge-case tests...");
 
 // 1. Basic alias renaming
 const df = $df.data({ a: [1, 2, 3] });
@@ -85,3 +85,4 @@ if (resMulti[0].a1 !== 1 || resMulti[0].a2 !== 1 || resMulti[0].a_doubled !== 2)
 }
 
 console.log("✓ StandardExpr.alias tests passed! (8 edge cases)");
+

@@ -10,94 +10,6 @@
 
 # Column Expression API
 
-## Namespace: $df.col.exprBase
-
-## Operation
-
-Renames the output expression column key.
-
-### Signature
-```typescript
-$df.col(<column_name>).alias(name: string): this
-```
-
-### Parameters
-- `name` (any): Name of the output column.
-
-### Returns: `ColumnExpression`
-
-### Examples
-```typescript
->>> const df = $df.data({ a: [1, 2, 3] })
->>> df
-shape: (3, 1)
-+---+
-| a |
-+---+
-| 1 |
-| 2 |
-| 3 |
-+---+
->>> df.withColumns($df.col("a").alias("renamed_a"))
-shape: (3, 2)
-+---+-----------+
-| a | renamed_a |
-+---+-----------+
-| 1 | 1         |
-| 2 | 2         |
-| 3 | 3         |
-+---+-----------+
-```
-
----
-
-## Operation
-
-Coerces the column data type to another type.
-
-### Signature
-```typescript
-$df.col(<column_name>).cast(
-  dataType: RegisteredDataType,
-  options: CastOptions = {}
-): this
-```
-
-### Parameters
-- `dataType` (any): Registered target data type (e.g. `$df.DataType.Int32`, `$df.DataType.String`).
-- `[options]` (any): Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
-
-### Returns: `ColumnExpression`
-
-### Types Referenced
-- [`RegisteredDataType`](#registereddatatype)
-- [`CastOptions`](#castoptions)
-
-### Examples
-```typescript
->>> const df = $df.data({ a: [1, 2, 3] })
->>> df
-shape: (3, 1)
-+---+
-| a |
-+---+
-| 1 |
-| 2 |
-| 3 |
-+---+
->>> df.withColumns($df.col("a").cast($df.DataType.Float64).alias("float_a"))
-shape: (3, 2)
-+---+---------+
-| a | float_a |
-+---+---------+
-| 1 | 1.0     |
-| 2 | 2.0     |
-| 3 | 3.0     |
-+---+---------+
-```
-
----
-
 ## Namespace: $df.col.arrayExpr
 
 ## Operation
@@ -1540,6 +1452,45 @@ shape: (3, 2)
 
 ## Operation
 
+Renames the output expression column key.
+
+### Signature
+```typescript
+$df.col(<column_name>).alias(name: string): this
+```
+
+### Parameters
+- `name` (any): Name of the output column.
+
+### Returns: `ColumnExpression`
+
+### Examples
+```typescript
+>>> const df = $df.data({ a: [1, 2, 3] })
+>>> df
+shape: (3, 1)
++---+
+| a |
++---+
+| 1 |
+| 2 |
+| 3 |
++---+
+>>> df.withColumns($df.col("a").alias("renamed_a"))
+shape: (3, 2)
++---+-----------+
+| a | renamed_a |
++---+-----------+
+| 1 | 1         |
+| 2 | 2         |
+| 3 | 3         |
++---+-----------+
+```
+
+---
+
+## Operation
+
 Aggregation: Returns true if all values in the group are truthy.
 
 ### Signature
@@ -2230,6 +2181,53 @@ shape: (1, 1)
 +-----+
 | 0   |
 +-----+
+```
+
+---
+
+## Operation
+
+Coerces the column data type to another type.
+
+### Signature
+```typescript
+$df.col(<column_name>).cast(
+  dataType: RegisteredDataType,
+  options: CastOptions = {}
+): this
+```
+
+### Parameters
+- `dataType` (any): Registered target data type (e.g. `$df.DataType.Int32`, `$df.DataType.String`).
+- `[options]` (any): Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
+
+### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`RegisteredDataType`](#registereddatatype)
+- [`CastOptions`](#castoptions)
+
+### Examples
+```typescript
+>>> const df = $df.data({ a: [1, 2, 3] })
+>>> df
+shape: (3, 1)
++---+
+| a |
++---+
+| 1 |
+| 2 |
+| 3 |
++---+
+>>> df.withColumns($df.col("a").cast($df.DataType.Float64).alias("float_a"))
+shape: (3, 2)
++---+---------+
+| a | float_a |
++---+---------+
+| 1 | 1.0     |
+| 2 | 2.0     |
+| 3 | 3.0     |
++---+---------+
 ```
 
 ---
@@ -9240,13 +9238,16 @@ Renames existing field keys inside structured object columns.
 
 ### Signature
 ```typescript
-$df.col(<column_name>).struct.renameFields(mapping: Record<string, string>)
+$df.col(<column_name>).struct.renameFields(mapping: RenameMappingArg)
 ```
 
 ### Parameters
 - `mapping` (any): Key-value map of current field names to new field names.
 
 ### Returns: `ColumnExpression`
+
+### Types Referenced
+- [`RenameMappingArg`](#renamemappingarg)
 
 ### Examples
 ```typescript
@@ -9387,6 +9388,9 @@ Extracts the 1-indexed century component (e.g. 21 for 2026) from a Datetime colu
 ```typescript
 $df.col(<column_name>).dt.century(timeZone?: string)
 ```
+
+### Parameters
+- `timeZone` (any): Optional IANA timezone identifier. Defaults to the column timezone or UTC.
 
 ### Returns: `ColumnExpression`
 
@@ -9772,6 +9776,9 @@ Extracts the 1-indexed millennium component index (e.g. 3 for the year 2026) fro
 ```typescript
 $df.col(<column_name>).dt.millennium(timeZone?: string)
 ```
+
+### Parameters
+- `timeZone` (any): Optional IANA timezone identifier. Defaults to the column timezone or UTC.
 
 ### Returns: `ColumnExpression`
 
@@ -10678,19 +10685,19 @@ Casts columns in the DataFrame to the specified data type(s).
 ### Signature
 ```typescript
 df.cast(
-  dtypes: RegisteredDataType | Record<string, RegisteredDataType>,
+  dtypes: CastTargetArg,
   options: CastOptions = {}
 ): DataFrame<any>
 ```
 
 ### Parameters
-- `dtypes` (RegisteredDataType | Record<string, RegisteredDataType>): Target data type for all columns, or mapping of column names to target data types.
+- `dtypes` (CastTargetArg): Target data type for all columns, or mapping of column names to target data types.
 - `[options]` (CastOptions): Casting options (e.g. strict).
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`RegisteredDataType`](#registereddatatype)
+- [`CastTargetArg`](#casttargetarg)
 - [`CastOptions`](#castoptions)
 
 ### Examples
@@ -10772,22 +10779,20 @@ Concatenates items vertically, horizontally, or diagonally.
 ### Signature
 ```typescript
 df.concat<U extends RowRecord = any>(
-  items: ConcatItem | ConcatItem[],
+  items: ConcatItemsArg,
   options: ConcatOptions = {}
 ): DataFrame<U>
 ```
 
 ### Parameters
-- `items` (ConcatItem | ConcatItem[]): Single DataFrame or array of DataFrames/rows to concatenate.
+- `items` (ConcatItemsArg): Single DataFrame or array of DataFrames/rows to concatenate.
 - `[options]` (ConcatOptions): Configuration options for concatenation layout and strictness.
-- `[options.how]` (ConcatHow): Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
-- `[options.horizontal.strict]` (boolean): When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
 - [`RowRecord`](#rowrecord)
-- [`ConcatItem`](#concatitem)
+- [`ConcatItemsArg`](#concatitemsarg)
 - [`ConcatOptions`](#concatoptions)
 
 ### Examples
@@ -10889,13 +10894,16 @@ Drops specified columns from the DataFrame.
 
 ### Signature
 ```typescript
-df.drop<K extends keyof T>(...args: (K | K[])[]): DataFrame<Omit<T, K>>
+df.drop<K extends keyof T>(...args: ColumnKeyArg<K>[]): DataFrame<Omit<T, K>>
 ```
 
 ### Parameters
-- `args` ((K | K[])[]): Column names or arrays of column names to remove.
+- `args` (ColumnKeyArg<K>[]): Column names or arrays of column names to remove.
 
 ### Returns: `DataFrame`
+
+### Types Referenced
+- [`ColumnKeyArg`](#columnkeyarg)
 
 ### Examples
 ```typescript
@@ -10926,13 +10934,16 @@ Drops rows with null or undefined values.
 
 ### Signature
 ```typescript
-df.dropNulls(subset?: string | string[]): DataFrame<T>
+df.dropNulls(subset?: ColumnKeyArg<string>): DataFrame<T>
 ```
 
 ### Parameters
-- `[subset]` (string | string[]): Column name or array of column names to check for nulls.
+- `[subset]` (ColumnKeyArg<string>): Column name or array of column names to check for nulls.
 
 ### Returns: `DataFrame`
+
+### Types Referenced
+- [`ColumnKeyArg`](#columnkeyarg)
 
 ### Examples
 ```typescript
@@ -11006,7 +11017,6 @@ df.equals<U extends RowRecord = any>(
 ### Parameters
 - `other` (DataFrame): The other DataFrame to compare with.
 - `[options]` (EqualsOptions): Comparison configuration options.
-- `[options.nullsEqual]` (boolean): Whether nulls / NaNs compare as equal. Default: `true`.
 
 ### Returns: `boolean`
 
@@ -11038,21 +11048,19 @@ Explodes an array column into multiple rows, replicating non-target row attribut
 ### Signature
 ```typescript
 df.explode(
-  columns: IntoExpr | IntoExpr[],
+  columns: IntoExprArg,
   options?: ExplodeOptions
 ): DataFrame<any>
 ```
 
 ### Parameters
-- `columns` (IntoExpr | IntoExpr[]): Target column expression or array column name to explode.
+- `columns` (IntoExprArg): Target column expression or array column name to explode.
 - `[options]` (ExplodeOptions): Configuration options for empty array and null handling.
-- `[options.emptyAsNull]` (boolean): When `true`, converts empty arrays to `null` rows.
-- `[options.keepNulls]` (boolean): When `true`, retains `null` array values during explosion.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`IntoExprArg`](#intoexprarg)
 - [`ExplodeOptions`](#explodeoptions)
 
 ### Examples
@@ -11178,9 +11186,6 @@ df.fillNull(options: FillNullOptions = {}): DataFrame<T>
 
 ### Parameters
 - `[options]` (FillNullOptions): Configuration options for null replacement.
-- `[options.value]` (any): Scalar replacement value or dict mapping column names to values.
-- `[options.strategy]` (FillNullStrategy): Statistical filling strategy (`"zero"`, `"mean"`, `"min"`, `"max"`, `"forward"`, `"backward"`).
-- `[options.limit]` (number): Maximum consecutive nulls to fill when using propagation strategies.
 
 ### Returns: `DataFrame`
 
@@ -11218,16 +11223,16 @@ Filters rows matching boolean column expressions or predicate callbacks.
 
 ### Signature
 ```typescript
-df.filter(...exprs: (IExpr | ((row: T) => any) | (IExpr | ((row: T) => any))[])[]): DataFrame<T>
+df.filter(...exprs: FilterPredicateArg<T>[]): DataFrame<T>
 ```
 
 ### Parameters
-- `exprs` ((IExpr | ((row: T) => any))[]): Expressions or predicate functions evaluated per row.
+- `exprs` (FilterPredicateArg<T>[]): Expressions or predicate functions evaluated per row.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`IExpr`](#iexpr)
+- [`FilterPredicateArg`](#filterpredicatearg)
 
 ### Examples
 ```typescript
@@ -11259,15 +11264,16 @@ Groups rows by key columns to prepare for aggregations.
 
 ### Signature
 ```typescript
-df.groupBy<K extends keyof T>(keys: K | K[]): GroupedData<T, K>
+df.groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K>
 ```
 
 ### Parameters
-- `keys` (K | K[]): Column name or array of key column names.
+- `keys` (ColumnKeyArg<K>): Column name or array of key column names.
 
 ### Returns: `GroupedData`
 
 ### Types Referenced
+- [`ColumnKeyArg`](#columnkeyarg)
 - [`GroupedData`](#groupeddata)
 
 ### Examples
@@ -11301,7 +11307,7 @@ Groups dynamically based on a time or integer index column over sliding / steppi
 ### Signature
 ```typescript
 df.groupByDynamic<K extends keyof T & string>(
-  indexColumn: K | IntoExpr,
+  indexColumn: DynamicIndexColumnArg<K>,
   options: GroupByDynamicOptions<T>
 ): GroupedData<T, K>
 ```
@@ -11313,7 +11319,7 @@ df.groupByDynamic<K extends keyof T & string>(
 ### Returns: `GroupedData`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`DynamicIndexColumnArg`](#dynamicindexcolumnarg)
 - [`GroupByDynamicOptions`](#groupbydynamicoptions)
 - [`GroupedData`](#groupeddata)
 
@@ -11420,19 +11426,19 @@ Inserts a new column at a specific ordinal index position.
 df.insertColumn(
   index: number,
   name: string,
-  expr: IntoExpr | ArrayLike<any>
+  expr: InsertColumnArg
 ): DataFrame<any>
 ```
 
 ### Parameters
 - `index` (number): Target column index position.
 - `name` (string): Name of the inserted column.
-- `expr` (IntoExpr | ArrayLike<any>): Value expression, column definition, or raw column values array.
+- `expr` (InsertColumnArg): Value expression, column definition, or raw column values array.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`InsertColumnArg`](#insertcolumnarg)
 
 ### Examples
 ```typescript
@@ -11465,15 +11471,18 @@ Retrieves a single scalar cell value by row and column position or name.
 ```typescript
 df.item(
   row?: number,
-  column?: number | string
+  column?: ColumnIndexOrNameArg
 ): any
 ```
 
 ### Parameters
 - `[row]` (number): Row index position.
-- `[column]` (number | string): Column index or column name string.
+- `[column]` (ColumnIndexOrNameArg): Column index or column name string.
 
 ### Returns: `any`
+
+### Types Referenced
+- [`ColumnIndexOrNameArg`](#columnindexornamearg)
 
 ### Examples
 ```typescript
@@ -11530,15 +11539,18 @@ Yields a generator iterating over rows as tuples or named objects.
 df.iterRows(
   {
     named = false
-  }: { named?: boolean } = {}
-): Generator<any[] | Record<string, any>>
+  }: IterRowsOptions = {}
+): Generator<IterRowResult<T>>
 ```
 
 ### Parameters
 - `[config]` (any): Iteration format configuration.
-- `[config.named]` (any): When `true`, yields row objects with column keys (`{ col: val }`). When `false` (default), yields positional arrays (`[val1, val2]`).
 
 ### Returns: `Generator of rows.`
+
+### Types Referenced
+- [`IterRowsOptions`](#iterrowsoptions)
+- [`IterRowResult`](#iterrowresult)
 
 ### Examples
 ```typescript
@@ -11570,14 +11582,6 @@ df.join<U extends RowRecord = any, R extends RowRecord = any>(
 ### Parameters
 - `other` (DataFrame): Right DataFrame to join with.
 - `[options]` (JoinOptions, default: {}): Join configuration object.
-- `[options.on]` (string | string[]): Join key column name or array of key column names that exist in both DataFrames.
-- `[options.leftOn]` (string | string[]): Join key column(s) in the left DataFrame when key names differ.
-- `[options.rightOn]` (string | string[]): Join key column(s) in the right DataFrame when key names differ.
-- `[options.how]` (JoinType): Join strategy. Default `"inner"`. - `"inner"` — Only rows with matching keys in both DataFrames. - `"left"` — All left rows; unmatched right values are `null`. - `"right"` — All right rows; unmatched left values are `null`. - `"outer"` — All rows from both sides; unmatched values are `null`. - `"semi"` — Left rows that have a match in the right DataFrame (only left columns retained). - `"anti"` — Left rows that have **no** match in the right DataFrame (only left columns retained). - `"cross"` — Cartesian product pairing every left row with every right row (keyless).
-- `[options.suffixes]` ([string, string]): Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping non-key column names (default `["", "_right"]`). Ignored for `"semi"` and `"anti"` joins.
-- `[options.joinNulls]` (boolean): If `true`, null key values are treated as equal and will match each other across DataFrames. Default `false` (SQL-standard: `NULL != NULL`).
-- `[options.coalesce]` (boolean): Coalescing behavior for join key columns. Default `true`. If `true`, coalesces join key values into left key columns and drops right key columns. If `false`, keeps join key columns separate.
-- `[options.maintainOrder]` (JoinMaintainOrder | boolean): Row order preservation strategy. Default `"none"`. - `"none"` (or `false`) — No specific ordering is desired. - `"left"` (or `true`) — Preserves the order of the left DataFrame. - `"right"` — Preserves the order of the right DataFrame. - `"left_right"` — Preserves the order of the left DataFrame first, then the right. - `"right_left"` — Preserves the order of the right DataFrame first, then the left.
 
 ### Returns: `DataFrame`
 
@@ -11634,18 +11638,6 @@ df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(
 ### Parameters
 - `other` (DataFrame): The right DataFrame to join with.
 - `options` (JoinAsofOptions): Asof join configuration options.
-- `[options.on]` (string): Column name to join on (must exist in both DataFrames and be sorted ascending).
-- `[options.leftOn]` (string): Left DataFrame join key column name.
-- `[options.rightOn]` (string): Right DataFrame join key column name.
-- `[options.by]` (string | string[]): Optional exact-match group column(s) present in both DataFrames.
-- `[options.leftBy]` (string | string[]): Group column(s) for exact key matching in left DataFrame.
-- `[options.rightBy]` (string | string[]): Group column(s) for exact key matching in right DataFrame.
-- `[options.strategy]` (JoinAsofStrategy): Match search strategy. Default `"backward"`. - `"backward"` — Matches the latest right row where `rightKey <= leftKey`. - `"forward"` — Matches the earliest right row where `rightKey >= leftKey`. - `"nearest"` — Matches the right row with the absolute nearest key value to `leftKey`.
-- `[options.tolerance]` (number | string): Maximum allowed distance between left key and right key.
-- `[options.allowExactMatches]` (boolean): Whether exact key matches are permitted. Default `true`.
-- `[options.suffixes]` ([string, string]): Column name suffixes `[leftSuffix, rightSuffix]` to resolve name collisions. Default `["", "_right"]`.
-- `[options.coalesce]` (boolean): Coalescing behavior for join key columns. Default `true`.
-- `[options.checkSorted]` (boolean): Whether to verify that join keys are sorted ascending prior to matching. Default `true`.
 
 ### Returns: `A new DataFrame containing the joined results.`
 
@@ -11706,20 +11698,19 @@ Evaluates one or more boolean expressions across combined rows from both DataFra
 ```typescript
 df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
   other: DataFrame<U>,
-  ...args: (IntoExpr | IntoExpr[] | JoinWhereOptions)[]
+  ...args: JoinWhereArg[]
 ): DataFrame<R>
 ```
 
 ### Parameters
 - `other` (DataFrame): The right DataFrame to join with.
-- `args` (...(IntoExpr | IntoExpr[] | JoinWhereOptions)): Predicate expression(s), arrays of expressions, and an optional configuration options object (`{ how, suffixes }`).
+- `args` (...JoinWhereArg): Predicate expression(s), arrays of expressions, and an optional configuration options object (`{ how, suffixes }`).
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
 - [`RowRecord`](#rowrecord)
-- [`IntoExpr`](#intoexpr)
-- [`JoinWhereOptions`](#joinwhereoptions)
+- [`JoinWhereArg`](#joinwherearg)
 
 ### Examples
 ```typescript
@@ -11775,8 +11766,6 @@ df.limit(
 ### Parameters
 - `n` (number): Maximum number of rows to take.
 - `[options]` (LimitOptions): Offset and slice direction options.
-- `[options.offset]` (number): Number of rows to skip before taking `n` rows (default 0).
-- `[options.from]` (LimitPosition): Slice direction starting point (`"start"` or `"end"`). Default `"start"`.
 
 ### Returns: `DataFrame`
 
@@ -11813,22 +11802,23 @@ Splits a DataFrame into sub-DataFrames partitioned by column names or expression
 
 ### Signature
 ```typescript
-df.partitionBy<K extends (keyof T & string) | IExpr>(
-  by: K | K[],
+df.partitionBy<K extends PartitionByKey<T>>(
+  by: ColumnKeyArg<K>,
   options: PartitionByOptions = {}
-): DataFrame<T>[] | Record<string, DataFrame<T>>
+): PartitionByResult<T>
 ```
 
 ### Parameters
-- `by` (K | K[]): Key column(s) or column expressions to partition by.
+- `by` (ColumnKeyArg<K>): Key column(s) or column expressions to partition by.
 - `[options]` (PartitionByOptions, default: {}): Partition configuration options.
-- `[options.asDict]` (boolean, default: false): If `true`, returns a dictionary mapping partition keys to sub-DataFrames.
 
-### Returns: `DataFrame<T>[] | Record<string, DataFrame<T>>`
+### Returns: `PartitionByResult<T>`
 
 ### Types Referenced
-- [`IExpr`](#iexpr)
+- [`PartitionByKey`](#partitionbykey)
+- [`ColumnKeyArg`](#columnkeyarg)
 - [`PartitionByOptions`](#partitionbyoptions)
+- [`PartitionByResult`](#partitionbyresult)
 
 ### Examples
 ```typescript
@@ -11848,10 +11838,6 @@ df.pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U>
 
 ### Parameters
 - `config` (any): Pivot table configuration options.
-- `config.index` (string | string[]): Key column(s) to use as new DataFrame rows.
-- `config.columns` (string): Column whose distinct values become new wide column headers.
-- `config.values` (string): Column whose cell values populate the pivoted grid cells.
-- `[config.agg]` (AggFn | string): Aggregation function to apply when multiple values exist for a cell.
 
 ### Returns: `DataFrame`
 
@@ -11890,13 +11876,16 @@ Renames columns based on a key-value mapping dictionary.
 
 ### Signature
 ```typescript
-df.rename(mapping: Partial<Record<keyof T, string>> = {}): DataFrame<any>
+df.rename(mapping: RenameMappingArg<T> = {}): DataFrame<any>
 ```
 
 ### Parameters
-- `[mapping]` (Partial<Record<keyof T, string>>): Dictionary mapping old column names to new names.
+- `[mapping]` (RenameMappingArg<T>): Dictionary mapping old column names to new names.
 
 ### Returns: `DataFrame`
+
+### Types Referenced
+- [`RenameMappingArg`](#renamemappingarg)
 
 ### Examples
 ```typescript
@@ -11992,17 +11981,17 @@ Selects specific columns or evaluates column expressions.
 
 ### Signature
 ```typescript
-df.select<U extends RowRecord = any>(...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]): DataFrame<U>
+df.select<U extends RowRecord = any>(...args: SelectArg[]): DataFrame<U>
 ```
 
 ### Parameters
-- `args` ((string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]): Column names, column expressions, or object maps to evaluate.
+- `args` (SelectArg[]): Column names, column expressions, or object maps to evaluate.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
 - [`RowRecord`](#rowrecord)
-- [`IExpr`](#iexpr)
+- [`SelectArg`](#selectarg)
 
 ### Examples
 ```typescript
@@ -12033,10 +12022,13 @@ Gets DataFrame dimensions as [height, width] tuple.
 
 ### Signature
 ```typescript
-df.shape: [number, number]
+df.shape: DataFrameShape
 ```
 
 ### Returns: `Tuple [height, width].`
+
+### Types Referenced
+- [`DataFrameShape`](#dataframeshape)
 
 ### Examples
 ```typescript
@@ -12108,10 +12100,6 @@ df.sort(config?: SortOptions<T>): DataFrame<T>
 
 ### Parameters
 - `[config]` (SortOptions<T>): Sort configuration options.
-- `config.by` (keyof T | (keyof T)[] | IExpr | IExpr[]): Column name(s) or expression(s) to sort by.
-- `[config.descending]` (boolean | boolean[]): Sort order boolean or array of booleans per key (default `false`).
-- `[config.nullsLast]` (boolean): When `true` (default), places nulls at the end of sorted output.
-- `[config.custom]` (Partial<Record<keyof T, (a: any, b: any) => number>>): Optional dictionary mapping column names to custom comparator functions.
 
 ### Returns: `DataFrame`
 
@@ -12187,16 +12175,16 @@ Evaluates a column expression or retrieves column values as a raw JavaScript arr
 
 ### Signature
 ```typescript
-df.toArray<K extends keyof T>(nameOrExpr: K | IExpr): any[]
+df.toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[]
 ```
 
 ### Parameters
-- `nameOrExpr` (K | IExpr): Target column name or column expression.
+- `nameOrExpr` (ColumnOrExprArg<K>): Target column name or column expression.
 
 ### Returns: `any[]`
 
 ### Types Referenced
-- [`IExpr`](#iexpr)
+- [`ColumnOrExprArg`](#columnorexprarg)
 
 ### Examples
 ```typescript
@@ -12291,9 +12279,6 @@ df.transpose(
 
 ### Parameters
 - `[options]` (TransposeOptions): Transpose layout options.
-- `[options.includeHeader]` (boolean): When `true`, includes original column names as a new header column (default `false`).
-- `[options.headerName]` (string): Name of the header column when `includeHeader` is `true` (default `"column"`).
-- `[options.columnNames]` (string | Iterable<string>): Column name or iterable of strings to use as transposed column headers.
 
 ### Returns: `DataFrame`
 
@@ -12331,13 +12316,16 @@ Filters distinct unique rows matching target key columns.
 
 ### Signature
 ```typescript
-df.unique<K extends keyof T>(columns?: K | K[]): DataFrame<T>
+df.unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T>
 ```
 
 ### Parameters
-- `[columns]` (K | K[]): Target column or array of column names to evaluate uniqueness.
+- `[columns]` (ColumnKeyArg<K>): Target column or array of column names to evaluate uniqueness.
 
 ### Returns: `DataFrame`
+
+### Types Referenced
+- [`ColumnKeyArg`](#columnkeyarg)
 
 ### Examples
 ```typescript
@@ -12373,10 +12361,6 @@ df.unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U>
 
 ### Parameters
 - `config` (UnpivotOptions<T>): Unpivot configuration options.
-- `config.idVars` (keyof T | (keyof T)[]): Key column(s) to retain as identifier variables.
-- `config.valueVars` (keyof T | (keyof T)[]): Column(s) to unpivot into variable-value pairs.
-- `[config.varName]` (string): Name for the new variable column holding old column headers (default `"variable"`).
-- `[config.valueName]` (string): Name for the new value column holding cell values (default `"value"`).
 
 ### Returns: `DataFrame`
 
@@ -12418,7 +12402,7 @@ Unstacks selected columns into multiple wide columns of size `step`. Reshapes da
 ### Signature
 ```typescript
 df.unstack(
-  columns: IntoExpr | IntoExpr[],
+  columns: IntoExprArg,
   options: UnstackOptions
 ): DataFrame<any>
 ```
@@ -12430,7 +12414,7 @@ df.unstack(
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`IntoExprArg`](#intoexprarg)
 - [`UnstackOptions`](#unstackoptions)
 
 ### Examples
@@ -12491,16 +12475,16 @@ Adds new columns or updates existing ones using column expressions.
 
 ### Signature
 ```typescript
-df.withColumns(...args: (string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]): DataFrame<any>
+df.withColumns(...args: SelectArg[]): DataFrame<any>
 ```
 
 ### Parameters
-- `args` ((string | IExpr | Record<string, any> | (string | IExpr | Record<string, any>)[])[]): Expressions or field objects defining column calculations.
+- `args` (SelectArg[]): Expressions or field objects defining column calculations.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
-- [`IExpr`](#iexpr)
+- [`SelectArg`](#selectarg)
 
 ### Examples
 ```typescript
@@ -12573,21 +12557,19 @@ Writes DataFrame to CSV format string or file/stream target.
 ### Signature
 ```typescript
 df.writeCsv(
-  file?: string | { write: (str: string) => void },
+  file?: WriteFileTargetArg,
   options: WriteCSVOptions = {}
 ): string
 ```
 
 ### Parameters
-- `[file]` (string | { write: (str: string) => void }): Target file path or writable stream target (optional).
+- `[file]` (WriteFileTargetArg): Target file path or writable stream target (optional).
 - `[options]` (WriteCSVOptions): CSV formatting options.
-- `[options.delimiter]` (string): Column delimiter character (default `","`).
-- `[options.header]` (boolean): When `true` (default), includes column header row.
-- `[options.quoteChar]` (string): Character used to enclose fields containing special characters (default `'"'`).
 
 ### Returns: `string`
 
 ### Types Referenced
+- [`WriteFileTargetArg`](#writefiletargetarg)
 - [`WriteCSVOptions`](#writecsvoptions)
 
 ### Examples
@@ -12614,7 +12596,7 @@ Writes DataFrame rows to JSON format string or file/stream target.
 ### Signature
 ```typescript
 df.writeJson(
-  file?: string | { write: (str: string) => void },
+  file?: WriteFileTargetArg,
   {
     format = "json",
     replacerOptions
@@ -12623,34 +12605,13 @@ df.writeJson(
 ```
 
 ### Parameters
-- `[file]` (string | { write: (str: string) => void }): Target file path or writable stream target (optional).
+- `[file]` (WriteFileTargetArg): Target file path or writable stream target (optional).
 - `[options]` (WriteJSONOptions): JSON formatting and replacer options.
-- `[options.format]` (JSONFormat): JSON output format structure (`"json"` or `"ndjson"`). Default `"json"`.
-- `[options.replacerOptions]` (SafeJsonReplacerOptions): Serialization options for custom type handling.
-- `[options.replacerOptions.formatDate]` ((v: Date) => string): Custom formatter function for Date objects. Ignored if `onDate` is specified.
-- `[options.replacerOptions.bigintStrategy]` ("string" | "number"): Convert BigInts to numeric strings or numbers if safe. Default `"string"`.
-- `[options.replacerOptions.onBigInt]` ((v: bigint) => any): Custom serialization override for BigInt values.
-- `[options.replacerOptions.onTypedArray]` ((v: any) => any): Custom serialization override for TypedArray values.
-- `[options.replacerOptions.onSet]` ((v: Set<any>) => any): Custom serialization override for Set objects.
-- `[options.replacerOptions.onMap]` ((v: Map<any, any>) => any): Custom serialization override for Map objects.
-- `[options.replacerOptions.onRegExp]` ((v: RegExp) => any): Custom serialization override for RegExp objects.
-- `[options.replacerOptions.onDate]` ((v: Date) => any): Custom serialization override for Date objects. Takes precedence over `formatDate`.
-- `[options.replacerOptions.onError]` ((v: Error) => any): Custom serialization override for Error objects. Prevents empty `{}` output.
-- `[options.replacerOptions.onURLSearchParams]` ((v: URLSearchParams) => any): Custom serialization override for URLSearchParams objects.
-- `[options.replacerOptions.onCustom]` ((this: any, k: string, v: any) => any): Catch-all serialization override for custom types. Runs after native type checks.
-- `[options.replacerOptions.handleCircular]` (boolean): If `true`, handles circular references by replacing them instead of throwing.
-- `[options.replacerOptions.onCircular]` ((this: any, k: string, v: any) => any): Custom fallback when a circular reference is found. Default `"[Circular]"`.
-- `[options.replacerOptions.voidBigIntReplacement]` (boolean): If `true`, disables the default safe serialization for BigInt values.
-- `[options.replacerOptions.voidTypedArrayReplacement]` (boolean): If `true`, disables the default safe serialization for TypedArray values.
-- `[options.replacerOptions.voidSetReplacement]` (boolean): If `true`, disables the default safe serialization for Set objects.
-- `[options.replacerOptions.voidMapReplacement]` (boolean): If `true`, disables the default safe serialization for Map objects.
-- `[options.replacerOptions.voidRegExpReplacement]` (boolean): If `true`, disables the default safe serialization for RegExp objects.
-- `[options.replacerOptions.voidDateReplacement]` (boolean): If `true`, disables the default safe serialization for Date objects.
-- `[options.replacerOptions.replacer]` (((this: any, k: string, v: any) => any) | (string | number)[] | null): Custom replacer function or array whitelist that runs first for pre-processing.
 
 ### Returns: `string`
 
 ### Types Referenced
+- [`WriteFileTargetArg`](#writefiletargetarg)
 - [`WriteJSONOptions`](#writejsonoptions)
 
 ### Examples
@@ -12676,7 +12637,7 @@ Aggregates grouped partitions using aggregation column expressions.
 
 ### Signature
 ```typescript
-df.groupBy(...).agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U>
+df.groupBy(...).agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U>
 ```
 
 ### Parameters
@@ -12686,7 +12647,7 @@ df.groupBy(...).agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataF
 
 ### Types Referenced
 - [`RowRecord`](#rowrecord)
-- [`IExpr`](#iexpr)
+- [`SelectArg`](#selectarg)
 
 ### Examples
 ```typescript
@@ -12795,17 +12756,16 @@ Returns the first non-null value among the specified expressions.
 
 ### Signature
 ```typescript
-$df.coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any>
+$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>
 ```
 
 ### Parameters
-- `exprs` (...(IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): The list of expressions or columns to coalesce.
+- `exprs` (...CoalesceArg): The list of expressions or columns to coalesce.
 
 ### Returns: `ColumnExpr<any>`
 
 ### Types Referenced
-- [`IExpr`](#iexpr)
-- [`ValidScalarTypes`](#validscalartypes)
+- [`CoalesceArg`](#coalescearg)
 - [`ColumnExpr`](#columnexpr)
 
 ### Examples
@@ -12881,7 +12841,7 @@ Concatenates items vertically, horizontally, or diagonally.
 ### Signature
 ```typescript
 $df.concat<U extends RowRecord = any>(
-  rawItems: ConcatItem | ConcatItem[],
+  rawItems: ConcatItemsArg,
   {
     how = 'vertical',
     horizontal
@@ -12892,14 +12852,12 @@ $df.concat<U extends RowRecord = any>(
 ### Parameters
 - `rawItems` (any): Single DataFrame or array of DataFrames/rows to concatenate.
 - `[options]` (any): Configuration options for concatenation layout and strictness.
-- `[options.how]` (any): Layout strategy: `"vertical"` (default, appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
-- `[options.horizontal.strict]` (any): When `true` (default), throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
 
 ### Returns: `DataFrame`
 
 ### Types Referenced
 - [`RowRecord`](#rowrecord)
-- [`ConcatItem`](#concatitem)
+- [`ConcatItemsArg`](#concatitemsarg)
 - [`ConcatOptions`](#concatoptions)
 
 ### Examples
@@ -13002,20 +12960,20 @@ Constructs a new DataFrame from an array of row records or a column dictionary.
 ### Signature
 ```typescript
 $df.data<T extends RowRecord = any>(
-  data: T[] | ColumnDict,
+  data: DataFrameDataArg<T>,
   schema?: DataFrameSchema
 ): DataFrame<T>
 ```
 
 ### Parameters
-- `data` (T[] | ColumnDict): Array of row objects or column data dictionary.
+- `data` (DataFrameDataArg<T>): Array of row objects or column data dictionary.
 - `[schema]` (DataFrameSchema): Optional explicit column schema mapping.
 
 ### Returns: `DataFrame<T>`
 
 ### Types Referenced
 - [`RowRecord`](#rowrecord)
-- [`ColumnDict`](#columndict)
+- [`DataFrameDataArg`](#dataframedataarg)
 - [`DataFrameSchema`](#dataframeschema)
 
 ### Examples
@@ -13039,16 +12997,16 @@ Constructs a Duration expression column from numeric values, string intervals, c
 
 ### Signature
 ```typescript
-$df.duration(options: DurationOptions | string = {}): ColumnExpr<any>
+$df.duration(options: DurationArg = {}): ColumnExpr<any>
 ```
 
 ### Parameters
-- `[options]` (DurationOptions | string): Duration component options or string interval (e.g. "1d 12h").
+- `[options]` (DurationArg): Duration component options or string interval (e.g. "1d 12h").
 
 ### Returns: `ColumnExpr<any>`
 
 ### Types Referenced
-- [`DurationOptions`](#durationoptions)
+- [`DurationArg`](#durationarg)
 - [`ColumnExpr`](#columnexpr)
 
 ### Examples
@@ -13115,15 +13073,16 @@ Creates an expression targeting all columns except the specified ones.
 
 ### Signature
 ```typescript
-$df.exclude(columns: string | string[]): ColumnExpr<any>
+$df.exclude(columns: ColumnKeyArg): ColumnExpr<any>
 ```
 
 ### Parameters
-- `columns` (string | string[]): The name or names of columns to exclude.
+- `columns` (ColumnKeyArg): The name or names of columns to exclude.
 
 ### Returns: `ColumnExpr<any>`
 
 ### Types Referenced
+- [`ColumnKeyArg`](#columnkeyarg)
 - [`ColumnExpr`](#columnexpr)
 
 ### Examples
@@ -13155,16 +13114,16 @@ Combines multiple columns or expressions horizontally into an array per row, all
 
 ### Signature
 ```typescript
-$df.horizontal(...exprs: (IntoExpr | IntoExpr[])[]): HorizontalExpr
+$df.horizontal(...exprs: IntoExprArg[]): HorizontalExpr
 ```
 
 ### Parameters
-- `exprs` (...(IntoExpr | IntoExpr[])[]): Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
+- `exprs` (...IntoExprArg): Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
 
 ### Returns: `HorizontalExpr`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`IntoExprArg`](#intoexprarg)
 - [`HorizontalExpr`](#horizontalexpr)
 
 ### Examples
@@ -13196,16 +13155,16 @@ Aggregates values of a column into a list within each group.
 
 ### Signature
 ```typescript
-$df.implode(column: IntoExpr | IntoExpr[]): ColumnExpr<any>
+$df.implode(column: IntoExprArg): ColumnExpr<any>
 ```
 
 ### Parameters
-- `column` (IntoExpr | IntoExpr[]): The column or expression to implode.
+- `column` (IntoExprArg): The column or expression to implode.
 
 ### Returns: `ColumnExpr<any>`
 
 ### Types Referenced
-- [`IntoExpr`](#intoexpr)
+- [`IntoExprArg`](#intoexprarg)
 - [`ColumnExpr`](#columnexpr)
 
 ### Examples
@@ -13247,8 +13206,6 @@ $df.lit(
 ### Parameters
 - `value` (any): The literal value (number, string, boolean, etc.).
 - `[options]` (any): Configuration options.
-- `[options.dtype]` (any): The data type to allocate for the literal values.
-- `[options.name]` (any): The name of the output column.
 
 ### Returns: `ColumnExpr<any>`
 
@@ -13294,9 +13251,6 @@ $df.readCsv<T extends RowRecord = any>(
 ### Parameters
 - `content` (any): The CSV content string.
 - `[options]` (any): Parse and configuration options.
-- `[options.hasHeader]` (any): Whether the first row is a header row (default `true`).
-- `[options.schema]` (any): Optional column schema to coerce types.
-- `[options.inferSchema]` (any): When `true` (default), automatically infers column types.
 
 ### Returns: `DataFrame`
 
@@ -13347,9 +13301,6 @@ $df.readJson(
 ### Parameters
 - `content` (any): The JSON or NDJSON content string.
 - `[options]` (any): Parse and configuration options.
-- `[options.format]` (any): Input format (`"json"` or `"ndjson"`). Default `"json"`.
-- `[options.trimBeforeParse]` (any): When `true` (default), trims whitespace before parsing.
-- `[options.schema]` (any): Optional column schema to coerce types.
 
 ### Returns: `A new DataFrame instance populated with the parsed records.`
 
@@ -13394,17 +13345,6 @@ $df.seqRange(
 ### Parameters
 - `value` (any): The initial value to start the sequence or the constant value to repeat.
 - `[options]` (any): Configuration options.
-- `[options.n]` (any): The number of values to generate. Defaults to the slice/DataFrame height.
-- `[options.dtype]` (any): The registered data type to coerce/allocate for the generated sequence.
-- `[options.name]` (any): The name of the output column.
-- `[options.mode]` (any): The sequence generation mode ("constant", "cumulative", or "independent").
-- `[options.step]` (any): The step value or function to compute the step at each row.
-- `[options.strict]` (any): If true, throws an error if the generated sequence height does not match the target height.
-- `[options.pad]` (any): In non-strict mode, pads the sequence with `padValue` if it is shorter than target range.
-- `[options.truncate]` (any): In non-strict mode, truncates the sequence if it exceeds target range.
-- `[options.padValue]` (any): The value to use for padding in non-strict mode.
-- `[options.startIndex]` (any): The starting index in the DataFrame to insert the sequence.
-- `[options.endIndex]` (any): The ending index in the DataFrame to insert the sequence.
 
 ### Returns: `ColumnExpr<any>`
 
@@ -13444,18 +13384,19 @@ Packages multiple expressions into a structured object column.
 ### Signature
 ```typescript
 $df.struct(
-  fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,
+  fields: StructArg,
   ...moreFields: IntoExpr[]
 ): ColumnExpr<any>
 ```
 
 ### Parameters
-- `fields` (IntoExpr[] | Record<string, IntoExpr> | IntoExpr): An array of expressions, a record of field names to expressions, or a single expression.
+- `fields` (StructArg): An array of expressions, a record of field names to expressions, or a single expression.
 - `moreFields` (...IntoExpr[]): Additional fields when a single expression is passed as the first parameter.
 
 ### Returns: `ColumnExpr<any>`
 
 ### Types Referenced
+- [`StructArg`](#structarg)
 - [`IntoExpr`](#intoexpr)
 - [`ColumnExpr`](#columnexpr)
 
@@ -13544,179 +13485,16 @@ export interface ColumnExpr<T> extends
 ### StructExprNamespace
 ```typescript
 export interface StructExprNamespace {
+    /** Dynamic struct field accessor returning a `ColumnExpr` for the given property key. */
     [key: string]: any;
 }
 ```
-
-### ExprConstructor
-```typescript
-export type ExprConstructor = new (...args: any[]) => IExpr;
-```
-References: [`IExpr`](#iexpr)
-
-### RandomOptions
-```typescript
-export interface RandomOptions {
-    min?: number;
-    max?: number;
-    integer?: boolean;
-}
-```
-
-### NumericArg
-```typescript
-export type NumericArg = number | bigint | IExpr | null;
-```
-References: [`IExpr`](#iexpr)
-
-### NumericSeriesArg
-```typescript
-export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;
-```
-References: [`NumericArg`](#numericarg), [`AnyTypedArray`](#anytypedarray)
-
-### BooleanArg
-```typescript
-export type BooleanArg = boolean | boolean[] | IExpr | null | undefined;
-```
-References: [`IExpr`](#iexpr)
-
-### ScalarArg
-```typescript
-export type ScalarArg = IExpr | ValidScalarTypes;
-```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
 
 ### ArrayArg
 ```typescript
 export type ArrayArg = IExpr | ValidScalarTypes[] | AnyTypedArray;
 ```
 References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`AnyTypedArray`](#anytypedarray)
-
-### ComparisonArg
-```typescript
-export type ComparisonArg = ScalarArg | ArrayArg;
-```
-References: [`ScalarArg`](#scalararg), [`ArrayArg`](#arrayarg)
-
-### StringArg
-```typescript
-export type StringArg = string | IExpr;
-```
-References: [`IExpr`](#iexpr)
-
-### RegexPatternArg
-```typescript
-export type RegexPatternArg = string | RegExp;
-```
-
-### RegexPatternSeriesArg
-```typescript
-export type RegexPatternSeriesArg = RegexPatternArg[];
-```
-References: [`RegexPatternArg`](#regexpatternarg)
-
-### StringReplacerArg
-```typescript
-export type StringReplacerArg = ValidScalarTypes | RowRecord;
-```
-References: [`ValidScalarTypes`](#validscalartypes), [`RowRecord`](#rowrecord)
-
-### StringReplacerFn
-```typescript
-export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => string;
-```
-References: [`StringReplacerArg`](#stringreplacerarg)
-
-### StringReplacementArg
-```typescript
-export type StringReplacementArg = string | StringReplacerFn;
-```
-References: [`StringReplacerFn`](#stringreplacerfn)
-
-### StringReplacementSeriesArg
-```typescript
-export type StringReplacementSeriesArg = StringReplacementArg[];
-```
-References: [`StringReplacementArg`](#stringreplacementarg)
-
-### ReplaceAllOptions
-```typescript
-export type ReplaceAllOptions = Omit<ReplaceOptions, "n">;
-```
-References: [`ReplaceOptions`](#replaceoptions)
-
-### CountMatchesOptions
-```typescript
-export interface CountMatchesOptions {
-    /**
-     * If true, treats the pattern as a literal string rather than a regular expression.
-     * @default false
-     */
-    literal?: boolean;
-}
-```
-
-### UnicodeNormalizeForm
-```typescript
-export type UnicodeNormalizeForm = "NFC" | "NFD" | "NFKC" | "NFKD";
-```
-
-### StructFieldsArg
-```typescript
-export type StructFieldsArg = IntoExprSeriesArg | ExprDict;
-```
-References: [`IntoExprSeriesArg`](#intoexprseriesarg), [`ExprDict`](#exprdict)
-
-### IsNDistinctOptions
-```typescript
-export interface IsNDistinctOptions {
-    /**
-     * If true (default), returns null when index is out of bounds.
-     * If false, throws an error if index is out of bounds.
-     * @default true
-     */
-    nullOnOob?: boolean;
-}
-```
-
-### RankOptions
-```typescript
-export interface RankOptions {
-    /**
-     * When true, ranks are consecutive integers without gaps between tied values (1, 2, 2, 3).
-     * When false (default), ranks have gaps for tied values (1, 2, 2, 4).
-     * @default false
-     */
-    dense?: boolean;
-}
-```
-
-### IsCloseOptions
-```typescript
-export interface IsCloseOptions {
-    absTol?: number;
-    relTol?: number;
-    nansEqual?: boolean;
-}
-```
-
-### CountOptions
-```typescript
-export interface CountOptions {
-    /**
-     * Whether to include `null`, `undefined`, or `NaN` values in the count.
-     * When `false`, counts only non-null, valid elements.
-     * @default false
-     */
-    includeNulls?: boolean;
-}
-```
-
-### ClosedBoundary
-```typescript
-export type ClosedBoundary = "both" | "left" | "right" | "none";
-```
 
 ### BetweenOptions
 ```typescript
@@ -13734,9 +13512,309 @@ export interface BetweenOptions {
 ```
 References: [`ClosedBoundary`](#closedboundary)
 
+### BooleanArg
+```typescript
+export type BooleanArg = ColumnKeyArg<boolean> | IExpr | null | undefined;
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`IExpr`](#iexpr)
+
+### ComparisonArg
+```typescript
+export type ComparisonArg = ScalarArg | ArrayArg;
+```
+References: [`ScalarArg`](#scalararg), [`ArrayArg`](#arrayarg)
+
+### CountMatchesOptions
+```typescript
+export interface CountMatchesOptions {
+    /**
+     * If true, treats the pattern as a literal string rather than a regular expression.
+     * @default false
+     */
+    literal?: boolean;
+}
+```
+
+### CountOptions
+```typescript
+export interface CountOptions {
+    /**
+     * Whether to include `null`, `undefined`, or `NaN` values in the count.
+     * When `false`, counts only non-null, valid elements.
+     * @default false
+     */
+    includeNulls?: boolean;
+}
+```
+
+### EwmKurtOptions
+```typescript
+export type EwmKurtOptions = EwmOptions;
+```
+References: [`EwmOptions`](#ewmoptions)
+
+### EwmMeanOptions
+```typescript
+export type EwmMeanOptions = Omit<EwmOptions, "bias" | "fisher">;
+```
+References: [`EwmOptions`](#ewmoptions)
+
+### EwmOptions
+```typescript
+export interface EwmOptions extends CentralMomentsOptions, KurtosisOptions {
+    /**
+     * When `true`, divides by the decaying adjustment factor in beginning periods to account for imbalance in relative weightings.
+     * @default true
+     */
+    adjust?: boolean;
+    /**
+     * Smoothing factor `alpha` directly in `(0, 1]`. Mutually exclusive with `span`, `halfLife`, and `com`.
+     */
+    alpha?: number;
+    /**
+     * When `false`, applies sample bias correction; when `true`, computes population moments without bias correction.
+     * @default false
+     */
+    bias?: boolean;
+    /**
+     * Optional timestamp/index column name or expression used to scale `halfLife` decay by elapsed time deltas.
+     */
+    by?: ColumnOrExprArg;
+    /**
+     * Decay in terms of center of mass (`alpha = 1 / (1 + com)`), where `com >= 0`.
+     */
+    com?: number;
+    /**
+     * When `true` (default), computes excess kurtosis (Fisher's definition, subtracting 3.0); when `false`, computes Pearson's kurtosis.
+     * @default true
+     */
+    fisher?: boolean;
+    /**
+     * Decay in terms of half-life (`alpha = 1 - exp(-ln(2) / halfLife)`), as a positive number or duration string.
+     */
+    halfLife?: DurationValueArg;
+    /**
+     * When `true`, ignores missing/null values when calculating weights; when `false`, weights decay across null positions.
+     * @default false
+     */
+    ignoreNulls?: boolean;
+    /**
+     * Minimum number of non-null observations in window required to produce a value (otherwise `null`).
+     * @default 1
+     */
+    minSamples?: number;
+    /**
+     * Decay in terms of span (`alpha = 2 / (span + 1)`), where `span >= 1`.
+     */
+    span?: number;
+}
+```
+References: [`CentralMomentsOptions`](#centralmomentsoptions), [`KurtosisOptions`](#kurtosisoptions), [`ColumnOrExprArg`](#columnorexprarg), [`DurationValueArg`](#durationvaluearg)
+
+### EwmSkewOptions
+```typescript
+export type EwmSkewOptions = Omit<EwmOptions, "fisher">;
+```
+References: [`EwmOptions`](#ewmoptions)
+
+### EwmStdOptions
+```typescript
+export type EwmStdOptions = Omit<EwmOptions, "bias" | "fisher">;
+```
+References: [`EwmOptions`](#ewmoptions)
+
+### EwmSumOptions
+```typescript
+export type EwmSumOptions = Omit<EwmOptions, "adjust" | "bias" | "fisher">;
+```
+References: [`EwmOptions`](#ewmoptions)
+
+### EwmVarOptions
+```typescript
+export type EwmVarOptions = Omit<EwmOptions, "bias" | "fisher">;
+```
+References: [`EwmOptions`](#ewmoptions)
+
+### IsCloseOptions
+```typescript
+export interface IsCloseOptions {
+    /**
+     * Non-negative absolute tolerance threshold.
+     * @default 1e-8
+     */
+    absTol?: number;
+    /**
+     * When `true`, two `NaN` values are treated as close (`true`).
+     * @default false
+     */
+    nansEqual?: boolean;
+    /**
+     * Non-negative relative tolerance threshold scaled by operand magnitude.
+     * @default 1e-8
+     */
+    relTol?: number;
+}
+```
+
+### IsNDistinctOptions
+```typescript
+export interface IsNDistinctOptions {
+    /**
+     * If true (default), returns null when index is out of bounds.
+     * If false, throws an error if index is out of bounds.
+     * @default true
+     */
+    nullOnOob?: boolean;
+}
+```
+
+### NumericArg
+```typescript
+export type NumericArg = number | bigint | IExpr | null;
+```
+References: [`IExpr`](#iexpr)
+
+### NumericSeriesArg
+```typescript
+export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;
+```
+References: [`NumericArg`](#numericarg), [`AnyTypedArray`](#anytypedarray)
+
 ### ProxyPropertyResolver
 ```typescript
 export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => any;
+```
+
+### RandomOptions
+```typescript
+export interface RandomOptions {
+    /**
+     * When `true`, generates random integers in `[min, max]`. When `false`, generates floating-point numbers in `[min, max)`.
+     * @default false
+     */
+    integer?: boolean;
+    /**
+     * Maximum bound (exclusive for floats, inclusive for integers) for generated random values.
+     * @default 1
+     */
+    max?: number;
+    /**
+     * Minimum bound (inclusive) for generated random values.
+     * @default 0
+     */
+    min?: number;
+}
+```
+
+### RankOptions
+```typescript
+export interface RankOptions {
+    /**
+     * When true, ranks are consecutive integers without gaps between tied values (1, 2, 2, 3).
+     * When false (default), ranks have gaps for tied values (1, 2, 2, 4).
+     * @default false
+     */
+    dense?: boolean;
+}
+```
+
+### ReplaceAllOptions
+```typescript
+export type ReplaceAllOptions = Omit<ReplaceOptions, "n">;
+```
+References: [`ReplaceOptions`](#replaceoptions)
+
+### RollingOptions
+```typescript
+export interface RollingOptions {
+    /**
+     * Number of consecutive elements in the moving window.
+     */
+    windowSize: number;
+}
+```
+
+### ShiftOptions
+```typescript
+export interface ShiftOptions {
+    /**
+     * Fallback fill value for empty slots introduced by shift/lag/lead.
+     * @default null
+     */
+    fillValue?: any;
+}
+```
+
+### StringArg
+```typescript
+export type StringArg = ColumnOrExprArg<string>;
+```
+References: [`ColumnOrExprArg`](#columnorexprarg)
+
+### StringDecodeOptions
+```typescript
+export interface StringDecodeOptions extends StringEncodeOptions {
+    /**
+     * Whether invalid encoded sequences should throw an error (`true`) or return `null` (`false`).
+     * @default true
+     */
+    strict?: boolean;
+}
+```
+References: [`StringEncodeOptions`](#stringencodeoptions)
+
+### StringEncodeOptions
+```typescript
+export interface StringEncodeOptions {
+    /**
+     * Target string encoding format (`"hex"` or `"base64"`).
+     */
+    encoding: StringEncoding;
+}
+```
+References: [`StringEncoding`](#stringencoding)
+
+### StringReplacementArg
+```typescript
+export type StringReplacementArg = string | StringReplacerFn;
+```
+References: [`StringReplacerFn`](#stringreplacerfn)
+
+### StringReplacementSeriesArg
+```typescript
+export type StringReplacementSeriesArg = StringReplacementArg[];
+```
+References: [`StringReplacementArg`](#stringreplacementarg)
+
+### StringReplacerArg
+```typescript
+export type StringReplacerArg = ValidScalarTypes | RowRecord;
+```
+References: [`ValidScalarTypes`](#validscalartypes), [`RowRecord`](#rowrecord)
+
+### StringReplacerFn
+```typescript
+export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => string;
+```
+References: [`StringReplacerArg`](#stringreplacerarg)
+
+### ToStructOptions
+```typescript
+export interface ToStructOptions {
+    /**
+     * Explicit array of struct field names or a callback `(idx: number) => string` generating field names by element index. Defaults to `"field_0"`, `"field_1"`, etc.
+     */
+    fields?: string[] | ((idx: number) => string);
+    /**
+     * Maximum number of array elements to extract into struct fields when `fields` is not an array. Defaults to the maximum array length in the column.
+     */
+    upperBound?: number;
+}
+```
+
+### UnicodeNormalizeForm
+```typescript
+export type UnicodeNormalizeForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 ```
 
 ### GroupedData
@@ -13744,6 +13822,125 @@ export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) 
 export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
 ```
 References: [`RowRecord`](#rowrecord), [`GroupedAggDelegatedOps`](#groupedaggdelegatedops)
+
+### CastTargetArg
+```typescript
+export type CastTargetArg = RegisteredDataType | DataFrameSchema;
+```
+References: [`RegisteredDataType`](#registereddatatype), [`DataFrameSchema`](#dataframeschema)
+
+### DataFrameColumns
+```typescript
+export type DataFrameColumns<T extends RowRecord> = {
+    /**
+     * Column data array or typed array for column `K`.
+     */
+    [K in keyof T]: ColumnData<T[K]>;
+};
+```
+References: [`RowRecord`](#rowrecord), [`ColumnData`](#columndata)
+
+### DataFrameShape
+```typescript
+export type DataFrameShape = [number, number];
+```
+
+### DynamicIndexColumnArg
+```typescript
+export type DynamicIndexColumnArg<K extends string = string> = K | IntoExpr;
+```
+References: [`IntoExpr`](#intoexpr)
+
+### DynamicLabel
+```typescript
+export type DynamicLabel = "left" | "right" | "datapoint";
+```
+
+### DynamicStartBy
+```typescript
+export type DynamicStartBy = "window" | "datapoint" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
+```
+
+### EqualsOptions
+```typescript
+export interface EqualsOptions {
+    /**
+     * Whether nulls and NaNs compare as equal.
+     * @default true
+     */
+    nullsEqual?: boolean;
+}
+```
+
+### FilterPredicate
+```typescript
+export type FilterPredicate<T extends RowRecord = RowRecord> = IExpr | RowPredicateFn<T>;
+```
+References: [`RowRecord`](#rowrecord), [`IExpr`](#iexpr), [`RowPredicateFn`](#rowpredicatefn)
+
+### FilterPredicateArg
+```typescript
+export type FilterPredicateArg<T extends RowRecord = RowRecord> = ColumnKeyArg<FilterPredicate<T>>;
+```
+References: [`RowRecord`](#rowrecord), [`ColumnKeyArg`](#columnkeyarg), [`FilterPredicate`](#filterpredicate)
+
+### GroupByDynamicOptions
+```typescript
+export interface GroupByDynamicOptions<T = any> {
+    /**
+     * Additional columns to partition / group by before dynamic windowing.
+     */
+    by?: ColumnKeyArg<keyof T>;
+    /**
+     * Verify whether index column is sorted in ascending order.
+     * @default true
+     */
+    checkSorted?: boolean;
+    /**
+     * Which boundary of the window interval is closed (`"left"`, `"right"`, `"both"`, `"none"`).
+     * @default "left"
+     */
+    closed?: ClosedBoundary;
+    /**
+     * Time interval window step period (e.g. `"1d"`, `"1h"`, `1000`).
+     */
+    every: DurationValueArg;
+    /**
+     * Polars alias for `by`.
+     */
+    groupBy?: ColumnKeyArg<keyof T>;
+    /**
+     * Include the lower and upper window boundaries (`_lower_boundary`, `_upper_boundary`).
+     * @default false
+     */
+    includeBoundaries?: boolean;
+    /**
+     * Which window boundary to use as the timestamp label (`"left"`, `"right"`, `"datapoint"`).
+     * @default "left"
+     */
+    label?: DynamicLabel;
+    /**
+     * Offset window start by a duration.
+     * @default 0
+     */
+    offset?: DurationValueArg;
+    /**
+     * Time period duration window width. Defaults to `every` if omitted.
+     */
+    period?: DurationValueArg;
+    /**
+     * Strategy to determine window start (`"window"`, `"datapoint"`, or day of week).
+     * @default "window"
+     */
+    startBy?: DynamicStartBy;
+    /**
+     * Truncate the index column values to the window start.
+     * @default true
+     */
+    truncate?: boolean;
+}
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`ClosedBoundary`](#closedboundary), [`DurationValueArg`](#durationvaluearg), [`DynamicLabel`](#dynamiclabel), [`DynamicStartBy`](#dynamicstartby)
 
 ### GroupedAggDelegatedMethodNames
 ```typescript
@@ -13768,14 +13965,106 @@ export type GroupedAggDelegatedMethodNames =
 ### GroupedAggDelegatedOps
 ```typescript
 export type GroupedAggDelegatedOps<T extends RowRecord = any> = {
+    /**
+     * Executes aggregation `K` across all non-key columns in each group.
+     */
     [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>;
 };
 ```
 References: [`RowRecord`](#rowrecord), [`GroupedAggDelegatedMethodNames`](#groupedaggdelegatedmethodnames), [`ColumnExpr`](#columnexpr)
 
-### JoinType
+### GroupMap
 ```typescript
-export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross";
+export type GroupMap = Map<string, number[]>;
+```
+
+### InsertColumnArg
+```typescript
+export type InsertColumnArg = IntoExpr | ArrayLike<any>;
+```
+References: [`IntoExpr`](#intoexpr)
+
+### IterRowResult
+```typescript
+export type IterRowResult<T extends RowRecord = RowRecord> = any[] | T;
+```
+References: [`RowRecord`](#rowrecord)
+
+### IterRowsOptions
+```typescript
+export interface IterRowsOptions {
+    /**
+     * When `true`, yields row objects with column keys (`{ col: val }`).
+     * When `false` (default), yields positional arrays (`[val1, val2]`).
+     * @default false
+     */
+    named?: boolean;
+}
+```
+
+### JoinAsofOptions
+```typescript
+export interface JoinAsofOptions<T = any, U extends RowRecord = any> {
+    /**
+     * Whether exact key matches are permitted.
+     * @default true
+     */
+    allowExactMatches?: boolean;
+    /**
+     * Optional exact-match group column(s) present in both DataFrames.
+     */
+    by?: ColumnKeyArg<keyof T & keyof U>;
+    /**
+     * Whether to verify that join keys are sorted ascending prior to matching.
+     * @default true
+     */
+    checkSorted?: boolean;
+    /**
+     * Coalescing behavior for join key columns.
+     * @default true
+     */
+    coalesce?: boolean;
+    /**
+     * Group column(s) for exact key matching in left DataFrame.
+     */
+    leftBy?: ColumnKeyArg<keyof T>;
+    /**
+     * Left DataFrame join key column name.
+     */
+    leftOn?: (keyof T);
+    /**
+     * Column name to join on (must exist in both DataFrames and be sorted ascending).
+     */
+    on?: (keyof T & keyof U);
+    /**
+     * Group column(s) for exact key matching in right DataFrame.
+     */
+    rightBy?: ColumnKeyArg<keyof U>;
+    /**
+     * Right DataFrame join key column name.
+     */
+    rightOn?: (keyof U);
+    /**
+     * Match search strategy (`"backward"`, `"forward"`, or `"nearest"`).
+     * @default "backward"
+     */
+    strategy?: JoinAsofStrategy;
+    /**
+     * Column name suffixes `[leftSuffix, rightSuffix]` to resolve name collisions.
+     * @default ["", "_right"]
+     */
+    suffixes?: JoinSuffixes;
+    /**
+     * Maximum allowed distance between left key and right key.
+     */
+    tolerance?: DurationValueArg;
+}
+```
+References: [`RowRecord`](#rowrecord), [`ColumnKeyArg`](#columnkeyarg), [`JoinAsofStrategy`](#joinasofstrategy), [`JoinSuffixes`](#joinsuffixes), [`DurationValueArg`](#durationvaluearg)
+
+### JoinAsofStrategy
+```typescript
+export type JoinAsofStrategy = "backward" | "forward" | "nearest";
 ```
 
 ### JoinMaintainOrder
@@ -13783,141 +14072,115 @@ export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | 
 export type JoinMaintainOrder = "none" | "left" | "right" | "left_right" | "right_left";
 ```
 
-### LimitPosition
-```typescript
-export type LimitPosition = "start" | "end";
-```
-
-### GroupMap
-```typescript
-export type GroupMap = Map<string, number[]>;
-```
-
-### EqualsOptions
-```typescript
-export interface EqualsOptions {
-    nullsEqual?: boolean;
-}
-```
-
-### LimitOptions
-```typescript
-export interface LimitOptions {
-    offset?: number;
-    from?: LimitPosition;
-}
-```
-References: [`LimitPosition`](#limitposition)
-
-### PivotOptions
-```typescript
-export interface PivotOptions<T> {
-    index: (keyof T) | (keyof T)[];
-    columns: keyof T;
-    values: keyof T;
-    agg?: AggFn<any> | string;
-}
-```
-References: [`AggFn`](#aggfn)
-
 ### JoinOptions
 ```typescript
 export interface JoinOptions<T = any, U extends RowRecord = any> {
-    on?: (keyof T & keyof U) | (keyof T & keyof U)[];
-    leftOn?: (keyof T) | (keyof T)[];
-    rightOn?: (keyof U) | (keyof U)[];
+    /**
+     * Coalescing behavior for join key columns. If `true`, coalesces join key values into left key columns and drops right key columns.
+     * @default true
+     */
+    coalesce?: boolean;
+    /**
+     * Join strategy (`"inner"`, `"left"`, `"right"`, `"outer"`, `"semi"`, `"anti"`, or `"cross"`).
+     * @default "inner"
+     */
     how?: JoinType;
-    suffixes?: [string, string];
+    /**
+     * If `true`, null key values are treated as equal and match each other across DataFrames.
+     * @default false
+     */
     joinNulls?: boolean;
-    coalesce?: boolean;
+    /**
+     * Join key column(s) in the left DataFrame when key names differ.
+     */
+    leftOn?: ColumnKeyArg<keyof T>;
+    /**
+     * Row order preservation strategy (`"none"`, `"left"`, `"right"`, `"left_right"`, `"right_left"`, or boolean).
+     * @default "none"
+     */
     maintainOrder?: JoinMaintainOrder | boolean;
+    /**
+     * Join key column name or array of key column names that exist in both DataFrames.
+     */
+    on?: ColumnKeyArg<keyof T & keyof U>;
+    /**
+     * Join key column(s) in the right DataFrame when key names differ.
+     */
+    rightOn?: ColumnKeyArg<keyof U>;
+    /**
+     * Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping non-key column names. Ignored for `"semi"` and `"anti"` joins.
+     * @default ["", "_right"]
+     */
+    suffixes?: JoinSuffixes;
 }
 ```
-References: [`RowRecord`](#rowrecord), [`JoinType`](#jointype), [`JoinMaintainOrder`](#joinmaintainorder)
+References: [`RowRecord`](#rowrecord), [`JoinType`](#jointype), [`ColumnKeyArg`](#columnkeyarg), [`JoinMaintainOrder`](#joinmaintainorder), [`JoinSuffixes`](#joinsuffixes)
 
-### JoinAsofStrategy
+### JoinSuffixes
 ```typescript
-export type JoinAsofStrategy = "backward" | "forward" | "nearest";
+export type JoinSuffixes = [string, string];
 ```
 
-### JoinAsofOptions
+### JoinType
 ```typescript
-export interface JoinAsofOptions<T = any, U extends RowRecord = any> {
-    on?: (keyof T & keyof U);
-    leftOn?: (keyof T);
-    rightOn?: (keyof U);
-    by?: (keyof T & keyof U) | (keyof T & keyof U)[];
-    leftBy?: (keyof T) | (keyof T)[];
-    rightBy?: (keyof U) | (keyof U)[];
-    strategy?: JoinAsofStrategy;
-    tolerance?: number | string;
-    allowExactMatches?: boolean;
-    suffixes?: [string, string];
-    coalesce?: boolean;
-    checkSorted?: boolean;
+export type JoinType = "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross";
+```
+
+### JoinWhereArg
+```typescript
+export type JoinWhereArg = IntoExprArg | JoinWhereOptions;
+```
+References: [`IntoExprArg`](#intoexprarg), [`JoinWhereOptions`](#joinwhereoptions)
+
+### JoinWhereOptions
+```typescript
+export interface JoinWhereOptions {
+    /**
+     * Join strategy: `"inner"`, `"left"`, or `"right"`.
+     * @default "inner"
+     */
+    how?: JoinWhereStrategy;
+    /**
+     * Column name suffixes `[leftSuffix, rightSuffix]` to resolve duplicate column names.
+     * @default ["", "_right"]
+     */
+    suffixes?: JoinSuffixes;
 }
 ```
-References: [`RowRecord`](#rowrecord), [`JoinAsofStrategy`](#joinasofstrategy)
+References: [`JoinWhereStrategy`](#joinwherestrategy), [`JoinSuffixes`](#joinsuffixes)
 
 ### JoinWhereStrategy
 ```typescript
 export type JoinWhereStrategy = "inner" | "left" | "right";
 ```
 
-### JoinWhereOptions
+### LimitOptions
 ```typescript
-export interface JoinWhereOptions {
-    /** Join strategy: "inner", "left", or "right". Default "inner". */
-    how?: JoinWhereStrategy;
-    /** Column name suffixes [leftSuffix, rightSuffix] to resolve duplicate column names. Default ["", "_right"]. */
-    suffixes?: [string, string];
+export interface LimitOptions {
+    /**
+     * Slice direction starting point (`"start"` or `"end"`).
+     * @default "start"
+     */
+    from?: LimitPosition;
+    /**
+     * Number of rows to skip before taking `n` rows.
+     * @default 0
+     */
+    offset?: number;
 }
 ```
-References: [`JoinWhereStrategy`](#joinwherestrategy)
+References: [`LimitPosition`](#limitposition)
 
-### DynamicClosed
+### LimitPosition
 ```typescript
-export type DynamicClosed = "left" | "right" | "both" | "none";
+export type LimitPosition = "start" | "end";
 ```
 
-### DynamicLabel
+### PartitionByKey
 ```typescript
-export type DynamicLabel = "left" | "right" | "datapoint";
+export type PartitionByKey<T extends RowRecord = RowRecord> = ColumnOrExprArg<keyof T & string>;
 ```
-
-### DynamicStartBy
-```typescript
-export type DynamicStartBy = "window" | "datapoint" | "monday" | "tuesday" | "wednesday" | "thursday" | "friday" | "saturday" | "sunday";
-```
-
-### GroupByDynamicOptions
-```typescript
-export interface GroupByDynamicOptions<T = any> {
-    /** Time interval window period (e.g. "1d", "1h", 1000). Defaults to every if not specified. */
-    every: string | number;
-    /** Time period duration window width. Defaults to every if omitted. */
-    period?: string | number;
-    /** Offset window start by a duration. Defaults to 0. */
-    offset?: string | number;
-    /** Truncate the index column values to the window start. Default: true */
-    truncate?: boolean;
-    /** Include the lower and upper window boundaries (_lower_boundary, _upper_boundary). Default: false */
-    includeBoundaries?: boolean;
-    /** Which boundary of the window interval is closed ("left", "right", "both", "none"). Default: "left" */
-    closed?: DynamicClosed;
-    /** Which window boundary to use as the timestamp label ("left", "right", "data_point"). Default: "left" */
-    label?: DynamicLabel;
-    /** Additional columns to partition / group by before dynamic windowing */
-    by?: (keyof T) | (keyof T)[];
-    /** Polars alias for by */
-    groupBy?: (keyof T) | (keyof T)[];
-    /** Strategy to determine window start ("window", "datapoint", or day of week). Default: "window" */
-    startBy?: DynamicStartBy;
-    /** Verify whether index column is sorted in ascending order. Default: true */
-    checkSorted?: boolean;
-}
-```
-References: [`DynamicClosed`](#dynamicclosed), [`DynamicLabel`](#dynamiclabel), [`DynamicStartBy`](#dynamicstartby)
+References: [`RowRecord`](#rowrecord), [`ColumnOrExprArg`](#columnorexprarg)
 
 ### PartitionByOptions
 ```typescript
@@ -13936,77 +14199,181 @@ export interface PartitionByOptions {
 }
 ```
 
-### UnpivotOptions
+### PartitionByResult
 ```typescript
-export interface UnpivotOptions<T> {
-    idVars: (keyof T) | (keyof T)[];
-    valueVars: (keyof T) | (keyof T)[];
-    varName?: string;
-    valueName?: string;
+export type PartitionByResult<T extends RowRecord = RowRecord> = DataFrame<T>[] | Record<string, DataFrame<T>>;
+```
+References: [`RowRecord`](#rowrecord)
+
+### PivotOptions
+```typescript
+export interface PivotOptions<T> {
+    /**
+     * Aggregation function to apply when multiple values exist for a cell.
+     */
+    agg?: AggFn<any> | string;
+    /**
+     * Column whose distinct values become new wide column headers.
+     */
+    columns: keyof T;
+    /**
+     * Key column(s) to use as new DataFrame rows.
+     */
+    index: ColumnKeyArg<keyof T>;
+    /**
+     * Column whose cell values populate the pivoted grid cells.
+     */
+    values: keyof T;
 }
+```
+References: [`AggFn`](#aggfn), [`ColumnKeyArg`](#columnkeyarg)
+
+### RowPredicateFn
+```typescript
+export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => any;
+```
+References: [`RowRecord`](#rowrecord)
+
+### SelectArg
+```typescript
+export type SelectArg = ColumnKeyArg<SelectItem>;
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`SelectItem`](#selectitem)
+
+### SelectItem
+```typescript
+export type SelectItem = ColumnOrExprArg | RowRecord;
+```
+References: [`ColumnOrExprArg`](#columnorexprarg), [`RowRecord`](#rowrecord)
+
+### SortOptions
+```typescript
+export interface SortOptions<T = any> extends SortArrayOptions<T> {
+    /**
+     * Column name(s) or expression(s) to sort by.
+     */
+    by: ColumnKeyArg<keyof T> | ColumnKeyArg<IExpr>;
+    /**
+     * Optional comparator function or dictionary mapping column names to custom comparator functions.
+     */
+    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
+    /**
+     * Sort order boolean or array of booleans per key.
+     * @default false
+     */
+    descending?: ColumnKeyArg<boolean>;
+    /**
+     * When `true`, places nulls at the end of sorted output.
+     * @default true
+     */
+    nullsLast?: boolean;
+}
+```
+References: [`SortArrayOptions`](#sortarrayoptions), [`ColumnKeyArg`](#columnkeyarg), [`IExpr`](#iexpr)
+
+### TransposeColumnNamesArg
+```typescript
+export type TransposeColumnNamesArg = string | Iterable<string>;
 ```
 
 ### TransposeOptions
 ```typescript
 export interface TransposeOptions {
-    includeHeader?: boolean;
+    /**
+     * Column name or iterable of strings to use as transposed column headers.
+     */
+    columnNames?: TransposeColumnNamesArg;
+    /**
+     * Name of the header column when `includeHeader` is `true`.
+     * @default "column"
+     */
     headerName?: string;
-    columnNames?: string | Iterable<string>;
+    /**
+     * When `true`, includes original column names as a new header column.
+     * @default false
+     */
+    includeHeader?: boolean;
 }
+```
+References: [`TransposeColumnNamesArg`](#transposecolumnnamesarg)
+
+### UnpivotOptions
+```typescript
+export interface UnpivotOptions<T> {
+    /**
+     * Key column(s) to retain as identifier variables.
+     */
+    idVars: ColumnKeyArg<keyof T>;
+    /**
+     * Name for the new value column holding cell values.
+     * @default "value"
+     */
+    valueName?: string;
+    /**
+     * Column(s) to unpivot into variable-value pairs.
+     */
+    valueVars: ColumnKeyArg<keyof T>;
+    /**
+     * Name for the new variable column holding old column headers.
+     * @default "variable"
+     */
+    varName?: string;
+}
+```
+References: [`ColumnKeyArg`](#columnkeyarg)
+
+### UnstackDirection
+```typescript
+export type UnstackDirection = "vertical" | "horizontal";
 ```
 
 ### UnstackOptions
 ```typescript
 export interface UnstackOptions {
     /**
-     * Number of columns to reshape each input column into.
+     * Value to fill in empty cells when length is not evenly divisible by step.
+     * @default null
      */
-    step: number;
-
+    fillValues?: any;
     /**
      * Reshaping direction:
      * - "vertical" (default): fills down the new columns first before moving to the next column.
      * - "horizontal": fills across row-by-row before moving to the next row.
      * @default "vertical"
      */
-    how?: "vertical" | "horizontal";
-
+    how?: UnstackDirection;
     /**
-     * Value to fill in empty cells when length is not evenly divisible by step.
-     * @default null
+     * Number of columns to reshape each input column into.
      */
-    fillValues?: any;
+    step: number;
+}
+```
+References: [`UnstackDirection`](#unstackdirection)
+
+### WritableStreamTarget
+```typescript
+export interface WritableStreamTarget {
+    /**
+     * Writes a serialized string chunk to the underlying stream target.
+     */
+    write: (str: string) => void;
 }
 ```
 
-### ReadJSONOptions
+### WriteFileTargetArg
 ```typescript
-export interface ReadJSONOptions extends JSONParseOptions {
-    /**
-     * Optional explicit schema mapping column names to their registered data types.
-     */
-    schema?: DataFrameSchema;
-}
+export type WriteFileTargetArg = string | WritableStreamTarget;
 ```
-References: [`JSONParseOptions`](#jsonparseoptions), [`DataFrameSchema`](#dataframeschema)
-
-### JSONStringifyReplacer
-```typescript
-export type JSONStringifyReplacer = typeof JSON.stringify extends {
-    (value: any, replacer?: infer R1, space?: any): string;
-    (value: any, replacer?: infer R2, space?: any): string;
-} ? R1 | R2 : never;
-```
+References: [`WritableStreamTarget`](#writablestreamtarget)
 
 ### WriteJSONOptions
 ```typescript
 export interface WriteJSONOptions {
     /**
-     * The format of the JSON output.
+     * The format of the JSON output (`"json"` or `"ndjson"`).
      * @default "json"
      */
     format?: JSONFormat;
-
     /**
      * Options for the safe JSON replacer.
      */
@@ -14014,47 +14381,6 @@ export interface WriteJSONOptions {
 }
 ```
 References: [`JSONFormat`](#jsonformat), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)
-
-### ReadCSVOptions
-```typescript
-export interface ReadCSVOptions {
-    /**
-     * Whether the CSV has a header row.
-     * @default true
-     */
-    hasHeader?: boolean;
-
-    /**
-     * Character that separates fields.
-     * @default ","
-     */
-    separator?: string;
-
-    /**
-     * The character used for quoting fields.
-     * @default '"'
-     */
-    quoteChar?: string;
-
-    /**
-     * String representations of null values.
-     * @default ["", "NA", "null", "NaN"]
-     */
-    nullValues?: string[];
-
-    /**
-     * Optional explicit schema mapping column names to their registered data types.
-     */
-    schema?: DataFrameSchema;
-
-    /**
-     * Try to infer types from values if no schema is provided.
-     * @default true
-     */
-    inferSchema?: boolean;
-}
-```
-References: [`DataFrameSchema`](#dataframeschema)
 
 ### RegisteredDataType
 ```typescript
@@ -14067,6 +14393,47 @@ export type RegisteredDataType =
     | ArrayType<any> | StructType<any>;
 ```
 
+### CoalesceArg
+```typescript
+export type CoalesceArg = ColumnKeyArg<ScalarArg>;
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`ScalarArg`](#scalararg)
+
+### DurationArg
+```typescript
+export type DurationArg = DurationOptions | string;
+```
+References: [`DurationOptions`](#durationoptions)
+
+### DurationComponentArg
+```typescript
+export type DurationComponentArg = IntoExpr | number;
+```
+References: [`IntoExpr`](#intoexpr)
+
+### DurationOptions
+```typescript
+export interface DurationOptions {
+    /** Number of days or column expression. */
+    days?: DurationComponentArg;
+    /** Number of hours or column expression. */
+    hours?: DurationComponentArg;
+    /** Number of microseconds or column expression. */
+    microseconds?: DurationComponentArg;
+    /** Number of milliseconds or column expression. */
+    milliseconds?: DurationComponentArg;
+    /** Number of minutes or column expression. */
+    minutes?: DurationComponentArg;
+    /** Number of nanoseconds or column expression. */
+    nanoseconds?: DurationComponentArg;
+    /** Number of seconds or column expression. */
+    seconds?: DurationComponentArg;
+    /** Number of weeks or column expression. */
+    weeks?: DurationComponentArg;
+}
+```
+References: [`DurationComponentArg`](#durationcomponentarg)
+
 ### HorizontalExpr
 ```typescript
 export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
@@ -14075,90 +14442,93 @@ References: [`ColumnExpr`](#columnexpr)
 
 ### LitOptions
 ```typescript
-export type LitOptions = Pick<SeqRangeOptions, "dtype" | "name">;
-```
-References: [`SeqRangeOptions`](#seqrangeoptions)
-
-### SeqRangeOptions
-```typescript
-export type SeqRangeOptions = {
-    n?: number;
+export interface LitOptions {
+    /**
+     * Registered data type to coerce and allocate for the literal column.
+     */
     dtype?: RegisteredDataType;
+    /**
+     * Output column name alias.
+     */
     name?: string;
-} & (
-        | { mode: "constant" }
-        | {
-            mode?: "cumulative";
-            step?: number | ((context: CumulativeStepContext) => any);
-        }
-        | {
-            mode: "independent";
-            step?: number | ((context: IndependentStepContext) => any);
-        }
-    ) & (
-        | { strict?: true }
-        | {
-            strict: false;
-            pad?: boolean;
-            truncate?: boolean;
-            padValue?: any;
-            startIndex?: number;
-            endIndex?: number;
-        }
-    );
-```
-References: [`RegisteredDataType`](#registereddatatype), [`CumulativeStepContext`](#cumulativestepcontext), [`IndependentStepContext`](#independentstepcontext)
-
-### WhenArg
-```typescript
-type WhenArg = IExpr | ValidScalarTypes | any[] | Record<string, any>;
-```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
-
-### RowRecord
-```typescript
-export type RowRecord = Record<string, any>;
-```
-
-### JSONFormat
-```typescript
-export type JSONFormat =
-    /** Standard JSON format. */
-    | "json"
-    /** Newline Delimited JSON format. */
-    | "ndjson";
-```
-
-### ColumnData
-```typescript
-export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
-```
-
-### ColumnDict
-```typescript
-export type ColumnDict = Record<string, ColumnData>;
-```
-References: [`ColumnData`](#columndata)
-
-### DataFrameSchema
-```typescript
-export type DataFrameSchema = Record<string, RegisteredDataType>;
+}
 ```
 References: [`RegisteredDataType`](#registereddatatype)
 
-### DataFrameColumns
+### SeqRangeOptions
 ```typescript
-export type DataFrameColumns<T extends RowRecord> = {
-    [K in keyof T]: ColumnData<T[K]>;
-};
+export interface SeqRangeOptions {
+    /**
+     * Registered data type to coerce and allocate for the generated sequence.
+     */
+    dtype?: RegisteredDataType;
+    /**
+     * Ending row index (exclusive) in the DataFrame to insert the sequence (non-strict mode).
+     */
+    endIndex?: number;
+    /**
+     * Sequence generation mode: `"constant"` repeats the initial value, `"cumulative"` increments from the previous value, and `"independent"` computes each element from its row index.
+     * @default "cumulative"
+     */
+    mode?: "constant" | "cumulative" | "independent";
+    /**
+     * Number of values to generate. Defaults to the slice or DataFrame height.
+     */
+    n?: number;
+    /**
+     * Output column name alias.
+     */
+    name?: string;
+    /**
+     * Pads the sequence with `padValue` if shorter than target slice range (non-strict mode).
+     * @default false
+     */
+    pad?: boolean;
+    /**
+     * Value used for padding in non-strict mode.
+     * @default null
+     */
+    padValue?: any;
+    /**
+     * Starting row index in the DataFrame to insert the sequence (non-strict mode).
+     * @default 0
+     */
+    startIndex?: number;
+    /**
+     * Step increment/multiplier value or step callback function.
+     * @default 1
+     */
+    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);
+    /**
+     * When `true`, throws a `ShapeError` if the generated sequence height does not match the target height. When `false`, allows padding, truncation, and slice bounds.
+     * @default true
+     */
+    strict?: boolean;
+    /**
+     * Truncates the sequence if it exceeds target slice range (non-strict mode).
+     * @default false
+     */
+    truncate?: boolean;
+}
 ```
-References: [`RowRecord`](#rowrecord), [`ColumnData`](#columndata)
+References: [`RegisteredDataType`](#registereddatatype), [`CumulativeStepContext`](#cumulativestepcontext), [`IndependentStepContext`](#independentstepcontext)
 
-### TypedArrayConstructor
+### StructArg
 ```typescript
-export type TypedArrayConstructor<T extends AnyTypedArray = AnyTypedArray> = new (length: number) => T;
+export type StructArg = StructFieldsArg | IntoExpr;
 ```
-References: [`AnyTypedArray`](#anytypedarray)
+References: [`StructFieldsArg`](#structfieldsarg), [`IntoExpr`](#intoexpr)
+
+### WhenArg
+```typescript
+export type WhenArg = ComparisonArg | RowRecord | any[];
+```
+References: [`ComparisonArg`](#comparisonarg), [`RowRecord`](#rowrecord)
+
+### AggFn
+```typescript
+export type AggFn<V, R = any> = (values: V[]) => R;
+```
 
 ### AnyTypedArray
 ```typescript
@@ -14176,6 +14546,923 @@ export type AnyTypedArray =
     | BigUint64Array;
 ```
 
+### BusinessDayRollType
+```typescript
+export type BusinessDayRollType = "raise" | "forward" | "backward";
+```
+
+### CastOptions
+```typescript
+export interface CastOptions {
+    /**
+     * Whether cast errors should throw or produce `null` values.
+     * @default true
+     */
+    strict?: boolean;
+}
+```
+
+### CentralMomentsOptions
+```typescript
+export interface CentralMomentsOptions {
+    /**
+     * Whether to apply exponentially weighted bias adjustment.
+     * @default true
+     */
+    adjust?: boolean;
+    /**
+     * Minimum number of valid observations required to return a non-null result.
+     * @default 1
+     */
+    minSamples?: number;
+}
+```
+
+### CentralMomentsResult
+```typescript
+export interface CentralMomentsResult {
+    /** Number of valid numeric observations processed. */
+    count: number;
+    /** Weighted 2nd central moment sum ($\sum w_i (x_i - \mu)^2$). */
+    m2Sum: number;
+    /** Weighted 3rd central moment sum ($\sum w_i (x_i - \mu)^3$). */
+    m3Sum: number;
+    /** Weighted 4th central moment sum ($\sum w_i (x_i - \mu)^4$). */
+    m4Sum: number;
+    /** Weighted arithmetic mean, or `null` if `count < minSamples`. */
+    mean: number | null;
+    /** Sample or weighted standard deviation, or `null` if insufficient samples. */
+    std: number | null;
+    /** Sum of weights across valid observations. */
+    sumW: number;
+    /** Sample or weighted variance, or `null` if insufficient samples. */
+    variance: number | null;
+    /** Weighted sum of observation values. */
+    weightedSum: number;
+}
+```
+
+### ClosedBoundary
+```typescript
+export type ClosedBoundary = "both" | "left" | "right" | "none";
+```
+
+### ColumnData
+```typescript
+export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
+```
+
+### ColumnDict
+```typescript
+export type ColumnDict = Record<string, ColumnData>;
+```
+References: [`ColumnData`](#columndata)
+
+### ColumnIndexOrNameArg
+```typescript
+export type ColumnIndexOrNameArg = number | string;
+```
+
+### ColumnKeyArg
+```typescript
+export type ColumnKeyArg<K = string> = K | K[];
+```
+
+### ColumnOrExprArg
+```typescript
+export type ColumnOrExprArg<K = string> = K | IExpr;
+```
+References: [`IExpr`](#iexpr)
+
+### ColumnSelector
+```typescript
+export type ColumnSelector<T = any> =
+    | ColumnKeyArg<keyof T | RegexPatternArg>
+    | ColumnKeyArg<DataType | Function>;
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`RegexPatternArg`](#regexpatternarg)
+
+### ConcatHow
+```typescript
+export type ConcatHow = "vertical" | "horizontal" | "diagonal";
+```
+
+### ConcatItem
+```typescript
+export type ConcatItem = DataFrame<any> | DataFrameDataArg;
+```
+References: [`DataFrameDataArg`](#dataframedataarg)
+
+### ConcatItemsArg
+```typescript
+export type ConcatItemsArg = ColumnKeyArg<ConcatItem>;
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`ConcatItem`](#concatitem)
+
+### ConcatOptions
+```typescript
+export interface ConcatOptions {
+    /**
+     * Configuration options specific to horizontal concatenation.
+     */
+    horizontal?: HorizontalConcatOptions;
+    /**
+     * Layout strategy: `"vertical"` (appends rows top-to-bottom), `"horizontal"` (joins unique columns side-by-side), or `"diagonal"` (concatenates mismatched columns with null padding).
+     * @default "vertical"
+     */
+    how?: ConcatHow;
+}
+```
+References: [`HorizontalConcatOptions`](#horizontalconcatoptions), [`ConcatHow`](#concathow)
+
+### DataFrameDataArg
+```typescript
+export type DataFrameDataArg<T extends RowRecord = RowRecord> = T[] | ColumnDict;
+```
+References: [`RowRecord`](#rowrecord), [`ColumnDict`](#columndict)
+
+### DataFrameSchema
+```typescript
+export type DataFrameSchema = Record<string, RegisteredDataType>;
+```
+References: [`RegisteredDataType`](#registereddatatype)
+
+### DateTimeParts
+```typescript
+export interface DateTimeParts {
+    /** 1-indexed day of the month from 1 to 31. */
+    day: number;
+    /** 0-indexed day of week (0 = Sunday, 6 = Saturday). */
+    dayOfWeek?: number;
+    /** 0-indexed hour of day from 0 to 23 (0 = Midnight). */
+    hour: number;
+    /** 0-indexed minute of hour from 0 to 59. */
+    minute: number;
+    /** 1-indexed calendar month from 1 to 12 (1 = January, 12 = December). */
+    month: number;
+    /** 0-indexed millisecond from 0 to 999. */
+    ms: number;
+    /** 0-indexed second of minute from 0 to 59. */
+    second: number;
+    /** Optional target timezone identifier (e.g. "UTC", "America/New_York"). */
+    timeZone?: string | null;
+    /** Calendar year (e.g. 2026). */
+    year: number;
+}
+```
+
+### DatetimeTimeUnit
+```typescript
+export type DatetimeTimeUnit = "ms" | "us" | "ns";
+```
+
+### DayOffsetOptions
+```typescript
+export interface DayOffsetOptions extends IsBusinessDayOptions {
+    /**
+     * ISO weekday numbers (`1 = Monday` ... `7 = Sunday`) considered non-business weekend days.
+     * @default [6, 7]
+     */
+    excludeWeekdays?: number[];
+    /**
+     * List or set of holiday dates (`Date`, ISO date string, or UTC timestamp) to exclude as business days.
+     */
+    holidays?: (Date | string | number)[] | Set<number>;
+    /**
+     * How to handle a starting date that falls on a non-business day: `"raise"`, `"forward"`, or `"backward"`.
+     * @default "raise"
+     */
+    roll?: BusinessDayRollType;
+}
+```
+References: [`IsBusinessDayOptions`](#isbusinessdayoptions), [`BusinessDayRollType`](#businessdayrolltype)
+
+### DurationValueArg
+```typescript
+export type DurationValueArg = number | string;
+```
+
+### EntropyOptions
+```typescript
+export interface EntropyOptions {
+    /**
+     * Logarithm base used to compute entropy.
+     * @default Math.E
+     */
+    base?: number;
+    /**
+     * If `true`, normalizes categorical value frequencies; if `false`, treats numeric values directly as discrete probabilities.
+     * @default true
+     */
+    normalize?: boolean;
+}
+```
+
+### EscapeRegexMode
+```typescript
+export type EscapeRegexMode = "tc39" | "nonAlphanumericAscii";
+```
+
+### EscapeRegexOptions
+```typescript
+export interface EscapeRegexOptions {
+    /**
+     * Escaping mode: `"tc39"` (ECMAScript `RegExp.escape` specification) or `"nonAlphanumericAscii"` (escapes all `[^A-Za-z0-9]`).
+     * @default "tc39"
+     */
+    mode?: EscapeRegexMode;
+}
+```
+References: [`EscapeRegexMode`](#escaperegexmode)
+
+### ExplodeOptions
+```typescript
+export interface ExplodeOptions {
+    /**
+     * When `true`, converts empty arrays to `null` rows.
+     * @default true
+     */
+    emptyAsNull?: boolean;
+    /**
+     * When `true`, retains `null` array values during explosion.
+     * @default true
+     */
+    keepNulls?: boolean;
+}
+```
+
+### ExprDict
+```typescript
+export type ExprDict = Record<string, IntoExpr>;
+```
+References: [`IntoExpr`](#intoexpr)
+
+### ExtractManyOptions
+```typescript
+export interface ExtractManyOptions extends ExtractRegexEngineOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to return all matches (global flag).
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * 0-based index or name of the capture group to extract.
+     * @default 0
+     */
+    groupIndex?: ColumnIndexOrNameArg;
+    /**
+     * Guarantees that the leftmost match is selected when multiple patterns match. Cannot be combined with `overlapping: true`.
+     * @default false
+     */
+    leftmost?: boolean;
+    /**
+     * Whether overlapping matches across patterns are allowed.
+     * @default false
+     */
+    overlapping?: boolean;
+}
+```
+References: [`ExtractRegexEngineOptions`](#extractregexengineoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg)
+
+### ExtractRegexEngineOptions
+```typescript
+export interface ExtractRegexEngineOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to return all matches (global flag).
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * 0-based index or name of the capture group to extract.
+     * @default 1
+     */
+    groupIndex?: ColumnIndexOrNameArg;
+}
+```
+References: [`ColumnIndexOrNameArg`](#columnindexornamearg)
+
+### FillNullOptions
+```typescript
+export type FillNullOptions = FillOptions;
+```
+References: [`FillOptions`](#filloptions)
+
+### FillNullStrategy
+```typescript
+export type FillNullStrategy = "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one";
+```
+
+### FillOptions
+```typescript
+export interface FillOptions {
+    /**
+     * Maximum number of consecutive target values to fill when using directional strategies (`"forward"`, `"backward"`).
+     */
+    limit?: number;
+    /**
+     * Filling strategy to calculate or propagate replacement values (`"forward"`, `"backward"`, `"min"`, `"max"`, `"mean"`, `"zero"`, `"one"`).
+     */
+    strategy?: FillNullStrategy;
+    /**
+     * Replacement scalar value or column expression to substitute in place of target values.
+     */
+    value?: ScalarArg;
+}
+```
+References: [`FillNullStrategy`](#fillnullstrategy), [`ScalarArg`](#scalararg)
+
+### FillTarget
+```typescript
+export type FillTarget = "null" | "nan" | "all" | ScalarArg;
+```
+References: [`ScalarArg`](#scalararg)
+
+### FindManyOptions
+```typescript
+export interface FindManyOptions extends ExtractManyOptions, EscapeRegexOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to return all matches (global flag).
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * 0-based index or name of the capture group to locate.
+     * @default 0
+     */
+    groupIndex?: ColumnIndexOrNameArg;
+    /**
+     * Guarantees that the leftmost match is selected when multiple patterns match.
+     * @default false
+     */
+    leftmost?: boolean;
+    /**
+     * Treat patterns as literal substrings instead of regular expressions.
+     * @default false
+     */
+    literal?: boolean;
+    /**
+     * Escaping mode when `literal` is `true`.
+     * @default "tc39"
+     */
+    mode?: EscapeRegexMode;
+    /**
+     * Whether overlapping matches across patterns are allowed.
+     * @default false
+     */
+    overlapping?: boolean;
+}
+```
+References: [`ExtractManyOptions`](#extractmanyoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg), [`EscapeRegexMode`](#escaperegexmode)
+
+### FindOptions
+```typescript
+export interface FindOptions extends ExtractRegexEngineOptions, EscapeRegexOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to return all matches (global flag).
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * 0-based index or name of the capture group to locate.
+     * @default 0
+     */
+    groupIndex?: ColumnIndexOrNameArg;
+    /**
+     * Treat pattern as a literal substring instead of a regular expression.
+     * @default false
+     */
+    literal?: boolean;
+    /**
+     * Escaping mode when `literal` is `true`.
+     * @default "tc39"
+     */
+    mode?: EscapeRegexMode;
+}
+```
+References: [`ExtractRegexEngineOptions`](#extractregexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg), [`EscapeRegexMode`](#escaperegexmode)
+
+### HorizontalConcatOptions
+```typescript
+export interface HorizontalConcatOptions {
+    /**
+     * When `true`, throws an error if row counts mismatch in horizontal concatenation. Set `false` to pad shorter DataFrames with `null`.
+     * @default true
+     */
+    strict?: boolean;
+}
+```
+
+### IExpr
+```typescript
+export interface IExpr {
+    /** Aggregation reducer function registered on the expression, or `null`. */
+    _aggFn?: AggFn<any> | null;
+    /** Parent base expression for struct field extraction or unnesting. */
+    _baseExpr?: IExpr;
+    /** Left and right operand metadata for binary expressions. */
+    _binaryMeta?: { _left: any; _right: any };
+    /** Branch operands collected by `$df.when().then().otherwise()` chains. */
+    _branchOperands?: any[];
+    /** Target `RegisteredDataType` registered via `.cast()`. */
+    _castType?: RegisteredDataType;
+    /** Source column name or expression selector marker. */
+    _colName?: string;
+    /** Logs intermediate column state during expression evaluation and returns `this`. */
+    _debug(label?: string): this;
+    /** Evaluates the full expression pipeline against `columns`. */
+    _evaluate(columns: ColumnDict, height: number): ColumnData;
+    /** Evaluates post-aggregation or post-partition operations starting after `opsIndex`. */
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
+    /** Evaluates pre-aggregation or pre-partition operations up to `opsIndex`. */
+    _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
+    /** Evaluates a row-wise window operation over a partition slice. */
+    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
+    /** Struct field name targeted by `.struct.field()`. */
+    _fieldName?: string;
+    /** Pipeline index marking the boundary of an `.agg()` reduction. */
+    _groupingOpsIndex?: number;
+    /** Returns `true` if the expression performs a full-column reduction without window partitioning. */
+    _isGlobalAgg?(): boolean;
+    /** Flag indicating whether the expression represents a constant literal value. */
+    _isLiteral?: boolean;
+    /** Flag indicating whether the expression expands struct fields via `.struct.unnest()`. */
+    _isUnnest?: boolean;
+    /** Flag indicating whether the expression requires window-function evaluation. */
+    _isWindow?: boolean;
+    /** Raw literal value when `_isLiteral` is `true`. */
+    _literalValue?: any;
+    /** Ordered pipeline of vectorized transformation functions. */
+    _ops: OpFn[];
+    /** Explicit output alias name assigned via `.alias()`. */
+    _outputName?: string;
+    /** Partitioning column keys or expressions supplied to `.over()`. */
+    _partitionBy?: ColumnOrExprArg[] | null;
+    /** Pipeline index marking the boundary of an `.over()` window partition. */
+    _partitionOpsIndex?: number;
+    /** Resolves an operand into an evaluated column array or scalar value. */
+    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
+    /** Window operation metadata descriptor when `_isWindow` is `true`. */
+    _windowOp?: { type: string;[key: string]: any } | null;
+}
+```
+References: [`AggFn`](#aggfn), [`RegisteredDataType`](#registereddatatype), [`ColumnDict`](#columndict), [`ColumnData`](#columndata), [`OpFn`](#opfn), [`ColumnOrExprArg`](#columnorexprarg)
+
+### IntoExpr
+```typescript
+export type IntoExpr = RegexPatternArg | IExpr;
+```
+References: [`RegexPatternArg`](#regexpatternarg), [`IExpr`](#iexpr)
+
+### IntoExprArg
+```typescript
+export type IntoExprArg = ColumnKeyArg<IntoExpr>;
+```
+References: [`ColumnKeyArg`](#columnkeyarg), [`IntoExpr`](#intoexpr)
+
+### IntoExprSeriesArg
+```typescript
+export type IntoExprSeriesArg = IntoExpr[];
+```
+References: [`IntoExpr`](#intoexpr)
+
+### IsBusinessDayOptions
+```typescript
+export interface IsBusinessDayOptions {
+    /**
+     * ISO weekday numbers (`1 = Monday` ... `7 = Sunday`) considered non-business weekend days.
+     * @default [6, 7]
+     */
+    excludeWeekdays?: number[];
+    /**
+     * List or set of holiday dates (`Date`, ISO date string, or UTC timestamp) to exclude as business days.
+     */
+    holidays?: (Date | string | number)[] | Set<number>;
+}
+```
+
+### JSONFormat
+```typescript
+export type JSONFormat =
+    /** Standard JSON format. */
+    | "json"
+    /** Newline Delimited JSON format. */
+    | "ndjson";
+```
+
+### KurtosisOptions
+```typescript
+export interface KurtosisOptions extends SkewOptions {
+    /**
+     * If `true`, computes biased population kurtosis; if `false`, applies sample bias correction.
+     * @default true
+     */
+    bias?: boolean;
+    /**
+     * If `true`, computes Fisher's excess kurtosis (subtracts 3 so a normal distribution equals 0); if `false`, computes Pearson's kurtosis.
+     * @default true
+     */
+    fisher?: boolean;
+}
+```
+References: [`SkewOptions`](#skewoptions)
+
+### OpFn
+```typescript
+export type OpFn = (vals: ColumnData, columns: ColumnDict) => ColumnData;
+```
+References: [`ColumnData`](#columndata), [`ColumnDict`](#columndict)
+
+### ReadCSVOptions
+```typescript
+export interface ReadCSVOptions {
+    /**
+     * Whether the CSV has a header row.
+     * @default true
+     */
+    hasHeader?: boolean;
+    /**
+     * Try to infer types from values if no schema is provided.
+     * @default true
+     */
+    inferSchema?: boolean;
+    /**
+     * String representations of null values.
+     * @default ["", "NA", "null", "NaN"]
+     */
+    nullValues?: string[];
+    /**
+     * The character used for quoting fields.
+     * @default '"'
+     */
+    quoteChar?: string;
+    /**
+     * Optional explicit schema mapping column names to their registered data types.
+     */
+    schema?: DataFrameSchema;
+    /**
+     * Character that separates fields.
+     * @default ","
+     */
+    separator?: string;
+}
+```
+References: [`DataFrameSchema`](#dataframeschema)
+
+### ReadJSONOptions
+```typescript
+export interface ReadJSONOptions extends JSONParseOptions {
+    /**
+     * Whether to allow JSON primitive roots instead of requiring objects or arrays.
+     * @default false
+     */
+    allowPrimitives?: boolean;
+    /**
+     * Format of the JSON content: `"json"` (standard JSON) or `"ndjson"` (Newline Delimited JSON).
+     * @default "json"
+     */
+    format?: JSONFormat;
+    /**
+     * Options specific to NDJSON parsing when `format` is `"ndjson"`.
+     */
+    ndjson?: NDJSONParseOptions;
+    /**
+     * Reviver function passed to `JSON.parse` for custom value transformation.
+     */
+    reviver?: Parameters<typeof JSON.parse>[1];
+    /**
+     * Optional explicit schema mapping column names to their registered data types.
+     */
+    schema?: DataFrameSchema;
+    /**
+     * Whether to trim leading and trailing whitespace before validating/parsing.
+     * @default false
+     */
+    trimBeforeParse?: boolean;
+}
+```
+References: [`JSONParseOptions`](#jsonparseoptions), [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions), [`DataFrameSchema`](#dataframeschema)
+
+### RegexEngineOptions
+```typescript
+export interface RegexEngineOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to return all matches (global flag).
+     * @default false
+     */
+    global?: boolean;
+}
+```
+
+### RegexPatternArg
+```typescript
+export type RegexPatternArg = string | RegExp;
+```
+
+### RegexPatternSeriesArg
+```typescript
+export type RegexPatternSeriesArg = RegexPatternArg[];
+```
+References: [`RegexPatternArg`](#regexpatternarg)
+
+### RenameMappingArg
+```typescript
+export type RenameMappingArg<T extends RowRecord = RowRecord> = Partial<Record<keyof T, string>>;
+```
+References: [`RowRecord`](#rowrecord)
+
+### ReplaceDateOptions
+```typescript
+export interface ReplaceDateOptions {
+    /** Replacement 1-indexed day of the month (1 to 31). */
+    day?: number;
+    /** Replacement 0-indexed hour of day (0 to 23). */
+    hour?: number;
+    /** Replacement 0-indexed minute of hour (0 to 59). */
+    minute?: number;
+    /** Replacement 1-indexed calendar month (1 to 12). */
+    month?: number;
+    /** Replacement 0-indexed millisecond (0 to 999). */
+    ms?: number;
+    /** Replacement 0-indexed second of minute (0 to 59). */
+    second?: number;
+    /** Target timezone identifier used to interpret and re-project the replaced components. */
+    timeZone?: string | null;
+    /** Replacement calendar year. */
+    year?: number;
+}
+```
+
+### ReplaceManyOptions
+```typescript
+export interface ReplaceManyOptions extends FindManyOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to replace all matches globally.
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * 0-based index or name of the capture group to replace.
+     * @default 0
+     */
+    groupIndex?: ColumnIndexOrNameArg;
+    /**
+     * Guarantees that the leftmost match is selected when multiple patterns match.
+     * @default false
+     */
+    leftmost?: boolean;
+    /**
+     * Treat patterns as literal substrings instead of regular expressions.
+     * @default false
+     */
+    literal?: boolean;
+    /**
+     * Escaping mode when `literal` is `true`.
+     * @default "tc39"
+     */
+    mode?: EscapeRegexMode;
+    /**
+     * Whether overlapping matches across patterns are allowed.
+     * @default false
+     */
+    overlapping?: boolean;
+}
+```
+References: [`FindManyOptions`](#findmanyoptions), [`ColumnIndexOrNameArg`](#columnindexornamearg), [`EscapeRegexMode`](#escaperegexmode)
+
+### ReplaceOptions
+```typescript
+export interface ReplaceOptions extends RegexEngineOptions, EscapeRegexOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * Whether to replace all matches globally.
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * Treat pattern as a literal substring instead of a regular expression.
+     * @default false
+     */
+    literal?: boolean;
+    /**
+     * Escaping mode when `literal` is `true`.
+     * @default "tc39"
+     */
+    mode?: EscapeRegexMode;
+    /**
+     * Maximum number of occurrences to replace (`-1` or `Infinity` replaces all).
+     * @default 1
+     */
+    n?: number;
+}
+```
+References: [`RegexEngineOptions`](#regexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`EscapeRegexMode`](#escaperegexmode)
+
+### RowRecord
+```typescript
+export type RowRecord = Record<string, any>;
+```
+
+### ScalarArg
+```typescript
+export type ScalarArg = IExpr | ValidScalarTypes;
+```
+References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
+
+### SkewOptions
+```typescript
+export interface SkewOptions {
+    /**
+     * If `true`, computes biased population skewness; if `false`, applies the Fisher-Pearson sample bias correction.
+     * @default true
+     */
+    bias?: boolean;
+}
+```
+
+### SortArrayOptions
+```typescript
+export interface SortArrayOptions<T = any> {
+    /**
+     * Optional comparator function or dictionary mapping column names to custom comparator functions.
+     */
+    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
+    /**
+     * Sort order boolean or array of booleans per key.
+     * @default false
+     */
+    descending?: ColumnKeyArg<boolean>;
+    /**
+     * When `true`, places nulls at the end of sorted output.
+     * @default true
+     */
+    nullsLast?: boolean;
+}
+```
+References: [`ColumnKeyArg`](#columnkeyarg)
+
+### SplitOptions
+```typescript
+export interface SplitOptions extends RegexEngineOptions, EscapeRegexOptions {
+    /**
+     * Whether matching should be case-insensitive for ASCII characters.
+     * @default false
+     */
+    asciiCaseInsensitive?: boolean;
+    /**
+     * If `true`, pads missing splits with `null` to guarantee `limit + 1` elements.
+     * @default false
+     */
+    exact?: boolean;
+    /**
+     * Whether to match globally.
+     * @default false
+     */
+    global?: boolean;
+    /**
+     * Include matched delimiter substrings in the split output array.
+     * @default false
+     */
+    inclusive?: boolean;
+    /**
+     * Maximum number of splits to perform.
+     */
+    limit?: number;
+    /**
+     * Treat delimiter as a literal substring (`true`) or regular expression (`false`).
+     * @default true
+     */
+    literal?: boolean;
+    /**
+     * Escaping mode when `literal` is `true`.
+     * @default "tc39"
+     */
+    mode?: EscapeRegexMode;
+    /**
+     * If `true`, throws an `InvalidArgumentError` when the split yields fewer than `limit + 1` elements.
+     * @default false
+     */
+    strict?: boolean;
+}
+```
+References: [`RegexEngineOptions`](#regexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions), [`EscapeRegexMode`](#escaperegexmode)
+
+### StrftimeOptions
+```typescript
+export interface StrftimeOptions {
+    /**
+     * Format string containing `%` date/time directives (e.g. `"%Y-%m-%d"`).
+     */
+    format: string;
+    /**
+     * BCP 47 locale tag used for localized month and weekday names.
+     * @default "en-US"
+     */
+    locale?: string;
+    /**
+     * Target IANA timezone identifier used when formatting date/time parts.
+     * @default "UTC"
+     */
+    timeZone?: string;
+}
+```
+
+### StringEncoding
+```typescript
+export type StringEncoding = "hex" | "base64";
+```
+
+### StrptimeOptions
+```typescript
+export interface StrptimeOptions {
+    /**
+     * Default IANA timezone or UTC offset applied when the parsed string has no `%z`/`%Z` directive.
+     * @default "UTC"
+     */
+    defaultTimeZone?: string;
+    /**
+     * Format string containing `%` date/time directives (e.g. `"%Y-%m-%d %H:%M:%S"`).
+     */
+    format: string;
+    /**
+     * If `true`, throws an error when a string fails to match `format`; if `false`, returns `null`.
+     * @default true
+     */
+    strict?: boolean;
+}
+```
+
+### StructFieldsArg
+```typescript
+export type StructFieldsArg = IntoExprSeriesArg | ExprDict;
+```
+References: [`IntoExprSeriesArg`](#intoexprseriesarg), [`ExprDict`](#exprdict)
+
+### TimeUnit
+```typescript
+export type TimeUnit = "s" | "ms" | "us" | "ns";
+```
+
+### UtcOffsetFormat
+```typescript
+export type UtcOffsetFormat = "milliseconds" | "minutes" | "hours" | "iso" | "basic";
+```
+
+### UtcOffsetOptions
+```typescript
+export interface UtcOffsetOptions {
+    /**
+     * Output format: `"milliseconds"`, `"minutes"`, `"hours"`, `"iso"` (`"+HH:MM"`), or `"basic"` (`"+HHMM"`).
+     * @default "milliseconds"
+     */
+    format?: UtcOffsetFormat;
+    /**
+     * Which offset component to compute: `"base"` (standard offset), `"total"` (wall-clock offset), or `"daylightSavingTime"` (DST delta).
+     * @default "total"
+     */
+    type?: UtcOffsetType;
+}
+```
+References: [`UtcOffsetFormat`](#utcoffsetformat), [`UtcOffsetType`](#utcoffsettype)
+
+### UtcOffsetType
+```typescript
+export type UtcOffsetType = "base" | "total" | "daylightSavingTime";
+```
+
 ### ValidPrimitiveTypes
 ```typescript
 export type ValidPrimitiveTypes = string | number | boolean | bigint | symbol | null | undefined;
@@ -14187,661 +15474,9 @@ export type ValidScalarTypes = Exclude<ValidPrimitiveTypes, symbol> | Date | Any
 ```
 References: [`ValidPrimitiveTypes`](#validprimitivetypes), [`AnyTypedArray`](#anytypedarray)
 
-### AggFn
+### ArrayCheckMode
 ```typescript
-export type AggFn<V, R = any> = (values: V[]) => R;
-```
-
-### OpFn
-```typescript
-export type OpFn = (vals: ColumnData, columns: ColumnDict) => ColumnData;
-```
-References: [`ColumnData`](#columndata), [`ColumnDict`](#columndict)
-
-### CastOptions
-```typescript
-export interface CastOptions {
-    /**
-     * Whether cast errors should throw or produce null values.
-     * @default true
-     */
-    strict?: boolean;
-}
-```
-
-### IntoExpr
-```typescript
-export type IntoExpr = string | RegExp | IExpr;
-```
-References: [`IExpr`](#iexpr)
-
-### IntoExprSeriesArg
-```typescript
-export type IntoExprSeriesArg = IntoExpr[];
-```
-References: [`IntoExpr`](#intoexpr)
-
-### ExprDict
-```typescript
-export type ExprDict = Record<string, IntoExpr>;
-```
-References: [`IntoExpr`](#intoexpr)
-
-### ColumnSelector
-```typescript
-export type ColumnSelector<T = any> =
-    | keyof T
-    | string
-    | RegExp
-    | DataType
-    | Function
-    | (keyof T | string | RegExp)[]
-    | (DataType | Function)[];
-```
-
-### IExpr
-```typescript
-export interface IExpr {
-    _ops: OpFn[];
-    _colName?: string;
-    _outputName?: string;
-    _isLiteral?: boolean;
-    _literalValue?: any;
-    _aggFn?: AggFn<any> | null;
-    _castType?: RegisteredDataType;
-    _binaryMeta?: { _left: any; _right: any };
-    _groupingOpsIndex?: number;
-    _partitionOpsIndex?: number;
-    _partitionBy?: (string | IExpr)[] | null;
-    _windowOp?: { type: string;[key: string]: any } | null;
-    _isWindow?: boolean;
-    _baseExpr?: IExpr;
-    _fieldName?: string;
-    _isUnnest?: boolean;
-    _branchOperands?: any[];
-    _isGlobalAgg?(): boolean;
-    alias(name: string): this;
-    cast(dataType: RegisteredDataType, options?: CastOptions): this;
-    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
-    _evaluate(columns: ColumnDict, height: number): ColumnData;
-    _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
-    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
-    _debug(label?: string): this;
-}
-```
-References: [`OpFn`](#opfn), [`AggFn`](#aggfn), [`RegisteredDataType`](#registereddatatype), [`CastOptions`](#castoptions), [`ColumnDict`](#columndict), [`ColumnData`](#columndata)
-
-### TimeUnit
-```typescript
-export type TimeUnit = "s" | "ms" | "us" | "ns";
-```
-
-### DatetimeTimeUnit
-```typescript
-export type DatetimeTimeUnit = "ms" | "us" | "ns";
-```
-
-### DurationUnit
-```typescript
-export type DurationUnit = "ns" | "us" | "ms" | "s" | "m" | "h" | "d" | "w" | "mo" | "q" | "y" | "i";
-```
-
-### DurationInterval
-```typescript
-export interface DurationInterval {
-    months: number;
-    days: number;
-    ms: number;
-    indexUnits: number;
-    isCalendar: boolean;
-    isIndex: boolean;
-}
-```
-
-### DurationOptions
-```typescript
-export interface DurationOptions {
-    weeks?: IntoExpr | number;
-    days?: IntoExpr | number;
-    hours?: IntoExpr | number;
-    minutes?: IntoExpr | number;
-    seconds?: IntoExpr | number;
-    milliseconds?: IntoExpr | number;
-    microseconds?: IntoExpr | number;
-    nanoseconds?: IntoExpr | number;
-}
-```
-References: [`IntoExpr`](#intoexpr)
-
-### ParseDurationStringOptions
-```typescript
-export interface ParseDurationStringOptions {
-    to?: DurationUnit;
-}
-```
-References: [`DurationUnit`](#durationunit)
-
-### ToDurationOptions
-```typescript
-export interface ToDurationOptions extends ParseDurationStringOptions {
-    fallback?: number;
-}
-```
-References: [`ParseDurationStringOptions`](#parsedurationstringoptions)
-
-### StrptimeOptions
-```typescript
-export interface StrptimeOptions {
-    format: string;
-    strict?: boolean;
-    defaultTimeZone?: string;
-}
-```
-
-### StrftimeOptions
-```typescript
-export interface StrftimeOptions {
-    format: string;
-    locale?: string;
-    timeZone?: string;
-}
-```
-
-### StringEncoding
-```typescript
-export type StringEncoding = "hex" | "base64";
-```
-
-### StringEncodeOptions
-```typescript
-export interface StringEncodeOptions {
-    encoding: StringEncoding;
-}
-```
-References: [`StringEncoding`](#stringencoding)
-
-### StringDecodeOptions
-```typescript
-export interface StringDecodeOptions extends StringEncodeOptions {
-    strict?: boolean;
-}
-```
-References: [`StringEncodeOptions`](#stringencodeoptions)
-
-### EscapeRegexMode
-```typescript
-export type EscapeRegexMode = "tc39" | "nonAlphanumericAscii";
-```
-
-### EscapeRegexOptions
-```typescript
-export interface EscapeRegexOptions {
-    /**
-     * Escaping mode:
-     * - "tc39" (default): TC39 ECMAScript standard specification (syntax metacharacters + set operators).
-     * - "nonAlphanumericAscii": Escapes all non-alphanumeric ASCII characters ([^A-Za-z0-9]) matching Polars / Rust regex::escape.
-     */
-    mode?: EscapeRegexMode;
-}
-```
-References: [`EscapeRegexMode`](#escaperegexmode)
-
-### ExtractRegexEngineOptions
-```typescript
-export interface ExtractRegexEngineOptions {
-    /**
-     * Index or name of the capture group to extract.
-     */
-    groupIndex?: number | string;
-    /**
-     * Whether matching should be case-insensitive for ASCII characters.
-     */
-    asciiCaseInsensitive?: boolean;
-    /**
-     * Whether to return all matches (global flag). Defaults to false.
-     */
-    global?: boolean;
-}
-```
-
-### RegexEngineOptions
-```typescript
-export type RegexEngineOptions = Omit<ExtractRegexEngineOptions, "groupIndex">;
-```
-References: [`ExtractRegexEngineOptions`](#extractregexengineoptions)
-
-### ExtractManyOptions
-```typescript
-export interface ExtractManyOptions extends ExtractRegexEngineOptions {
-    /**
-     * Whether overlapping matches are allowed.
-     */
-    overlapping?: boolean;
-    /**
-     * Guarantees in case there are overlapping matches that the leftmost match is used.
-     * In case there are multiple candidates for the leftmost match, the pattern which comes
-     * first in patterns is used. May not be used together with overlapping = true.
-     */
-    leftmost?: boolean;
-}
-```
-References: [`ExtractRegexEngineOptions`](#extractregexengineoptions)
-
-### FindOptions
-```typescript
-export interface FindOptions extends ExtractRegexEngineOptions, EscapeRegexOptions {
-    /**
-     * Treat pattern as literal string instead of regex.
-     */
-    literal?: boolean;
-}
-```
-References: [`ExtractRegexEngineOptions`](#extractregexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions)
-
-### FindManyOptions
-```typescript
-export interface FindManyOptions extends ExtractManyOptions, EscapeRegexOptions {
-    /**
-     * Treat patterns as literal strings instead of regex.
-     */
-    literal?: boolean;
-}
-```
-References: [`ExtractManyOptions`](#extractmanyoptions), [`EscapeRegexOptions`](#escaperegexoptions)
-
-### ReplaceOptions
-```typescript
-export interface ReplaceOptions extends RegexEngineOptions, EscapeRegexOptions {
-    /**
-     * Treat pattern as a literal string instead of regex.
-     */
-    literal?: boolean;
-    /**
-     * Number of occurrences to replace. Use -1 or Infinity to replace all. Defaults to 1.
-     */
-    n?: number;
-}
-```
-References: [`RegexEngineOptions`](#regexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions)
-
-### ReplaceManyOptions
-```typescript
-export interface ReplaceManyOptions extends FindManyOptions { }
-```
-References: [`FindManyOptions`](#findmanyoptions)
-
-### SplitOptions
-```typescript
-export interface SplitOptions extends RegexEngineOptions, EscapeRegexOptions {
-    /**
-     * Treat delimiter as literal string (default: true). Set to false for regex matching.
-     */
-    literal?: boolean;
-    /**
-     * Include delimiter in the split results.
-     */
-    inclusive?: boolean;
-    /**
-     * Maximum number of splits to perform.
-     */
-    limit?: number;
-    /**
-     * If true, pads missing splits with null to guarantee exact limit + 1 parts.
-     */
-    exact?: boolean;
-    /**
-     * If true, throws an InvalidArgumentError if the split does not yield at least limit + 1 parts.
-     */
-    strict?: boolean;
-}
-```
-References: [`RegexEngineOptions`](#regexengineoptions), [`EscapeRegexOptions`](#escaperegexoptions)
-
-### BusinessDayRollType
-```typescript
-export type BusinessDayRollType = "raise" | "forward" | "backward";
-```
-
-### IsBusinessDayOptions
-```typescript
-export interface IsBusinessDayOptions {
-    holidays?: (Date | string | number)[] | Set<number>;
-    excludeWeekdays?: number[];
-}
-```
-
-### DayOffsetOptions
-```typescript
-export interface DayOffsetOptions extends IsBusinessDayOptions {
-    roll?: BusinessDayRollType;
-}
-```
-References: [`IsBusinessDayOptions`](#isbusinessdayoptions), [`BusinessDayRollType`](#businessdayrolltype)
-
-### UtcOffsetType
-```typescript
-export type UtcOffsetType = "base" | "total" | "daylightSavingTime";
-```
-
-### UtcOffsetFormat
-```typescript
-export type UtcOffsetFormat = "milliseconds" | "minutes" | "hours" | "iso" | "basic";
-```
-
-### UtcOffsetOptions
-```typescript
-export interface UtcOffsetOptions {
-    type?: UtcOffsetType;
-    format?: UtcOffsetFormat;
-}
-```
-References: [`UtcOffsetType`](#utcoffsettype), [`UtcOffsetFormat`](#utcoffsetformat)
-
-### DateTimeParts
-```typescript
-export interface DateTimeParts {
-    /** Calendar year (e.g. 2026). */
-    year: number;
-    /** 1-indexed calendar month from 1 to 12 (1 = January, 12 = December). */
-    month: number;
-    /** 1-indexed day of the month from 1 to 31. */
-    day: number;
-    /** 0-indexed hour of day from 0 to 23 (0 = Midnight). */
-    hour: number;
-    /** 0-indexed minute of hour from 0 to 59. */
-    minute: number;
-    /** 0-indexed second of minute from 0 to 59. */
-    second: number;
-    /** 0-indexed millisecond from 0 to 999. */
-    ms: number;
-    /** 0-indexed day of week (0 = Sunday, 6 = Saturday). */
-    dayOfWeek?: number;
-    /** Optional target timezone identifier (e.g. "UTC", "America/New_York"). */
-    timeZone?: string | null;
-}
-```
-
-### ReplaceDateOptions
-```typescript
-export type ReplaceDateOptions = Partial<Omit<DateTimeParts, "dayOfWeek">>;
-```
-References: [`DateTimeParts`](#datetimeparts)
-
-### RollingOptions
-```typescript
-export interface RollingOptions {
-    windowSize: number;
-}
-```
-
-### EwmOperation
-```typescript
-export type EwmOperation = "mean" | "sum" | "std" | "var" | "skew" | "kurt";
-```
-
-### EwmOptions
-```typescript
-export interface EwmOptions {
-    alpha?: number;
-    span?: number;
-    halfLife?: number | string;
-    com?: number;
-    minSamples?: number;
-    adjust?: boolean;
-    ignoreNulls?: boolean;
-    by?: string | IExpr;
-    bias?: boolean;
-    fisher?: boolean;
-}
-```
-References: [`IExpr`](#iexpr)
-
-### EwmSumOptions
-```typescript
-export type EwmSumOptions = Omit<EwmOptions, "adjust" | "bias" | "fisher">;
-```
-References: [`EwmOptions`](#ewmoptions)
-
-### EwmMeanOptions
-```typescript
-export type EwmMeanOptions = Omit<EwmOptions, "bias" | "fisher">;
-```
-References: [`EwmOptions`](#ewmoptions)
-
-### EwmVarOptions
-```typescript
-export type EwmVarOptions = Omit<EwmOptions, "bias" | "fisher">;
-```
-References: [`EwmOptions`](#ewmoptions)
-
-### EwmStdOptions
-```typescript
-export type EwmStdOptions = Omit<EwmOptions, "bias" | "fisher">;
-```
-References: [`EwmOptions`](#ewmoptions)
-
-### EwmSkewOptions
-```typescript
-export type EwmSkewOptions = Omit<EwmOptions, "fisher">;
-```
-References: [`EwmOptions`](#ewmoptions)
-
-### EwmKurtOptions
-```typescript
-export type EwmKurtOptions = EwmOptions;
-```
-References: [`EwmOptions`](#ewmoptions)
-
-### SortArrayOptions
-```typescript
-export interface SortArrayOptions<T = any> {
-    descending?: boolean | boolean[];
-    nullsLast?: boolean;
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
-}
-```
-
-### SortOptions
-```typescript
-export interface SortOptions<T = any> extends SortArrayOptions<T> {
-    by: keyof T | (keyof T)[] | IExpr | IExpr[];
-}
-```
-References: [`SortArrayOptions`](#sortarrayoptions), [`IExpr`](#iexpr)
-
-### ConcatHow
-```typescript
-export type ConcatHow = "vertical" | "horizontal" | "diagonal";
-```
-
-### HorizontalConcatOptions
-```typescript
-export interface HorizontalConcatOptions {
-    strict?: boolean;
-}
-```
-
-### ConcatOptions
-```typescript
-export interface ConcatOptions {
-    how?: ConcatHow;
-    horizontal?: HorizontalConcatOptions;
-}
-```
-References: [`ConcatHow`](#concathow), [`HorizontalConcatOptions`](#horizontalconcatoptions)
-
-### ConcatItem
-```typescript
-export type ConcatItem = DataFrame<any> | ColumnDict | RowRecord[];
-```
-References: [`ColumnDict`](#columndict), [`RowRecord`](#rowrecord)
-
-### ExplodeOptions
-```typescript
-export interface ExplodeOptions {
-    emptyAsNull?: boolean;
-    keepNulls?: boolean;
-}
-```
-
-### InferDataType
-```typescript
-export type InferDataType<T> = T extends DataType<infer U> ? U : any;
-```
-
-### InferSchema
-```typescript
-export type InferSchema<S extends DataFrameSchema> = {
-    [K in keyof S]: InferDataType<S[K]>;
-};
-```
-References: [`DataFrameSchema`](#dataframeschema), [`InferDataType`](#inferdatatype)
-
-### FlattenUnion
-```typescript
-export type FlattenUnion<T> = {
-    [K in (T extends any ? keyof T : never)]?: T extends any ? (K extends keyof T ? T[K] : never) : never;
-};
-```
-
-### FillNullStrategy
-```typescript
-export type FillNullStrategy = "forward" | "backward" | "min" | "max" | "mean" | "zero" | "one";
-```
-
-### FillTarget
-```typescript
-export type FillTarget = "null" | "nan" | "all" | IExpr | ValidScalarTypes;
-```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes)
-
-### FillOptions
-```typescript
-export interface FillOptions {
-    /**
-     * Replacement scalar value or column expression to substitute in place of target values.
-     */
-    value?: IExpr | ValidScalarTypes | null;
-    /**
-     * Filling strategy to calculate or propagate replacement values.
-     * - `"forward"`: Propagate last valid value forward.
-     * - `"backward"`: Propagate next valid value backward.
-     * - `"min"`: Replace with column minimum.
-     * - `"max"`: Replace with column maximum.
-     * - `"mean"`: Replace with column arithmetic mean.
-     * - `"zero"`: Replace with 0.
-     * - `"one"`: Replace with 1.
-     */
-    strategy?: FillNullStrategy;
-    /**
-     * Maximum number of consecutive target values to fill when using directional strategies ("forward", "backward").
-     */
-    limit?: number;
-}
-```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`FillNullStrategy`](#fillnullstrategy)
-
-### FillNullOptions
-```typescript
-export interface FillNullOptions {
-    /**
-     * Replacement scalar value or column expression to substitute in place of null values.
-     */
-    value?: IExpr | ValidScalarTypes | null;
-    /**
-     * Filling strategy to calculate or propagate replacement values.
-     */
-    strategy?: FillNullStrategy;
-    /**
-     * Maximum number of consecutive null values to fill when using directional strategies ("forward", "backward").
-     */
-    limit?: number;
-}
-```
-References: [`IExpr`](#iexpr), [`ValidScalarTypes`](#validscalartypes), [`FillNullStrategy`](#fillnullstrategy)
-
-### ToStructOptions
-```typescript
-export interface ToStructOptions {
-    fields?: string[] | ((idx: number) => string);
-    upperBound?: number;
-}
-```
-
-### SkewOptions
-```typescript
-export interface SkewOptions {
-    bias?: boolean;
-}
-```
-
-### KurtosisOptions
-```typescript
-export interface KurtosisOptions {
-    fisher?: boolean;
-    bias?: boolean;
-}
-```
-
-### CentralMomentsOptions
-```typescript
-export interface CentralMomentsOptions {
-    adjust?: boolean;
-    minSamples?: number;
-}
-```
-
-### CentralMomentsResult
-```typescript
-export interface CentralMomentsResult {
-    count: number;
-    sumW: number;
-    weightedSum: number;
-    mean: number | null;
-    m2Sum: number;
-    m3Sum: number;
-    m4Sum: number;
-    variance: number | null;
-    std: number | null;
-}
-```
-
-### EntropyOptions
-```typescript
-export interface EntropyOptions {
-    base?: number;
-    normalize?: boolean;
-}
-```
-
-### ShiftOptions
-```typescript
-export interface ShiftOptions {
-    /**
-     * Fallback fill value for empty slots introduced by shift/lag/lead.
-     * @default null
-     */
-    fillValue?: any;
-}
-```
-
-### ToValidArrayOptions
-```typescript
-export interface ToValidArrayOptions {
-    /**
-     * If true, returns a shallow copy of an existing array.
-     * If false, returns the input array directly without cloning.
-     * @default true
-     */
-    clone?: boolean;
-    /**
-     * If true, wraps null or undefined into an array containing that single element.
-     * If false, returns an empty array [].
-     * @default false
-     */
-    wrapNull?: boolean;
-}
+export type ArrayCheckMode = "every" | "some";
 ```
 
 ### ArrayItemType
@@ -14865,126 +15500,148 @@ export type ArrayItemType =
     | ((v: unknown) => any);
 ```
 
-### ArrayCheckMode
+### BigIntRange
 ```typescript
-export type ArrayCheckMode = "every" | "some";
+export type BigIntRange =
+    | {
+        /** Minimum inclusive BigInt value. */
+        min: bigint;
+        /** Maximum inclusive BigInt value. */
+        max: bigint;
+    }
+    | BigIntRangeType;
+```
+References: [`BigIntRangeType`](#bigintrangetype)
+
+### BigIntRangeType
+```typescript
+export type BigIntRangeType = keyof typeof BIGINT_RANGES;
 ```
 
-### IsArrayOfTypeOptionsParams
+### BinarySearchOptions
 ```typescript
-export type IsArrayOfTypeOptionsParams = {
-    mode?: ArrayCheckMode;
-    allowNulls?: boolean;
-    allowEmpty?: boolean;
-    coerce?: (v: unknown) => any;
-};
-```
-References: [`ArrayCheckMode`](#arraycheckmode)
-
-### UniqueArrayStatsOptions
-```typescript
-export interface UniqueArrayStatsOptions {
+export interface BinarySearchOptions<T = any> {
     /**
-     * If true, uses strict serialization comparison (via keySelector or toCanonicalString)
-     * to group complex nested types (like Arrays, Sets, Maps, and Dates) by value instead of reference.
+     * Optional accessor function `(index, item) => number` for indirect searching.
+     */
+    getValue?: (index: number, item: T) => number;
+    /**
+     * Search side: `"left"` (first index `>= target`) or `"right"` (first index `> target`).
+     * @default "left"
+     */
+    side?: BinarySearchSide;
+}
+```
+References: [`BinarySearchSide`](#binarysearchside)
+
+### BinarySearchSide
+```typescript
+export type BinarySearchSide = "left" | "right";
+```
+
+### BinaryValidationOptions
+```typescript
+export interface BinaryValidationOptions {
+    /**
+     * When `true`, requires strict binary buffer type matching.
      * @default false
      */
     strict?: boolean;
-
-    /**
-     * Custom function to extract a unique comparison key from each element.
-     * If strict is true and no selector is provided, falls back to `toCanonicalString`.
-     */
-    keySelector?: (val: any) => any;
 }
 ```
 
-### StepSliceArrayOptions
+### CandidateMatch
 ```typescript
-export interface StepSliceArrayOptions {
-    /**
-     * The step size to slice the array by. Cannot be zero.
-     * Positive values slice forward (left-to-right), negative values slice backward (right-to-left).
-     * @default 1
-     */
-    step?: number;
-
-    /**
-     * The index to start slicing from (inclusive).
-     * Supports negative values to start relative to the end of the array.
-     * @default 0
-     */
-    offsetStart?: number;
-
-    /**
-     * The index to end slicing at (exclusive).
-     * Supports negative values to end relative to the end of the array.
-     * Defaults to the end of the array (if step > 0) or -1 (if step < 0).
-     */
-    offsetEnd?: number;
-
-    /**
-     * Caps the maximum number of items gathered in the sliced result array.
-     * If specified, the slicing process stops once this limit is reached.
-     */
-    maxItemsGathered?: number;
-
-    /**
-     * If true, returns null when the starting offset is out of bounds.
-     * If false, throws an error when the starting offset is out of bounds.
-     * @default true
-     */
-    nullOnOob?: boolean;
+export interface CandidateMatch<T = unknown> {
+    /** Match end offset (exclusive) in the input string. */
+    _end: number;
+    /** Pattern index in the input pattern array. */
+    _i: number;
+    /** Extracted payload associated with the match. */
+    _payload: T;
+    /** Match start offset (inclusive) in the input string. */
+    _start: number;
 }
 ```
 
-### JoinArrayOptions
+### ChangeCaseOptions
 ```typescript
-export interface JoinArrayOptions {
+export interface ChangeCaseOptions {
     /**
-     * If true, nullish elements (null and undefined) are completely ignored during joining.
-     * If false (default), nullish elements are serialized as empty strings or custom `nullValue`.
-     * @default false
+     * Target casing format: `"camel"`, `"kebab"`, `"pascal"`, `"snake"`, or `"title"`.
      */
-    ignoreNulls?: boolean;
-
-    /**
-     * Custom string representation for nullish values.
-     * Only applied if `ignoreNulls` is false.
-     * @default ""
-     */
-    nullValue?: string;
-
-    /**
-     * Optional prefix string prepended to the final joined result.
-     * @default ""
-     */
-    prefix?: string;
-
-    /**
-     * Optional suffix string appended to the final joined result.
-     * @default ""
-     */
-    suffix?: string;
-
-    /**
-     * Maximum number of array elements to join.
-     * If specified, elements beyond this limit are omitted and `truncationMarker` is appended.
-     */
-    limit?: number;
-
-    /**
-     * Custom placeholder string appended to the joined string when limit truncation occurs.
-     * Only applied if `limit` is specified and the array length exceeds it.
-     * @default "..."
-     */
-    truncationMarker?: string;
-
-    /**
-     * Callback function used to format each individual non-null element to a custom string representation.
-     */
-    valueFormatter?: (val: any, index: number) => string;
+    format: "camel" | "kebab" | "pascal" | "snake" | "title";
 }
+```
+
+### CumulativeStepContext
+```typescript
+export interface CumulativeStepContext {
+    /** The absolute index of the current element in the parent array. */
+    absoluteIndex: number;
+    /** The relative iteration counter of the stepping process (starts at 1). */
+    index: number;
+    /** The original value at the current index in the target array. */
+    originalValue: any;
+    /** The accumulated value returned by the step function from the previous stepped index. */
+    prev: any;
+    /** The entire target array being populated/modified. */
+    targetArray: any;
+}
+```
+
+### DateDirective
+```typescript
+export interface DateDirective {
+    /** Formats a `Date` and decomposed `DateTimeParts` into the directive's string representation. */
+    _format: (d: Date, locale: string, timeZone: string, parts: import("../types").DateTimeParts) => string;
+    /** Target date/time component field populated when this directive is parsed. */
+    _parseField?: "year" | "month" | "day" | "hour" | "minute" | "second" | "ms" | "ampm" | "offset";
+    /** Optional normalizer converting the matched substring into a numeric or string component value. */
+    _parseNormalize?: (valStr: string) => number | string;
+    /** Regular expression pattern source used to match the directive during `strptime()`. */
+    _parseRegex?: string;
+}
+```
+References: [`DateTimeParts`](#datetimeparts)
+
+### DecimalOptions
+```typescript
+export interface DecimalOptions {
+    /**
+     * Total maximum number of significant digits (1 to 38).
+     * @default 38
+     */
+    precision?: number;
+    /**
+     * Number of digits to the right of the decimal point (`0 <= scale <= precision`).
+     * @default 9
+     */
+    scale?: number;
+}
+```
+
+### DurationInterval
+```typescript
+export interface DurationInterval {
+    /** Number of calendar days (`d`, `w`). */
+    days: number;
+    /** Number of row index units (`i`). */
+    indexUnits: number;
+    /** `true` if the interval contains calendar units (`months > 0` or `days > 0`). */
+    isCalendar: boolean;
+    /** `true` if the interval is measured in row index units (`i`). */
+    isIndex: boolean;
+    /** Number of calendar months (`mo`, `q`, `y`). */
+    months: number;
+    /** Number of sub-day milliseconds (`h`, `m`, `s`, `ms`, `us`, `ns`). */
+    ms: number;
+}
+```
+
+### DurationUnit
+```typescript
+export type DurationUnit = "ns" | "us" | "ms" | "s" | "m" | "h" | "d" | "w" | "mo" | "q" | "y" | "i";
 ```
 
 ### FillSeqBaseOptions
@@ -14992,463 +15649,162 @@ export interface JoinArrayOptions {
 export interface FillSeqBaseOptions {
     /**
      * Type coercion helper applied to each generated value before writing.
-     * 
-     * @param v The newly generated candidate value.
-     * @returns The coerced value to write to the array.
      */
     coerce?: (v: any) => any;
-
     /**
-     * Conditional predicate determining if a value should be replaced at a given index.
-     * 
-     * @param v The original/current value at the target index.
-     * @param index The absolute index of the current element.
-     * @param array The entire target array.
-     * @returns True if the candidate value should overwrite the original value, false otherwise.
+     * Conditional predicate determining if a value should be written at a given index.
      */
     condition?: (v: any, index: number, array: any[]) => boolean;
-
     /**
-     * If true, iterates and populates in reverse (from startIndex down to endIndex).
+     * Exclusive boundary index at which iteration and writing stops.
+     */
+    endIndex?: number;
+    /**
+     * If `true`, iterates and populates in reverse from `startIndex` down to `endIndex`.
      * @default false
      */
     reverse?: boolean;
-
     /**
-     * The index at which array iteration and writing begins.
-     * @default reverse ? length - 1 : 0
+     * Index at which array iteration and writing begins.
+     * @default 0
      */
     startIndex?: number;
-
-    /**
-     * The exclusive boundary index at which iteration and writing stops.
-     * @default reverse ? -1 : length
-     */
-    endIndex?: number;
-}
-```
-
-### CumulativeStepContext
-```typescript
-export interface CumulativeStepContext {
-    /** The accumulated value returned by the step function from the previous stepped index. */
-    prev: any;
-    /** The relative iteration counter of the stepping process (starts at 1). */
-    index: number;
-    /** The original value at the current index in the target array. */
-    originalValue: any;
-    /** The absolute index of the current element in the parent array. */
-    absoluteIndex: number;
-    /** The entire target array being populated/modified. */
-    targetArray: any;
-}
-```
-
-### IndependentStepContext
-```typescript
-export interface IndependentStepContext {
-    /** The relative iteration counter of the generation process (starts at 0). */
-    index: number;
-    /** The static starting value passed to the sequence generator. */
-    initialValue: any;
-    /** The original value at the current index in the target array. */
-    originalValue: any;
-    /** The absolute index of the current element in the parent array. */
-    absoluteIndex: number;
-    /** The entire target array being populated/modified. */
-    targetArray: any;
 }
 ```
 
 ### FillSeqOptions
 ```typescript
-export type FillSeqOptions = FillSeqBaseOptions & (
-    | {
-        mode: "constant";
-        step?: never;
-    }
-    | {
-        mode?: "cumulative";
-        step?: number | ((context: CumulativeStepContext) => any);
-    }
-    | {
-        mode: "independent";
-        step?: number | ((context: IndependentStepContext) => any);
-    }
-);
-```
-References: [`FillSeqBaseOptions`](#fillseqbaseoptions), [`CumulativeStepContext`](#cumulativestepcontext), [`IndependentStepContext`](#independentstepcontext)
-
-### BinarySearchSide
-```typescript
-export type BinarySearchSide = "left" | "right";
-```
-
-### BinarySearchOptions
-```typescript
-export interface BinarySearchOptions<T = any> {
-    side?: BinarySearchSide;
-    getValue?: (index: number, item: T) => number;
+export interface FillSeqOptions extends FillSeqBaseOptions {
+    /**
+     * Type coercion helper applied to each generated value before writing.
+     */
+    coerce?: (v: any) => any;
+    /**
+     * Conditional predicate determining if a value should be written at a given index.
+     */
+    condition?: (v: any, index: number, array: any[]) => boolean;
+    /**
+     * Exclusive boundary index at which iteration and writing stops.
+     */
+    endIndex?: number;
+    /**
+     * Sequence generation mode: `"constant"`, `"cumulative"`, or `"independent"`.
+     * @default "cumulative"
+     */
+    mode?: "constant" | "cumulative" | "independent";
+    /**
+     * If `true`, iterates and populates in reverse from `startIndex` down to `endIndex`.
+     * @default false
+     */
+    reverse?: boolean;
+    /**
+     * Index at which array iteration and writing begins.
+     * @default 0
+     */
+    startIndex?: number;
+    /**
+     * Step increment value or callback function.
+     * @default 1
+     */
+    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);
 }
 ```
-References: [`BinarySearchSide`](#binarysearchside)
+References: [`FillSeqBaseOptions`](#fillseqbaseoptions), [`CumulativeStepContext`](#cumulativestepcontext), [`IndependentStepContext`](#independentstepcontext)
 
 ### FilterByMaskOptions
 ```typescript
 export interface FilterByMaskOptions {
+    /**
+     * If `true`, non-matching elements are replaced with `null` while preserving array length; if `false`, they are omitted.
+     * @default false
+     */
     nullify?: boolean;
 }
 ```
 
-### BinaryValidationOptions
+### FloatOptions
 ```typescript
-export interface BinaryValidationOptions {
-    strict?: boolean;
-}
-```
-
-### FormatCSVValueOptions
-```typescript
-export interface FormatCSVValueOptions {
+export interface FloatOptions extends ParseNumberOptions {
     /**
-     * The string representation to use for null/missing values.
-     * @default ""
+     * Whether `NaN` is considered a valid number.
+     * @default false
      */
-    nullValue?: string;
-
+    allowNaN?: boolean;
     /**
-     * Custom format string for Date values (e.g. "%Y-%m-%d").
+     * Whether `Infinity` and `-Infinity` are considered valid numbers.
+     * @default false
      */
-    dateFormat?: string;
-
+    allowNonFiniteNumbers?: boolean;
     /**
-     * Custom format string for Time values (e.g. "%H:%M:%S").
+     * Floating-point precision target (`"Float32"` or `"Float64"`).
      */
-    timeFormat?: string;
-
+    floatPrecision?: FloatPrecision;
     /**
-     * Custom format string for Datetime values (e.g. "%Y-%m-%d %H:%M:%S").
-     */
-    datetimeFormat?: string;
-
-    /**
-     * Options for numeric formatting (floats, ints, bigints).
-     */
-    numericFormatOptions?: NumericFormatOptions;
-
-    /**
-     * Options for the safe JSON replacer used when formatting objects/arrays.
-     */
-    replacerOptions?: SafeJsonReplacerOptions;
-}
-```
-References: [`NumericFormatOptions`](#numericformatoptions), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)
-
-### WriteCSVOptions
-```typescript
-export interface WriteCSVOptions extends FormatCSVValueOptions {
-    /**
-     * Whether to write the header row.
+     * When `true`, allows scientific notation (e.g. `"1.5e3"`) when parsing numeric strings.
      * @default true
      */
-    includeHeader?: boolean;
-
-    /**
-     * Character that separates fields.
-     * @default ","
-     */
-    separator?: string;
-
-    /**
-     * The string used to end each row.
-     * @default "\n"
-     */
-    lineTerminator?: string;
-
-    /**
-     * The character used for quoting fields.
-     * @default '"'
-     */
-    quoteChar?: string;
-
-    /**
-     * Defines when to use quotes.
-     * - "necessary": Quotes only when required (e.g., value contains separator, quote_char, or newlines).
-     * - "always": Quotes every field.
-     * - "never": Never quotes fields.
-     * - "non_numeric": Quotes all fields that are non-numeric.
-     * @default "necessary"
-     */
-    quoteStyle?: "necessary" | "always" | "never" | "non_numeric";
-
-    /**
-     * Whether to include a Byte Order Mark (BOM) at the start of the file.
-     * @default false
-     */
-    includeBom?: boolean;
-}
-```
-References: [`FormatCSVValueOptions`](#formatcsvvalueoptions)
-
-### DateDirective
-```typescript
-interface DateDirective {
-    _format: (d: Date, locale: string, timeZone: string, parts: DateTimeParts) => string;
-    _parseRegex?: string;
-    _parseField?: "year" | "month" | "day" | "hour" | "minute" | "second" | "ms" | "ampm" | "offset";
-    _parseNormalize?: (valStr: string) => number | string;
-}
-```
-References: [`DateTimeParts`](#datetimeparts)
-
-### NDJSONParseOptions
-```typescript
-export interface NDJSONParseOptions {
-    /**
-     * Skip malformed or invalid lines instead of failing the entire parse.
-     * @default false
-     */
-    skipInvalidLines?: boolean;
-
-    /**
-     * Maximum number of non-empty lines to validate or parse. Lines beyond this limit are ignored.
-     */
-    maxLines?: number;
-
-    /**
-     * Number of non-empty lines to skip at the beginning of the content.
-     * @default 0
-     */
-    skipLines?: number;
-}
-```
-
-### JSONParseOptions
-```typescript
-export interface JSONParseOptions {
-    /**
-     * The format of the JSON content, either "json" (standard JSON) or "ndjson" (Newline Delimited JSON).
-     * @default "json"
-     */
-    format?: JSONFormat;
-
-    /**
-     * Whether to allow JSON primitives (like numbers, booleans, strings, or null) instead of requiring wrapped arrays/objects.
-     * @default false
-     */
-    allowPrimitives?: boolean;
-
-    /**
-     * Whether to trim leading and trailing whitespace from the outermost input before validating/parsing.
-     * @default false
-     */
-    trimBeforeParse?: boolean;
-
-    /**
-     * A reviver function passed directly to JSON.parse for custom value transformation.
-     */
-    reviver?: Parameters<typeof JSON.parse>[1];
-
-    /**
-     * Options specific to NDJSON parsing. Only applicable when format is "ndjson".
-     */
-    ndjson?: NDJSONParseOptions;
-
-}
-```
-References: [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions)
-
-### SafeJsonParseOptions
-```typescript
-export type SafeJsonParseOptions<T = unknown, F = T> = JSONParseOptions & {
-    /**
-     * A guard function to validate the shape of the parsed result. If the guard returns false,
-     * `onError` is called and the fallback (or original input) is returned.
-     */
-    guard?: ((value: unknown) => value is T) | ((value: unknown) => boolean);
-
-    /**
-     * Called when parsing succeeds but the guard check fails.
-     */
-    onError?: (err: unknown) => void;
-
-    /**
-     * A fallback value to return if parsing fails or the guard check fails.
-     * If not specified, the original input is returned.
-     */
-    fallback?: F;
-};
-```
-References: [`JSONParseOptions`](#jsonparseoptions)
-
-### SafeJsonReplacerOptions
-```typescript
-export interface SafeJsonReplacerOptions {
-    /** Custom formatter function for Date objects. Ignored if onDate is specified. */
-    formatDate?: (v: Date) => string;
-
-    /** Convert BigInts to numeric strings ("123") or numbers if safe. Defaults to "string". */
-    bigintStrategy?: "string" | "number";
-
-    /** Custom serialization override for BigInt values. */
-    onBigInt?: (v: bigint) => any;
-
-    /** Custom serialization override for TypedArray values. */
-    onTypedArray?: (v: any) => any;
-
-    /** Custom serialization override for Set objects. */
-    onSet?: (v: Set<any>) => any;
-
-    /** Custom serialization override for Map objects. */
-    onMap?: (v: Map<any, any>) => any;
-
-    /** Custom serialization override for RegExp objects. */
-    onRegExp?: (v: RegExp) => any;
-
-    /** Custom serialization override for Date objects. Takes precedence over formatDate. */
-    onDate?: (v: Date) => any;
-
-    /** Custom serialization override for Error objects. Prevents empty {} strings. */
-    onError?: (v: Error) => any;
-
-    /** Custom serialization override for URLSearchParams objects. */
-    onURLSearchParams?: (v: URLSearchParams) => any;
-
-    /** Catch-all serialization override for custom types. Runs after native type checks. */
-    onCustom?: (this: any, k: string, v: any) => any;
-
-    /** If true, handles circular references by replacing them with a string/override instead of throwing. */
-    handleCircular?: boolean;
-
-    /** Custom fallback string or value when a circular reference is found. Defaults to "[Circular]" */
-    onCircular?: (this: any, k: string, v: any) => any;
-
-    /** If true, disables/voids the default safe serialization for BigInt values. */
-    voidBigIntReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for TypedArray values. */
-    voidTypedArrayReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for Set objects. */
-    voidSetReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for Map objects. */
-    voidMapReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for RegExp objects. */
-    voidRegExpReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for Date objects. */
-    voidDateReplacement?: boolean;
-
-    /** A custom replacer function or array whitelist that runs first for pre-processing keys/values. */
-    replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null;
-}
-```
-
-### JsonTokenType
-```typescript
-type JsonTokenType =
-    /**
-     * Selects an object property by name (e.g., .foo or ['foo']) 
-     */
-    | "prop"
-    /**
-     * Selects a zero-based or negative array index (e.g., [0] or [-1]) 
-     */
-    | "idx"
-    /**
-     * Selects a range or stepped slice of an array (e.g., [1:5:2]) 
-     */
-    | "slice"
-    /**
-     * Selects all immediate properties of an object or elements of an array (e.g., .* or [*]) 
-     */
-    | "wildcard"
-    /** 
-     * Recursively searches and collects matching keys down the hierarchy (e.g., ..foo) 
-     */
-    | "rec";
-```
-
-### JsonToken
-```typescript
-interface JsonToken {
-    /** The evaluation operation type. */
-    type: JsonTokenType;
-
-    /** Property name or recursive search key. Used by "prop" and "rec" tokens. */
-    key?: string;
-
-    /** Target index position. Used by "idx" tokens. Supports negative indices. */
-    idx?: number;
-
-    /** Starting array index (inclusive). Used by "slice" tokens. Defaults to 0 or end of array depending on step. */
-    start?: number;
-
-    /** Ending array index (exclusive). Used by "slice" tokens. Defaults to array bound depending on step. */
-    end?: number;
-
-    /** Increment step value. Used by "slice" tokens. Defaults to 1. Cannot be 0. */
-    step?: number;
-}
-```
-References: [`JsonTokenType`](#jsontokentype)
-
-### NumericValidationOptions
-```typescript
-export interface NumericValidationOptions {
-    allowNonFiniteNumbers?: boolean;
-    allowNaN?: boolean;
-}
-```
-
-### ParseNumberOptions
-```typescript
-export interface ParseNumberOptions extends NumericValidationOptions {
-    strictNumericString?: boolean;
     floatScientific?: boolean;
+    /**
+     * When `true`, rejects strings containing currency symbols, percent signs, or non-standard formatting.
+     * @default false
+     */
+    strictNumericString?: boolean;
 }
 ```
-References: [`NumericValidationOptions`](#numericvalidationoptions)
-
-### NumericFormatOptions
-```typescript
-export interface NumericFormatOptions extends Intl.NumberFormatOptions {
-    /** BCP 47 language tag (e.g., 'en-US' for dot, 'de-DE' for comma). Defaults to 'en-US'. */
-    locale?: string;
-    /** If true, formats negative numbers in parentheses e.g. (1.23) instead of -1.23. */
-    accountingNegatives?: boolean;
-    /** Fallback string if the value cannot be parsed into a formatable number. */
-    fallback?: string;
-    /** If true, returns the fallback string for Infinity and -Infinity values. */
-    formatNonFinite?: boolean;
-}
-```
+References: [`ParseNumberOptions`](#parsenumberoptions), [`FloatPrecision`](#floatprecision)
 
 ### FloatPrecision
 ```typescript
 export type FloatPrecision = "Float32" | "Float64";
 ```
 
-### FloatOptions
+### FormatCSVValueOptions
 ```typescript
-export interface FloatOptions extends ParseNumberOptions {
-    floatPrecision?: FloatPrecision;
+export interface FormatCSVValueOptions {
+    /**
+     * Custom `strftime` format string for `Date` values (e.g. `"%Y-%m-%d"`).
+     */
+    dateFormat?: string;
+    /**
+     * Custom `strftime` format string for `Datetime` values (e.g. `"%Y-%m-%d %H:%M:%S"`).
+     */
+    datetimeFormat?: string;
+    /**
+     * String representation to use for `null` or missing values.
+     * @default ""
+     */
+    nullValue?: string;
+    /**
+     * Options for numeric formatting (floats, ints, bigints).
+     */
+    numericFormatOptions?: NumericFormatOptions;
+    /**
+     * Options for the safe JSON replacer used when formatting objects and arrays.
+     */
+    replacerOptions?: SafeJsonReplacerOptions;
+    /**
+     * Custom `strftime` format string for `Time` values (e.g. `"%H:%M:%S"`).
+     */
+    timeFormat?: string;
 }
 ```
-References: [`ParseNumberOptions`](#parsenumberoptions), [`FloatPrecision`](#floatprecision)
+References: [`NumericFormatOptions`](#numericformatoptions), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)
 
-### IntRangeType
+### IndependentStepContext
 ```typescript
-export type IntRangeType = keyof typeof INT_RANGES;
+export interface IndependentStepContext {
+    /** The absolute index of the current element in the parent array. */
+    absoluteIndex: number;
+    /** The relative iteration counter of the generation process (starts at 0). */
+    index: number;
+    /** The static starting value passed to the sequence generator. */
+    initialValue: any;
+    /** The original value at the current index in the target array. */
+    originalValue: any;
+    /** The entire target array being populated/modified. */
+    targetArray: any;
+}
 ```
-
-### IntRange
-```typescript
-export type IntRange = { min: number; max: number } | IntRangeType;
-```
-References: [`IntRangeType`](#intrangetype)
 
 ### IntCoerceType
 ```typescript
@@ -15458,107 +15814,622 @@ export type IntCoerceType = "round" | "floor" | "ceil" | "truncate";
 ### IntOptions
 ```typescript
 export interface IntOptions {
-    range?: IntRange;
+    /**
+     * Rounding strategy used by `toValidInt()` when coercing fractional numbers.
+     */
     coerce?: IntCoerceType;
+    /**
+     * Integer range bounds to validate against.
+     */
+    range?: IntRange;
 }
 ```
-References: [`IntRange`](#intrange), [`IntCoerceType`](#intcoercetype)
+References: [`IntCoerceType`](#intcoercetype), [`IntRange`](#intrange)
 
-### BigIntRangeType
+### IntRange
 ```typescript
-export type BigIntRangeType = keyof typeof BIGINT_RANGES;
+export type IntRange =
+    | {
+        /** Minimum inclusive integer value. */
+        min: number;
+        /** Maximum inclusive integer value. */
+        max: number;
+    }
+    | IntRangeType;
+```
+References: [`IntRangeType`](#intrangetype)
+
+### IntRangeType
+```typescript
+export type IntRangeType = keyof typeof INT_RANGES;
 ```
 
-### BigIntRange
+### IsArrayOfTypeOptionsParams
 ```typescript
-export type BigIntRange = { min: bigint; max: bigint } | BigIntRangeType;
+export interface IsArrayOfTypeOptionsParams {
+    /**
+     * Whether an empty array is considered valid.
+     * @default true
+     */
+    allowEmpty?: boolean;
+    /**
+     * Whether `null` and `undefined` elements are permitted without failing validation.
+     * @default false
+     */
+    allowNulls?: boolean;
+    /**
+     * Optional custom coercion function applied to each element in `toArrayOfType()`.
+     */
+    coerce?: (v: unknown) => any;
+    /**
+     * Quantifier mode: `"every"` requires all elements to match; `"some"` requires at least one element to match.
+     * @default "every"
+     */
+    mode?: ArrayCheckMode;
+}
 ```
-References: [`BigIntRangeType`](#bigintrangetype)
+References: [`ArrayCheckMode`](#arraycheckmode)
+
+### IsUnicodeSurrogateOptions
+```typescript
+export interface IsUnicodeSurrogateOptions {
+    /**
+     * Which surrogate code units to match: `"all"`, `"high"` (`0xD800..0xDBFF`), or `"low"` (`0xDC00..0xDFFF`).
+     * @default "all"
+     */
+    type?: UnicodeSurrogateType;
+}
+```
+References: [`UnicodeSurrogateType`](#unicodesurrogatetype)
 
 ### IsValidBigIntOptions
 ```typescript
 export interface IsValidBigIntOptions {
+    /**
+     * 64-bit integer range bounds to validate against.
+     * @default "Int64"
+     */
     range?: BigIntRange;
 }
 ```
 References: [`BigIntRange`](#bigintrange)
 
-### toValidBigIntOptions
+### JoinArrayOptions
 ```typescript
-export interface toValidBigIntOptions extends IsValidBigIntOptions {
-    truncate?: boolean;
+export interface JoinArrayOptions {
+    /**
+     * If `true`, `null` and `undefined` elements are skipped during joining.
+     * @default false
+     */
+    ignoreNulls?: boolean;
+    /**
+     * Maximum number of array elements to join before truncating with `truncationMarker`.
+     */
+    limit?: number;
+    /**
+     * Custom string representation for `null` and `undefined` elements when `ignoreNulls` is `false`.
+     * @default ""
+     */
+    nullValue?: string;
+    /**
+     * Prefix string prepended to the joined result.
+     * @default ""
+     */
+    prefix?: string;
+    /**
+     * Suffix string appended to the joined result.
+     * @default ""
+     */
+    suffix?: string;
+    /**
+     * Placeholder string appended when `limit` truncation occurs.
+     * @default "..."
+     */
+    truncationMarker?: string;
+    /**
+     * Callback function used to format each non-null element to a string.
+     */
+    valueFormatter?: (val: any, index: number) => string;
 }
 ```
-References: [`IsValidBigIntOptions`](#isvalidbigintoptions)
 
-### DecimalOptions
+### JSONParseOptions
 ```typescript
-export interface DecimalOptions {
-    precision?: number;
-    scale?: number;
+export interface JSONParseOptions {
+    /**
+     * Whether to allow JSON primitive roots (numbers, booleans, strings, `null`) instead of requiring objects or arrays.
+     * @default false
+     */
+    allowPrimitives?: boolean;
+    /**
+     * Format of the JSON content: `"json"` (standard JSON) or `"ndjson"` (Newline Delimited JSON).
+     * @default "json"
+     */
+    format?: JSONFormat;
+    /**
+     * Options specific to NDJSON parsing when `format` is `"ndjson"`.
+     */
+    ndjson?: NDJSONParseOptions;
+    /**
+     * Reviver function passed to `JSON.parse` for custom value transformation.
+     */
+    reviver?: Parameters<typeof JSON.parse>[1];
+    /**
+     * Whether to trim leading and trailing whitespace before validating/parsing.
+     * @default false
+     */
+    trimBeforeParse?: boolean;
 }
 ```
+References: [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions)
+
+### JsonToken
+```typescript
+export interface JsonToken {
+    /** Ending array index (exclusive). Used by `"slice"` tokens. */
+    end?: number;
+    /** Target index position. Used by `"idx"` tokens. Supports negative indices. */
+    idx?: number;
+    /** Property name or recursive search key. Used by `"prop"` and `"rec"` tokens. */
+    key?: string;
+    /** Starting array index (inclusive). Used by `"slice"` tokens. */
+    start?: number;
+    /** Increment step value. Used by `"slice"` tokens. Cannot be 0. */
+    step?: number;
+    /** The evaluation operation type. */
+    type: JsonTokenType;
+}
+```
+References: [`JsonTokenType`](#jsontokentype)
+
+### JsonTokenType
+```typescript
+export type JsonTokenType =
+    /** Selects an object property by name (e.g., `.foo` or `['foo']`). */
+    | "prop"
+    /** Selects a zero-based or negative array index (e.g., `[0]` or `[-1]`). */
+    | "idx"
+    /** Selects a range or stepped slice of an array (e.g., `[1:5:2]`). */
+    | "slice"
+    /** Selects all immediate properties of an object or elements of an array (e.g., `.*` or `[*]`). */
+    | "wildcard"
+    /** Recursively searches and collects matching keys down the hierarchy (e.g., `..foo`). */
+    | "rec";
+```
+
+### NDJSONParseOptions
+```typescript
+export interface NDJSONParseOptions {
+    /**
+     * Maximum number of non-empty lines to validate or parse.
+     */
+    maxLines?: number;
+    /**
+     * Skip malformed or invalid lines instead of failing the entire parse.
+     * @default false
+     */
+    skipInvalidLines?: boolean;
+    /**
+     * Number of non-empty lines to skip at the beginning of the content.
+     * @default 0
+     */
+    skipLines?: number;
+}
+```
+
+### NumericFormatOptions
+```typescript
+export interface NumericFormatOptions extends Intl.NumberFormatOptions {
+    /**
+     * If `true`, formats negative numbers in accounting parentheses (e.g. `(1.23)`).
+     * @default false
+     */
+    accountingNegatives?: boolean;
+    /**
+     * Fallback string returned when the value cannot be parsed into a formattable number.
+     * @default "NaN"
+     */
+    fallback?: string;
+    /**
+     * If `true`, returns `fallback` for `Infinity` and `-Infinity` values.
+     * @default false
+     */
+    formatNonFinite?: boolean;
+    /**
+     * BCP 47 language tag (e.g. `"en-US"`, `"de-DE"`).
+     * @default "en-US"
+     */
+    locale?: string;
+}
+```
+
+### NumericValidationOptions
+```typescript
+export interface NumericValidationOptions {
+    /**
+     * Whether `NaN` is considered a valid number.
+     * @default false
+     */
+    allowNaN?: boolean;
+    /**
+     * Whether `Infinity` and `-Infinity` are considered valid numbers.
+     * @default false
+     */
+    allowNonFiniteNumbers?: boolean;
+}
+```
+
+### ParseDurationStringOptions
+```typescript
+export interface ParseDurationStringOptions {
+    /**
+     * Target unit to convert the parsed duration into.
+     * @default "ms"
+     */
+    to?: DurationUnit;
+}
+```
+References: [`DurationUnit`](#durationunit)
+
+### ParseNumberOptions
+```typescript
+export interface ParseNumberOptions extends NumericValidationOptions {
+    /**
+     * Whether `NaN` is considered a valid number.
+     * @default false
+     */
+    allowNaN?: boolean;
+    /**
+     * Whether `Infinity` and `-Infinity` are considered valid numbers.
+     * @default false
+     */
+    allowNonFiniteNumbers?: boolean;
+    /**
+     * When `true`, allows scientific notation (e.g. `"1.5e3"`) when parsing numeric strings.
+     * @default true
+     */
+    floatScientific?: boolean;
+    /**
+     * When `true`, rejects strings containing currency symbols, percent signs, or non-standard formatting.
+     * @default false
+     */
+    strictNumericString?: boolean;
+}
+```
+References: [`NumericValidationOptions`](#numericvalidationoptions)
+
+### SafeJsonParseOptions
+```typescript
+export interface SafeJsonParseOptions<T = unknown, F = T> extends JSONParseOptions {
+    /**
+     * Whether to allow JSON primitive roots (numbers, booleans, strings, `null`) instead of requiring objects or arrays.
+     * @default false
+     */
+    allowPrimitives?: boolean;
+    /**
+     * Fallback value returned when parsing or guard validation fails.
+     */
+    fallback?: F;
+    /**
+     * Format of the JSON content: `"json"` (standard JSON) or `"ndjson"` (Newline Delimited JSON).
+     * @default "json"
+     */
+    format?: JSONFormat;
+    /**
+     * Guard predicate to validate the parsed value. If it returns `false`, `onError` is called and `fallback` is returned.
+     */
+    guard?: ((value: unknown) => value is T) | ((value: unknown) => boolean);
+    /**
+     * Options specific to NDJSON parsing when `format` is `"ndjson"`.
+     */
+    ndjson?: NDJSONParseOptions;
+    /**
+     * Callback invoked when parsing fails or the `guard` check returns `false`.
+     */
+    onError?: (err: unknown) => void;
+    /**
+     * Reviver function passed to `JSON.parse` for custom value transformation.
+     */
+    reviver?: Parameters<typeof JSON.parse>[1];
+    /**
+     * Whether to trim leading and trailing whitespace before validating/parsing.
+     * @default false
+     */
+    trimBeforeParse?: boolean;
+}
+```
+References: [`JSONParseOptions`](#jsonparseoptions), [`JSONFormat`](#jsonformat), [`NDJSONParseOptions`](#ndjsonparseoptions)
+
+### SafeJsonReplacerOptions
+```typescript
+export interface SafeJsonReplacerOptions {
+    /**
+     * Strategy for serializing `BigInt` values: `"string"` or `"number"`.
+     * @default "string"
+     */
+    bigintStrategy?: "string" | "number";
+    /** Custom formatter function for `Date` objects (ignored if `onDate` is specified). */
+    formatDate?: (v: Date) => string;
+    /**
+     * If `true`, replaces circular references instead of throwing.
+     * @default false
+     */
+    handleCircular?: boolean;
+    /** Custom serialization override for `BigInt` values. */
+    onBigInt?: (v: bigint) => any;
+    /** Custom callback invoked when a circular reference is encountered. */
+    onCircular?: (this: any, k: string, v: any) => any;
+    /** Catch-all serialization override for custom types, executed after native type checks. */
+    onCustom?: (this: any, k: string, v: any) => any;
+    /** Custom serialization override for `Date` objects (takes precedence over `formatDate`). */
+    onDate?: (v: Date) => any;
+    /** Custom serialization override for `Error` objects. */
+    onError?: (v: Error) => any;
+    /** Custom serialization override for `Map` objects. */
+    onMap?: (v: Map<any, any>) => any;
+    /** Custom serialization override for `RegExp` objects. */
+    onRegExp?: (v: RegExp) => any;
+    /** Custom serialization override for `Set` objects. */
+    onSet?: (v: Set<any>) => any;
+    /** Custom serialization override for `TypedArray` values. */
+    onTypedArray?: (v: any) => any;
+    /** Custom serialization override for `URLSearchParams` objects. */
+    onURLSearchParams?: (v: URLSearchParams) => any;
+    /** Custom `JSON.stringify` replacer function or property whitelist array applied first. */
+    replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null;
+    /**
+     * If `true`, disables default safe serialization for `BigInt` values.
+     * @default false
+     */
+    voidBigIntReplacement?: boolean;
+    /**
+     * If `true`, disables default safe serialization for `Date` objects.
+     * @default false
+     */
+    voidDateReplacement?: boolean;
+    /**
+     * If `true`, disables default safe serialization for `Map` objects.
+     * @default false
+     */
+    voidMapReplacement?: boolean;
+    /**
+     * If `true`, disables default safe serialization for `RegExp` objects.
+     * @default false
+     */
+    voidRegExpReplacement?: boolean;
+    /**
+     * If `true`, disables default safe serialization for `Set` objects.
+     * @default false
+     */
+    voidSetReplacement?: boolean;
+    /**
+     * If `true`, disables default safe serialization for `TypedArray` values.
+     * @default false
+     */
+    voidTypedArrayReplacement?: boolean;
+}
+```
+
+### StepSliceArrayOptions
+```typescript
+export interface StepSliceArrayOptions {
+    /**
+     * Maximum number of items to gather in the sliced result array.
+     */
+    maxItemsGathered?: number;
+    /**
+     * If `true`, returns `null` when the starting offset is out of bounds; if `false`, throws an error.
+     * @default true
+     */
+    nullOnOob?: boolean;
+    /**
+     * Ending index (exclusive). Supports negative indices relative to array length.
+     */
+    offsetEnd?: number;
+    /**
+     * Starting index (inclusive). Supports negative indices relative to array length.
+     * @default 0
+     */
+    offsetStart?: number;
+    /**
+     * Step size to slice the array by (non-zero). Positive slices forward; negative slices backward.
+     * @default 1
+     */
+    step?: number;
+}
+```
+
+### StripCharsOptions
+```typescript
+export interface StripCharsOptions {
+    /**
+     * Maximum number of non-contiguous matching blocks allowed to be stripped from the end (`-1` or `null` strips all).
+     */
+    maxMatchesEnd?: number | null;
+    /**
+     * Maximum number of non-contiguous matching blocks allowed to be stripped from the start (`-1` or `null` strips all).
+     */
+    maxMatchesStart?: number | null;
+    /**
+     * Maximum number of non-matching characters allowed to be skipped from the end before a match block is found (`-1` or `null` scans full length).
+     */
+    maxScanEnd?: number | null;
+    /**
+     * Maximum number of non-matching characters allowed to be skipped from the start before a match block is found (`-1` or `null` scans full length).
+     */
+    maxScanStart?: number | null;
+    /**
+     * Boundary strip mode: `"both"`, `"start"`, or `"end"`.
+     * @default "both"
+     */
+    mode?: StripMode;
+    /**
+     * If `true`, returns `""` instead of `null` when the stripped result is empty or input is `null`.
+     * @default false
+     */
+    returnStringOnNull?: boolean;
+    /**
+     * Options that apply only when `characters` is a string (and not a `RegExp`).
+     */
+    stringOptions?: {
+        /**
+         * If `true`, treats `characters` as a literal substring rather than a set of characters.
+         * @default false
+         */
+        literal?: boolean;
+        /**
+         * If `true`, performs case-insensitive character and substring matching.
+         * @default false
+         */
+        caseInsensitive?: boolean;
+    };
+    /**
+     * If `true`, trims standard whitespace first before performing character stripping.
+     * @default false
+     */
+    trimFirst?: boolean;
+}
+```
+References: [`StripMode`](#stripmode)
 
 ### StripMode
 ```typescript
 export type StripMode = "both" | "start" | "end";
 ```
 
-### StripCharsOptions
+### ToDurationOptions
 ```typescript
-export type StripCharsOptions = {
+export interface ToDurationOptions extends ParseDurationStringOptions {
     /**
-     * The strip mode: "both" (default), "start", or "end".
+     * Fallback numeric value returned when the input cannot be parsed as a valid duration.
      */
-    mode?: StripMode;
+    fallback?: number;
     /**
-     * If true, returns an empty string instead of null when the result is empty or input is null.
+     * Target unit to convert the parsed duration into.
+     * @default "ms"
      */
-    returnStringOnNull?: boolean;
-    /**
-     * The maximum number of non-matching characters allowed to be skipped from the start
-     * before a match block is found. Passing -1 or null means scan the full length.
-     */
-    maxScanStart?: number | null;
-    /**
-     * The maximum number of non-matching characters allowed to be skipped from the end
-     * before a match block is found. Passing -1 or null means scan the full length.
-     */
-    maxScanEnd?: number | null;
-    /**
-     * The maximum number of non-contiguous matching blocks allowed to be stripped from the start.
-     * Passing -1 or null means strip all matching blocks.
-     */
-    maxMatchesStart?: number | null;
-    /**
-     * The maximum number of non-contiguous matching blocks allowed to be stripped from the end.
-     * Passing -1 or null means strip all matching blocks.
-     */
-    maxMatchesEnd?: number | null;
-    /**
-     * If true, trims standard whitespace first before performing character stripping.
-     */
-    trimFirst?: boolean;
-    /**
-     * Options that apply only when the characters parameter is a string (and not a RegExp).
-     */
-    stringOptions?: {
-        /**
-         * If true, treats the characters string as a literal substring rather than a set of characters.
-         */
-        literal?: boolean;
-        /**
-         * If true, performs case-insensitive character and substring matching.
-         */
-        caseInsensitive?: boolean;
-    };
-};
-```
-References: [`StripMode`](#stripmode)
-
-### ChangeCaseOptions
-```typescript
-export interface ChangeCaseOptions {
-    format: "camel" | "kebab" | "pascal" | "snake" | "title";
+    to?: DurationUnit;
 }
 ```
+References: [`ParseDurationStringOptions`](#parsedurationstringoptions), [`DurationUnit`](#durationunit)
+
+### ToValidArrayOptions
+```typescript
+export interface ToValidArrayOptions {
+    /**
+     * If `true`, returns a shallow copy of an existing array. If `false`, returns the input array directly without cloning.
+     * @default true
+     */
+    clone?: boolean;
+    /**
+     * If `true`, wraps `null` or `undefined` into a single-element array. If `false`, returns an empty array `[]`.
+     * @default false
+     */
+    wrapNull?: boolean;
+}
+```
+
+### toValidBigIntOptions
+```typescript
+export interface toValidBigIntOptions extends IsValidBigIntOptions {
+    /**
+     * 64-bit integer range bounds to validate against.
+     * @default "Int64"
+     */
+    range?: BigIntRange;
+    /**
+     * When `true`, truncates fractional numbers/strings toward zero before converting to `bigint`.
+     * @default false
+     */
+    truncate?: boolean;
+}
+```
+References: [`IsValidBigIntOptions`](#isvalidbigintoptions), [`BigIntRange`](#bigintrange)
+
+### TypedArrayConstructor
+```typescript
+export type TypedArrayConstructor<T extends AnyTypedArray = AnyTypedArray> = new (length: number) => T;
+```
+References: [`AnyTypedArray`](#anytypedarray)
+
+### UnicodeSurrogateType
+```typescript
+export type UnicodeSurrogateType = "all" | "high" | "low";
+```
+
+### UniqueArrayStatsOptions
+```typescript
+export interface UniqueArrayStatsOptions {
+    /**
+     * Custom function to extract a unique comparison key from each element.
+     */
+    keySelector?: (val: any) => any;
+    /**
+     * If `true`, uses canonical serialization to group nested structures (Arrays, Sets, Maps, Dates) by value instead of reference.
+     * @default false
+     */
+    strict?: boolean;
+}
+```
+
+### WriteCSVOptions
+```typescript
+export interface WriteCSVOptions extends FormatCSVValueOptions {
+    /**
+     * Custom `strftime` format string for `Date` values (e.g. `"%Y-%m-%d"`).
+     */
+    dateFormat?: string;
+    /**
+     * Custom `strftime` format string for `Datetime` values (e.g. `"%Y-%m-%d %H:%M:%S"`).
+     */
+    datetimeFormat?: string;
+    /**
+     * Whether to include a UTF-8 Byte Order Mark (BOM) at the start of the output.
+     * @default false
+     */
+    includeBom?: boolean;
+    /**
+     * Whether to write the header row.
+     * @default true
+     */
+    includeHeader?: boolean;
+    /**
+     * String used to terminate each row.
+     * @default "\n"
+     */
+    lineTerminator?: string;
+    /**
+     * String representation to use for `null` or missing values.
+     * @default ""
+     */
+    nullValue?: string;
+    /**
+     * Options for numeric formatting (floats, ints, bigints).
+     */
+    numericFormatOptions?: NumericFormatOptions;
+    /**
+     * Single-character quote symbol used for quoting fields.
+     * @default '"'
+     */
+    quoteChar?: string;
+    /**
+     * Quoting strategy for CSV fields: `"necessary"`, `"always"`, `"never"`, or `"non_numeric"`.
+     * @default "necessary"
+     */
+    quoteStyle?: "necessary" | "always" | "never" | "non_numeric";
+    /**
+     * Options for the safe JSON replacer used when formatting objects and arrays.
+     */
+    replacerOptions?: SafeJsonReplacerOptions;
+    /**
+     * Single-character delimiter that separates fields.
+     * @default ","
+     */
+    separator?: string;
+    /**
+     * Custom `strftime` format string for `Time` values (e.g. `"%H:%M:%S"`).
+     */
+    timeFormat?: string;
+}
+```
+References: [`FormatCSVValueOptions`](#formatcsvvalueoptions), [`NumericFormatOptions`](#numericformatoptions), [`SafeJsonReplacerOptions`](#safejsonreplaceroptions)

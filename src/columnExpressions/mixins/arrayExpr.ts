@@ -22,13 +22,12 @@ import type {
     ExplodeOptions,
     IExpr,
     AnyTypedArray,
-    ToStructOptions,
-    ShiftOptions,
+    ScalarArg,
     ValidScalarTypes
 } from "../../types";
 import { ELEMENT_MARKER } from "../constants";
 import { ComputeError } from "../../exceptions";
-import type { ScalarArg, ArrayArg, NumericArg, NumericSeriesArg } from "../types";
+import type { ArrayArg, NumericArg, NumericSeriesArg, ToStructOptions, ShiftOptions } from "../types";
 
 
 /**

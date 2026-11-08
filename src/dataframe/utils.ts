@@ -1,8 +1,8 @@
 /** @internalfile */
-import type { IExpr, ColumnData, ColumnDict, RegisteredDataType, DataFrameSchema, RowRecord } from "../types"
-import type { JoinOptions, JoinAsofOptions, JoinWhereOptions } from "./types"
+import type { IExpr, ColumnData, ColumnDict, ColumnOrExprArg, DataFrameSchema, RowRecord } from "../types"
+import type { GroupMap, JoinOptions, JoinAsofOptions, JoinWhereOptions, WriteFileTargetArg } from "./types"
 import { DataFrame } from "./dataframe"
-import { DataTypeRegistry } from "../datatypes"
+import { DataTypeRegistry, type RegisteredDataType } from "../datatypes"
 import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
 import { isObj, isTypedArray, toCanonicalString, isArrayOrTypedArray, isValidDateObj, computeCartesianProduct, toValidNumber, isValidNumber, isValidInt, binarySearch, toArrayOfType } from "../utils"
 import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exceptions"
@@ -10,8 +10,8 @@ import { assertColumnExists, IOStreamError, InvalidArgumentError } from "../exce
 export function partitionByColumns(
     columns: ColumnDict,
     height: number,
-    partitionKeys: (string | IExpr)[]
-): Map<string, number[]> {
+    partitionKeys: ColumnOrExprArg[]
+): GroupMap {
     const pKeysLen = partitionKeys.length;
     const evalCols: ColumnDict = {};
     const evalKeys = new Array<string>(pKeysLen);
@@ -208,7 +208,7 @@ export function gatherColumnsByIndices(
     return res;
 }
 
-export function buildGroupMap(columns: ColumnDict, keys: string[], height: number): Map<string, number[]> {
+export function buildGroupMap(columns: ColumnDict, keys: string[], height: number): GroupMap {
     const groups = new Map<string, number[]>();
     for (let i = 0; i < height; i++) {
         const hash = computeRowHash(columns, keys, i);
@@ -265,7 +265,7 @@ export function coerceColumn(col: ColumnData, type: RegisteredDataType, height: 
 }
 
 export function writeStringToFileOrStream(
-    file: string | { write: (str: string) => void } | undefined,
+    file: WriteFileTargetArg | undefined,
     content: string
 ): void {
     if (!file) return;

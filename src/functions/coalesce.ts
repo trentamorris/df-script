@@ -1,12 +1,13 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
-import type { IExpr, ValidScalarTypes } from "../types";
+import type { ScalarArg } from "../types";
+import type { CoalesceArg } from "./types";
 import { evaluateArgsMatrix } from "../columnExpressions/utils";
 import { COALESCE_MARKER } from "../columnExpressions/constants";
 
 /**
  * Returns the first non-null value among the specified expressions.
  *
- * @param {...(IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]} exprs The list of expressions or columns to coalesce.
+ * @param {...CoalesceArg} exprs The list of expressions or columns to coalesce.
  * @returns {ColumnExpr<any>} A column expression resolving to the first non-null value.
  * @namespace $df
  * @category Function
@@ -23,10 +24,10 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * | 3         |
  * +-----------+
  */
-export function coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any> {
+export function coalesce(...exprs: CoalesceArg[]): ColumnExpr<any> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))
-        ? (exprs[0] as (IExpr | ValidScalarTypes)[])
-        : (exprs as (IExpr | ValidScalarTypes)[]);
+        ? (exprs[0] as ScalarArg[])
+        : (exprs as ScalarArg[]);
 
     const expr = new ColumnExpr(COALESCE_MARKER);
     expr._ops.push((_, columns) => {

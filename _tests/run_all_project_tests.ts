@@ -26,7 +26,6 @@ const _runSuite = (name: string, fn: () => void) => {
 };
 
 // 1. ColumnExpressions
-_runSuite("exprBase", () => { require("./columnExpressions/exprBase/run_all"); });
 _runSuite("arrayExpr", () => { require("./columnExpressions/mixins/arrayExpr/run_all"); });
 _runSuite("standardExpr", () => { require("./columnExpressions/mixins/standardExpr/run_all"); });
 _runSuite("stringExpr", () => { require("./columnExpressions/mixins/stringExpr/run_all"); });

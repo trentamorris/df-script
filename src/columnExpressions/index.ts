@@ -1,5 +1,6 @@
 export * from "./constants"
 export * from "./types"
+export * from "../functions/types"
 export * from "./exprBase"
 export * from "./mixins/standardExpr"
 export * from "./mixins/arrayExpr"

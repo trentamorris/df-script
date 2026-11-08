@@ -15,7 +15,7 @@ import {
     US_PER_MS,
     NS_PER_MS
 } from "../constants";
-import type { DurationInterval, ParseDurationStringOptions, ToDurationOptions } from "../types";
+import type { DurationInterval, ParseDurationStringOptions, ToDurationOptions } from "./types";
 
 const _CALENDAR_DURATION_UNITS: Readonly<Record<string, { kind: "month" | "day"; factor: number }>> = Object.freeze({
     M: { kind: "month", factor: 1 },

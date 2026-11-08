@@ -1,34 +1,10 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { LITERAL_MARKER } from "../columnExpressions/constants";
 import { ShapeError } from "../exceptions";
-import type { RegisteredDataType, FlattenUnion } from "../types";
-import { clamp, fillSequence, CumulativeStepContext, IndependentStepContext } from "../utils";
 
-export type SeqRangeOptions = {
-    n?: number;
-    dtype?: RegisteredDataType;
-    name?: string;
-} & (
-        | { mode: "constant" }
-        | {
-            mode?: "cumulative";
-            step?: number | ((context: CumulativeStepContext) => any);
-        }
-        | {
-            mode: "independent";
-            step?: number | ((context: IndependentStepContext) => any);
-        }
-    ) & (
-        | { strict?: true }
-        | {
-            strict: false;
-            pad?: boolean;
-            truncate?: boolean;
-            padValue?: any;
-            startIndex?: number;
-            endIndex?: number;
-        }
-    );
+import { clamp, fillSequence } from "../utils";
+import type { SeqRangeOptions } from "./types";
+
 
 /**
  * Creates a column expression that generates a range of values.
@@ -37,17 +13,6 @@ export type SeqRangeOptions = {
  *
  * @param value The initial value to start the sequence or the constant value to repeat.
  * @param [options] Configuration options.
- * @param [options.n] The number of values to generate. Defaults to the slice/DataFrame height.
- * @param [options.dtype] The registered data type to coerce/allocate for the generated sequence.
- * @param [options.name] The name of the output column.
- * @param [options.mode] The sequence generation mode ("constant", "cumulative", or "independent").
- * @param [options.step] The step value or function to compute the step at each row.
- * @param [options.strict] If true, throws an error if the generated sequence height does not match the target height.
- * @param [options.pad] In non-strict mode, pads the sequence with `padValue` if it is shorter than target range.
- * @param [options.truncate] In non-strict mode, truncates the sequence if it exceeds target range.
- * @param [options.padValue] The value to use for padding in non-strict mode.
- * @param [options.startIndex] The starting index in the DataFrame to insert the sequence.
- * @param [options.endIndex] The ending index in the DataFrame to insert the sequence.
  * @returns {ColumnExpr<any>} A column expression generating the sequence.
  * @namespace $df
  * @category Function
@@ -68,7 +33,7 @@ export function seqRange(
     value: any,
     options: SeqRangeOptions = { strict: true }
 ): ColumnExpr<any> {
-    const opts = options as FlattenUnion<SeqRangeOptions>;
+    const opts = options;
     const expr = new ColumnExpr(LITERAL_MARKER);
     expr._literalValue = value;
 

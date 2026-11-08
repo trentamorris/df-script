@@ -1,6 +1,6 @@
 import { DataFrame } from "../dataframe/dataframe";
-import type { ReadCSVOptions } from "../dataframe/types";
-import type { ColumnDict, RowRecord } from "../types";
+
+import type { ColumnDict, ReadCSVOptions, RowRecord } from "../types";
 import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
 
 /**
@@ -11,9 +11,6 @@ import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
  * @syntax $df.{symbol}(...)
  * @param content The CSV content string.
  * @param [options] Parse and configuration options.
- * @param [options.hasHeader] Whether the first row is a header row (default `true`).
- * @param [options.schema] Optional column schema to coerce types.
- * @param [options.inferSchema] When `true` (default), automatically infers column types.
  * @returns DataFrame
  * @example
  * <!-- doc:base_2x2 -->

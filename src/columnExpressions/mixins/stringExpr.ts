@@ -1,7 +1,5 @@
 import type {
     StrptimeOptions,
-    StringDecodeOptions,
-    StringEncodeOptions,
     EscapeRegexOptions,
     ExtractManyOptions,
     ExtractRegexEngineOptions,
@@ -9,10 +7,12 @@ import type {
     FindManyOptions,
     SplitOptions,
     ReplaceOptions,
+    RegexPatternArg,
+    RegexPatternSeriesArg,
     ReplaceManyOptions,
 } from "../../types";
 import { ExprBase } from "../exprBase";
-import type { StringArg, RegexPatternArg, RegexPatternSeriesArg, StringReplacementArg, StringReplacementSeriesArg , ReplaceAllOptions, CountMatchesOptions, UnicodeNormalizeForm } from "../types";
+import type { StringArg, StringReplacementArg, StringReplacementSeriesArg, ReplaceAllOptions, CountMatchesOptions, UnicodeNormalizeForm, StringDecodeOptions, StringEncodeOptions } from "../types";
 import { TEXT_ENCODER } from "../../constants";
 import {
     toValidDate,

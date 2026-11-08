@@ -1,88 +1,14 @@
 /** @internalfile */
-import type { ColumnDict } from "../types";
+import type { ColumnDict, ReadCSVOptions } from "../types";
+import type { FormatCSVValueOptions, WriteCSVOptions } from "./types";
 import { strftime, toValidDate } from "./date";
-import { createSafeJsonReplacer, type SafeJsonReplacerOptions } from "./json";
-import { formatNumber, toValidNumber, toValidBigInt, type NumericFormatOptions } from "./number";
+import { createSafeJsonReplacer } from "./json";
+import { formatNumber, toValidNumber, toValidBigInt } from "./number";
 import { NEWLINE, CARRIAGE_RETURN, UTF8_BOM, NEWLINE_REGEX } from "../constants";
 import { DataType, Utf8, Boolean as BoolType, Int64, Float64, Datetime } from "../datatypes";
-import type { ReadCSVOptions } from "../dataframe/types";
+
 import { unboxPrimitiveObj, isValidDateObj } from "./object";
 import { replaceString, stripChars } from "./string";
-
-export interface FormatCSVValueOptions {
-    /**
-     * The string representation to use for null/missing values.
-     * @default ""
-     */
-    nullValue?: string;
-
-    /**
-     * Custom format string for Date values (e.g. "%Y-%m-%d").
-     */
-    dateFormat?: string;
-
-    /**
-     * Custom format string for Time values (e.g. "%H:%M:%S").
-     */
-    timeFormat?: string;
-
-    /**
-     * Custom format string for Datetime values (e.g. "%Y-%m-%d %H:%M:%S").
-     */
-    datetimeFormat?: string;
-
-    /**
-     * Options for numeric formatting (floats, ints, bigints).
-     */
-    numericFormatOptions?: NumericFormatOptions;
-
-    /**
-     * Options for the safe JSON replacer used when formatting objects/arrays.
-     */
-    replacerOptions?: SafeJsonReplacerOptions;
-}
-
-export interface WriteCSVOptions extends FormatCSVValueOptions {
-    /**
-     * Whether to write the header row.
-     * @default true
-     */
-    includeHeader?: boolean;
-
-    /**
-     * Character that separates fields.
-     * @default ","
-     */
-    separator?: string;
-
-    /**
-     * The string used to end each row.
-     * @default "\n"
-     */
-    lineTerminator?: string;
-
-    /**
-     * The character used for quoting fields.
-     * @default '"'
-     */
-    quoteChar?: string;
-
-    /**
-     * Defines when to use quotes.
-     * - "necessary": Quotes only when required (e.g., value contains separator, quote_char, or newlines).
-     * - "always": Quotes every field.
-     * - "never": Never quotes fields.
-     * - "non_numeric": Quotes all fields that are non-numeric.
-     * @default "necessary"
-     */
-    quoteStyle?: "necessary" | "always" | "never" | "non_numeric";
-
-    /**
-     * Whether to include a Byte Order Mark (BOM) at the start of the file.
-     * @default false
-     */
-    includeBom?: boolean;
-}
 
 function _formatCsvValue(options: FormatCSVValueOptions = {}) {
     const {

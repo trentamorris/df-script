@@ -3,7 +3,19 @@ import { isClass, isObj, isPlainObj, isValidDateObj, isRegExp, typedArrayTagGett
 import { toValidNumber, isValidNumber, isValidInt, toValidInt, toValidBigInt, isValidBigInt, clamp, SAFE_BIGINT_RANGE } from "./number";
 import { toValidDate } from "./date";
 import { toCanonicalString, toCleanRegExp } from "./string";
-import type { AnyTypedArray, TypedArrayConstructor, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions, ToValidArrayOptions } from "../types";
+import type { AnyTypedArray, ColumnData, SkewOptions, KurtosisOptions, CentralMomentsOptions, CentralMomentsResult, EntropyOptions, SortArrayOptions } from "../types";
+import type {
+    TypedArrayConstructor,
+    ToValidArrayOptions,
+    ArrayItemType,
+    IsArrayOfTypeOptionsParams,
+    UniqueArrayStatsOptions,
+    StepSliceArrayOptions,
+    JoinArrayOptions,
+    FillSeqOptions,
+    BinarySearchOptions,
+    FilterByMaskOptions
+} from "./types";
 
 import { ComputeError, InvalidArgumentError } from "../exceptions";
 
@@ -38,32 +50,6 @@ export function getArrayElement(arr: any[] | AnyTypedArray, index: number, nullO
     }
     return isOob ? null : (arr.at(index) ?? null);
 }
-
-export type ArrayItemType =
-    | "string"
-    | "number"
-    | "int"
-    | "boolean"
-    | "bigint"
-    | "object"
-    | "plainObject"
-    | "date"
-    | "regexp"
-    | "array"
-    | "any"
-    | "null"
-    | "undefined"
-    | "nullish"
-    | (new (...args: any[]) => any)
-    | ((v: unknown) => any);
-
-export type ArrayCheckMode = "every" | "some";
-export type IsArrayOfTypeOptionsParams = {
-    mode?: ArrayCheckMode;
-    allowNulls?: boolean;
-    allowEmpty?: boolean;
-    coerce?: (v: unknown) => any;
-};
 
 /**
  * Shared Type Validator & Coercer Factory
@@ -391,24 +377,6 @@ export function getArrayStats(arr: unknown): {
 }
 
 
-/**
- * Options configuration for the `getUniqueArrayStats` utility.
- */
-export interface UniqueArrayStatsOptions {
-    /**
-     * If true, uses strict serialization comparison (via keySelector or toCanonicalString)
-     * to group complex nested types (like Arrays, Sets, Maps, and Dates) by value instead of reference.
-     * @default false
-     */
-    strict?: boolean;
-
-    /**
-     * Custom function to extract a unique comparison key from each element.
-     * If strict is true and no selector is provided, falls back to `toCanonicalString`.
-     */
-    keySelector?: (val: any) => any;
-}
-
 export function getUniqueArrayStats(
     arr: ArrayLike<any>,
     {
@@ -463,45 +431,6 @@ export function getUniqueArrayStats(
         count: frequencies.size,
         frequencies
     };
-}
-
-/**
- * Options configuration for the `stepSliceArray` utility.
- */
-export interface StepSliceArrayOptions {
-    /**
-     * The step size to slice the array by. Cannot be zero.
-     * Positive values slice forward (left-to-right), negative values slice backward (right-to-left).
-     * @default 1
-     */
-    step?: number;
-
-    /**
-     * The index to start slicing from (inclusive).
-     * Supports negative values to start relative to the end of the array.
-     * @default 0
-     */
-    offsetStart?: number;
-
-    /**
-     * The index to end slicing at (exclusive).
-     * Supports negative values to end relative to the end of the array.
-     * Defaults to the end of the array (if step > 0) or -1 (if step < 0).
-     */
-    offsetEnd?: number;
-
-    /**
-     * Caps the maximum number of items gathered in the sliced result array.
-     * If specified, the slicing process stops once this limit is reached.
-     */
-    maxItemsGathered?: number;
-
-    /**
-     * If true, returns null when the starting offset is out of bounds.
-     * If false, throws an error when the starting offset is out of bounds.
-     * @default true
-     */
-    nullOnOob?: boolean;
 }
 
 export function stepSliceArray<T>(
@@ -565,55 +494,6 @@ export function stepSliceArray<T>(
 }
 
 /**
- * Options configuration for the `joinArray` utility.
- */
-export interface JoinArrayOptions {
-    /**
-     * If true, nullish elements (null and undefined) are completely ignored during joining.
-     * If false (default), nullish elements are serialized as empty strings or custom `nullValue`.
-     * @default false
-     */
-    ignoreNulls?: boolean;
-
-    /**
-     * Custom string representation for nullish values.
-     * Only applied if `ignoreNulls` is false.
-     * @default ""
-     */
-    nullValue?: string;
-
-    /**
-     * Optional prefix string prepended to the final joined result.
-     * @default ""
-     */
-    prefix?: string;
-
-    /**
-     * Optional suffix string appended to the final joined result.
-     * @default ""
-     */
-    suffix?: string;
-
-    /**
-     * Maximum number of array elements to join.
-     * If specified, elements beyond this limit are omitted and `truncationMarker` is appended.
-     */
-    limit?: number;
-
-    /**
-     * Custom placeholder string appended to the joined string when limit truncation occurs.
-     * Only applied if `limit` is specified and the array length exceeds it.
-     * @default "..."
-     */
-    truncationMarker?: string;
-
-    /**
-     * Callback function used to format each individual non-null element to a custom string representation.
-     */
-    valueFormatter?: (val: any, index: number) => string;
-}
-
-/**
  * Joins the elements of an array-like structure into a string using a separator.
  * Excludes nullish checks and formats nested arrays cleanly.
  */
@@ -650,85 +530,6 @@ export function joinArray(
 
     return prefix + strList.join(separator) + (truncated ? truncationMarker : "") + suffix;
 }
-
-export interface FillSeqBaseOptions {
-    /**
-     * Type coercion helper applied to each generated value before writing.
-     * 
-     * @param v The newly generated candidate value.
-     * @returns The coerced value to write to the array.
-     */
-    coerce?: (v: any) => any;
-
-    /**
-     * Conditional predicate determining if a value should be replaced at a given index.
-     * 
-     * @param v The original/current value at the target index.
-     * @param index The absolute index of the current element.
-     * @param array The entire target array.
-     * @returns True if the candidate value should overwrite the original value, false otherwise.
-     */
-    condition?: (v: any, index: number, array: any[]) => boolean;
-
-    /**
-     * If true, iterates and populates in reverse (from startIndex down to endIndex).
-     * @default false
-     */
-    reverse?: boolean;
-
-    /**
-     * The index at which array iteration and writing begins.
-     * @default reverse ? length - 1 : 0
-     */
-    startIndex?: number;
-
-    /**
-     * The exclusive boundary index at which iteration and writing stops.
-     * @default reverse ? -1 : length
-     */
-    endIndex?: number;
-}
-
-export interface CumulativeStepContext {
-    /** The accumulated value returned by the step function from the previous stepped index. */
-    prev: any;
-    /** The relative iteration counter of the stepping process (starts at 1). */
-    index: number;
-    /** The original value at the current index in the target array. */
-    originalValue: any;
-    /** The absolute index of the current element in the parent array. */
-    absoluteIndex: number;
-    /** The entire target array being populated/modified. */
-    targetArray: any;
-}
-
-export interface IndependentStepContext {
-    /** The relative iteration counter of the generation process (starts at 0). */
-    index: number;
-    /** The static starting value passed to the sequence generator. */
-    initialValue: any;
-    /** The original value at the current index in the target array. */
-    originalValue: any;
-    /** The absolute index of the current element in the parent array. */
-    absoluteIndex: number;
-    /** The entire target array being populated/modified. */
-    targetArray: any;
-}
-
-export type FillSeqOptions = FillSeqBaseOptions & (
-    | {
-        mode: "constant";
-        step?: never;
-    }
-    | {
-        mode?: "cumulative";
-        step?: number | ((context: CumulativeStepContext) => any);
-    }
-    | {
-        mode: "independent";
-        step?: number | ((context: IndependentStepContext) => any);
-    }
-);
 
 export function fillSequence(
     targetArray: any,
@@ -1112,12 +913,6 @@ export function computeCartesianProduct(lenA: number, lenB: number): { leftIndic
     return { leftIndices, rightIndices };
 }
 
-export type BinarySearchSide = "left" | "right";
-export interface BinarySearchOptions<T = any> {
-    side?: BinarySearchSide;
-    getValue?: (index: number, item: T) => number;
-}
-
 /**
  * Performs a binary search on a sorted numeric array or ArrayLike structure.
  * Supports an optional `getValue` accessor for indirect index searching without array allocations.
@@ -1391,10 +1186,6 @@ export function computeBy(
     }
     const idx = getArrayStats(bys)[statKey];
     return idx !== null ? targets[idx] : null;
-}
-
-export interface FilterByMaskOptions {
-    nullify?: boolean;
 }
 
 /**

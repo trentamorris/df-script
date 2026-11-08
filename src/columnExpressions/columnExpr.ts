@@ -6,10 +6,13 @@ import { ArrayExpr } from "./mixins/arrayExpr"
 import { StructExpr } from "./mixins/structExpr"
 import { isObj, isRegExp, isArrayOfType } from "../utils"
 import { DataType } from "../datatypes"
-import type { IExpr, DataFrameSchema, ColumnDict } from "../types"
+import type { IExpr, DataFrameSchema, ColumnDict, ColumnSelector } from "../types"
 import { SchemaError } from "../exceptions"
 import { ALL_COLUMNS_MARKER } from "./constants"
 
+/**
+ * Column expression representing one or more target columns or literal values with vectorized operations.
+ */
 export class ColumnExpr<T> extends ExprBase {
     _colName: string = "";
     _colNames?: string[];
@@ -26,16 +29,7 @@ export class ColumnExpr<T> extends ExprBase {
      * @category ColumnExpression
      * @syntax $df.col(<column_name>).{symbol}(...)
      */
-    constructor(
-        colName:
-            | keyof T
-            | string
-            | RegExp
-            | DataType
-            | Function
-            | (keyof T | string | RegExp)[]
-            | (DataType | Function)[]
-    ) {
+    constructor(colName: ColumnSelector<T>) {
         super();
 
         if (isRegExp(colName)) {

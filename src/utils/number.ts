@@ -1,5 +1,15 @@
 /** @internalfile */
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
+import type {
+    NumericValidationOptions,
+    ParseNumberOptions,
+    NumericFormatOptions,
+    FloatOptions,
+    IntOptions,
+    IsValidBigIntOptions,
+    toValidBigIntOptions,
+    DecimalOptions
+} from "./types";
 import {
     INT8_MIN, INT8_MAX, UINT8_MIN, UINT8_MAX,
     INT16_MIN, INT16_MAX, UINT16_MIN, UINT16_MAX,
@@ -17,11 +27,6 @@ const _EXPONENT_INDICATOR_REGEX = /[eE]/;
 // /** Generic Number Helpers */
 // ============================================================================
 
-export interface NumericValidationOptions {
-    allowNonFiniteNumbers?: boolean;
-    allowNaN?: boolean;
-}
-
 export function isValidNumber(
     v: unknown,
     options?: NumericValidationOptions
@@ -37,10 +42,6 @@ export function isValidNumber(
     }
 
     return true;
-}
-export interface ParseNumberOptions extends NumericValidationOptions {
-    strictNumericString?: boolean;
-    floatScientific?: boolean;
 }
 
 function _validateGroupLengths(parts: string[]): boolean {
@@ -169,17 +170,6 @@ export function toValidNumber(
     }
 }
 
-export interface NumericFormatOptions extends Intl.NumberFormatOptions {
-    /** BCP 47 language tag (e.g., 'en-US' for dot, 'de-DE' for comma). Defaults to 'en-US'. */
-    locale?: string;
-    /** If true, formats negative numbers in parentheses e.g. (1.23) instead of -1.23. */
-    accountingNegatives?: boolean;
-    /** Fallback string if the value cannot be parsed into a formatable number. */
-    fallback?: string;
-    /** If true, returns the fallback string for Infinity and -Infinity values. */
-    formatNonFinite?: boolean;
-}
-
 /**
  * Formats any numeric value (number, bigint, numeric string, Date, etc.) for output,
  * handling NaN, Infinity, scientific notation, precision, and accounting formats.
@@ -230,12 +220,6 @@ export function formatNumber({
 // /** Float Functions */
 // ============================================================================
 
-export type FloatPrecision = "Float32" | "Float64";
-
-export interface FloatOptions extends ParseNumberOptions {
-    floatPrecision?: FloatPrecision;
-}
-
 export function isValidFloat(
     v: unknown,
     { floatPrecision, allowNonFiniteNumbers = false }: FloatOptions = {}
@@ -283,15 +267,6 @@ export const INT_RANGES = {
     UInt16: { min: UINT16_MIN, max: UINT16_MAX },
     UInt32: { min: UINT32_MIN, max: UINT32_MAX }
 } as const;
-
-export type IntRangeType = keyof typeof INT_RANGES;
-export type IntRange = { min: number; max: number } | IntRangeType;
-
-export type IntCoerceType = "round" | "floor" | "ceil" | "truncate";
-export interface IntOptions {
-    range?: IntRange;
-    coerce?: IntCoerceType;
-}
 
 function _resolveRangeLimits<T extends number | bigint>(
     range: string | { min: T; max: T } | undefined,
@@ -350,17 +325,6 @@ export const SAFE_BIGINT_RANGE = {
         max: SAFE_BIGINT_MAX
     }
 } as const;
-
-export type BigIntRangeType = keyof typeof BIGINT_RANGES;
-export type BigIntRange = { min: bigint; max: bigint } | BigIntRangeType;
-
-export interface IsValidBigIntOptions {
-    range?: BigIntRange;
-}
-
-export interface toValidBigIntOptions extends IsValidBigIntOptions {
-    truncate?: boolean;
-}
 
 export function isValidBigInt(
     v: unknown,
@@ -456,11 +420,6 @@ export function toValidBigInt(
 // ============================================================================
 // /** Decimal Functions */
 // ============================================================================
-
-export interface DecimalOptions {
-    precision?: number;
-    scale?: number;
-}
 
 function _getDecimalMaxVal(precision: number, scale: number): number | null {
     const integerDigits = precision - scale;

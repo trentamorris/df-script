@@ -1,24 +1,17 @@
 import type {
     IExpr,
     AggFn,
+    CastOptions,
     SkewOptions,
     KurtosisOptions,
     EntropyOptions,
     FillNullOptions,
     FillOptions,
     FillTarget,
-    RollingOptions,
-    ShiftOptions,
-    EwmOptions,
-    EwmKurtOptions,
-    EwmMeanOptions,
-    EwmSkewOptions,
-    EwmStdOptions,
-    EwmSumOptions,
-    EwmVarOptions,
     CentralMomentsResult
 } from "../../types"
-import type { RandomOptions, NumericArg, NumericSeriesArg, BooleanArg, ComparisonArg, IsCloseOptions, BetweenOptions, CountOptions, RankOptions, IsNDistinctOptions } from "../types"
+import type { RegisteredDataType } from "../../datatypes"
+import type { RandomOptions, NumericArg, NumericSeriesArg, BooleanArg, ComparisonArg, IsCloseOptions, BetweenOptions, CountOptions, RankOptions, IsNDistinctOptions, RollingOptions, ShiftOptions, EwmOptions, EwmKurtOptions, EwmMeanOptions, EwmSkewOptions, EwmStdOptions, EwmSumOptions, EwmVarOptions } from "../types"
 import { ExprBase } from "../exprBase"
 import { computeIsIn, compareMissing, computeRank, evaluateExpression, evaluateArg } from "../utils"
 import { ComputeError, InvalidArgumentError } from "../../exceptions"
@@ -208,6 +201,29 @@ export class StandardExpr extends ExprBase {
      */
     add(val: NumericArg) {
         return this._deriveBinary(val, (v, r) => v + r);
+    }
+
+    /**
+     * Renames the output expression column key.
+     *
+     * @param name Name of the output column.
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("a").alias("renamed_a"))
+     * shape: (3, 2)
+     * +---+-----------+
+     * | a | renamed_a |
+     * +---+-----------+
+     * | 1 | 1         |
+     * | 2 | 2         |
+     * | 3 | 3         |
+     * +---+-----------+
+     */
+    alias(name: string): this {
+        const newInst = this._derive();
+        newInst._outputName = name;
+        return newInst;
     }
 
     /**
@@ -582,6 +598,33 @@ export class StandardExpr extends ExprBase {
      */
     bitwiseXor() {
         return this._deriveAgg(v => reduceBitwise(v, (a, b) => a ^ b));
+    }
+
+    /**
+     * Coerces the column data type to another type.
+     *
+     * @param dataType Registered target data type (e.g. `$df.DataType.Int32`, `$df.DataType.String`).
+     * @param [options] Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
+     * @returns ColumnExpression
+     * @example
+     * <!-- doc:base_numbers_3x1 -->
+     * >>> df.withColumns($df.col("a").cast($df.DataType.Float64).alias("float_a"))
+     * shape: (3, 2)
+     * +---+---------+
+     * | a | float_a |
+     * +---+---------+
+     * | 1 | 1.0     |
+     * | 2 | 2.0     |
+     * | 3 | 3.0     |
+     * +---+---------+
+     */
+    cast(dataType: RegisteredDataType, options: CastOptions = {}): this {
+        const strict = options.strict ?? true;
+        const derivedInst = this._deriveUnary((v) => strict ? dataType.coerce(v) : (() => {
+            try { return dataType.coerce(v); } catch { return null; }
+        })());
+        derivedInst._castType = dataType;
+        return derivedInst as this;
     }
 
     /**

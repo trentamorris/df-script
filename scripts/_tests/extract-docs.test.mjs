@@ -7,6 +7,9 @@ import {
   extractTypesFromContent,
   extractTypeProperties,
   extractSubTypes,
+  resolveTypeAliasString,
+  resolveTypeProperties,
+  buildFunctionTypeTree,
   extractRawDocsFromContent,
   extractRawDocs
 } from "../extract-docs.mjs";
@@ -342,7 +345,7 @@ test("extractRawDocs: top-level domain keys, columnExpressions hierarchy, and fl
 
   assert.deepStrictEqual(
     Object.keys(allDocs.columnExpressions).sort(),
-    ["arrayExpr", "exprBase", "standardExpr", "stringExpr", "structExpr", "temporalExpr"]
+    ["arrayExpr", "standardExpr", "stringExpr", "structExpr", "temporalExpr"]
   );
 
   // VerifySeqRange & its subTypes chain
@@ -357,13 +360,13 @@ test("extractRawDocs: top-level domain keys, columnExpressions hierarchy, and fl
 
   const seqRangeOpts = allDocs.types.SeqRangeOptions;
   assert.ok(seqRangeOpts, "Missing types.SeqRangeOptions");
-  assert.strictEqual(seqRangeOpts.filePath, "functions/seqRange.ts");
+  assert.strictEqual(seqRangeOpts.filePath, "functions/types.ts");
   assert.deepStrictEqual(seqRangeOpts.subTypes, [
     "RegisteredDataType",
     "CumulativeStepContext",
     "IndependentStepContext"
   ]);
-  assert.ok(seqRangeOpts.signature.startsWith("export type SeqRangeOptions = {"));
+  assert.ok(seqRangeOpts.signature.startsWith("export interface SeqRangeOptions {"));
 
   for (const subKey of seqRangeOpts.subTypes) {
     assert.ok(allDocs.types[subKey], `Missing subType '${subKey}' in docs.types`);
@@ -381,9 +384,9 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     },
     coalesce: {
       filePath: "functions/coalesce.ts",
-      signature: "$df.coalesce(...exprs: (IExpr | ValidScalarTypes | (IExpr | ValidScalarTypes)[])[]): ColumnExpr<any>",
+      signature: "$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>",
       returns: "ColumnExpr<any>",
-      subTypes: ["IExpr", "ValidScalarTypes", "ColumnExpr"]
+      subTypes: ["CoalesceArg", "ColumnExpr"]
     },
     col: {
       filePath: "functions/col.ts",
@@ -393,21 +396,21 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     },
     concat: {
       filePath: "functions/concat.ts",
-      signature: "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItem | ConcatItem[],\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>",
+      signature: "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItemsArg,\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>",
       returns: "DataFrame",
-      subTypes: ["RowRecord", "ConcatItem", "ConcatOptions"]
+      subTypes: ["RowRecord", "ConcatItemsArg", "ConcatOptions"]
     },
     data: {
       filePath: "functions/data.ts",
-      signature: "$df.data<T extends RowRecord = any>(\n  data: T[] | ColumnDict,\n  schema?: DataFrameSchema\n): DataFrame<T>",
+      signature: "$df.data<T extends RowRecord = any>(\n  data: DataFrameDataArg<T>,\n  schema?: DataFrameSchema\n): DataFrame<T>",
       returns: "DataFrame<T>",
-      subTypes: ["RowRecord", "ColumnDict", "DataFrameSchema"]
+      subTypes: ["RowRecord", "DataFrameDataArg", "DataFrameSchema"]
     },
     duration: {
       filePath: "functions/duration.ts",
-      signature: "$df.duration(options: DurationOptions | string = {}): ColumnExpr<any>",
+      signature: "$df.duration(options: DurationArg = {}): ColumnExpr<any>",
       returns: "ColumnExpr<any>",
-      subTypes: ["DurationOptions", "ColumnExpr"]
+      subTypes: ["DurationArg", "ColumnExpr"]
     },
     element: {
       filePath: "functions/element.ts",
@@ -417,21 +420,21 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     },
     exclude: {
       filePath: "functions/exclude.ts",
-      signature: "$df.exclude(columns: string | string[]): ColumnExpr<any>",
+      signature: "$df.exclude(columns: ColumnKeyArg): ColumnExpr<any>",
       returns: "ColumnExpr<any>",
-      subTypes: ["ColumnExpr"]
+      subTypes: ["ColumnKeyArg", "ColumnExpr"]
     },
     horizontal: {
       filePath: "functions/horizontal.ts",
-      signature: "$df.horizontal(...exprs: (IntoExpr | IntoExpr[])[]): HorizontalExpr",
+      signature: "$df.horizontal(...exprs: IntoExprArg[]): HorizontalExpr",
       returns: "HorizontalExpr",
-      subTypes: ["IntoExpr", "HorizontalExpr"]
+      subTypes: ["IntoExprArg", "HorizontalExpr"]
     },
     implode: {
       filePath: "functions/implode.ts",
-      signature: "$df.implode(column: IntoExpr | IntoExpr[]): ColumnExpr<any>",
+      signature: "$df.implode(column: IntoExprArg): ColumnExpr<any>",
       returns: "ColumnExpr<any>",
-      subTypes: ["IntoExpr", "ColumnExpr"]
+      subTypes: ["IntoExprArg", "ColumnExpr"]
     },
     lit: {
       filePath: "functions/lit.ts",
@@ -459,9 +462,9 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     },
     struct: {
       filePath: "functions/struct.ts",
-      signature: "$df.struct(\n  fields: IntoExpr[] | Record<string, IntoExpr> | IntoExpr,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
+      signature: "$df.struct(\n  fields: StructArg,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
       returns: "ColumnExpr<any>",
-      subTypes: ["IntoExpr", "ColumnExpr"]
+      subTypes: ["StructArg", "IntoExpr", "ColumnExpr"]
     },
     when: {
       filePath: "functions/when.ts",
@@ -734,6 +737,402 @@ test("extractTypeProperties: union or non-object signatures return undefined", (
   assert.strictEqual(extractTypeProperties("export type TimeUnit = 's' | 'ms' | 'us' | 'ns';"), undefined);
   assert.strictEqual(extractTypeProperties(""), undefined);
   assert.strictEqual(extractTypeProperties(null), undefined);
+});
+
+test("resolveTypeAliasString, resolveTypeProperties, and buildFunctionTypeTree: Omit, Pick, Partial, extends, unions, inline objects, and generic aliases", () => {
+  const src = `
+    /** Base A */
+    export interface BaseA {
+      /** Prop a */
+      a?: number;
+    }
+    /** Base B */
+    export interface BaseB {
+      /** Prop b @default true */
+      b?: boolean;
+      /** Prop c */
+      c?: string;
+    }
+    /** Child extending BaseA and BaseB */
+    export interface ChildOpts extends BaseA, BaseB {
+      /** Nested inline */
+      nested?: {
+        /** Inner flag @default false */
+        flag?: boolean;
+      };
+      /** Sub options ref */
+      sub?: SubOpts;
+    }
+    /** Sub options */
+    export interface SubOpts {
+      /** Strict mode @default true */
+      strict?: boolean;
+    }
+    /** Omitted options */
+    export type OmittedOpts = Omit<ChildOpts, "b" | "c">;
+    /** Picked options */
+    export type PickedOpts = Pick<ChildOpts, "a" | "b">;
+    /** Partial options */
+    export type PartialSub = Partial<SubOpts>;
+    /** Generic key arg */
+    export type KeyArg<K = string> = K | K[];
+    /** Chained alias */
+    export type ChainedKeyArg = KeyArg<number>;
+    /** Union with options */
+    export type UnionOptsArg = SubOpts | string;
+  `;
+
+  const typesMap = extractTypesFromContent(src, "test.ts");
+
+  // 1. Generic & chained alias resolution
+  assert.strictEqual(resolveTypeAliasString("KeyArg", typesMap), "string | string[]");
+  assert.strictEqual(resolveTypeAliasString("KeyArg<boolean>", typesMap), "boolean | boolean[]");
+  assert.strictEqual(resolveTypeAliasString("ChainedKeyArg", typesMap), "number | number[]");
+  assert.strictEqual(resolveTypeAliasString("ChainedKeyArg[]", typesMap), "(number | number[])[]");
+
+  // 2. Multi-interface extends + inline object + nested options resolution
+  const childProps = resolveTypeProperties("ChildOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(childProps), ["a", "b", "c", "nested", "sub"]);
+  assert.strictEqual(childProps.b.default, "true");
+  assert.strictEqual(childProps.nested.type, "object");
+  assert.strictEqual(childProps.nested.properties.flag.default, "false");
+  assert.strictEqual(childProps.sub.properties.strict.default, "true");
+
+  // 3. Omit & Pick resolution
+  const omittedProps = resolveTypeProperties("OmittedOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(omittedProps), ["a", "nested", "sub"]);
+  const pickedProps = resolveTypeProperties("PickedOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(pickedProps), ["a", "b"]);
+
+  // 4. Union containing options interface (`SubOpts | string`)
+  const unionProps = resolveTypeProperties("UnionOptsArg", typesMap);
+  assert.deepStrictEqual(Object.keys(unionProps), ["strict"]);
+
+  // 5. buildFunctionTypeTree with destructured, variadic, and optional params
+  const fnTree = buildFunctionTypeTree(
+    "myFn(items: ChainedKeyArg, { a, sub }: OmittedOpts = {}, ...rest: UnionOptsArg[]): void",
+    [
+      { name: "items", desc: "Input items." },
+      { name: "[options]", desc: "Configuration options." },
+      { name: "...rest", desc: "Variadic union args." }
+    ],
+    typesMap
+  );
+  assert.ok(fnTree);
+  assert.strictEqual(fnTree.items.resolvedType, "number | number[]");
+  assert.strictEqual(fnTree.items.optional, false);
+  assert.strictEqual(fnTree.options.type, "OmittedOpts");
+  assert.strictEqual(fnTree.options.optional, true);
+  assert.strictEqual(fnTree.options.default, "{}");
+  assert.deepStrictEqual(Object.keys(fnTree.options.properties), ["a", "nested", "sub"]);
+  assert.strictEqual(fnTree.rest.variadic, true);
+  assert.strictEqual(fnTree.rest.resolvedType, "(SubOpts | string)[]");
+  assert.deepStrictEqual(Object.keys(fnTree.rest.properties), ["strict"]);
+});
+
+test("extractRawDocs: verifies real project typeTree for ewmVar, concat, readJson, and duration", () => {
+  const allDocs = extractRawDocs();
+
+  // ewmVar: EwmVarOptions = Omit<EwmOptions, 'bias' | 'fisher'>
+  const ewmVarTree = allDocs.columnExpressions.standardExpr.ewmVar.typeTree;
+  assert.ok(ewmVarTree && ewmVarTree.options && ewmVarTree.options.properties);
+  assert.deepStrictEqual(Object.keys(ewmVarTree.options.properties), [
+    "adjust",
+    "alpha",
+    "by",
+    "com",
+    "halfLife",
+    "ignoreNulls",
+    "minSamples",
+    "span"
+  ]);
+  assert.strictEqual(ewmVarTree.options.properties.by.resolvedType, "string | IExpr");
+  assert.strictEqual(ewmVarTree.options.properties.halfLife.resolvedType, "number | string");
+  assert.strictEqual(ewmVarTree.options.properties.by.properties, undefined); // IExpr is opaque
+
+  // concat: nested HorizontalConcatOptions inside ConcatOptions + 2-step alias ConcatItemsArg
+  const concatTree = allDocs.dataframe.concat.typeTree;
+  assert.strictEqual(concatTree.items.resolvedType, "ConcatItem | ConcatItem[]");
+  assert.strictEqual(concatTree.options.properties.horizontal.properties.strict.default, "true");
+
+  // duration: union DurationArg = DurationOptions | string has both resolvedType and properties
+  const durationTree = allDocs.functions.duration.typeTree;
+  assert.strictEqual(durationTree.options.resolvedType, "DurationOptions | string");
+  assert.ok(durationTree.options.properties.days);
+});
+
+// ─── 9. Extreme Complex Type Edge Cases for typeTree & Type Resolution ───────
+
+test("Extreme edge cases: nested utility types (Partial<Omit<...>>, Required<Pick<...>>, Readonly<...>) and empty Omit", () => {
+  const src = `
+    export interface CoreOpts {
+      /** Alpha @default 1 */
+      alpha?: number;
+      /** Beta */
+      beta: string;
+      /** Gamma @default false */
+      gamma?: boolean;
+      /** Delta */
+      delta: number[];
+    }
+    export type NestedPartialOmit = Partial<Omit<CoreOpts, "delta" | "gamma">>;
+    export type NestedRequiredPick = Required<Pick<CoreOpts, "alpha" | "gamma">>;
+    export type NestedReadonlyOmitPick = Readonly<Omit<Pick<CoreOpts, "alpha" | "beta" | "gamma">, "beta">>;
+    export type EmptyOmit = Omit<Pick<CoreOpts, "alpha">, "alpha">;
+  `;
+  const typesMap = extractTypesFromContent(src, "nested.ts");
+
+  const partialOmit = resolveTypeProperties("NestedPartialOmit", typesMap);
+  assert.deepStrictEqual(Object.keys(partialOmit), ["alpha", "beta"]);
+  assert.strictEqual(partialOmit.alpha.optional, true);
+  assert.strictEqual(partialOmit.beta.optional, true);
+
+  const reqPick = resolveTypeProperties("NestedRequiredPick", typesMap);
+  assert.deepStrictEqual(Object.keys(reqPick), ["alpha", "gamma"]);
+  assert.strictEqual(reqPick.alpha.optional, false);
+  assert.strictEqual(reqPick.gamma.optional, false);
+
+  const roOmitPick = resolveTypeProperties("NestedReadonlyOmitPick", typesMap);
+  assert.deepStrictEqual(Object.keys(roOmitPick), ["alpha", "gamma"]);
+
+  const emptyOmit = resolveTypeProperties("EmptyOmit", typesMap);
+  assert.strictEqual(emptyOmit, undefined);
+});
+
+test("Extreme edge cases: intersections (&), multi-path discriminated unions (|), and inline object types", () => {
+  const src = `
+    export interface BaseConfig {
+      /** Strict mode @default true */
+      strict?: boolean;
+    }
+    export interface ExtraConfig {
+      /** Limit count */
+      limit?: number;
+    }
+    export type IntersectedOpts = BaseConfig & ExtraConfig & {
+      /** Inline readonly mode @default "fast" */
+      readonly mode?: "fast" | "accurate";
+      /** Deep inline object */
+      nested?: {
+        /** Retries @default 3 */
+        retries?: number;
+      };
+    };
+    export type DiscriminatedWindowOpts =
+      | {
+          /** Window strategy */
+          kind: "rolling";
+          /** Window size */
+          windowSize: number;
+          /** Minimum samples @default 1 */
+          minSamples?: number;
+        }
+      | {
+          kind: "expanding";
+          minSamples?: number;
+          /** Center window @default false */
+          center?: boolean;
+        };
+    export type CombinedIntersectionUnion = BaseConfig & DiscriminatedWindowOpts;
+  `;
+  const typesMap = extractTypesFromContent(src, "complex.ts");
+
+  const interProps = resolveTypeProperties("IntersectedOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(interProps), ["limit", "mode", "nested", "strict"]);
+  assert.strictEqual(interProps.mode.type, '"fast" | "accurate"');
+  assert.strictEqual(interProps.mode.default, '"fast"');
+  assert.strictEqual(interProps.nested.type, "object");
+  assert.strictEqual(interProps.nested.properties.retries.default, "3");
+
+  const unionProps = resolveTypeProperties("DiscriminatedWindowOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(unionProps), ["center", "kind", "minSamples", "windowSize"]);
+  assert.strictEqual(unionProps.kind.type, '"rolling" | "expanding"');
+  assert.strictEqual(unionProps.kind.optional, false);
+  assert.strictEqual(unionProps.windowSize.optional, true);
+  assert.strictEqual(unionProps.center.optional, true);
+  assert.strictEqual(unionProps.minSamples.optional, true);
+  assert.strictEqual(unionProps.minSamples.default, "1");
+
+  const combinedProps = resolveTypeProperties("CombinedIntersectionUnion", typesMap);
+  assert.deepStrictEqual(Object.keys(combinedProps), ["center", "kind", "minSamples", "strict", "windowSize"]);
+});
+
+test("Extreme edge cases: generic interfaces, generic extends, property-name collision with generic param T, and Array/ReadonlyArray aliases", () => {
+  const src = `
+    export interface MetaInfo {
+      /** Source tag */
+      source?: string;
+    }
+    export interface BaseBox<T = string> {
+      /** Default item */
+      defaultItem?: T;
+    }
+    export interface PagedBox<T = string, M = MetaInfo> extends BaseBox<T> {
+      /** Items array */
+      items: T[];
+      /** Metadata */
+      meta?: M;
+      /** Property literally named T should not have its key replaced */
+      T?: boolean;
+    }
+    export type KeyOrArr<K = string> = K | K[];
+    export type NullableKeyOrArr<K = string> = KeyOrArr<K> | null | undefined;
+  `;
+  const typesMap = extractTypesFromContent(src, "generics.ts");
+
+  const defaultBox = resolveTypeProperties("PagedBox", typesMap);
+  assert.strictEqual(defaultBox.defaultItem.type, "string");
+  assert.strictEqual(defaultBox.items.type, "string[]");
+  assert.strictEqual(defaultBox.T.type, "boolean");
+  assert.deepStrictEqual(Object.keys(defaultBox.meta.properties), ["source"]);
+
+  const numBox = resolveTypeProperties("PagedBox<number, { customFlag?: boolean }>", typesMap);
+  assert.strictEqual(numBox.defaultItem.type, "number");
+  assert.strictEqual(numBox.items.type, "number[]");
+  assert.strictEqual(numBox.T.type, "boolean");
+  assert.strictEqual(numBox.meta.type, "object");
+  assert.deepStrictEqual(Object.keys(numBox.meta.properties), ["customFlag"]);
+
+  assert.strictEqual(
+    resolveTypeAliasString("NullableKeyOrArr<number>", typesMap),
+    "number | number[] | null | undefined"
+  );
+  assert.strictEqual(
+    resolveTypeAliasString("Array<KeyOrArr<boolean>>", typesMap),
+    "Array<boolean | boolean[]>"
+  );
+  assert.strictEqual(
+    resolveTypeAliasString("ReadonlyArray<KeyOrArr<number>>", typesMap),
+    "ReadonlyArray<number | number[]>"
+  );
+  assert.strictEqual(
+    resolveTypeAliasString("((KeyOrArr<string>))[]", typesMap),
+    "(string | string[])[]"
+  );
+});
+
+test("Extreme edge cases: circular/self-referential types and declarative @internal / _ suppression", () => {
+  const src = `
+    export interface TreeNodeOpts {
+      /** Node label */
+      label: string;
+      /** Child nodes */
+      children?: TreeNodeOpts[];
+    }
+    export interface MutualA {
+      /** Name A */
+      nameA: string;
+      /** Ref B */
+      b?: MutualB;
+    }
+    export interface MutualB {
+      /** Name B */
+      nameB: string;
+      /** Ref A */
+      a?: MutualA;
+    }
+    export type RecursiveAlias = string | RecursiveAlias[];
+
+    /**
+     * Internal engine state type.
+     * @internal
+     */
+    export interface MarkedInternalType {
+      /** Secret field */
+      secret: string;
+    }
+
+    export interface MixedVisibilityOpts {
+      _privateState?: any;
+      [key: string]: any;
+      /**
+       * Hidden internal prop.
+       * @internal
+       */
+      hiddenProp?: number;
+      /** Public visible prop @default "ok" */
+      publicProp?: string;
+    }
+  `;
+  const typesMap = extractTypesFromContent(src, "cycles.ts");
+
+  const treeProps = resolveTypeProperties("TreeNodeOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(treeProps), ["children", "label"]);
+  assert.strictEqual(treeProps.children.properties, undefined);
+
+  const mutualAProps = resolveTypeProperties("MutualA", typesMap);
+  assert.deepStrictEqual(Object.keys(mutualAProps), ["b", "nameA"]);
+  assert.deepStrictEqual(Object.keys(mutualAProps.b.properties), ["a", "nameB"]);
+  assert.strictEqual(mutualAProps.b.properties.a.properties, undefined);
+
+  assert.ok(resolveTypeAliasString("RecursiveAlias", typesMap));
+  assert.strictEqual(resolveTypeProperties("MarkedInternalType", typesMap), undefined);
+
+  const mixedProps = resolveTypeProperties("MixedVisibilityOpts", typesMap);
+  assert.deepStrictEqual(Object.keys(mixedProps), ["publicProp"]);
+
+  const parsedJsdoc = parseJSDocComment(`
+    * Runs action.
+    * @param {MixedVisibilityOpts} [options={}] Main options.
+    * @param {string} [options.publicProp="overridden"] Overridden public prop description.
+    * @param {MixedVisibilityOpts} [suppressedOpts] @internal Do not expand this argument.
+  `);
+
+  const fnTree = buildFunctionTypeTree(
+    "runAction(options: MixedVisibilityOpts = {}, suppressedOpts?: MixedVisibilityOpts): void",
+    parsedJsdoc.params,
+    typesMap
+  );
+  assert.strictEqual(fnTree.options.properties.publicProp.desc, "Overridden public prop description.");
+  assert.strictEqual(fnTree.options.properties.publicProp.default, '"overridden"');
+  assert.strictEqual(fnTree.suppressedOpts.properties, undefined);
+  assert.strictEqual(fnTree.suppressedOpts.desc, "Do not expand this argument.");
+});
+
+test("Full codebase typeTree invariant audit: 0 missing descriptions, 0 leaked internal/_/index properties across all 210+ parameterized operations", () => {
+  const allDocs = extractRawDocs();
+  const opGroups = [
+    ...Object.entries(allDocs.columnExpressions).map(([k, v]) => [`columnExpressions.${k}`, v]),
+    ["dataframe", allDocs.dataframe],
+    ["functions", allDocs.functions]
+  ];
+
+  let treeCount = 0;
+  function assertValidProps(propsMap, ctx) {
+    const keys = Object.keys(propsMap);
+    assert.ok(keys.length > 0, `Empty properties map in ${ctx}`);
+    assert.deepStrictEqual(keys, [...keys].sort((a, b) => a.localeCompare(b)), `Unsorted property keys in ${ctx}`);
+
+    for (const [k, prop] of Object.entries(propsMap)) {
+      assert.ok(!k.startsWith("_"), `Leaked internal '_' property '${k}' in ${ctx}`);
+      assert.ok(!k.startsWith("["), `Leaked index/mapped property '${k}' in ${ctx}`);
+      assert.strictEqual(prop.internal, undefined, `Leaked internal flag on '${k}' in ${ctx}`);
+      assert.ok(typeof prop.type === "string" && prop.type.length > 0, `Missing type on '${k}' in ${ctx}`);
+      assert.strictEqual(typeof prop.optional, "boolean", `Missing boolean optional on '${k}' in ${ctx}`);
+      assert.ok(typeof prop.desc === "string" && prop.desc.trim().length > 0, `Empty desc on '${k}' in ${ctx}`);
+      if (prop.properties) {
+        assertValidProps(prop.properties, `${ctx}.${k}`);
+      }
+    }
+  }
+
+  for (const [groupName, symbols] of opGroups) {
+    for (const [sym, data] of Object.entries(symbols)) {
+      if (!data.typeTree) continue;
+      treeCount++;
+      for (const [paramKey, node] of Object.entries(data.typeTree)) {
+        const ctx = `${groupName}.${sym}(${paramKey})`;
+        assert.ok(typeof node.type === "string" && node.type.length > 0, `Missing type in ${ctx}`);
+        assert.strictEqual(typeof node.optional, "boolean", `Missing boolean optional in ${ctx}`);
+        assert.ok(typeof node.desc === "string" && node.desc.trim().length > 0, `Empty param desc in ${ctx}`);
+        if (node.properties) {
+          assertValidProps(node.properties, ctx);
+        }
+      }
+    }
+  }
+
+  assert.ok(treeCount >= 210, `Expected at least 210 operations with typeTree, got ${treeCount}`);
 });
 
 console.log(`✅ All ${passed} test suites in scripts/_tests/extract-docs.test.mjs passed!`);

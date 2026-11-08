@@ -1,4 +1,6 @@
-import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict, RegisteredDataType, CastOptions } from "../types"
+/** @internalfile */
+import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict } from "../types"
+import type { RegisteredDataType } from "../datatypes"
 import { ALL_COLUMNS_MARKER } from "./constants"
 import { ColumnNotFoundError, assertNotNull } from "../exceptions"
 import { evaluateExpression, kleeneUnary, kleeneBinary } from "./utils"
@@ -127,55 +129,5 @@ export class ExprBase implements IExpr {
 
     _toColExpr(col: any): any {
         return toColExpr(col, this);
-    }
-
-    /**
-     * Renames the output expression column key.
-     *
-     * @param name Name of the output column.
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("a").alias("renamed_a"))
-     * shape: (3, 2)
-     * +---+-----------+
-     * | a | renamed_a |
-     * +---+-----------+
-     * | 1 | 1         |
-     * | 2 | 2         |
-     * | 3 | 3         |
-     * +---+-----------+
-     */
-    alias(name: string): this {
-        const newInst = this._derive();
-        newInst._outputName = name;
-        return newInst;
-    }
-
-    /**
-     * Coerces the column data type to another type.
-     *
-     * @param dataType Registered target data type (e.g. `$df.DataType.Int32`, `$df.DataType.String`).
-     * @param [options] Type casting options (e.g. `{ strict: false }` to produce nulls instead of throwing on invalid values).
-     * @returns ColumnExpression
-     * @example
-     * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("a").cast($df.DataType.Float64).alias("float_a"))
-     * shape: (3, 2)
-     * +---+---------+
-     * | a | float_a |
-     * +---+---------+
-     * | 1 | 1.0     |
-     * | 2 | 2.0     |
-     * | 3 | 3.0     |
-     * +---+---------+
-     */
-    cast(dataType: RegisteredDataType, options: CastOptions = {}): this {
-        const strict = options.strict ?? true;
-        const derivedInst = this._deriveUnary((v) => strict ? dataType.coerce(v) : (() => {
-            try { return dataType.coerce(v); } catch { return null; }
-        })());
-        derivedInst._castType = dataType;
-        return derivedInst as this;
     }
 }

@@ -1,5 +1,5 @@
 import { ExprBase } from "../exprBase";
-import type { StructFieldsArg } from "../types";
+import type { StructFieldsArg, RenameMappingArg } from "../../types";
 import { InvalidArgumentError } from "../../exceptions";
 import { LITERAL_MARKER } from "../constants";
 import { createDelegatingProxy } from "../utils";
@@ -53,7 +53,7 @@ export class StructExprNamespace {
      * | { name: "Alice", id: 1 }  | { id: 1, first_name: "Alice" } |
      * +---------------------------+--------------------------------+
      */
-    renameFields(mapping: Record<string, string>) {
+    renameFields(mapping: RenameMappingArg) {
         return this._expr._deriveUnary((v: any) => {
             if (v == null || typeof v !== "object") return null;
             const newObj: any = {};
@@ -151,7 +151,11 @@ export class StructExprNamespace {
     }
 }
 
+/**
+ * Dynamic index signature allowing direct property access on `struct` expressions (delegating to `.struct.field(key)`).
+ */
 export interface StructExprNamespace {
+    /** Dynamic struct field accessor returning a `ColumnExpr` for the given property key. */
     [key: string]: any;
 }
 

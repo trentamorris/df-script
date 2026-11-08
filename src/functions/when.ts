@@ -1,9 +1,9 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
-import type { IExpr, ValidScalarTypes } from "../types";
+import type { WhenArg } from "./types";
 import { evaluateArg, isEvaluatedColumn, evaluateArgsMatrix } from "../columnExpressions/utils";
 import { WHEN_MARKER } from "../columnExpressions/constants";
 
-type WhenArg = IExpr | ValidScalarTypes | any[] | Record<string, any>;
+
 
 export class WhenThenChain {
     _predicates: WhenArg[];

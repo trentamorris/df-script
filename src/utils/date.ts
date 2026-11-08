@@ -1,6 +1,7 @@
 /** @internalfile */
 import { escapeRegExp } from "./string";
 import type { TimeUnit, StrptimeOptions, StrftimeOptions, IsBusinessDayOptions, DayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions, DateTimeParts } from "../types";
+import type { DateDirective } from "./types";
 import { ComputeError } from "../exceptions";
 import { isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidInt } from "./number";
@@ -221,13 +222,6 @@ function _getISO(y: number, m: number, d: number, field: "week" | "year" = "week
     if (field === "year") return date.getUTCFullYear();
     const ordinal = _getOrdinalDay(date);
     return ordinal != null ? Math.floor((ordinal - 1) / 7) + 1 : null;
-}
-
-interface DateDirective {
-    _format: (d: Date, locale: string, timeZone: string, parts: DateTimeParts) => string;
-    _parseRegex?: string;
-    _parseField?: "year" | "month" | "day" | "hour" | "minute" | "second" | "ms" | "ampm" | "offset";
-    _parseNormalize?: (valStr: string) => number | string;
 }
 
 const _normalizeSubsecond = (s: string): number => parseInt(s.padEnd(3, "0").slice(0, 3), 10);

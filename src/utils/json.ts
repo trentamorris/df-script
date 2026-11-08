@@ -1,5 +1,5 @@
 /** @internalfile */
-import type { JSONFormat } from "../types";
+import type { SafeJsonParseOptions, SafeJsonReplacerOptions, JsonToken } from "./types";
 import { isTypedArray, stepSliceArray } from "./array";
 import { isObj, isSafeObjPropertyKey, isSet, isMap, isRegExp, isError, isURLSearchParams, isValidDateObj, unboxPrimitiveObj } from "./object";
 import { isValidBigInt, toValidInt, SAFE_BIGINT_RANGE } from "./number";
@@ -18,75 +18,6 @@ function _isWrappedJsonComposite(str: string, options: { trim?: boolean } = {}):
     const lChar = s[len - 1];
     return (fChar === "{" && lChar === "}") || (fChar === "[" && lChar === "]");
 }
-
-export interface NDJSONParseOptions {
-    /**
-     * Skip malformed or invalid lines instead of failing the entire parse.
-     * @default false
-     */
-    skipInvalidLines?: boolean;
-
-    /**
-     * Maximum number of non-empty lines to validate or parse. Lines beyond this limit are ignored.
-     */
-    maxLines?: number;
-
-    /**
-     * Number of non-empty lines to skip at the beginning of the content.
-     * @default 0
-     */
-    skipLines?: number;
-}
-
-export interface JSONParseOptions {
-    /**
-     * The format of the JSON content, either "json" (standard JSON) or "ndjson" (Newline Delimited JSON).
-     * @default "json"
-     */
-    format?: JSONFormat;
-
-    /**
-     * Whether to allow JSON primitives (like numbers, booleans, strings, or null) instead of requiring wrapped arrays/objects.
-     * @default false
-     */
-    allowPrimitives?: boolean;
-
-    /**
-     * Whether to trim leading and trailing whitespace from the outermost input before validating/parsing.
-     * @default false
-     */
-    trimBeforeParse?: boolean;
-
-    /**
-     * A reviver function passed directly to JSON.parse for custom value transformation.
-     */
-    reviver?: Parameters<typeof JSON.parse>[1];
-
-    /**
-     * Options specific to NDJSON parsing. Only applicable when format is "ndjson".
-     */
-    ndjson?: NDJSONParseOptions;
-
-}
-
-export type SafeJsonParseOptions<T = unknown, F = T> = JSONParseOptions & {
-    /**
-     * A guard function to validate the shape of the parsed result. If the guard returns false,
-     * `onError` is called and the fallback (or original input) is returned.
-     */
-    guard?: ((value: unknown) => value is T) | ((value: unknown) => boolean);
-
-    /**
-     * Called when parsing succeeds but the guard check fails.
-     */
-    onError?: (err: unknown) => void;
-
-    /**
-     * A fallback value to return if parsing fails or the guard check fails.
-     * If not specified, the original input is returned.
-     */
-    fallback?: F;
-};
 
 /**
  * Validates whether the given value is a valid JSON or NDJSON string.
@@ -186,68 +117,6 @@ export function safeJsonParse<T = unknown, F = unknown>(
     }
 }
 
-export interface SafeJsonReplacerOptions {
-    /** Custom formatter function for Date objects. Ignored if onDate is specified. */
-    formatDate?: (v: Date) => string;
-
-    /** Convert BigInts to numeric strings ("123") or numbers if safe. Defaults to "string". */
-    bigintStrategy?: "string" | "number";
-
-    /** Custom serialization override for BigInt values. */
-    onBigInt?: (v: bigint) => any;
-
-    /** Custom serialization override for TypedArray values. */
-    onTypedArray?: (v: any) => any;
-
-    /** Custom serialization override for Set objects. */
-    onSet?: (v: Set<any>) => any;
-
-    /** Custom serialization override for Map objects. */
-    onMap?: (v: Map<any, any>) => any;
-
-    /** Custom serialization override for RegExp objects. */
-    onRegExp?: (v: RegExp) => any;
-
-    /** Custom serialization override for Date objects. Takes precedence over formatDate. */
-    onDate?: (v: Date) => any;
-
-    /** Custom serialization override for Error objects. Prevents empty {} strings. */
-    onError?: (v: Error) => any;
-
-    /** Custom serialization override for URLSearchParams objects. */
-    onURLSearchParams?: (v: URLSearchParams) => any;
-
-    /** Catch-all serialization override for custom types. Runs after native type checks. */
-    onCustom?: (this: any, k: string, v: any) => any;
-
-    /** If true, handles circular references by replacing them with a string/override instead of throwing. */
-    handleCircular?: boolean;
-
-    /** Custom fallback string or value when a circular reference is found. Defaults to "[Circular]" */
-    onCircular?: (this: any, k: string, v: any) => any;
-
-    /** If true, disables/voids the default safe serialization for BigInt values. */
-    voidBigIntReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for TypedArray values. */
-    voidTypedArrayReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for Set objects. */
-    voidSetReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for Map objects. */
-    voidMapReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for RegExp objects. */
-    voidRegExpReplacement?: boolean;
-
-    /** If true, disables/voids the default safe serialization for Date objects. */
-    voidDateReplacement?: boolean;
-
-    /** A custom replacer function or array whitelist that runs first for pre-processing keys/values. */
-    replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null;
-}
-
 export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
     const bigintStrat = options.bigintStrategy ?? "string";
     const whitelist = Array.isArray(options.replacer)
@@ -306,54 +175,6 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
 
         return val;
     };
-}
-
-/**
- * Represents the type of operation a JSONPath token performs.
- */
-type JsonTokenType =
-    /**
-     * Selects an object property by name (e.g., .foo or ['foo']) 
-     */
-    | "prop"
-    /**
-     * Selects a zero-based or negative array index (e.g., [0] or [-1]) 
-     */
-    | "idx"
-    /**
-     * Selects a range or stepped slice of an array (e.g., [1:5:2]) 
-     */
-    | "slice"
-    /**
-     * Selects all immediate properties of an object or elements of an array (e.g., .* or [*]) 
-     */
-    | "wildcard"
-    /** 
-     * Recursively searches and collects matching keys down the hierarchy (e.g., ..foo) 
-     */
-    | "rec";
-
-/**
- * Parsed AST token representing a single evaluation step in a JSONPath expression.
- */
-interface JsonToken {
-    /** The evaluation operation type. */
-    type: JsonTokenType;
-
-    /** Property name or recursive search key. Used by "prop" and "rec" tokens. */
-    key?: string;
-
-    /** Target index position. Used by "idx" tokens. Supports negative indices. */
-    idx?: number;
-
-    /** Starting array index (inclusive). Used by "slice" tokens. Defaults to 0 or end of array depending on step. */
-    start?: number;
-
-    /** Ending array index (exclusive). Used by "slice" tokens. Defaults to array bound depending on step. */
-    end?: number;
-
-    /** Increment step value. Used by "slice" tokens. Defaults to 1. Cannot be 0. */
-    step?: number;
 }
 
 

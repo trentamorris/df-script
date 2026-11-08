@@ -1,10 +1,13 @@
 import { DataFrame } from "./dataframe"
 import { inferColumnType, coerceColumn, gatherColumnByIndices } from "./utils"
-import type { GroupMap, GroupedAggDelegatedOps } from "./types"
+import type { GroupMap, GroupedAggDelegatedOps, SelectArg } from "./types"
 import { resolveColumnSelectors, ALL_COLUMNS_MARKER, resolveExprOutputType, ColumnExpr } from "../columnExpressions"
 import { DataTypeRegistry } from "../datatypes"
-import type { IExpr, ColumnDict, RowRecord, DataFrameSchema } from "../types"
+import type { ColumnDict, RowRecord, DataFrameSchema } from "../types"
 
+/**
+ * Grouped DataFrame interface including delegated aggregation shorthand methods.
+ */
 export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
 
 /**
@@ -81,7 +84,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * | B     | 30      |
      * +-------+---------+
      */
-    agg<U extends RowRecord = any>(...exprs: (IExpr | any)[]): DataFrame<U> {
+    agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U> {
         const keys = this._keys as unknown as string[];
         const allKeys = this._allKeys as unknown as string[];
         const normalizedExprs = DataFrame._normalizeArgs(exprs);

@@ -1,7 +1,8 @@
 /**
  * @internalfile
  */
-import type { IExpr, DataFrameSchema, RegisteredDataType, DatetimeTimeUnit, ColumnData } from "../types";
+import type { IExpr, DataFrameSchema, DatetimeTimeUnit, ColumnData } from "../types";
+import type { RegisteredDataType } from "../datatypes";
 import {
     DatetimeType,
     DurationType,

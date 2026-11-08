@@ -1,7 +1,7 @@
 declare const process: any;
-import { $df } from "../../../src/index";
+import { $df } from "../../../../src/index";
 
-console.log("Running ExprBase.cast edge-case tests...");
+console.log("Running StandardExpr.cast edge-case tests...");
 
 // 1. Cast integer to Utf8 string
 const df = $df.data({ a: [1, 2, 3] });
@@ -95,3 +95,4 @@ if (typeof resDate[0].ts !== "bigint" && typeof resDate[0].ts !== "number") {
 }
 
 console.log("✓ StandardExpr.cast tests passed! (9 edge cases)");
+
