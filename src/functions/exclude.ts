@@ -12,6 +12,7 @@ import type { ColumnKeyArg } from "../types";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Exclude a single column by name:
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.exclude("a"))
  * shape: (2, 1)
@@ -21,6 +22,19 @@ import type { ColumnKeyArg } from "../types";
  * | x |
  * | y |
  * +---+
+ *
+ * @example
+ * // 2. Exclude a single column from a multi-column dataset:
+ * <!-- doc:base_numbers_3x2 -->
+ * >>> df.select($df.exclude("a"))
+ * shape: (3, 1)
+ * +----+
+ * | b  |
+ * +----+
+ * | 10 |
+ * | 20 |
+ * | 30 |
+ * +----+
  */
 export function exclude(columns: ColumnKeyArg): ColumnExpr<any> {
     const expr = new ColumnExpr(ALL_COLUMNS_MARKER);

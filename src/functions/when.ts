@@ -92,6 +92,7 @@ export class WhenThen extends ColumnExpr<any> {
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Binary condition with otherwise fallback:
  * <!-- doc:base_numbers_3x1 -->
  * >>> df.select(
  * ...   $df.when($df.col("a").gt(2)).then("High")
@@ -105,6 +106,23 @@ export class WhenThen extends ColumnExpr<any> {
  * | Low  |
  * | High |
  * +------+
+ *
+ * @example
+ * // 2. Multi-case conditional chaining:
+ * <!-- doc:base_numbers_3x1 -->
+ * >>> df.select(
+ * ...   $df.when($df.col("a").eq(1)).then("One")
+ * ...     .when($df.col("a").eq(2)).then("Two")
+ * ...     .otherwise("Other").alias("label")
+ * ... )
+ * shape: (3, 1)
+ * +-------+
+ * | label |
+ * +-------+
+ * | One   |
+ * | Two   |
+ * | Other |
+ * +-------+
  */
 export function when(predicate: WhenArg): WhenThenChain {
     return new WhenThenChain([predicate]);

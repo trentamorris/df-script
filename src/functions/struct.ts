@@ -15,6 +15,7 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Package fields using an object property mapping:
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.struct({ x: "a", y: "b" }).alias("coord"))
  * shape: (2, 1)
@@ -23,6 +24,18 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  * +------------------+
  * | { x: 1, y: "x" } |
  * | { x: 2, y: "y" } |
+ * +------------------+
+ *
+ * @example
+ * // 2. Package positional column expressions directly into a struct:
+ * <!-- doc:base_2x2 -->
+ * >>> df.select($df.struct($df.col("a"), $df.col("b")).alias("pair"))
+ * shape: (2, 1)
+ * +------------------+
+ * | pair             |
+ * +------------------+
+ * | { a: 1, b: "x" } |
+ * | { a: 2, b: "y" } |
  * +------------------+
  */
 export function struct(

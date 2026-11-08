@@ -487,7 +487,8 @@
       "get": {
         "desc": "Extracts a single list element by its index position.",
         "examples": [
-          ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.get(1).alias(\"second\"))\nshape: (2, 2)\n+-----------+--------+\n| a         | second |\n+-----------+--------+\n| [1, 2, 3] | 2      |\n| [4, 5]    | 5      |\n+-----------+--------+"
+          "// 1. Positive 0-based index:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.get(1).alias(\"second\"))\nshape: (2, 2)\n+-----------+--------+\n| a         | second |\n+-----------+--------+\n| [1, 2, 3] | 2      |\n| [4, 5]    | 5      |\n+-----------+--------+",
+          "// 2. Negative index (from the end):\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.get(-1).alias(\"last_val\"))\nshape: (2, 2)\n+-----------+----------+\n| a         | last_val |\n+-----------+----------+\n| [1, 2, 3] | 3        |\n| [4, 5]    | 5        |\n+-----------+----------+"
         ],
         "params": [
           {
@@ -508,8 +509,8 @@
         "signature": "$df.col(<column_name>).arr.get(\n  index: NumericArg,\n  nullOnOob: boolean = true\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.get(\n  index: number | bigint | IExpr | null,\n  nullOnOob: boolean = true\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 464,
-        "lineEnd": 469,
+        "lineStart": 477,
+        "lineEnd": 482,
         "typeTree": {
           "index": {
             "type": "NumericArg",
@@ -528,7 +529,8 @@
       "join": {
         "desc": "Joins elements of list columns into a single string column.",
         "examples": [
-          ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.join(\"-\").alias(\"joined\"))\nshape: (2, 2)\n+------------+--------+\n| a          | joined |\n+------------+--------+\n| [\"a\", \"b\"] | \"a-b\"  |\n| [\"c\"]      | \"c\"    |\n+------------+--------+"
+          "// 1. Default delimiter join:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.join(\"-\").alias(\"joined\"))\nshape: (2, 2)\n+-----------+---------+\n| a         | joined  |\n+-----------+---------+\n| [1, 2, 3] | \"1-2-3\" |\n| [4, 5]    | \"4-5\"   |\n+-----------+---------+",
+          "// 2. Custom delimiter with prefix and suffix options:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.join(\" | \", { prefix: \"<\", suffix: \">\" }).alias(\"joined\"))\nshape: (2, 2)\n+-----------+---------------+\n| a         | joined        |\n+-----------+---------------+\n| [1, 2, 3] | \"<1 | 2 | 3>\" |\n| [4, 5]    | \"<4 | 5>\"     |\n+-----------+---------------+"
         ],
         "params": [
           {
@@ -549,8 +551,8 @@
         "signature": "$df.col(<column_name>).arr.join(\n  separator: string = \",\",\n  options: JoinArrayOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.join(\n  separator: string = \",\",\n  options: {\n    ignoreNulls?: boolean = false,\n    limit?: number,\n    nullValue?: string = \"\",\n    prefix?: string = \"\",\n    suffix?: string = \"\",\n    truncationMarker?: string = \"...\",\n    valueFormatter?: (val: any, index: number) => string\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 487,
-        "lineEnd": 489,
+        "lineStart": 513,
+        "lineEnd": 515,
         "typeTree": {
           "separator": {
             "type": "string",
@@ -628,8 +630,8 @@
         "signature": "$df.col(<column_name>).arr.last(nullOnOob: boolean = true)",
         "signatureDetailed": "$df.col(<column_name>).arr.last(nullOnOob: boolean = true)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 506,
-        "lineEnd": 508,
+        "lineStart": 532,
+        "lineEnd": 534,
         "typeTree": {
           "nullOnOob": {
             "type": "boolean",
@@ -649,8 +651,8 @@
         "signature": "$df.col(<column_name>).arr.len()",
         "signatureDetailed": "$df.col(<column_name>).arr.len()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 513,
-        "lineEnd": 515
+        "lineStart": 539,
+        "lineEnd": 541
       },
       "lengths": {
         "desc": "Returns the length of each list inside the column cell.",
@@ -666,8 +668,8 @@
         "signature": "$df.col(<column_name>).arr.lengths()",
         "signatureDetailed": "$df.col(<column_name>).arr.lengths()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 531,
-        "lineEnd": 533
+        "lineStart": 557,
+        "lineEnd": 559
       },
       "max": {
         "desc": "Returns the maximum value of elements inside each list.",
@@ -683,8 +685,8 @@
         "signature": "$df.col(<column_name>).arr.max()",
         "signatureDetailed": "$df.col(<column_name>).arr.max()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 549,
-        "lineEnd": 551
+        "lineStart": 575,
+        "lineEnd": 577
       },
       "mean": {
         "desc": "Returns average of elements inside each list.",
@@ -700,8 +702,8 @@
         "signature": "$df.col(<column_name>).arr.mean()",
         "signatureDetailed": "$df.col(<column_name>).arr.mean()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 567,
-        "lineEnd": 569
+        "lineStart": 593,
+        "lineEnd": 595
       },
       "median": {
         "desc": "Returns statistical median inside each list.",
@@ -717,8 +719,8 @@
         "signature": "$df.col(<column_name>).arr.median()",
         "signatureDetailed": "$df.col(<column_name>).arr.median()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 585,
-        "lineEnd": 587
+        "lineStart": 611,
+        "lineEnd": 613
       },
       "min": {
         "desc": "Returns minimum of elements inside each list.",
@@ -734,8 +736,8 @@
         "signature": "$df.col(<column_name>).arr.min()",
         "signatureDetailed": "$df.col(<column_name>).arr.min()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 603,
-        "lineEnd": 605
+        "lineStart": 629,
+        "lineEnd": 631
       },
       "mode": {
         "desc": "Returns the mode value inside each list.",
@@ -751,8 +753,8 @@
         "signature": "$df.col(<column_name>).arr.mode()",
         "signatureDetailed": "$df.col(<column_name>).arr.mode()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 621,
-        "lineEnd": 623
+        "lineStart": 647,
+        "lineEnd": 649
       },
       "nUnique": {
         "desc": "Returns the unique count of elements inside each list.",
@@ -774,8 +776,8 @@
         "signature": "$df.col(<column_name>).arr.nUnique(options: UniqueArrayStatsOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).arr.nUnique(\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 640,
-        "lineEnd": 642,
+        "lineStart": 666,
+        "lineEnd": 668,
         "typeTree": {
           "options": {
             "type": "UniqueArrayStatsOptions",
@@ -812,8 +814,8 @@
         "signature": "$df.col(<column_name>).arr.reverse()",
         "signatureDetailed": "$df.col(<column_name>).arr.reverse()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 658,
-        "lineEnd": 660
+        "lineStart": 684,
+        "lineEnd": 686
       },
       "shift": {
         "desc": "Shifts elements of list columns by N offsets.",
@@ -835,8 +837,8 @@
         "signature": "$df.col(<column_name>).arr.shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.shift(\n  n: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 677,
-        "lineEnd": 679,
+        "lineStart": 703,
+        "lineEnd": 705,
         "typeTree": {
           "n": {
             "type": "number",
@@ -863,7 +865,8 @@
       "slice": {
         "desc": "Slices nested list arrays.",
         "examples": [
-          ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.slice(1, 3).alias(\"sliced\"))\nshape: (2, 2)\n+-----------+--------+\n| a         | sliced |\n+-----------+--------+\n| [1, 2, 3] | [2, 3] |\n| [4, 5]    | [5]    |\n+-----------+--------+"
+          "// 1. Positive slice with start and end offsets:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.slice(1, 3).alias(\"sliced\"))\nshape: (2, 2)\n+-----------+--------+\n| a         | sliced |\n+-----------+--------+\n| [1, 2, 3] | [2, 3] |\n| [4, 5]    | [5]    |\n+-----------+--------+",
+          "// 2. Negative slice offset from the end:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.withColumns($df.col(\"a\").arr.slice(-2).alias(\"tail2\"))\nshape: (2, 2)\n+-----------+--------+\n| a         | tail2  |\n+-----------+--------+\n| [1, 2, 3] | [2, 3] |\n| [4, 5]    | [4, 5] |\n+-----------+--------+"
         ],
         "params": [
           {
@@ -884,8 +887,8 @@
         "signature": "$df.col(<column_name>).arr.slice(\n  start?: number,\n  end?: number\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.slice(\n  start?: number,\n  end?: number\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 697,
-        "lineEnd": 699,
+        "lineStart": 736,
+        "lineEnd": 738,
         "typeTree": {
           "start": {
             "type": "number",
@@ -919,8 +922,8 @@
         "signature": "$df.col(<column_name>).arr.sort(options?: SortArrayOptions)",
         "signatureDetailed": "$df.col(<column_name>).arr.sort(\n  options?: {\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,\n    descending?: boolean | boolean[] = false,\n    nullsLast?: boolean = true\n  }\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 716,
-        "lineEnd": 718,
+        "lineStart": 755,
+        "lineEnd": 757,
         "typeTree": {
           "options": {
             "type": "SortArrayOptions",
@@ -977,8 +980,8 @@
         "signature": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: ValidScalarTypes[]\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: (Exclude<ValidPrimitiveTypes, symbol> | Date | AnyTypedArray)[]\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 737,
-        "lineEnd": 744,
+        "lineStart": 776,
+        "lineEnd": 783,
         "typeTree": {
           "start": {
             "type": "number",
@@ -1013,8 +1016,8 @@
         "signature": "$df.col(<column_name>).arr.std()",
         "signatureDetailed": "$df.col(<column_name>).arr.std()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 760,
-        "lineEnd": 762
+        "lineStart": 799,
+        "lineEnd": 801
       },
       "sum": {
         "desc": "Returns sum of elements inside each list.",
@@ -1030,8 +1033,8 @@
         "signature": "$df.col(<column_name>).arr.sum()",
         "signatureDetailed": "$df.col(<column_name>).arr.sum()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 778,
-        "lineEnd": 780
+        "lineStart": 817,
+        "lineEnd": 819
       },
       "toStruct": {
         "desc": "Converts list column elements to struct columns.",
@@ -1053,8 +1056,8 @@
         "signature": "$df.col(<column_name>).arr.toStruct(\n  {\n    upperBound,\n    fields\n  }: ToStructOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.toStruct(\n  options: {\n    fields?: string[] | ((idx: number) => string) = `\"field_0\"`, `\"field_1\"`, etc,\n    upperBound?: number = the maximum array length in the column\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 797,
-        "lineEnd": 843,
+        "lineStart": 836,
+        "lineEnd": 882,
         "typeTree": {
           "options": {
             "type": "ToStructOptions",
@@ -1098,8 +1101,8 @@
         "signature": "$df.col(<column_name>).arr.unique(options: UniqueArrayStatsOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).arr.unique(\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 860,
-        "lineEnd": 862,
+        "lineStart": 899,
+        "lineEnd": 901,
         "typeTree": {
           "options": {
             "type": "UniqueArrayStatsOptions",
@@ -1136,8 +1139,8 @@
         "signature": "$df.col(<column_name>).arr.variance()",
         "signatureDetailed": "$df.col(<column_name>).arr.variance()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 878,
-        "lineEnd": 880
+        "lineStart": 917,
+        "lineEnd": 919
       }
     },
     "standardExpr": {
@@ -2243,7 +2246,7 @@
       "ewmKurt": {
         "desc": "Window: Computes exponentially weighted moving kurtosis.",
         "examples": [
-          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"val\").ewmKurt({ alpha: 0.5 }).alias(\"ewm_kurt\"))"
+          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"a\").ewmKurt({ alpha: 0.5 }).alias(\"ewm_kurt\"))\nshape: (3, 2)\n+---+----------+\n| a | ewm_kurt |\n+---+----------+\n| 1 | null     |\n| 2 | -1       |\n| 3 | 1.052409 |\n+---+----------+"
         ],
         "params": [
           {
@@ -2259,8 +2262,8 @@
         "signature": "$df.col(<column_name>).ewmKurt(options: EwmKurtOptions)",
         "signatureDetailed": "$df.col(<column_name>).ewmKurt(\n  options: {\n    adjust?: boolean = true,\n    alpha?: number,\n    bias?: boolean = false,\n    by?: string | IExpr,\n    com?: number,\n    fisher?: boolean = true,\n    halfLife?: number | string,\n    ignoreNulls?: boolean = false,\n    minSamples?: number = 1,\n    span?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1094,
-        "lineEnd": 1102,
+        "lineStart": 1102,
+        "lineEnd": 1110,
         "typeTree": {
           "options": {
             "type": "EwmKurtOptions",
@@ -2331,7 +2334,7 @@
       "ewmMean": {
         "desc": "Window: Computes exponentially weighted moving average (mean).",
         "examples": [
-          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"val\").ewmMean({ alpha: 0.5 }).alias(\"ewm_mean\"))\nshape: (3, 2)\n+-----+----------+\n| val | ewm_mean |\n+-----+----------+\n| 10  | 10       |\n| 20  | 16.666667|\n| 30  | 24.285714|\n+-----+----------+"
+          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"a\").ewmMean({ alpha: 0.5 }).alias(\"ewm_mean\"))\nshape: (3, 2)\n+---+----------+\n| a | ewm_mean |\n+---+----------+\n| 1 | 1        |\n| 2 | 1.666667 |\n| 3 | 2.428571 |\n+---+----------+"
         ],
         "params": [
           {
@@ -2347,8 +2350,8 @@
         "signature": "$df.col(<column_name>).ewmMean(options: EwmMeanOptions)",
         "signatureDetailed": "$df.col(<column_name>).ewmMean(\n  options: {\n    adjust?: boolean = true,\n    alpha?: number,\n    by?: string | IExpr,\n    com?: number,\n    halfLife?: number | string,\n    ignoreNulls?: boolean = false,\n    minSamples?: number = 1,\n    span?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1120,
-        "lineEnd": 1122,
+        "lineStart": 1128,
+        "lineEnd": 1130,
         "typeTree": {
           "options": {
             "type": "EwmMeanOptions",
@@ -2407,7 +2410,7 @@
       "ewmSkew": {
         "desc": "Window: Computes exponentially weighted moving skewness.",
         "examples": [
-          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"val\").ewmSkew({ alpha: 0.5 }).alias(\"ewm_skew\"))"
+          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"a\").ewmSkew({ alpha: 0.5 }).alias(\"ewm_skew\"))\nshape: (3, 2)\n+---+-----------+\n| a | ewm_skew  |\n+---+-----------+\n| 1 | null      |\n| 2 | -0.816497 |\n| 3 | -1.125865 |\n+---+-----------+"
         ],
         "params": [
           {
@@ -2423,8 +2426,8 @@
         "signature": "$df.col(<column_name>).ewmSkew(options: EwmSkewOptions)",
         "signatureDetailed": "$df.col(<column_name>).ewmSkew(\n  options: {\n    adjust?: boolean = true,\n    alpha?: number,\n    bias?: boolean = false,\n    by?: string | IExpr,\n    com?: number,\n    halfLife?: number | string,\n    ignoreNulls?: boolean = false,\n    minSamples?: number = 1,\n    span?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1132,
-        "lineEnd": 1140,
+        "lineStart": 1148,
+        "lineEnd": 1156,
         "typeTree": {
           "options": {
             "type": "EwmSkewOptions",
@@ -2489,7 +2492,7 @@
       "ewmStd": {
         "desc": "Window: Computes exponentially weighted moving standard deviation.",
         "examples": [
-          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"val\").ewmStd({ alpha: 0.5 }).alias(\"ewm_std\"))"
+          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"a\").ewmStd({ alpha: 0.5 }).alias(\"ewm_std\"))\nshape: (3, 2)\n+---+----------+\n| a | ewm_std  |\n+---+----------+\n| 1 | null     |\n| 2 | 0.471405 |\n| 3 | 0.728431 |\n+---+----------+"
         ],
         "params": [
           {
@@ -2505,8 +2508,8 @@
         "signature": "$df.col(<column_name>).ewmStd(options: EwmStdOptions)",
         "signatureDetailed": "$df.col(<column_name>).ewmStd(\n  options: {\n    adjust?: boolean = true,\n    alpha?: number,\n    by?: string | IExpr,\n    com?: number,\n    halfLife?: number | string,\n    ignoreNulls?: boolean = false,\n    minSamples?: number = 1,\n    span?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1150,
-        "lineEnd": 1152,
+        "lineStart": 1174,
+        "lineEnd": 1176,
         "typeTree": {
           "options": {
             "type": "EwmStdOptions",
@@ -2565,7 +2568,7 @@
       "ewmSum": {
         "desc": "Window: Computes exponentially weighted moving sum.",
         "examples": [
-          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"val\").ewmSum({ alpha: 0.5 }).alias(\"ewm_sum\"))"
+          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"a\").ewmSum({ alpha: 0.5 }).alias(\"ewm_sum\"))\nshape: (3, 2)\n+---+---------+\n| a | ewm_sum |\n+---+---------+\n| 1 | 1       |\n| 2 | 2.5     |\n| 3 | 4.25    |\n+---+---------+"
         ],
         "params": [
           {
@@ -2581,8 +2584,8 @@
         "signature": "$df.col(<column_name>).ewmSum(options: EwmSumOptions)",
         "signatureDetailed": "$df.col(<column_name>).ewmSum(\n  options: {\n    alpha?: number,\n    by?: string | IExpr,\n    com?: number,\n    halfLife?: number | string,\n    ignoreNulls?: boolean = false,\n    minSamples?: number = 1,\n    span?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1162,
-        "lineEnd": 1164,
+        "lineStart": 1194,
+        "lineEnd": 1196,
         "typeTree": {
           "options": {
             "type": "EwmSumOptions",
@@ -2635,7 +2638,7 @@
       "ewmVar": {
         "desc": "Window: Computes exponentially weighted moving variance.",
         "examples": [
-          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"val\").ewmVar({ alpha: 0.5 }).alias(\"ewm_var\"))"
+          ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.withColumns($df.col(\"a\").ewmVar({ alpha: 0.5 }).alias(\"ewm_var\"))\nshape: (3, 2)\n+---+----------+\n| a | ewm_var  |\n+---+----------+\n| 1 | null     |\n| 2 | 0.222222 |\n| 3 | 0.530612 |\n+---+----------+"
         ],
         "params": [
           {
@@ -2651,8 +2654,8 @@
         "signature": "$df.col(<column_name>).ewmVar(options: EwmVarOptions)",
         "signatureDetailed": "$df.col(<column_name>).ewmVar(\n  options: {\n    adjust?: boolean = true,\n    alpha?: number,\n    by?: string | IExpr,\n    com?: number,\n    halfLife?: number | string,\n    ignoreNulls?: boolean = false,\n    minSamples?: number = 1,\n    span?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1174,
-        "lineEnd": 1176,
+        "lineStart": 1214,
+        "lineEnd": 1216,
         "typeTree": {
           "options": {
             "type": "EwmVarOptions",
@@ -2721,8 +2724,8 @@
         "signature": "$df.col(<column_name>).exp()",
         "signatureDetailed": "$df.col(<column_name>).exp()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1193,
-        "lineEnd": 1195
+        "lineStart": 1233,
+        "lineEnd": 1235
       },
       "expm1": {
         "desc": "Computes e^x - 1 for each element in the column.",
@@ -2737,8 +2740,8 @@
         "signature": "$df.col(<column_name>).expm1()",
         "signatureDetailed": "$df.col(<column_name>).expm1()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1212,
-        "lineEnd": 1214
+        "lineStart": 1252,
+        "lineEnd": 1254
       },
       "fill": {
         "desc": "Replaces targeted values (\"null\", \"nan\", or \"all\") with a specified value or strategy.",
@@ -2766,8 +2769,8 @@
         "signature": "$df.col(<column_name>).fill(\n  target: FillTarget,\n  options: FillOptions = {}\n): this",
         "signatureDetailed": "$df.col(<column_name>).fill(\n  target: \"null\" | \"nan\" | \"all\" | ScalarArg,\n  options: {\n    limit?: number,\n    strategy?: \"forward\" | \"backward\" | \"min\" | \"max\" | \"mean\" | \"zero\" | \"one\",\n    value?: IExpr | ValidScalarTypes\n  } = {}\n): this",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1233,
-        "lineEnd": 1301,
+        "lineStart": 1273,
+        "lineEnd": 1341,
         "typeTree": {
           "target": {
             "type": "FillTarget",
@@ -2823,8 +2826,8 @@
         "signature": "$df.col(<column_name>).fillNan(options: FillNullOptions = {}): this",
         "signatureDetailed": "$df.col(<column_name>).fillNan(\n  options: {\n    limit?: number,\n    strategy?: \"forward\" | \"backward\" | \"min\" | \"max\" | \"mean\" | \"zero\" | \"one\",\n    value?: IExpr | ValidScalarTypes\n  } = {}\n): this",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1319,
-        "lineEnd": 1321,
+        "lineStart": 1359,
+        "lineEnd": 1361,
         "typeTree": {
           "options": {
             "type": "FillNullOptions",
@@ -2872,8 +2875,8 @@
         "signature": "$df.col(<column_name>).fillNull(options: FillNullOptions = {}): this",
         "signatureDetailed": "$df.col(<column_name>).fillNull(\n  options: {\n    limit?: number,\n    strategy?: \"forward\" | \"backward\" | \"min\" | \"max\" | \"mean\" | \"zero\" | \"one\",\n    value?: IExpr | ValidScalarTypes\n  } = {}\n): this",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1339,
-        "lineEnd": 1341,
+        "lineStart": 1379,
+        "lineEnd": 1381,
         "typeTree": {
           "options": {
             "type": "FillNullOptions",
@@ -2921,8 +2924,8 @@
         "signature": "$df.col(<column_name>).filter(predicate: IExpr): this",
         "signatureDetailed": "$df.col(<column_name>).filter(predicate: IExpr): this",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1358,
-        "lineEnd": 1363,
+        "lineStart": 1398,
+        "lineEnd": 1403,
         "typeTree": {
           "predicate": {
             "type": "IExpr",
@@ -2944,8 +2947,8 @@
         "signature": "$df.col(<column_name>).first()",
         "signatureDetailed": "$df.col(<column_name>).first()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1379,
-        "lineEnd": 1381
+        "lineStart": 1419,
+        "lineEnd": 1421
       },
       "floor": {
         "desc": "Rounds column values down to the nearest integer.",
@@ -2960,8 +2963,8 @@
         "signature": "$df.col(<column_name>).floor()",
         "signatureDetailed": "$df.col(<column_name>).floor()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1398,
-        "lineEnd": 1400
+        "lineStart": 1438,
+        "lineEnd": 1440
       },
       "floordiv": {
         "desc": "Performs integer division floor(x / y) on column values.",
@@ -2982,8 +2985,8 @@
         "signature": "$df.col(<column_name>).floordiv(val: NumericArg)",
         "signatureDetailed": "$df.col(<column_name>).floordiv(val: number | bigint | IExpr | null)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1418,
-        "lineEnd": 1420,
+        "lineStart": 1458,
+        "lineEnd": 1460,
         "typeTree": {
           "val": {
             "type": "NumericArg",
@@ -3012,8 +3015,8 @@
         "signature": "$df.col(<column_name>).ge(val: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).ge(val: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1438,
-        "lineEnd": 1440,
+        "lineStart": 1478,
+        "lineEnd": 1480,
         "typeTree": {
           "val": {
             "type": "ComparisonArg",
@@ -3042,8 +3045,8 @@
         "signature": "$df.col(<column_name>).gt(val: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).gt(val: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1458,
-        "lineEnd": 1460,
+        "lineStart": 1498,
+        "lineEnd": 1500,
         "typeTree": {
           "val": {
             "type": "ComparisonArg",
@@ -3066,8 +3069,8 @@
         "signature": "$df.col(<column_name>).hasNulls()",
         "signatureDetailed": "$df.col(<column_name>).hasNulls()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1475,
-        "lineEnd": 1477
+        "lineStart": 1515,
+        "lineEnd": 1517
       },
       "hypot": {
         "desc": "Computes the hypotenuse sqrt(x^2 + y^2) of two values.",
@@ -3088,8 +3091,8 @@
         "signature": "$df.col(<column_name>).hypot(val: NumericArg)",
         "signatureDetailed": "$df.col(<column_name>).hypot(val: number | bigint | IExpr | null)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1495,
-        "lineEnd": 1497,
+        "lineStart": 1535,
+        "lineEnd": 1537,
         "typeTree": {
           "val": {
             "type": "NumericArg",
@@ -3112,8 +3115,8 @@
         "signature": "$df.col(<column_name>).implode()",
         "signatureDetailed": "$df.col(<column_name>).implode()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1513,
-        "lineEnd": 1515
+        "lineStart": 1553,
+        "lineEnd": 1555
       },
       "isClose": {
         "desc": "Determines if floating-point values are approximately equal within tolerances.",
@@ -3138,8 +3141,8 @@
         "signature": "$df.col(<column_name>).isClose(\n  other: any,\n  {\n    absTol = 1e-8,\n    relTol = 1e-8,\n    nansEqual = false\n  }: IsCloseOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).isClose(\n  other: any,\n  options: {\n    absTol?: number = 1e-8,\n    nansEqual?: boolean = false,\n    relTol?: number = 1e-8\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1534,
-        "lineEnd": 1551,
+        "lineStart": 1574,
+        "lineEnd": 1591,
         "typeTree": {
           "other": {
             "type": "any",
@@ -3187,8 +3190,8 @@
         "signature": "$df.col(<column_name>).isDuplicated()",
         "signatureDetailed": "$df.col(<column_name>).isDuplicated()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1568,
-        "lineEnd": 1578
+        "lineStart": 1608,
+        "lineEnd": 1618
       },
       "isFinite": {
         "desc": "Checks if values are finite numbers (not NaN or Infinity).",
@@ -3203,8 +3206,8 @@
         "signature": "$df.col(<column_name>).isFinite()",
         "signatureDetailed": "$df.col(<column_name>).isFinite()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1596,
-        "lineEnd": 1598
+        "lineStart": 1636,
+        "lineEnd": 1638
       },
       "isIn": {
         "desc": "Checks if column values are members of a specified array or list.",
@@ -3225,8 +3228,8 @@
         "signature": "$df.col(<column_name>).isIn(values: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).isIn(values: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1616,
-        "lineEnd": 1618,
+        "lineStart": 1656,
+        "lineEnd": 1658,
         "typeTree": {
           "values": {
             "type": "ComparisonArg",
@@ -3249,8 +3252,8 @@
         "signature": "$df.col(<column_name>).isInfinite()",
         "signatureDetailed": "$df.col(<column_name>).isInfinite()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1635,
-        "lineEnd": 1637
+        "lineStart": 1675,
+        "lineEnd": 1677
       },
       "isNan": {
         "desc": "Checks if values are NaN.",
@@ -3265,8 +3268,8 @@
         "signature": "$df.col(<column_name>).isNan()",
         "signatureDetailed": "$df.col(<column_name>).isNan()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1654,
-        "lineEnd": 1656
+        "lineStart": 1694,
+        "lineEnd": 1696
       },
       "isNDistinct": {
         "desc": "Checks if column values match the N-th distinct value by positive or negative index position.",
@@ -3291,8 +3294,8 @@
         "signature": "$df.col(<column_name>).isNDistinct(\n  index: number,\n  options: IsNDistinctOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).isNDistinct(\n  index: number,\n  options: {\n    nullOnOob?: boolean = true\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1675,
-        "lineEnd": 1682,
+        "lineStart": 1715,
+        "lineEnd": 1722,
         "typeTree": {
           "index": {
             "type": "number",
@@ -3328,8 +3331,8 @@
         "signature": "$df.col(<column_name>).isNotNan()",
         "signatureDetailed": "$df.col(<column_name>).isNotNan()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1699,
-        "lineEnd": 1701
+        "lineStart": 1739,
+        "lineEnd": 1741
       },
       "isNotNull": {
         "desc": "Checks if column values are non-null and valid (not null, undefined, or missing).",
@@ -3344,8 +3347,8 @@
         "signature": "$df.col(<column_name>).isNotNull()",
         "signatureDetailed": "$df.col(<column_name>).isNotNull()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1718,
-        "lineEnd": 1720
+        "lineStart": 1758,
+        "lineEnd": 1760
       },
       "isNull": {
         "desc": "Checks if column values are null, undefined, or missing.",
@@ -3360,8 +3363,8 @@
         "signature": "$df.col(<column_name>).isNull()",
         "signatureDetailed": "$df.col(<column_name>).isNull()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1737,
-        "lineEnd": 1739
+        "lineStart": 1777,
+        "lineEnd": 1779
       },
       "isUnique": {
         "desc": "Checks if values occur exactly once in the column.",
@@ -3376,8 +3379,8 @@
         "signature": "$df.col(<column_name>).isUnique()",
         "signatureDetailed": "$df.col(<column_name>).isUnique()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1756,
-        "lineEnd": 1758
+        "lineStart": 1796,
+        "lineEnd": 1798
       },
       "kurtosis": {
         "desc": "Aggregation: Computes the kurtosis (peakedness/tailedness) of a numeric column.",
@@ -3398,8 +3401,8 @@
         "signature": "$df.col(<column_name>).kurtosis(options: KurtosisOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).kurtosis(\n  options: {\n    bias?: boolean = true,\n    fisher?: boolean = true\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1774,
-        "lineEnd": 1776,
+        "lineStart": 1814,
+        "lineEnd": 1816,
         "typeTree": {
           "options": {
             "type": "KurtosisOptions",
@@ -3446,8 +3449,8 @@
         "signature": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1795,
-        "lineEnd": 1806,
+        "lineStart": 1835,
+        "lineEnd": 1846,
         "typeTree": {
           "offset": {
             "type": "number",
@@ -3484,8 +3487,8 @@
         "signature": "$df.col(<column_name>).last()",
         "signatureDetailed": "$df.col(<column_name>).last()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1822,
-        "lineEnd": 1824
+        "lineStart": 1862,
+        "lineEnd": 1864
       },
       "le": {
         "desc": "Boolean comparison: Returns true if less than or equal to argument.",
@@ -3506,8 +3509,8 @@
         "signature": "$df.col(<column_name>).le(val: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).le(val: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1842,
-        "lineEnd": 1844,
+        "lineStart": 1882,
+        "lineEnd": 1884,
         "typeTree": {
           "val": {
             "type": "ComparisonArg",
@@ -3540,8 +3543,8 @@
         "signature": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1863,
-        "lineEnd": 1865,
+        "lineStart": 1903,
+        "lineEnd": 1905,
         "typeTree": {
           "offset": {
             "type": "number",
@@ -3584,8 +3587,8 @@
         "signature": "$df.col(<column_name>).log(base: number = Math.E)",
         "signatureDetailed": "$df.col(<column_name>).log(base: number = Math.E)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1883,
-        "lineEnd": 1885,
+        "lineStart": 1923,
+        "lineEnd": 1925,
         "typeTree": {
           "base": {
             "type": "number",
@@ -3608,8 +3611,8 @@
         "signature": "$df.col(<column_name>).log1p()",
         "signatureDetailed": "$df.col(<column_name>).log1p()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1902,
-        "lineEnd": 1904
+        "lineStart": 1942,
+        "lineEnd": 1944
       },
       "lt": {
         "desc": "Boolean comparison: Returns true if less than argument.",
@@ -3630,8 +3633,8 @@
         "signature": "$df.col(<column_name>).lt(val: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).lt(val: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1922,
-        "lineEnd": 1924,
+        "lineStart": 1962,
+        "lineEnd": 1964,
         "typeTree": {
           "val": {
             "type": "ComparisonArg",
@@ -3654,8 +3657,8 @@
         "signature": "$df.col(<column_name>).max()",
         "signatureDetailed": "$df.col(<column_name>).max()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1940,
-        "lineEnd": 1942
+        "lineStart": 1980,
+        "lineEnd": 1982
       },
       "maxBy": {
         "desc": "Aggregation: Finds the value in this column corresponding to the maximum value in the `by` expression.",
@@ -3676,8 +3679,8 @@
         "signature": "$df.col(<column_name>).maxBy(by: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).maxBy(by: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1958,
-        "lineEnd": 1960,
+        "lineStart": 1998,
+        "lineEnd": 2000,
         "typeTree": {
           "by": {
             "type": "ComparisonArg",
@@ -3700,8 +3703,8 @@
         "signature": "$df.col(<column_name>).mean()",
         "signatureDetailed": "$df.col(<column_name>).mean()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1976,
-        "lineEnd": 1978
+        "lineStart": 2016,
+        "lineEnd": 2018
       },
       "median": {
         "desc": "Aggregation: Computes the 50th percentile median.",
@@ -3716,8 +3719,8 @@
         "signature": "$df.col(<column_name>).median()",
         "signatureDetailed": "$df.col(<column_name>).median()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 1994,
-        "lineEnd": 1996
+        "lineStart": 2034,
+        "lineEnd": 2036
       },
       "min": {
         "desc": "Aggregation: Finds the minimum value in the group.",
@@ -3732,8 +3735,8 @@
         "signature": "$df.col(<column_name>).min()",
         "signatureDetailed": "$df.col(<column_name>).min()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2012,
-        "lineEnd": 2014
+        "lineStart": 2052,
+        "lineEnd": 2054
       },
       "minBy": {
         "desc": "Aggregation: Finds the value in this column corresponding to the minimum value in the `by` expression.",
@@ -3754,8 +3757,8 @@
         "signature": "$df.col(<column_name>).minBy(by: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).minBy(by: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2030,
-        "lineEnd": 2032,
+        "lineStart": 2070,
+        "lineEnd": 2072,
         "typeTree": {
           "by": {
             "type": "ComparisonArg",
@@ -3784,8 +3787,8 @@
         "signature": "$df.col(<column_name>).mod(val: NumericArg)",
         "signatureDetailed": "$df.col(<column_name>).mod(val: number | bigint | IExpr | null)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2050,
-        "lineEnd": 2052,
+        "lineStart": 2090,
+        "lineEnd": 2092,
         "typeTree": {
           "val": {
             "type": "NumericArg",
@@ -3808,8 +3811,8 @@
         "signature": "$df.col(<column_name>).mode()",
         "signatureDetailed": "$df.col(<column_name>).mode()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2067,
-        "lineEnd": 2069
+        "lineStart": 2107,
+        "lineEnd": 2109
       },
       "mul": {
         "desc": "Multiplies column values by a scalar or another column expression.",
@@ -3830,8 +3833,8 @@
         "signature": "$df.col(<column_name>).mul(val: NumericArg)",
         "signatureDetailed": "$df.col(<column_name>).mul(val: number | bigint | IExpr | null)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2087,
-        "lineEnd": 2089,
+        "lineStart": 2127,
+        "lineEnd": 2129,
         "typeTree": {
           "val": {
             "type": "NumericArg",
@@ -3854,8 +3857,8 @@
         "signature": "$df.col(<column_name>).nanMax()",
         "signatureDetailed": "$df.col(<column_name>).nanMax()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2104,
-        "lineEnd": 2106
+        "lineStart": 2144,
+        "lineEnd": 2146
       },
       "nanMin": {
         "desc": "Aggregation: Finds the minimum value in the group, taking NaN values into account (NaN propagates).",
@@ -3870,8 +3873,8 @@
         "signature": "$df.col(<column_name>).nanMin()",
         "signatureDetailed": "$df.col(<column_name>).nanMin()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2121,
-        "lineEnd": 2123
+        "lineStart": 2161,
+        "lineEnd": 2163
       },
       "ne": {
         "desc": "Boolean comparison: Returns true if values do not match.",
@@ -3892,8 +3895,8 @@
         "signature": "$df.col(<column_name>).ne(val: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).ne(val: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2141,
-        "lineEnd": 2143,
+        "lineStart": 2181,
+        "lineEnd": 2183,
         "typeTree": {
           "val": {
             "type": "ComparisonArg",
@@ -3916,8 +3919,8 @@
         "signature": "$df.col(<column_name>).negate()",
         "signatureDetailed": "$df.col(<column_name>).negate()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2160,
-        "lineEnd": 2162
+        "lineStart": 2200,
+        "lineEnd": 2202
       },
       "neMissing": {
         "desc": "Difference check that treats null values as equal to each other.",
@@ -3938,8 +3941,8 @@
         "signature": "$df.col(<column_name>).neMissing(val: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).neMissing(val: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2180,
-        "lineEnd": 2182,
+        "lineStart": 2220,
+        "lineEnd": 2222,
         "typeTree": {
           "val": {
             "type": "ComparisonArg",
@@ -3962,8 +3965,8 @@
         "signature": "$df.col(<column_name>).not()",
         "signatureDetailed": "$df.col(<column_name>).not()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2200,
-        "lineEnd": 2202
+        "lineStart": 2240,
+        "lineEnd": 2242
       },
       "notIn": {
         "desc": "Checks if values are not elements of a specific array or set list.",
@@ -3984,8 +3987,8 @@
         "signature": "$df.col(<column_name>).notIn(values: ComparisonArg)",
         "signatureDetailed": "$df.col(<column_name>).notIn(values: ScalarArg | ArrayArg)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2220,
-        "lineEnd": 2222,
+        "lineStart": 2260,
+        "lineEnd": 2262,
         "typeTree": {
           "values": {
             "type": "ComparisonArg",
@@ -4008,8 +4011,8 @@
         "signature": "$df.col(<column_name>).nullCount()",
         "signatureDetailed": "$df.col(<column_name>).nullCount()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2237,
-        "lineEnd": 2239
+        "lineStart": 2277,
+        "lineEnd": 2279
       },
       "nUnique": {
         "desc": "Aggregation: Computes number of unique elements.",
@@ -4030,8 +4033,8 @@
         "signature": "$df.col(<column_name>).nUnique(options: UniqueArrayStatsOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).nUnique(\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2255,
-        "lineEnd": 2257,
+        "lineStart": 2295,
+        "lineEnd": 2297,
         "typeTree": {
           "options": {
             "type": "UniqueArrayStatsOptions",
@@ -4073,8 +4076,8 @@
         "signature": "$df.col(<column_name>).or(other: BooleanArg)",
         "signatureDetailed": "$df.col(<column_name>).or(other: boolean | boolean[] | IExpr | null | undefined)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2276,
-        "lineEnd": 2291,
+        "lineStart": 2316,
+        "lineEnd": 2331,
         "typeTree": {
           "other": {
             "type": "BooleanArg",
@@ -4103,8 +4106,8 @@
         "signature": "$df.col(<column_name>).over(columns: string | IExpr | (string | IExpr)[])",
         "signatureDetailed": "$df.col(<column_name>).over(columns: string | IExpr | (string | IExpr)[])",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2309,
-        "lineEnd": 2314,
+        "lineStart": 2349,
+        "lineEnd": 2354,
         "typeTree": {
           "columns": {
             "type": "string | IExpr | (string | IExpr)[]",
@@ -4132,8 +4135,8 @@
         "signature": "$df.col(<column_name>).pow(val: NumericArg)",
         "signatureDetailed": "$df.col(<column_name>).pow(val: number | bigint | IExpr | null)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2332,
-        "lineEnd": 2334,
+        "lineStart": 2372,
+        "lineEnd": 2374,
         "typeTree": {
           "val": {
             "type": "NumericArg",
@@ -4156,8 +4159,8 @@
         "signature": "$df.col(<column_name>).product()",
         "signatureDetailed": "$df.col(<column_name>).product()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2350,
-        "lineEnd": 2352
+        "lineStart": 2390,
+        "lineEnd": 2392
       },
       "quantile": {
         "desc": "Aggregation: Computes the specific quantile values (0.0 to 1.0).",
@@ -4178,8 +4181,8 @@
         "signature": "$df.col(<column_name>).quantile(q: number)",
         "signatureDetailed": "$df.col(<column_name>).quantile(q: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2368,
-        "lineEnd": 2371,
+        "lineStart": 2408,
+        "lineEnd": 2411,
         "typeTree": {
           "q": {
             "type": "number",
@@ -4201,8 +4204,8 @@
         "signature": "$df.col(<column_name>).radians()",
         "signatureDetailed": "$df.col(<column_name>).radians()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2388,
-        "lineEnd": 2390
+        "lineStart": 2428,
+        "lineEnd": 2430
       },
       "rand": {
         "desc": "Fills sequence with pseudo-random generated floats or integers.",
@@ -4227,8 +4230,8 @@
         "signature": "$df.col(<column_name>).rand(\n  seed?: number,\n  {\n    min = 0,\n    max = 1,\n    integer = false\n  }: RandomOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).rand(\n  seed?: number,\n  options: {\n    integer?: boolean = false,\n    max?: number = 1,\n    min?: number = 0\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2409,
-        "lineEnd": 2422,
+        "lineStart": 2449,
+        "lineEnd": 2462,
         "typeTree": {
           "seed": {
             "type": "number",
@@ -4276,8 +4279,8 @@
         "signature": "$df.col(<column_name>).rank(options: RankOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).rank(\n  options: {\n    dense?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2438,
-        "lineEnd": 2440,
+        "lineStart": 2478,
+        "lineEnd": 2480,
         "typeTree": {
           "options": {
             "type": "RankOptions",
@@ -4308,8 +4311,8 @@
         "signature": "$df.col(<column_name>).reverse(): this",
         "signatureDetailed": "$df.col(<column_name>).reverse(): this",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2457,
-        "lineEnd": 2459
+        "lineStart": 2497,
+        "lineEnd": 2499
       },
       "rolling": {
         "desc": "Window: Computes a rolling window reduction using a ColumnExpression or a custom callback function.",
@@ -4334,8 +4337,8 @@
         "signature": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: number | RollingOptions,\n  exprOrFn: IExpr | ((vals: any[]) => any)\n)",
         "signatureDetailed": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: {\n    windowSize: number\n  },\n  exprOrFn: IExpr | ((vals: any[]) => any)\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2478,
-        "lineEnd": 2499,
+        "lineStart": 2518,
+        "lineEnd": 2539,
         "typeTree": {
           "optionsOrWindowSize": {
             "type": "number | RollingOptions",
@@ -4375,8 +4378,8 @@
         "signature": "$df.col(<column_name>).rollingMax(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingMax(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2517,
-        "lineEnd": 2519,
+        "lineStart": 2557,
+        "lineEnd": 2559,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4404,8 +4407,8 @@
         "signature": "$df.col(<column_name>).rollingMean(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingMean(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2537,
-        "lineEnd": 2539,
+        "lineStart": 2577,
+        "lineEnd": 2579,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4433,8 +4436,8 @@
         "signature": "$df.col(<column_name>).rollingMedian(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingMedian(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2557,
-        "lineEnd": 2559,
+        "lineStart": 2597,
+        "lineEnd": 2599,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4462,8 +4465,8 @@
         "signature": "$df.col(<column_name>).rollingMin(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingMin(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2577,
-        "lineEnd": 2579,
+        "lineStart": 2617,
+        "lineEnd": 2619,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4495,8 +4498,8 @@
         "signature": "$df.col(<column_name>).rollingQuantile(\n  quantile: number,\n  windowSize: number\n)",
         "signatureDetailed": "$df.col(<column_name>).rollingQuantile(\n  quantile: number,\n  windowSize: number\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2598,
-        "lineEnd": 2600,
+        "lineStart": 2638,
+        "lineEnd": 2640,
         "typeTree": {
           "quantile": {
             "type": "number",
@@ -4529,8 +4532,8 @@
         "signature": "$df.col(<column_name>).rollingRank(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingRank(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2618,
-        "lineEnd": 2622,
+        "lineStart": 2658,
+        "lineEnd": 2662,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4558,8 +4561,8 @@
         "signature": "$df.col(<column_name>).rollingStd(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingStd(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2640,
-        "lineEnd": 2642,
+        "lineStart": 2680,
+        "lineEnd": 2682,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4587,8 +4590,8 @@
         "signature": "$df.col(<column_name>).rollingSum(windowSize: number)",
         "signatureDetailed": "$df.col(<column_name>).rollingSum(windowSize: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2660,
-        "lineEnd": 2662,
+        "lineStart": 2700,
+        "lineEnd": 2702,
         "typeTree": {
           "windowSize": {
             "type": "number",
@@ -4616,8 +4619,8 @@
         "signature": "$df.col(<column_name>).round(decimals: number = 0)",
         "signatureDetailed": "$df.col(<column_name>).round(decimals: number = 0)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2680,
-        "lineEnd": 2682,
+        "lineStart": 2720,
+        "lineEnd": 2722,
         "typeTree": {
           "decimals": {
             "type": "number",
@@ -4646,8 +4649,8 @@
         "signature": "$df.col(<column_name>).roundSigFigs(sigFigs: number)",
         "signatureDetailed": "$df.col(<column_name>).roundSigFigs(sigFigs: number)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2700,
-        "lineEnd": 2702,
+        "lineStart": 2740,
+        "lineEnd": 2742,
         "typeTree": {
           "sigFigs": {
             "type": "number",
@@ -4669,8 +4672,8 @@
         "signature": "$df.col(<column_name>).rowNumber()",
         "signatureDetailed": "$df.col(<column_name>).rowNumber()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2719,
-        "lineEnd": 2723
+        "lineStart": 2759,
+        "lineEnd": 2763
       },
       "shift": {
         "desc": "Shifts values by the given number of rows, filling newly introduced slots with null. Positive offsets shift values down (lag); negative offsets shift values up (lead).\n\nSupports windowing and partition grouping via `.over(...)`.",
@@ -4691,8 +4694,8 @@
         "signature": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2745,
-        "lineEnd": 2747,
+        "lineStart": 2785,
+        "lineEnd": 2787,
         "typeTree": {
           "n": {
             "type": "number",
@@ -4729,8 +4732,8 @@
         "signature": "$df.col(<column_name>).sign()",
         "signatureDetailed": "$df.col(<column_name>).sign()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2764,
-        "lineEnd": 2766
+        "lineStart": 2804,
+        "lineEnd": 2806
       },
       "sin": {
         "desc": "Computes the sine of the column values.",
@@ -4745,8 +4748,8 @@
         "signature": "$df.col(<column_name>).sin()",
         "signatureDetailed": "$df.col(<column_name>).sin()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2783,
-        "lineEnd": 2785
+        "lineStart": 2823,
+        "lineEnd": 2825
       },
       "sinh": {
         "desc": "Computes the hyperbolic sine of the column values.",
@@ -4761,8 +4764,8 @@
         "signature": "$df.col(<column_name>).sinh()",
         "signatureDetailed": "$df.col(<column_name>).sinh()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2802,
-        "lineEnd": 2804
+        "lineStart": 2842,
+        "lineEnd": 2844
       },
       "skew": {
         "desc": "Aggregation: Computes the sample skewness as the Fisher-Pearson coefficient of skewness.",
@@ -4783,8 +4786,8 @@
         "signature": "$df.col(<column_name>).skew(options: SkewOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).skew(\n  options: {\n    bias?: boolean = true\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2820,
-        "lineEnd": 2822,
+        "lineStart": 2860,
+        "lineEnd": 2862,
         "typeTree": {
           "options": {
             "type": "SkewOptions",
@@ -4821,8 +4824,8 @@
         "signature": "$df.col(<column_name>).spearmanCorr(other: NumericSeriesArg)",
         "signatureDetailed": "$df.col(<column_name>).spearmanCorr(other: NumericArg | number[] | AnyTypedArray)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2838,
-        "lineEnd": 2840,
+        "lineStart": 2878,
+        "lineEnd": 2880,
         "typeTree": {
           "other": {
             "type": "NumericSeriesArg",
@@ -4845,8 +4848,8 @@
         "signature": "$df.col(<column_name>).sqrt()",
         "signatureDetailed": "$df.col(<column_name>).sqrt()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2857,
-        "lineEnd": 2859
+        "lineStart": 2897,
+        "lineEnd": 2899
       },
       "std": {
         "desc": "Aggregation: Computes sample standard deviation.",
@@ -4861,8 +4864,8 @@
         "signature": "$df.col(<column_name>).std()",
         "signatureDetailed": "$df.col(<column_name>).std()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2874,
-        "lineEnd": 2876
+        "lineStart": 2914,
+        "lineEnd": 2916
       },
       "sub": {
         "desc": "Subtracts a scalar or another column expression.",
@@ -4883,8 +4886,8 @@
         "signature": "$df.col(<column_name>).sub(val: NumericArg)",
         "signatureDetailed": "$df.col(<column_name>).sub(val: number | bigint | IExpr | null)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2894,
-        "lineEnd": 2896,
+        "lineStart": 2934,
+        "lineEnd": 2936,
         "typeTree": {
           "val": {
             "type": "NumericArg",
@@ -4907,8 +4910,8 @@
         "signature": "$df.col(<column_name>).sum()",
         "signatureDetailed": "$df.col(<column_name>).sum()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2912,
-        "lineEnd": 2914
+        "lineStart": 2952,
+        "lineEnd": 2954
       },
       "tan": {
         "desc": "Computes the tangent of the column values.",
@@ -4923,8 +4926,8 @@
         "signature": "$df.col(<column_name>).tan()",
         "signatureDetailed": "$df.col(<column_name>).tan()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2931,
-        "lineEnd": 2933
+        "lineStart": 2971,
+        "lineEnd": 2973
       },
       "tanh": {
         "desc": "Computes the hyperbolic tangent of the column values.",
@@ -4939,8 +4942,8 @@
         "signature": "$df.col(<column_name>).tanh()",
         "signatureDetailed": "$df.col(<column_name>).tanh()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2950,
-        "lineEnd": 2952
+        "lineStart": 2990,
+        "lineEnd": 2992
       },
       "trunc": {
         "desc": "Truncates fractional digits of column values.",
@@ -4955,8 +4958,8 @@
         "signature": "$df.col(<column_name>).trunc()",
         "signatureDetailed": "$df.col(<column_name>).trunc()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2969,
-        "lineEnd": 2971
+        "lineStart": 3009,
+        "lineEnd": 3011
       },
       "variance": {
         "desc": "Aggregation: Computes sample variance.",
@@ -4971,8 +4974,8 @@
         "signature": "$df.col(<column_name>).variance()",
         "signatureDetailed": "$df.col(<column_name>).variance()",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 2986,
-        "lineEnd": 2988
+        "lineStart": 3026,
+        "lineEnd": 3028
       },
       "wAvg": {
         "desc": "Aggregation: Computes weighted average.",
@@ -4993,8 +4996,8 @@
         "signature": "$df.col(<column_name>).wAvg(weights: NumericSeriesArg)",
         "signatureDetailed": "$df.col(<column_name>).wAvg(weights: NumericArg | number[] | AnyTypedArray)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 3004,
-        "lineEnd": 3006,
+        "lineStart": 3044,
+        "lineEnd": 3046,
         "typeTree": {
           "weights": {
             "type": "NumericSeriesArg",
@@ -5023,8 +5026,8 @@
         "signature": "$df.col(<column_name>).xor(other: BooleanArg)",
         "signatureDetailed": "$df.col(<column_name>).xor(other: boolean | boolean[] | IExpr | null | undefined)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
-        "lineStart": 3025,
-        "lineEnd": 3027,
+        "lineStart": 3065,
+        "lineEnd": 3067,
         "typeTree": {
           "other": {
             "type": "BooleanArg",
@@ -9262,7 +9265,8 @@
     "groupBy": {
       "desc": "Groups rows by key columns to prepare for aggregations.",
       "examples": [
-        ">>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [10, 20, 30] })\n>>> df\nshape: (3, 2)\n+-------+-----+\n| group | val |\n+-------+-----+\n| A     | 10  |\n| A     | 20  |\n| B     | 30  |\n+-------+-----+\n>>> df.groupBy(\"group\").agg($df.col(\"val\").sum().alias(\"sum\"))\nshape: (2, 2)\n+-----+-----+\n| cat | sum |\n+-----+-----+\n| A   | 30  |\n| B   | 30  |\n+-----+-----+"
+        "// 1. Group by single column with single aggregation:\n>>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [10, 20, 30] })\n>>> df\nshape: (3, 2)\n+-------+-----+\n| group | val |\n+-------+-----+\n| A     | 10  |\n| A     | 20  |\n| B     | 30  |\n+-------+-----+\n>>> df.groupBy(\"group\").agg($df.col(\"val\").sum().alias(\"sum\"))\nshape: (2, 2)\n+-------+-----+\n| group | sum |\n+-------+-----+\n| A     | 30  |\n| B     | 30  |\n+-------+-----+",
+        "// 2. Group by with multiple parallel aggregations:\n>>> const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [10, 20, 30] })\n>>> df\nshape: (3, 2)\n+-------+-----+\n| group | val |\n+-------+-----+\n| A     | 10  |\n| A     | 20  |\n| B     | 30  |\n+-------+-----+\n>>> df.groupBy(\"group\").agg(\n...   $df.col(\"val\").mean().alias(\"avg\"),\n...   $df.col(\"val\").sum().alias(\"total\")\n... )\nshape: (2, 3)\n+-------+-----+-------+\n| group | avg | total |\n+-------+-----+-------+\n| A     | 15  | 30    |\n| B     | 30  | 30    |\n+-------+-----+-------+"
       ],
       "params": [
         {
@@ -9279,8 +9283,8 @@
       "signature": "df.groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K>",
       "signatureDetailed": "df.groupBy<K extends keyof T>(keys: K | K[]): GroupedData<T, K>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 613,
-      "lineEnd": 623,
+      "lineStart": 629,
+      "lineEnd": 639,
       "typeTree": {
         "keys": {
           "type": "ColumnKeyArg<K>",
@@ -9313,8 +9317,8 @@
       "signature": "df.groupByDynamic<K extends keyof T & string>(\n  indexColumn: DynamicIndexColumnArg<K>,\n  options: GroupByDynamicOptions<T>\n): GroupedData<T, K>",
       "signatureDetailed": "df.groupByDynamic<K extends keyof T & string>(\n  indexColumn: K | IntoExpr,\n  options: {\n    by?: keyof any | keyof any[],\n    checkSorted?: boolean = true,\n    closed?: \"both\" | \"left\" | \"right\" | \"none\" = \"left\",\n    every: number | string,\n    groupBy?: keyof any | keyof any[],\n    includeBoundaries?: boolean = false,\n    label?: \"left\" | \"right\" | \"datapoint\" = \"left\",\n    offset?: number | string = 0,\n    period?: number | string = `every` if omitted,\n    startBy?: \"window\" | \"datapoint\" | \"monday\" | \"tuesday\" | \"wednesday\" | \"thursday\" | \"friday\" | \"saturday\" | \"sunday\" = \"window\",\n    truncate?: boolean = true\n  }\n): GroupedData<T, K>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 642,
-      "lineEnd": 839,
+      "lineStart": 658,
+      "lineEnd": 855,
       "typeTree": {
         "indexColumn": {
           "type": "DynamicIndexColumnArg<K>",
@@ -9421,8 +9425,8 @@
       "signature": "df.head(n: number = 10): DataFrame<T>",
       "signatureDetailed": "df.head(n: number = 10): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 857,
-      "lineEnd": 859,
+      "lineStart": 873,
+      "lineEnd": 875,
       "typeTree": {
         "n": {
           "type": "number",
@@ -9445,8 +9449,8 @@
       "signature": "df.height: number",
       "signatureDetailed": "df.height: number",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 869,
-      "lineEnd": 871
+      "lineStart": 885,
+      "lineEnd": 887
     },
     "insertColumn": {
       "desc": "Inserts a new column at a specific ordinal index position.",
@@ -9478,8 +9482,8 @@
       "signature": "df.insertColumn(\n  index: number,\n  name: string,\n  expr: InsertColumnArg\n): DataFrame<any>",
       "signatureDetailed": "df.insertColumn(\n  index: number,\n  name: string,\n  expr: IntoExpr | ArrayLike<any>\n): DataFrame<any>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 890,
-      "lineEnd": 911,
+      "lineStart": 906,
+      "lineEnd": 927,
       "typeTree": {
         "index": {
           "type": "number",
@@ -9524,8 +9528,8 @@
       "signature": "df.item(\n  row?: number,\n  column?: ColumnIndexOrNameArg\n): any",
       "signatureDetailed": "df.item(\n  row?: number,\n  column?: number | string\n): any",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 925,
-      "lineEnd": 954,
+      "lineStart": 941,
+      "lineEnd": 970,
       "typeTree": {
         "row": {
           "type": "number",
@@ -9553,8 +9557,8 @@
       "signature": "df.iterColumns(): Generator<ColumnData>",
       "signatureDetailed": "df.iterColumns(): Generator<ColumnData>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 964,
-      "lineEnd": 968
+      "lineStart": 980,
+      "lineEnd": 984
     },
     "iterRows": {
       "desc": "Yields a generator iterating over rows as tuples or named objects.",
@@ -9575,8 +9579,8 @@
       "signature": "df.iterRows(\n  {\n    named = false\n  }: IterRowsOptions = {}\n): Generator<IterRowResult<T>>",
       "signatureDetailed": "df.iterRows(\n  config: {\n    named?: boolean = false\n  } = {}\n): Generator<IterRowResult<T>>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 979,
-      "lineEnd": 1001,
+      "lineStart": 995,
+      "lineEnd": 1017,
       "typeTree": {
         "config": {
           "type": "IterRowsOptions",
@@ -9597,7 +9601,8 @@
     "join": {
       "desc": "Joins two DataFrames on key columns using a specified join strategy.",
       "examples": [
-        ">>> const df1 = $df.data({ id: [1, 2], val: [\"a\", \"b\"] })\n>>> const df2 = $df.data({ id: [1, 2], num: [100, 200] })\n>>> df1\nshape: (2, 2)\n+----+-----+\n| id | val |\n+----+-----+\n| 1  | a   |\n| 2  | b   |\n+----+-----+\n>>> df2\nshape: (2, 2)\n+----+-----+\n| id | num |\n+----+-----+\n| 1  | 100 |\n| 2  | 200 |\n+----+-----+\n>>> df1.join(df2, { on: \"id\" })\nshape: (2, 3)\n+----+-----+-----+\n| id | val | num |\n+----+-----+-----+\n| 1  | a   | 100 |\n| 2  | b   | 200 |\n+----+-----+-----+"
+        "// 1. Inner join on matching key column:\n>>> const df1 = $df.data({ id: [1, 2], val: [\"a\", \"b\"] })\n>>> const df2 = $df.data({ id: [1, 2], num: [100, 200] })\n>>> df1\nshape: (2, 2)\n+----+-----+\n| id | val |\n+----+-----+\n| 1  | a   |\n| 2  | b   |\n+----+-----+\n>>> df2\nshape: (2, 2)\n+----+-----+\n| id | num |\n+----+-----+\n| 1  | 100 |\n| 2  | 200 |\n+----+-----+\n>>> df1.join(df2, { on: \"id\" })\nshape: (2, 3)\n+----+-----+-----+\n| id | val | num |\n+----+-----+-----+\n| 1  | a   | 100 |\n| 2  | b   | 200 |\n+----+-----+-----+",
+        "// 2. Outer join on matching key column:\n>>> const df1 = $df.data({ id: [1, 2], val: [\"a\", \"b\"] })\n>>> const df2 = $df.data({ id: [1, 2], num: [100, 200] })\n>>> df1\nshape: (2, 2)\n+----+-----+\n| id | val |\n+----+-----+\n| 1  | a   |\n| 2  | b   |\n+----+-----+\n>>> df2\nshape: (2, 2)\n+----+-----+\n| id | num |\n+----+-----+\n| 1  | 100 |\n| 2  | 200 |\n+----+-----+\n>>> df1.join(df2, { on: \"id\", how: \"outer\" })\nshape: (2, 3)\n+----+-----+-----+\n| id | val | num |\n+----+-----+-----+\n| 1  | a   | 100 |\n| 2  | b   | 200 |\n+----+-----+-----+"
       ],
       "params": [
         {
@@ -9620,8 +9625,8 @@
       "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: JoinOptions<T, U> = {}\n): DataFrame<R>",
       "signatureDetailed": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: {\n    coalesce?: boolean = true,\n    how?: \"inner\" | \"outer\" | \"left\" | \"right\" | \"semi\" | \"anti\" | \"cross\" = \"inner\",\n    joinNulls?: boolean = false,\n    leftOn?: keyof any | keyof any[],\n    maintainOrder?: JoinMaintainOrder | boolean = \"none\",\n    on?: keyof any & keyof any | (keyof any & keyof any)[],\n    rightOn?: keyof any | keyof any[],\n    suffixes?: [string, string] = [\"\", \"_right\"]\n  } = {}\n): DataFrame<R>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1019,
-      "lineEnd": 1114,
+      "lineStart": 1048,
+      "lineEnd": 1143,
       "typeTree": {
         "other": {
           "type": "DataFrame<U>",
@@ -9713,8 +9718,8 @@
       "signature": "df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: JoinAsofOptions<T, U>\n): DataFrame<R>",
       "signatureDetailed": "df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: {\n    allowExactMatches?: boolean = true,\n    by?: keyof any & keyof any | (keyof any & keyof any)[],\n    checkSorted?: boolean = true,\n    coalesce?: boolean = true,\n    leftBy?: keyof any | keyof any[],\n    leftOn?: (keyof any),\n    on?: (keyof any & keyof any),\n    rightBy?: keyof any | keyof any[],\n    rightOn?: (keyof any),\n    strategy?: \"backward\" | \"forward\" | \"nearest\" = \"backward\",\n    suffixes?: [string, string] = [\"\", \"_right\"],\n    tolerance?: number | string\n  }\n): DataFrame<R>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1138,
-      "lineEnd": 1217,
+      "lineStart": 1167,
+      "lineEnd": 1246,
       "typeTree": {
         "other": {
           "type": "DataFrame<U>",
@@ -9826,8 +9831,8 @@
       "signature": "df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  ...args: JoinWhereArg[]\n): DataFrame<R>",
       "signatureDetailed": "df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  ...args: {\n    how?: \"inner\" | \"left\" | \"right\" = \"inner\",\n    suffixes?: [string, string] = [\"\", \"_right\"]\n  }\n): DataFrame<R>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1248,
-      "lineEnd": 1301,
+      "lineStart": 1277,
+      "lineEnd": 1330,
       "typeTree": {
         "other": {
           "type": "DataFrame<U>",
@@ -9884,8 +9889,8 @@
       "signature": "df.limit(\n  n: number,\n  {\n    offset = 0,\n    from = \"start\"\n  }: LimitOptions = {}\n): DataFrame<T>",
       "signatureDetailed": "df.limit(\n  n: number,\n  options: {\n    from?: \"start\" | \"end\" = \"start\",\n    offset?: number = 0\n  } = {}\n): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1319,
-      "lineEnd": 1343,
+      "lineStart": 1348,
+      "lineEnd": 1372,
       "typeTree": {
         "n": {
           "type": "number",
@@ -9941,8 +9946,8 @@
       "signature": "df.partitionBy<K extends PartitionByKey<T>>(\n  by: ColumnKeyArg<K>,\n  options: PartitionByOptions = {}\n): PartitionByResult<T>",
       "signatureDetailed": "df.partitionBy<K extends PartitionByKey<T>>(\n  by: K | K[],\n  options: {\n    asDict?: boolean = false,\n    maintainOrder?: boolean = true\n  } = {}\n): PartitionByResult<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1355,
-      "lineEnd": 1372,
+      "lineStart": 1384,
+      "lineEnd": 1401,
       "typeTree": {
         "by": {
           "type": "ColumnKeyArg<K>",
@@ -9991,8 +9996,8 @@
       "signature": "df.pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U>",
       "signatureDetailed": "df.pivot<U extends RowRecord = any>(\n  config: {\n    agg?: (values: any[]) => any | string,\n    columns: keyof T,\n    index: keyof T | keyof T[],\n    values: keyof T\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1389,
-      "lineEnd": 1443,
+      "lineStart": 1418,
+      "lineEnd": 1472,
       "typeTree": {
         "config": {
           "type": "PivotOptions<T>",
@@ -10045,8 +10050,8 @@
       "signature": "df.rename(mapping: RenameMappingArg<T> = {}): DataFrame<any>",
       "signatureDetailed": "df.rename(mapping: RenameMappingArg<T> = {}): DataFrame<any>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1460,
-      "lineEnd": 1472,
+      "lineStart": 1489,
+      "lineEnd": 1501,
       "typeTree": {
         "mapping": {
           "type": "RenameMappingArg<T>",
@@ -10069,8 +10074,8 @@
       "signature": "df.reverse(): DataFrame<T>",
       "signatureDetailed": "df.reverse(): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1488,
-      "lineEnd": 1490
+      "lineStart": 1517,
+      "lineEnd": 1519
     },
     "schema": {
       "desc": "Gets current DataFrameSchema dictionary mapping column names to DataType.",
@@ -10085,8 +10090,8 @@
       "signature": "df.schema: DataFrameSchema",
       "signatureDetailed": "df.schema: DataFrameSchema",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1500,
-      "lineEnd": 1502
+      "lineStart": 1529,
+      "lineEnd": 1531
     },
     "select": {
       "desc": "Selects specific columns or evaluates column expressions.",
@@ -10108,8 +10113,8 @@
       "signature": "df.select<U extends RowRecord = any>(...args: SelectArg[]): DataFrame<U>",
       "signatureDetailed": "df.select<U extends RowRecord = any>(...args: (SelectItem | SelectItem[])[]): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1519,
-      "lineEnd": 1616,
+      "lineStart": 1548,
+      "lineEnd": 1645,
       "typeTree": {
         "args": {
           "type": "SelectArg[]",
@@ -10133,8 +10138,8 @@
       "signature": "df.shape: DataFrameShape",
       "signatureDetailed": "df.shape: DataFrameShape",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1626,
-      "lineEnd": 1628
+      "lineStart": 1655,
+      "lineEnd": 1657
     },
     "slice": {
       "desc": "Slices a subset range of rows between start and end index.",
@@ -10161,8 +10166,8 @@
       "signature": "df.slice(\n  start: number,\n  end?: number\n): DataFrame<T>",
       "signatureDetailed": "df.slice(\n  start: number,\n  end?: number\n): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1646,
-      "lineEnd": 1655,
+      "lineStart": 1675,
+      "lineEnd": 1684,
       "typeTree": {
         "start": {
           "type": "number",
@@ -10196,8 +10201,8 @@
       "signature": "df.sort(config?: SortOptions<T>): DataFrame<T>",
       "signatureDetailed": "df.sort(\n  config?: {\n    by: keyof any | keyof any[] | IExpr | IExpr[],\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,\n    descending?: boolean | boolean[] = false,\n    nullsLast?: boolean = true\n  }\n): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1673,
-      "lineEnd": 1708,
+      "lineStart": 1702,
+      "lineEnd": 1737,
       "typeTree": {
         "config": {
           "type": "SortOptions<T>",
@@ -10251,8 +10256,8 @@
       "signature": "df.tail(n: number = 10): DataFrame<T>",
       "signatureDetailed": "df.tail(n: number = 10): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1725,
-      "lineEnd": 1727,
+      "lineStart": 1754,
+      "lineEnd": 1756,
       "typeTree": {
         "n": {
           "type": "number",
@@ -10282,8 +10287,8 @@
       "signature": "df.toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[]",
       "signatureDetailed": "df.toArray<K extends keyof T>(nameOrExpr: K | IExpr): any[]",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1738,
-      "lineEnd": 1740,
+      "lineStart": 1767,
+      "lineEnd": 1769,
       "typeTree": {
         "nameOrExpr": {
           "type": "ColumnOrExprArg<K>",
@@ -10306,8 +10311,8 @@
       "signature": "df.toDict(): DataFrameColumns<T>",
       "signatureDetailed": "df.toDict(): DataFrameColumns<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1750,
-      "lineEnd": 1752
+      "lineStart": 1779,
+      "lineEnd": 1781
     },
     "toDicts": {
       "desc": "Converts rows into an array of JavaScript objects.",
@@ -10322,8 +10327,8 @@
       "signature": "df.toDicts(): T[]",
       "signatureDetailed": "df.toDicts(): T[]",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1762,
-      "lineEnd": 1764
+      "lineStart": 1791,
+      "lineEnd": 1793
     },
     "transpose": {
       "desc": "Transposes rows into columns and columns into rows.",
@@ -10345,8 +10350,8 @@
       "signature": "df.transpose(\n  {\n    includeHeader = false,\n    headerName = \"column\",\n    columnNames\n  }: TransposeOptions = {}\n): DataFrame<any>",
       "signatureDetailed": "df.transpose(\n  options: {\n    columnNames?: string | Iterable<string>,\n    headerName?: string = \"column\",\n    includeHeader?: boolean = false\n  } = {}\n): DataFrame<any>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1781,
-      "lineEnd": 1837,
+      "lineStart": 1810,
+      "lineEnd": 1866,
       "typeTree": {
         "options": {
           "type": "TransposeOptions",
@@ -10396,8 +10401,8 @@
       "signature": "df.unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T>",
       "signatureDetailed": "df.unique<K extends keyof T>(columns?: K | K[]): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1854,
-      "lineEnd": 1857,
+      "lineStart": 1883,
+      "lineEnd": 1886,
       "typeTree": {
         "columns": {
           "type": "ColumnKeyArg<K>",
@@ -10427,8 +10432,8 @@
       "signature": "df.unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U>",
       "signatureDetailed": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars: keyof T | keyof T[],\n    valueName?: string = \"value\",\n    valueVars: keyof T | keyof T[],\n    varName?: string = \"variable\"\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1876,
-      "lineEnd": 1923,
+      "lineStart": 1905,
+      "lineEnd": 1952,
       "typeTree": {
         "config": {
           "type": "UnpivotOptions<T>",
@@ -10486,8 +10491,8 @@
       "signature": "df.unstack(\n  columns: IntoExprArg,\n  options: UnstackOptions\n): DataFrame<any>",
       "signatureDetailed": "df.unstack(\n  columns: IntoExpr | IntoExpr[],\n  options: {\n    fillValues?: any = null,\n    how?: \"vertical\" | \"horizontal\" = \"vertical\",\n    step: number\n  }\n): DataFrame<any>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1943,
-      "lineEnd": 1999,
+      "lineStart": 1972,
+      "lineEnd": 2028,
       "typeTree": {
         "columns": {
           "type": "IntoExprArg",
@@ -10535,8 +10540,8 @@
       "signature": "df.width: number",
       "signatureDetailed": "df.width: number",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2009,
-      "lineEnd": 2011
+      "lineStart": 2038,
+      "lineEnd": 2040
     },
     "withColumns": {
       "desc": "Adds new columns or updates existing ones using column expressions.",
@@ -10558,8 +10563,8 @@
       "signature": "df.withColumns(...args: SelectArg[]): DataFrame<any>",
       "signatureDetailed": "df.withColumns(...args: (SelectItem | SelectItem[])[]): DataFrame<any>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2028,
-      "lineEnd": 2059,
+      "lineStart": 2057,
+      "lineEnd": 2088,
       "typeTree": {
         "args": {
           "type": "SelectArg[]",
@@ -10595,8 +10600,8 @@
       "signature": "df.withRowIndex(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
       "signatureDetailed": "df.withRowIndex(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2077,
-      "lineEnd": 2087,
+      "lineStart": 2106,
+      "lineEnd": 2116,
       "typeTree": {
         "name": {
           "type": "string",
@@ -10640,8 +10645,8 @@
       "signature": "df.writeCsv(\n  file?: WriteFileTargetArg,\n  options: WriteCSVOptions = {}\n): string",
       "signatureDetailed": "df.writeCsv(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    dateFormat?: string,\n    datetimeFormat?: string,\n    includeBom?: boolean = false,\n    includeHeader?: boolean = true,\n    lineTerminator?: string = \"\\n\",\n    nullValue?: string = \"\",\n    numericFormatOptions?: {\n      accountingNegatives?: boolean = false,\n      fallback?: string = \"NaN\",\n      formatNonFinite?: boolean = false,\n      locale?: string = \"en-US\"\n    },\n    quoteChar?: string = '\"',\n    quoteStyle?: \"necessary\" | \"always\" | \"never\" | \"non_numeric\" = \"necessary\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => any,\n      onCircular?: (this: any, k: string, v: any) => any,\n      onCustom?: (this: any, k: string, v: any) => any,\n      onDate?: (v: Date) => any,\n      onError?: (v: Error) => any,\n      onMap?: (v: Map<any, any>) => any,\n      onRegExp?: (v: RegExp) => any,\n      onSet?: (v: Set<any>) => any,\n      onTypedArray?: (v: any) => any,\n      onURLSearchParams?: (v: URLSearchParams) => any,\n      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    },\n    separator?: string = \",\",\n    timeFormat?: string\n  } = {}\n): string",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2101,
-      "lineEnd": 2136,
+      "lineStart": 2130,
+      "lineEnd": 2165,
       "typeTree": {
         "file": {
           "type": "WriteFileTargetArg",
@@ -10897,8 +10902,8 @@
       "signature": "df.writeJson(\n  file?: WriteFileTargetArg,\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string",
       "signatureDetailed": "df.writeJson(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    format?: \"json\" | \"ndjson\" = \"json\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => any,\n      onCircular?: (this: any, k: string, v: any) => any,\n      onCustom?: (this: any, k: string, v: any) => any,\n      onDate?: (v: Date) => any,\n      onError?: (v: Error) => any,\n      onMap?: (v: Map<any, any>) => any,\n      onRegExp?: (v: RegExp) => any,\n      onSet?: (v: Set<any>) => any,\n      onTypedArray?: (v: any) => any,\n      onURLSearchParams?: (v: URLSearchParams) => any,\n      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    }\n  } = {}\n): string",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2150,
-      "lineEnd": 2177,
+      "lineStart": 2179,
+      "lineEnd": 2206,
       "typeTree": {
         "file": {
           "type": "WriteFileTargetArg",
@@ -11273,7 +11278,8 @@
     "coalesce": {
       "desc": "Returns the first non-null value among the specified expressions.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, null, 3], b: [null, 2, null] })\n>>> df\nshape: (3, 2)\n+------+------+\n| a    | b    |\n+------+------+\n| 1    | null |\n| null | 2    |\n| 3    | null |\n+------+------+\n>>> df.select($df.coalesce($df.col(\"a\"), $df.col(\"b\"), $df.lit(3)).alias(\"coalesced\"))\nshape: (3, 1)\n+-----------+\n| coalesced |\n+-----------+\n| 1         |\n| 2         |\n| 3         |\n+-----------+"
+        "// 1. Coalesce across multiple columns to pick the first non-null:\n>>> const df = $df.data({ a: [1, null, 3], b: [null, 2, null] })\n>>> df\nshape: (3, 2)\n+------+------+\n| a    | b    |\n+------+------+\n| 1    | null |\n| null | 2    |\n| 3    | null |\n+------+------+\n>>> df.select($df.coalesce($df.col(\"a\"), $df.col(\"b\")).alias(\"ab\"))\nshape: (3, 1)\n+----+\n| ab |\n+----+\n| 1  |\n| 2  |\n| 3  |\n+----+",
+        "// 2. Coalesce column with a fallback literal value:\n>>> const df = $df.data({ a: [1, null, 3], b: [null, 2, null] })\n>>> df\nshape: (3, 2)\n+------+------+\n| a    | b    |\n+------+------+\n| 1    | null |\n| null | 2    |\n| 3    | null |\n+------+------+\n>>> df.select($df.coalesce($df.col(\"a\"), $df.lit(0)).alias(\"a0\"))\nshape: (3, 1)\n+----+\n| a0 |\n+----+\n| 1  |\n| 0  |\n| 3  |\n+----+"
       ],
       "params": [
         {
@@ -11290,8 +11296,8 @@
       "signature": "$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>",
       "signatureDetailed": "$df.coalesce(...exprs: (ScalarArg | ScalarArg[])[]): ColumnExpr<any>",
       "filePath": "functions/coalesce.ts",
-      "lineStart": 27,
-      "lineEnd": 56,
+      "lineStart": 41,
+      "lineEnd": 70,
       "typeTree": {
         "exprs": {
           "type": "CoalesceArg[]",
@@ -11305,7 +11311,9 @@
     "col": {
       "desc": "Creates a column expression referencing one or more columns by name, regular expression, or data type.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.col(\"a\"))\nshape: (2, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n+---+"
+        "// 1. Select single column by name:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.col(\"a\"))\nshape: (2, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n+---+",
+        "// 2. Select multiple columns via array:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.col([\"a\", \"b\"]))\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+",
+        "// 3. Select columns matching a RegExp pattern:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.col(/^b$/))\nshape: (2, 1)\n+---+\n| b |\n+---+\n| x |\n| y |\n+---+"
       ],
       "params": [
         {
@@ -11322,8 +11330,8 @@
       "signature": "$df.col<T = any>(name: ColumnSelector<T>): ColumnExpr<T>",
       "signatureDetailed": "$df.col<T = any>(name: keyof T | RegexPatternArg | (keyof T | RegexPatternArg)[] | DataType | Function | (DataType | Function)[]): ColumnExpr<T>",
       "filePath": "functions/col.ts",
-      "lineStart": 24,
-      "lineEnd": 26,
+      "lineStart": 49,
+      "lineEnd": 51,
       "typeTree": {
         "name": {
           "type": "ColumnSelector<T>",
@@ -11400,7 +11408,8 @@
     "data": {
       "desc": "Constructs a new DataFrame from an array of row records or a column dictionary.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+"
+        "// 1. Construct DataFrame from a column dictionary:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+",
+        "// 2. Construct DataFrame from an array of row objects:\n>>> const df = $df.data([\n...   { a: 1, b: \"x\" },\n...   { a: 2, b: \"y\" }\n... ])\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+"
       ],
       "params": [
         {
@@ -11422,8 +11431,8 @@
       "signature": "$df.data<T extends RowRecord = any>(\n  data: DataFrameDataArg<T>,\n  schema?: DataFrameSchema\n): DataFrame<T>",
       "signatureDetailed": "$df.data<T extends RowRecord = any>(\n  data: T[] | ColumnDict,\n  schema?: Record<string, RegisteredDataType>\n): DataFrame<T>",
       "filePath": "functions/data.ts",
-      "lineStart": 25,
-      "lineEnd": 30,
+      "lineStart": 41,
+      "lineEnd": 46,
       "typeTree": {
         "data": {
           "type": "DataFrameDataArg<T>",
@@ -11442,7 +11451,8 @@
     "duration": {
       "desc": "Constructs a Duration expression column from numeric values, string intervals, column references, or expressions.",
       "examples": [
-        ">>> const df = $df.data({ date: [\"2026-05-20T10:00:00.123Z\"] })\n>>> df\nshape: (1, 1)\n+--------------------------+\n| date                     |\n+--------------------------+\n| 2026-05-20T10:00:00.123Z |\n+--------------------------+\n>>> df.select($df.col(\"date\").cast($df.Datetime).add($df.duration({ days: 1 })).alias(\"plus_1_day\"))\nshape: (1, 1)\n+--------------------------+\n| plus_1_day               |\n+--------------------------+\n| 2026-05-21T10:00:00.123Z |\n+--------------------------+"
+        "// 1. Construct from a duration component options object:\n>>> const df = $df.data({ date: [\"2026-05-20T10:00:00.123Z\"] })\n>>> df\nshape: (1, 1)\n+--------------------------+\n| date                     |\n+--------------------------+\n| 2026-05-20T10:00:00.123Z |\n+--------------------------+\n>>> df.select($df.col(\"date\").cast($df.Datetime).add($df.duration({ days: 1 })).alias(\"plus_1_day\"))\nshape: (1, 1)\n+--------------------------+\n| plus_1_day               |\n+--------------------------+\n| 2026-05-21T10:00:00.123Z |\n+--------------------------+",
+        "// 2. Construct from a duration string shorthand:\n>>> const df = $df.data({ date: [\"2026-05-20T10:00:00.123Z\"] })\n>>> df\nshape: (1, 1)\n+--------------------------+\n| date                     |\n+--------------------------+\n| 2026-05-20T10:00:00.123Z |\n+--------------------------+\n>>> df.select($df.col(\"date\").cast($df.Datetime).add($df.duration(\"12h\")).alias(\"plus_12h\"))\nshape: (1, 1)\n+--------------------------+\n| plus_12h                 |\n+--------------------------+\n| 2026-05-20T22:00:00.123Z |\n+--------------------------+"
       ],
       "params": [
         {
@@ -11459,8 +11469,8 @@
       "signature": "$df.duration(options: DurationArg = {}): ColumnExpr<any>",
       "signatureDetailed": "$df.duration(\n  options: {\n    days?: IntoExpr | number,\n    hours?: IntoExpr | number,\n    microseconds?: IntoExpr | number,\n    milliseconds?: IntoExpr | number,\n    minutes?: IntoExpr | number,\n    nanoseconds?: IntoExpr | number,\n    seconds?: IntoExpr | number,\n    weeks?: IntoExpr | number\n  } = {}\n): ColumnExpr<any>",
       "filePath": "functions/duration.ts",
-      "lineStart": 28,
-      "lineEnd": 70,
+      "lineStart": 40,
+      "lineEnd": 82,
       "typeTree": {
         "options": {
           "type": "DurationArg",
@@ -11524,7 +11534,8 @@
     "element": {
       "desc": "Creates an expression referencing the current element(s) of an array during evaluation. Primarily used inside array operations like `filter`, `map`, or `eval`.",
       "examples": [
-        ">>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.select($df.col(\"a\").arr.filter($df.element().gt(2)).alias(\"filtered\"))\nshape: (2, 1)\n+----------+\n| filtered |\n+----------+\n| [3]      |\n| [4, 5]   |\n+----------+"
+        "// 1. Filter elements within array cells:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.select($df.col(\"a\").arr.filter($df.element().gt(2)).alias(\"filtered\"))\nshape: (2, 1)\n+----------+\n| filtered |\n+----------+\n| [3]      |\n| [4, 5]   |\n+----------+",
+        "// 2. Perform element-wise calculation across array cells:\n>>> const df = $df.data({ a: [[1, 2, 3], [4, 5]] })\n>>> df\nshape: (2, 1)\n+-----------+\n| a         |\n+-----------+\n| [1, 2, 3] |\n| [4, 5]    |\n+-----------+\n>>> df.select($df.col(\"a\").arr.eval($df.element().mul(10)).alias(\"scaled\"))\nshape: (2, 1)\n+--------------+\n| scaled       |\n+--------------+\n| [10, 20, 30] |\n| [40, 50]     |\n+--------------+"
       ],
       "returns": "ColumnExpr<T>",
       "namespace": "$df",
@@ -11534,13 +11545,14 @@
       "signature": "$df.element<T = any>(): ColumnExpr<T>",
       "signatureDetailed": "$df.element<T = any>(): ColumnExpr<T>",
       "filePath": "functions/element.ts",
-      "lineStart": 24,
-      "lineEnd": 26
+      "lineStart": 37,
+      "lineEnd": 39
     },
     "exclude": {
       "desc": "Creates an expression targeting all columns except the specified ones.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.exclude(\"a\"))\nshape: (2, 1)\n+---+\n| b |\n+---+\n| x |\n| y |\n+---+"
+        "// 1. Exclude a single column by name:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.exclude(\"a\"))\nshape: (2, 1)\n+---+\n| b |\n+---+\n| x |\n| y |\n+---+",
+        "// 2. Exclude a single column from a multi-column dataset:\n>>> const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] })\n>>> df\nshape: (3, 2)\n+---+----+\n| a | b  |\n+---+----+\n| 1 | 10 |\n| 2 | 20 |\n| 3 | 30 |\n+---+----+\n>>> df.select($df.exclude(\"a\"))\nshape: (3, 1)\n+----+\n| b  |\n+----+\n| 10 |\n| 20 |\n| 30 |\n+----+"
       ],
       "params": [
         {
@@ -11557,8 +11569,8 @@
       "signature": "$df.exclude(columns: ColumnKeyArg): ColumnExpr<any>",
       "signatureDetailed": "$df.exclude(columns: string | string[]): ColumnExpr<any>",
       "filePath": "functions/exclude.ts",
-      "lineStart": 25,
-      "lineEnd": 29,
+      "lineStart": 39,
+      "lineEnd": 43,
       "typeTree": {
         "columns": {
           "type": "ColumnKeyArg",
@@ -11634,7 +11646,8 @@
     "lit": {
       "desc": "Creates a literal column expression that repeats the given value for all rows.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.lit(42).alias(\"answer\"))\nshape: (2, 1)\n+--------+\n| answer |\n+--------+\n| 42     |\n| 42     |\n+--------+"
+        "// 1. Literal number repeated for every row:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.lit(42).alias(\"answer\"))\nshape: (2, 1)\n+--------+\n| answer |\n+--------+\n| 42     |\n| 42     |\n+--------+",
+        "// 2. Literal string repeated across rows:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.withColumns($df.lit(\"active\").alias(\"status\"))\nshape: (2, 3)\n+---+---+--------+\n| a | b | status |\n+---+---+--------+\n| 1 | x | active |\n| 2 | y | active |\n+---+---+--------+"
       ],
       "params": [
         {
@@ -11654,8 +11667,8 @@
       "signature": "$df.lit(\n  value: any,\n  options: LitOptions = {}\n): ColumnExpr<any>",
       "signatureDetailed": "$df.lit(\n  value: any,\n  options: {\n    dtype?: Int8Type | Int16Type | Int32Type | Int64Type | UInt8Type | UInt16Type | UInt32Type | UInt64Type | Float32Type | Float64Type | DecimalType | BooleanType | Utf8Type | BinaryType | NullType | ObjectType | DateType | DatetimeType | TimeType | DurationType | ArrayType<any> | StructType<any>,\n    name?: string\n  } = {}\n): ColumnExpr<any>",
       "filePath": "functions/lit.ts",
-      "lineStart": 26,
-      "lineEnd": 31,
+      "lineStart": 39,
+      "lineEnd": 44,
       "typeTree": {
         "value": {
           "type": "any",
@@ -11858,7 +11871,8 @@
     "seqRange": {
       "desc": "Creates a column expression that generates a range of values. If mode is \"cumulative\" (default) or \"independent\", it generates a sequence. If mode is \"constant\", it repeats the given value.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.select($df.seqRange(1, { step: 2 }).alias(\"odd\"))\nshape: (3, 1)\n+-----+\n| odd |\n+-----+\n| 1   |\n| 3   |\n| 5   |\n+-----+"
+        "// 1. Ascending stepping sequence:\n>>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.select($df.seqRange(1, { step: 2 }).alias(\"odd\"))\nshape: (3, 1)\n+-----+\n| odd |\n+-----+\n| 1   |\n| 3   |\n| 5   |\n+-----+",
+        "// 2. Descending stepping sequence:\n>>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.select($df.seqRange(10, { step: -1 }).alias(\"countdown\"))\nshape: (3, 1)\n+-----------+\n| countdown |\n+-----------+\n| 10        |\n| 9         |\n| 8         |\n+-----------+"
       ],
       "params": [
         {
@@ -11878,8 +11892,8 @@
       "signature": "$df.seqRange(\n  value: any,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<any>",
       "signatureDetailed": "$df.seqRange(\n  value: any,\n  options: {\n    dtype?: Int8Type | Int16Type | Int32Type | Int64Type | UInt8Type | UInt16Type | UInt32Type | UInt64Type | Float32Type | Float64Type | DecimalType | BooleanType | Utf8Type | BinaryType | NullType | ObjectType | DateType | DatetimeType | TimeType | DurationType | ArrayType<any> | StructType<any>,\n    endIndex?: number,\n    mode?: \"constant\" | \"cumulative\" | \"independent\" = \"cumulative\",\n    n?: number = the slice or DataFrame height,\n    name?: string,\n    pad?: boolean = false,\n    padValue?: any = null,\n    startIndex?: number = 0,\n    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any) = 1,\n    strict?: boolean = true,\n    truncate?: boolean = false\n  } = { strict: true }\n): ColumnExpr<any>",
       "filePath": "functions/seqRange.ts",
-      "lineStart": 32,
-      "lineEnd": 91,
+      "lineStart": 46,
+      "lineEnd": 105,
       "typeTree": {
         "value": {
           "type": "any",
@@ -11963,7 +11977,8 @@
     "struct": {
       "desc": "Packages multiple expressions into a structured object column.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.struct({ x: \"a\", y: \"b\" }).alias(\"coord\"))\nshape: (2, 1)\n+------------------+\n| coord            |\n+------------------+\n| { x: 1, y: \"x\" } |\n| { x: 2, y: \"y\" } |\n+------------------+"
+        "// 1. Package fields using an object property mapping:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.struct({ x: \"a\", y: \"b\" }).alias(\"coord\"))\nshape: (2, 1)\n+------------------+\n| coord            |\n+------------------+\n| { x: 1, y: \"x\" } |\n| { x: 2, y: \"y\" } |\n+------------------+",
+        "// 2. Package positional column expressions directly into a struct:\n>>> const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] })\n>>> df\nshape: (2, 2)\n+---+---+\n| a | b |\n+---+---+\n| 1 | x |\n| 2 | y |\n+---+---+\n>>> df.select($df.struct($df.col(\"a\"), $df.col(\"b\")).alias(\"pair\"))\nshape: (2, 1)\n+------------------+\n| pair             |\n+------------------+\n| { a: 1, b: \"x\" } |\n| { a: 2, b: \"y\" } |\n+------------------+"
       ],
       "params": [
         {
@@ -11985,8 +12000,8 @@
       "signature": "$df.struct(\n  fields: StructArg,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
       "signatureDetailed": "$df.struct(\n  fields: StructFieldsArg | IntoExpr,\n  ...moreFields: (RegexPatternArg | IExpr)[]\n): ColumnExpr<any>",
       "filePath": "functions/struct.ts",
-      "lineStart": 28,
-      "lineEnd": 48,
+      "lineStart": 41,
+      "lineEnd": 61,
       "typeTree": {
         "fields": {
           "type": "StructArg",
@@ -12006,7 +12021,8 @@
     "when": {
       "desc": "Provides conditional branch evaluations inside column expressions.",
       "examples": [
-        ">>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.select(\n...   $df.when($df.col(\"a\").gt(2)).then(\"High\")\n...     .otherwise(\"Low\").alias(\"tier\")\n... )\nshape: (3, 1)\n+------+\n| tier |\n+------+\n| Low  |\n| Low  |\n| High |\n+------+"
+        "// 1. Binary condition with otherwise fallback:\n>>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.select(\n...   $df.when($df.col(\"a\").gt(2)).then(\"High\")\n...     .otherwise(\"Low\").alias(\"tier\")\n... )\nshape: (3, 1)\n+------+\n| tier |\n+------+\n| Low  |\n| Low  |\n| High |\n+------+",
+        "// 2. Multi-case conditional chaining:\n>>> const df = $df.data({ a: [1, 2, 3] })\n>>> df\nshape: (3, 1)\n+---+\n| a |\n+---+\n| 1 |\n| 2 |\n| 3 |\n+---+\n>>> df.select(\n...   $df.when($df.col(\"a\").eq(1)).then(\"One\")\n...     .when($df.col(\"a\").eq(2)).then(\"Two\")\n...     .otherwise(\"Other\").alias(\"label\")\n... )\nshape: (3, 1)\n+-------+\n| label |\n+-------+\n| One   |\n| Two   |\n| Other |\n+-------+"
       ],
       "params": [
         {
@@ -12023,8 +12039,8 @@
       "signature": "$df.when(predicate: WhenArg): WhenThenChain",
       "signatureDetailed": "$df.when(predicate: ComparisonArg | RowRecord | any[]): WhenThenChain",
       "filePath": "functions/when.ts",
-      "lineStart": 109,
-      "lineEnd": 111,
+      "lineStart": 127,
+      "lineEnd": 129,
       "typeTree": {
         "predicate": {
           "type": "WhenArg",

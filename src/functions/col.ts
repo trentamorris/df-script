@@ -11,6 +11,7 @@ import type { ColumnSelector } from "../types";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Select single column by name:
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.col("a"))
  * shape: (2, 1)
@@ -19,6 +20,30 @@ import type { ColumnSelector } from "../types";
  * +---+
  * | 1 |
  * | 2 |
+ * +---+
+ *
+ * @example
+ * // 2. Select multiple columns via array:
+ * <!-- doc:base_2x2 -->
+ * >>> df.select($df.col(["a", "b"]))
+ * shape: (2, 2)
+ * +---+---+
+ * | a | b |
+ * +---+---+
+ * | 1 | x |
+ * | 2 | y |
+ * +---+---+
+ *
+ * @example
+ * // 3. Select columns matching a RegExp pattern:
+ * <!-- doc:base_2x2 -->
+ * >>> df.select($df.col(/^b$/))
+ * shape: (2, 1)
+ * +---+
+ * | b |
+ * +---+
+ * | x |
+ * | y |
  * +---+
  */
 export function col<T = any>(name: ColumnSelector<T>): ColumnExpr<T> {

@@ -13,6 +13,7 @@ import type { LitOptions } from "./types";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Literal number repeated for every row:
  * <!-- doc:base_2x2 -->
  * >>> df.select($df.lit(42).alias("answer"))
  * shape: (2, 1)
@@ -22,6 +23,18 @@ import type { LitOptions } from "./types";
  * | 42     |
  * | 42     |
  * +--------+
+ *
+ * @example
+ * // 2. Literal string repeated across rows:
+ * <!-- doc:base_2x2 -->
+ * >>> df.withColumns($df.lit("active").alias("status"))
+ * shape: (2, 3)
+ * +---+---+--------+
+ * | a | b | status |
+ * +---+---+--------+
+ * | 1 | x | active |
+ * | 2 | y | active |
+ * +---+---+--------+
  */
 export function lit(value: any, options: LitOptions = {}): ColumnExpr<any> {
     const expr = seqRange(value, { ...options, mode: "constant" });

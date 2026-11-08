@@ -600,15 +600,31 @@ export class DataFrame<T extends RowRecord = any> {
      * @param {ColumnKeyArg<K>} keys Column name or array of key column names.
      * @returns {GroupedData}
      * @example
+     * // 1. Group by single column with single aggregation:
      * <!-- doc:base_grouped_3x2 -->
      * >>> df.groupBy("group").agg($df.col("val").sum().alias("sum"))
      * shape: (2, 2)
-     * +-----+-----+
-     * | cat | sum |
-     * +-----+-----+
-     * | A   | 30  |
-     * | B   | 30  |
-     * +-----+-----+
+     * +-------+-----+
+     * | group | sum |
+     * +-------+-----+
+     * | A     | 30  |
+     * | B     | 30  |
+     * +-------+-----+
+     *
+     * @example
+     * // 2. Group by with multiple parallel aggregations:
+     * <!-- doc:base_grouped_3x2 -->
+     * >>> df.groupBy("group").agg(
+     * ...   $df.col("val").mean().alias("avg"),
+     * ...   $df.col("val").sum().alias("total")
+     * ... )
+     * shape: (2, 3)
+     * +-------+-----+-------+
+     * | group | avg | total |
+     * +-------+-----+-------+
+     * | A     | 15  | 30    |
+     * | B     | 30  | 30    |
+     * +-------+-----+-------+
      */
     groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K> {
         const keysStr = toArrayOfType<string>(keys, "string");
@@ -1006,8 +1022,21 @@ export class DataFrame<T extends RowRecord = any> {
      * @param {JoinOptions} [options={}] Join configuration object.
      * @returns {DataFrame}
      * @example
+     * // 1. Inner join on matching key column:
      * <!-- doc:base_join_pair -->
      * >>> df1.join(df2, { on: "id" })
+     * shape: (2, 3)
+     * +----+-----+-----+
+     * | id | val | num |
+     * +----+-----+-----+
+     * | 1  | a   | 100 |
+     * | 2  | b   | 200 |
+     * +----+-----+-----+
+     *
+     * @example
+     * // 2. Outer join on matching key column:
+     * <!-- doc:base_join_pair -->
+     * >>> df1.join(df2, { on: "id", how: "outer" })
      * shape: (2, 3)
      * +----+-----+-----+
      * | id | val | num |

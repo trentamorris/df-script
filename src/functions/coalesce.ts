@@ -13,16 +13,30 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Coalesce across multiple columns to pick the first non-null:
  * <!-- doc:base_nulls_3x2 -->
- * >>> df.select($df.coalesce($df.col("a"), $df.col("b"), $df.lit(3)).alias("coalesced"))
+ * >>> df.select($df.coalesce($df.col("a"), $df.col("b")).alias("ab"))
  * shape: (3, 1)
- * +-----------+
- * | coalesced |
- * +-----------+
- * | 1         |
- * | 2         |
- * | 3         |
- * +-----------+
+ * +----+
+ * | ab |
+ * +----+
+ * | 1  |
+ * | 2  |
+ * | 3  |
+ * +----+
+ *
+ * @example
+ * // 2. Coalesce column with a fallback literal value:
+ * <!-- doc:base_nulls_3x2 -->
+ * >>> df.select($df.coalesce($df.col("a"), $df.lit(0)).alias("a0"))
+ * shape: (3, 1)
+ * +----+
+ * | a0 |
+ * +----+
+ * | 1  |
+ * | 0  |
+ * | 3  |
+ * +----+
  */
 export function coalesce(...exprs: CoalesceArg[]): ColumnExpr<any> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))

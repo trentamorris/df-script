@@ -451,6 +451,7 @@ export class ArrayExprNamespace {
      * @param nullOnOob If true, returns null if index is out of bounds (default: true).
      * @returns ColumnExpression
      * @example
+     * // 1. Positive 0-based index:
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.get(1).alias("second"))
      * shape: (2, 2)
@@ -460,6 +461,18 @@ export class ArrayExprNamespace {
      * | [1, 2, 3] | 2      |
      * | [4, 5]    | 5      |
      * +-----------+--------+
+     *
+     * @example
+     * // 2. Negative index (from the end):
+     * <!-- doc:base_array_nested_2rows -->
+     * >>> df.withColumns($df.col("a").arr.get(-1).alias("last_val"))
+     * shape: (2, 2)
+     * +-----------+----------+
+     * | a         | last_val |
+     * +-----------+----------+
+     * | [1, 2, 3] | 3        |
+     * | [4, 5]    | 5        |
+     * +-----------+----------+
      */
     get(index: NumericArg, nullOnOob: boolean = true) {
         return this._deriveArrayBinary(index, (arr, val) => {
@@ -474,15 +487,28 @@ export class ArrayExprNamespace {
      * @param options String conversion options.
      * @returns ColumnExpression
      * @example
+     * // 1. Default delimiter join:
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.join("-").alias("joined"))
      * shape: (2, 2)
-     * +------------+--------+
-     * | a          | joined |
-     * +------------+--------+
-     * | ["a", "b"] | "a-b"  |
-     * | ["c"]      | "c"    |
-     * +------------+--------+
+     * +-----------+---------+
+     * | a         | joined  |
+     * +-----------+---------+
+     * | [1, 2, 3] | "1-2-3" |
+     * | [4, 5]    | "4-5"   |
+     * +-----------+---------+
+     *
+     * @example
+     * // 2. Custom delimiter with prefix and suffix options:
+     * <!-- doc:base_array_nested_2rows -->
+     * >>> df.withColumns($df.col("a").arr.join(" | ", { prefix: "<", suffix: ">" }).alias("joined"))
+     * shape: (2, 2)
+     * +-----------+---------------+
+     * | a         | joined        |
+     * +-----------+---------------+
+     * | [1, 2, 3] | "<1 | 2 | 3>" |
+     * | [4, 5]    | "<4 | 5>"     |
+     * +-----------+---------------+
      */
     join(separator: string = ",", options: JoinArrayOptions = {}) {
         return this._deriveArray((arr) => joinArray(arr, separator, options));
@@ -684,6 +710,7 @@ export class ArrayExprNamespace {
      * @param end The slice ending index.
      * @returns ColumnExpression
      * @example
+     * // 1. Positive slice with start and end offsets:
      * <!-- doc:base_array_nested_2rows -->
      * >>> df.withColumns($df.col("a").arr.slice(1, 3).alias("sliced"))
      * shape: (2, 2)
@@ -692,6 +719,18 @@ export class ArrayExprNamespace {
      * +-----------+--------+
      * | [1, 2, 3] | [2, 3] |
      * | [4, 5]    | [5]    |
+     * +-----------+--------+
+     *
+     * @example
+     * // 2. Negative slice offset from the end:
+     * <!-- doc:base_array_nested_2rows -->
+     * >>> df.withColumns($df.col("a").arr.slice(-2).alias("tail2"))
+     * shape: (2, 2)
+     * +-----------+--------+
+     * | a         | tail2  |
+     * +-----------+--------+
+     * | [1, 2, 3] | [2, 3] |
+     * | [4, 5]    | [4, 5] |
      * +-----------+--------+
      */
     slice(start?: number, end?: number) {

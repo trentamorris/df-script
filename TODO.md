@@ -173,83 +173,15 @@ A prioritized roadmap of upcoming features, improvements, and refactorings.
   * [x] Allow selecting columns dynamically by RegExp patterns (`df.select(/^prefix_/)`, `$df.col(/_suffix$/)`) with full transformation expression support.
 
 
-## 🚀 v2.1.0 Release Scope
-
-### ⚡ Performance, Bundle Size & Interoperability
-- [x] **Eliminate Redundant Convenience Wrappers**: Removed redundant aliases (`df.vstack()` and `df.hstack()`) in favor of canonical `df.concat()` and `$df.concat()`.
-- [x] **Modular 1:1 Test Parity**: Built 110 dedicated atomic unit tests mirroring `src/utils/` exports 1:1.
-- [x] **Horizontal Row-Wise Vector Expressions**: Added `$df.allHorizontal`, `$df.anyHorizontal`, `$df.maxHorizontal`, `$df.minHorizontal`, `$df.sumHorizontal`, `$df.meanHorizontal`, `$df.coalesceHorizontal`, and `$df.concatHorizontal`.
-- [x] **DataFrame Reshaping**: Implemented full wide-table pivoting via `DataFrame.unstack()`, schema transformation via `DataFrame.cast()`, and deep comparison via `DataFrame.equals()`.
-
-### 🧹 Strict NaN vs. Null Semantics Audit
-- [x] **Core NaN Semantics & Behavior Verification**:
-  * [x] Verify consistent behavior across all aggregations (`.sum()`, `.mean()`, `.std()`, `.min()`, `.max()`) and comparison operators: ensure floating-point `NaN` propagates or ignores according to IEEE 754 / Polars standards (distinguishing `NaN` from missing `null`, and handling `NaN == NaN` consistently in join/group hashing vs. boolean comparisons).
-  * [x] Check type inference: ensure numeric columns containing only numbers and `NaN` infer as `Float64` rather than generic `Any` or `Null`.
-
-
-## 🚀 v2.2.0 Release Scope
-
-### 🚨 Centralized Error Handling & Exception Factory Architecture
-- [ ] **Centralized Exception Factories (`src/exceptions/utils.ts`)**:
-  * Consolidate repetitive inline error constructions across `dataframe.ts`, `StandardExpr.ts`, and `utils/` into dedicated factory helpers (`_errCol`, `_errArg`, `_errType`, `_errSchema`, `_errBounds`).
-  * Eliminate duplicate string literal allocations across throw sites, significantly shrinking un-mangled bundle bytes.
-  * Standardize error messages with clear diagnostic context (expected types, received types, column names, out-of-bounds indices).
-  * Ensure 100% adherence to Rule #8 (containing scope) and Rule #2 (defensive guard clauses).
-
-### ⚡ Algorithmic Bundle Size Optimization & AST Compaction
-- [ ] **Higher-Order Aggregator / Reducer Templates**:
-  * Factor out repetitive null-checking, partition dispatch, and loop accumulation scaffolds across `StandardExpr.ts` (`sum`, `mean`, `min`, `max`, `prod`, `std`, `var`) into a lean internal aggregation kernel.
-- [ ] **Unary Math Vectorizer Dispatch Table**:
-  * Unify the 18 element-wise mathematical unary expressions (`abs`, `sqrt`, `cbrt`, `exp`, `log`, `sin`, `cos`, `tan`, etc.) through a single vectorized higher-order transform.
-- [ ] **Temporal Expression Date Part Dispatcher**:
-  * Consolidate repetitive date component extractions in `TemporalExpr.ts` into a unified `_datePart` extractor.
-- [ ] **Dedicated Parallel Build Script (`scripts/build.mjs`)**:
-  * Extract the long inline CLI build command from `package.json` into a dedicated ES-module script using `esbuild.build()` directly.
-  * Run all 6 bundle targets (`dist/index.js`, `dist/index.mjs`, `dist/utils.js`, `dist/utils.mjs`, `dist/expressions.js`, `dist/expressions.mjs`) in parallel with `Promise.all`.
-  * Run TypeScript declaration emit (`tsc --emitDeclarationOnly`) concurrently to drastically cut build times.
-  * Clean up `package.json` scripts to maintain cross-platform shell compatibility and readability.
-### 🛠️ Unified Missing & NaN Filling Architecture
-- [x] **Unified `fillNull`, `fillNan` & Generic `fill` Powered by `fillSequence`**:
-  * [x] Extend `FillNullOptions` & `FillOptions` with target selection (`"null" | "nan" | "all"`).
-  * [x] Reused existing `fillSequence` utility to power forward, backward, constant, and independent stepping strategies across `fillNull` and `fillNan`.
-  * [x] Add `.fill(target, options)` and `.fillNan(valueOrOptions)` on both `ColumnExpr` (`StandardExpr`) and `DataFrame`.
-  * [x] Add dedicated unit test suites: `_tests/columnExpressions/mixins/StandardExpr/fill.test.ts`, `fillNan.test.ts`, `_tests/dataframe/fill.test.ts`, and `fillNan.test.ts`.
-
-### 🏎️ Automated Performance & Throughput Benchmarking Suite
-- [ ] **Method-Co-located Benchmarks (`<method>.bench.ts`)**:
-  * Adopt the lean suffix pattern placing `<method>.bench.ts` directly alongside `<method>.test.ts` in `_tests/` (e.g. `_tests/dataframe/groupBy.bench.ts` next to `groupBy.test.ts`, `_tests/dataframe/join.bench.ts` next to `join.test.ts`).
-  * **Dual-Faceted Validation**:
-    * `<method>.test.ts`: Robustness, edge cases, type coercions, null/NaN handling, Kleene logic, and invariant checks.
-    * `<method>.bench.ts`: Throughput (rows/sec), memory pressure (`heapUsed`), and latency scaling across realistic dataset volumes (1k, 50k, 500k rows).
-  * Avoid deep subfolder bloat (no `filter/robustness.test.ts` vs `filter/performance.test.ts` folder explosion) while maintaining strict 1:1 visibility.
-  * Separate execution pipelines: `npm test` runs instant unit correctness suites, while `npm run bench` runs throughput / latency micro-benchmarks with synthetic datasets.
-  * Track throughput (rows/sec), latency per operation, and memory allocation overhead (`heapUsed`) on hot paths (`filter`, `groupBy`, `join`, `select`, `partitionBy`).
-- [ ] **Automated Memory / Heap Growth Invariant Checks**:
-  * Implement assertions verifying `process.memoryUsage().heapUsed` stays flat across 10,000+ chained operations to guarantee zero memory leakage on hot transformation paths.
-- [ ] **Generative Property-Based & Chaos Fuzzing Suite (`test:fuzz`)**:
-  * Implement zero-dependency seeded PRNG (`fuzzHelper.ts` powered by `mulberry32`) to generate random shapes, nested schemas, pathological strings, extreme dates, NaNs, and infinities.
-  * Co-locate `<method>.fuzz.ts` files or provide dedicated fuzz invariant suites verifying algebraic and mathematical properties (e.g., partition invariants, identity laws, non-growth filters, idempotent sorting).
-  * Keep decoupled from the instant 3.5s `npm test` pipeline via an isolated `npm run test:fuzz` script for nightly/extended regression testing.
-
-
-
-
-## 🔮 Future / Backlog Scope (V2.2.0+)
+## 🔮 Future / Backlog Scope
 
 ### 🏹 Interoperability & High-Precision Storage
-- [ ] **Lightweight Zero-Dependency Binary Serialization (`serialize` / `deserialize`)**:
-  * Implement compact binary buffer serialization (`ArrayBuffer`) for fast, zero-copy DataFrame caching in browser IndexedDB, Web Workers, or local storage without heavy external format dependencies.
+- [ ] **Centralized Exception Factories (`src/exceptions/utils.ts`)**:
+  * Consolidate repetitive inline error constructions across column expressions into dedicated factory helpers to eliminate duplicate string literal allocations and standardize diagnostic error messages.
+- [ ] **Generative Property-Based & Chaos Fuzzing Suite (`npm run test:fuzz`)**:
+  * Implement zero-dependency seeded PRNG (`fuzzHelper.ts` powered by `mulberry32`) to generate random shapes, nested schemas, pathological strings, extreme dates, NaNs, and infinities, verifying algebraic/mathematical properties via an isolated `npm run test:fuzz` script for nightly/extended regression testing.
 - [ ] **Apache Arrow & IPC Interoperability**:
   * Provide lightweight serialization adapters for Apache Arrow IPC memory format, facilitating zero-copy data exchange with Python Polars, PyArrow, and browser WebAssembly runtimes.
-- [ ] **High-Precision Sub-Millisecond Datetime & Duration Storage (`us`, `ns`)**:
-  * Transition from standard JS `Date` objects (which are limited to millisecond resolution) to raw 64-bit integer / `BigInt` array representations for true sub-millisecond (`us` microsecond and `ns` nanosecond) datetime storage, duration storage, and `.dt.total_*()` unscaling.
-- [ ] **First-Class 1D `Series` Data Structure**:
-  * Introduce a dedicated 1D `Series` container (`$df.Series(name, values, dtype)`) providing direct columnar operations, element-wise math/string/temporal expressions, and seamless conversions (`df.to_series()`, `df.drop_in_place()`) without wrapping into single-column DataFrames.
-- [ ] **Optional Multi-Threaded / Web Worker Chunk Parallelization**:
-  * Evaluate optional multi-threaded expression chunking via Worker Threads / Web Workers and `SharedArrayBuffer` for heavy background numeric operations without disrupting synchronous, single-threaded browser DX.
-- [ ] **Argument Normalization & Flexible Parameter Signatures**:
-  * Normalize arguments across column expressions and DataFrame operations to support both positional and option object signatures (e.g., `.round(2)` vs `.round({ decimals: 2 })`, `.clip(min, max)` vs `.clip({ lower, upper })`).
-  * Add defensive parameter unpacking to prevent accidental `NaN` or unhandled options when developers pass options objects to methods expecting positional primitives.
 
 ### 🐻 Complete Polars Functionality Parity & Migration Backlog
 The following list tracks the complete surface of Polars functionality to achieve 100% parity where applicable to JS/TS.

@@ -18,6 +18,7 @@ import type { SeqRangeOptions } from "./types";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Ascending stepping sequence:
  * <!-- doc:base_numbers_3x1 -->
  * >>> df.select($df.seqRange(1, { step: 2 }).alias("odd"))
  * shape: (3, 1)
@@ -28,6 +29,19 @@ import type { SeqRangeOptions } from "./types";
  * | 3   |
  * | 5   |
  * +-----+
+ *
+ * @example
+ * // 2. Descending stepping sequence:
+ * <!-- doc:base_numbers_3x1 -->
+ * >>> df.select($df.seqRange(10, { step: -1 }).alias("countdown"))
+ * shape: (3, 1)
+ * +-----------+
+ * | countdown |
+ * +-----------+
+ * | 10        |
+ * | 9         |
+ * | 8         |
+ * +-----------+
  */
 export function seqRange(
     value: any,

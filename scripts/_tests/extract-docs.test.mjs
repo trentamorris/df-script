@@ -486,6 +486,25 @@ test("Full codebase invariant check: all symbols and types have valid signatures
       assert.ok(data.filePath, `Missing filePath in ${ctx}`);
       assert.ok(data.signature, `Missing signature in ${ctx}`);
       assert.ok(data.signatureDetailed, `Missing signatureDetailed in ${ctx}`);
+      assert.ok(!data.signatureDetailed.includes("[object Object]"), `Corrupted object in signatureDetailed of ${ctx}: ${data.signatureDetailed}`);
+      assert.ok(!data.signatureDetailed.includes(": undefined ="), `Corrupted undefined default in signatureDetailed of ${ctx}: ${data.signatureDetailed}`);
+      assert.ok(!data.signatureDetailed.includes(": undefined\n"), `Missing type resolved to undefined in signatureDetailed of ${ctx}: ${data.signatureDetailed}`);
+
+      // Verify balanced parentheses
+      const openParens = (data.signatureDetailed.match(/\(/g) || []).length;
+      const closeParens = (data.signatureDetailed.match(/\)/g) || []).length;
+      assert.strictEqual(openParens, closeParens, `Mismatched parentheses in signatureDetailed of ${ctx}:\n${data.signatureDetailed}`);
+
+      // Verify all documented params are represented in signatureDetailed
+      if (data.params && data.params.length > 0) {
+        for (const p of data.params) {
+          const rawName = p.name.replace(/^\[|\]$/g, "").split(".")[0].trim();
+          assert.ok(
+            data.signatureDetailed.includes(rawName),
+            `Param '${rawName}' (from '${p.name}') is missing from signatureDetailed of ${ctx}:\n${data.signatureDetailed}`
+          );
+        }
+      }
       assert.ok(!data.signature.includes("get get("), `Duplicate 'get get(' in ${ctx}: ${data.signature}`);
       assert.ok(!data.signature.includes("Errorextends"), `Corrupted class signature in ${ctx}: ${data.signature}`);
       assert.ok(!data.signature.includes(".get "), `Invalid '.get ' getter syntax in ${ctx}: ${data.signature}`);

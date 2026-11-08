@@ -11,6 +11,7 @@ import { ELEMENT_MARKER } from "../columnExpressions/constants";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
+ * // 1. Filter elements within array cells:
  * <!-- doc:base_array_nested_2rows -->
  * >>> df.select($df.col("a").arr.filter($df.element().gt(2)).alias("filtered"))
  * shape: (2, 1)
@@ -20,6 +21,18 @@ import { ELEMENT_MARKER } from "../columnExpressions/constants";
  * | [3]      |
  * | [4, 5]   |
  * +----------+
+ *
+ * @example
+ * // 2. Perform element-wise calculation across array cells:
+ * <!-- doc:base_array_nested_2rows -->
+ * >>> df.select($df.col("a").arr.eval($df.element().mul(10)).alias("scaled"))
+ * shape: (2, 1)
+ * +--------------+
+ * | scaled       |
+ * +--------------+
+ * | [10, 20, 30] |
+ * | [40, 50]     |
+ * +--------------+
  */
 export function element<T = any>(): ColumnExpr<T> {
     return new ColumnExpr(ELEMENT_MARKER);

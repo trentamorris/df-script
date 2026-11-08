@@ -1089,7 +1089,15 @@ export class StandardExpr extends ExprBase {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("val").ewmKurt({ alpha: 0.5 }).alias("ewm_kurt"))
+     * >>> df.withColumns($df.col("a").ewmKurt({ alpha: 0.5 }).alias("ewm_kurt"))
+     * shape: (3, 2)
+     * +---+----------+
+     * | a | ewm_kurt |
+     * +---+----------+
+     * | 1 | null     |
+     * | 2 | -1       |
+     * | 3 | 1.052409 |
+     * +---+----------+
      */
     ewmKurt(options: EwmKurtOptions) {
         return this._ewmUnary(options, s => {
@@ -1107,15 +1115,15 @@ export class StandardExpr extends ExprBase {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("val").ewmMean({ alpha: 0.5 }).alias("ewm_mean"))
+     * >>> df.withColumns($df.col("a").ewmMean({ alpha: 0.5 }).alias("ewm_mean"))
      * shape: (3, 2)
-     * +-----+----------+
-     * | val | ewm_mean |
-     * +-----+----------+
-     * | 10  | 10       |
-     * | 20  | 16.666667|
-     * | 30  | 24.285714|
-     * +-----+----------+
+     * +---+----------+
+     * | a | ewm_mean |
+     * +---+----------+
+     * | 1 | 1        |
+     * | 2 | 1.666667 |
+     * | 3 | 2.428571 |
+     * +---+----------+
      */
     ewmMean(options: EwmMeanOptions) {
         return this._ewmUnary(options, s => s.mean);
@@ -1127,7 +1135,15 @@ export class StandardExpr extends ExprBase {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("val").ewmSkew({ alpha: 0.5 }).alias("ewm_skew"))
+     * >>> df.withColumns($df.col("a").ewmSkew({ alpha: 0.5 }).alias("ewm_skew"))
+     * shape: (3, 2)
+     * +---+-----------+
+     * | a | ewm_skew  |
+     * +---+-----------+
+     * | 1 | null      |
+     * | 2 | -0.816497 |
+     * | 3 | -1.125865 |
+     * +---+-----------+
      */
     ewmSkew(options: EwmSkewOptions) {
         return this._ewmUnary(options, s => {
@@ -1145,7 +1161,15 @@ export class StandardExpr extends ExprBase {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("val").ewmStd({ alpha: 0.5 }).alias("ewm_std"))
+     * >>> df.withColumns($df.col("a").ewmStd({ alpha: 0.5 }).alias("ewm_std"))
+     * shape: (3, 2)
+     * +---+----------+
+     * | a | ewm_std  |
+     * +---+----------+
+     * | 1 | null     |
+     * | 2 | 0.471405 |
+     * | 3 | 0.728431 |
+     * +---+----------+
      */
     ewmStd(options: EwmStdOptions) {
         return this._ewmUnary(options, s => s.count < 2 ? null : s.std);
@@ -1157,7 +1181,15 @@ export class StandardExpr extends ExprBase {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("val").ewmSum({ alpha: 0.5 }).alias("ewm_sum"))
+     * >>> df.withColumns($df.col("a").ewmSum({ alpha: 0.5 }).alias("ewm_sum"))
+     * shape: (3, 2)
+     * +---+---------+
+     * | a | ewm_sum |
+     * +---+---------+
+     * | 1 | 1       |
+     * | 2 | 2.5     |
+     * | 3 | 4.25    |
+     * +---+---------+
      */
     ewmSum(options: EwmSumOptions) {
         return this._ewmUnary(options, s => s.weightedSum);
@@ -1169,7 +1201,15 @@ export class StandardExpr extends ExprBase {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.withColumns($df.col("val").ewmVar({ alpha: 0.5 }).alias("ewm_var"))
+     * >>> df.withColumns($df.col("a").ewmVar({ alpha: 0.5 }).alias("ewm_var"))
+     * shape: (3, 2)
+     * +---+----------+
+     * | a | ewm_var  |
+     * +---+----------+
+     * | 1 | null     |
+     * | 2 | 0.222222 |
+     * | 3 | 0.530612 |
+     * +---+----------+
      */
     ewmVar(options: EwmVarOptions) {
         return this._ewmUnary(options, s => s.count < 2 ? null : s.variance);
