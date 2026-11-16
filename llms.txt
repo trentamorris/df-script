@@ -1,10 +1,10 @@
-# df-script: High-Performance TypeScript DataFrame Library
+# df-script: High-Performance, Vectorized TypeScript DataFrame Engine
 
 ## Overview
 
-- **Version**: 2.4.0
 - **License**: MIT (Trent Morris)
 - **Interactive Documentation**: [https://df-script.js.org](https://df-script.js.org)
+- **In-Browser Notebook**: [https://df-script.js.org/notebook](https://df-script.js.org/notebook)
 - **Repository**: [https://github.com/trentamorris/df-script](https://github.com/trentamorris/df-script)
 - **Full LLM Reference (Markdown)**: [llms-full.txt](https://df-script.js.org/llms-full.txt)
 - **Raw API Schema (JSON)**: [docs.json](https://df-script.js.org/docs.json)
@@ -13,9 +13,31 @@
 
 ## Introduction
 
-**df-script** is a blazing-fast, **zero-dependency**, expression-based DataFrame and data manipulation library for **TypeScript** and **JavaScript**.
+**df-script** is a 43kB, **zero-dependency**, **vectorized** expression-based DataFrame engine with 300+ operations for **TypeScript** and **JavaScript**.
 
 Heavily inspired by modern columnar engines like **Polars** and **Pandas**, `df-script` brings declarative, high-performance data transformations directly to modern JavaScript and TypeScript environments. Easily execute complex multi-column groupings, relational joins, windowed rolling statistics, string parsing, temporal conversions, and nested structs with a fluent, expressive API and zero external dependencies.
+
+
+---
+
+
+## Why df-script?
+
+For most web applications, performing complex data transformations requires maintaining a dedicated backend service. Suddenly, an otherwise straightforward application introduces deployment pipelines, network latency, serialization bottlenecks, asynchronous state management, and ongoing cloud hosting bills, all just to run operations modern client CPUs can perform in milliseconds.
+
+I know what you're thinking: why not just use existing engines like Polars or DuckDB? While both are phenomenal analytical engines, `nodejs-polars` relies on native Node.js binaries (ruling out browsers and standard edge runtimes), and `@duckdb/duckdb-wasm` ships multi-megabyte WebAssembly bundles with heavy worker setup, far too much weight for client-side web apps or lightweight edge functions.
+
+Alright, alright, alright: “What about existing JavaScript libraries like `arquero`, `danfojs`, `data-forge`, `dataframe-js`, ...?” Look, if your web bundle can genuinely afford including the entire multi-megabyte TensorFlow.js dependency tree, writing string-based row callbacks (`d => d.a + d.b`), or dealing with unmaintained, legacy row-oriented iterators, by all means, those are the tools for you.
+
+That leaves the rest of us with what previously (hint, hint) felt like the only viable alternative: hand-writing custom functions or native chains of `.map()`, `.filter()`, and `.reduce()` to transform data directly in the browser. These chained operations repeatedly traverse the dataset and flood memory with intermediate objects, degrading performance and freezing the UI. Worse, what starts as a simple utility quickly devolves into hundreds of lines of fragile boilerplate once real-world edge cases surface:
+
+- **Composite Keys**: Hashing multi-column keys without collisions, distinguishing string `"null"` from literal `null` and `undefined`, maintaining deterministic order, and handling sparse indices.
+- **Relational Joins**: Reliable outer joins without silent truncation, resolving column name collisions with automatic suffixing, and aligning time-series with as-of nearest matches.
+- **Windowing & Rolling Metrics**: Managing sliding window boundaries, min-sample thresholds, cumulative accumulators, and lead/lag offsets without unbounded memory growth.
+- **Numeric Integrity**: Eliminating silent precision loss from floating-point drift, `NaN` contagion, `-0` vs `+0`, integer overflows, and `BigInt` cross-type operations.
+- **Date & String Edge Cases**: Handling timezone offsets across client environments, ISO/RFC parsing variations, regex escaping, and Unicode surrogate pairs.
+
+**`df-script` changes this equation entirely.** It introduces a 43kB, zero-dependency, vectorized, column-oriented DataFrame engine constructed specifically to enable complex chained data transformations directly in the browser with zero network latency and no server maintenance. By avoiding high-level array iterators like `.map()` and `.reduce()` in favor of contiguous columnar loops, `df-script` drastically cuts intermediate object allocations to reduce garbage collection pressure. Every function is backed by a dedicated 1:1 test suite covering hundreds of extreme edge cases, so you never have to hand-roll fragile data logic again.
 
 
 ---
@@ -250,24 +272,6 @@ Output:
 +----------------------+-------------+------------+------------------+----------------+------------+
 */
 ```
-
-
----
-
-
-## Why df-script?
-
-For most web applications, performing complex data transformations requires maintaining a dedicated backend service. Suddenly, an otherwise straightforward application introduces deployment pipelines, network latency, serialization bottlenecks, asynchronous state management, and ongoing cloud hosting bills, all just to run operations modern client CPUs can perform in milliseconds.
-
-To avoid this, many developers implement hand-written functions or native chains of `.map()`, `.filter()`, and `.reduce()` to transform data directly in the browser. These chained operations repeatedly traverse the dataset and flood memory with intermediate objects, degrading performance and freezing the UI. Worse, what starts as a simple utility quickly devolves into hundreds of lines of fragile boilerplate once real-world edge cases surface:
-
-- **Composite Keys**: Hashing multi-column keys without collisions, distinguishing string `"null"` from literal `null` and `undefined`, maintaining deterministic order, and handling sparse indices.
-- **Relational Joins**: Reliable outer joins without silent truncation, resolving column name collisions with automatic suffixing, and aligning time-series with as-of nearest matches.
-- **Windowing & Rolling Metrics**: Managing sliding window boundaries, min-sample thresholds, cumulative accumulators, and lead/lag offsets without unbounded memory growth.
-- **Numeric Integrity**: Eliminating silent precision loss from floating-point drift, `NaN` contagion, `-0` vs `+0`, integer overflows, and `BigInt` cross-type operations.
-- **Date & String Edge Cases**: Handling timezone offsets across client environments, ISO/RFC parsing variations, regex escaping, and Unicode surrogate pairs.
-
-**`df-script` changes this equation entirely.** It introduces a zero-dependency, column-oriented DataFrame engine constructed specifically to enable complex chained data transformations directly in the browser with zero network latency and no server maintenance. By avoiding high-level array iterators like `.map()` and `.reduce()` in favor of contiguous columnar loops, `df-script` drastically cuts intermediate object allocations to reduce garbage collection pressure. Every function is backed by a dedicated 1:1 test suite covering hundreds of extreme edge cases, so you never have to hand-roll fragile data logic again.
 
 
 ---

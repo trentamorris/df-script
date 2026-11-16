@@ -32,6 +32,20 @@ export const DOC_EXAMPLES: Record<string, string> = {
         '+---+'
     ].join('\n'),
 
+    // 2b. Single-column 3-row signed numeric DataFrame - { a: [-1, 0, 2] }
+    base_signed_numbers_3x1: [
+        '>>> const df = $df.data({ a: [-1, 0, 2] })',
+        '>>> df',
+        'shape: (3, 1)',
+        '+----+',
+        '| a  |',
+        '+----+',
+        '| -1 |',
+        '| 0  |',
+        '| 2  |',
+        '+----+'
+    ].join('\n'),
+
     // 3. Basic 3-row numeric DataFrame - { a: [1, 2, 3], b: [10, 20, 30] }
     base_numbers_3x2: [
         '>>> const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] })',
