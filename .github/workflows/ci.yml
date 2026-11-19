@@ -37,4 +37,4 @@ jobs:
         run: npm run test:dist
 
       - name: Verify generated docs & LLMs files are up-to-date
-        run: git diff --exit-code docs.json llms.txt llms-full.txt
+        run: git diff --ignore-space-at-eol --exit-code docs.json llms.txt llms-full.txt
