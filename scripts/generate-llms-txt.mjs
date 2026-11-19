@@ -26,8 +26,11 @@ const readmePath = path.resolve(rootDir, "README.md");
 // ─── 1. Generate llms.txt from README.md ──────────────────────────────────────
 
 export function buildLlmsTxtFromReadme(readmeContent) {
+  // Normalize Windows CRLF to LF first
+  const normalized = readmeContent.replace(/\r\n/g, "\n");
+
   // 1. Strip shields / badge images: [![...](...)](...)
-  let clean = readmeContent.replace(/\[\!\[.*?\]\(.*?\)\]\(.*?\)\s*\n?/g, "");
+  let clean = normalized.replace(/\[\!\[.*?\]\(.*?\)\]\(.*?\)\s*\n?/g, "");
 
   // 2. Normalize repeated empty newlines down to max 2
   clean = clean.replace(/\n{3,}/g, "\n\n").trim();

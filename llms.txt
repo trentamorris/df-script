@@ -17,9 +17,7 @@
 
 Heavily inspired by modern columnar engines like **Polars** and **Pandas**, `df-script` brings declarative, high-performance data transformations directly to modern JavaScript and TypeScript environments. Easily execute complex multi-column groupings, relational joins, windowed rolling statistics, string parsing, temporal conversions, and nested structs with a fluent, expressive API and zero external dependencies.
 
-
 ---
-
 
 ## Why df-script?
 
@@ -39,9 +37,7 @@ That leaves the rest of us with what previously (hint, hint) felt like the only 
 
 **`df-script` changes this equation entirely.** It introduces a 43kB, zero-dependency, vectorized, column-oriented DataFrame engine constructed specifically to enable complex chained data transformations directly in the browser with zero network latency and no server maintenance. By avoiding high-level array iterators like `.map()` and `.reduce()` in favor of contiguous columnar loops, `df-script` drastically cuts intermediate object allocations to reduce garbage collection pressure. Every function is backed by a dedicated 1:1 test suite covering hundreds of extreme edge cases, so you never have to hand-roll fragile data logic again.
 
-
 ---
-
 
 ## Installation
 
@@ -69,9 +65,7 @@ import { $df, DataFrame, ColumnExpr, DataType } from "df-script";
 const { $df, DataFrame, ColumnExpr, DataType } = require("df-script");
 ```
 
-
 ---
-
 
 ## Compatibility
 
@@ -89,9 +83,7 @@ const { $df, DataFrame, ColumnExpr, DataType } = require("df-script");
   - React, Next.js, Vue, Nuxt, Svelte, SolidJS, Astro, etc.
   - Vite, Webpack, Rollup, esbuild, etc.
 
-
 ---
-
 
 ## Quick Start
 
@@ -273,9 +265,7 @@ Output:
 */
 ```
 
-
 ---
-
 
 ## Data Types
 
@@ -322,9 +312,7 @@ Type selectors match entire families of data types when filtering columns via `$
 | **`$df.Temporal`** | All date, time, timestamp, and duration types (`Date`, `Datetime`, `Time`, `Duration`). |
 | **`$df.Nested`** | All nested structural types (`Array`, `Struct`). |
 
-
 ---
-
 
 ## Functions
 
@@ -349,9 +337,7 @@ The `$df` entry point provides top-level functions to create DataFrames, constru
 | **`$df.struct`** | Constructs a struct expression. |
 | **`$df.when`** | Starts a conditional `when / then / otherwise` expression. |
 
-
 ---
-
 
 ## DataFrame Operations
 
@@ -407,9 +393,7 @@ All operations and getters on `DataFrame` in alphabetical order:
 | **`.writeCsv`** | Serializes or writes DataFrame to CSV. |
 | **`.writeJson`** | Serializes or writes DataFrame to JSON / NDJSON. |
 
-
 ---
-
 
 ## Column Expressions
 
@@ -713,9 +697,7 @@ All column expressions inherit from `ColumnExpr` / `ExprBase` and support fluent
 | **`.struct.unnest`** | Unnests struct fields into top-level columns. |
 | **`.struct.withFields`** | Adds or updates struct fields. |
 
-
 ---
-
 
 ## License
 
