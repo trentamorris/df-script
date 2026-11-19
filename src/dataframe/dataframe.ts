@@ -3,7 +3,7 @@ import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
 import type { IExpr, ColumnData, ColumnDict, ColumnIndexOrNameArg, ColumnKeyArg, ColumnOrExprArg, ConcatOptions, ConcatItemsArg, DataFrameDataArg, RenameMappingArg, RowRecord, DataFrameSchema, ExplodeOptions, IntoExpr, IntoExprArg, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
-import type { CastTargetArg, DataFrameColumns, DataFrameShape, DynamicIndexColumnArg, EqualsOptions, FilterPredicateArg, GroupByDynamicOptions, InsertColumnArg, IterRowResult, IterRowsOptions, JoinAsofOptions, JoinMaintainOrder, JoinOptions, JoinWhereArg, JoinWhereOptions, LimitOptions, PartitionByKey, PartitionByOptions, PartitionByResult, PivotOptions, RowPredicateFn, SelectArg, SortOptions, TransposeOptions, UnpivotOptions, UnstackOptions, WriteFileTargetArg, WriteJSONOptions } from "./types"
+import type { CastTargetArg, DataFrameColumns, DataFrameShape, DynamicIndexColumnArg, EqualsOptions, FilterPredicateArg, GroupByDynamicOptions, InsertColumnArg, IterRowResult, IterRowsOptions, JoinAsofOptions, JoinMaintainOrder, JoinOptions, JoinWhereArg, JoinWhereOptions, LimitOptions, PartitionByKey, PartitionByOptions, PartitionByResult, PivotOptions, Rename, RowPredicateFn, SelectArg, SortOptions, TransposeOptions, UnpivotOptions, UnstackOptions, WriteFileTargetArg, WriteJSONOptions } from "./types"
 import { DataTypeRegistry, DataType, type RegisteredDataType } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate, type WriteCSVOptions } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, InvalidArgumentError, IOStreamError } from "../exceptions"
@@ -57,15 +57,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @category DataFrame
      * @syntax df.{symbol}(...)
      * @example
-     * >>> const df = $df.data([{ a: 1, b: "x" }, { a: 2, b: "y" }])
-     * >>> df
-     * shape: (2, 2)
-     * +-----+-----+
-     * | a   | b   |
-     * +-----+-----+
-     * | 1   | x   |
-     * | 2   | y   |
-     * +-----+-----+
+     * const df = $df.data([{ a: 1, b: "x" }, { a: 2, b: "y" }]);
+     * // shape: (2, 2)
+     * // +-----+-----+
+     * // | a   | b   |
+     * // +-----+-----+
+     * // | 1   | x   |
+     * // | 2   | y   |
+     * // +-----+-----+
      */
     constructor(data: DataFrameDataArg<T>, schema?: DataFrameSchema, height?: number) {
         if (Array.isArray(data)) {
@@ -174,9 +173,9 @@ export class DataFrame<T extends RowRecord = any> {
      *
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.cast($df.Float64)
-     * >>> df.cast({ a: $df.Float64, b: $df.Utf8 })
-     * >>> df.cast({ num_str: $df.Int64 }, { strict: false })
+     * df.cast($df.Float64);
+     * df.cast({ a: $df.Float64, b: $df.Utf8 });
+     * df.cast({ a: $df.Int64 }, { strict: false });
      */
     cast(
         dtypes: CastTargetArg,
@@ -207,15 +206,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame<T>}
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> const cloned = df.clone()
-     * >>> cloned
-     * shape: (2, 2)
-     * +---+---+
-     * | a | b |
-     * +---+---+
-     * | 1 | x |
-     * | 2 | y |
-     * +---+---+
+     * const cloned = df.clone();
+     * cloned;
+     * // shape: (2, 2)
+     * // +---+---+
+     * // | a | b |
+     * // +---+---+
+     * // | 1 | x |
+     * // | 2 | y |
+     * // +---+---+
      */
     clone(): DataFrame<T> {
         return this.select<T>(all());
@@ -226,11 +225,11 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of column name strings.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.columns
-     * ["a", "b"]
+     * df.columns;
+     * // ["a", "b"]
      */
-    get columns(): string[] {
-        return Object.keys(this._columns);
+    get columns(): Array<keyof T & string> {
+        return Object.keys(this._columns) as (keyof T & string)[];
     }
 
     /**
@@ -243,42 +242,43 @@ export class DataFrame<T extends RowRecord = any> {
      * @example
      * // 1. Vertical Concatenation (default):
      * <!-- doc:base_concat_pair -->
-     * >>> df1.concat(df2, { how: "vertical" })
-     * shape: (4, 1)
-     * +------+
-     * | a    |
-     * +------+
-     * | 1    |
-     * | 2    |
-     * | null |
-     * | null |
-     * +------+
+     * df1.concat(df2, { how: "vertical" });
+     * // shape: (4, 1)
+     * // +------+
+     * // | a    |
+     * // +------+
+     * // | 1    |
+     * // | 2    |
+     * // | null |
+     * // | null |
+     * // +------+
      * 
      * @example
      * // 2. Horizontal Concatenation:
      * <!-- doc:base_concat_pair -->
-     * >>> df1.concat(df2, { how: "horizontal" })
-     * shape: (2, 2)
-     * +---+----+
-     * | a | b  |
-     * +---+----+
-     * | 1 | 10 |
-     * | 2 | 20 |
-     * +---+----+
+     * const dfB = $df.data({ b: [10, 20] });
+     * df1.concat(dfB, { how: "horizontal" });
+     * // shape: (2, 2)
+     * // +---+----+
+     * // | a | b  |
+     * // +---+----+
+     * // | 1 | 10 |
+     * // | 2 | 20 |
+     * // +---+----+
      * 
      * @example
      * // 3. Diagonal Concatenation (mismatched columns):
      * <!-- doc:base_concat_pair -->
-     * >>> df1.concat(df2, { how: "diagonal" })
-     * shape: (4, 2)
-     * +------+------+
-     * | a    | b    |
-     * +------+------+
-     * | 1    | null |
-     * | 2    | null |
-     * | null | 10   |
-     * | null | 20   |
-     * +------+------+
+     * df1.concat(df2, { how: "diagonal" });
+     * // shape: (4, 2)
+     * // +------+------+
+     * // | a    | b    |
+     * // +------+------+
+     * // | 1    | null |
+     * // | 2    | null |
+     * // | null | 10   |
+     * // | null | 20   |
+     * // +------+------+
      */
     concat<U extends RowRecord = any>(
         items: ConcatItemsArg,
@@ -296,14 +296,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.drop("b")
-     * shape: (2, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 1 |
-     * | 2 |
-     * +---+
+     * df.drop("b");
+     * // shape: (2, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 1 |
+     * // | 2 |
+     * // +---+
      */
     drop<K extends keyof T>(...args: ColumnKeyArg<K>[]): DataFrame<Omit<T, K>> {
         return this.select<Omit<T, K>>(exclude(args.flat() as any));
@@ -315,14 +315,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_nulls_3x2 -->
-     * >>> df.dropNulls()
-     * shape: (2, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 1 |
-     * | 3 |
-     * +---+
+     * df.dropNulls("a");
+     * // shape: (2, 2)
+     * // +---+------+
+     * // | a | b    |
+     * // +---+------+
+     * // | 1 | null |
+     * // | 3 | null |
+     * // +---+------+
      */
     dropNulls(subset?: ColumnKeyArg<string>): DataFrame<T> {
         return this.filter(subset ? new ColumnExpr(subset).isNotNull() : all().isNotNull());
@@ -333,8 +333,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of RegisteredDataType definitions.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.dtypes
-     * [Float64, Utf8]
+     * df.dtypes;
+     * // [Float64, Utf8]
      */
     get dtypes(): RegisteredDataType[] {
         const keys = Object.keys(this._columns);
@@ -354,9 +354,9 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {boolean} `true` if both DataFrames are equal, `false` otherwise.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> const df2 = df.clone()
-     * >>> df.equals(df2)
-     * true
+     * const df2 = df.clone();
+     * df.equals(df2);
+     * // true
      */
     equals<U extends RowRecord = any>(other: DataFrame<U>, { nullsEqual = true }: EqualsOptions = {}): boolean {
         if ((this as unknown) === other) return true;
@@ -409,14 +409,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_array_nested_2rows -->
-     * >>> df.explode("values")
-     * shape: (2, 2)
-     * +-------+--------+
-     * | group | values |
-     * +-------+--------+
-     * | A     | 1      |
-     * | A     | 2      |
-     * +-------+--------+
+     * df.explode("a");
+     * // shape: (2, 2)
+     * // +-------+--------+
+     * // | group | values |
+     * // +-------+--------+
+     * // | A     | 1      |
+     * // | A     | 2      |
+     * // +-------+--------+
      */
     explode(
         columns: IntoExprArg,
@@ -446,15 +446,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_nulls_3x2 -->
-     * >>> df.fill("null", { value: 0 })
-     * shape: (3, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 1 |
-     * | 0 |
-     * | 3 |
-     * +---+
+     * df.fill("null", { value: 0 });
+     * // shape: (3, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 1 |
+     * // | 0 |
+     * // | 3 |
+     * // +---+
      */
     fill(
         target: FillTarget,
@@ -470,15 +470,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.fillNan({ value: 0 })
-     * shape: (3, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 1 |
-     * | 2 |
-     * | 3 |
-     * +---+
+     * df.fillNan({ value: 0 });
+     * // shape: (3, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 1 |
+     * // | 2 |
+     * // | 3 |
+     * // +---+
      */
     fillNan(options: FillNullOptions = {}): DataFrame<T> {
         if (this._height === 0) return this;
@@ -491,15 +491,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_nulls_3x2 -->
-     * >>> df.fillNull({ value: 0 })
-     * shape: (3, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 1 |
-     * | 0 |
-     * | 3 |
-     * +---+
+     * df.fillNull({ value: 0 });
+     * // shape: (3, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 1 |
+     * // | 0 |
+     * // | 3 |
+     * // +---+
      */
     fillNull(options: FillNullOptions = {}): DataFrame<T> {
         if (this._height === 0) return this;
@@ -512,14 +512,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_numbers_3x2 -->
-     * >>> df.filter($df.col("a").gt(1))
-     * shape: (2, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 2 |
-     * | 3 |
-     * +---+
+     * df.filter($df.col("a").gt(1));
+     * // shape: (2, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 2 |
+     * // | 3 |
+     * // +---+
      */
     filter(...exprs: FilterPredicateArg<T>[]): DataFrame<T> {
         const height = this._height;
@@ -602,29 +602,29 @@ export class DataFrame<T extends RowRecord = any> {
      * @example
      * // 1. Group by single column with single aggregation:
      * <!-- doc:base_grouped_3x2 -->
-     * >>> df.groupBy("group").agg($df.col("val").sum().alias("sum"))
-     * shape: (2, 2)
-     * +-------+-----+
-     * | group | sum |
-     * +-------+-----+
-     * | A     | 30  |
-     * | B     | 30  |
-     * +-------+-----+
+     * df.groupBy("group").agg($df.col("val").sum().alias("sum"));
+     * // shape: (2, 2)
+     * // +-------+-----+
+     * // | group | sum |
+     * // +-------+-----+
+     * // | A     | 30  |
+     * // | B     | 30  |
+     * // +-------+-----+
      *
      * @example
      * // 2. Group by with multiple parallel aggregations:
      * <!-- doc:base_grouped_3x2 -->
-     * >>> df.groupBy("group").agg(
-     * ...   $df.col("val").mean().alias("avg"),
-     * ...   $df.col("val").sum().alias("total")
-     * ... )
-     * shape: (2, 3)
-     * +-------+-----+-------+
-     * | group | avg | total |
-     * +-------+-----+-------+
-     * | A     | 15  | 30    |
-     * | B     | 30  | 30    |
-     * +-------+-----+-------+
+     * df.groupBy("group").agg(
+     * $df.col("val").mean().alias("avg"),
+     * $df.col("val").sum().alias("total")
+     * )
+     * // shape: (2, 3)
+     * // +-------+-----+-------+
+     * // | group | avg | total |
+     * // +-------+-----+-------+
+     * // | A     | 15  | 30    |
+     * // | B     | 30  | 30    |
+     * // +-------+-----+-------+
      */
     groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K> {
         const keysStr = toArrayOfType<string>(keys, "string");
@@ -646,14 +646,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns GroupedData
      * @example
      * <!-- doc:base_dataframe_dynamic -->
-     * >>> df.groupByDynamic("time", { every: "1d", period: "1d" }).agg($df.col("val").sum().alias("daily_sum"))
-     * shape: (2, 2)
-     * +--------------------------+-----------+
-     * | time                     | daily_sum |
-     * +--------------------------+-----------+
-     * | 2024-01-01T00:00:00.000Z | 30        |
-     * | 2024-01-02T00:00:00.000Z | 30        |
-     * +--------------------------+-----------+
+     * df.groupByDynamic("time", { every: "1d", period: "1d" }).agg($df.col("val").sum().alias("daily_sum"));
+     * // shape: (2, 2)
+     * // +--------------------------+-----------+
+     * // | time                     | daily_sum |
+     * // +--------------------------+-----------+
+     * // | 2024-01-01T00:00:00.000Z | 30        |
+     * // | 2024-01-02T00:00:00.000Z | 30        |
+     * // +--------------------------+-----------+
      */
     groupByDynamic<K extends keyof T & string>(
         indexColumn: DynamicIndexColumnArg<K>,
@@ -861,14 +861,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.head(2)
-     * shape: (2, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 1 |
-     * | 2 |
-     * +---+
+     * df.head(2);
+     * // shape: (2, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 1 |
+     * // | 2 |
+     * // +---+
      */
     head(n: number = 10): DataFrame<T> {
         return this.limit(n, { offset: 0, from: "start" })
@@ -879,8 +879,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Number of rows.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.height
-     * 3
+     * df.height;
+     * // 3
      */
     get height(): number {
         return this._height;
@@ -894,14 +894,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.insertColumn(1, "c", [10, 20])
-     * shape: (2, 3)
-     * +---+----+---+
-     * | a | c  | b |
-     * +---+----+---+
-     * | 1 | 10 | x |
-     * | 2 | 20 | y |
-     * +---+----+---+
+     * df.insertColumn(1, "c", [10, 20]);
+     * // shape: (2, 3)
+     * // +---+----+---+
+     * // | a | c  | b |
+     * // +---+----+---+
+     * // | 1 | 10 | x |
+     * // | 2 | 20 | y |
+     * // +---+----+---+
      */
     insertColumn(index: number, name: string, expr: InsertColumnArg): DataFrame<any> {
         const colExpr = isArrayOrTypedArray(expr)
@@ -935,8 +935,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @throws {ShapeError} If row or column index is out of bounds.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.item(0, "val")
-     * 42
+     * df.item(0, "a");
+     * // 42
      */
     item(row?: number, column?: ColumnIndexOrNameArg): any {
         const height = this._height;
@@ -974,7 +974,7 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Generator of ColumnData arrays.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> Array.from(df.iterColumns())
+     * Array.from(df.iterColumns());
      * [ Float64Array([1, 2]), ["x", "y"] ]
      */
     *iterColumns(): Generator<ColumnData> {
@@ -989,7 +989,7 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Generator of rows.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> Array.from(df.iterRows({ named: true }))
+     * Array.from(df.iterRows({ named: true }));
      * [ { a: 1, b: "x" }, { a: 2, b: "y" } ]
      */
     *iterRows({ named = false }: IterRowsOptions = {}): Generator<IterRowResult<T>> {
@@ -1024,26 +1024,26 @@ export class DataFrame<T extends RowRecord = any> {
      * @example
      * // 1. Inner join on matching key column:
      * <!-- doc:base_join_pair -->
-     * >>> df1.join(df2, { on: "id" })
-     * shape: (2, 3)
-     * +----+-----+-----+
-     * | id | val | num |
-     * +----+-----+-----+
-     * | 1  | a   | 100 |
-     * | 2  | b   | 200 |
-     * +----+-----+-----+
+     * df1.join(df2, { on: "id" });
+     * // shape: (2, 3)
+     * // +----+-----+-----+
+     * // | id | val | num |
+     * // +----+-----+-----+
+     * // | 1  | a   | 100 |
+     * // | 2  | b   | 200 |
+     * // +----+-----+-----+
      *
      * @example
      * // 2. Outer join on matching key column:
      * <!-- doc:base_join_pair -->
-     * >>> df1.join(df2, { on: "id", how: "outer" })
-     * shape: (2, 3)
-     * +----+-----+-----+
-     * | id | val | num |
-     * +----+-----+-----+
-     * | 1  | a   | 100 |
-     * | 2  | b   | 200 |
-     * +----+-----+-----+
+     * df1.join(df2, { on: "id", how: "outer" });
+     * // shape: (2, 3)
+     * // +----+-----+-----+
+     * // | id | val | num |
+     * // +----+-----+-----+
+     * // | 1  | a   | 100 |
+     * // | 2  | b   | 200 |
+     * // +----+-----+-----+
      */
     join<U extends RowRecord = any, R extends RowRecord = any>(
         other: DataFrame<U>,
@@ -1154,15 +1154,15 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns A new DataFrame containing the joined results.
      * @example
      * <!-- doc:base_asof_pair -->
-     * >>> trades.joinAsof(quotes, { on: "time", by: "ticker" })
-     * shape: (3, 4)
-     * +------+--------+-------+-------+
-     * | time | ticker | price | bid   |
-     * +------+--------+-------+-------+
-     * | 1000 | AAPL   | 150.0 | 149.9 |
-     * | 1005 | AAPL   | 150.5 | 150.4 |
-     * | 1015 | AAPL   | 151.0 | 150.8 |
-     * +------+--------+-------+-------+
+     * trades.joinAsof(quotes, { on: "time", by: "ticker" });
+     * // shape: (3, 4)
+     * // +------+--------+-------+-------+
+     * // | time | ticker | price | bid   |
+     * // +------+--------+-------+-------+
+     * // | 1000 | AAPL   | 150.0 | 149.9 |
+     * // | 1005 | AAPL   | 150.5 | 150.4 |
+     * // | 1015 | AAPL   | 151.0 | 150.8 |
+     * // +------+--------+-------+-------+
      */
     joinAsof<U extends RowRecord = any, R extends RowRecord = any>(
         other: DataFrame<U>,
@@ -1258,21 +1258,21 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame} A new DataFrame containing the joined results.
      * @example
      * <!-- doc:base_join_where_pair -->
-     * >>> east.joinWhere(
-     * ...     west,
-     * ...     $df.col("dur").lt($df.col("time")),
-     * ...     $df.col("rev").lt($df.col("cost"))
-     * ... )
-     * shape: (5, 8)
-     * +-----+-----+-----+-------+------+------+------+-------------+
-     * | id  | dur | rev | cores | t_id | time | cost | cores_right |
-     * +-----+-----+-----+-------+------+------+------+-------------+
-     * | 100 | 120 | 12  | 2     | 498  | 130  | 13   | 2           |
-     * | 100 | 120 | 12  | 2     | 676  | 150  | 15   | 1           |
-     * | 100 | 120 | 12  | 2     | 742  | 170  | 16   | 4           |
-     * | 101 | 140 | 14  | 8     | 676  | 150  | 15   | 1           |
-     * | 101 | 140 | 14  | 8     | 742  | 170  | 16   | 4           |
-     * +-----+-----+-----+-------+------+------+------+-------------+
+     * east.joinWhere(
+     * west,
+     * $df.col("dur").lt($df.col("time")),
+     * $df.col("rev").lt($df.col("cost"))
+     * )
+     * // shape: (5, 8)
+     * // +-----+-----+-----+-------+------+------+------+-------------+
+     * // | id  | dur | rev | cores | t_id | time | cost | cores_right |
+     * // +-----+-----+-----+-------+------+------+------+-------------+
+     * // | 100 | 120 | 12  | 2     | 498  | 130  | 13   | 2           |
+     * // | 100 | 120 | 12  | 2     | 676  | 150  | 15   | 1           |
+     * // | 100 | 120 | 12  | 2     | 742  | 170  | 16   | 4           |
+     * // | 101 | 140 | 14  | 8     | 676  | 150  | 15   | 1           |
+     * // | 101 | 140 | 14  | 8     | 742  | 170  | 16   | 4           |
+     * // +-----+-----+-----+-------+------+------+------+-------------+
      */
     joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
         other: DataFrame<U>,
@@ -1336,14 +1336,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.limit(2, { offset: 1 })
-     * shape: (2, 1)
-     * +----+
-     * | a  |
-     * +----+
-     * | 20 |
-     * | 30 |
-     * +----+
+     * df.limit(2, { offset: 1 });
+     * // shape: (2, 1)
+     * // +----+
+     * // | a  |
+     * // +----+
+     * // | 20 |
+     * // | 30 |
+     * // +----+
      */
     limit(n: number, { offset = 0, from = "start" }: LimitOptions = {}): DataFrame<T> {
         const len = this._height;
@@ -1379,7 +1379,7 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {PartitionByResult<T>}
      * @example
      * <!-- doc:base_dataframe_partition -->
-     * >>> const [groupA, groupB] = df.partitionBy("category")
+     * const [groupA, groupB] = df.partitionBy("category");
      */
     partitionBy<K extends PartitionByKey<T>>(
         by: ColumnKeyArg<K>,
@@ -1406,14 +1406,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * <!-- doc:base_pivot_table -->
-     * >>> df.pivot({ index: "year", columns: "month", values: "revenue" })
-     * shape: (2, 3)
-     * +------+-----+-----+
-     * | year | Jan | Feb |
-     * +------+-----+-----+
-     * | 2020 | 100 | 150 |
-     * | 2021 | 120 | 180 |
-     * +------+-----+-----+
+     * df.pivot({ index: "year", columns: "month", values: "revenue" });
+     * // shape: (2, 3)
+     * // +------+-----+-----+
+     * // | year | Jan | Feb |
+     * // +------+-----+-----+
+     * // | 2020 | 100 | 150 |
+     * // | 2021 | 120 | 180 |
+     * // +------+-----+-----+
      */
     pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U> {
         if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0);
@@ -1477,16 +1477,16 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.rename({ a: "id", b: "label" })
-     * shape: (2, 2)
-     * +----+-------+
-     * | id | label |
-     * +----+-------+
-     * | 1  | x     |
-     * | 2  | y     |
-     * +----+-------+
+     * df.rename({ a: "id", b: "label" });
+     * // shape: (2, 2)
+     * // +----+-------+
+     * // | id | label |
+     * // +----+-------+
+     * // | 1  | x     |
+     * // | 2  | y     |
+     * // +----+-------+
      */
-    rename(mapping: RenameMappingArg<T> = {}): DataFrame<any> {
+    rename<M extends RenameMappingArg<T> = RenameMappingArg<T>>(mapping: M = {} as M): DataFrame<Rename<T, M>> {
         const keys = Object.keys(this._columns);
         const len = keys.length;
         const selectList: any[] = new Array(len);
@@ -1497,7 +1497,7 @@ export class DataFrame<T extends RowRecord = any> {
             selectList[i] = newKey ? new ColumnExpr(k).alias(newKey) : k;
         }
 
-        return this.select(...selectList);
+        return this.select(...selectList) as unknown as DataFrame<Rename<T, M>>;
     }
 
     /**
@@ -1505,14 +1505,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.reverse()
-     * shape: (2, 2)
-     * +---+---+
-     * | a | b |
-     * +---+---+
-     * | 2 | y |
-     * | 1 | x |
-     * +---+---+
+     * df.reverse();
+     * // shape: (2, 2)
+     * // +---+---+
+     * // | a | b |
+     * // +---+---+
+     * // | 2 | y |
+     * // | 1 | x |
+     * // +---+---+
      */
     reverse(): DataFrame<T> {
         return this._height === 0 ? this : this.select<T>(all().reverse());
@@ -1523,8 +1523,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrameSchema mapping.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.schema
-     * { a: Float64, b: Utf8 }
+     * df.schema;
+     * // { a: Float64, b: Utf8 }
      */
     get schema(): DataFrameSchema {
         return this._schema;
@@ -1533,17 +1533,35 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Selects specific columns or evaluates column expressions.
      * @param {SelectArg[]} args Column names, column expressions, or object maps to evaluate.
-     * @returns {DataFrame}
-     * @example
+     * @returns {DataFrame}     * @example
+     * // 1. Select and transform columns:
      * <!-- doc:base_2x2 -->
-     * >>> df.select("a", $df.col("b").add(100).alias("b_plus"))
-     * shape: (2, 2)
-     * +---+--------+
-     * | a | b_plus |
-     * +---+--------+
-     * | 1 | 110    |
-     * | 2 | 120    |
-     * +---+--------+
+     * df.select("a", $df.col("b").alias("b_copy"));
+     * // shape: (2, 2)
+     * // +---+--------+
+     * // | a | b_copy |
+     * // +---+--------+
+     * // | 1 | x      |
+     * // | 2 | y      |
+     * // +---+--------+
+     *
+     * @example
+     * // 2. Compute expressions on numeric columns:
+     * <!-- doc:base_numbers_3x2 -->
+     * df.select("a", $df.col("b").mul(2).alias("b_double"));
+     * // shape: (3, 2)
+     * // +---+----------+
+     * // | a | b_double |
+     * // +---+----------+
+     * // | 1 | 20       |
+     * // | 2 | 40       |
+     * // | 3 | 60       |
+     * // +---+----------+
+     * // | a | b_plus |
+     * // +---+--------+
+     * // | 1 | 110    |
+     * // | 2 | 120    |
+     * // +---+--------+
      */
     select<U extends RowRecord = any>(
         ...args: SelectArg[]
@@ -1649,8 +1667,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Tuple [height, width].
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.shape
-     * [2, 2]
+     * df.shape;
+     * // [2, 2]
      */
     get shape(): DataFrameShape {
         return [this.height, this.width];
@@ -1660,17 +1678,34 @@ export class DataFrame<T extends RowRecord = any> {
      * Slices a subset range of rows between start and end index.
      * @param {number} start Starting row index.
      * @param {number} [end] Optional ending row index (exclusive).
-     * @returns {DataFrame}
-     * @example
+     * @returns {DataFrame}     * @example
+     * // 1. Slice rows by start and offset count:
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.slice(1, 3)
-     * shape: (2, 1)
-     * +----+
-     * | a  |
-     * +----+
-     * | 20 |
-     * | 30 |
-     * +----+
+     * df.slice(1, 2);
+     * // shape: (2, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 2 |
+     * // | 3 |
+     * // +---+
+     *
+     * @example
+     * // 2. Negative offset to slice from the tail:
+     * <!-- doc:base_numbers_3x1 -->
+     * df.slice(-2);
+     * // shape: (2, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 2 |
+     * // | 3 |
+     * // +---+
+     * // | a  |
+     * // +----+
+     * // | 20 |
+     * // | 30 |
+     * // +----+
      */
     slice(start: number, end?: number): DataFrame<T> {
         const total = this._height;
@@ -1686,18 +1721,37 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Sorts DataFrame rows by one or more column expressions or custom sorters.
      * @param {SortOptions<T>} [config] Sort configuration options.
-     * @returns {DataFrame}
-     * @example
+     * @returns {DataFrame}     * @example
+     * // 1. Sort ascending by column name:
      * <!-- doc:base_numbers_3x2 -->
-     * >>> df.sort({ by: "a", descending: true })
-     * shape: (3, 2)
-     * +---+----+
-     * | a | b  |
-     * +---+----+
-     * | 3 | 30 |
-     * | 2 | 20 |
-     * | 1 | 10 |
-     * +---+----+
+     * df.sort("a");
+     * // shape: (3, 2)
+     * // +---+----+
+     * // | a | b  |
+     * // +---+----+
+     * // | 1 | 10 |
+     * // | 2 | 20 |
+     * // | 3 | 30 |
+     * // +---+----+
+     *
+     * @example
+     * // 2. Sort descending using configuration options:
+     * <!-- doc:base_numbers_3x2 -->
+     * df.sort({ by: "a", descending: true });
+     * // shape: (3, 2)
+     * // +---+----+
+     * // | a | b  |
+     * // +---+----+
+     * // | 3 | 30 |
+     * // | 2 | 20 |
+     * // | 1 | 10 |
+     * // +---+----+
+     * // | a | b  |
+     * // +---+----+
+     * // | 3 | 30 |
+     * // | 2 | 20 |
+     * // | 1 | 10 |
+     * // +---+----+
      */
     sort(config?: SortOptions<T>): DataFrame<T> {
         if (!config?.by || this._height === 0) return this;
@@ -1742,14 +1796,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns DataFrame
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.tail(2)
-     * shape: (2, 1)
-     * +---+
-     * | a |
-     * +---+
-     * | 3 |
-     * | 4 |
-     * +---+
+     * df.tail(2);
+     * // shape: (2, 1)
+     * // +---+
+     * // | a |
+     * // +---+
+     * // | 3 |
+     * // | 4 |
+     * // +---+
      */
     tail(n: number = 10): DataFrame<T> {
         return this.limit(n, { offset: 0, from: 'end' })
@@ -1761,8 +1815,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {any[]} Array of column scalar values.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.toArray("a")
-     * [10, 20]
+     * df.toArray("a");
+     * // [10, 20]
      */
     toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[] {
         return toValidArray(Object.values(this.select(nameOrExpr as any)._columns)?.[0] ?? []);
@@ -1773,8 +1827,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Column dictionary map.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.toDict()
-     * { a: Float64Array([1, 2]), b: ["x", "y"] }
+     * df.toDict();
+     * // { a: Float64Array([1, 2]), b: ["x", "y"] }
      */
     toDict(): DataFrameColumns<T> {
         return { ...this._columns };
@@ -1785,8 +1839,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Array of row record objects.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.toDicts()
-     * [{ a: 1, b: "x" }]
+     * df.toDicts();
+     * // [{ a: 1, b: "x" }]
      */
     toDicts(): T[] {
         return columnsToRows(this._columns, this._height);
@@ -1798,14 +1852,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_pivot_table -->
-     * >>> df.transpose({ includeHeader: true, headerName: "metric" })
-     * shape: (2, 3)
-     * +--------+----------+----------+
-     * | metric | column_0 | column_1 |
-     * +--------+----------+----------+
-     * | q1     | 100      | 500      |
-     * | q2     | 120      | 600      |
-     * +--------+----------+----------+
+     * df.transpose({ includeHeader: true, headerName: "metric" });
+     * // shape: (2, 3)
+     * // +--------+----------+----------+
+     * // | metric | column_0 | column_1 |
+     * // +--------+----------+----------+
+     * // | q1     | 100      | 500      |
+     * // | q2     | 120      | 600      |
+     * // +--------+----------+----------+
      */
     transpose({
         includeHeader = false,
@@ -1871,14 +1925,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.unique()
-     * shape: (2, 2)
-     * +---+---+
-     * | a | b |
-     * +---+---+
-     * | 1 | x |
-     * | 2 | y |
-     * +---+---+
+     * df.unique();
+     * // shape: (2, 2)
+     * // +---+---+
+     * // | a | b |
+     * // +---+---+
+     * // | 1 | x |
+     * // | 2 | y |
+     * // +---+---+
      */
     unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T> {
         const keys = columns !== undefined ? toValidArray(columns) : (Object.keys(this._columns) as any);
@@ -1891,16 +1945,16 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_pivot_table -->
-     * >>> df.unpivot({ idVars: "metric", valueVars: ["q1", "q2"], varName: "quarter", valueName: "val" })
-     * shape: (4, 3)
-     * +--------+---------+-----+
-     * | metric | quarter | val |
-     * +--------+---------+-----+
-     * | sales  | q1      | 100 |
-     * | sales  | q2      | 120 |
-     * | clicks | q1      | 500 |
-     * | clicks | q2      | 600 |
-     * +--------+---------+-----+
+     * df.unpivot({ idVars: "year", valueVars: ["revenue"], varName: "variable", valueName: "revenue_amt" });
+     * // shape: (4, 3)
+     * // +--------+---------+-----+
+     * // | metric | quarter | val |
+     * // +--------+---------+-----+
+     * // | sales  | q1      | 100 |
+     * // | sales  | q2      | 120 |
+     * // | clicks | q1      | 500 |
+     * // | clicks | q2      | 600 |
+     * // +--------+---------+-----+
      */
     unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> {
         const { idVars, valueVars, varName = "variable", valueName = "value" } = config;
@@ -1960,14 +2014,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame} A new wide DataFrame with unstacked columns.
      * @example
      * <!-- doc:base_numbers_3x1 -->
-     * >>> df.unstack("a", { step: 2, how: "horizontal" })
-     * shape: (2, 2)
-     * +-----+------+
-     * | a_0 | a_1  |
-     * +-----+------+
-     * | 1   | 2    |
-     * | 3   | null |
-     * +-----+------+
+     * df.unstack("a", { step: 2, how: "horizontal" });
+     * // shape: (2, 2)
+     * // +-----+------+
+     * // | a_0 | a_1  |
+     * // +-----+------+
+     * // | 1   | 2    |
+     * // | 3   | null |
+     * // +-----+------+
      */
     unstack(
         columns: IntoExprArg,
@@ -2032,8 +2086,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns Number of columns.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.width
-     * 2
+     * df.width;
+     * // 2
      */
     get width(): number {
         return Object.keys(this._columns).length;
@@ -2042,28 +2096,49 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Adds new columns or updates existing ones using column expressions.
      * @param {SelectArg[]} args Expressions or field objects defining column calculations.
-     * @returns {DataFrame}
-     * @example
+     * @returns {DataFrame}     * @example
+     * // 1. Append a single calculated column:
      * <!-- doc:base_2x2 -->
-     * >>> df.withColumns($df.col("a").mul(10).alias("a_x10"))
-     * shape: (2, 3)
-     * +---+---+-------+
-     * | a | b | a_x10 |
-     * +---+---+-------+
-     * | 1 | x | 10    |
-     * | 2 | y | 20    |
-     * +---+---+-------+
+     * df.withColumns($df.col("a").mul(10).alias("a_x10"));
+     * // shape: (2, 3)
+     * // +---+---+-------+
+     * // | a | b | a_x10 |
+     * // +---+---+-------+
+     * // | 1 | x | 10    |
+     * // | 2 | y | 20    |
+     * // +---+---+-------+
+     *
+     * @example
+     * // 2. Add multiple columns in a single evaluation:
+     * <!-- doc:base_numbers_3x2 -->
+     * df.withColumns(
+     *   $df.col("a").add(100).alias("a_plus"),
+     *   $df.col("b").mul(2).alias("b_times_2")
+     * );
+     * // shape: (3, 4)
+     * // +---+----+--------+-----------+
+     * // | a | b  | a_plus | b_times_2 |
+     * // +---+----+--------+-----------+
+     * // | 1 | 10 | 101    | 20        |
+     * // | 2 | 20 | 102    | 40        |
+     * // | 3 | 30 | 103    | 60        |
+     * // +---+----+--------+-----------+
+     * // | a | b | a_x10 |
+     * // +---+---+-------+
+     * // | 1 | x | 10    |
+     * // | 2 | y | 20    |
+     * // +---+---+-------+
      */
-    withColumns(
+    withColumns<NewCols extends RowRecord = RowRecord>(
         ...args: SelectArg[]
-    ): DataFrame<any> {
-        if (args.length === 0) return this;
+    ): DataFrame<T & NewCols> {
+        if (args.length === 0) return this as unknown as DataFrame<T & NewCols>;
 
         const exprs = DataFrame._normalizeArgs(args);
         const allKeys = Object.keys(this._columns);
         const expandedExprs = resolveColumnSelectors(exprs, allKeys, undefined, this._schema, this._columns);
         const numEntries = expandedExprs.length;
-        if (numEntries === 0) return this;
+        if (numEntries === 0) return this as unknown as DataFrame<T & NewCols>;
 
         const overrides = new Map<string, IExpr>();
         for (let j = 0; j < numEntries; j++) {
@@ -2084,7 +2159,7 @@ export class DataFrame<T extends RowRecord = any> {
             selectList.push(expr);
         }
 
-        return this.select(...selectList);
+        return this.select(...selectList) as unknown as DataFrame<T & NewCols>;
     }
 
     /**
@@ -2094,14 +2169,14 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {DataFrame}
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.withRowIndex("idx")
-     * shape: (2, 3)
-     * +-----+---+---+
-     * | idx | a | b |
-     * +-----+---+---+
-     * | 0   | 1 | x |
-     * | 1   | 2 | y |
-     * +-----+---+---+
+     * df.withRowIndex("idx");
+     * // shape: (2, 3)
+     * // +-----+---+---+
+     * // | idx | a | b |
+     * // +-----+---+---+
+     * // | 0   | 1 | x |
+     * // | 1   | 2 | y |
+     * // +-----+---+---+
      */
     withRowIndex(name: string = "index", offset: number = 0): DataFrame<any> {
         const expr = seqRange(offset, {
@@ -2124,8 +2199,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {string} CSV string output.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.writeCsv()
-     * "a,b\n1,x"
+     * df.writeCsv();
+     * // "a,b\n1,x"
      */
     writeCsv(
         file?: WriteFileTargetArg,
@@ -2173,8 +2248,8 @@ export class DataFrame<T extends RowRecord = any> {
      * @returns {string} JSON string representation.
      * @example
      * <!-- doc:base_2x2 -->
-     * >>> df.writeJson()
-     * '[{"a":1,"b":"x"}]'
+     * df.writeJson();
+     * // '[{"a":1,"b":"x"}]'
      */
     writeJson(
         file?: WriteFileTargetArg,

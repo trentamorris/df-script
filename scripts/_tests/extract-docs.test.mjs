@@ -156,7 +156,7 @@ test("parseJSDocComment: multi-line @param descriptions and default values", () 
    *   and runs in O(N + M) time.
    * @returns {DataFrame<R>} Joined DataFrame.
    * @example
-   * >>> df1.join(df2, { on: "id" })
+   * df1.join(df2, { on: "id" });
    `;
 
   const parsed = parseJSDocComment(comment);
@@ -181,7 +181,7 @@ test("parseJSDocComment: multi-line @param descriptions and default values", () 
     "[Performance]: Hash join is used for equi-joins and runs in O(N + M) time."
   ]);
   assert.strictEqual(parsed.returns, "DataFrame<R>");
-  assert.deepStrictEqual(parsed.examples, ['>>> df1.join(df2, { on: "id" })']);
+  assert.deepStrictEqual(parsed.examples, ['df1.join(df2, { on: "id" });']);
 });
 
 // ─── 4. extractSignatureAndEnd & extractRawDocsFromContent Edge Cases ─────────
@@ -419,7 +419,7 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     },
     readJson: {
       filePath: "functions/readJson.ts",
-      signature: '$df.readJson(\n  content: string,\n  {\n    format = "json",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<any>',
+      signature: '$df.readJson<T extends RowRecord = any>(\n  content: string,\n  {\n    format = "json",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<T>',
       returns: "A new DataFrame instance populated with the parsed records."
     },
     seqRange: {

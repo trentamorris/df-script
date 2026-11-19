@@ -16,15 +16,30 @@ import { HORIZONTAL_MARKER } from "../columnExpressions/constants";
  * @category Function
  * @syntax $df.{symbol}(...)
  * @example
- * <!-- doc:base_2x2 -->
- * >>> df.select($df.horizontal("a", "b").sum().alias("row_sum"))
- * shape: (2, 1)
- * +---------+
- * | row_sum |
- * +---------+
- * | 1       |
- * | 2       |
- * +---------+
+ * // 1. Horizontal sum across row values:
+ * <!-- doc:base_numbers_3x2 -->
+ * df.select($df.horizontal("a", "b").sum().alias("row_sum"));
+ * // shape: (3, 1)
+ * // +---------+
+ * // | row_sum |
+ * // +---------+
+ * // | 11      |
+ * // | 22      |
+ * // | 33      |
+ * // +---------+
+ *
+ * @example
+ * // 2. Horizontal row-wise minimum:
+ * <!-- doc:base_numbers_3x2 -->
+ * df.select($df.horizontal("a", "b").min().alias("row_min"));
+ * // shape: (3, 1)
+ * // +---------+
+ * // | row_min |
+ * // +---------+
+ * // | 1       |
+ * // | 2       |
+ * // | 3       |
+ * // +---------+
  */
 export function horizontal(
     ...exprs: IntoExprArg[]

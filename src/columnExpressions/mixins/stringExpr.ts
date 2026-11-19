@@ -81,15 +81,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.concat("!").alias("exclaimed"))
-     * shape: (3, 2)
-     * +----------+-----------+
-     * | s        | exclaimed |
-     * +----------+-----------+
-     * | "apple"  | apple!    |
-     * | "banana" | banana!   |
-     * | "cherry" | cherry!   |
-     * +----------+-----------+
+     * df.withColumns($df.col("s").str.concat("!").alias("exclaimed"));
+     * // shape: (3, 2)
+     * // +----------+-----------+
+     * // | s        | exclaimed |
+     * // +----------+-----------+
+     * // | "apple"  | apple!    |
+     * // | "banana" | banana!   |
+     * // | "cherry" | cherry!   |
+     * // +----------+-----------+
      */
     concat(other: StringArg) {
         return this._expr._deriveBinary(other, (v: any, o: any) => String(v) + String(o));
@@ -102,13 +102,13 @@ export class StringExprNamespace {
      * @example
      * <!-- doc:base_strings_3x1 -->
      * >>> df.withColumns($df.col("email").str.contains("@example.com").alias("is_example"))
-     * shape: (2, 2)
-     * +------------------+------------+
-     * | email            | is_example |
-     * +------------------+------------+
-     * | user@example.com | true       |
-     * | admin@test.org   | false      |
-     * +------------------+------------+
+     * // shape: (2, 2)
+     * // +------------------+------------+
+     * // | email            | is_example |
+     * // +------------------+------------+
+     * // | user@example.com | true       |
+     * // | admin@test.org   | false      |
+     * // +------------------+------------+
      */
     contains(pattern: RegexPatternArg) {
         return this._derivePattern(pattern, (str) => this._matchPattern(str, pattern));
@@ -120,14 +120,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.containsAny(["@example.com", "@test.org"]).alias("is_target"))
-     * shape: (2, 2)
-     * +------------------+-----------+
-     * | email            | is_target |
-     * +------------------+-----------+
-     * | user@example.com | true      |
-     * | admin@test.org   | true      |
-     * +------------------+-----------+
+     * df.withColumns($df.col("email").str.containsAny(["@example.com", "@test.org"]).alias("is_target"))
+     * // shape: (2, 2)
+     * // +------------------+-----------+
+     * // | email            | is_target |
+     * // +------------------+-----------+
+     * // | user@example.com | true      |
+     * // | admin@test.org   | true      |
+     * // +------------------+-----------+
      */
     containsAny(patterns: RegexPatternSeriesArg) {
         return this._derivePattern(patterns, (str) => {
@@ -144,15 +144,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.countMatches("a").alias("a_count"))
-     * shape: (3, 2)
-     * +----------+---------+
-     * | s        | a_count |
-     * +----------+---------+
-     * | "apple"  | 1       |
-     * | "banana" | 3       |
-     * | "cherry" | 0       |
-     * +----------+---------+
+     * df.withColumns($df.col("s").str.countMatches("a").alias("a_count"));
+     * // shape: (3, 2)
+     * // +----------+---------+
+     * // | s        | a_count |
+     * // +----------+---------+
+     * // | "apple"  | 1       |
+     * // | "banana" | 3       |
+     * // | "cherry" | 0       |
+     * // +----------+---------+
      */
     countMatches(pattern: RegexPatternArg, options: CountMatchesOptions = {}) {
         const literal = options.literal ?? false;
@@ -175,15 +175,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.encode({ encoding: "hex" }).str.decode({ encoding: "hex" }).alias("decoded"))
-     * shape: (3, 2)
-     * +----------+---------+
-     * | s        | decoded |
-     * +----------+---------+
-     * | "apple"  | apple   |
-     * | "banana" | banana  |
-     * | "cherry" | cherry  |
-     * +----------+---------+
+     * df.withColumns($df.col("s").str.encode({ encoding: "hex" }).str.decode({ encoding: "hex" }).alias("decoded"));
+     * // shape: (3, 2)
+     * // +----------+---------+
+     * // | s        | decoded |
+     * // +----------+---------+
+     * // | "apple"  | apple   |
+     * // | "banana" | banana  |
+     * // | "cherry" | cherry  |
+     * // +----------+---------+
      */
     decode(options: StringDecodeOptions) {
         return this._deriveString((str) => decodeString(str, options.encoding, options));
@@ -194,14 +194,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.encodeUriComponent().str.decodeUriComponent().alias("decoded"))
-     * shape: (2, 2)
-     * +-------------+-------------+
-     * | s           | decoded     |
-     * +-------------+-------------+
-     * | "  hello  " | "  hello  " |
-     * | "  world  " | "  world  " |
-     * +-------------+-------------+
+     * df.withColumns($df.col("s").str.encodeUriComponent().str.decodeUriComponent().alias("decoded"));
+     * // shape: (2, 2)
+     * // +-------------+-------------+
+     * // | s           | decoded     |
+     * // +-------------+-------------+
+     * // | "  hello  " | "  hello  " |
+     * // | "  world  " | "  world  " |
+     * // +-------------+-------------+
      */
     decodeUriComponent() {
         return this._deriveString((str) => {
@@ -217,15 +217,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.encode({ encoding: "hex" }).alias("encoded"))
-     * shape: (3, 2)
-     * +----------+----------------+
-     * | s        | encoded        |
-     * +----------+----------------+
-     * | "apple"  | 6170706c65     |
-     * | "banana" | 62616e616e61   |
-     * | "cherry" | 636865727279   |
-     * +----------+----------------+
+     * df.withColumns($df.col("s").str.encode({ encoding: "hex" }).alias("encoded"));
+     * // shape: (3, 2)
+     * // +----------+----------------+
+     * // | s        | encoded        |
+     * // +----------+----------------+
+     * // | "apple"  | 6170706c65     |
+     * // | "banana" | 62616e616e61   |
+     * // | "cherry" | 636865727279   |
+     * // +----------+----------------+
      */
     encode(options: StringEncodeOptions) {
         return this._deriveString((str) => encodeString(str, options.encoding));
@@ -236,14 +236,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.encodeUriComponent().alias("encoded"))
-     * shape: (2, 2)
-     * +-------------+-------------------+
-     * | s           | encoded           |
-     * +-------------+-------------------+
-     * | "  hello  " | "%20%20hello%20%20" |
-     * | "  world  " | "%20%20world%20%20" |
-     * +-------------+-------------------+
+     * df.withColumns($df.col("s").str.encodeUriComponent().alias("encoded"));
+     * // shape: (2, 2)
+     * // +-------------+-------------------+
+     * // | s           | encoded           |
+     * // +-------------+-------------------+
+     * // | "  hello  " | "%20%20hello%20%20" |
+     * // | "  world  " | "%20%20world%20%20" |
+     * // +-------------+-------------------+
      */
     encodeUriComponent() {
         return this._deriveString((str) => {
@@ -257,14 +257,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.endsWith(".org").alias("is_org"))
-     * shape: (2, 2)
-     * +------------------+--------+
-     * | email            | is_org |
-     * +------------------+--------+
-     * | user@example.com | false  |
-     * | admin@test.org   | true   |
-     * +------------------+--------+
+     * df.withColumns($df.col("email").str.endsWith(".org").alias("is_org"));
+     * // shape: (2, 2)
+     * // +------------------+--------+
+     * // | email            | is_org |
+     * // +------------------+--------+
+     * // | user@example.com | false  |
+     * // | admin@test.org   | true   |
+     * // +------------------+--------+
      */
     endsWith(suffix: string) {
         return this._deriveString((str) => str.endsWith(suffix));
@@ -275,15 +275,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.escapeRegex().alias("escaped"))
-     * shape: (3, 2)
-     * +----------+---------+
-     * | s        | escaped |
-     * +----------+---------+
-     * | "apple"  | apple   |
-     * | "banana" | banana  |
-     * | "cherry" | cherry  |
-     * +----------+---------+
+     * df.withColumns($df.col("s").str.escapeRegex().alias("escaped"));
+     * // shape: (3, 2)
+     * // +----------+---------+
+     * // | s        | escaped |
+     * // +----------+---------+
+     * // | "apple"  | apple   |
+     * // | "banana" | banana  |
+     * // | "cherry" | cherry  |
+     * // +----------+---------+
      */
     escapeRegex(options: EscapeRegexOptions = {}) {
         return this._deriveString((str) => escapeRegExp(str, options));
@@ -294,15 +294,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.explode().alias("chars"))
-     * shape: (3, 2)
-     * +----------+-------------------------------------+
-     * | s        | chars                               |
-     * +----------+-------------------------------------+
-     * | "apple"  | ["a", "p", "p", "l", "e"]           |
-     * | "banana" | ["b", "a", "n", "a", "n", "a"]     |
-     * | "cherry" | ["c", "h", "e", "r", "r", "y"]     |
-     * +----------+-------------------------------------+
+     * df.withColumns($df.col("s").str.explode().alias("chars"));
+     * // shape: (3, 2)
+     * // +----------+-------------------------------------+
+     * // | s        | chars                               |
+     * // +----------+-------------------------------------+
+     * // | "apple"  | ["a", "p", "p", "l", "e"]           |
+     * // | "banana" | ["b", "a", "n", "a", "n", "a"]     |
+     * // | "cherry" | ["c", "h", "e", "r", "r", "y"]     |
+     * // +----------+-------------------------------------+
      */
     explode() {
         return this._deriveString((str) => str.split(""));
@@ -315,14 +315,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.extract(/@(\w+)/).alias("domain"))
-     * shape: (2, 2)
-     * +------------------+---------+
-     * | email            | domain  |
-     * +------------------+---------+
-     * | user@example.com | example |
-     * | admin@test.org   | test    |
-     * +------------------+---------+
+     * df.withColumns($df.col("email").str.extract(/@(\w+)/).alias("domain"));
+     * // shape: (2, 2)
+     * // +------------------+---------+
+     * // | email            | domain  |
+     * // +------------------+---------+
+     * // | user@example.com | example |
+     * // | admin@test.org   | test    |
+     * // +------------------+---------+
      */
     extract(pattern: RegexPatternArg, options?: ExtractRegexEngineOptions) {
         return this._derivePattern(pattern, (str) => extractRegex(str, pattern, options));
@@ -335,15 +335,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.extractAll(/[aeiou]/).alias("vowels"))
-     * shape: (3, 2)
-     * +----------+-----------------+
-     * | s        | vowels          |
-     * +----------+-----------------+
-     * | "apple"  | ["a", "e"]      |
-     * | "banana" | ["a", "a", "a"] |
-     * | "cherry" | ["e"]           |
-     * +----------+-----------------+
+     * df.withColumns($df.col("s").str.extractAll(/[aeiou]/).alias("vowels"));
+     * // shape: (3, 2)
+     * // +----------+-----------------+
+     * // | s        | vowels          |
+     * // +----------+-----------------+
+     * // | "apple"  | ["a", "e"]      |
+     * // | "banana" | ["a", "a", "a"] |
+     * // | "cherry" | ["e"]           |
+     * // +----------+-----------------+
      */
     extractAll(pattern: RegexPatternArg, options?: ExtractRegexEngineOptions) {
         return this._derivePattern(pattern, (str) => extractRegexAll(str, pattern, options) ?? []);
@@ -355,14 +355,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.extractGroups(/(?<user>\w+)@(?<domain>\w+)/).alias("parsed"))
-     * shape: (2, 2)
-     * +------------------+------------------------------------+
-     * | email            | parsed                             |
-     * +------------------+------------------------------------+
-     * | user@example.com | { user: "user", domain: "example" }|
-     * | admin@test.org   | { user: "admin", domain: "test" }  |
-     * +------------------+------------------------------------+
+     * df.withColumns($df.col("email").str.extractGroups(/(?<user>\w+)@(?<domain>\w+)/).alias("parsed"));
+     * // shape: (2, 2)
+     * // +------------------+------------------------------------+
+     * // | email            | parsed                             |
+     * // +------------------+------------------------------------+
+     * // | user@example.com | { user: "user", domain: "example" }|
+     * // | admin@test.org   | { user: "admin", domain: "test" }  |
+     * // +------------------+------------------------------------+
      */
     extractGroups(pattern: RegexPatternArg, options: ExtractRegexEngineOptions = {}) {
         return this._derivePattern(pattern, (str) => extractRegexEngine(str, pattern, options)?.[0] ?? null);
@@ -375,15 +375,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.extractMany([/app/, /ban/, /che/]).alias("extracted"))
-     * shape: (3, 2)
-     * +----------+-------------+
-     * | s        | extracted   |
-     * +----------+-------------+
-     * | "apple"  | ["app"]     |
-     * | "banana" | ["ban"]     |
-     * | "cherry" | ["che"]     |
-     * +----------+-------------+
+     * df.withColumns($df.col("s").str.extractMany([/app/, /ban/, /che/]).alias("extracted"));
+     * // shape: (3, 2)
+     * // +----------+-------------+
+     * // | s        | extracted   |
+     * // +----------+-------------+
+     * // | "apple"  | ["app"]     |
+     * // | "banana" | ["ban"]     |
+     * // | "cherry" | ["che"]     |
+     * // +----------+-------------+
      */
     extractMany(patterns: RegexPatternSeriesArg, options: ExtractManyOptions = {}) {
         return this._derivePattern(patterns, (str) => extractRegexMany(str, patterns, options));
@@ -397,15 +397,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.find("a").alias("pos"))
-     * shape: (3, 2)
-     * +----------+------+
-     * | s        | pos  |
-     * +----------+------+
-     * | "apple"  | 0    |
-     * | "banana" | 1    |
-     * | "cherry" | null |
-     * +----------+------+
+     * df.withColumns($df.col("s").str.find("a").alias("pos"));
+     * // shape: (3, 2)
+     * // +----------+------+
+     * // | s        | pos  |
+     * // +----------+------+
+     * // | "apple"  | 0    |
+     * // | "banana" | 1    |
+     * // | "cherry" | null |
+     * // +----------+------+
      */
     find(value: RegexPatternArg, options: FindOptions = {}) {
         return this._derivePattern(value, (str) => findRegex(str, value, options));
@@ -418,15 +418,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.findMany(["a", "e"]).alias("positions"))
-     * shape: (3, 2)
-     * +----------+-----------+
-     * | s        | positions |
-     * +----------+-----------+
-     * | "apple"  | [0, 4]    |
-     * | "banana" | [1]       |
-     * | "cherry" | [2]       |
-     * +----------+-----------+
+     * df.withColumns($df.col("s").str.findMany(["a", "e"]).alias("positions"));
+     * // shape: (3, 2)
+     * // +----------+-----------+
+     * // | s        | positions |
+     * // +----------+-----------+
+     * // | "apple"  | [0, 4]    |
+     * // | "banana" | [1]       |
+     * // | "cherry" | [2]       |
+     * // +----------+-----------+
      */
     findMany(patterns: RegexPatternSeriesArg, options: FindManyOptions = {}) {
         return this._derivePattern(patterns, (str) => findManyRegex(str, patterns, options));
@@ -438,15 +438,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.head(3).alias("prefix"))
-     * shape: (3, 2)
-     * +----------+--------+
-     * | s        | prefix |
-     * +----------+--------+
-     * | "apple"  | app    |
-     * | "banana" | ban    |
-     * | "cherry" | che    |
-     * +----------+--------+
+     * df.withColumns($df.col("s").str.head(3).alias("prefix"));
+     * // shape: (3, 2)
+     * // +----------+--------+
+     * // | s        | prefix |
+     * // +----------+--------+
+     * // | "apple"  | app    |
+     * // | "banana" | ban    |
+     * // | "cherry" | che    |
+     * // +----------+--------+
      */
     head(n: number = 1) {
         return this.slice(0, n);
@@ -460,14 +460,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_array_nested_2rows -->
-     * >>> df.withColumns($df.col("a").str.join("-").alias("joined"))
-     * shape: (2, 2)
-     * +------------+--------+
-     * | a          | joined |
-     * +------------+--------+
-     * | ["a", "b"] | a-b    |
-     * | ["c"]      | c      |
-     * +------------+--------+
+     * df.withColumns($df.col("a").str.join("-").alias("joined"));
+     * // shape: (2, 2)
+     * // +------------+--------+
+     * // | a          | joined |
+     * // +------------+--------+
+     * // | ["a", "b"] | a-b    |
+     * // | ["c"]      | c      |
+     * // +------------+--------+
      */
     join(delimiter: string = "", options: JoinArrayOptions = {}) {
         return this._expr._deriveUnary((v: any) =>
@@ -482,14 +482,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.trim().str.jsonDecode().alias("parsed"))
-     * shape: (2, 2)
-     * +-------------+---------+
-     * | s           | parsed  |
-     * +-------------+---------+
-     * | "  hello  " | "hello" |
-     * | "  world  " | "world" |
-     * +-------------+---------+
+     * df.withColumns($df.col("s").str.trim().str.jsonDecode().alias("parsed"));
+     * // shape: (2, 2)
+     * // +-------------+---------+
+     * // | s           | parsed  |
+     * // +-------------+---------+
+     * // | "  hello  " | "hello" |
+     * // | "  world  " | "world" |
+     * // +-------------+---------+
      */
     jsonDecode(options: SafeJsonParseOptions = {}) {
         return this._deriveString((str) => safeJsonParse(str, options));
@@ -501,14 +501,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.trim().str.jsonPathMatch("$").alias("val"))
-     * shape: (2, 2)
-     * +-------------+---------+
-     * | s           | val     |
-     * +-------------+---------+
-     * | "  hello  " | "hello" |
-     * | "  world  " | "world" |
-     * +-------------+---------+
+     * df.withColumns($df.col("json").str.jsonPathMatch("$.a").alias("val"));
+     * // shape: (2, 2)
+     * // +-------------+---------+
+     * // | s           | val     |
+     * // +-------------+---------+
+     * // | "  hello  " | "hello" |
+     * // | "  world  " | "world" |
+     * // +-------------+---------+
      */
     jsonPathMatch(jsonPath: string) {
         return this._deriveString((str) => jsonPathMatch(str, jsonPath));
@@ -519,15 +519,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.len().alias("length"))
-     * shape: (3, 2)
-     * +----------+--------+
-     * | s        | length |
-     * +----------+--------+
-     * | "apple"  | 5      |
-     * | "banana" | 6      |
-     * | "cherry" | 6      |
-     * +----------+--------+
+     * df.withColumns($df.col("s").str.len().alias("length"));
+     * // shape: (3, 2)
+     * // +----------+--------+
+     * // | s        | length |
+     * // +----------+--------+
+     * // | "apple"  | 5      |
+     * // | "banana" | 6      |
+     * // | "cherry" | 6      |
+     * // +----------+--------+
      */
     len() {
         return this.lenChars();
@@ -538,15 +538,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.lenBytes().alias("bytes"))
-     * shape: (3, 2)
-     * +----------+-------+
-     * | s        | bytes |
-     * +----------+-------+
-     * | "apple"  | 5     |
-     * | "banana" | 6     |
-     * | "cherry" | 6     |
-     * +----------+-------+
+     * df.withColumns($df.col("s").str.lenBytes().alias("bytes"));
+     * // shape: (3, 2)
+     * // +----------+-------+
+     * // | s        | bytes |
+     * // +----------+-------+
+     * // | "apple"  | 5     |
+     * // | "banana" | 6     |
+     * // | "cherry" | 6     |
+     * // +----------+-------+
      */
     lenBytes() {
         return this._deriveString((str) => TEXT_ENCODER.encode(str).length);
@@ -557,15 +557,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.lenChars().alias("length"))
-     * shape: (3, 2)
-     * +----------+--------+
-     * | s        | length |
-     * +----------+--------+
-     * | "apple"  | 5      |
-     * | "banana" | 6      |
-     * | "cherry" | 6      |
-     * +----------+--------+
+     * df.withColumns($df.col("s").str.lenChars().alias("length"));
+     * // shape: (3, 2)
+     * // +----------+--------+
+     * // | s        | length |
+     * // +----------+--------+
+     * // | "apple"  | 5      |
+     * // | "banana" | 6      |
+     * // | "cherry" | 6      |
+     * // +----------+--------+
      */
     lenChars() {
         return this._deriveString((str) => str.length);
@@ -576,15 +576,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.lower().alias("lowered"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | lowered   |
-     * +-------------+-----------+
-     * | "HELLO"     | hello     |
-     * | "World"     | world     |
-     * | "df-script" | df-script |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.lower().alias("lowered"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | lowered   |
+     * // +-------------+-----------+
+     * // | "HELLO"     | hello     |
+     * // | "World"     | world     |
+     * // | "df-script" | df-script |
+     * // +-------------+-----------+
      */
     lower() {
         return this._deriveString((str) => str.toLowerCase());
@@ -597,15 +597,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.lpad(8, "_").alias("padded"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | padded   |
-     * +----------+----------+
-     * | "apple"  | ___apple |
-     * | "banana" | __banana |
-     * | "cherry" | __cherry |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.lpad(8, "_").alias("padded"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | padded   |
+     * // +----------+----------+
+     * // | "apple"  | ___apple |
+     * // | "banana" | __banana |
+     * // | "cherry" | __cherry |
+     * // +----------+----------+
      */
     lpad(width: number, fill: string = " ") {
         return this._deriveString((str) => str.padStart(width, fill));
@@ -618,15 +618,15 @@ export class StringExprNamespace {
      * @throws InvalidArgumentError If an invalid normalization form is provided.
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.normalize("NFC").alias("normalized"))
-     * shape: (3, 2)
-     * +-------------+------------+
-     * | s           | normalized |
-     * +-------------+------------+
-     * | "HELLO"     | HELLO      |
-     * | "World"     | World      |
-     * | "df-script" | df-script  |
-     * +-------------+------------+
+     * df.withColumns($df.col("s").str.normalize("NFC").alias("normalized"));
+     * // shape: (3, 2)
+     * // +-------------+------------+
+     * // | s           | normalized |
+     * // +-------------+------------+
+     * // | "HELLO"     | HELLO      |
+     * // | "World"     | World      |
+     * // | "df-script" | df-script  |
+     * // +-------------+------------+
      */
     normalize(form: UnicodeNormalizeForm = "NFC") {
         return this._deriveString((str) => str.normalize(form));
@@ -639,15 +639,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.padEnd(8, "_").alias("padded"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | padded   |
-     * +----------+----------+
-     * | "apple"  | apple___ |
-     * | "banana" | banana__ |
-     * | "cherry" | cherry__ |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.padEnd(8, "_").alias("padded"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | padded   |
+     * // +----------+----------+
+     * // | "apple"  | apple___ |
+     * // | "banana" | banana__ |
+     * // | "cherry" | cherry__ |
+     * // +----------+----------+
      */
     padEnd(width: number, fill: string = " ") {
         return this.rpad(width, fill);
@@ -660,15 +660,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.padStart(8, "_").alias("padded"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | padded   |
-     * +----------+----------+
-     * | "apple"  | ___apple |
-     * | "banana" | __banana |
-     * | "cherry" | __cherry |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.padStart(8, "_").alias("padded"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | padded   |
+     * // +----------+----------+
+     * // | "apple"  | ___apple |
+     * // | "banana" | __banana |
+     * // | "cherry" | __cherry |
+     * // +----------+----------+
      */
     padStart(width: number, fill: string = " ") {
         return this.lpad(width, fill);
@@ -682,14 +682,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.replace("example", "test").alias("updated"))
-     * shape: (2, 2)
-     * +------------------+---------------+
-     * | email            | updated       |
-     * +------------------+---------------+
-     * | user@example.com | user@test.com |
-     * | admin@test.org   | admin@test.org|
-     * +------------------+---------------+
+     * df.withColumns($df.col("email").str.replace("example", "test").alias("updated"));
+     * // shape: (2, 2)
+     * // +------------------+---------------+
+     * // | email            | updated       |
+     * // +------------------+---------------+
+     * // | user@example.com | user@test.com |
+     * // | admin@test.org   | admin@test.org|
+     * // +------------------+---------------+
      */
     replace(
         pattern: RegexPatternArg,
@@ -707,15 +707,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.replaceAll("a", "@").alias("replaced"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | replaced |
-     * +----------+----------+
-     * | "apple"  | @pple    |
-     * | "banana" | b@n@n@   |
-     * | "cherry" | cherry   |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.replaceAll("a", "@").alias("replaced"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | replaced |
+     * // +----------+----------+
+     * // | "apple"  | @pple    |
+     * // | "banana" | b@n@n@   |
+     * // | "cherry" | cherry   |
+     * // +----------+----------+
      */
     replaceAll(
         pattern: RegexPatternArg,
@@ -734,15 +734,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.replaceMany(["apple", "banana"], ["1", "2"]).alias("res"))
-     * shape: (3, 2)
-     * +----------+--------+
-     * | s        | res    |
-     * +----------+--------+
-     * | "apple"  | 1      |
-     * | "banana" | 2      |
-     * | "cherry" | cherry |
-     * +----------+--------+
+     * df.withColumns($df.col("s").str.replaceMany(["apple", "banana"], ["1", "2"]).alias("res"));
+     * // shape: (3, 2)
+     * // +----------+--------+
+     * // | s        | res    |
+     * // +----------+--------+
+     * // | "apple"  | 1      |
+     * // | "banana" | 2      |
+     * // | "cherry" | cherry |
+     * // +----------+--------+
      */
     replaceMany(
         patterns: RegexPatternSeriesArg | Record<string, string>,
@@ -757,15 +757,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.reverse().alias("rev"))
-     * shape: (3, 2)
-     * +----------+--------+
-     * | s        | rev    |
-     * +----------+--------+
-     * | "apple"  | elppa  |
-     * | "banana" | ananab |
-     * | "cherry" | yrrehc |
-     * +----------+--------+
+     * df.withColumns($df.col("s").str.reverse().alias("rev"));
+     * // shape: (3, 2)
+     * // +----------+--------+
+     * // | s        | rev    |
+     * // +----------+--------+
+     * // | "apple"  | elppa  |
+     * // | "banana" | ananab |
+     * // | "cherry" | yrrehc |
+     * // +----------+--------+
      */
     reverse() {
         return this._deriveString((str) => str.split("").reverse().join(""));
@@ -778,15 +778,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.rpad(8, "_").alias("padded"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | padded   |
-     * +----------+----------+
-     * | "apple"  | apple___ |
-     * | "banana" | banana__ |
-     * | "cherry" | cherry__ |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.rpad(8, "_").alias("padded"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | padded   |
+     * // +----------+----------+
+     * // | "apple"  | apple___ |
+     * // | "banana" | banana__ |
+     * // | "cherry" | cherry__ |
+     * // +----------+----------+
      */
     rpad(width: number, fill: string = " ") {
         return this._deriveString((str) => str.padEnd(width, fill));
@@ -799,15 +799,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.slice(0, 3).alias("sub"))
-     * shape: (3, 2)
-     * +----------+-----+
-     * | s        | sub |
-     * +----------+-----+
-     * | "apple"  | app |
-     * | "banana" | ban |
-     * | "cherry" | che |
-     * +----------+-----+
+     * df.withColumns($df.col("s").str.slice(0, 3).alias("sub"));
+     * // shape: (3, 2)
+     * // +----------+-----+
+     * // | s        | sub |
+     * // +----------+-----+
+     * // | "apple"  | app |
+     * // | "banana" | ban |
+     * // | "cherry" | che |
+     * // +----------+-----+
      */
     slice(offset: number, length?: number) {
         return this._deriveString((str) => {
@@ -824,14 +824,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.split("@").alias("parts"))
-     * shape: (2, 2)
-     * +------------------+------------------------+
-     * | email            | parts                  |
-     * +------------------+------------------------+
-     * | user@example.com | ["user", "example.com"]|
-     * | admin@test.org   | ["admin", "test.org"]  |
-     * +------------------+------------------------+
+     * df.withColumns($df.col("email").str.split("@").alias("parts"));
+     * // shape: (2, 2)
+     * // +------------------+------------------------+
+     * // | email            | parts                  |
+     * // +------------------+------------------------+
+     * // | user@example.com | ["user", "example.com"]|
+     * // | admin@test.org   | ["admin", "test.org"]  |
+     * // +------------------+------------------------+
      */
     split(delimiter: string, options?: SplitOptions) {
         return this._deriveString((str) => splitString(str, delimiter, options));
@@ -843,15 +843,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.startsWith("a").alias("starts_a"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | starts_a |
-     * +----------+----------+
-     * | "apple"  | true     |
-     * | "banana" | false    |
-     * | "cherry" | false    |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.startsWith("a").alias("starts_a"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | starts_a |
+     * // +----------+----------+
+     * // | "apple"  | true     |
+     * // | "banana" | false    |
+     * // | "cherry" | false    |
+     * // +----------+----------+
      */
     startsWith(prefix: string) {
         return this._deriveString((str) => str.startsWith(prefix));
@@ -864,14 +864,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.stripChars().alias("stripped"))
-     * shape: (2, 2)
-     * +-------------+----------+
-     * | s           | stripped |
-     * +-------------+----------+
-     * | "  hello  " | hello    |
-     * | "  world  " | world    |
-     * +-------------+----------+
+     * df.withColumns($df.col("s").str.stripChars().alias("stripped"));
+     * // shape: (2, 2)
+     * // +-------------+----------+
+     * // | s           | stripped |
+     * // +-------------+----------+
+     * // | "  hello  " | hello    |
+     * // | "  world  " | world    |
+     * // +-------------+----------+
      */
     stripChars(characters?: RegexPatternArg, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "both", ...options }));
@@ -884,14 +884,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.stripCharsEnd().alias("stripped"))
-     * shape: (2, 2)
-     * +-------------+----------+
-     * | s           | stripped |
-     * +-------------+----------+
-     * | "  hello  " | "  hello" |
-     * | "  world  " | "  world" |
-     * +-------------+----------+
+     * df.withColumns($df.col("s").str.stripCharsEnd().alias("stripped"));
+     * // shape: (2, 2)
+     * // +-------------+----------+
+     * // | s           | stripped |
+     * // +-------------+----------+
+     * // | "  hello  " | "  hello" |
+     * // | "  world  " | "  world" |
+     * // +-------------+----------+
      */
     stripCharsEnd(characters?: RegexPatternArg, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "end", ...options }));
@@ -904,14 +904,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.stripCharsStart().alias("stripped"))
-     * shape: (2, 2)
-     * +-------------+----------+
-     * | s           | stripped |
-     * +-------------+----------+
-     * | "  hello  " | "hello  " |
-     * | "  world  " | "world  " |
-     * +-------------+----------+
+     * df.withColumns($df.col("s").str.stripCharsStart().alias("stripped"));
+     * // shape: (2, 2)
+     * // +-------------+----------+
+     * // | s           | stripped |
+     * // +-------------+----------+
+     * // | "  hello  " | "hello  " |
+     * // | "  world  " | "world  " |
+     * // +-------------+----------+
      */
     stripCharsStart(characters?: RegexPatternArg, options?: StripCharsOptions) {
         return this._deriveString((str) => stripChars(str, characters, { mode: "start", ...options }));
@@ -923,15 +923,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.stripPrefix("df-").alias("stripped"))
-     * shape: (3, 2)
-     * +-------------+----------+
-     * | s           | stripped |
-     * +-------------+----------+
-     * | "HELLO"     | HELLO    |
-     * | "World"     | World    |
-     * | "df-script" | script   |
-     * +-------------+----------+
+     * df.withColumns($df.col("s").str.stripPrefix("df-").alias("stripped"));
+     * // shape: (3, 2)
+     * // +-------------+----------+
+     * // | s           | stripped |
+     * // +-------------+----------+
+     * // | "HELLO"     | HELLO    |
+     * // | "World"     | World    |
+     * // | "df-script" | script   |
+     * // +-------------+----------+
      */
     stripPrefix(prefix: string) {
         return this._deriveString((str) => {
@@ -951,14 +951,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("email").str.stripSuffix(".com").alias("stripped"))
-     * shape: (2, 2)
-     * +------------------+----------------+
-     * | email            | stripped       |
-     * +------------------+----------------+
-     * | user@example.com | user@example   |
-     * | admin@test.org   | admin@test.org |
-     * +------------------+----------------+
+     * df.withColumns($df.col("email").str.stripSuffix(".com").alias("stripped"));
+     * // shape: (2, 2)
+     * // +------------------+----------------+
+     * // | email            | stripped       |
+     * // +------------------+----------------+
+     * // | user@example.com | user@example   |
+     * // | admin@test.org   | admin@test.org |
+     * // +------------------+----------------+
      */
     stripSuffix(suffix: string) {
         return this._deriveString((str) => {
@@ -980,13 +980,13 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_temporal_single -->
-     * >>> df.withColumns($df.col("d").str.strptime({ format: "%Y-%m-%d" }).alias("parsed"))
-     * shape: (1, 2)
-     * +------------+--------------------------+
-     * | d          | parsed                   |
-     * +------------+--------------------------+
-     * | 2026-05-20 | 2026-05-20T00:00:00.000Z |
-     * +------------+--------------------------+
+     * df.withColumns($df.col("d").str.strptime({ format: "%Y-%m-%d" }).alias("parsed"));
+     * // shape: (1, 2)
+     * // +------------+--------------------------+
+     * // | d          | parsed                   |
+     * // +------------+--------------------------+
+     * // | 2026-05-20 | 2026-05-20T00:00:00.000Z |
+     * // +------------+--------------------------+
      */
     strptime(options: StrptimeOptions) {
         return this._deriveString((str) => strptime(str, options));
@@ -998,15 +998,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.tail(3).alias("suffix"))
-     * shape: (3, 2)
-     * +----------+--------+
-     * | s        | suffix |
-     * +----------+--------+
-     * | "apple"  | ple    |
-     * | "banana" | ana    |
-     * | "cherry" | rry    |
-     * +----------+--------+
+     * df.withColumns($df.col("s").str.tail(3).alias("suffix"));
+     * // shape: (3, 2)
+     * // +----------+--------+
+     * // | s        | suffix |
+     * // +----------+--------+
+     * // | "apple"  | ple    |
+     * // | "banana" | ana    |
+     * // | "cherry" | rry    |
+     * // +----------+--------+
      */
     tail(n: number = 1) {
         return this.slice(-n);
@@ -1017,15 +1017,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toCamelCase().alias("camel"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | camel     |
-     * +-------------+-----------+
-     * | "HELLO"     | hello     |
-     * | "World"     | world     |
-     * | "df-script" | dfScript  |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.toCamelCase().alias("camel"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | camel     |
+     * // +-------------+-----------+
+     * // | "HELLO"     | hello     |
+     * // | "World"     | world     |
+     * // | "df-script" | dfScript  |
+     * // +-------------+-----------+
      */
     toCamelCase() {
         return this._deriveString((str) => changeCase(str, { format: "camel" }));
@@ -1036,13 +1036,13 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_temporal_single -->
-     * >>> df.withColumns($df.col("d").str.toDate().alias("date"))
-     * shape: (1, 2)
-     * +------------+--------------------------+
-     * | d          | date                     |
-     * +------------+--------------------------+
-     * | 2026-05-20 | 2026-05-20T00:00:00.000Z |
-     * +------------+--------------------------+
+     * df.withColumns($df.col("d").str.toDate().alias("date"));
+     * // shape: (1, 2)
+     * // +------------+--------------------------+
+     * // | d          | date                     |
+     * // +------------+--------------------------+
+     * // | 2026-05-20 | 2026-05-20T00:00:00.000Z |
+     * // +------------+--------------------------+
      */
     toDate() {
         return this._deriveString((str) => toValidDate(str, { dateOnly: true }));
@@ -1053,13 +1053,13 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_temporal_single -->
-     * >>> df.withColumns($df.col("d").str.toDatetime().alias("dt"))
-     * shape: (1, 2)
-     * +------------+--------------------------+
-     * | d          | dt                       |
-     * +------------+--------------------------+
-     * | 2026-05-20 | 2026-05-20T00:00:00.000Z |
-     * +------------+--------------------------+
+     * df.withColumns($df.col("d").str.toDatetime().alias("dt"));
+     * // shape: (1, 2)
+     * // +------------+--------------------------+
+     * // | d          | dt                       |
+     * // +------------+--------------------------+
+     * // | 2026-05-20 | 2026-05-20T00:00:00.000Z |
+     * // +------------+--------------------------+
      */
     toDatetime() {
         return this._deriveString(toValidDate);
@@ -1072,15 +1072,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.len().str.toDecimal().alias("num"))
-     * shape: (3, 2)
-     * +----------+-----+
-     * | s        | num |
-     * +----------+-----+
-     * | "apple"  | 5   |
-     * | "banana" | 6   |
-     * | "cherry" | 6   |
-     * +----------+-----+
+     * df.withColumns($df.col("s").str.len().str.toDecimal().alias("num"));
+     * // shape: (3, 2)
+     * // +----------+-----+
+     * // | s        | num |
+     * // +----------+-----+
+     * // | "apple"  | 5   |
+     * // | "banana" | 6   |
+     * // | "cherry" | 6   |
+     * // +----------+-----+
      */
     toDecimal(precision?: number, scale?: number) {
         return this._deriveString((str) => toValidDecimal(str, { precision, scale }));
@@ -1091,15 +1091,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.len().str.toInteger().alias("num"))
-     * shape: (3, 2)
-     * +----------+-----+
-     * | s        | num |
-     * +----------+-----+
-     * | "apple"  | 5   |
-     * | "banana" | 6   |
-     * | "cherry" | 6   |
-     * +----------+-----+
+     * df.withColumns($df.col("s").str.len().str.toInteger().alias("num"));
+     * // shape: (3, 2)
+     * // +----------+-----+
+     * // | s        | num |
+     * // +----------+-----+
+     * // | "apple"  | 5   |
+     * // | "banana" | 6   |
+     * // | "cherry" | 6   |
+     * // +----------+-----+
      */
     toInteger() {
         return this._deriveString(toValidInt);
@@ -1110,15 +1110,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toKebabCase().alias("kebab"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | kebab     |
-     * +-------------+-----------+
-     * | "HELLO"     | hello     |
-     * | "World"     | world     |
-     * | "df-script" | df-script |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.toKebabCase().alias("kebab"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | kebab     |
+     * // +-------------+-----------+
+     * // | "HELLO"     | hello     |
+     * // | "World"     | world     |
+     * // | "df-script" | df-script |
+     * // +-------------+-----------+
      */
     toKebabCase() {
         return this._deriveString((str) => changeCase(str, { format: "kebab" }));
@@ -1129,15 +1129,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toLowerCase().alias("lower_name"))
-     * shape: (3, 2)
-     * +-------------+------------+
-     * | s           | lower_name |
-     * +-------------+------------+
-     * | "HELLO"     | hello      |
-     * | "World"     | world      |
-     * | "df-script" | df-script  |
-     * +-------------+------------+
+     * df.withColumns($df.col("s").str.toLowerCase().alias("lower_name"));
+     * // shape: (3, 2)
+     * // +-------------+------------+
+     * // | s           | lower_name |
+     * // +-------------+------------+
+     * // | "HELLO"     | hello      |
+     * // | "World"     | world      |
+     * // | "df-script" | df-script  |
+     * // +-------------+------------+
      */
     toLowerCase() {
         return this.lower();
@@ -1148,15 +1148,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toPascalCase().alias("pascal"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | pascal    |
-     * +-------------+-----------+
-     * | "HELLO"     | Hello     |
-     * | "World"     | World     |
-     * | "df-script" | DfScript  |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.toPascalCase().alias("pascal"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | pascal    |
+     * // +-------------+-----------+
+     * // | "HELLO"     | Hello     |
+     * // | "World"     | World     |
+     * // | "df-script" | DfScript  |
+     * // +-------------+-----------+
      */
     toPascalCase() {
         return this._deriveString((str) => changeCase(str, { format: "pascal" }));
@@ -1167,15 +1167,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toSnakeCase().alias("snake"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | snake     |
-     * +-------------+-----------+
-     * | "HELLO"     | hello     |
-     * | "World"     | world     |
-     * | "df-script" | df_script |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.toSnakeCase().alias("snake"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | snake     |
+     * // +-------------+-----------+
+     * // | "HELLO"     | hello     |
+     * // | "World"     | world     |
+     * // | "df-script" | df_script |
+     * // +-------------+-----------+
      */
     toSnakeCase() {
         return this._deriveString((str) => changeCase(str, { format: "snake" }));
@@ -1186,15 +1186,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toTime().alias("time"))
-     * shape: (3, 2)
-     * +----------+------+
-     * | s        | time |
-     * +----------+------+
-     * | "apple"  | null |
-     * | "banana" | null |
-     * | "cherry" | null |
-     * +----------+------+
+     * df.withColumns($df.col("s").str.toTime().alias("time"));
+     * // shape: (3, 2)
+     * // +----------+------+
+     * // | s        | time |
+     * // +----------+------+
+     * // | "apple"  | null |
+     * // | "banana" | null |
+     * // | "cherry" | null |
+     * // +----------+------+
      */
     toTime() {
         return this._deriveString(toValidTime);
@@ -1205,15 +1205,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toTitleCase().alias("title"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | title     |
-     * +-------------+-----------+
-     * | "HELLO"     | Hello     |
-     * | "World"     | World     |
-     * | "df-script" | Df Script |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.toTitleCase().alias("title"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | title     |
+     * // +-------------+-----------+
+     * // | "HELLO"     | Hello     |
+     * // | "World"     | World     |
+     * // | "df-script" | Df Script |
+     * // +-------------+-----------+
      */
     toTitleCase() {
         return this._deriveString((str) => changeCase(str, { format: "title" }));
@@ -1224,15 +1224,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.toUpperCase().alias("upper"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | upper     |
-     * +-------------+-----------+
-     * | "HELLO"     | HELLO     |
-     * | "World"     | WORLD     |
-     * | "df-script" | DF-SCRIPT |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.toUpperCase().alias("upper"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | upper     |
+     * // +-------------+-----------+
+     * // | "HELLO"     | HELLO     |
+     * // | "World"     | WORLD     |
+     * // | "df-script" | DF-SCRIPT |
+     * // +-------------+-----------+
      */
     toUpperCase() {
         return this.upper();
@@ -1243,14 +1243,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.trim().alias("clean"))
-     * shape: (2, 2)
-     * +-------------+-------+
-     * | s           | clean |
-     * +-------------+-------+
-     * | "  hello  " | hello |
-     * | "  world  " | world |
-     * +-------------+-------+
+     * df.withColumns($df.col("s").str.trim().alias("clean"));
+     * // shape: (2, 2)
+     * // +-------------+-------+
+     * // | s           | clean |
+     * // +-------------+-------+
+     * // | "  hello  " | hello |
+     * // | "  world  " | world |
+     * // +-------------+-------+
      */
     trim() {
         return this.stripChars();
@@ -1261,14 +1261,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.trimEnd().alias("clean"))
-     * shape: (2, 2)
-     * +-------------+----------+
-     * | s           | clean    |
-     * +-------------+----------+
-     * | "  hello  " | "  hello" |
-     * | "  world  " | "  world" |
-     * +-------------+----------+
+     * df.withColumns($df.col("s").str.trimEnd().alias("clean"));
+     * // shape: (2, 2)
+     * // +-------------+----------+
+     * // | s           | clean    |
+     * // +-------------+----------+
+     * // | "  hello  " | "  hello" |
+     * // | "  world  " | "  world" |
+     * // +-------------+----------+
      */
     trimEnd() {
         return this.stripCharsEnd();
@@ -1279,14 +1279,14 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.trimStart().alias("clean"))
-     * shape: (2, 2)
-     * +-------------+----------+
-     * | s           | clean    |
-     * +-------------+----------+
-     * | "  hello  " | "hello  "|
-     * | "  world  " | "world  "|
-     * +-------------+----------+
+     * df.withColumns($df.col("s").str.trimStart().alias("clean"));
+     * // shape: (2, 2)
+     * // +-------------+----------+
+     * // | s           | clean    |
+     * // +-------------+----------+
+     * // | "  hello  " | "hello  "|
+     * // | "  world  " | "world  "|
+     * // +-------------+----------+
      */
     trimStart() {
         return this.stripCharsStart();
@@ -1297,15 +1297,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.upper().alias("upper"))
-     * shape: (3, 2)
-     * +-------------+-----------+
-     * | s           | upper     |
-     * +-------------+-----------+
-     * | "HELLO"     | HELLO     |
-     * | "World"     | WORLD     |
-     * | "df-script" | DF-SCRIPT |
-     * +-------------+-----------+
+     * df.withColumns($df.col("s").str.upper().alias("upper"));
+     * // shape: (3, 2)
+     * // +-------------+-----------+
+     * // | s           | upper     |
+     * // +-------------+-----------+
+     * // | "HELLO"     | HELLO     |
+     * // | "World"     | WORLD     |
+     * // | "df-script" | DF-SCRIPT |
+     * // +-------------+-----------+
      */
     upper() {
         return this._deriveString((str) => str.toUpperCase());
@@ -1317,15 +1317,15 @@ export class StringExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.withColumns($df.col("s").str.zfill(8).alias("padded"))
-     * shape: (3, 2)
-     * +----------+----------+
-     * | s        | padded   |
-     * +----------+----------+
-     * | "apple"  | 000apple |
-     * | "banana" | 00banana |
-     * | "cherry" | 00cherry |
-     * +----------+----------+
+     * df.withColumns($df.col("s").str.zfill(8).alias("padded"));
+     * // shape: (3, 2)
+     * // +----------+----------+
+     * // | s        | padded   |
+     * // +----------+----------+
+     * // | "apple"  | 000apple |
+     * // | "banana" | 00banana |
+     * // | "cherry" | 00cherry |
+     * // +----------+----------+
      */
     zfill(width: number) {
         return this.lpad(width, "0");
@@ -1342,15 +1342,15 @@ export class StringExpr extends ExprBase {
      * @returns StringExprNamespace
      * @example
      * <!-- doc:base_strings_3x1 -->
-     * >>> df.select($df.col("s").str.len())
-     * shape: (3, 1)
-     * +-----+
-     * | len |
-     * +-----+
-     * | 5   |
-     * | 6   |
-     * | 6   |
-     * +-----+
+     * df.select($df.col("s").str.len());
+     * // shape: (3, 1)
+     * // +-----+
+     * // | len |
+     * // +-----+
+     * // | 5   |
+     * // | 6   |
+     * // | 6   |
+     * // +-----+
      */
     get str() {
         return new StringExprNamespace(this);

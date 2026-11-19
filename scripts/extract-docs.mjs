@@ -11,7 +11,7 @@
 
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,7 +40,7 @@ export function syncJSDocsInFiles(sourceFiles) {
 
     content = content.replace(tagRegex, jsdoc => {
       return jsdoc.replace(
-        /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*\* >>>|\n\s*\* @|\*\/))/g,
+        /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*\* (?:df\.|\$df\.|const |let |var |[a-zA-Z0-9_$]+ =|[a-zA-Z0-9_$]+\.)|\n\s*\* @|\*\/))/g,
         (match, key, tableContent) => {
           if (tableContent && tableContent.trim()) {
             changed = true;
@@ -200,7 +200,7 @@ export function parseJSDocComment(comment) {
         ? examplesList.map(ex => {
             return ex
               .replace(
-                /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*>>> (?:df\.[a-zA-Z0-9_$]|df1\.|df2\.|trades\.|quotes\.|\$df\.|\$col|\/\/)|$))/g,
+                /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*(?:df\.|df1\.|df2\.|trades\.|quotes\.|east\.|west\.|\$df\.|\$col|const |let |var |\/\/)|$))/g,
                 (_, key) => {
                   return docExamples[key] ? docExamples[key].replace(/^ {5}\* /gm, "") : "";
                 }
@@ -1612,6 +1612,71 @@ export function extractRawDocs() {
 /**
  * Hydrates clean <!-- doc:KEY --> tags in compiled .d.ts files with full ASCII tables.
  */
+
+/**
+ * Verifies that every extracted example in docs.json is executable without errors.
+ */
+export async function validateExtractedDocExamples(docs) {
+  // Dynamically import the compiled library bundle if available, or source
+  let dfScript;
+  const distEntry = path.resolve(__dirname, "../dist/index.js");
+  if (fs.existsSync(distEntry)) {
+    dfScript = await import(pathToFileURL(distEntry).href);
+  } else {
+    // If running prior to build, skip runtime eval
+    console.log("  (dist/index.js not yet built; skipping runtime doctest validation)");
+    return;
+  }
+
+  const { all, col, element, lit, when } = dfScript;
+  const dfNs = dfScript.default || dfScript;
+
+  let total = 0;
+  let passed = 0;
+  const errors = [];
+
+  function cleanCodeToRun(exampleStr) {
+    const lines = exampleStr.split("\n");
+    const codeLines = [];
+    for (const l of lines) {
+      const trimmed = l.trim();
+      if (!trimmed || trimmed.startsWith("//")) continue;
+      codeLines.push(l);
+    }
+    return codeLines.join("\n");
+  }
+
+  function walk(obj, currentPath) {
+    if (!obj || typeof obj !== "object") return;
+    if (obj.examples && Array.isArray(obj.examples)) {
+      obj.examples.forEach((ex, idx) => {
+        total++;
+        const code = cleanCodeToRun(ex);
+        try {
+          const fn = new Function("$df", "all", "col", "element", "lit", "when", code);
+          fn(dfNs, all, col, element, lit, when);
+          passed++;
+        } catch (err) {
+          errors.push({ path: `${currentPath}[${idx}]`, err: err.message, code });
+        }
+      });
+    }
+    for (const [k, v] of Object.entries(obj)) {
+      walk(v, currentPath ? `${currentPath}.${k}` : k);
+    }
+  }
+
+  walk(docs, "");
+  if (errors.length > 0) {
+    console.error(`❌ Doctest validation failed: ${errors.length} of ${total} examples threw errors:`);
+    for (const e of errors) {
+      console.error(`  - ${e.path}: ${e.err}`);
+    }
+    throw new Error(`Doc extraction aborted due to ${errors.length} invalid example(s).`);
+  }
+  console.log(`  ✓ Verified ${passed} of ${total} doc examples executed cleanly without error.`);
+}
+
 export function hydrateDtsInDir(dir) {
   let count = 0;
   for (const full of _walkFiles(dir, f => f.endsWith(".d.ts"))) {
@@ -1661,6 +1726,8 @@ if (isMain) {
   const typeCount = Object.keys(docs.types).length;
 
   console.log(`  Extracted ${typeCount} TypeScript type definitions.`);
+
+  await validateExtractedDocExamples(docs);
 
   fs.writeFileSync(outPath, JSON.stringify(docs, null, 2), "utf-8");
   console.log(`  Written to: ${outPath}`);

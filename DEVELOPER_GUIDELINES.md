@@ -50,8 +50,13 @@ This document outlines core engineering principles and standards for writing cle
 ## 11. Testing Standards & 1:1 Hierarchy Mirroring
 - **1:1 File Hierarchy Mirroring**: Test files in `_tests/` must mirror the exact directory and file structure of `src/` (e.g., `src/functions/concat.ts` ➔ `_tests/functions/concat.test.ts`, `src/utils/number.ts` ➔ `_tests/utils/number.test.ts`).
 - **Atomic Method Tests for Core Classes**: For large core classes like `DataFrame`, each public method or getter must have its own dedicated test file under `_tests/dataframe/<methodName>.test.ts` (e.g., `df.width` ➔ `_tests/dataframe/width.test.ts`, `df.select()` ➔ `_tests/dataframe/select.test.ts`). Avoid catch-all or miscellaneous test files.
+- **Structured & Numbered Test Cases**: Number each test case sequentially starting from 1, 2, 3, ... (e.g., `// 1. ...`, `// 2. ...`) and clearly define what is being tested so every test file has consistent structure.
+- **Type-Level Testing (`*.test-d.ts`)**: In addition to runtime `.test.ts` files, add companion `.test-d.ts` files (e.g., `_tests/dataframe/select.test-d.ts`) to test compile-time types and ensure APIs remain strictly typed.
 - **Test Runner Registration**: Every new test file must be imported in `_tests/run_all_project_tests.ts` and the relevant subdirectory runner (e.g. `_tests/dataframe/run_all.ts`).
-- **Dual Verification Requirement**: After any code changes, verify that both the local test suite and distribution bundle verification pass with zero errors (`npm test` and `npm run test:dist`).
+- **Verification Requirement**: After any code changes, verify that all tests pass with zero errors:
+  - `npm test` (local test suite and runtime assertions)
+  - `npm run test:dist` (build and distribution bundle verification)
+  - `npm run test:types` (type-level verification across all `.test-d.ts` files)
 - **Standalone Execution & Node Guards**: Always declare `declare const process: any;` at the top of test files when referencing Node `process` to ensure standalone execution compatibility.
 
 ## 12. Zero Dependencies, Runtime Portability & Numeric Integrity

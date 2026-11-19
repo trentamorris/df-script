@@ -24,13 +24,13 @@ export class StructExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_struct_single -->
-     * >>> df.withColumns($df.col("user").struct.field("name").alias("user_name"))
-     * shape: (1, 2)
-     * +---------------------------+-----------+
-     * | user                      | user_name |
-     * +---------------------------+-----------+
-     * | { name: "Alice", id: 1 }  | Alice     |
-     * +---------------------------+-----------+
+     * df.withColumns($df.col("user").struct.field("name").alias("user_name"));
+     * // shape: (1, 2)
+     * // +---------------------------+-----------+
+     * // | user                      | user_name |
+     * // +---------------------------+-----------+
+     * // | { name: "Alice", id: 1 }  | Alice     |
+     * // +---------------------------+-----------+
      */
     field(name: string) {
         const derived = this._expr._deriveUnary((v: any) => (v != null && typeof v === "object" ? v[name] : null));
@@ -45,13 +45,13 @@ export class StructExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_struct_single -->
-     * >>> df.withColumns($df.col("user").struct.renameFields({ name: "first_name" }).alias("user_renamed"))
-     * shape: (1, 2)
-     * +---------------------------+--------------------------------+
-     * | user                      | user_renamed                   |
-     * +---------------------------+--------------------------------+
-     * | { name: "Alice", id: 1 }  | { id: 1, first_name: "Alice" } |
-     * +---------------------------+--------------------------------+
+     * df.withColumns($df.col("user").struct.renameFields({ name: "first_name" }).alias("user_renamed"));
+     * // shape: (1, 2)
+     * // +---------------------------+--------------------------------+
+     * // | user                      | user_renamed                   |
+     * // +---------------------------+--------------------------------+
+     * // | { name: "Alice", id: 1 }  | { id: 1, first_name: "Alice" } |
+     * // +---------------------------+--------------------------------+
      */
     renameFields(mapping: RenameMappingArg) {
         return this._expr._deriveUnary((v: any) => {
@@ -75,13 +75,13 @@ export class StructExprNamespace {
      * @throws {Error} If expressions passed without an alias or name.
      * @example
      * <!-- doc:base_struct_single -->
-     * >>> df.withColumns($df.col("user").struct.withFields({ is_active: $df.lit(true) }).alias("updated_user"))
-     * shape: (1, 2)
-     * +------------------------------+-------------------------------------------+
-     * | user                         | updated_user                              |
-     * +------------------------------+-------------------------------------------+
-     * | { name: "Alice", age: 30 }   | { name: "Alice", age: 30, is_active: true }|
-     * +------------------------------+-------------------------------------------+
+     * df.withColumns($df.col("user").struct.withFields({ is_active: $df.lit(true) }).alias("updated_user"));
+     * // shape: (1, 2)
+     * // +------------------------------+-------------------------------------------+
+     * // | user                         | updated_user                              |
+     * // +------------------------------+-------------------------------------------+
+     * // | { name: "Alice", age: 30 }   | { name: "Alice", age: 30, is_active: true }|
+     * // +------------------------------+-------------------------------------------+
      */
     withFields(fields: StructFieldsArg) {
         return this._expr._derive((vArray: any[], columns: any) => {
@@ -135,13 +135,13 @@ export class StructExprNamespace {
      * @returns ColumnExpression
      * @example
      * <!-- doc:base_struct_single -->
-     * >>> df.select($df.col("user").struct.unnest())
-     * shape: (1, 2)
-     * +-------+-----+
-     * | name  | age |
-     * +-------+-----+
-     * | Alice | 30  |
-     * +-------+-----+
+     * df.select($df.col("user").struct.unnest());
+     * // shape: (1, 2)
+     * // +-------+-----+
+     * // | name  | age |
+     * // +-------+-----+
+     * // | Alice | 30  |
+     * // +-------+-----+
      */
     unnest() {
         const newInst = this._expr._derive();
@@ -169,13 +169,13 @@ export class StructExpr extends ExprBase {
      * @returns StructExprNamespace
      * @example
      * <!-- doc:base_struct_single -->
-     * >>> df.select($df.col("user").struct.field("name"))
-     * shape: (1, 1)
-     * +---------+
-     * | name    |
-     * +---------+
-     * | "Alice" |
-     * +---------+
+     * df.select($df.col("user").struct.field("name"));
+     * // shape: (1, 1)
+     * // +---------+
+     * // | name    |
+     * // +---------+
+     * // | "Alice" |
+     * // +---------+
      */
     get struct() {
         return new StructExprNamespace(this);

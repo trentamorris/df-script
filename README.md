@@ -24,7 +24,7 @@
 
 ## Introduction
 
-**df-script** is a 43kB, **zero-dependency**, **vectorized** expression-based DataFrame engine with 300+ operations for **TypeScript** and **JavaScript**.
+**df-script** is a 43kB, **zero-dependency**, **vectorized** DataFrame engine with 300+ operations for **TypeScript** and **JavaScript**.
 
 Heavily inspired by modern columnar engines like **Polars** and **Pandas**, `df-script` brings declarative, high-performance data transformations directly to modern JavaScript and TypeScript environments. Easily execute complex multi-column groupings, relational joins, windowed rolling statistics, string parsing, temporal conversions, and nested structs with a fluent, expressive API and zero external dependencies.
 

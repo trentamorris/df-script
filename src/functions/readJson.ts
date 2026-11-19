@@ -1,5 +1,5 @@
 import { DataFrame } from "../dataframe/dataframe";
-import type { ReadJSONOptions } from "../types";
+import type { ReadJSONOptions, RowRecord } from "../types";
 import { safeJsonParse, isObj } from "../utils";
 import { DataFrameError } from "../exceptions";
 
@@ -22,7 +22,7 @@ import { DataFrameError } from "../exceptions";
  * | 2 | y |
  * +---+---+
  */
-export function readJson(
+export function readJson<T extends RowRecord = any>(
     content: string,
     {
         format = "json",
@@ -30,11 +30,11 @@ export function readJson(
         schema,
         ...parseOpts
     }: ReadJSONOptions = {}
-): DataFrame<any> {
+): DataFrame<T> {
     const parsed = safeJsonParse(content, { format, trimBeforeParse, ...parseOpts });
     if (parsed === content) {
         throw new DataFrameError(`Invalid JSON input: must be a valid, non-empty JSON ${format} string.`);
     }
     const parsedData = Array.isArray(parsed) ? parsed : (isObj(parsed) ? [parsed] : []);
-    return new DataFrame(parsedData, schema);
+    return new DataFrame<T>(parsedData as any, schema);
 }

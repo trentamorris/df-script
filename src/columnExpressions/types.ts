@@ -317,11 +317,13 @@ export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => 
  */
 export interface ToStructOptions {
     /**
-     * Explicit array of struct field names or a callback `(idx: number) => string` generating field names by element index. Defaults to `"field_0"`, `"field_1"`, etc.
+     * Explicit array of struct field names or a callback `(idx: number) => string` generating field names by element index.
+     * When omitted, field names are generated automatically as `"field_0"`, `"field_1"`, etc.
      */
     fields?: string[] | ((idx: number) => string);
     /**
-     * Maximum number of array elements to extract into struct fields when `fields` is not an array. Defaults to the maximum array length in the column.
+     * Maximum number of array elements to extract into struct fields when `fields` is not an array.
+     * When omitted, uses the maximum array length in the column.
      */
     upperBound?: number;
 }

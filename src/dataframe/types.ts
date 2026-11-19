@@ -43,6 +43,13 @@ export type DataFrameColumns<T extends RowRecord> = {
 export type DataFrameShape = [number, number];
 
 /**
+ * Resolves the resulting row record after renaming columns via mapping `M`.
+ */
+export type Rename<T, M extends Record<string, string | undefined>> = {
+    [K in keyof T as K extends keyof M ? (M[K] extends string ? M[K] : K) : K]: T[K];
+};
+
+/**
  * Target index column or expression for `DataFrame.groupByDynamic()`.
  */
 export type DynamicIndexColumnArg<K extends string = string> = K | IntoExpr;

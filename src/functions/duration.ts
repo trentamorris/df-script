@@ -18,24 +18,24 @@ import type { DurationArg, DurationComponentArg } from "./types";
  * @example
  * // 1. Construct from a duration component options object:
  * <!-- doc:base_temporal_single -->
- * >>> df.select($df.col("date").cast($df.Datetime).add($df.duration({ days: 1 })).alias("plus_1_day"))
- * shape: (1, 1)
- * +--------------------------+
- * | plus_1_day               |
- * +--------------------------+
- * | 2026-05-21T10:00:00.123Z |
- * +--------------------------+
+ * df.select($df.col("date").cast($df.Datetime).add($df.duration({ days: 1 })).alias("plus_1_day"));
+ * // shape: (1, 1)
+ * // +--------------------------+
+ * // | plus_1_day               |
+ * // +--------------------------+
+ * // | 2026-05-21T10:00:00.123Z |
+ * // +--------------------------+
  *
  * @example
  * // 2. Construct from a duration string shorthand:
  * <!-- doc:base_temporal_single -->
- * >>> df.select($df.col("date").cast($df.Datetime).add($df.duration("12h")).alias("plus_12h"))
- * shape: (1, 1)
- * +--------------------------+
- * | plus_12h                 |
- * +--------------------------+
- * | 2026-05-20T22:00:00.123Z |
- * +--------------------------+
+ * df.select($df.col("date").cast($df.Datetime).add($df.duration("12h")).alias("plus_12h"));
+ * // shape: (1, 1)
+ * // +--------------------------+
+ * // | plus_12h                 |
+ * // +--------------------------+
+ * // | 2026-05-20T22:00:00.123Z |
+ * // +--------------------------+
  */
 export function duration(options: DurationArg = {}): ColumnExpr<any> {
     if (typeof options === "string") {

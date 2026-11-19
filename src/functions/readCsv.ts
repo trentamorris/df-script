@@ -13,15 +13,28 @@ import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
  * @param [options] Parse and configuration options.
  * @returns DataFrame
  * @example
+ * // 1. Parse standard comma-separated values:
  * <!-- doc:base_2x2 -->
- * >>> $df.readCsv("a,b\n1,x\n2,y")
- * shape: (2, 2)
- * +---+---+
- * | a | b |
- * +---+---+
- * | 1 | x |
- * | 2 | y |
- * +---+---+
+ * $df.readCsv("a,b\n1,x\n2,y");
+ * // shape: (2, 2)
+ * // +---+---+
+ * // | a | b |
+ * // +---+---+
+ * // | 1 | x |
+ * // | 2 | y |
+ * // +---+---+
+ *
+ * @example
+ * // 2. Parse delimited text with custom separator options:
+ * <!-- doc:base_2x2 -->
+ * $df.readCsv("a;b\n10;20\n30;40", { separator: ";" });
+ * // shape: (2, 2)
+ * // +----+----+
+ * // | a  | b  |
+ * // +----+----+
+ * // | 10 | 20 |
+ * // | 30 | 40 |
+ * // +----+----+
  */
 export function readCsv<T extends RowRecord = any>(
     content: string,

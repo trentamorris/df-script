@@ -13,30 +13,28 @@ import type { RowRecord, DataFrameSchema, DataFrameDataArg } from "../types";
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Construct DataFrame from a column dictionary:
- * >>> const df = $df.data({ a: [1, 2], b: ["x", "y"] })
- * >>> df
- * shape: (2, 2)
- * +---+---+
- * | a | b |
- * +---+---+
- * | 1 | x |
- * | 2 | y |
- * +---+---+
+ * const df = $df.data({ a: [1, 2], b: ["x", "y"] });
+ * // shape: (2, 2)
+ * // +---+---+
+ * // | a | b |
+ * // +---+---+
+ * // | 1 | x |
+ * // | 2 | y |
+ * // +---+---+
  *
  * @example
  * // 2. Construct DataFrame from an array of row objects:
- * >>> const df = $df.data([
- * ...   { a: 1, b: "x" },
- * ...   { a: 2, b: "y" }
- * ... ])
- * >>> df
- * shape: (2, 2)
- * +---+---+
- * | a | b |
- * +---+---+
- * | 1 | x |
- * | 2 | y |
- * +---+---+
+ * const df = $df.data([
+ * { a: 1, b: "x" },
+ * { a: 2, b: "y" }
+ * ])
+ * // shape: (2, 2)
+ * // +---+---+
+ * // | a | b |
+ * // +---+---+
+ * // | 1 | x |
+ * // | 2 | y |
+ * // +---+---+
  */
 export function data<T extends RowRecord = any>(
     data: DataFrameDataArg<T>,

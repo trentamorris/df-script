@@ -48,5 +48,12 @@ if (dfNoOp.columns.join(",") !== "a,b,c") {
     throw new Error("No-op rename modified column names");
 }
 
+// 5. Strictly-typed rename result verification
+const strictlyRenamed = df.rename({ first_name: "firstName" });
+const firstNameVal: string = strictlyRenamed.toDicts()[0].firstName;
+if (firstNameVal !== "Alice") {
+    throw new Error("Strictly typed firstName value mismatch");
+}
+
 console.log("✓ rename tests passed!");
 
