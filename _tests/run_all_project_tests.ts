@@ -1,10 +1,17 @@
-import { createRequire } from "node:module";
-
+export {};
 declare const process: any;
+declare const require: any;
 
 const _require = typeof require !== "undefined"
     ? require
-    : createRequire(import.meta.url);
+    : (eval("typeof createRequire !== 'undefined'") ? eval("createRequire(import.meta.url)") : (function() {
+        try {
+            const req = eval("(function() { try { return require('node:module').createRequire(import.meta.url); } catch { return require('module').createRequire(import.meta.url); } })()");
+            return req;
+        } catch {
+            return null;
+        }
+    })());
 
 console.log("=========================================");
 console.log("RUNNING ALL DFSCRIPT PROJECT TESTS...");
