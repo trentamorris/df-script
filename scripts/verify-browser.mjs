@@ -18,7 +18,7 @@ const bundlePath = path.join(rootDir, "dist", "browser-test-bundle.js");
 
 try {
   execSync(
-    'npx esbuild _tests/run_all_browser_tests.ts --bundle --platform=browser --format=iife --outfile=dist/browser-test-bundle.js --external:fs --external:path --external:node:* --ignore-annotations',
+    'npx esbuild _tests/run_all_browser_tests.ts --bundle --platform=browser --format=iife --conditions=@df-script/source --outfile=dist/browser-test-bundle.js --external:fs --external:path --external:node:* --ignore-annotations',
     { cwd: rootDir, stdio: ["pipe", "pipe", "pipe"] }
   );
   console.log("✓ PASSED");
