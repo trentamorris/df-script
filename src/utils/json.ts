@@ -145,7 +145,7 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
             }
         }
 
-        const candidate = (val !== null && typeof val === "object") || typeof val === "bigint" ? val : raw;
+        const candidate = (raw !== undefined && (isURLSearchParams(raw) || isError(raw))) ? raw : (((val !== null && typeof val === "object") || typeof val === "bigint") ? val : raw);
         const unboxed = isObj(candidate) ? unboxPrimitiveObj(candidate) : candidate;
 
         if (unboxed !== null && typeof unboxed !== "object" && typeof unboxed !== "bigint") {
