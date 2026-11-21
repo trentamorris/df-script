@@ -474,7 +474,7 @@ try {
     for (let i = 0; i < 5000; i++) {
         deepNestedJson = `{"child": ${deepNestedJson}}`;
     }
-    const recursiveReviver = (k: string, v: any) => {
+    const recursiveReviver = (k: string, v: any): any => {
         if (k === "child") {
             return safeJsonParse(JSON.stringify(v), { reviver: recursiveReviver });
         }
