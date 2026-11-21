@@ -1,3 +1,4 @@
+declare const process: any;
 import { $df } from "../../src/index";
 
 console.log("=========================================");
