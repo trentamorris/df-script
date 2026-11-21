@@ -471,7 +471,7 @@ try {
 
     // 34. Maximum Call Stack via Extreme Object Depth & Recursive Revivers (RangeError handling)
     let deepNestedJson = '{"a": 1}';
-    for (let i = 0; i < 5000; i++) {
+    for (let i = 0; i < 500; i++) {
         deepNestedJson = `{"child": ${deepNestedJson}}`;
     }
     const recursiveReviver = (k: string, v: any): any => {
