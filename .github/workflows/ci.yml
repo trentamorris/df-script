@@ -73,8 +73,11 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Bundle test suite for Deno
+        run: npx esbuild _tests/run_all_browser_tests.ts --bundle --platform=neutral --format=esm --outfile=dist/deno-test-bundle.mjs --external:node:* --external:fs --external:path --ignore-annotations
+
       - name: Run runtime test suite with Deno
-        run: deno run -A --node-modules-dir=auto _tests/run_all_browser_tests.ts
+        run: deno run -A dist/deno-test-bundle.mjs
 
   browser-test:
     name: Browser Engines (Chromium, Firefox, WebKit)
