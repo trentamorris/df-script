@@ -384,7 +384,11 @@ try {
     const mergedObj = Object.assign({}, parsedPollution);
     assert((Object.prototype as any).admin === undefined, "Object.prototype.admin remains unpolluted");
     assert(Object.prototype.hasOwnProperty.call(parsedPollution, "__proto__"), "JSON.parse creates an own property '__proto__'");
-    assert(mergedObj.admin === true, "Object.assign invokes target prototype setter when copying __proto__ property");
+    if (Object.prototype.hasOwnProperty.call(Object.prototype, "__proto__")) {
+        assert(mergedObj.admin === true, "Object.assign invokes target prototype setter when copying __proto__ property");
+    } else {
+        assert(mergedObj.__proto__ !== undefined, "Object.assign copies __proto__ as plain property when Object.prototype.__proto__ is disabled");
+    }
 
     // 22. Large Precision Integer Truncation (BigInt / 64-bit Integers)
     const bigIdJson = '{"id": 9007199254740999}';

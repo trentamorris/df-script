@@ -1,4 +1,4 @@
-import "./isJsonString.test";
-import "./safeJsonParse.test";
-import "./createSafeJsonReplacer.test";
-import "./jsonPathMatch.test";
+import "./isJsonString.test.ts";
+import "./safeJsonParse.test.ts";
+import "./createSafeJsonReplacer.test.ts";
+import "./jsonPathMatch.test.ts";

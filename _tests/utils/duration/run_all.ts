@@ -2,11 +2,11 @@ console.log("=========================================");
 console.log("STARTING DURATION UTILS TESTS...");
 console.log("=========================================");
 
-import "./scaleDurationMs.test";
-import "./parseDurationString.test";
-import "./toDuration.test";
-import "./parseDurationInterval.test";
-import "./addCalendarDuration.test";
+import "./scaleDurationMs.test.ts";
+import "./parseDurationString.test.ts";
+import "./toDuration.test.ts";
+import "./parseDurationInterval.test.ts";
+import "./addCalendarDuration.test.ts";
 
 console.log("=========================================");
 console.log("🎉 ALL DURATION UTILS TESTS PASSED SUCCESSFULLY!");

@@ -74,7 +74,7 @@ jobs:
           deno-version: v2.x
 
       - name: Run runtime test suite with Deno
-        run: deno run -A --node-modules-dir=auto --unstable-sloppy-imports _tests/run_all_browser_tests.ts
+        run: deno run -A --node-modules-dir=auto _tests/run_all_browser_tests.ts
 
   browser-test:
     name: Browser Engines (Chromium, Firefox, WebKit)
