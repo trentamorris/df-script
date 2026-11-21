@@ -38,3 +38,34 @@ jobs:
 
       - name: Verify generated docs & LLMs files are up-to-date
         run: git diff --ignore-space-at-eol --exit-code docs.json llms.txt llms-full.txt
+
+  bun-test:
+    name: Bun on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies with Bun
+        run: bun install
+
+      - name: Run runtime test suite with Bun
+        run: bun test _tests/run_all_project_tests.ts
+
+  deno-test:
+    name: Deno on ubuntu-latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Run runtime test suite with Deno
+        run: deno run -A _tests/run_all_project_tests.ts
