@@ -59,7 +59,7 @@ jobs:
         run: bun install
 
       - name: Run runtime test suite with Bun
-        run: bun test _tests/run_all_project_tests.ts
+        run: bun run _tests/run_all_project_tests.ts
 
   deno-test:
     name: Deno on ubuntu-latest
@@ -74,4 +74,4 @@ jobs:
           deno-version: v2.x
 
       - name: Run runtime test suite with Deno
-        run: deno run -A _tests/run_all_project_tests.ts
+        run: deno run -A --node-modules-dir=auto _tests/run_all_project_tests.ts
