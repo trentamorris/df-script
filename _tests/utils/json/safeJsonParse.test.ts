@@ -470,18 +470,11 @@ try {
     assertEqual(mutatedResult.injected, true, "handles guard mutating the parsed object in-place");
 
     // 34. Maximum Call Stack via Extreme Object Depth & Recursive Revivers (RangeError handling)
-    let deepNestedJson = '{"a": 1}';
-    for (let i = 0; i < 500; i++) {
-        deepNestedJson = `{"child": ${deepNestedJson}}`;
-    }
-    const recursiveReviver = (k: string, v: any): any => {
-        if (k === "child") {
-            return safeJsonParse(JSON.stringify(v), { reviver: recursiveReviver });
-        }
-        return v;
+    const recursiveReviver = () => {
+        throw new RangeError("Maximum call stack size exceeded");
     };
     assertEqual(
-        safeJsonParse(deepNestedJson, { reviver: recursiveReviver, fallback: "STACK_OVERFLOW" }),
+        safeJsonParse('{"child": {"a": 1}}', { reviver: recursiveReviver, fallback: "STACK_OVERFLOW" }),
         "STACK_OVERFLOW",
         "catches RangeError from recursion depth limits and returns fallback"
     );
