@@ -1,8 +1,8 @@
 declare const require: any;
 declare const __dirname: string;
 import { DataFrame } from "../../src/dataframe";
-const fs = typeof require === "function" ? require("fs") : null;
-const path = typeof require === "function" ? require("path") : null;
+const fs = (typeof process !== "undefined" && typeof require === "function") ? (function() { try { return require("fs"); } catch { return null; } })() : null;
+const path = (typeof process !== "undefined" && typeof require === "function") ? (function() { try { return require("path"); } catch { return null; } })() : null;
 
 console.log("=========================================");
 console.log("STARTING DATAFRAME writeJson TESTS...");

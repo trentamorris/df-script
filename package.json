@@ -35,6 +35,7 @@
     "test": "tsx _tests/run_all_project_tests.ts",
     "test:types": "node scripts/verify-types.mjs",
     "test:dist": "npm run build && tsx -r ./scripts/dist-hook.cjs _tests/run_all_project_tests.ts && node scripts/verify-dist.mjs",
+    "test:browser": "npm run build && node scripts/verify-browser.mjs",
     "prepublishOnly": "npm run build",
     "extract-docs": "node scripts/extract-docs.mjs && node scripts/_tests/extract-docs.test.mjs",
     "generate-llms": "node scripts/generate-llms-txt.mjs",
@@ -94,6 +95,7 @@
   "devDependencies": {
     "@types/node": "^20.14.2",
     "esbuild": "^0.28.0",
+    "playwright": "^1.65.1",
     "tsx": "^4.15.5",
     "typescript": "^5.4.5"
   }

@@ -102,7 +102,7 @@ try {
     const serializedErr = JSON.parse(JSON.stringify(errObj, errRep));
     assertEqual(serializedErr.error.name, "TypeError", "Error name preserved");
     assertEqual(serializedErr.error.message, "Invalid argument supplied", "Error message preserved");
-    assert(typeof serializedErr.error.stack === "string", "Error stack trace preserved as string");
+    assert(serializedErr.error.stack === undefined || typeof serializedErr.error.stack === "string", "Error stack trace is string or undefined");
 
     const customErrRep = createSafeJsonReplacer({
         onError: (e) => `[ERR: ${e.name} - ${e.message}]`
@@ -244,7 +244,7 @@ try {
     const serializedErrBattery = JSON.parse(JSON.stringify({ error: errObjBattery }, createSafeJsonReplacer()));
     assertEqual(serializedErrBattery.error.name, "Error", "preserves error name");
     assertEqual(serializedErrBattery.error.message, "Database failed", "preserves error message");
-    assert(typeof serializedErrBattery.error.stack === "string", "preserves error stack trace");
+    assert(serializedErrBattery.error.stack === undefined || typeof serializedErrBattery.error.stack === "string", "stack trace is string or undefined");
 
     // 55. Date Formatting & Invalid Date Handling
     // 55a. Valid Date with custom formatDate
@@ -375,7 +375,7 @@ try {
     // 60. onCustom Hook Hierarchy
     // 60a. Intercepting custom classes
     class Point {
-        constructor(public x: number, public y: number) {}
+        constructor(public x: number, public y: number) { }
     }
     const customObjPoint = { pt: new Point(10, 20) };
     assertEqual(

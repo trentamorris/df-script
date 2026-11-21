@@ -35,7 +35,9 @@ try {
     // 3. Non-typed array constructors should fail
     assert(!isTypedArrayConstructor(Array), "Array should fail");
     assert(!isTypedArrayConstructor(ArrayBuffer), "ArrayBuffer should fail");
-    assert(!isTypedArrayConstructor(SharedArrayBuffer), "SharedArrayBuffer should fail");
+    if (typeof SharedArrayBuffer !== "undefined") {
+        assert(!isTypedArrayConstructor(SharedArrayBuffer), "SharedArrayBuffer should fail");
+    }
     assert(!isTypedArrayConstructor(DataView), "DataView should fail");
     assert(!isTypedArrayConstructor(Date), "Date should fail");
     assert(!isTypedArrayConstructor(RegExp), "RegExp should fail");

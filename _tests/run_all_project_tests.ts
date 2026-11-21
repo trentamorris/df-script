@@ -1,8 +1,17 @@
 export {};
-import { createRequire } from "module";
 declare const process: any;
+declare const require: any;
 
-const _require = typeof require !== "undefined" ? require : createRequire(import.meta.url);
+const _require = typeof require !== "undefined"
+    ? require
+    : (eval("typeof createRequire !== 'undefined'") ? eval("createRequire(import.meta.url)") : (function() {
+        try {
+            const m = eval("import('module')");
+            return m?.createRequire ? m.createRequire(import.meta.url) : null;
+        } catch {
+            return null;
+        }
+    })());
 
 console.log("=========================================");
 console.log("RUNNING ALL DFSCRIPT PROJECT TESTS...");
