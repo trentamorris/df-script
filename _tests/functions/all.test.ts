@@ -1,4 +1,4 @@
-import { $df } from "../../src/index";
+import { $df } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION $df.all() TESTS...");

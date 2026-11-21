@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df, Object as ObjectType } from "../../../../src/index";
+import { $df, Object as ObjectType } from "df-script";
 
 console.log("Running ArrayExpr.splice tests...");
 

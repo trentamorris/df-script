@@ -1,6 +1,6 @@
 declare const process: any;
-import { DataFrame } from "../../src/dataframe";
-import { $df } from "../../src/index";
+import { DataFrame } from "df-script";
+import { $df } from "df-script";
 
 console.log("Running DataFrame.unstack tests...");
 

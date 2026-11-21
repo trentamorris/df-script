@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df } from "../../../../src";
+import { $df } from "df-script";
 
 console.log("Running StandardExpr.arctan2 tests...");
 

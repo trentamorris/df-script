@@ -1,6 +1,6 @@
 declare const process: any;
-import { $df } from "../../../../src/index";
-import { DataTypeRegistry } from "../../../../src/datatypes";
+import { $df } from "df-script";
+import { DataTypeRegistry } from "df-script";
 
 console.log("Running StringExpr.join tests...");
 

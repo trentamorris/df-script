@@ -1,7 +1,7 @@
 declare const process: any;
-import { DataFrame } from "../../src/dataframe";
-import { $df } from "../../src/api";
-import { DataTypeRegistry } from "../../src/datatypes";
+import { DataFrame } from "df-script";
+import { $df } from "df-script";
+import { DataTypeRegistry } from "df-script";
 
 console.log("Running select tests...");
 

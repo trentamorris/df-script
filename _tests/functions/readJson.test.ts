@@ -1,6 +1,6 @@
 declare const process: any;
-import { $df } from "../../src/index";
-import { Int64, Utf8 } from "../../src/datatypes";
+import { $df } from "df-script";
+import { Int64, Utf8 } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING $df.readJson FUNCTION TESTS...");

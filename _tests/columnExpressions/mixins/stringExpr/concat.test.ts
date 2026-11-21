@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df, Utf8, Int32 } from "../../../../src/index";
+import { $df, Utf8, Int32 } from "df-script";
 
 console.log("Running StringExpr.concat tests...");
 

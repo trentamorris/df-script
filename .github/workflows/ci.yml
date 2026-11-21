@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -14,6 +17,7 @@ jobs:
   test:
     name: Node ${{ matrix.node-version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -40,30 +44,38 @@ jobs:
         run: npm run test:types
 
       - name: Run build & distribution verification (npm run test:dist)
-        run: npm run test:dist
+        run: npm run test:dist -- --node
 
       - name: Verify generated docs & LLMs files are up-to-date
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
         run: git diff --ignore-space-at-eol --exit-code docs.json llms.txt llms-full.txt
 
   bun-test:
     name: Bun on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Install dependencies with Bun
-        run: bun install
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run runtime test suite with Bun
         run: bun run _tests/run_all_project_tests.ts
 
+      - name: Build dist & verify it in Bun
+        run: npm run test:dist -- --bun
+
   deno-test:
     name: Deno on ubuntu-latest
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -73,15 +85,22 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Install dependencies
+        run: npm ci
+
       - name: Bundle test suite for Deno
         run: npx esbuild _tests/run_all_browser_tests.ts --bundle --platform=neutral --format=esm --outfile=dist/deno-test-bundle.mjs --external:node:* --external:fs --external:path --ignore-annotations
 
       - name: Run runtime test suite with Deno
         run: deno run -A dist/deno-test-bundle.mjs
 
+      - name: Build dist & verify it in Deno
+        run: npm run test:dist -- --deno
+
   browser-test:
     name: Browser Engines (Chromium, Firefox, WebKit)
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

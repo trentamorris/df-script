@@ -1,7 +1,7 @@
 declare const process: any;
 
-import { DataFrame } from "../../src/dataframe";
-import { $df } from "../../src";
+import { DataFrame } from "df-script";
+import { $df } from "df-script";
 
 console.log("Running insertColumn tests...");
 

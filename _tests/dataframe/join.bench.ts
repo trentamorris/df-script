@@ -1,4 +1,4 @@
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 import { benchCompare } from "../benchHelper";
 
 console.log("=================================================");

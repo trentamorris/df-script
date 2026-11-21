@@ -1,7 +1,7 @@
 declare const process: any;
 declare const require: any;
 declare const __dirname: string;
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 const fs = (typeof process !== "undefined" && typeof require === "function") ? (function() { try { return require("fs"); } catch { return null; } })() : null;
 const path = (typeof process !== "undefined" && typeof require === "function") ? (function() { try { return require("path"); } catch { return null; } })() : null;
 

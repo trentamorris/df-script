@@ -43,7 +43,7 @@ console.log("");
 
 try {
   process.stdout.write("▶ Compiling type assertions with tsc... ");
-  const cmd = `npx tsc --target ES2022 --module CommonJS --moduleResolution node --strict --noEmit --skipLibCheck --rootDir . ${relativeFiles.join(" ")}`;
+  const cmd = `npx tsc --target ES2022 --module ESNext --moduleResolution bundler --customConditions @df-script/source --strict --noEmit --skipLibCheck --rootDir . ${relativeFiles.join(" ")}`;
   execSync(cmd, { cwd: rootDir, stdio: "pipe" });
   console.log("✓ PASSED\n");
   console.log("=========================================");

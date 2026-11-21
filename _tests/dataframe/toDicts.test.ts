@@ -1,4 +1,4 @@
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 
 console.log("Running constructor and toDicts tests...");
 
@@ -41,7 +41,7 @@ const dfNullData = new DataFrame(null as any);
 if (dfNullData.height !== 0) throw new Error("Null data fallback height != 0");
 
 // Explicit schema with partial/missing columns
-import { DataTypeRegistry } from "../../src/datatypes";
+import { DataTypeRegistry } from "df-script";
 const dfPartialSchema = new DataFrame<{ a: number; b: string | null }>([{ a: 1 } as any], {
     a: DataTypeRegistry.Int32,
     b: DataTypeRegistry.Utf8

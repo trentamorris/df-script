@@ -1,7 +1,7 @@
 declare const process: any;
-import { DataFrame } from "../../src/dataframe";
-import { DataTypeRegistry } from "../../src/datatypes";
-import { $df } from "../../src/index";
+import { DataFrame } from "df-script";
+import { DataTypeRegistry } from "df-script";
+import { $df } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING DATAFRAME EQUALS 10/10 TESTS...");

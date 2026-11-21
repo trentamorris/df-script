@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df, ObjectDataType } from "../../../../src/index";
+import { $df, ObjectDataType } from "df-script";
 
 console.log("Running ArrayExpr.containsAll tests...");
 

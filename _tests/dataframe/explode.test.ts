@@ -1,6 +1,6 @@
 declare const process: any;
-import { $df } from "../../src/index";
-import { DataFrameError, ShapeError } from "../../src/exceptions";
+import { $df } from "df-script";
+import { DataFrameError, ShapeError } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING EXPLODE EDGE CASES TESTS...");

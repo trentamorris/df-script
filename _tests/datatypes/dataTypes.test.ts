@@ -1,5 +1,5 @@
-import { DataFrame } from "../../src/dataframe";
-import { $df } from "../../src/api";
+import { DataFrame } from "df-script";
+import { $df } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING POLARS DATATYPES TESTS...");

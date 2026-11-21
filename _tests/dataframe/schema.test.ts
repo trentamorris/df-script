@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df } from "../../src/index";
+import { $df } from "df-script";
 
 const data = [
     { name: "Alice", age: 30, is_active: 1, joined: "2026-05-20" },

@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df, Utf8 } from "../../../../src/index";
+import { $df, Utf8 } from "df-script";
 
 console.log("Running StringExpr.containsAny tests...");
 

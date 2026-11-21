@@ -1,4 +1,4 @@
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 
 console.log("Running sort tests...");
 
@@ -97,7 +97,7 @@ if (
 }
 
 // 7. Expressions as Sort Keys
-import { $df } from "../../src";
+import { $df } from "df-script";
 const dfExprSort = dfMulti.sort({
     by: [$df.col("score").mul(2), $df.col("group")],
     descending: [true, false]

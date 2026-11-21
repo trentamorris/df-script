@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df } from "../../../../src/index";
+import { $df } from "df-script";
 
 console.log("Running StandardExpr.cast edge-case tests...");
 

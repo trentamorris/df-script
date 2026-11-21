@@ -1,6 +1,6 @@
 declare const process: any;
-import { $df } from "../../../../src";
-import { InvalidArgumentError } from "../../../../src/exceptions";
+import { $df } from "df-script";
+import { InvalidArgumentError } from "df-script";
 
 console.log("Running StandardExpr.ewmKurt tests...");
 

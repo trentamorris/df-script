@@ -1,4 +1,5 @@
 import esbuild from "esbuild";
+import fs from "fs";
 
 const sharedMangleCache = {};
 
@@ -37,3 +38,7 @@ for (const cfg of builds) {
     }
 }
 console.log("Build complete! Mangle cache entries:", Object.keys(sharedMangleCache).length);
+
+// Persist the property-mangle map (unpublished) so scripts/test-dist.mjs can compile _tests with identical names
+fs.mkdirSync("build", { recursive: true });
+fs.writeFileSync("build/mangle-cache.json", JSON.stringify(sharedMangleCache, null, 2));

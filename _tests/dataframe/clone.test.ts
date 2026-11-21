@@ -1,5 +1,5 @@
-import { DataFrame } from "../../src/dataframe";
-import { DataTypeRegistry } from "../../src/datatypes";
+import { DataFrame } from "df-script";
+import { DataTypeRegistry } from "df-script";
 
 console.log("Running comprehensive df.clone() tests...");
 

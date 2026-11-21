@@ -1,5 +1,5 @@
 declare const process: any;
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING DATAFRAME WIDTH GETTER TESTS...");

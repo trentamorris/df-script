@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df } from "../../../../src";
+import { $df } from "df-script";
 
 console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests...");
 

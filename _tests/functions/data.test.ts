@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df, ShapeError } from "../../src/index";
+import { $df, ShapeError } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING $df.data() TESTS...");

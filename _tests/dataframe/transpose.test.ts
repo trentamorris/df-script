@@ -1,4 +1,4 @@
-import { DataFrame } from "../../src";
+import { DataFrame } from "df-script";
 
 console.log("Running transpose tests...");
 

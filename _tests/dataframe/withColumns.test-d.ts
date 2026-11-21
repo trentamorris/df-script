@@ -1,6 +1,6 @@
-import type { DataFrame } from "../../src/dataframe";
+import type { DataFrame } from "df-script";
 import type { Expect, Equal } from "../testTypeHelper";
-import { $df } from "../../src";
+import { $df } from "df-script";
 
 // Setup base test DataFrame types
 interface BaseUser {

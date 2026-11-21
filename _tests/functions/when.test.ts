@@ -1,5 +1,5 @@
 declare const process: any;
-import { $df, ColumnExpr } from "../../src/index";
+import { $df, ColumnExpr } from "df-script";
 
 console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION WHEN-THEN-OTHERWISE TESTS...");

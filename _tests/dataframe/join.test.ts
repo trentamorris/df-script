@@ -1,4 +1,4 @@
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 
 console.log("Running join tests...");
 
@@ -509,7 +509,7 @@ try {
 }
 if (!caughtKeysInCross) throw new Error("Expected keys in cross join to throw");
 // Edge case 4: Extreme Cartesian dimensions size guard
-import { computeCartesianProduct } from "../../src/utils/array";
+import { computeCartesianProduct } from "df-script/utils";
 let caughtOverflow = false;
 try {
     computeCartesianProduct(50000, 100000);

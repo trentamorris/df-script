@@ -1,4 +1,4 @@
-import { DataFrame } from "../../src/dataframe";
+import { DataFrame } from "df-script";
 
 console.log("Running writeCsv tests...");
 

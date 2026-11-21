@@ -1,4 +1,4 @@
-import { DataFrame, $df } from "../../src";
+import { DataFrame, $df } from "df-script";
 
 console.log("Running fillNull tests...");
 
