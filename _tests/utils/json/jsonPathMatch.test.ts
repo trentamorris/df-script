@@ -325,7 +325,7 @@ try {
     assertEqual(jsonPathMatch(extremeData, "$..*.*"), "item0", "chained wildcards return first match");
 
     console.log(`SUCCESS: All jsonPathMatch tests passed! (${testsPassed} assertions)`);
-} catch (err) {
-    console.error(`FAILURE: jsonPathMatch test failed!`, err);
+} catch (err: any) {
+    console.error(`FAILURE: jsonPathMatch test failed! Error details:`, err?.stack || err?.message || err);
     process.exit(1);
 }

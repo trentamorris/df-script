@@ -50,7 +50,7 @@ try {
 
 
     console.log(`SUCCESS: All isJsonString tests passed! (${testsPassed} assertions)`);
-} catch (err) {
-    console.error(`FAILURE: isJsonString test failed!`, err);
+} catch (err: any) {
+    console.error(`FAILURE: isJsonString test failed! Error details:`, err?.stack || err?.message || err);
     process.exit(1);
 }

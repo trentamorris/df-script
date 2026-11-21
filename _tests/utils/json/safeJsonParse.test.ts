@@ -907,7 +907,7 @@ try {
     );
 
     console.log(`SUCCESS: All safeJsonParse tests passed! (${testsPassed} assertions)`);
-} catch (err) {
-    console.error(`FAILURE: safeJsonParse test failed!`, err);
+} catch (err: any) {
+    console.error(`FAILURE: safeJsonParse test failed! Error details:`, err?.stack || err?.message || err);
     process.exit(1);
 }

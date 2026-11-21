@@ -747,7 +747,7 @@ try {
 
 
     console.log(`SUCCESS: All createSafeJsonReplacer tests passed! (${testsPassed} assertions)`);
-} catch (err) {
-    console.error(`FAILURE: createSafeJsonReplacer test failed!`, err);
+} catch (err: any) {
+    console.error(`FAILURE: createSafeJsonReplacer test failed! Error details:`, err?.stack || err?.message || err);
     process.exit(1);
 }
