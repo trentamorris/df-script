@@ -406,9 +406,6 @@ export function decodeString(
 
 
 
-// Lone surrogate check to prevent native RegExp.escape from throwing a TypeError on unpaired surrogates.
-const _LONE_SURROGATE_REGEX = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
-
 // Shared control & lone-surrogate pattern fragment (C0 controls, DEL, lone surrogates)
 const _BASE_CONTROL_PATTERN = "\\x00-\\x1F\\x7F\\u{D800}-\\u{DFFF}";
 
@@ -459,9 +456,6 @@ export function escapeRegExp(
     const mode = options?.mode ?? "tc39";
 
     if (mode === "tc39") {
-        if (typeof (RegExp as any).escape === "function" && !_LONE_SURROGATE_REGEX.test(str)) {
-            return (RegExp as any).escape(str);
-        }
         return str.replace(_TC39_REGEX, _replaceRegexChar);
     }
 
