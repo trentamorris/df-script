@@ -37,7 +37,7 @@
     "build": "npm run clean && tsc --emitDeclarationOnly && node scripts/build.mjs && npm run extract-docs && npm run generate-llms",
     "test": "tsx --conditions=@df-script/source _tests/run_all_project_tests.ts",
     "test:types": "node scripts/verify-types.mjs",
-    "test:dist": "node scripts/test-dist.mjs",
+    "test:dist": "node scripts/verify-dist.mjs",
     "test:browser": "npm run build && node scripts/verify-browser.mjs",
     "prepublishOnly": "npm run build",
     "extract-docs": "node scripts/extract-docs.mjs && node scripts/_tests/extract-docs.test.mjs",
