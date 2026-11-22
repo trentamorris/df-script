@@ -8,7 +8,7 @@ import type { ColumnDict, RowRecord, DataFrameSchema } from "../types"
 /**
  * Grouped DataFrame interface including delegated aggregation shorthand methods.
  */
-export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
+export interface GroupedData<T extends RowRecord = RowRecord, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
 
 /**
  * Represents a DataFrame grouped by key columns, supporting aggregation operations.
@@ -16,13 +16,13 @@ export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyo
  * @category DataFrame
  * @syntax df.groupBy(...).{symbol}(...)
  */
-export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> {
+export class GroupedData<T extends RowRecord = RowRecord, K extends keyof T = keyof T> {
     private _keys: K[]
     private _allKeys: (keyof T)[]
     private _parentColumns: ColumnDict
     private _parentHeight: number
     private _parentSchema: DataFrameSchema
-    private _synthesizedColumns?: Record<string, any[]>
+    private _synthesizedColumns?: Record<string, unknown[]>
     private _groupIndicesList: number[][]
     private _firstIndices: number[]
 
@@ -33,7 +33,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
         parentColumns: ColumnDict,
         parentHeight: number,
         parentSchema: DataFrameSchema,
-        synthesizedColumns?: Record<string, any[]>
+        synthesizedColumns?: Record<string, unknown[]>
     ) {
         this._keys = keys
         this._allKeys = allKeys
@@ -84,7 +84,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * // | B     | 30      |
      * // +-------+---------+
      */
-    agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U> {
+    agg<U extends RowRecord = RowRecord>(...exprs: SelectArg[]): DataFrame<U> {
         const keys = this._keys as unknown as string[];
         const allKeys = this._allKeys as unknown as string[];
         const normalizedExprs = DataFrame._normalizeArgs(exprs);
@@ -98,7 +98,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
             const e = expandedExprs[i];
             const targetKey = e._outputName || e._colName || ALL_COLUMNS_MARKER;
 
-            let evaluated: any;
+            let evaluated: ColumnDict[string];
             if (!e._aggFn) {
                 evaluated = e._evaluate(newColumns, numGroups);
             } else {
@@ -106,7 +106,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
                 const aggregated = new Array(numGroups);
                 for (let g = 0; g < numGroups; g++) {
                     const indices = groupIndicesList[g];
-                    aggregated[g] = e._aggFn(gatherColumnByIndices(pre, indices) as any[]);
+                    aggregated[g] = e._aggFn(gatherColumnByIndices(pre, indices) as unknown[]);
                 }
                 evaluated = e._evaluatePost(e._groupingOpsIndex, aggregated, newColumns);
             }
@@ -120,7 +120,7 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
             newColumns[targetKey] = coerceColumn(evaluated, type, groupCount);
         }
 
-        return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
+        return DataFrame._createDirect<U>(newColumns as ColumnDict, outSchema, groupCount);
     }
 
     /**
@@ -137,9 +137,9 @@ export class GroupedData<T extends RowRecord = any, K extends keyof T = keyof T>
      * // | B     |
      * // +-------+
      */
-    toDataframe<U extends RowRecord = any>(): DataFrame<U> {
+    toDataframe<U extends RowRecord = RowRecord>(): DataFrame<U> {
         const { newColumns, outSchema, groupCount } = this._materializeKeyColumns(this._keys as unknown as string[]);
-        return DataFrame._createDirect<U>(newColumns as any, outSchema, groupCount);
+        return DataFrame._createDirect<U>(newColumns as ColumnDict, outSchema, groupCount);
     }
 }
 
@@ -162,8 +162,8 @@ const GROUPED_AGG_METHODS: Record<keyof GroupedAggDelegatedOps, 1> = {
 };
 
 for (const method in GROUPED_AGG_METHODS) {
-    (GroupedData.prototype as any)[method] = function (this: GroupedData<any, any>, ...args: any[]) {
-        const allExpr = new ColumnExpr(ALL_COLUMNS_MARKER) as any;
+    (GroupedData.prototype as unknown as Record<string, unknown>)[method] = function (this: GroupedData, ...args: unknown[]) {
+        const allExpr = new ColumnExpr(ALL_COLUMNS_MARKER) as unknown as Record<string, (...args: unknown[]) => SelectArg>;
         return this.agg(allExpr[method](...args));
     };
 }

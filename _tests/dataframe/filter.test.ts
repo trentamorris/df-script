@@ -290,6 +290,41 @@ if (typedDictsRes[0].idx !== 30 || typedDictsRes[1].idx !== 40) {
     throw new Error("30. TypedArray filter values failed");
 }
 
+// All-false predicate returns 0-row DataFrame with preserved schema
+const dfZeroMatch = new DataFrame([
+    { a: 1, b: "x" },
+    { a: 2, b: "y" }
+]).filter($df.col("a").gt(999));
+if (dfZeroMatch.height !== 0 || dfZeroMatch.width !== 2 || dfZeroMatch.schema.a === undefined) {
+    throw new Error("All-false filter should preserve schema with 0 height");
+}
+
+// TypedArray column preservation after filter
+const dfTypedFilter = new DataFrame({
+    nums: new Float64Array([10.5, 20.5, 30.5]),
+    tags: ["a", "b", "c"]
+}).filter($df.col("nums").gt(15));
+if (dfTypedFilter.height !== 2 || dfTypedFilter.item(0, "nums") !== 20.5) {
+    throw new Error("TypedArray filter failed");
+}
+
+// NaN and null three-valued logic in filter
+const dfNanNull = new DataFrame([
+    { v: 10 },
+    { v: NaN },
+    { v: null }
+]).filter($df.col("v").gt(0));
+if (dfNanNull.height !== 1 || dfNanNull.item(0, "v") !== 10) {
+    throw new Error("NaN/null three-valued filter failed");
+}
+
+// Immutability: original DataFrame is unchanged
+const dfOrig = new DataFrame([{ x: 1 }, { x: 2 }]);
+const dfFilteredOrig = dfOrig.filter($df.col("x").eq(2));
+if (dfOrig.height !== 2 || dfFilteredOrig.height !== 1) {
+    throw new Error("filter mutated original DataFrame");
+}
+
 console.log("✓ filter tests passed!");
 
 

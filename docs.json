@@ -8760,8 +8760,8 @@
       "category": "DataFrame",
       "propertyAccess": "cast",
       "callExpression": ".cast()",
-      "signature": "df.cast(\n  dtypes: CastTargetArg,\n  options: CastOptions = {}\n): DataFrame<any>",
-      "signatureDetailed": "df.cast(\n  dtypes: RegisteredDataType | DataFrameSchema,\n  options: {\n    strict?: boolean = true\n  } = {}\n): DataFrame<any>",
+      "signature": "df.cast<U extends RowRecord = RowRecord>(\n  dtypes: CastTargetArg,\n  options: CastOptions = {}\n): DataFrame<U>",
+      "signatureDetailed": "df.cast<U extends RowRecord = RowRecord>(\n  dtypes: RegisteredDataType | DataFrameSchema,\n  options: {\n    strict?: boolean = true\n  } = {}\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 180,
       "lineEnd": 201,
@@ -8844,8 +8844,8 @@
       "category": "DataFrame",
       "propertyAccess": "concat",
       "callExpression": ".concat()",
-      "signature": "df.concat<U extends RowRecord = any>(\n  items: ConcatItemsArg,\n  options: ConcatOptions = {}\n): DataFrame<U>",
-      "signatureDetailed": "df.concat<U extends RowRecord = any>(\n  items: ConcatItem | ConcatItem[],\n  options: {\n    horizontal?: {\n      strict?: boolean = true\n    },\n    how?: \"vertical\" | \"horizontal\" | \"diagonal\" = \"vertical\"\n  } = {}\n): DataFrame<U>",
+      "signature": "df.concat<U extends RowRecord = T>(\n  items: ConcatItemsArg,\n  options: ConcatOptions = {}\n): DataFrame<U>",
+      "signatureDetailed": "df.concat<U extends RowRecord = T>(\n  items: ConcatItem | ConcatItem[],\n  options: {\n    horizontal?: {\n      strict?: boolean = true\n    },\n    how?: \"vertical\" | \"horizontal\" | \"diagonal\" = \"vertical\"\n  } = {}\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 283,
       "lineEnd": 291,
@@ -8987,8 +8987,8 @@
       "category": "DataFrame",
       "propertyAccess": "equals",
       "callExpression": ".equals()",
-      "signature": "df.equals<U extends RowRecord = any>(\n  other: DataFrame<U>,\n  {\n    nullsEqual = true\n  }: EqualsOptions = {}\n): boolean",
-      "signatureDetailed": "df.equals<U extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: {\n    nullsEqual?: boolean = true\n  } = {}\n): boolean",
+      "signature": "df.equals<U extends RowRecord = RowRecord>(\n  other: DataFrame<U>,\n  {\n    nullsEqual = true\n  }: EqualsOptions = {}\n): boolean",
+      "signatureDetailed": "df.equals<U extends RowRecord = RowRecord>(\n  other: DataFrame<U>,\n  options: {\n    nullsEqual?: boolean = true\n  } = {}\n): boolean",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 361,
       "lineEnd": 403,
@@ -9036,8 +9036,8 @@
       "category": "DataFrame",
       "propertyAccess": "explode",
       "callExpression": ".explode()",
-      "signature": "df.explode(\n  columns: IntoExprArg,\n  options?: ExplodeOptions\n): DataFrame<any>",
-      "signatureDetailed": "df.explode(\n  columns: IntoExpr | IntoExpr[],\n  options?: {\n    emptyAsNull?: boolean = true,\n    keepNulls?: boolean = true\n  }\n): DataFrame<any>",
+      "signature": "df.explode<U extends RowRecord = RowRecord>(\n  columns: IntoExprArg,\n  options?: ExplodeOptions\n): DataFrame<U>",
+      "signatureDetailed": "df.explode<U extends RowRecord = RowRecord>(\n  columns: IntoExpr | IntoExpr[],\n  options?: {\n    emptyAsNull?: boolean = true,\n    keepNulls?: boolean = true\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 421,
       "lineEnd": 440,
@@ -9250,7 +9250,7 @@
       "propertyAccess": "filter",
       "callExpression": ".filter()",
       "signature": "df.filter(...exprs: FilterPredicateArg<T>[]): DataFrame<T>",
-      "signatureDetailed": "df.filter(...exprs: (IExpr | (row: T) => any | FilterPredicate<T>[])[]): DataFrame<T>",
+      "signatureDetailed": "df.filter(...exprs: (IExpr | (row: T) => unknown | FilterPredicate<T>[])[]): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 524,
       "lineEnd": 596,
@@ -9260,7 +9260,7 @@
           "optional": false,
           "variadic": true,
           "desc": "Expressions or predicate functions evaluated per row.",
-          "resolvedType": "(IExpr | (row: T) => any | FilterPredicate<T>[])[]"
+          "resolvedType": "(IExpr | (row: T) => unknown | FilterPredicate<T>[])[]"
         }
       }
     },
@@ -9317,7 +9317,7 @@
       "propertyAccess": "groupByDynamic",
       "callExpression": ".groupByDynamic()",
       "signature": "df.groupByDynamic<K extends keyof T & string>(\n  indexColumn: DynamicIndexColumnArg<K>,\n  options: GroupByDynamicOptions<T>\n): GroupedData<T, K>",
-      "signatureDetailed": "df.groupByDynamic<K extends keyof T & string>(\n  indexColumn: K | IntoExpr,\n  options: {\n    by?: keyof any | keyof any[],\n    checkSorted?: boolean = true,\n    closed?: \"both\" | \"left\" | \"right\" | \"none\" = \"left\",\n    every: number | string,\n    groupBy?: keyof any | keyof any[],\n    includeBoundaries?: boolean = false,\n    label?: \"left\" | \"right\" | \"datapoint\" = \"left\",\n    offset?: number | string = 0,\n    period?: number | string = `every` if omitted,\n    startBy?: \"window\" | \"datapoint\" | \"monday\" | \"tuesday\" | \"wednesday\" | \"thursday\" | \"friday\" | \"saturday\" | \"sunday\" = \"window\",\n    truncate?: boolean = true\n  }\n): GroupedData<T, K>",
+      "signatureDetailed": "df.groupByDynamic<K extends keyof T & string>(\n  indexColumn: K | IntoExpr,\n  options: {\n    by?: keyof RowRecord | keyof RowRecord[],\n    checkSorted?: boolean = true,\n    closed?: \"both\" | \"left\" | \"right\" | \"none\" = \"left\",\n    every: number | string,\n    groupBy?: keyof RowRecord | keyof RowRecord[],\n    includeBoundaries?: boolean = false,\n    label?: \"left\" | \"right\" | \"datapoint\" = \"left\",\n    offset?: number | string = 0,\n    period?: number | string = `every` if omitted,\n    startBy?: \"window\" | \"datapoint\" | \"monday\" | \"tuesday\" | \"wednesday\" | \"thursday\" | \"friday\" | \"saturday\" | \"sunday\" = \"window\",\n    truncate?: boolean = true\n  }\n): GroupedData<T, K>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 658,
       "lineEnd": 855,
@@ -9334,10 +9334,10 @@
           "desc": "Dynamic grouping configuration options (`every`, `period`, `offset`, `truncate`, `includeBoundaries`, `closed`, `label`, `by`, `startBy`, `checkSorted`).",
           "properties": {
             "by": {
-              "type": "ColumnKeyArg<keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord>",
               "optional": true,
               "desc": "Additional columns to partition / group by before dynamic windowing.",
-              "resolvedType": "keyof any | keyof any[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[]"
             },
             "checkSorted": {
               "type": "boolean",
@@ -9359,10 +9359,10 @@
               "resolvedType": "number | string"
             },
             "groupBy": {
-              "type": "ColumnKeyArg<keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord>",
               "optional": true,
               "desc": "Polars alias for `by`.",
-              "resolvedType": "keyof any | keyof any[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[]"
             },
             "includeBoundaries": {
               "type": "boolean",
@@ -9481,8 +9481,8 @@
       "category": "DataFrame",
       "propertyAccess": "insertColumn",
       "callExpression": ".insertColumn()",
-      "signature": "df.insertColumn(\n  index: number,\n  name: string,\n  expr: InsertColumnArg\n): DataFrame<any>",
-      "signatureDetailed": "df.insertColumn(\n  index: number,\n  name: string,\n  expr: IntoExpr | ArrayLike<any>\n): DataFrame<any>",
+      "signature": "df.insertColumn<K extends string, U extends RowRecord = Record<K, unknown>>(\n  index: number,\n  name: K,\n  expr: InsertColumnArg\n): DataFrame<T & U>",
+      "signatureDetailed": "df.insertColumn<K extends string, U extends RowRecord = Record<K, unknown>>(\n  index: number,\n  name: K,\n  expr: IntoExpr | ArrayLike<unknown>\n): DataFrame<T & U>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 906,
       "lineEnd": 927,
@@ -9493,7 +9493,7 @@
           "desc": "Target column index position."
         },
         "name": {
-          "type": "string",
+          "type": "K",
           "optional": false,
           "desc": "Name of the inserted column."
         },
@@ -9501,7 +9501,7 @@
           "type": "InsertColumnArg",
           "optional": false,
           "desc": "Value expression, column definition, or raw column values array.",
-          "resolvedType": "IntoExpr | ArrayLike<any>"
+          "resolvedType": "IntoExpr | ArrayLike<unknown>"
         }
       }
     },
@@ -9522,13 +9522,13 @@
           "desc": "Column index or column name string."
         }
       ],
-      "returns": "any",
+      "returns": "T[K]",
       "namespace": "df",
       "category": "DataFrame",
       "propertyAccess": "item",
       "callExpression": ".item()",
-      "signature": "df.item(\n  row?: number,\n  column?: ColumnIndexOrNameArg\n): any",
-      "signatureDetailed": "df.item(\n  row?: number,\n  column?: number | string\n): any",
+      "signature": "df.item<K extends keyof T = keyof T>(\n  row?: number,\n  column?: K | number\n): T[K]",
+      "signatureDetailed": "df.item<K extends keyof T = keyof T>(\n  row?: number,\n  column?: K | number\n): T[K]",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 941,
       "lineEnd": 970,
@@ -9539,10 +9539,9 @@
           "desc": "Row index position."
         },
         "column": {
-          "type": "ColumnIndexOrNameArg",
+          "type": "K | number",
           "optional": true,
-          "desc": "Column index or column name string.",
-          "resolvedType": "number | string"
+          "desc": "Column index or column name string."
         }
       }
     },
@@ -9624,8 +9623,8 @@
       "category": "DataFrame",
       "propertyAccess": "join",
       "callExpression": ".join()",
-      "signature": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: JoinOptions<T, U> = {}\n): DataFrame<R>",
-      "signatureDetailed": "df.join<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: {\n    coalesce?: boolean = true,\n    how?: \"inner\" | \"outer\" | \"left\" | \"right\" | \"semi\" | \"anti\" | \"cross\" = \"inner\",\n    joinNulls?: boolean = false,\n    leftOn?: keyof any | keyof any[],\n    maintainOrder?: JoinMaintainOrder | boolean = \"none\",\n    on?: keyof any & keyof any | (keyof any & keyof any)[],\n    rightOn?: keyof any | keyof any[],\n    suffixes?: [string, string] = [\"\", \"_right\"]\n  } = {}\n): DataFrame<R>",
+      "signature": "df.join<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(\n  other: DataFrame<U>,\n  options: JoinOptions<T, U> = {}\n): DataFrame<R>",
+      "signatureDetailed": "df.join<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(\n  other: DataFrame<U>,\n  options: {\n    coalesce?: boolean = true,\n    how?: \"inner\" | \"outer\" | \"left\" | \"right\" | \"semi\" | \"anti\" | \"cross\" = \"inner\",\n    joinNulls?: boolean = false,\n    leftOn?: keyof RowRecord | keyof RowRecord[],\n    maintainOrder?: JoinMaintainOrder | boolean = \"none\",\n    on?: keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[],\n    rightOn?: keyof RowRecord | keyof RowRecord[],\n    suffixes?: [string, string] = [\"\", \"_right\"]\n  } = {}\n): DataFrame<R>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 1048,
       "lineEnd": 1143,
@@ -9661,10 +9660,10 @@
               "default": "false"
             },
             "leftOn": {
-              "type": "ColumnKeyArg<keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord>",
               "optional": true,
               "desc": "Join key column(s) in the left DataFrame when key names differ.",
-              "resolvedType": "keyof any | keyof any[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[]"
             },
             "maintainOrder": {
               "type": "JoinMaintainOrder | boolean",
@@ -9673,16 +9672,16 @@
               "default": "\"none\""
             },
             "on": {
-              "type": "ColumnKeyArg<keyof any & keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord & keyof RowRecord>",
               "optional": true,
               "desc": "Join key column name or array of key column names that exist in both DataFrames.",
-              "resolvedType": "keyof any & keyof any | (keyof any & keyof any)[]"
+              "resolvedType": "keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[]"
             },
             "rightOn": {
-              "type": "ColumnKeyArg<keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord>",
               "optional": true,
               "desc": "Join key column(s) in the right DataFrame when key names differ.",
-              "resolvedType": "keyof any | keyof any[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[]"
             },
             "suffixes": {
               "type": "JoinSuffixes",
@@ -9717,8 +9716,8 @@
       "category": "DataFrame",
       "propertyAccess": "joinAsof",
       "callExpression": ".joinAsof()",
-      "signature": "df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: JoinAsofOptions<T, U>\n): DataFrame<R>",
-      "signatureDetailed": "df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  options: {\n    allowExactMatches?: boolean = true,\n    by?: keyof any & keyof any | (keyof any & keyof any)[],\n    checkSorted?: boolean = true,\n    coalesce?: boolean = true,\n    leftBy?: keyof any | keyof any[],\n    leftOn?: (keyof any),\n    on?: (keyof any & keyof any),\n    rightBy?: keyof any | keyof any[],\n    rightOn?: (keyof any),\n    strategy?: \"backward\" | \"forward\" | \"nearest\" = \"backward\",\n    suffixes?: [string, string] = [\"\", \"_right\"],\n    tolerance?: number | string\n  }\n): DataFrame<R>",
+      "signature": "df.joinAsof<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(\n  other: DataFrame<U>,\n  options: JoinAsofOptions<T, U>\n): DataFrame<R>",
+      "signatureDetailed": "df.joinAsof<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(\n  other: DataFrame<U>,\n  options: {\n    allowExactMatches?: boolean = true,\n    by?: keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[],\n    checkSorted?: boolean = true,\n    coalesce?: boolean = true,\n    leftBy?: keyof RowRecord | keyof RowRecord[],\n    leftOn?: (keyof RowRecord),\n    on?: (keyof RowRecord & keyof RowRecord),\n    rightBy?: keyof RowRecord | keyof RowRecord[],\n    rightOn?: (keyof RowRecord),\n    strategy?: \"backward\" | \"forward\" | \"nearest\" = \"backward\",\n    suffixes?: [string, string] = [\"\", \"_right\"],\n    tolerance?: number | string\n  }\n): DataFrame<R>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 1167,
       "lineEnd": 1246,
@@ -9740,10 +9739,10 @@
               "default": "true"
             },
             "by": {
-              "type": "ColumnKeyArg<keyof any & keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord & keyof RowRecord>",
               "optional": true,
               "desc": "Optional exact-match group column(s) present in both DataFrames.",
-              "resolvedType": "keyof any & keyof any | (keyof any & keyof any)[]"
+              "resolvedType": "keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[]"
             },
             "checkSorted": {
               "type": "boolean",
@@ -9758,29 +9757,29 @@
               "default": "true"
             },
             "leftBy": {
-              "type": "ColumnKeyArg<keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord>",
               "optional": true,
               "desc": "Group column(s) for exact key matching in left DataFrame.",
-              "resolvedType": "keyof any | keyof any[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[]"
             },
             "leftOn": {
-              "type": "(keyof any)",
+              "type": "(keyof RowRecord)",
               "optional": true,
               "desc": "Left DataFrame join key column name."
             },
             "on": {
-              "type": "(keyof any & keyof any)",
+              "type": "(keyof RowRecord & keyof RowRecord)",
               "optional": true,
               "desc": "Column name to join on (must exist in both DataFrames and be sorted ascending)."
             },
             "rightBy": {
-              "type": "ColumnKeyArg<keyof any>",
+              "type": "ColumnKeyArg<keyof RowRecord>",
               "optional": true,
               "desc": "Group column(s) for exact key matching in right DataFrame.",
-              "resolvedType": "keyof any | keyof any[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[]"
             },
             "rightOn": {
-              "type": "(keyof any)",
+              "type": "(keyof RowRecord)",
               "optional": true,
               "desc": "Right DataFrame join key column name."
             },
@@ -9830,8 +9829,8 @@
       "category": "DataFrame",
       "propertyAccess": "joinWhere",
       "callExpression": ".joinWhere()",
-      "signature": "df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  ...args: JoinWhereArg[]\n): DataFrame<R>",
-      "signatureDetailed": "df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(\n  other: DataFrame<U>,\n  ...args: {\n    how?: \"inner\" | \"left\" | \"right\" = \"inner\",\n    suffixes?: [string, string] = [\"\", \"_right\"]\n  }\n): DataFrame<R>",
+      "signature": "df.joinWhere<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(\n  other: DataFrame<U>,\n  ...args: JoinWhereArg[]\n): DataFrame<R>",
+      "signatureDetailed": "df.joinWhere<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(\n  other: DataFrame<U>,\n  ...args: {\n    how?: \"inner\" | \"left\" | \"right\" = \"inner\",\n    suffixes?: [string, string] = [\"\", \"_right\"]\n  }\n): DataFrame<R>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 1277,
       "lineEnd": 1330,
@@ -9995,8 +9994,8 @@
       "category": "DataFrame",
       "propertyAccess": "pivot",
       "callExpression": ".pivot()",
-      "signature": "df.pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U>",
-      "signatureDetailed": "df.pivot<U extends RowRecord = any>(\n  config: {\n    agg?: (values: any[]) => any | string,\n    columns: keyof T,\n    index: keyof T | keyof T[],\n    values: keyof T\n  }\n): DataFrame<U>",
+      "signature": "df.pivot<U extends RowRecord = RowRecord>(config: PivotOptions<T>): DataFrame<U>",
+      "signatureDetailed": "df.pivot<U extends RowRecord = RowRecord>(\n  config: {\n    agg?: (values: unknown[]) => any | string,\n    columns: keyof T,\n    index: keyof T | keyof T[],\n    values: keyof T\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 1418,
       "lineEnd": 1472,
@@ -10007,10 +10006,10 @@
           "desc": "Pivot table configuration options.",
           "properties": {
             "agg": {
-              "type": "AggFn<any> | string",
+              "type": "AggFn<unknown> | string",
               "optional": true,
               "desc": "Aggregation function to apply when multiple values exist for a cell.",
-              "resolvedType": "(values: any[]) => any | string"
+              "resolvedType": "(values: unknown[]) => any | string"
             },
             "columns": {
               "type": "keyof T",
@@ -10096,8 +10095,9 @@
       "lineEnd": 1531
     },
     "select": {
-      "desc": "Selects specific columns or evaluates column expressions. // 1. Select and transform columns: <!-- doc:base_2x2 --> df.select(\"a\", $df.col(\"b\").alias(\"b_copy\")); // shape: (2, 2) // +---+--------+ // | a | b_copy | // +---+--------+ // | 1 | x      | // | 2 | y      | // +---+--------+",
+      "desc": "Selects specific columns or evaluates column expressions.",
       "examples": [
+        "// 1. Select and transform columns:\nconst df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] });\n// shape: (2, 2)\n// +---+---+\n// | a | b |\n// +---+---+\n// | 1 | x |\n// | 2 | y |\n// +---+---+\ndf.select(\"a\", $df.col(\"b\").alias(\"b_copy\"));\n// shape: (2, 2)\n// +---+--------+\n// | a | b_copy |\n// +---+--------+\n// | 1 | x      |\n// | 2 | y      |\n// +---+--------+",
         "// 2. Compute expressions on numeric columns:\nconst df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });\n// shape: (3, 2)\n// +---+----+\n// | a | b  |\n// +---+----+\n// | 1 | 10 |\n// | 2 | 20 |\n// | 3 | 30 |\n// +---+----+\ndf.select(\"a\", $df.col(\"b\").mul(2).alias(\"b_double\"));\n// shape: (3, 2)\n// +---+----------+\n// | a | b_double |\n// +---+----------+\n// | 1 | 20       |\n// | 2 | 40       |\n// | 3 | 60       |\n// +---+----------+\n// | a | b_plus |\n// +---+--------+\n// | 1 | 110    |\n// | 2 | 120    |\n// +---+--------+"
       ],
       "params": [
@@ -10112,11 +10112,11 @@
       "category": "DataFrame",
       "propertyAccess": "select",
       "callExpression": ".select()",
-      "signature": "df.select<U extends RowRecord = any>(...args: SelectArg[]): DataFrame<U>",
-      "signatureDetailed": "df.select<U extends RowRecord = any>(...args: (SelectItem | SelectItem[])[]): DataFrame<U>",
+      "signature": "df.select<U extends RowRecord = RowRecord>(...args: SelectArg[]): DataFrame<U>",
+      "signatureDetailed": "df.select<U extends RowRecord = RowRecord>(...args: (SelectItem | SelectItem[])[]): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1566,
-      "lineEnd": 1663,
+      "lineStart": 1567,
+      "lineEnd": 1664,
       "typeTree": {
         "args": {
           "type": "SelectArg[]",
@@ -10140,12 +10140,13 @@
       "signature": "df.shape: DataFrameShape",
       "signatureDetailed": "df.shape: DataFrameShape",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1673,
-      "lineEnd": 1675
+      "lineStart": 1674,
+      "lineEnd": 1676
     },
     "slice": {
-      "desc": "Slices a subset range of rows between start and end index. // 1. Slice rows by start and offset count: <!-- doc:base_numbers_3x1 --> df.slice(1, 2); // shape: (2, 1) // +---+ // | a | // +---+ // | 2 | // | 3 | // +---+",
+      "desc": "Slices a subset range of rows between start and end index.",
       "examples": [
+        "// 1. Slice rows by start and offset count:\nconst df = $df.data({ a: [1, 2, 3], val: [10, 20, 30], score: [75, 85, 95] });\n// shape: (3, 1)\n// +---+\n// | a |\n// +---+\n// | 1 |\n// | 2 |\n// | 3 |\n// +---+\ndf.slice(1, 2);\n// shape: (2, 1)\n// +---+\n// | a |\n// +---+\n// | 2 |\n// | 3 |\n// +---+",
         "// 2. Negative offset to slice from the tail:\nconst df = $df.data({ a: [1, 2, 3], val: [10, 20, 30], score: [75, 85, 95] });\n// shape: (3, 1)\n// +---+\n// | a |\n// +---+\n// | 1 |\n// | 2 |\n// | 3 |\n// +---+\ndf.slice(-2);\n// shape: (2, 1)\n// +---+\n// | a |\n// +---+\n// | 2 |\n// | 3 |\n// +---+\n// | a  |\n// +----+\n// | 20 |\n// | 30 |\n// +----+"
       ],
       "params": [
@@ -10168,8 +10169,8 @@
       "signature": "df.slice(\n  start: number,\n  end?: number\n): DataFrame<T>",
       "signatureDetailed": "df.slice(\n  start: number,\n  end?: number\n): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1710,
-      "lineEnd": 1719,
+      "lineStart": 1712,
+      "lineEnd": 1721,
       "typeTree": {
         "start": {
           "type": "number",
@@ -10184,8 +10185,9 @@
       }
     },
     "sort": {
-      "desc": "Sorts DataFrame rows by one or more column expressions or custom sorters. // 1. Sort ascending by column name: <!-- doc:base_numbers_3x2 --> df.sort(\"a\"); // shape: (3, 2) // +---+----+ // | a | b  | // +---+----+ // | 1 | 10 | // | 2 | 20 | // | 3 | 30 | // +---+----+",
+      "desc": "Sorts DataFrame rows by one or more column expressions or custom sorters.",
       "examples": [
+        "// 1. Sort ascending by column name:\nconst df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });\n// shape: (3, 2)\n// +---+----+\n// | a | b  |\n// +---+----+\n// | 1 | 10 |\n// | 2 | 20 |\n// | 3 | 30 |\n// +---+----+\ndf.sort(\"a\");\n// shape: (3, 2)\n// +---+----+\n// | a | b  |\n// +---+----+\n// | 1 | 10 |\n// | 2 | 20 |\n// | 3 | 30 |\n// +---+----+",
         "// 2. Sort descending using configuration options:\nconst df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });\n// shape: (3, 2)\n// +---+----+\n// | a | b  |\n// +---+----+\n// | 1 | 10 |\n// | 2 | 20 |\n// | 3 | 30 |\n// +---+----+\ndf.sort({ by: \"a\", descending: true });\n// shape: (3, 2)\n// +---+----+\n// | a | b  |\n// +---+----+\n// | 3 | 30 |\n// | 2 | 20 |\n// | 1 | 10 |\n// +---+----+\n// | a | b  |\n// +---+----+\n// | 3 | 30 |\n// | 2 | 20 |\n// | 1 | 10 |\n// +---+----+"
       ],
       "params": [
@@ -10201,10 +10203,10 @@
       "propertyAccess": "sort",
       "callExpression": ".sort()",
       "signature": "df.sort(config?: SortOptions<T>): DataFrame<T>",
-      "signatureDetailed": "df.sort(\n  config?: {\n    by: keyof any | keyof any[] | IExpr | IExpr[],\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,\n    descending?: boolean | boolean[] = false,\n    nullsLast?: boolean = true\n  }\n): DataFrame<T>",
+      "signatureDetailed": "df.sort(\n  config?: {\n    by: keyof RowRecord | keyof RowRecord[] | IExpr | IExpr[],\n    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof RowRecord, (a: unknown, b: unknown) => number>> | null,\n    descending?: boolean | boolean[] = false,\n    nullsLast?: boolean = true\n  }\n): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1756,
-      "lineEnd": 1791,
+      "lineStart": 1759,
+      "lineEnd": 1794,
       "typeTree": {
         "config": {
           "type": "SortOptions<T>",
@@ -10212,13 +10214,13 @@
           "desc": "Sort configuration options.",
           "properties": {
             "by": {
-              "type": "ColumnKeyArg<keyof any> | ColumnKeyArg<IExpr>",
+              "type": "ColumnKeyArg<keyof RowRecord> | ColumnKeyArg<IExpr>",
               "optional": false,
               "desc": "Column name(s) or expression(s) to sort by.",
-              "resolvedType": "keyof any | keyof any[] | IExpr | IExpr[]"
+              "resolvedType": "keyof RowRecord | keyof RowRecord[] | IExpr | IExpr[]"
             },
             "customComp": {
-              "type": "((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null",
+              "type": "((a: unknown, b: unknown) => number) | Partial<Record<keyof RowRecord, (a: unknown, b: unknown) => number>> | null",
               "optional": true,
               "desc": "Optional comparator function or dictionary mapping column names to custom comparator functions."
             },
@@ -10258,8 +10260,8 @@
       "signature": "df.tail(n: number = 10): DataFrame<T>",
       "signatureDetailed": "df.tail(n: number = 10): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1808,
-      "lineEnd": 1810,
+      "lineStart": 1811,
+      "lineEnd": 1813,
       "typeTree": {
         "n": {
           "type": "number",
@@ -10281,16 +10283,16 @@
           "desc": "Target column name or column expression."
         }
       ],
-      "returns": "any[]",
+      "returns": "R[]",
       "namespace": "df",
       "category": "DataFrame",
       "propertyAccess": "toArray",
       "callExpression": ".toArray()",
-      "signature": "df.toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[]",
-      "signatureDetailed": "df.toArray<K extends keyof T>(nameOrExpr: K | IExpr): any[]",
+      "signature": "df.toArray<K extends keyof T, R = T[K]>(nameOrExpr: ColumnOrExprArg<K>): R[]",
+      "signatureDetailed": "df.toArray<K extends keyof T, R = T[K]>(nameOrExpr: K | IExpr): R[]",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1821,
-      "lineEnd": 1823,
+      "lineStart": 1824,
+      "lineEnd": 1826,
       "typeTree": {
         "nameOrExpr": {
           "type": "ColumnOrExprArg<K>",
@@ -10313,8 +10315,8 @@
       "signature": "df.toDict(): DataFrameColumns<T>",
       "signatureDetailed": "df.toDict(): DataFrameColumns<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1833,
-      "lineEnd": 1835
+      "lineStart": 1836,
+      "lineEnd": 1838
     },
     "toDicts": {
       "desc": "Converts rows into an array of JavaScript objects.",
@@ -10329,8 +10331,8 @@
       "signature": "df.toDicts(): T[]",
       "signatureDetailed": "df.toDicts(): T[]",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1845,
-      "lineEnd": 1847
+      "lineStart": 1848,
+      "lineEnd": 1850
     },
     "transpose": {
       "desc": "Transposes rows into columns and columns into rows.",
@@ -10349,11 +10351,11 @@
       "category": "DataFrame",
       "propertyAccess": "transpose",
       "callExpression": ".transpose()",
-      "signature": "df.transpose(\n  {\n    includeHeader = false,\n    headerName = \"column\",\n    columnNames\n  }: TransposeOptions = {}\n): DataFrame<any>",
-      "signatureDetailed": "df.transpose(\n  options: {\n    columnNames?: string | Iterable<string>,\n    headerName?: string = \"column\",\n    includeHeader?: boolean = false\n  } = {}\n): DataFrame<any>",
+      "signature": "df.transpose<U extends RowRecord = RowRecord>(\n  {\n    includeHeader = false,\n    headerName = \"column\",\n    columnNames\n  }: TransposeOptions = {}\n): DataFrame<U>",
+      "signatureDetailed": "df.transpose<U extends RowRecord = RowRecord>(\n  options: {\n    columnNames?: string | Iterable<string>,\n    headerName?: string = \"column\",\n    includeHeader?: boolean = false\n  } = {}\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1864,
-      "lineEnd": 1920,
+      "lineStart": 1867,
+      "lineEnd": 1923,
       "typeTree": {
         "options": {
           "type": "TransposeOptions",
@@ -10400,11 +10402,11 @@
       "category": "DataFrame",
       "propertyAccess": "unique",
       "callExpression": ".unique()",
-      "signature": "df.unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T>",
-      "signatureDetailed": "df.unique<K extends keyof T>(columns?: K | K[]): DataFrame<T>",
+      "signature": "df.unique<K extends keyof T & string>(columns?: ColumnKeyArg<K>): DataFrame<T>",
+      "signatureDetailed": "df.unique<K extends keyof T & string>(columns?: K | K[]): DataFrame<T>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1937,
-      "lineEnd": 1940,
+      "lineStart": 1940,
+      "lineEnd": 1943,
       "typeTree": {
         "columns": {
           "type": "ColumnKeyArg<K>",
@@ -10431,11 +10433,11 @@
       "category": "DataFrame",
       "propertyAccess": "unpivot",
       "callExpression": ".unpivot()",
-      "signature": "df.unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U>",
-      "signatureDetailed": "df.unpivot<U extends RowRecord = any>(\n  config: {\n    idVars: keyof T | keyof T[],\n    valueName?: string = \"value\",\n    valueVars: keyof T | keyof T[],\n    varName?: string = \"variable\"\n  }\n): DataFrame<U>",
+      "signature": "df.unpivot<U extends RowRecord = RowRecord>(config: UnpivotOptions<T>): DataFrame<U>",
+      "signatureDetailed": "df.unpivot<U extends RowRecord = RowRecord>(\n  config: {\n    idVars: keyof T | keyof T[],\n    valueName?: string = \"value\",\n    valueVars: keyof T | keyof T[],\n    varName?: string = \"variable\"\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 1959,
-      "lineEnd": 2006,
+      "lineStart": 1962,
+      "lineEnd": 2009,
       "typeTree": {
         "config": {
           "type": "UnpivotOptions<T>",
@@ -10490,11 +10492,11 @@
       "category": "DataFrame",
       "propertyAccess": "unstack",
       "callExpression": ".unstack()",
-      "signature": "df.unstack(\n  columns: IntoExprArg,\n  options: UnstackOptions\n): DataFrame<any>",
-      "signatureDetailed": "df.unstack(\n  columns: IntoExpr | IntoExpr[],\n  options: {\n    fillValues?: any = null,\n    how?: \"vertical\" | \"horizontal\" = \"vertical\",\n    step: number\n  }\n): DataFrame<any>",
+      "signature": "df.unstack<U extends RowRecord = RowRecord>(\n  columns: IntoExprArg,\n  options: UnstackOptions\n): DataFrame<U>",
+      "signatureDetailed": "df.unstack<U extends RowRecord = RowRecord>(\n  columns: IntoExpr | IntoExpr[],\n  options: {\n    fillValues?: unknown = null,\n    how?: \"vertical\" | \"horizontal\" = \"vertical\",\n    step: number\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2026,
-      "lineEnd": 2082,
+      "lineStart": 2029,
+      "lineEnd": 2085,
       "typeTree": {
         "columns": {
           "type": "IntoExprArg",
@@ -10508,7 +10510,7 @@
           "desc": "Unstack configuration options (`step`, `how`, `fillValues`).",
           "properties": {
             "fillValues": {
-              "type": "any",
+              "type": "unknown",
               "optional": true,
               "desc": "Value to fill in empty cells when length is not evenly divisible by step.",
               "default": "null"
@@ -10542,8 +10544,8 @@
       "signature": "df.width: number",
       "signatureDetailed": "df.width: number",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2092,
-      "lineEnd": 2094
+      "lineStart": 2095,
+      "lineEnd": 2097
     },
     "withColumns": {
       "desc": "Adds new columns or updates existing ones using column expressions. // 1. Append a single calculated column: <!-- doc:base_2x2 --> df.withColumns($df.col(\"a\").mul(10).alias(\"a_x10\")); // shape: (2, 3) // +---+---+-------+ // | a | b | a_x10 | // +---+---+-------+ // | 1 | x | 10    | // | 2 | y | 20    | // +---+---+-------+",
@@ -10565,8 +10567,8 @@
       "signature": "df.withColumns<NewCols extends RowRecord = RowRecord>(...args: SelectArg[]): DataFrame<T & NewCols>",
       "signatureDetailed": "df.withColumns<NewCols extends RowRecord = RowRecord>(...args: (SelectItem | SelectItem[])[]): DataFrame<T & NewCols>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2132,
-      "lineEnd": 2163,
+      "lineStart": 2135,
+      "lineEnd": 2166,
       "typeTree": {
         "args": {
           "type": "SelectArg[]",
@@ -10599,16 +10601,16 @@
       "category": "DataFrame",
       "propertyAccess": "withRowIndex",
       "callExpression": ".withRowIndex()",
-      "signature": "df.withRowIndex(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
-      "signatureDetailed": "df.withRowIndex(\n  name: string = \"index\",\n  offset: number = 0\n): DataFrame<any>",
+      "signature": "df.withRowIndex<K extends string = \"index\">(\n  name: K = \"index\" as K,\n  offset: number = 0\n): DataFrame<T & Record<K, number>>",
+      "signatureDetailed": "df.withRowIndex<K extends string = \"index\">(\n  name: K = \"index\" as K,\n  offset: number = 0\n): DataFrame<T & Record<K, number>>",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2181,
-      "lineEnd": 2191,
+      "lineStart": 2184,
+      "lineEnd": 2194,
       "typeTree": {
         "name": {
-          "type": "string",
+          "type": "K",
           "optional": true,
-          "default": "\"index\"",
+          "default": "\"index\" as K",
           "desc": "Name of index column (default \"index\")."
         },
         "offset": {
@@ -10647,8 +10649,8 @@
       "signature": "df.writeCsv(\n  file?: WriteFileTargetArg,\n  options: WriteCSVOptions = {}\n): string",
       "signatureDetailed": "df.writeCsv(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    dateFormat?: string,\n    datetimeFormat?: string,\n    includeBom?: boolean = false,\n    includeHeader?: boolean = true,\n    lineTerminator?: string = \"\\n\",\n    nullValue?: string = \"\",\n    numericFormatOptions?: {\n      accountingNegatives?: boolean = false,\n      fallback?: string = \"NaN\",\n      formatNonFinite?: boolean = false,\n      locale?: string = \"en-US\"\n    },\n    quoteChar?: string = '\"',\n    quoteStyle?: \"necessary\" | \"always\" | \"never\" | \"non_numeric\" = \"necessary\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => any,\n      onCircular?: (this: any, k: string, v: any) => any,\n      onCustom?: (this: any, k: string, v: any) => any,\n      onDate?: (v: Date) => any,\n      onError?: (v: Error) => any,\n      onMap?: (v: Map<any, any>) => any,\n      onRegExp?: (v: RegExp) => any,\n      onSet?: (v: Set<any>) => any,\n      onTypedArray?: (v: any) => any,\n      onURLSearchParams?: (v: URLSearchParams) => any,\n      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    },\n    separator?: string = \",\",\n    timeFormat?: string\n  } = {}\n): string",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2205,
-      "lineEnd": 2240,
+      "lineStart": 2208,
+      "lineEnd": 2243,
       "typeTree": {
         "file": {
           "type": "WriteFileTargetArg",
@@ -10904,8 +10906,8 @@
       "signature": "df.writeJson(\n  file?: WriteFileTargetArg,\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string",
       "signatureDetailed": "df.writeJson(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    format?: \"json\" | \"ndjson\" = \"json\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => any,\n      onCircular?: (this: any, k: string, v: any) => any,\n      onCustom?: (this: any, k: string, v: any) => any,\n      onDate?: (v: Date) => any,\n      onError?: (v: Error) => any,\n      onMap?: (v: Map<any, any>) => any,\n      onRegExp?: (v: RegExp) => any,\n      onSet?: (v: Set<any>) => any,\n      onTypedArray?: (v: any) => any,\n      onURLSearchParams?: (v: URLSearchParams) => any,\n      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    }\n  } = {}\n): string",
       "filePath": "dataframe/dataframe.ts",
-      "lineStart": 2254,
-      "lineEnd": 2281,
+      "lineStart": 2257,
+      "lineEnd": 2284,
       "typeTree": {
         "file": {
           "type": "WriteFileTargetArg",
@@ -11068,8 +11070,8 @@
       "category": "DataFrame",
       "propertyAccess": "agg",
       "callExpression": ".agg()",
-      "signature": "df.groupBy(...).agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U>",
-      "signatureDetailed": "df.groupBy(...exprs: (SelectItem | SelectItem[])[]).agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U>",
+      "signature": "df.groupBy(...).agg<U extends RowRecord = RowRecord>(...exprs: SelectArg[]): DataFrame<U>",
+      "signatureDetailed": "df.groupBy(...exprs: (SelectItem | SelectItem[])[]).agg<U extends RowRecord = RowRecord>(...exprs: SelectArg[]): DataFrame<U>",
       "filePath": "dataframe/grouped.ts",
       "lineStart": 87,
       "lineEnd": 124,
@@ -11093,8 +11095,8 @@
       "category": "DataFrame",
       "propertyAccess": "toDataframe",
       "callExpression": ".toDataframe()",
-      "signature": "df.groupBy(...).toDataframe<U extends RowRecord = any>(): DataFrame<U>",
-      "signatureDetailed": "df.groupBy(...).toDataframe<U extends RowRecord = any>(): DataFrame<U>",
+      "signature": "df.groupBy(...).toDataframe<U extends RowRecord = RowRecord>(): DataFrame<U>",
+      "signatureDetailed": "df.groupBy(...).toDataframe<U extends RowRecord = RowRecord>(): DataFrame<U>",
       "filePath": "dataframe/grouped.ts",
       "lineStart": 140,
       "lineEnd": 143
@@ -12816,7 +12818,7 @@
       "lineStart": 11,
       "lineEnd": 11,
       "desc": "Grouped DataFrame interface including delegated aggregation shorthand methods.",
-      "signature": "export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }"
+      "signature": "export interface GroupedData<T extends RowRecord = RowRecord, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }"
     },
     "CastTargetArg": {
       "filePath": "dataframe/types.ts",
@@ -12915,13 +12917,13 @@
       "lineStart": 92,
       "lineEnd": 144,
       "desc": "Configuration options for rolling/dynamic temporal or index window grouping (`DataFrame.groupByDynamic()`).",
-      "signature": "export interface GroupByDynamicOptions<T = any> {\n    /**\n     * Additional columns to partition / group by before dynamic windowing.\n     */\n    by?: ColumnKeyArg<keyof T>;\n    /**\n     * Verify whether index column is sorted in ascending order.\n     * @default true\n     */\n    checkSorted?: boolean;\n    /**\n     * Which boundary of the window interval is closed (`\"left\"`, `\"right\"`, `\"both\"`, `\"none\"`).\n     * @default \"left\"\n     */\n    closed?: ClosedBoundary;\n    /**\n     * Time interval window step period (e.g. `\"1d\"`, `\"1h\"`, `1000`).\n     */\n    every: DurationValueArg;\n    /**\n     * Polars alias for `by`.\n     */\n    groupBy?: ColumnKeyArg<keyof T>;\n    /**\n     * Include the lower and upper window boundaries (`_lower_boundary`, `_upper_boundary`).\n     * @default false\n     */\n    includeBoundaries?: boolean;\n    /**\n     * Which window boundary to use as the timestamp label (`\"left\"`, `\"right\"`, `\"datapoint\"`).\n     * @default \"left\"\n     */\n    label?: DynamicLabel;\n    /**\n     * Offset window start by a duration.\n     * @default 0\n     */\n    offset?: DurationValueArg;\n    /**\n     * Time period duration window width. Defaults to `every` if omitted.\n     */\n    period?: DurationValueArg;\n    /**\n     * Strategy to determine window start (`\"window\"`, `\"datapoint\"`, or day of week).\n     * @default \"window\"\n     */\n    startBy?: DynamicStartBy;\n    /**\n     * Truncate the index column values to the window start.\n     * @default true\n     */\n    truncate?: boolean;\n}",
+      "signature": "export interface GroupByDynamicOptions<T = RowRecord> {\n    /**\n     * Additional columns to partition / group by before dynamic windowing.\n     */\n    by?: ColumnKeyArg<keyof T>;\n    /**\n     * Verify whether index column is sorted in ascending order.\n     * @default true\n     */\n    checkSorted?: boolean;\n    /**\n     * Which boundary of the window interval is closed (`\"left\"`, `\"right\"`, `\"both\"`, `\"none\"`).\n     * @default \"left\"\n     */\n    closed?: ClosedBoundary;\n    /**\n     * Time interval window step period (e.g. `\"1d\"`, `\"1h\"`, `1000`).\n     */\n    every: DurationValueArg;\n    /**\n     * Polars alias for `by`.\n     */\n    groupBy?: ColumnKeyArg<keyof T>;\n    /**\n     * Include the lower and upper window boundaries (`_lower_boundary`, `_upper_boundary`).\n     * @default false\n     */\n    includeBoundaries?: boolean;\n    /**\n     * Which window boundary to use as the timestamp label (`\"left\"`, `\"right\"`, `\"datapoint\"`).\n     * @default \"left\"\n     */\n    label?: DynamicLabel;\n    /**\n     * Offset window start by a duration.\n     * @default 0\n     */\n    offset?: DurationValueArg;\n    /**\n     * Time period duration window width. Defaults to `every` if omitted.\n     */\n    period?: DurationValueArg;\n    /**\n     * Strategy to determine window start (`\"window\"`, `\"datapoint\"`, or day of week).\n     * @default \"window\"\n     */\n    startBy?: DynamicStartBy;\n    /**\n     * Truncate the index column values to the window start.\n     * @default true\n     */\n    truncate?: boolean;\n}",
       "properties": {
         "by": {
-          "type": "ColumnKeyArg<keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord>",
           "optional": true,
           "desc": "Additional columns to partition / group by before dynamic windowing.",
-          "resolvedType": "keyof any | keyof any[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[]"
         },
         "checkSorted": {
           "type": "boolean",
@@ -12943,10 +12945,10 @@
           "resolvedType": "number | string"
         },
         "groupBy": {
-          "type": "ColumnKeyArg<keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord>",
           "optional": true,
           "desc": "Polars alias for `by`.",
-          "resolvedType": "keyof any | keyof any[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[]"
         },
         "includeBoundaries": {
           "type": "boolean",
@@ -13002,10 +13004,10 @@
       "lineStart": 169,
       "lineEnd": 174,
       "desc": "Mapped interface of aggregation shorthand methods available directly on `GroupedData`.",
-      "signature": "export type GroupedAggDelegatedOps<T extends RowRecord = any> = {\n    /**\n     * Executes aggregation `K` across all non-key columns in each group.\n     */\n    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>;\n};",
+      "signature": "export type GroupedAggDelegatedOps<T extends RowRecord = RowRecord> = {\n    /**\n     * Executes aggregation `K` across all non-key columns in each group.\n     */\n    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<RowRecord>[K]>) => DataFrame<T>;\n};",
       "properties": {
         "[K in GroupedAggDelegatedMethodNames]": {
-          "type": "(...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>",
+          "type": "(...args: Parameters<ColumnExpr<RowRecord>[K]>) => DataFrame<T>",
           "optional": false,
           "desc": "Executes aggregation `K` across all non-key columns in each group."
         }
@@ -13023,14 +13025,14 @@
       "lineStart": 185,
       "lineEnd": 185,
       "desc": "Value operand for `DataFrame.insertColumn()`. Accepts a column expression selector or a raw array-like sequence of column values.",
-      "signature": "export type InsertColumnArg = IntoExpr | ArrayLike<any>;"
+      "signature": "export type InsertColumnArg = IntoExpr | ArrayLike<unknown>;"
     },
     "IterRowResult": {
       "filePath": "dataframe/types.ts",
       "lineStart": 190,
       "lineEnd": 190,
       "desc": "Single row yielded by `DataFrame.iterRows()`, either as a positional value array or a named row record.",
-      "signature": "export type IterRowResult<T extends RowRecord = RowRecord> = any[] | T;"
+      "signature": "export type IterRowResult<T extends RowRecord = RowRecord> = unknown[] | T;"
     },
     "IterRowsOptions": {
       "filePath": "dataframe/types.ts",
@@ -13052,7 +13054,7 @@
       "lineStart": 207,
       "lineEnd": 261,
       "desc": "Configuration options for as-of proximity joins (`DataFrame.joinAsof()`).",
-      "signature": "export interface JoinAsofOptions<T = any, U extends RowRecord = any> {\n    /**\n     * Whether exact key matches are permitted.\n     * @default true\n     */\n    allowExactMatches?: boolean;\n    /**\n     * Optional exact-match group column(s) present in both DataFrames.\n     */\n    by?: ColumnKeyArg<keyof T & keyof U>;\n    /**\n     * Whether to verify that join keys are sorted ascending prior to matching.\n     * @default true\n     */\n    checkSorted?: boolean;\n    /**\n     * Coalescing behavior for join key columns.\n     * @default true\n     */\n    coalesce?: boolean;\n    /**\n     * Group column(s) for exact key matching in left DataFrame.\n     */\n    leftBy?: ColumnKeyArg<keyof T>;\n    /**\n     * Left DataFrame join key column name.\n     */\n    leftOn?: (keyof T);\n    /**\n     * Column name to join on (must exist in both DataFrames and be sorted ascending).\n     */\n    on?: (keyof T & keyof U);\n    /**\n     * Group column(s) for exact key matching in right DataFrame.\n     */\n    rightBy?: ColumnKeyArg<keyof U>;\n    /**\n     * Right DataFrame join key column name.\n     */\n    rightOn?: (keyof U);\n    /**\n     * Match search strategy (`\"backward\"`, `\"forward\"`, or `\"nearest\"`).\n     * @default \"backward\"\n     */\n    strategy?: JoinAsofStrategy;\n    /**\n     * Column name suffixes `[leftSuffix, rightSuffix]` to resolve name collisions.\n     * @default [\"\", \"_right\"]\n     */\n    suffixes?: JoinSuffixes;\n    /**\n     * Maximum allowed distance between left key and right key.\n     */\n    tolerance?: DurationValueArg;\n}",
+      "signature": "export interface JoinAsofOptions<T = RowRecord, U extends RowRecord = RowRecord> {\n    /**\n     * Whether exact key matches are permitted.\n     * @default true\n     */\n    allowExactMatches?: boolean;\n    /**\n     * Optional exact-match group column(s) present in both DataFrames.\n     */\n    by?: ColumnKeyArg<keyof T & keyof U>;\n    /**\n     * Whether to verify that join keys are sorted ascending prior to matching.\n     * @default true\n     */\n    checkSorted?: boolean;\n    /**\n     * Coalescing behavior for join key columns.\n     * @default true\n     */\n    coalesce?: boolean;\n    /**\n     * Group column(s) for exact key matching in left DataFrame.\n     */\n    leftBy?: ColumnKeyArg<keyof T>;\n    /**\n     * Left DataFrame join key column name.\n     */\n    leftOn?: (keyof T);\n    /**\n     * Column name to join on (must exist in both DataFrames and be sorted ascending).\n     */\n    on?: (keyof T & keyof U);\n    /**\n     * Group column(s) for exact key matching in right DataFrame.\n     */\n    rightBy?: ColumnKeyArg<keyof U>;\n    /**\n     * Right DataFrame join key column name.\n     */\n    rightOn?: (keyof U);\n    /**\n     * Match search strategy (`\"backward\"`, `\"forward\"`, or `\"nearest\"`).\n     * @default \"backward\"\n     */\n    strategy?: JoinAsofStrategy;\n    /**\n     * Column name suffixes `[leftSuffix, rightSuffix]` to resolve name collisions.\n     * @default [\"\", \"_right\"]\n     */\n    suffixes?: JoinSuffixes;\n    /**\n     * Maximum allowed distance between left key and right key.\n     */\n    tolerance?: DurationValueArg;\n}",
       "properties": {
         "allowExactMatches": {
           "type": "boolean",
@@ -13061,10 +13063,10 @@
           "default": "true"
         },
         "by": {
-          "type": "ColumnKeyArg<keyof any & keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord & keyof RowRecord>",
           "optional": true,
           "desc": "Optional exact-match group column(s) present in both DataFrames.",
-          "resolvedType": "keyof any & keyof any | (keyof any & keyof any)[]"
+          "resolvedType": "keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[]"
         },
         "checkSorted": {
           "type": "boolean",
@@ -13079,29 +13081,29 @@
           "default": "true"
         },
         "leftBy": {
-          "type": "ColumnKeyArg<keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord>",
           "optional": true,
           "desc": "Group column(s) for exact key matching in left DataFrame.",
-          "resolvedType": "keyof any | keyof any[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[]"
         },
         "leftOn": {
-          "type": "(keyof any)",
+          "type": "(keyof RowRecord)",
           "optional": true,
           "desc": "Left DataFrame join key column name."
         },
         "on": {
-          "type": "(keyof any & keyof any)",
+          "type": "(keyof RowRecord & keyof RowRecord)",
           "optional": true,
           "desc": "Column name to join on (must exist in both DataFrames and be sorted ascending)."
         },
         "rightBy": {
-          "type": "ColumnKeyArg<keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord>",
           "optional": true,
           "desc": "Group column(s) for exact key matching in right DataFrame.",
-          "resolvedType": "keyof any | keyof any[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[]"
         },
         "rightOn": {
-          "type": "(keyof any)",
+          "type": "(keyof RowRecord)",
           "optional": true,
           "desc": "Right DataFrame join key column name."
         },
@@ -13146,7 +13148,7 @@
       "lineStart": 276,
       "lineEnd": 314,
       "desc": "Configuration options for joining two DataFrames (`DataFrame.join()`).",
-      "signature": "export interface JoinOptions<T = any, U extends RowRecord = any> {\n    /**\n     * Coalescing behavior for join key columns. If `true`, coalesces join key values into left key columns and drops right key columns.\n     * @default true\n     */\n    coalesce?: boolean;\n    /**\n     * Join strategy (`\"inner\"`, `\"left\"`, `\"right\"`, `\"outer\"`, `\"semi\"`, `\"anti\"`, or `\"cross\"`).\n     * @default \"inner\"\n     */\n    how?: JoinType;\n    /**\n     * If `true`, null key values are treated as equal and match each other across DataFrames.\n     * @default false\n     */\n    joinNulls?: boolean;\n    /**\n     * Join key column(s) in the left DataFrame when key names differ.\n     */\n    leftOn?: ColumnKeyArg<keyof T>;\n    /**\n     * Row order preservation strategy (`\"none\"`, `\"left\"`, `\"right\"`, `\"left_right\"`, `\"right_left\"`, or boolean).\n     * @default \"none\"\n     */\n    maintainOrder?: JoinMaintainOrder | boolean;\n    /**\n     * Join key column name or array of key column names that exist in both DataFrames.\n     */\n    on?: ColumnKeyArg<keyof T & keyof U>;\n    /**\n     * Join key column(s) in the right DataFrame when key names differ.\n     */\n    rightOn?: ColumnKeyArg<keyof U>;\n    /**\n     * Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping non-key column names. Ignored for `\"semi\"` and `\"anti\"` joins.\n     * @default [\"\", \"_right\"]\n     */\n    suffixes?: JoinSuffixes;\n}",
+      "signature": "export interface JoinOptions<T = RowRecord, U extends RowRecord = RowRecord> {\n    /**\n     * Coalescing behavior for join key columns. If `true`, coalesces join key values into left key columns and drops right key columns.\n     * @default true\n     */\n    coalesce?: boolean;\n    /**\n     * Join strategy (`\"inner\"`, `\"left\"`, `\"right\"`, `\"outer\"`, `\"semi\"`, `\"anti\"`, or `\"cross\"`).\n     * @default \"inner\"\n     */\n    how?: JoinType;\n    /**\n     * If `true`, null key values are treated as equal and match each other across DataFrames.\n     * @default false\n     */\n    joinNulls?: boolean;\n    /**\n     * Join key column(s) in the left DataFrame when key names differ.\n     */\n    leftOn?: ColumnKeyArg<keyof T>;\n    /**\n     * Row order preservation strategy (`\"none\"`, `\"left\"`, `\"right\"`, `\"left_right\"`, `\"right_left\"`, or boolean).\n     * @default \"none\"\n     */\n    maintainOrder?: JoinMaintainOrder | boolean;\n    /**\n     * Join key column name or array of key column names that exist in both DataFrames.\n     */\n    on?: ColumnKeyArg<keyof T & keyof U>;\n    /**\n     * Join key column(s) in the right DataFrame when key names differ.\n     */\n    rightOn?: ColumnKeyArg<keyof U>;\n    /**\n     * Suffix tuple `[leftSuffix, rightSuffix]` appended to overlapping non-key column names. Ignored for `\"semi\"` and `\"anti\"` joins.\n     * @default [\"\", \"_right\"]\n     */\n    suffixes?: JoinSuffixes;\n}",
       "properties": {
         "coalesce": {
           "type": "boolean",
@@ -13168,10 +13170,10 @@
           "default": "false"
         },
         "leftOn": {
-          "type": "ColumnKeyArg<keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord>",
           "optional": true,
           "desc": "Join key column(s) in the left DataFrame when key names differ.",
-          "resolvedType": "keyof any | keyof any[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[]"
         },
         "maintainOrder": {
           "type": "JoinMaintainOrder | boolean",
@@ -13180,16 +13182,16 @@
           "default": "\"none\""
         },
         "on": {
-          "type": "ColumnKeyArg<keyof any & keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord & keyof RowRecord>",
           "optional": true,
           "desc": "Join key column name or array of key column names that exist in both DataFrames.",
-          "resolvedType": "keyof any & keyof any | (keyof any & keyof any)[]"
+          "resolvedType": "keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[]"
         },
         "rightOn": {
-          "type": "ColumnKeyArg<keyof any>",
+          "type": "ColumnKeyArg<keyof RowRecord>",
           "optional": true,
           "desc": "Join key column(s) in the right DataFrame when key names differ.",
-          "resolvedType": "keyof any | keyof any[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[]"
         },
         "suffixes": {
           "type": "JoinSuffixes",
@@ -13336,13 +13338,13 @@
       "lineStart": 404,
       "lineEnd": 421,
       "desc": "Configuration options for reshaping a DataFrame from long to wide format (`DataFrame.pivot()`).",
-      "signature": "export interface PivotOptions<T> {\n    /**\n     * Aggregation function to apply when multiple values exist for a cell.\n     */\n    agg?: AggFn<any> | string;\n    /**\n     * Column whose distinct values become new wide column headers.\n     */\n    columns: keyof T;\n    /**\n     * Key column(s) to use as new DataFrame rows.\n     */\n    index: ColumnKeyArg<keyof T>;\n    /**\n     * Column whose cell values populate the pivoted grid cells.\n     */\n    values: keyof T;\n}",
+      "signature": "export interface PivotOptions<T> {\n    /**\n     * Aggregation function to apply when multiple values exist for a cell.\n     */\n    agg?: AggFn<unknown> | string;\n    /**\n     * Column whose distinct values become new wide column headers.\n     */\n    columns: keyof T;\n    /**\n     * Key column(s) to use as new DataFrame rows.\n     */\n    index: ColumnKeyArg<keyof T>;\n    /**\n     * Column whose cell values populate the pivoted grid cells.\n     */\n    values: keyof T;\n}",
       "properties": {
         "agg": {
-          "type": "AggFn<any> | string",
+          "type": "AggFn<unknown> | string",
           "optional": true,
           "desc": "Aggregation function to apply when multiple values exist for a cell.",
-          "resolvedType": "(values: any[]) => any | string"
+          "resolvedType": "(values: unknown[]) => any | string"
         },
         "columns": {
           "type": "keyof T",
@@ -13367,7 +13369,7 @@
       "lineStart": 426,
       "lineEnd": 426,
       "desc": "Row-level predicate callback function for `DataFrame.filter()`.",
-      "signature": "export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => any;"
+      "signature": "export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => unknown;"
     },
     "SelectArg": {
       "filePath": "dataframe/types.ts",
@@ -13388,16 +13390,16 @@
       "lineStart": 443,
       "lineEnd": 462,
       "desc": "Configuration options for sorting a DataFrame (`DataFrame.sort()`).",
-      "signature": "export interface SortOptions<T = any> extends SortArrayOptions<T> {\n    /**\n     * Column name(s) or expression(s) to sort by.\n     */\n    by: ColumnKeyArg<keyof T> | ColumnKeyArg<IExpr>;\n    /**\n     * Optional comparator function or dictionary mapping column names to custom comparator functions.\n     */\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;\n    /**\n     * Sort order boolean or array of booleans per key.\n     * @default false\n     */\n    descending?: ColumnKeyArg<boolean>;\n    /**\n     * When `true`, places nulls at the end of sorted output.\n     * @default true\n     */\n    nullsLast?: boolean;\n}",
+      "signature": "export interface SortOptions<T = RowRecord> extends SortArrayOptions<T> {\n    /**\n     * Column name(s) or expression(s) to sort by.\n     */\n    by: ColumnKeyArg<keyof T> | ColumnKeyArg<IExpr>;\n    /**\n     * Optional comparator function or dictionary mapping column names to custom comparator functions.\n     */\n    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof T, (a: unknown, b: unknown) => number>> | null;\n    /**\n     * Sort order boolean or array of booleans per key.\n     * @default false\n     */\n    descending?: ColumnKeyArg<boolean>;\n    /**\n     * When `true`, places nulls at the end of sorted output.\n     * @default true\n     */\n    nullsLast?: boolean;\n}",
       "properties": {
         "by": {
-          "type": "ColumnKeyArg<keyof any> | ColumnKeyArg<IExpr>",
+          "type": "ColumnKeyArg<keyof RowRecord> | ColumnKeyArg<IExpr>",
           "optional": false,
           "desc": "Column name(s) or expression(s) to sort by.",
-          "resolvedType": "keyof any | keyof any[] | IExpr | IExpr[]"
+          "resolvedType": "keyof RowRecord | keyof RowRecord[] | IExpr | IExpr[]"
         },
         "customComp": {
-          "type": "((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null",
+          "type": "((a: unknown, b: unknown) => number) | Partial<Record<keyof RowRecord, (a: unknown, b: unknown) => number>> | null",
           "optional": true,
           "desc": "Optional comparator function or dictionary mapping column names to custom comparator functions."
         },
@@ -13495,10 +13497,10 @@
       "lineStart": 522,
       "lineEnd": 539,
       "desc": "Configuration options for reshaping columns into wider multi-column blocks (`DataFrame.unstack()`).",
-      "signature": "export interface UnstackOptions {\n    /**\n     * Value to fill in empty cells when length is not evenly divisible by step.\n     * @default null\n     */\n    fillValues?: any;\n    /**\n     * Reshaping direction:\n     * - \"vertical\" (default): fills down the new columns first before moving to the next column.\n     * - \"horizontal\": fills across row-by-row before moving to the next row.\n     * @default \"vertical\"\n     */\n    how?: UnstackDirection;\n    /**\n     * Number of columns to reshape each input column into.\n     */\n    step: number;\n}",
+      "signature": "export interface UnstackOptions {\n    /**\n     * Value to fill in empty cells when length is not evenly divisible by step.\n     * @default null\n     */\n    fillValues?: unknown;\n    /**\n     * Reshaping direction:\n     * - \"vertical\" (default): fills down the new columns first before moving to the next column.\n     * - \"horizontal\": fills across row-by-row before moving to the next row.\n     * @default \"vertical\"\n     */\n    how?: UnstackDirection;\n    /**\n     * Number of columns to reshape each input column into.\n     */\n    step: number;\n}",
       "properties": {
         "fillValues": {
-          "type": "any",
+          "type": "unknown",
           "optional": true,
           "desc": "Value to fill in empty cells when length is not evenly divisible by step.",
           "default": "null"
@@ -13677,9 +13679,9 @@
       }
     },
     "RegisteredDataType": {
-      "filePath": "datatypes/types.ts",
-      "lineStart": 352,
-      "lineEnd": 358,
+      "filePath": "datatypes/dataTypes.ts",
+      "lineStart": 425,
+      "lineEnd": 431,
       "desc": "Union of all concrete registered DataType instances supported in a DataFrame schema.",
       "signature": "export type RegisteredDataType =\n    | Int8Type | Int16Type | Int32Type | Int64Type\n    | UInt8Type | UInt16Type | UInt32Type | UInt64Type\n    | Float32Type | Float64Type | DecimalType\n    | BooleanType | Utf8Type | BinaryType | NullType | ObjectType\n    | DateType | DatetimeType | TimeType | DurationType\n    | ArrayType<any> | StructType<any>;"
     },

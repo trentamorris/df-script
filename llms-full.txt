@@ -10513,12 +10513,12 @@ Casts columns in the DataFrame to the specified data type(s).
 
 ### Signature
 ```typescript
-df.cast(
+df.cast<U extends RowRecord = RowRecord>(
   dtypes: RegisteredDataType | DataFrameSchema,
   options: {
     strict?: boolean = true
   } = {}
-): DataFrame<any>
+): DataFrame<U>
 ```
 
 ### Parameters
@@ -10611,7 +10611,7 @@ Concatenates items vertically, horizontally, or diagonally.
 
 ### Signature
 ```typescript
-df.concat<U extends RowRecord = any>(
+df.concat<U extends RowRecord = T>(
   items: ConcatItem | ConcatItem[],
   options: {
     horizontal?: {
@@ -10822,7 +10822,7 @@ Compares this DataFrame with another for equality. Checks shape, column names, c
 
 ### Signature
 ```typescript
-df.equals<U extends RowRecord = any>(
+df.equals<U extends RowRecord = RowRecord>(
   other: DataFrame<U>,
   options: {
     nullsEqual?: boolean = true
@@ -10859,13 +10859,13 @@ Explodes an array column into multiple rows, replicating non-target row attribut
 
 ### Signature
 ```typescript
-df.explode(
+df.explode<U extends RowRecord = RowRecord>(
   columns: IntoExpr | IntoExpr[],
   options?: {
     emptyAsNull?: boolean = true,
     keepNulls?: boolean = true
   }
-): DataFrame<any>
+): DataFrame<U>
 ```
 
 ### Parameters
@@ -11036,7 +11036,7 @@ Filters rows matching boolean column expressions or predicate callbacks.
 
 ### Signature
 ```typescript
-df.filter(...exprs: (IExpr | (row: T) => any | FilterPredicate<T>[])[]): DataFrame<T>
+df.filter(...exprs: (IExpr | (row: T) => unknown | FilterPredicate<T>[])[]): DataFrame<T>
 ```
 
 ### Parameters
@@ -11136,11 +11136,11 @@ Groups dynamically based on a time or integer index column over sliding / steppi
 df.groupByDynamic<K extends keyof T & string>(
   indexColumn: K | IntoExpr,
   options: {
-    by?: keyof any | keyof any[],
+    by?: keyof RowRecord | keyof RowRecord[],
     checkSorted?: boolean = true,
     closed?: "both" | "left" | "right" | "none" = "left",
     every: number | string,
-    groupBy?: keyof any | keyof any[],
+    groupBy?: keyof RowRecord | keyof RowRecord[],
     includeBoundaries?: boolean = false,
     label?: "left" | "right" | "datapoint" = "left",
     offset?: number | string = 0,
@@ -11254,11 +11254,11 @@ Inserts a new column at a specific ordinal index position.
 
 ### Signature
 ```typescript
-df.insertColumn(
+df.insertColumn<K extends string, U extends RowRecord = Record<K, unknown>>(
   index: number,
-  name: string,
-  expr: IntoExpr | ArrayLike<any>
-): DataFrame<any>
+  name: K,
+  expr: IntoExpr | ArrayLike<unknown>
+): DataFrame<T & U>
 ```
 
 ### Parameters
@@ -11296,17 +11296,17 @@ Retrieves a single scalar cell value by row and column position or name.
 
 ### Signature
 ```typescript
-df.item(
+df.item<K extends keyof T = keyof T>(
   row?: number,
-  column?: number | string
-): any
+  column?: K | number
+): T[K]
 ```
 
 ### Parameters
 - `[row]` (number): Row index position.
 - `[column]` (ColumnIndexOrNameArg): Column index or column name string.
 
-### Returns: `any`
+### Returns: `T[K]`
 
 ### Examples
 ```typescript
@@ -11387,16 +11387,16 @@ Joins two DataFrames on key columns using a specified join strategy.
 
 ### Signature
 ```typescript
-df.join<U extends RowRecord = any, R extends RowRecord = any>(
+df.join<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(
   other: DataFrame<U>,
   options: {
     coalesce?: boolean = true,
     how?: "inner" | "outer" | "left" | "right" | "semi" | "anti" | "cross" = "inner",
     joinNulls?: boolean = false,
-    leftOn?: keyof any | keyof any[],
+    leftOn?: keyof RowRecord | keyof RowRecord[],
     maintainOrder?: JoinMaintainOrder | boolean = "none",
-    on?: keyof any & keyof any | (keyof any & keyof any)[],
-    rightOn?: keyof any | keyof any[],
+    on?: keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[],
+    rightOn?: keyof RowRecord | keyof RowRecord[],
     suffixes?: [string, string] = ["", "_right"]
   } = {}
 ): DataFrame<R>
@@ -11473,18 +11473,18 @@ Similar to a left join, but instead of exact key equality, matches the nearest k
 
 ### Signature
 ```typescript
-df.joinAsof<U extends RowRecord = any, R extends RowRecord = any>(
+df.joinAsof<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(
   other: DataFrame<U>,
   options: {
     allowExactMatches?: boolean = true,
-    by?: keyof any & keyof any | (keyof any & keyof any)[],
+    by?: keyof RowRecord & keyof RowRecord | (keyof RowRecord & keyof RowRecord)[],
     checkSorted?: boolean = true,
     coalesce?: boolean = true,
-    leftBy?: keyof any | keyof any[],
-    leftOn?: (keyof any),
-    on?: (keyof any & keyof any),
-    rightBy?: keyof any | keyof any[],
-    rightOn?: (keyof any),
+    leftBy?: keyof RowRecord | keyof RowRecord[],
+    leftOn?: (keyof RowRecord),
+    on?: (keyof RowRecord & keyof RowRecord),
+    rightBy?: keyof RowRecord | keyof RowRecord[],
+    rightOn?: (keyof RowRecord),
     strategy?: "backward" | "forward" | "nearest" = "backward",
     suffixes?: [string, string] = ["", "_right"],
     tolerance?: number | string
@@ -11547,7 +11547,7 @@ Evaluates one or more boolean expressions across combined rows from both DataFra
 
 ### Signature
 ```typescript
-df.joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
+df.joinWhere<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(
   other: DataFrame<U>,
   ...args: {
     how?: "inner" | "left" | "right" = "inner",
@@ -11699,9 +11699,9 @@ Pivots columns from long format to a wide datagrid structure.
 
 ### Signature
 ```typescript
-df.pivot<U extends RowRecord = any>(
+df.pivot<U extends RowRecord = RowRecord>(
   config: {
-    agg?: (values: any[]) => any | string,
+    agg?: (values: unknown[]) => any | string,
     columns: keyof T,
     index: keyof T | keyof T[],
     values: keyof T
@@ -11836,11 +11836,11 @@ df.schema;
 
 ## Operation
 
-Selects specific columns or evaluates column expressions. // 1. Select and transform columns: <!-- doc:base_2x2 --> df.select("a", $df.col("b").alias("b_copy")); // shape: (2, 2) // +---+--------+ // | a | b_copy | // +---+--------+ // | 1 | x      | // | 2 | y      | // +---+--------+
+Selects specific columns or evaluates column expressions.
 
 ### Signature
 ```typescript
-df.select<U extends RowRecord = any>(...args: (SelectItem | SelectItem[])[]): DataFrame<U>
+df.select<U extends RowRecord = RowRecord>(...args: (SelectItem | SelectItem[])[]): DataFrame<U>
 ```
 
 ### Parameters
@@ -11850,6 +11850,24 @@ df.select<U extends RowRecord = any>(...args: (SelectItem | SelectItem[])[]): Da
 
 ### Examples
 ```typescript
+// 1. Select and transform columns:
+const df = $df.data({ a: [1, 2], b: ["x", "y"] });
+// shape: (2, 2)
+// +---+---+
+// | a | b |
+// +---+---+
+// | 1 | x |
+// | 2 | y |
+// +---+---+
+df.select("a", $df.col("b").alias("b_copy"));
+// shape: (2, 2)
+// +---+--------+
+// | a | b_copy |
+// +---+--------+
+// | 1 | x      |
+// | 2 | y      |
+// +---+--------+
+
 // 2. Compute expressions on numeric columns:
 const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });
 // shape: (3, 2)
@@ -11907,7 +11925,7 @@ df.shape;
 
 ## Operation
 
-Slices a subset range of rows between start and end index. // 1. Slice rows by start and offset count: <!-- doc:base_numbers_3x1 --> df.slice(1, 2); // shape: (2, 1) // +---+ // | a | // +---+ // | 2 | // | 3 | // +---+
+Slices a subset range of rows between start and end index.
 
 ### Signature
 ```typescript
@@ -11925,6 +11943,25 @@ df.slice(
 
 ### Examples
 ```typescript
+// 1. Slice rows by start and offset count:
+const df = $df.data({ a: [1, 2, 3], val: [10, 20, 30], score: [75, 85, 95] });
+// shape: (3, 1)
+// +---+
+// | a |
+// +---+
+// | 1 |
+// | 2 |
+// | 3 |
+// +---+
+df.slice(1, 2);
+// shape: (2, 1)
+// +---+
+// | a |
+// +---+
+// | 2 |
+// | 3 |
+// +---+
+
 // 2. Negative offset to slice from the tail:
 const df = $df.data({ a: [1, 2, 3], val: [10, 20, 30], score: [75, 85, 95] });
 // shape: (3, 1)
@@ -11954,14 +11991,14 @@ df.slice(-2);
 
 ## Operation
 
-Sorts DataFrame rows by one or more column expressions or custom sorters. // 1. Sort ascending by column name: <!-- doc:base_numbers_3x2 --> df.sort("a"); // shape: (3, 2) // +---+----+ // | a | b  | // +---+----+ // | 1 | 10 | // | 2 | 20 | // | 3 | 30 | // +---+----+
+Sorts DataFrame rows by one or more column expressions or custom sorters.
 
 ### Signature
 ```typescript
 df.sort(
   config?: {
-    by: keyof any | keyof any[] | IExpr | IExpr[],
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,
+    by: keyof RowRecord | keyof RowRecord[] | IExpr | IExpr[],
+    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof RowRecord, (a: unknown, b: unknown) => number>> | null,
     descending?: boolean | boolean[] = false,
     nullsLast?: boolean = true
   }
@@ -11975,6 +12012,26 @@ df.sort(
 
 ### Examples
 ```typescript
+// 1. Sort ascending by column name:
+const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });
+// shape: (3, 2)
+// +---+----+
+// | a | b  |
+// +---+----+
+// | 1 | 10 |
+// | 2 | 20 |
+// | 3 | 30 |
+// +---+----+
+df.sort("a");
+// shape: (3, 2)
+// +---+----+
+// | a | b  |
+// +---+----+
+// | 1 | 10 |
+// | 2 | 20 |
+// | 3 | 30 |
+// +---+----+
+
 // 2. Sort descending using configuration options:
 const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });
 // shape: (3, 2)
@@ -12047,13 +12104,13 @@ Evaluates a column expression or retrieves column values as a raw JavaScript arr
 
 ### Signature
 ```typescript
-df.toArray<K extends keyof T>(nameOrExpr: K | IExpr): any[]
+df.toArray<K extends keyof T, R = T[K]>(nameOrExpr: K | IExpr): R[]
 ```
 
 ### Parameters
 - `nameOrExpr` (ColumnOrExprArg<K>): Target column name or column expression.
 
-### Returns: `any[]`
+### Returns: `R[]`
 
 ### Examples
 ```typescript
@@ -12131,13 +12188,13 @@ Transposes rows into columns and columns into rows.
 
 ### Signature
 ```typescript
-df.transpose(
+df.transpose<U extends RowRecord = RowRecord>(
   options: {
     columnNames?: string | Iterable<string>,
     headerName?: string = "column",
     includeHeader?: boolean = false
   } = {}
-): DataFrame<any>
+): DataFrame<U>
 ```
 
 ### Parameters
@@ -12175,7 +12232,7 @@ Filters distinct unique rows matching target key columns.
 
 ### Signature
 ```typescript
-df.unique<K extends keyof T>(columns?: K | K[]): DataFrame<T>
+df.unique<K extends keyof T & string>(columns?: K | K[]): DataFrame<T>
 ```
 
 ### Parameters
@@ -12211,7 +12268,7 @@ Unpivots a wide DataFrame into a long format structure.
 
 ### Signature
 ```typescript
-df.unpivot<U extends RowRecord = any>(
+df.unpivot<U extends RowRecord = RowRecord>(
   config: {
     idVars: keyof T | keyof T[],
     valueName?: string = "value",
@@ -12258,14 +12315,14 @@ Unstacks selected columns into multiple wide columns of size `step`. Reshapes da
 
 ### Signature
 ```typescript
-df.unstack(
+df.unstack<U extends RowRecord = RowRecord>(
   columns: IntoExpr | IntoExpr[],
   options: {
-    fillValues?: any = null,
+    fillValues?: unknown = null,
     how?: "vertical" | "horizontal" = "vertical",
     step: number
   }
-): DataFrame<any>
+): DataFrame<U>
 ```
 
 ### Parameters
@@ -12377,10 +12434,10 @@ Appends an incremental index column.
 
 ### Signature
 ```typescript
-df.withRowIndex(
-  name: string = "index",
+df.withRowIndex<K extends string = "index">(
+  name: K = "index" as K,
   offset: number = 0
-): DataFrame<any>
+): DataFrame<T & Record<K, number>>
 ```
 
 ### Parameters
@@ -12552,7 +12609,7 @@ Aggregates grouped partitions using aggregation column expressions.
 
 ### Signature
 ```typescript
-df.groupBy(...exprs: (SelectItem | SelectItem[])[]).agg<U extends RowRecord = any>(...exprs: SelectArg[]): DataFrame<U>
+df.groupBy(...exprs: (SelectItem | SelectItem[])[]).agg<U extends RowRecord = RowRecord>(...exprs: SelectArg[]): DataFrame<U>
 ```
 
 ### Parameters
@@ -12589,7 +12646,7 @@ Converts group keys back into a single distinct DataFrame without aggregations.
 
 ### Signature
 ```typescript
-df.groupBy(...).toDataframe<U extends RowRecord = any>(): DataFrame<U>
+df.groupBy(...).toDataframe<U extends RowRecord = RowRecord>(): DataFrame<U>
 ```
 
 ### Returns: `DataFrame`
@@ -13932,7 +13989,7 @@ export type UnicodeNormalizeForm = "NFC" | "NFD" | "NFKC" | "NFKD";
 
 ### GroupedData
 ```typescript
-export interface GroupedData<T extends RowRecord = any, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
+export interface GroupedData<T extends RowRecord = RowRecord, K extends keyof T = keyof T> extends GroupedAggDelegatedOps<T> { }
 ```
 
 ### CastTargetArg
@@ -14000,7 +14057,7 @@ export type FilterPredicateArg<T extends RowRecord = RowRecord> = ColumnKeyArg<F
 
 ### GroupByDynamicOptions
 ```typescript
-export interface GroupByDynamicOptions<T = any> {
+export interface GroupByDynamicOptions<T = RowRecord> {
     /**
      * Additional columns to partition / group by before dynamic windowing.
      */
@@ -14077,11 +14134,11 @@ export type GroupedAggDelegatedMethodNames =
 
 ### GroupedAggDelegatedOps
 ```typescript
-export type GroupedAggDelegatedOps<T extends RowRecord = any> = {
+export type GroupedAggDelegatedOps<T extends RowRecord = RowRecord> = {
     /**
      * Executes aggregation `K` across all non-key columns in each group.
      */
-    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>;
+    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<RowRecord>[K]>) => DataFrame<T>;
 };
 ```
 
@@ -14092,12 +14149,12 @@ export type GroupMap = Map<string, number[]>;
 
 ### InsertColumnArg
 ```typescript
-export type InsertColumnArg = IntoExpr | ArrayLike<any>;
+export type InsertColumnArg = IntoExpr | ArrayLike<unknown>;
 ```
 
 ### IterRowResult
 ```typescript
-export type IterRowResult<T extends RowRecord = RowRecord> = any[] | T;
+export type IterRowResult<T extends RowRecord = RowRecord> = unknown[] | T;
 ```
 
 ### IterRowsOptions
@@ -14114,7 +14171,7 @@ export interface IterRowsOptions {
 
 ### JoinAsofOptions
 ```typescript
-export interface JoinAsofOptions<T = any, U extends RowRecord = any> {
+export interface JoinAsofOptions<T = RowRecord, U extends RowRecord = RowRecord> {
     /**
      * Whether exact key matches are permitted.
      * @default true
@@ -14183,7 +14240,7 @@ export type JoinMaintainOrder = "none" | "left" | "right" | "left_right" | "righ
 
 ### JoinOptions
 ```typescript
-export interface JoinOptions<T = any, U extends RowRecord = any> {
+export interface JoinOptions<T = RowRecord, U extends RowRecord = RowRecord> {
     /**
      * Coalescing behavior for join key columns. If `true`, coalesces join key values into left key columns and drops right key columns.
      * @default true
@@ -14314,7 +14371,7 @@ export interface PivotOptions<T> {
     /**
      * Aggregation function to apply when multiple values exist for a cell.
      */
-    agg?: AggFn<any> | string;
+    agg?: AggFn<unknown> | string;
     /**
      * Column whose distinct values become new wide column headers.
      */
@@ -14332,7 +14389,7 @@ export interface PivotOptions<T> {
 
 ### RowPredicateFn
 ```typescript
-export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => any;
+export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => unknown;
 ```
 
 ### SelectArg
@@ -14347,7 +14404,7 @@ export type SelectItem = ColumnOrExprArg | RowRecord;
 
 ### SortOptions
 ```typescript
-export interface SortOptions<T = any> extends SortArrayOptions<T> {
+export interface SortOptions<T = RowRecord> extends SortArrayOptions<T> {
     /**
      * Column name(s) or expression(s) to sort by.
      */
@@ -14355,7 +14412,7 @@ export interface SortOptions<T = any> extends SortArrayOptions<T> {
     /**
      * Optional comparator function or dictionary mapping column names to custom comparator functions.
      */
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
+    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof T, (a: unknown, b: unknown) => number>> | null;
     /**
      * Sort order boolean or array of booleans per key.
      * @default false
@@ -14430,7 +14487,7 @@ export interface UnstackOptions {
      * Value to fill in empty cells when length is not evenly divisible by step.
      * @default null
      */
-    fillValues?: any;
+    fillValues?: unknown;
     /**
      * Reshaping direction:
      * - "vertical" (default): fills down the new columns first before moving to the next column.

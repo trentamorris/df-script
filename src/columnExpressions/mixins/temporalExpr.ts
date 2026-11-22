@@ -1,5 +1,5 @@
 import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, DayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
-import { DatetimeType, Int32, BooleanDataType } from "../../datatypes/types";
+import { DatetimeType, Int32, BooleanDataType } from "../../datatypes/dataTypes";
 import { InvalidArgumentError } from "../../exceptions";
 import { ExprBase } from "../exprBase";
 import type { NumericArg } from "../types";

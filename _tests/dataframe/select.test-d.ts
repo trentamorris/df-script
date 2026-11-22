@@ -1,4 +1,4 @@
-import type { DataFrame } from "df-script";
+import type { DataFrame, RowRecord } from "df-script";
 import type { Expect, Equal } from "../testTypeHelper";
 import { $df } from "df-script";
 
@@ -25,17 +25,17 @@ const dfAliased = df.select<{ user_id: number; status: string }>(
 );
 export type _Test3_Aliased = Expect<Equal<typeof dfAliased, DataFrame<{ user_id: number; status: string }>>>;
 
-// 4. Default / untyped select falls back to DataFrame<any>
+// 4. Default / untyped select falls back to DataFrame<RowRecord>
 const dfDefault = df.select("id", "username");
-export type _Test4_DefaultAny = Expect<Equal<typeof dfDefault, DataFrame<any>>>;
+export type _Test4_DefaultRowRecord = Expect<Equal<typeof dfDefault, DataFrame<RowRecord>>>;
 
-// 5. Zero-argument select() falls back to DataFrame<any>
+// 5. Zero-argument select() falls back to DataFrame<RowRecord>
 const dfEmpty = df.select();
-export type _Test5_EmptySelect = Expect<Equal<typeof dfEmpty, DataFrame<any>>>;
+export type _Test5_EmptySelect = Expect<Equal<typeof dfEmpty, DataFrame<RowRecord>>>;
 
-// 6. Array argument form select(["id", "username"]) defaults to DataFrame<any>
+// 6. Array argument form select(["id", "username"]) defaults to DataFrame<RowRecord>
 const dfArrayArg = df.select(["id", "username"]);
-export type _Test6_ArrayArg = Expect<Equal<typeof dfArrayArg, DataFrame<any>>>;
+export type _Test6_ArrayArg = Expect<Equal<typeof dfArrayArg, DataFrame<RowRecord>>>;
 
 // 7. Extracting rows via toDicts() on a typed select preserves projected record types
 const rows = df.select<{ id: number }>("id").toDicts();
@@ -55,3 +55,18 @@ const dfChained = df
     .withColumns<{ score: number }>($df.lit(100).alias("score"))
     .select<{ username: string; score: number }>("username", "score");
 export type _Test10_ChainedSelect = Expect<Equal<typeof dfChained, DataFrame<{ username: string; score: number }>>>;
+
+// 11. Record-mapping syntax with explicit generic preserves projected schema
+const dfRecord = df.select<{ person_name: string; doubled: number }>({
+    person_name: $df.col("name"),
+    doubled: $df.col("id").mul(2)
+});
+export type _Test11_RecordMapping = Expect<Equal<typeof dfRecord, DataFrame<{ person_name: string; doubled: number }>>>;
+
+// 12. Pick<T, K> utility type works seamlessly with select
+const dfPicked = df.select<Pick<TestUser, "id" | "isActive">>("id", "isActive");
+export type _Test12_PickUtility = Expect<Equal<typeof dfPicked, DataFrame<Pick<TestUser, "id" | "isActive">>>>;
+
+// 13. Negative type tests
+// @ts-expect-error - invalid argument type to select
+df.select(123);

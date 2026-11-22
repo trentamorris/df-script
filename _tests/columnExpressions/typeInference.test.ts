@@ -1,6 +1,6 @@
 declare const process: any;
 import { $df } from "../../src/index";
-import { DatetimeType, DurationType, BooleanType, DecimalType } from "../../src/datatypes/types";
+import { DatetimeType, DurationType, BooleanType, DecimalType } from "../../src/datatypes/dataTypes";
 
 console.log("=========================================");
 console.log("STARTING POST-OPERATION TYPE INFERENCE TESTS...");

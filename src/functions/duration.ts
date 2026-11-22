@@ -1,7 +1,7 @@
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { toColExpr } from "../columnExpressions/exprBase";
 import { lit } from "./lit";
-import { DurationType } from "../datatypes/types";
+import { DurationType } from "../datatypes/dataTypes";
 import { InvalidArgumentError } from "../exceptions";
 import { isValidNumber, parseDurationString, FIXED_DURATION_UNITS } from "../utils";
 import type { IntoExpr } from "../types";

@@ -11,7 +11,7 @@ import {
     Float64Type,
     Float32Type,
     DecimalType
-} from "../datatypes/types";
+} from "../datatypes/dataTypes";
 import { DataType, DataTypeRegistry } from "../datatypes";
 import {
     isValidDateObj,

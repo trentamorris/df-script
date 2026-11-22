@@ -1,6 +1,6 @@
 /** @internalfile */
 import type { IExpr, ColumnData, ColumnDict, ColumnOrExprArg, DataFrameSchema, RowRecord } from "../types"
-import type { GroupMap, JoinOptions, JoinAsofOptions, JoinWhereOptions, WriteFileTargetArg } from "./types"
+import type { GroupMap, JoinOptions, JoinAsofOptions, JoinWhereOptions, WritableStreamTarget, WriteFileTargetArg } from "./types"
 import { DataFrame } from "./dataframe"
 import { DataTypeRegistry, type RegisteredDataType } from "../datatypes"
 import { KEY_SEPARATOR, UNMATCHED_ROW_INDEX } from "../constants"
@@ -65,12 +65,12 @@ export function resolveWindowExpr(expr: IExpr, columns: ColumnDict, height: numb
     return expr._evaluatePost(expr._partitionOpsIndex, results, columns);
 }
 
-export function rowsToColumns(rows: any[]): { columns: ColumnDict; height: number } {
+export function rowsToColumns(rows: RowRecord[]): { columns: ColumnDict; height: number } {
     if (!Array.isArray(rows) || rows.length === 0) {
         return { columns: {}, height: 0 };
     }
     const height = rows.length;
-    const columns: Record<string, any[]> = {};
+    const columns: Record<string, unknown[]> = {};
 
     for (let r = 0; r < height; r++) {
         const row = rows[r];
@@ -92,22 +92,22 @@ export function rowsToColumns(rows: any[]): { columns: ColumnDict; height: numbe
     return { columns, height };
 }
 
-export function getRowFromColumns(columns: ColumnDict, idx: number, keys: string[]): any {
-    const row: any = {};
+export function getRowFromColumns<T extends RowRecord = RowRecord>(columns: ColumnDict, idx: number, keys: string[]): T {
+    const row: RowRecord = {};
     for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
         const val = columns[k][idx];
         row[k] = val === undefined ? null : val;
     }
-    return row;
+    return row as T;
 }
-export function columnsToRows(columns: ColumnDict, height: number): any[] {
+export function columnsToRows<T extends RowRecord = RowRecord>(columns: ColumnDict, height: number): T[] {
     const keys = Object.keys(columns);
     const rows = new Array(height);
     for (let r = 0; r < height; r++) {
         rows[r] = getRowFromColumns(columns, r, keys);
     }
-    return rows;
+    return rows as T[];
 }
 
 export function inferColumnType(col: ColumnData): RegisteredDataType {
@@ -123,7 +123,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
     let isObject = true;
     let hasDateObj = false;
     let hasNonNull = false;
-    const allArrayElements: any[] = [];
+    const allArrayElements: unknown[] = [];
 
     for (let i = 0; i < col.length; i++) {
         const val = col[i];
@@ -137,7 +137,7 @@ export function inferColumnType(col: ColumnData): RegisteredDataType {
         if (val instanceof Uint8Array || !isArrayOrTypedArray(val)) {
             isArrayVal = false;
         } else if (isArrayVal) {
-            const valArr = val as any;
+            const valArr = val as unknown[];
             const subLen = valArr.length;
             for (let j = 0; j < subLen; j++) {
                 allArrayElements.push(valArr[j]);
@@ -238,7 +238,7 @@ export function computeRowHash(columns: ColumnDict, keys: string[], rowIndex: nu
 }
 
 export function coerceColumn(col: ColumnData, type: RegisteredDataType, height: number): ColumnData {
-    const newCol: any = type.allocate ? type.allocate(height) : new Array(height);
+    const newCol = (type.allocate ? type.allocate(height) : new Array(height)) as unknown[];
 
     if (!isTypedArray(newCol)) {
         for (let i = 0; i < height; i++) {
@@ -250,7 +250,7 @@ export function coerceColumn(col: ColumnData, type: RegisteredDataType, height: 
     for (let i = 0; i < height; i++) {
         const coerced = type.coerce(col[i]);
         if (coerced !== null && coerced !== undefined) {
-            newCol[i] = coerced;
+            (newCol as unknown[])[i] = coerced;
             continue;
         }
 
@@ -279,8 +279,8 @@ export function writeStringToFileOrStream(
         return;
     }
 
-    if (isObj(file) && typeof (file as any).write === "function") {
-        (file as any).write(content);
+    if (isObj(file) && typeof (file as WritableStreamTarget).write === "function") {
+        (file as WritableStreamTarget).write(content);
         return;
     }
 
@@ -659,7 +659,7 @@ export function alignWhereIndices(
     return { leftIndices, rightIndices };
 }
 
-export function materializeJoinedDataFrame<R extends RowRecord = any>(
+export function materializeJoinedDataFrame<R extends RowRecord = RowRecord>(
     leftCols: ColumnDict,
     rightCols: ColumnDict,
     leftSchema: DataFrameSchema,

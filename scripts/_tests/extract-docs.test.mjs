@@ -1219,7 +1219,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
   assert.strictEqual(
     dfConcat.signatureDetailed,
     [
-      "df.concat<U extends RowRecord = any>(",
+      "df.concat<U extends RowRecord = T>(",
       "  items: ConcatItem | ConcatItem[],",
       "  options: {",
       "    horizontal?: {",

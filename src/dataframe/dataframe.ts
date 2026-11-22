@@ -2,8 +2,8 @@ import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER,
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
-import type { IExpr, ColumnData, ColumnDict, ColumnIndexOrNameArg, ColumnKeyArg, ColumnOrExprArg, ConcatOptions, ConcatItemsArg, DataFrameDataArg, RenameMappingArg, RowRecord, DataFrameSchema, ExplodeOptions, IntoExpr, IntoExprArg, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
-import type { CastTargetArg, DataFrameColumns, DataFrameShape, DynamicIndexColumnArg, EqualsOptions, FilterPredicateArg, GroupByDynamicOptions, InsertColumnArg, IterRowResult, IterRowsOptions, JoinAsofOptions, JoinMaintainOrder, JoinOptions, JoinWhereArg, JoinWhereOptions, LimitOptions, PartitionByKey, PartitionByOptions, PartitionByResult, PivotOptions, Rename, RowPredicateFn, SelectArg, SortOptions, TransposeOptions, UnpivotOptions, UnstackOptions, WriteFileTargetArg, WriteJSONOptions } from "./types"
+import type { IExpr, ColumnData, ColumnDict, ColumnKeyArg, ColumnOrExprArg, ConcatOptions, ConcatItemsArg, DataFrameDataArg, RenameMappingArg, RowRecord, DataFrameSchema, ExplodeOptions, IntoExpr, IntoExprArg, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
+import type { CastTargetArg, DataFrameColumns, DataFrameShape, DynamicIndexColumnArg, EqualsOptions, FilterPredicateArg, GroupByDynamicOptions, InsertColumnArg, IterRowResult, IterRowsOptions, JoinAsofOptions, JoinMaintainOrder, JoinOptions, JoinWhereArg, JoinWhereOptions, LimitOptions, PartitionByKey, PartitionByOptions, PartitionByResult, PivotOptions, Rename, RowPredicateFn, SelectArg, SortOptions, TransposeOptions, UnpivotOptions, UnstackOptions, WritableStreamTarget, WriteFileTargetArg, WriteJSONOptions } from "./types"
 import { DataTypeRegistry, DataType, type RegisteredDataType } from "../datatypes"
 import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate, type WriteCSVOptions } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, InvalidArgumentError, IOStreamError } from "../exceptions"
@@ -29,12 +29,12 @@ import {
 /**
  * Two-dimensional columnar tabular data structure supporting expression execution and reshaping.
  */
-export class DataFrame<T extends RowRecord = any> {
+export class DataFrame<T extends RowRecord = RowRecord> {
     public _columns: DataFrameColumns<T>
     private _height: number
     private _schema: DataFrameSchema = {}
 
-    static _createDirect<U extends RowRecord = any>(
+    static _createDirect<U extends RowRecord = RowRecord>(
         columns: ColumnDict,
         schema: DataFrameSchema,
         height: number
@@ -107,7 +107,7 @@ export class DataFrame<T extends RowRecord = any> {
         this._applySchema(schema);
     }
 
-    static _normalizeArgs(args: any[]): IExpr[] {
+    static _normalizeArgs(args: SelectArg[]): IExpr[] {
         const flatArgs = args.flat(Infinity);
         const exprs: IExpr[] = [];
         const len = flatArgs.length;
@@ -124,8 +124,8 @@ export class DataFrame<T extends RowRecord = any> {
                 const numKeys = keys.length;
                 for (let j = 0; j < numKeys; j++) {
                     const key = keys[j];
-                    const val = (arg as Record<string, any>)[key];
-                    exprs.push(isColExpr(val) ? (val as any).alias(key) : lit(val).alias(key));
+                    const val = (arg as Record<string, unknown>)[key];
+                    exprs.push(isColExpr(val) ? (val as ColumnExpr<RowRecord>).alias(key) : lit(val).alias(key));
                 }
             }
         }
@@ -177,13 +177,13 @@ export class DataFrame<T extends RowRecord = any> {
      * df.cast({ a: $df.Float64, b: $df.Utf8 });
      * df.cast({ a: $df.Int64 }, { strict: false });
      */
-    cast(
+    cast<U extends RowRecord = RowRecord>(
         dtypes: CastTargetArg,
         options: CastOptions = {}
-    ): DataFrame<any> {
-        if (this._height === 0) return this;
+    ): DataFrame<U> {
+        if (this._height === 0) return this as unknown as DataFrame<U>;
         if (dtypes instanceof DataType) {
-            return this.withColumns(all().cast(dtypes, options));
+            return this.withColumns(all().cast(dtypes, options)) as DataFrame<U>;
         }
 
         if (isObj(dtypes)) {
@@ -194,7 +194,7 @@ export class DataFrame<T extends RowRecord = any> {
                 const k = keys[i];
                 exprs[i] = new ColumnExpr(k).cast(dtypes[k], options);
             }
-            return this.withColumns(...exprs);
+            return this.withColumns(...exprs) as DataFrame<U>;
         }
 
         throw new InvalidArgumentError("Invalid cast target");
@@ -280,7 +280,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // | null | 20   |
      * // +------+------+
      */
-    concat<U extends RowRecord = any>(
+    concat<U extends RowRecord = T>(
         items: ConcatItemsArg,
         options: ConcatOptions = {}
     ): DataFrame<U> {
@@ -306,7 +306,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // +---+
      */
     drop<K extends keyof T>(...args: ColumnKeyArg<K>[]): DataFrame<Omit<T, K>> {
-        return this.select<Omit<T, K>>(exclude(args.flat() as any));
+        return this.select<Omit<T, K>>(exclude(args.flat() as string[]));
     }
 
     /**
@@ -358,7 +358,7 @@ export class DataFrame<T extends RowRecord = any> {
      * df.equals(df2);
      * // true
      */
-    equals<U extends RowRecord = any>(other: DataFrame<U>, { nullsEqual = true }: EqualsOptions = {}): boolean {
+    equals<U extends RowRecord = RowRecord>(other: DataFrame<U>, { nullsEqual = true }: EqualsOptions = {}): boolean {
         if ((this as unknown) === other) return true;
         if (!(other instanceof DataFrame)) return false;
 
@@ -418,10 +418,10 @@ export class DataFrame<T extends RowRecord = any> {
      * // | A     | 2      |
      * // +-------+--------+
      */
-    explode(
+    explode<U extends RowRecord = RowRecord>(
         columns: IntoExprArg,
         options?: ExplodeOptions
-    ): DataFrame<any> {
+    ): DataFrame<U> {
         const targetCols = this._resolveTargetColumns(columns, "Explode column");
         const colsToExplode = new Set<string>(targetCols);
         const keys = Object.keys(this._columns);
@@ -590,7 +590,7 @@ export class DataFrame<T extends RowRecord = any> {
         const newColumns = {} as DataFrameColumns<T>;
         for (let k = 0; k < keys.length; k++) {
             const key = keys[k];
-            (newColumns as any)[key] = filterByMask(this._columns[key], mask);
+            (newColumns as ColumnDict)[key] = filterByMask(this._columns[key], mask);
         }
         return DataFrame._createDirect<T>(newColumns, this._schema, matchCount);
     }
@@ -635,7 +635,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const groups = buildGroupMap(this._columns, keysStr, this._height);
         const allKeys = Object.keys(this._columns) as (keyof T)[];
-        return new GroupedData(groups, keysStr as any, allKeys, this._columns, this._height, this._schema) as any;
+        return new GroupedData<T, K>(groups, keysStr as K[], allKeys, this._columns, this._height, this._schema);
     }
 
     /**
@@ -678,7 +678,7 @@ export class DataFrame<T extends RowRecord = any> {
         const indexColName = typeof indexColumn === "string"
             ? indexColumn
             : isColExpr(indexColumn)
-                ? (indexColumn as any)._colName ?? String(indexColumn)
+                ? (indexColumn as { _colName?: string })._colName ?? String(indexColumn)
                 : String(indexColumn);
         assertColumnExists(indexColName, this._columns, "Index column");
 
@@ -750,7 +750,7 @@ export class DataFrame<T extends RowRecord = any> {
             ...(includeBoundaries ? [LOWER_BOUNDARY_COL, UPPER_BOUNDARY_COL] : [])
         ];
         const dynGroups = new Map<string, number[]>();
-        const synCols: Record<string, any[]> = {};
+        const synCols: Record<string, unknown[]> = {};
         for (let i = 0; i < outKeys.length; i++) synCols[outKeys[i]] = [];
 
         const effPeriodInterval = periodInterval ?? everyInterval;
@@ -843,15 +843,15 @@ export class DataFrame<T extends RowRecord = any> {
         const bType = includeBoundaries ? (this._schema[indexColName] || (isDateType ? DataTypeRegistry.Datetime : DataTypeRegistry.Float64)) : null;
         const outSchema: DataFrameSchema = bType ? { ...this._schema, [LOWER_BOUNDARY_COL]: bType, [UPPER_BOUNDARY_COL]: bType } : this._schema;
 
-        return new GroupedData(
+        return new GroupedData<T, K>(
             dynGroups,
-            outKeys as any,
+            outKeys as K[],
             Object.keys(this._columns) as (keyof T)[],
             this._columns,
             this._height,
             outSchema,
             synCols
-        ) as any;
+        );
     }
 
 
@@ -903,15 +903,15 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 2 | 20 | y |
      * // +---+----+---+
      */
-    insertColumn(index: number, name: string, expr: InsertColumnArg): DataFrame<any> {
+    insertColumn<K extends string, U extends RowRecord = Record<K, unknown>>(index: number, name: K, expr: InsertColumnArg): DataFrame<T & U> {
         const colExpr = isArrayOrTypedArray(expr)
-            ? (toColExpr(LITERAL_MARKER, ColumnExpr) as ColumnExpr<any>)._derive(() => expr as any).alias(name)
-            : (toColExpr(expr, ColumnExpr) as ColumnExpr<any>).alias(name);
+            ? (toColExpr(LITERAL_MARKER, ColumnExpr) as ColumnExpr<RowRecord>)._derive(() => expr as ColumnData).alias(name)
+            : (toColExpr(expr, ColumnExpr) as ColumnExpr<RowRecord>).alias(name);
 
         const keys = Object.keys(this._columns);
         const keysLen = keys.length;
 
-        const selectList: any[] = [];
+        const selectList: SelectArg[] = [];
         for (let i = 0; i < keysLen; i++) {
             const k = keys[i];
             if (k !== name) {
@@ -923,14 +923,14 @@ export class DataFrame<T extends RowRecord = any> {
         const targetIndex = clamp(index < 0 ? len + index : index, { min: 0, max: len });
         selectList.splice(targetIndex, 0, colExpr);
 
-        return this.select<any>(...selectList);
+        return this.select<T & U>(...selectList);
     }
 
     /**
      * Retrieves a single scalar cell value by row and column position or name.
      * @param {number} [row] Row index position.
      * @param {ColumnIndexOrNameArg} [column] Column index or column name string.
-     * @returns {any} Cell scalar value.
+     * @returns {T[K]} Cell scalar value.
      * @throws {DataFrameError} If shape is not (1, 1) when called without arguments.
      * @throws {ShapeError} If row or column index is out of bounds.
      * @example
@@ -938,7 +938,7 @@ export class DataFrame<T extends RowRecord = any> {
      * df.item(0, "a");
      * // 42
      */
-    item(row?: number, column?: ColumnIndexOrNameArg): any {
+    item<K extends keyof T = keyof T>(row?: number, column?: K | number): T[K] {
         const height = this._height;
         const keys = Object.keys(this._columns);
         const width = keys.length;
@@ -947,7 +947,7 @@ export class DataFrame<T extends RowRecord = any> {
             if (height !== 1 || width !== 1) {
                 throw new DataFrameError("DataFrame.item() can only be called without arguments if the shape is (1, 1).");
             }
-            return this._columns[keys[0]][0];
+            return this._columns[keys[0]][0] as T[K];
         }
 
         if (row === undefined || column === undefined) {
@@ -962,11 +962,11 @@ export class DataFrame<T extends RowRecord = any> {
             if (column < 0 || column >= width) {
                 throw new ShapeError(`Column index ${column} is out of bounds for DataFrame width ${width}.`);
             }
-            return this._columns[keys[column]][row];
+            return this._columns[keys[column]][row] as T[K];
         }
 
-        assertColumnExists(column, this._columns, "Column");
-        return this._columns[column][row];
+        assertColumnExists(column as string, this._columns, "Column");
+        return this._columns[column as string][row] as T[K];
     }
 
     /**
@@ -1045,7 +1045,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 2  | b   | 200 |
      * // +----+-----+-----+
      */
-    join<U extends RowRecord = any, R extends RowRecord = any>(
+    join<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(
         other: DataFrame<U>,
         options: JoinOptions<T, U> = {}
     ): DataFrame<R> {
@@ -1126,7 +1126,7 @@ export class DataFrame<T extends RowRecord = any> {
             other._height,
             leftKeysStr,
             rightKeysStr,
-            resolvedConfig
+            resolvedConfig as Partial<JoinOptions>
         );
 
         return materializeJoinedDataFrame<R>(
@@ -1164,7 +1164,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 1015 | AAPL   | 151.0 | 150.8 |
      * // +------+--------+-------+-------+
      */
-    joinAsof<U extends RowRecord = any, R extends RowRecord = any>(
+    joinAsof<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(
         other: DataFrame<U>,
         options: JoinAsofOptions<T, U>
     ): DataFrame<R> {
@@ -1226,7 +1226,7 @@ export class DataFrame<T extends RowRecord = any> {
             rightOnKey,
             leftByKeys,
             rightByKeys,
-            resolvedOptions
+            resolvedOptions as JoinAsofOptions
         );
 
         const leftKeysStr = [leftOnKey, ...leftByKeys];
@@ -1274,7 +1274,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 101 | 140 | 14  | 8     | 742  | 170  | 16   | 4           |
      * // +-----+-----+-----+-------+------+------+------+-------------+
      */
-    joinWhere<U extends RowRecord = any, R extends RowRecord = any>(
+    joinWhere<U extends RowRecord = RowRecord, R extends RowRecord = T & U>(
         other: DataFrame<U>,
         ...args: JoinWhereArg[]
     ): DataFrame<R> {
@@ -1289,7 +1289,7 @@ export class DataFrame<T extends RowRecord = any> {
             const arg = args[i];
 
             if (Array.isArray(arg)) {
-                for (let j = 0; j < arg.length; j++) predicates.push(toColExpr(arg[j], ColumnExpr) as ColumnExpr<any>);
+                for (let j = 0; j < arg.length; j++) predicates.push(toColExpr(arg[j], ColumnExpr) as ColumnExpr<RowRecord>);
                 continue;
             }
 
@@ -1298,7 +1298,7 @@ export class DataFrame<T extends RowRecord = any> {
                 continue;
             }
 
-            predicates.push(toColExpr(arg as IntoExpr, ColumnExpr) as ColumnExpr<any>);
+            predicates.push(toColExpr(arg as IntoExpr, ColumnExpr) as ColumnExpr<RowRecord>);
         }
 
         const { how = "inner", suffixes = ["", "_right"] } = options;
@@ -1365,7 +1365,7 @@ export class DataFrame<T extends RowRecord = any> {
         const keysLen = keys.length;
         for (let i = 0; i < keysLen; i++) {
             const key = keys[i];
-            newColumns[key] = (this._columns[key] as any).slice(actualStart, actualEnd);
+            newColumns[key] = (this._columns[key] as unknown[]).slice(actualStart, actualEnd) as ColumnData;
         }
 
         return DataFrame._createDirect<T>(newColumns, this._schema, newHeight);
@@ -1415,8 +1415,8 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 2021 | 120 | 180 |
      * // +------+-----+-----+
      */
-    pivot<U extends RowRecord = any>(config: PivotOptions<T>): DataFrame<U> {
-        if (this._height === 0) return DataFrame._createDirect<any>({}, {}, 0);
+    pivot<U extends RowRecord = RowRecord>(config: PivotOptions<T>): DataFrame<U> {
+        if (this._height === 0) return DataFrame._createDirect<U>({}, {}, 0);
 
         const { index, columns, values } = config;
         const indexStr = toArrayOfType<string>(index, "string");
@@ -1449,12 +1449,12 @@ export class DataFrame<T extends RowRecord = any> {
         }
 
         const outHeight = groups.size;
-        const newColumns: Record<string, any[]> = {};
+        const newColumns: Record<string, unknown[]> = {};
         const outSchema: DataFrameSchema = {};
 
         for (let j = 0; j < indexLen; j++) {
             const idxKey = indexStr[j];
-            newColumns[idxKey] = gatherColumnByIndices(this._columns[idxKey], firstRowIdxs) as any[];
+            newColumns[idxKey] = gatherColumnByIndices(this._columns[idxKey], firstRowIdxs) as unknown[];
             if (this._schema[idxKey]) outSchema[idxKey] = this._schema[idxKey];
         }
 
@@ -1489,11 +1489,11 @@ export class DataFrame<T extends RowRecord = any> {
     rename<M extends RenameMappingArg<T> = RenameMappingArg<T>>(mapping: M = {} as M): DataFrame<Rename<T, M>> {
         const keys = Object.keys(this._columns);
         const len = keys.length;
-        const selectList: any[] = new Array(len);
+        const selectList: SelectArg[] = new Array(len);
 
         for (let i = 0; i < len; i++) {
             const k = keys[i];
-            const newKey = (mapping as any)[k];
+            const newKey = (mapping as Record<string, string | undefined>)[k];
             selectList[i] = newKey ? new ColumnExpr(k).alias(newKey) : k;
         }
 
@@ -1533,7 +1533,8 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Selects specific columns or evaluates column expressions.
      * @param {SelectArg[]} args Column names, column expressions, or object maps to evaluate.
-     * @returns {DataFrame}     * @example
+     * @returns {DataFrame}     
+     * @example
      * // 1. Select and transform columns:
      * <!-- doc:base_2x2 -->
      * df.select("a", $df.col("b").alias("b_copy"));
@@ -1563,7 +1564,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 2 | 120    |
      * // +---+--------+
      */
-    select<U extends RowRecord = any>(
+    select<U extends RowRecord = RowRecord>(
         ...args: SelectArg[]
     ): DataFrame<U> {
         const exprs = DataFrame._normalizeArgs(args);
@@ -1596,7 +1597,7 @@ export class DataFrame<T extends RowRecord = any> {
             evaluatedCols[i] = col;
             targetKeys[i] = targetKey;
 
-            const rowMap = col && (col as any).rowMap;
+            const rowMap = col && (col as { rowMap?: Int32Array }).rowMap;
             if (!rowMap) continue;
 
             if (!activeRowMap) {
@@ -1630,7 +1631,7 @@ export class DataFrame<T extends RowRecord = any> {
         for (let i = 0; i < numExprs; i++) {
             const targetKey = targetKeys[i];
             let col = evaluatedCols[i];
-            const hasRowMap = col && (col as any).rowMap;
+            const hasRowMap = col && (col as { rowMap?: Int32Array }).rowMap;
 
             const len = isArrayOrTypedArray(col) ? col.length : 0;
             const expectedLen = (activeRowMap && !hasRowMap) ? this._height : targetHeight;
@@ -1639,7 +1640,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
 
             if (activeRowMap && !hasRowMap) {
-                col = gatherColumnByIndices(col, activeRowMap as any);
+                col = gatherColumnByIndices(col, activeRowMap as unknown as (number | null)[]);
             }
 
             evaluatedCols[i] = col;
@@ -1678,7 +1679,8 @@ export class DataFrame<T extends RowRecord = any> {
      * Slices a subset range of rows between start and end index.
      * @param {number} start Starting row index.
      * @param {number} [end] Optional ending row index (exclusive).
-     * @returns {DataFrame}     * @example
+     * @returns {DataFrame}
+     * @example
      * // 1. Slice rows by start and offset count:
      * <!-- doc:base_numbers_3x1 -->
      * df.slice(1, 2);
@@ -1721,7 +1723,8 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Sorts DataFrame rows by one or more column expressions or custom sorters.
      * @param {SortOptions<T>} [config] Sort configuration options.
-     * @returns {DataFrame}     * @example
+     * @returns {DataFrame}
+     * @example
      * // 1. Sort ascending by column name:
      * <!-- doc:base_numbers_3x2 -->
      * df.sort("a");
@@ -1758,7 +1761,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const { by, descending = false, nullsLast = true, customComp } = config;
         const sortKeys = toValidArray(by);
-        const evalCols = Object.values(this.select(...sortKeys as any)._columns);
+        const evalCols = Object.values(this.select(...(sortKeys as SelectArg[]))._columns);
         const nCols = evalCols.length;
 
         const height = this._height;
@@ -1772,7 +1775,7 @@ export class DataFrame<T extends RowRecord = any> {
             colOpts[i] = {
                 descending: isDescArr ? Boolean(descending[i]) : Boolean(descending),
                 nullsLast,
-                customComp: isCompFn ? customComp : (customComp as any)?.[sortKeys[i]]
+                customComp: isCompFn ? customComp : (customComp as Record<string, ((a: unknown, b: unknown) => number) | undefined>)?.[sortKeys[i] as string]
             };
         }
 
@@ -1787,7 +1790,7 @@ export class DataFrame<T extends RowRecord = any> {
             return 0;
         });
 
-        return DataFrame._createDirect<T>(gatherColumnsByIndices(this._columns, indices) as any, this._schema, height);
+        return DataFrame._createDirect<T>(gatherColumnsByIndices(this._columns, indices) as ColumnDict, this._schema, height);
     }
 
     /**
@@ -1812,14 +1815,14 @@ export class DataFrame<T extends RowRecord = any> {
     /**
      * Evaluates a column expression or retrieves column values as a raw JavaScript array.
      * @param {ColumnOrExprArg<K>} nameOrExpr Target column name or column expression.
-     * @returns {any[]} Array of column scalar values.
+     * @returns {R[]} Array of column scalar values.
      * @example
      * <!-- doc:base_2x2 -->
      * df.toArray("a");
      * // [10, 20]
      */
-    toArray<K extends keyof T>(nameOrExpr: ColumnOrExprArg<K>): any[] {
-        return toValidArray(Object.values(this.select(nameOrExpr as any)._columns)?.[0] ?? []);
+    toArray<K extends keyof T, R = T[K]>(nameOrExpr: ColumnOrExprArg<K>): R[] {
+        return toValidArray(Object.values(this.select(nameOrExpr as SelectArg)._columns)?.[0] ?? []) as R[];
     }
 
     /**
@@ -1861,11 +1864,11 @@ export class DataFrame<T extends RowRecord = any> {
      * // | q2     | 120      | 600      |
      * // +--------+----------+----------+
      */
-    transpose({
+    transpose<U extends RowRecord = RowRecord>({
         includeHeader = false,
         headerName = "column",
         columnNames: colNamesOpt
-    }: TransposeOptions = {}): DataFrame<any> {
+    }: TransposeOptions = {}): DataFrame<U> {
         const height = this._height;
         if (height === 0) {
             const cols: ColumnDict = includeHeader ? { [headerName]: [] } : {};
@@ -1892,7 +1895,7 @@ export class DataFrame<T extends RowRecord = any> {
                 newColNames[i] = String(val);
             }
         } else if (colNamesOpt != null) {
-            newColNames = Array.from(colNamesOpt as Iterable<any>, String);
+            newColNames = Array.from(colNamesOpt as Iterable<unknown>, String);
             if (newColNames.length !== height) {
                 throw new DataFrameError(`columnNames length (${newColNames.length}) must match the height of the DataFrame (${height})`);
             }
@@ -1934,8 +1937,8 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 2 | y |
      * // +---+---+
      */
-    unique<K extends keyof T>(columns?: ColumnKeyArg<K>): DataFrame<T> {
-        const keys = columns !== undefined ? toValidArray(columns) : (Object.keys(this._columns) as any);
+    unique<K extends keyof T & string>(columns?: ColumnKeyArg<K>): DataFrame<T> {
+        const keys = columns !== undefined ? toValidArray(columns) : (Object.keys(this._columns) as K[]);
         return this.groupBy(keys).agg(exclude(keys).first());
     }
 
@@ -1956,7 +1959,7 @@ export class DataFrame<T extends RowRecord = any> {
      * // | clicks | q2      | 600 |
      * // +--------+---------+-----+
      */
-    unpivot<U extends RowRecord = any>(config: UnpivotOptions<T>): DataFrame<U> {
+    unpivot<U extends RowRecord = RowRecord>(config: UnpivotOptions<T>): DataFrame<U> {
         const { idVars, valueVars, varName = "variable", valueName = "value" } = config;
         const idVarsStr = toArrayOfType<string>(idVars, "string");
         const valueVarsStr = toArrayOfType<string>(valueVars, "string");
@@ -1972,7 +1975,7 @@ export class DataFrame<T extends RowRecord = any> {
 
         const newHeight = this._height * valueVarsLen;
 
-        const newColumns: Record<string, any[]> = {};
+        const newColumns: Record<string, unknown[]> = {};
         for (let k = 0; k < idVarsLen; k++) {
             newColumns[idVarsStr[k]] = new Array(newHeight);
         }
@@ -2002,7 +2005,7 @@ export class DataFrame<T extends RowRecord = any> {
         outSchema[varName] = DataTypeRegistry.Utf8;
         outSchema[valueName] = inferColumnType(newColumns[valueName]);
 
-        return DataFrame._createDirect<U>(newColumns as any, outSchema, newHeight);
+        return DataFrame._createDirect<U>(newColumns as ColumnDict, outSchema, newHeight);
     }
 
     /**
@@ -2023,10 +2026,10 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 3   | null |
      * // +-----+------+
      */
-    unstack(
+    unstack<U extends RowRecord = RowRecord>(
         columns: IntoExprArg,
         options: UnstackOptions
-    ): DataFrame<any> {
+    ): DataFrame<U> {
         if (!isValidNumber(options?.step) || options.step < 1) {
             throw new InvalidArgumentError("unstack() requires a positive integer 'step' >= 1");
         }
@@ -2038,17 +2041,17 @@ export class DataFrame<T extends RowRecord = any> {
         const step = Math.trunc(options.step);
 
         if (this._height === 0) {
-            return DataFrame._createDirect<any>({}, {}, 0);
+            return DataFrame._createDirect<U>({}, {}, 0);
         }
 
         const targetCols = this._resolveTargetColumns(columns, "unstack target column");
         if (targetCols.length === 0) {
-            return DataFrame._createDirect<any>({}, {}, 0);
+            return DataFrame._createDirect<U>({}, {}, 0);
         }
 
         const origHeight = this._height;
         const newHeight = Math.ceil(origHeight / step);
-        const newColumns: Record<string, any[]> = {};
+        const newColumns: Record<string, unknown[]> = {};
         const newSchema: DataFrameSchema = {};
 
         const numTargets = targetCols.length;
@@ -2078,7 +2081,7 @@ export class DataFrame<T extends RowRecord = any> {
             }
         }
 
-        return DataFrame._createDirect<any>(newColumns, newSchema, newHeight);
+        return DataFrame._createDirect<U>(newColumns, newSchema, newHeight);
     }
 
     /**
@@ -2178,14 +2181,14 @@ export class DataFrame<T extends RowRecord = any> {
      * // | 1   | 2 | y |
      * // +-----+---+---+
      */
-    withRowIndex(name: string = "index", offset: number = 0): DataFrame<any> {
+    withRowIndex<K extends string = "index">(name: K = "index" as K, offset: number = 0): DataFrame<T & Record<K, number>> {
         const expr = seqRange(offset, {
             mode: "independent",
             dtype: DataTypeRegistry.UInt32,
             step: 1
         });
 
-        const df = this.insertColumn(0, name, expr);
+        const df = this.insertColumn<K, Record<K, number>>(0, name, expr);
         df._schema[name] = DataTypeRegistry.UInt32;
         return df;
     }
@@ -2223,11 +2226,11 @@ export class DataFrame<T extends RowRecord = any> {
                 } finally {
                     fs.closeSync(fd);
                 }
-            } else if (isObj(file) && typeof (file as any).write === "function") {
+            } else if (isObj(file) && typeof (file as WritableStreamTarget).write === "function") {
                 stringifyCSV(this._columns, this._height, {
                     ...options,
                     onRow: (str) => {
-                        (file as any).write(str);
+                        (file as WritableStreamTarget).write(str);
                     }
                 });
             } else {
@@ -2269,11 +2272,11 @@ export class DataFrame<T extends RowRecord = any> {
             const len = dicts.length;
             const lines = new Array(len);
             for (let i = 0; i < len; i++) {
-                lines[i] = JSON.stringify(dicts[i], safeReplacer as any);
+                lines[i] = JSON.stringify(dicts[i], safeReplacer as (key: string, value: unknown) => unknown);
             }
             jsonStr = lines.join(NEWLINE);
         } else {
-            jsonStr = JSON.stringify(this.toDicts(), safeReplacer as any);
+            jsonStr = JSON.stringify(this.toDicts(), safeReplacer as (key: string, value: unknown) => unknown);
         }
 
         writeStringToFileOrStream(file, jsonStr);

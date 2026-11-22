@@ -76,3 +76,7 @@ export type _Test10_ColumnsType = Expect<Equal<
     typeof extendedCols,
     Array<"id" | "username" | "isActive" | "score">
 >>;
+
+// 11. Negative type tests
+// @ts-expect-error - invalid argument type to withColumns
+df.withColumns(123);

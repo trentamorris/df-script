@@ -89,7 +89,7 @@ export type FilterPredicateArg<T extends RowRecord = RowRecord> = ColumnKeyArg<F
 /**
  * Configuration options for rolling/dynamic temporal or index window grouping (`DataFrame.groupByDynamic()`).
  */
-export interface GroupByDynamicOptions<T = any> {
+export interface GroupByDynamicOptions<T = RowRecord> {
     /**
      * Additional columns to partition / group by before dynamic windowing.
      */
@@ -166,11 +166,11 @@ export type GroupedAggDelegatedMethodNames =
 /**
  * Mapped interface of aggregation shorthand methods available directly on `GroupedData`.
  */
-export type GroupedAggDelegatedOps<T extends RowRecord = any> = {
+export type GroupedAggDelegatedOps<T extends RowRecord = RowRecord> = {
     /**
      * Executes aggregation `K` across all non-key columns in each group.
      */
-    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<any>[K]>) => DataFrame<T>;
+    [K in GroupedAggDelegatedMethodNames]: (...args: Parameters<ColumnExpr<RowRecord>[K]>) => DataFrame<T>;
 };
 
 /**
@@ -182,12 +182,12 @@ export type GroupMap = Map<string, number[]>;
  * Value operand for `DataFrame.insertColumn()`.
  * Accepts a column expression selector or a raw array-like sequence of column values.
  */
-export type InsertColumnArg = IntoExpr | ArrayLike<any>;
+export type InsertColumnArg = IntoExpr | ArrayLike<unknown>;
 
 /**
  * Single row yielded by `DataFrame.iterRows()`, either as a positional value array or a named row record.
  */
-export type IterRowResult<T extends RowRecord = RowRecord> = any[] | T;
+export type IterRowResult<T extends RowRecord = RowRecord> = unknown[] | T;
 
 /**
  * Configuration options for `DataFrame.iterRows()`.
@@ -204,7 +204,7 @@ export interface IterRowsOptions {
 /**
  * Configuration options for as-of proximity joins (`DataFrame.joinAsof()`).
  */
-export interface JoinAsofOptions<T = any, U extends RowRecord = any> {
+export interface JoinAsofOptions<T = RowRecord, U extends RowRecord = RowRecord> {
     /**
      * Whether exact key matches are permitted.
      * @default true
@@ -273,7 +273,7 @@ export type JoinMaintainOrder = "none" | "left" | "right" | "left_right" | "righ
 /**
  * Configuration options for joining two DataFrames (`DataFrame.join()`).
  */
-export interface JoinOptions<T = any, U extends RowRecord = any> {
+export interface JoinOptions<T = RowRecord, U extends RowRecord = RowRecord> {
     /**
      * Coalescing behavior for join key columns. If `true`, coalesces join key values into left key columns and drops right key columns.
      * @default true
@@ -405,7 +405,7 @@ export interface PivotOptions<T> {
     /**
      * Aggregation function to apply when multiple values exist for a cell.
      */
-    agg?: AggFn<any> | string;
+    agg?: AggFn<unknown> | string;
     /**
      * Column whose distinct values become new wide column headers.
      */
@@ -423,7 +423,7 @@ export interface PivotOptions<T> {
 /**
  * Row-level predicate callback function for `DataFrame.filter()`.
  */
-export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => any;
+export type RowPredicateFn<T extends RowRecord = RowRecord> = (row: T) => unknown;
 
 /**
  * Variadic argument for `DataFrame.select()`, `DataFrame.withColumns()`, and `GroupedData.agg()`.
@@ -440,7 +440,7 @@ export type SelectItem = ColumnOrExprArg | RowRecord;
 /**
  * Configuration options for sorting a DataFrame (`DataFrame.sort()`).
  */
-export interface SortOptions<T = any> extends SortArrayOptions<T> {
+export interface SortOptions<T = RowRecord> extends SortArrayOptions<T> {
     /**
      * Column name(s) or expression(s) to sort by.
      */
@@ -448,7 +448,7 @@ export interface SortOptions<T = any> extends SortArrayOptions<T> {
     /**
      * Optional comparator function or dictionary mapping column names to custom comparator functions.
      */
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
+    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof T, (a: unknown, b: unknown) => number>> | null;
     /**
      * Sort order boolean or array of booleans per key.
      * @default false
@@ -524,7 +524,7 @@ export interface UnstackOptions {
      * Value to fill in empty cells when length is not evenly divisible by step.
      * @default null
      */
-    fillValues?: any;
+    fillValues?: unknown;
     /**
      * Reshaping direction:
      * - "vertical" (default): fills down the new columns first before moving to the next column.

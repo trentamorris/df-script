@@ -38,6 +38,7 @@
     "test": "tsx --conditions=@df-script/source _tests/run_all_project_tests.ts",
     "test:types": "node scripts/verify-types.mjs",
     "test:dist": "node scripts/verify-dist.mjs",
+    "test:docs": "npm run extract-docs && npm run generate-llms && git diff --exit-code docs.json llms.txt llms-full.txt",
     "test:browser": "npm run build && node scripts/verify-browser.mjs",
     "prepublishOnly": "npm run build",
     "extract-docs": "node scripts/extract-docs.mjs && node scripts/_tests/extract-docs.test.mjs",

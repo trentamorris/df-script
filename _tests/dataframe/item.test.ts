@@ -48,7 +48,7 @@ assertThrows(() => {
 }, "Column index 2 is out of bounds");
 
 assertThrows(() => {
-    df.item(0, "c");
+    df.item(0, "c" as any);
 }, "Column \"c\" does not exist");
 
 assertThrows(() => {
@@ -78,6 +78,28 @@ assertThrows(() => {
 assertThrows(() => {
     df.item(-1, 0);
 }, "Row index -1 is out of bounds");
+
+// 8. Null value in (1, 1) DataFrame
+const dfNull = new DataFrame([{ val: null }]);
+if (dfNull.item() !== null) {
+    throw new Error(`Expected null, got ${dfNull.item()}`);
+}
+
+// 9. Empty DataFrame (0 rows) throws out of bounds
+const dfEmpty = new DataFrame({ a: [] as number[] });
+assertThrows(() => {
+    dfEmpty.item(0, "a");
+}, "Row index 0 is out of bounds");
+
+// 10. BigInt and Date values preserved
+const d = new Date("2026-01-01T00:00:00.000Z");
+const dfTyped = new DataFrame([{ big: 9007199254740993n, dt: d }]);
+if (dfTyped.item(0, "big") !== 9007199254740993n) {
+    throw new Error("Expected BigInt value");
+}
+if (!(dfTyped.item(0, "dt") instanceof Date) || dfTyped.item(0, "dt").getTime() !== d.getTime()) {
+    throw new Error("Expected Date value");
+}
 
 assertThrows(() => {
     df.item(0, -1);

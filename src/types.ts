@@ -1,7 +1,7 @@
 /** @typefile */
 import type { DataFrame } from "./dataframe/dataframe";
 import type { RegisteredDataType } from "./datatypes";
-import type { DataType } from "./datatypes/dataType";
+import type { DataType } from "./datatypes/dataTypes";
 import type { JSONParseOptions, NDJSONParseOptions } from "./utils";
 
 /**
