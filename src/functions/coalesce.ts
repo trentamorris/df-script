@@ -56,7 +56,7 @@ export function coalesce<T extends RowRecord = RowRecord>(...exprs: CoalesceArg[
             let foundVal = null;
             for (let j = 0; j < exprCount; j++) {
                 const arr = evaluatedArrays[j];
-                const val = isCol[j] ? arr[i] : arr;
+                const val = isCol[j] ? (arr as unknown[])[i] : arr;
                 if (val != null) {
                     foundVal = val;
                     break;

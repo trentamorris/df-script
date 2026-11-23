@@ -1,3 +1,5 @@
+import type { ColumnData, ColumnDict } from "../../types";
+import type { ColumnExpr } from "../columnExpr";
 import { ExprBase } from "../exprBase";
 import type { StructFieldsArg, RenameMappingArg } from "../../types";
 import { InvalidArgumentError } from "../../exceptions";
@@ -11,9 +13,9 @@ import { createDelegatingProxy } from "../utils";
  */
 
 export class StructExprNamespace {
-    _expr: any;
+    _expr: ColumnExpr<unknown>;
 
-    constructor(expr: any) {
+    constructor(expr: ColumnExpr<unknown>) {
         this._expr = expr;
         return createDelegatingProxy(this, (prop, target) => prop in target ? undefined : target.field(prop));
     }
@@ -33,7 +35,7 @@ export class StructExprNamespace {
      * // +---------------------------+-----------+
      */
     field(name: string) {
-        const derived = this._expr._deriveUnary((v: any) => (v != null && typeof v === "object" ? v[name] : null));
+        const derived = this._expr._deriveUnary((v: unknown) => (v != null && typeof v === "object" ? (v as Record<string, unknown>)[name] : null));
         derived._baseExpr = this._expr;
         derived._fieldName = name;
         return derived.alias(name);
@@ -54,15 +56,15 @@ export class StructExprNamespace {
      * // +---------------------------+--------------------------------+
      */
     renameFields(mapping: RenameMappingArg) {
-        return this._expr._deriveUnary((v: any) => {
+        return this._expr._deriveUnary((v: unknown) => {
             if (v == null || typeof v !== "object") return null;
-            const newObj: any = {};
+            const newObj: Record<string, unknown> = {};
             const origKeys = Object.keys(v);
             const origLen = origKeys.length;
             for (let k = 0; k < origLen; k++) {
                 const key = origKeys[k];
                 const newKey = mapping[key] !== undefined ? mapping[key] : key;
-                newObj[newKey] = (v as any)[key];
+                newObj[newKey] = (v as Record<string, unknown>)[key];
             }
             return newObj;
         });
@@ -84,14 +86,14 @@ export class StructExprNamespace {
      * // +------------------------------+-------------------------------------------+
      */
     withFields(fields: StructFieldsArg) {
-        return this._expr._derive((vArray: any[], columns: any) => {
+        return this._expr._derive((vArray: ColumnData, columns: unknown) => {
             const height = vArray.length;
             const result = new Array(height);
-            const resolved: { name: string; expr: any }[] = [];
+            const resolved: { name: string; expr: unknown }[] = [];
 
             if (Array.isArray(fields)) {
                 for (let j = 0; j < fields.length; j++) {
-                    const expr = this._expr._toColExpr(fields[j]);
+                    const expr = this._expr._toColExpr(fields[j]) as ColumnExpr<unknown>;
                     const name = (expr._outputName && expr._outputName !== LITERAL_MARKER)
                         ? expr._outputName
                         : (expr._colName !== LITERAL_MARKER ? expr._colName : "");
@@ -110,7 +112,7 @@ export class StructExprNamespace {
             const len = resolved.length;
             const fieldValues = new Array(len);
             for (let j = 0; j < len; j++) {
-                fieldValues[j] = resolved[j].expr._evaluate(columns, height);
+                fieldValues[j] = (resolved[j].expr as ColumnExpr<unknown>)._evaluate(columns as ColumnDict, height);
             }
 
             for (let i = 0; i < height; i++) {
@@ -120,7 +122,7 @@ export class StructExprNamespace {
                     continue;
                 }
 
-                const newObj: any = { ...v };
+                const newObj: Record<string, unknown> = { ...v };
                 for (let j = 0; j < len; j++) {
                     newObj[resolved[j].name] = fieldValues[j][i];
                 }
@@ -156,7 +158,7 @@ export class StructExprNamespace {
  */
 export interface StructExprNamespace {
     /** Dynamic struct field accessor returning a `ColumnExpr` for the given property key. */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export class StructExpr extends ExprBase {
@@ -178,6 +180,6 @@ export class StructExpr extends ExprBase {
      * // +---------+
      */
     get struct() {
-        return new StructExprNamespace(this);
+        return new StructExprNamespace(this as unknown as ColumnExpr<unknown>);
     }
 }

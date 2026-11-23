@@ -1,3 +1,4 @@
+import type { ColumnExprInternal } from "./types"
 import { ExprBase } from "./exprBase"
 import { StandardExpr } from "./mixins/standardExpr"
 import { StringExpr } from "./mixins/stringExpr"
@@ -17,8 +18,8 @@ export class ColumnExpr<T> extends ExprBase {
     _colName: string = "";
     _colNames?: string[];
     _excludedCols: string[] = [];
-    _targetType?: any;
-    _targetTypes?: any[];
+    _targetType?: unknown;
+    _targetTypes?: unknown[];
     _pattern?: RegExp;
     _patterns?: RegExp[];
 
@@ -75,10 +76,10 @@ export interface ColumnExpr<T> extends
     ArrayExpr,
     StructExpr { }
 
-function _applyMixins(derivedCtor: any, constructors: any[]) {
+function _applyMixins(derivedCtor: { prototype: object }, constructors: Array<{ prototype: object }>) {
     for (const ctor of constructors) {
         const desc = Object.getOwnPropertyDescriptors(ctor.prototype);
-        delete (desc as any).constructor;
+        delete (desc as { constructor?: unknown }).constructor;
         Object.defineProperties(derivedCtor.prototype, desc);
     }
 }
@@ -97,13 +98,14 @@ _applyMixins(ColumnExpr, [
  * Returns null if the expression is not a multi-column selector.
  */
 function _getTargetKeys(
-    expr: any,
+    expr: unknown,
     allKeys: string[],
     excludeSet: Set<string>,
     schema?: DataFrameSchema
 ): string[] | null {
-    if (expr?._colNames?.length && !expr._patterns?.length) {
-        return expr._colNames;
+    const multiExpr = expr as ColumnExprInternal | undefined;
+    if (multiExpr?._colNames?.length && !multiExpr._patterns?.length) {
+        return multiExpr._colNames;
     }
 
     const isExpr = expr instanceof ColumnExpr;
@@ -175,7 +177,7 @@ function _getTargetKeys(
  * into concrete ColumnExpr instances.
  */
 export function resolveColumnSelectors(
-    exprs: any[],
+    exprs: unknown[],
     allKeys: string[],
     keysToExcludeFromAll?: string[],
     schema?: DataFrameSchema,
@@ -198,9 +200,9 @@ export function resolveColumnSelectors(
             const baseExpr = expr._baseExpr as IExpr;
             let fields: string[] = [];
             const colName = expr._colName;
-            const baseHasOps = (baseExpr as any)._ops?.length > 0;
+            const baseHasOps = ((baseExpr as ColumnExprInternal)._ops?.length ?? 0) > 0;
             if (!baseHasOps && typeof colName === "string" && schema && schema[colName] && schema[colName].name === "Struct") {
-                fields = Object.keys((schema[colName] as any).fields);
+                fields = Object.keys((schema[colName] as unknown as { fields: Record<string, unknown> }).fields);
             }
             if (fields.length === 0 && columns) {
                 const columnsKeys = Object.keys(columns);
@@ -220,32 +222,33 @@ export function resolveColumnSelectors(
             if (fieldsLen > 0) {
                 for (let fIdx = 0; fIdx < fieldsLen; fIdx++) {
                     const fieldName = fields[fIdx];
-                    const fieldExpr = (baseExpr as any).struct.field(fieldName);
+                    const fieldExpr = (baseExpr as ColumnExpr<unknown>).struct.field(fieldName);
                     expanded.push(fieldExpr);
                 }
                 continue;
             }
         }
 
-        const targets = _getTargetKeys(expr, allKeys, excludeSet, schema);
+        const typedExpr = expr as ColumnExpr<unknown>;
+        const targets = _getTargetKeys(typedExpr, allKeys, excludeSet, schema);
         if (targets !== null) {
             const tLen = targets.length;
             for (let j = 0; j < tLen; j++) {
                 const concrete = new ColumnExpr(targets[j]);
-                concrete._ops = expr._ops ? [...expr._ops] : [];
-                concrete._aggFn = expr._aggFn;
-                concrete._partitionOpsIndex = expr._partitionOpsIndex;
-                concrete._groupingOpsIndex = expr._groupingOpsIndex;
-                concrete._partitionBy = expr._partitionBy;
-                if (expr._castType) concrete._castType = expr._castType;
-                if (expr._evaluateWindow) concrete._evaluateWindow = expr._evaluateWindow;
-                if (expr._outputName && expr._outputName !== ALL_COLUMNS_MARKER) {
-                    concrete._outputName = expr._outputName;
+                concrete._ops = typedExpr._ops ? [...typedExpr._ops] : [];
+                concrete._aggFn = typedExpr._aggFn;
+                concrete._partitionOpsIndex = typedExpr._partitionOpsIndex;
+                concrete._groupingOpsIndex = typedExpr._groupingOpsIndex;
+                concrete._partitionBy = typedExpr._partitionBy;
+                if (typedExpr._castType) concrete._castType = typedExpr._castType;
+                if (typedExpr._evaluateWindow) concrete._evaluateWindow = typedExpr._evaluateWindow;
+                if (typedExpr._outputName && typedExpr._outputName !== ALL_COLUMNS_MARKER) {
+                    concrete._outputName = typedExpr._outputName;
                 }
                 expanded.push(concrete);
             }
         } else {
-            expanded.push(expr);
+            expanded.push(typedExpr);
         }
     }
 

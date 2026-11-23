@@ -1181,7 +1181,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
       '    prefix?: string = "",',
       '    suffix?: string = "",',
       '    truncationMarker?: string = "...",',
-      "    valueFormatter?: (val: any, index: number) => string",
+      "    valueFormatter?: (val: unknown, index: number) => string",
       "  } = {}",
       ")"
     ].join("\n")

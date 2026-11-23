@@ -297,7 +297,7 @@ Counts occurrence frequency of item inside nested lists.
 $df.col(<column_name>).arr.countMatches(
   item: IExpr | ValidScalarTypes,
   options: {
-    keySelector?: (val: any) => any,
+    keySelector?: (val: unknown) => string,
     strict?: boolean = false
   } = {}
 )
@@ -641,7 +641,7 @@ $df.col(<column_name>).arr.join(
     prefix?: string = "",
     suffix?: string = "",
     truncationMarker?: string = "...",
-    valueFormatter?: (val: any, index: number) => string
+    valueFormatter?: (val: unknown, index: number) => string
   } = {}
 )
 ```
@@ -968,7 +968,7 @@ Returns the unique count of elements inside each list.
 ```typescript
 $df.col(<column_name>).arr.nUnique(
   options: {
-    keySelector?: (val: any) => any,
+    keySelector?: (val: unknown) => string,
     strict?: boolean = false
   } = {}
 )
@@ -1043,7 +1043,7 @@ Shifts elements of list columns by N offsets.
 $df.col(<column_name>).arr.shift(
   n: number = 1,
   options: {
-    fillValue?: any = null
+    fillValue?: unknown = null
   } = {}
 )
 ```
@@ -1142,7 +1142,7 @@ Sorts elements inside each list.
 ```typescript
 $df.col(<column_name>).arr.sort(
   options?: {
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,
+    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof unknown, (a: unknown, b: unknown) => number>> | null,
     descending?: boolean | boolean[] = false,
     nullsLast?: boolean = true
   }
@@ -1333,7 +1333,7 @@ Returns each list with unique elements only.
 ```typescript
 $df.col(<column_name>).arr.unique(
   options: {
-    keySelector?: (val: any) => any,
+    keySelector?: (val: unknown) => string,
     strict?: boolean = false
   } = {}
 )
@@ -3886,7 +3886,7 @@ Determines if floating-point values are approximately equal within tolerances.
 ### Signature
 ```typescript
 $df.col(<column_name>).isClose(
-  other: any,
+  other: unknown,
   options: {
     absTol?: number = 1e-8,
     nansEqual?: boolean = false,
@@ -4337,7 +4337,7 @@ Window: Shifts values down by offset, filling missing slots with default value.
 $df.col(<column_name>).lag(
   offset: number = 1,
   options: {
-    fillValue?: any = null
+    fillValue?: unknown = null
   } = {}
 )
 ```
@@ -4453,7 +4453,7 @@ Window: Shifts values up by offset, filling missing slots with default value.
 $df.col(<column_name>).lead(
   offset: number = 1,
   options: {
-    fillValue?: any = null
+    fillValue?: unknown = null
   } = {}
 )
 ```
@@ -5209,7 +5209,7 @@ Aggregation: Computes number of unique elements.
 ```typescript
 $df.col(<column_name>).nUnique(
   options: {
-    keySelector?: (val: any) => any,
+    keySelector?: (val: unknown) => string,
     strict?: boolean = false
   } = {}
 )
@@ -5592,7 +5592,7 @@ $df.col(<column_name>).rolling(
   optionsOrWindowSize: {
     windowSize: number
   },
-  exprOrFn: IExpr | ((vals: any[]) => any)
+  exprOrFn: IExpr | ((vals: unknown[]) => any)
 )
 ```
 
@@ -6056,7 +6056,7 @@ Supports windowing and partition grouping via `.over(...)`.
 $df.col(<column_name>).shift(
   n: number = 1,
   options: {
-    fillValue?: any = null
+    fillValue?: unknown = null
   } = {}
 )
 ```
@@ -7379,7 +7379,7 @@ $df.col(<column_name>).str.join(
     prefix?: string = "",
     suffix?: string = "",
     truncationMarker?: string = "...",
-    valueFormatter?: (val: any, index: number) => string
+    valueFormatter?: (val: unknown, index: number) => string
   } = {}
 )
 ```
@@ -11701,7 +11701,7 @@ Pivots columns from long format to a wide datagrid structure.
 ```typescript
 df.pivot<U extends RowRecord = RowRecord>(
   config: {
-    agg?: (values: unknown[]) => any | string,
+    agg?: (values: unknown[]) => unknown | string,
     columns: keyof T,
     index: keyof T | keyof T[],
     values: keyof T
@@ -12497,17 +12497,17 @@ df.writeCsv(
       bigintStrategy?: "string" | "number" = "string",
       formatDate?: (v: Date) => string,
       handleCircular?: boolean = false,
-      onBigInt?: (v: bigint) => any,
-      onCircular?: (this: any, k: string, v: any) => any,
-      onCustom?: (this: any, k: string, v: any) => any,
-      onDate?: (v: Date) => any,
-      onError?: (v: Error) => any,
-      onMap?: (v: Map<any, any>) => any,
-      onRegExp?: (v: RegExp) => any,
-      onSet?: (v: Set<any>) => any,
-      onTypedArray?: (v: any) => any,
-      onURLSearchParams?: (v: URLSearchParams) => any,
-      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,
+      onBigInt?: (v: bigint) => unknown,
+      onCircular?: (this: unknown, k: string, v: unknown) => unknown,
+      onCustom?: (this: unknown, k: string, v: unknown) => unknown,
+      onDate?: (v: Date) => unknown,
+      onError?: (v: Error) => unknown,
+      onMap?: (v: Map<unknown, unknown>) => unknown,
+      onRegExp?: (v: RegExp) => unknown,
+      onSet?: (v: Set<unknown>) => unknown,
+      onTypedArray?: (v: unknown) => unknown,
+      onURLSearchParams?: (v: URLSearchParams) => unknown,
+      replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null,
       voidBigIntReplacement?: boolean = false,
       voidDateReplacement?: boolean = false,
       voidMapReplacement?: boolean = false,
@@ -12559,17 +12559,17 @@ df.writeJson(
       bigintStrategy?: "string" | "number" = "string",
       formatDate?: (v: Date) => string,
       handleCircular?: boolean = false,
-      onBigInt?: (v: bigint) => any,
-      onCircular?: (this: any, k: string, v: any) => any,
-      onCustom?: (this: any, k: string, v: any) => any,
-      onDate?: (v: Date) => any,
-      onError?: (v: Error) => any,
-      onMap?: (v: Map<any, any>) => any,
-      onRegExp?: (v: RegExp) => any,
-      onSet?: (v: Set<any>) => any,
-      onTypedArray?: (v: any) => any,
-      onURLSearchParams?: (v: URLSearchParams) => any,
-      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,
+      onBigInt?: (v: bigint) => unknown,
+      onCircular?: (this: unknown, k: string, v: unknown) => unknown,
+      onCustom?: (this: unknown, k: string, v: unknown) => unknown,
+      onDate?: (v: Date) => unknown,
+      onError?: (v: Error) => unknown,
+      onMap?: (v: Map<unknown, unknown>) => unknown,
+      onRegExp?: (v: RegExp) => unknown,
+      onSet?: (v: Set<unknown>) => unknown,
+      onTypedArray?: (v: unknown) => unknown,
+      onURLSearchParams?: (v: URLSearchParams) => unknown,
+      replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null,
       voidBigIntReplacement?: boolean = false,
       voidDateReplacement?: boolean = false,
       voidMapReplacement?: boolean = false,
@@ -13675,7 +13675,7 @@ export interface ColumnExpr<T> extends
 ```typescript
 export interface StructExprNamespace {
     /** Dynamic struct field accessor returning a `ColumnExpr` for the given property key. */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 ```
 
@@ -13699,9 +13699,39 @@ export interface BetweenOptions {
 }
 ```
 
+### BinaryMeta
+```typescript
+export interface BinaryMeta {
+    /** Left operand of the binary expression. */
+    _left: unknown;
+    /** Right operand of the binary expression. */
+    _right: unknown;
+}
+```
+
 ### BooleanArg
 ```typescript
 export type BooleanArg = ColumnKeyArg<boolean> | IExpr | null | undefined;
+```
+
+### ColumnExprInternal
+```typescript
+export interface ColumnExprInternal {
+    /** Binary operation metadata attached to `_ops` functions. */
+    _binaryMeta?: BinaryMeta;
+    /** Target column name for single-column expressions. */
+    _colName?: string;
+    /** Target column names for multi-column selectors. */
+    _colNames?: string[];
+    /** Evaluation method on expression-like objects. */
+    _evaluate?: unknown;
+    /** Operation pipeline array. */
+    _ops?: unknown[];
+    /** Regex/glob patterns for multi-column selectors. */
+    _patterns?: unknown[];
+    /** Explicit target DataType override. */
+    _targetType?: unknown;
+}
 ```
 
 ### ComparisonArg
@@ -13916,7 +13946,7 @@ export interface ShiftOptions {
      * Fallback fill value for empty slots introduced by shift/lag/lead.
      * @default null
      */
-    fillValue?: any;
+    fillValue?: unknown;
 }
 ```
 
@@ -14668,7 +14698,7 @@ export type WhenArg = ComparisonArg | RowRecord | unknown[];
 
 ### AggFn
 ```typescript
-export type AggFn<V, R = any> = (values: V[]) => R;
+export type AggFn<V, R = unknown> = (values: V[]) => R;
 ```
 
 ### AnyTypedArray
@@ -14750,7 +14780,7 @@ export type ClosedBoundary = "both" | "left" | "right" | "none";
 
 ### ColumnData
 ```typescript
-export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
+export type ColumnData<T = unknown> = ArrayLike<T> & Iterable<T>;
 ```
 
 ### ColumnDict
@@ -14775,7 +14805,7 @@ export type ColumnOrExprArg<K = string> = K | IExpr;
 
 ### ColumnSelector
 ```typescript
-export type ColumnSelector<T = any> =
+export type ColumnSelector<T = unknown> =
     | ColumnKeyArg<keyof T | RegexPatternArg>
     | ColumnKeyArg<DataType | Function>;
 ```
@@ -14787,7 +14817,7 @@ export type ConcatHow = "vertical" | "horizontal" | "diagonal";
 
 ### ConcatItem
 ```typescript
-export type ConcatItem = DataFrame<any> | DataFrameDataArg;
+export type ConcatItem = DataFrame<RowRecord> | DataFrameDataArg;
 ```
 
 ### ConcatItemsArg
@@ -15099,13 +15129,13 @@ export interface HorizontalConcatOptions {
 ```typescript
 export interface IExpr {
     /** Aggregation reducer function registered on the expression, or `null`. */
-    _aggFn?: AggFn<any> | null;
+    _aggFn?: AggFn<unknown> | null;
     /** Parent base expression for struct field extraction or unnesting. */
     _baseExpr?: IExpr;
     /** Left and right operand metadata for binary expressions. */
-    _binaryMeta?: { _left: any; _right: any };
+    _binaryMeta?: { _left: unknown; _right: unknown };
     /** Branch operands collected by `$df.when().then().otherwise()` chains. */
-    _branchOperands?: any[];
+    _branchOperands?: unknown[];
     /** Target `RegisteredDataType` registered via `.cast()`. */
     _castType?: RegisteredDataType;
     /** Source column name or expression selector marker. */
@@ -15115,11 +15145,11 @@ export interface IExpr {
     /** Evaluates the full expression pipeline against `columns`. */
     _evaluate(columns: ColumnDict, height: number): ColumnData;
     /** Evaluates post-aggregation or post-partition operations starting after `opsIndex`. */
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: unknown[], columns: ColumnDict): ColumnData;
     /** Evaluates pre-aggregation or pre-partition operations up to `opsIndex`. */
     _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
     /** Evaluates a row-wise window operation over a partition slice. */
-    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
+    _evaluateWindow?(groupPreValues: unknown[], partitionIndices: number[], currentIndex: number): unknown;
     /** Struct field name targeted by `.struct.field()`. */
     _fieldName?: string;
     /** Pipeline index marking the boundary of an `.agg()` reduction. */
@@ -15133,7 +15163,7 @@ export interface IExpr {
     /** Flag indicating whether the expression requires window-function evaluation. */
     _isWindow?: boolean;
     /** Raw literal value when `_isLiteral` is `true`. */
-    _literalValue?: any;
+    _literalValue?: unknown;
     /** Ordered pipeline of vectorized transformation functions. */
     _ops: OpFn[];
     /** Explicit output alias name assigned via `.alias()`. */
@@ -15143,9 +15173,9 @@ export interface IExpr {
     /** Pipeline index marking the boundary of an `.over()` window partition. */
     _partitionOpsIndex?: number;
     /** Resolves an operand into an evaluated column array or scalar value. */
-    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
+    _resolve(val: unknown, columns: ColumnDict, height: number): ColumnData | unknown;
     /** Window operation metadata descriptor when `_isWindow` is `true`. */
-    _windowOp?: { type: string;[key: string]: any } | null;
+    _windowOp?: { type: string;[key: string]: unknown } | null;
 }
 ```
 
@@ -15425,11 +15455,11 @@ export interface SkewOptions {
 
 ### SortArrayOptions
 ```typescript
-export interface SortArrayOptions<T = any> {
+export interface SortArrayOptions<T = unknown> {
     /**
      * Optional comparator function or dictionary mapping column names to custom comparator functions.
      */
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
+    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof T, (a: unknown, b: unknown) => number>> | null;
     /**
      * Sort order boolean or array of booleans per key.
      * @default false
@@ -15601,8 +15631,8 @@ export type ArrayItemType =
     | "null"
     | "undefined"
     | "nullish"
-    | (new (...args: any[]) => any)
-    | ((v: unknown) => any);
+    | (new (...args: unknown[]) => unknown)
+    | ((v: unknown) => unknown);
 ```
 
 ### BigIntRange
@@ -15624,7 +15654,7 @@ export type BigIntRangeType = keyof typeof BIGINT_RANGES;
 
 ### BinarySearchOptions
 ```typescript
-export interface BinarySearchOptions<T = any> {
+export interface BinarySearchOptions<T = unknown> {
     /**
      * Optional accessor function `(index, item) => number` for indirect searching.
      */
@@ -15685,11 +15715,11 @@ export interface CumulativeStepContext {
     /** The relative iteration counter of the stepping process (starts at 1). */
     index: number;
     /** The original value at the current index in the target array. */
-    originalValue: any;
+    originalValue: unknown;
     /** The accumulated value returned by the step function from the previous stepped index. */
-    prev: any;
+    prev: unknown;
     /** The entire target array being populated/modified. */
-    targetArray: any;
+    targetArray: unknown;
 }
 ```
 
@@ -15752,11 +15782,11 @@ export interface FillSeqBaseOptions {
     /**
      * Type coercion helper applied to each generated value before writing.
      */
-    coerce?: (v: any) => any;
+    coerce?: (v: unknown) => unknown;
     /**
      * Conditional predicate determining if a value should be written at a given index.
      */
-    condition?: (v: any, index: number, array: any[]) => boolean;
+    condition?: (v: unknown, index: number, array: unknown[]) => boolean;
     /**
      * Exclusive boundary index at which iteration and writing stops.
      */
@@ -15780,11 +15810,11 @@ export interface FillSeqOptions extends FillSeqBaseOptions {
     /**
      * Type coercion helper applied to each generated value before writing.
      */
-    coerce?: (v: any) => any;
+    coerce?: (v: unknown) => unknown;
     /**
      * Conditional predicate determining if a value should be written at a given index.
      */
-    condition?: (v: any, index: number, array: any[]) => boolean;
+    condition?: (v: unknown, index: number, array: unknown[]) => boolean;
     /**
      * Exclusive boundary index at which iteration and writing stops.
      */
@@ -15808,7 +15838,7 @@ export interface FillSeqOptions extends FillSeqBaseOptions {
      * Step increment value or callback function.
      * @default 1
      */
-    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);
+    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => unknown);
 }
 ```
 
@@ -15897,11 +15927,11 @@ export interface IndependentStepContext {
     /** The relative iteration counter of the generation process (starts at 0). */
     index: number;
     /** The static starting value passed to the sequence generator. */
-    initialValue: any;
+    initialValue: unknown;
     /** The original value at the current index in the target array. */
-    originalValue: any;
+    originalValue: unknown;
     /** The entire target array being populated/modified. */
-    targetArray: any;
+    targetArray: unknown;
 }
 ```
 
@@ -15957,7 +15987,7 @@ export interface IsArrayOfTypeOptionsParams {
     /**
      * Optional custom coercion function applied to each element in `toArrayOfType()`.
      */
-    coerce?: (v: unknown) => any;
+    coerce?: (v: unknown) => unknown;
     /**
      * Quantifier mode: `"every"` requires all elements to match; `"some"` requires at least one element to match.
      * @default "every"
@@ -16023,7 +16053,7 @@ export interface JoinArrayOptions {
     /**
      * Callback function used to format each non-null element to a string.
      */
-    valueFormatter?: (val: any, index: number) => string;
+    valueFormatter?: (val: unknown, index: number) => string;
 }
 ```
 
@@ -16106,6 +16136,16 @@ export interface NDJSONParseOptions {
      * @default 0
      */
     skipLines?: number;
+}
+```
+
+### NodeBufferConstructor
+```typescript
+export interface NodeBufferConstructor {
+    /**
+     * Allocates a new `Buffer` containing the given string encoded with `enc`.
+     */
+    from(s: string, enc: string): Uint8Array & { toString(enc: string): string };
 }
 ```
 
@@ -16245,27 +16285,27 @@ export interface SafeJsonReplacerOptions {
      */
     handleCircular?: boolean;
     /** Custom serialization override for `BigInt` values. */
-    onBigInt?: (v: bigint) => any;
+    onBigInt?: (v: bigint) => unknown;
     /** Custom callback invoked when a circular reference is encountered. */
-    onCircular?: (this: any, k: string, v: any) => any;
+    onCircular?: (this: unknown, k: string, v: unknown) => unknown;
     /** Catch-all serialization override for custom types, executed after native type checks. */
-    onCustom?: (this: any, k: string, v: any) => any;
+    onCustom?: (this: unknown, k: string, v: unknown) => unknown;
     /** Custom serialization override for `Date` objects (takes precedence over `formatDate`). */
-    onDate?: (v: Date) => any;
+    onDate?: (v: Date) => unknown;
     /** Custom serialization override for `Error` objects. */
-    onError?: (v: Error) => any;
+    onError?: (v: Error) => unknown;
     /** Custom serialization override for `Map` objects. */
-    onMap?: (v: Map<any, any>) => any;
+    onMap?: (v: Map<unknown, unknown>) => unknown;
     /** Custom serialization override for `RegExp` objects. */
-    onRegExp?: (v: RegExp) => any;
+    onRegExp?: (v: RegExp) => unknown;
     /** Custom serialization override for `Set` objects. */
-    onSet?: (v: Set<any>) => any;
+    onSet?: (v: Set<unknown>) => unknown;
     /** Custom serialization override for `TypedArray` values. */
-    onTypedArray?: (v: any) => any;
+    onTypedArray?: (v: unknown) => unknown;
     /** Custom serialization override for `URLSearchParams` objects. */
-    onURLSearchParams?: (v: URLSearchParams) => any;
+    onURLSearchParams?: (v: URLSearchParams) => unknown;
     /** Custom `JSON.stringify` replacer function or property whitelist array applied first. */
-    replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null;
+    replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null;
     /**
      * If `true`, disables default safe serialization for `BigInt` values.
      * @default false
@@ -16448,7 +16488,7 @@ export interface UniqueArrayStatsOptions {
     /**
      * Custom function to extract a unique comparison key from each element.
      */
-    keySelector?: (val: any) => any;
+    keySelector?: (val: unknown) => string;
     /**
      * If `true`, uses canonical serialization to group nested structures (Arrays, Sets, Maps, Dates) by value instead of reference.
      * @default false

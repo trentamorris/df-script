@@ -37,10 +37,40 @@ export interface BetweenOptions {
 }
 
 /**
+ * Metadata attached to binary expression operations for type inference.
+ */
+export interface BinaryMeta {
+    /** Left operand of the binary expression. */
+    _left: unknown;
+    /** Right operand of the binary expression. */
+    _right: unknown;
+}
+
+/**
  * Operand for boolean logical operations (and, or, xor).
  * Accepts a boolean literal, boolean array, another column expression, or null.
  */
 export type BooleanArg = ColumnKeyArg<boolean> | IExpr | null | undefined;
+
+/**
+ * Internal structural shape for inspecting column expression metadata.
+ */
+export interface ColumnExprInternal {
+    /** Binary operation metadata attached to `_ops` functions. */
+    _binaryMeta?: BinaryMeta;
+    /** Target column name for single-column expressions. */
+    _colName?: string;
+    /** Target column names for multi-column selectors. */
+    _colNames?: string[];
+    /** Evaluation method on expression-like objects. */
+    _evaluate?: unknown;
+    /** Operation pipeline array. */
+    _ops?: unknown[];
+    /** Regex/glob patterns for multi-column selectors. */
+    _patterns?: unknown[];
+    /** Explicit target DataType override. */
+    _targetType?: unknown;
+}
 
 /**
  * Operand for equality and comparison expressions (eq, ne, eqMissing, neMissing).
@@ -259,7 +289,7 @@ export interface ShiftOptions {
      * Fallback fill value for empty slots introduced by shift/lag/lead.
      * @default null
      */
-    fillValue?: any;
+    fillValue?: unknown;
 }
 
 /**

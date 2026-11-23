@@ -21,8 +21,8 @@
         "signature": "$df.col(<column_name>).arr.agg(expr: IExpr)",
         "signatureDetailed": "$df.col(<column_name>).arr.agg(expr: IExpr)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 99,
-        "lineEnd": 101,
+        "lineStart": 101,
+        "lineEnd": 103,
         "typeTree": {
           "expr": {
             "type": "IExpr",
@@ -45,8 +45,8 @@
         "signature": "$df.col(<column_name>).arr.all()",
         "signatureDetailed": "$df.col(<column_name>).arr.all()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 117,
-        "lineEnd": 119
+        "lineStart": 119,
+        "lineEnd": 121
       },
       "any": {
         "desc": "Returns true if any item in nested list cells is truthy.",
@@ -62,8 +62,8 @@
         "signature": "$df.col(<column_name>).arr.any()",
         "signatureDetailed": "$df.col(<column_name>).arr.any()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 135,
-        "lineEnd": 137
+        "lineStart": 137,
+        "lineEnd": 139
       },
       "argMax": {
         "desc": "Finds the index of the maximum value in each array.",
@@ -79,8 +79,8 @@
         "signature": "$df.col(<column_name>).arr.argMax()",
         "signatureDetailed": "$df.col(<column_name>).arr.argMax()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 153,
-        "lineEnd": 155
+        "lineStart": 155,
+        "lineEnd": 157
       },
       "argMin": {
         "desc": "Finds the index of the minimum value in each array.",
@@ -96,8 +96,8 @@
         "signature": "$df.col(<column_name>).arr.argMin()",
         "signatureDetailed": "$df.col(<column_name>).arr.argMin()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 171,
-        "lineEnd": 173
+        "lineStart": 173,
+        "lineEnd": 175
       },
       "contains": {
         "desc": "Checks if nested lists contain item.",
@@ -119,8 +119,8 @@
         "signature": "$df.col(<column_name>).arr.contains(item: ScalarArg)",
         "signatureDetailed": "$df.col(<column_name>).arr.contains(item: IExpr | ValidScalarTypes)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 190,
-        "lineEnd": 192,
+        "lineStart": 192,
+        "lineEnd": 194,
         "typeTree": {
           "item": {
             "type": "ScalarArg",
@@ -150,8 +150,8 @@
         "signature": "$df.col(<column_name>).arr.containsAll(items: ArrayArg)",
         "signatureDetailed": "$df.col(<column_name>).arr.containsAll(items: IExpr | ValidScalarTypes[] | AnyTypedArray)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 209,
-        "lineEnd": 214,
+        "lineStart": 211,
+        "lineEnd": 216,
         "typeTree": {
           "items": {
             "type": "ArrayArg",
@@ -181,8 +181,8 @@
         "signature": "$df.col(<column_name>).arr.containsAny(items: ArrayArg)",
         "signatureDetailed": "$df.col(<column_name>).arr.containsAny(items: IExpr | ValidScalarTypes[] | AnyTypedArray)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 231,
-        "lineEnd": 236,
+        "lineStart": 233,
+        "lineEnd": 238,
         "typeTree": {
           "items": {
             "type": "ArrayArg",
@@ -214,10 +214,10 @@
         "propertyAccess": "countMatches",
         "callExpression": ".arr.countMatches()",
         "signature": "$df.col(<column_name>).arr.countMatches(\n  item: ScalarArg,\n  options: UniqueArrayStatsOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).arr.countMatches(\n  item: IExpr | ValidScalarTypes,\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).arr.countMatches(\n  item: IExpr | ValidScalarTypes,\n  options: {\n    keySelector?: (val: unknown) => string,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 254,
-        "lineEnd": 256,
+        "lineStart": 256,
+        "lineEnd": 258,
         "typeTree": {
           "item": {
             "type": "ScalarArg",
@@ -232,7 +232,7 @@
             "desc": "Statistics and matching options.",
             "properties": {
               "keySelector": {
-                "type": "(val: any) => any",
+                "type": "(val: unknown) => string",
                 "optional": true,
                 "desc": "Custom function to extract a unique comparison key from each element."
               },
@@ -266,8 +266,8 @@
         "signature": "$df.col(<column_name>).arr.eval(expr: IExpr)",
         "signatureDetailed": "$df.col(<column_name>).arr.eval(expr: IExpr)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 273,
-        "lineEnd": 283,
+        "lineStart": 275,
+        "lineEnd": 285,
         "typeTree": {
           "expr": {
             "type": "IExpr",
@@ -296,8 +296,8 @@
         "signature": "$df.col(<column_name>).arr.explode(\n  {\n    emptyAsNull = true,\n    keepNulls = true\n  }: ExplodeOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.explode(\n  options: {\n    emptyAsNull?: boolean = true,\n    keepNulls?: boolean = true\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 303,
-        "lineEnd": 359,
+        "lineStart": 305,
+        "lineEnd": 361,
         "typeTree": {
           "options": {
             "type": "ExplodeOptions",
@@ -341,8 +341,8 @@
         "signature": "$df.col(<column_name>).arr.filter(expr: IExpr)",
         "signatureDetailed": "$df.col(<column_name>).arr.filter(expr: IExpr)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 376,
-        "lineEnd": 378,
+        "lineStart": 378,
+        "lineEnd": 380,
         "typeTree": {
           "expr": {
             "type": "IExpr",
@@ -371,8 +371,8 @@
         "signature": "$df.col(<column_name>).arr.first(nullOnOob: boolean = true)",
         "signatureDetailed": "$df.col(<column_name>).arr.first(nullOnOob: boolean = true)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 395,
-        "lineEnd": 397,
+        "lineStart": 397,
+        "lineEnd": 399,
         "typeTree": {
           "nullOnOob": {
             "type": "boolean",
@@ -406,8 +406,8 @@
         "signature": "$df.col(<column_name>).arr.gather(\n  indices: NumericSeriesArg,\n  nullOnOob: boolean = true\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.gather(\n  indices: NumericArg | number[] | AnyTypedArray,\n  nullOnOob: boolean = true\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 415,
-        "lineEnd": 430,
+        "lineStart": 417,
+        "lineEnd": 432,
         "typeTree": {
           "indices": {
             "type": "NumericSeriesArg",
@@ -443,8 +443,8 @@
         "signature": "$df.col(<column_name>).arr.gatherEvery(options: StepSliceArrayOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).arr.gatherEvery(\n  options: {\n    maxItemsGathered?: number,\n    nullOnOob?: boolean = true,\n    offsetEnd?: number,\n    offsetStart?: number = 0,\n    step?: number = 1\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 447,
-        "lineEnd": 449,
+        "lineStart": 449,
+        "lineEnd": 451,
         "typeTree": {
           "options": {
             "type": "StepSliceArrayOptions",
@@ -509,8 +509,8 @@
         "signature": "$df.col(<column_name>).arr.get(\n  index: NumericArg,\n  nullOnOob: boolean = true\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.get(\n  index: number | bigint | IExpr | null,\n  nullOnOob: boolean = true\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 480,
-        "lineEnd": 485,
+        "lineStart": 482,
+        "lineEnd": 487,
         "typeTree": {
           "index": {
             "type": "NumericArg",
@@ -549,10 +549,10 @@
         "propertyAccess": "join",
         "callExpression": ".arr.join()",
         "signature": "$df.col(<column_name>).arr.join(\n  separator: string = \",\",\n  options: JoinArrayOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).arr.join(\n  separator: string = \",\",\n  options: {\n    ignoreNulls?: boolean = false,\n    limit?: number,\n    nullValue?: string = \"\",\n    prefix?: string = \"\",\n    suffix?: string = \"\",\n    truncationMarker?: string = \"...\",\n    valueFormatter?: (val: any, index: number) => string\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).arr.join(\n  separator: string = \",\",\n  options: {\n    ignoreNulls?: boolean = false,\n    limit?: number,\n    nullValue?: string = \"\",\n    prefix?: string = \"\",\n    suffix?: string = \"\",\n    truncationMarker?: string = \"...\",\n    valueFormatter?: (val: unknown, index: number) => string\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 516,
-        "lineEnd": 518,
+        "lineStart": 518,
+        "lineEnd": 520,
         "typeTree": {
           "separator": {
             "type": "string",
@@ -602,7 +602,7 @@
                 "default": "\"...\""
               },
               "valueFormatter": {
-                "type": "(val: any, index: number) => string",
+                "type": "(val: unknown, index: number) => string",
                 "optional": true,
                 "desc": "Callback function used to format each non-null element to a string."
               }
@@ -630,8 +630,8 @@
         "signature": "$df.col(<column_name>).arr.last(nullOnOob: boolean = true)",
         "signatureDetailed": "$df.col(<column_name>).arr.last(nullOnOob: boolean = true)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 535,
-        "lineEnd": 537,
+        "lineStart": 537,
+        "lineEnd": 539,
         "typeTree": {
           "nullOnOob": {
             "type": "boolean",
@@ -655,8 +655,8 @@
         "signature": "$df.col(<column_name>).arr.len()",
         "signatureDetailed": "$df.col(<column_name>).arr.len()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 553,
-        "lineEnd": 555
+        "lineStart": 555,
+        "lineEnd": 557
       },
       "lengths": {
         "desc": "Returns the length of each list inside the column cell.",
@@ -672,8 +672,8 @@
         "signature": "$df.col(<column_name>).arr.lengths()",
         "signatureDetailed": "$df.col(<column_name>).arr.lengths()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 571,
-        "lineEnd": 573
+        "lineStart": 573,
+        "lineEnd": 575
       },
       "max": {
         "desc": "Returns the maximum value of elements inside each list.",
@@ -689,8 +689,8 @@
         "signature": "$df.col(<column_name>).arr.max()",
         "signatureDetailed": "$df.col(<column_name>).arr.max()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 589,
-        "lineEnd": 591
+        "lineStart": 591,
+        "lineEnd": 593
       },
       "mean": {
         "desc": "Returns average of elements inside each list.",
@@ -706,8 +706,8 @@
         "signature": "$df.col(<column_name>).arr.mean()",
         "signatureDetailed": "$df.col(<column_name>).arr.mean()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 607,
-        "lineEnd": 609
+        "lineStart": 609,
+        "lineEnd": 611
       },
       "median": {
         "desc": "Returns statistical median inside each list.",
@@ -723,8 +723,8 @@
         "signature": "$df.col(<column_name>).arr.median()",
         "signatureDetailed": "$df.col(<column_name>).arr.median()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 625,
-        "lineEnd": 627
+        "lineStart": 627,
+        "lineEnd": 629
       },
       "min": {
         "desc": "Returns minimum of elements inside each list.",
@@ -740,8 +740,8 @@
         "signature": "$df.col(<column_name>).arr.min()",
         "signatureDetailed": "$df.col(<column_name>).arr.min()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 643,
-        "lineEnd": 645
+        "lineStart": 645,
+        "lineEnd": 647
       },
       "mode": {
         "desc": "Returns the mode value inside each list.",
@@ -757,8 +757,8 @@
         "signature": "$df.col(<column_name>).arr.mode()",
         "signatureDetailed": "$df.col(<column_name>).arr.mode()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 661,
-        "lineEnd": 663
+        "lineStart": 663,
+        "lineEnd": 665
       },
       "nUnique": {
         "desc": "Returns the unique count of elements inside each list.",
@@ -778,10 +778,10 @@
         "propertyAccess": "nUnique",
         "callExpression": ".arr.nUnique()",
         "signature": "$df.col(<column_name>).arr.nUnique(options: UniqueArrayStatsOptions = {})",
-        "signatureDetailed": "$df.col(<column_name>).arr.nUnique(\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).arr.nUnique(\n  options: {\n    keySelector?: (val: unknown) => string,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 680,
-        "lineEnd": 682,
+        "lineStart": 682,
+        "lineEnd": 684,
         "typeTree": {
           "options": {
             "type": "UniqueArrayStatsOptions",
@@ -790,7 +790,7 @@
             "desc": "Formatting/statistics parameters.",
             "properties": {
               "keySelector": {
-                "type": "(val: any) => any",
+                "type": "(val: unknown) => string",
                 "optional": true,
                 "desc": "Custom function to extract a unique comparison key from each element."
               },
@@ -818,8 +818,8 @@
         "signature": "$df.col(<column_name>).arr.reverse()",
         "signatureDetailed": "$df.col(<column_name>).arr.reverse()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 698,
-        "lineEnd": 700
+        "lineStart": 700,
+        "lineEnd": 702
       },
       "shift": {
         "desc": "Shifts elements of list columns by N offsets.",
@@ -839,10 +839,10 @@
         "propertyAccess": "shift",
         "callExpression": ".arr.shift()",
         "signature": "$df.col(<column_name>).arr.shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).arr.shift(\n  n: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).arr.shift(\n  n: number = 1,\n  options: {\n    fillValue?: unknown = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 717,
-        "lineEnd": 719,
+        "lineStart": 719,
+        "lineEnd": 721,
         "typeTree": {
           "n": {
             "type": "number",
@@ -857,7 +857,7 @@
             "desc": "Configuration options for shifting column or array elements (`shift`, `lag`, `lead`).",
             "properties": {
               "fillValue": {
-                "type": "any",
+                "type": "unknown",
                 "optional": true,
                 "desc": "Fallback fill value for empty slots introduced by shift/lag/lead.",
                 "default": "null"
@@ -891,8 +891,8 @@
         "signature": "$df.col(<column_name>).arr.slice(\n  start?: number,\n  end?: number\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.slice(\n  start?: number,\n  end?: number\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 750,
-        "lineEnd": 752,
+        "lineStart": 752,
+        "lineEnd": 754,
         "typeTree": {
           "start": {
             "type": "number",
@@ -924,10 +924,10 @@
         "propertyAccess": "sort",
         "callExpression": ".arr.sort()",
         "signature": "$df.col(<column_name>).arr.sort(options?: SortArrayOptions)",
-        "signatureDetailed": "$df.col(<column_name>).arr.sort(\n  options?: {\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null,\n    descending?: boolean | boolean[] = false,\n    nullsLast?: boolean = true\n  }\n)",
+        "signatureDetailed": "$df.col(<column_name>).arr.sort(\n  options?: {\n    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof unknown, (a: unknown, b: unknown) => number>> | null,\n    descending?: boolean | boolean[] = false,\n    nullsLast?: boolean = true\n  }\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 769,
-        "lineEnd": 771,
+        "lineStart": 771,
+        "lineEnd": 773,
         "typeTree": {
           "options": {
             "type": "SortArrayOptions",
@@ -935,7 +935,7 @@
             "desc": "Sort customization parameters (e.g. descending flag).",
             "properties": {
               "customComp": {
-                "type": "((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null",
+                "type": "((a: unknown, b: unknown) => number) | Partial<Record<keyof unknown, (a: unknown, b: unknown) => number>> | null",
                 "optional": true,
                 "desc": "Optional comparator function or dictionary mapping column names to custom comparator functions."
               },
@@ -984,8 +984,8 @@
         "signature": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: ValidScalarTypes[]\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.splice(\n  start: number,\n  deleteCount?: number,\n  ...items: (Exclude<ValidPrimitiveTypes, symbol> | Date | AnyTypedArray)[]\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 790,
-        "lineEnd": 797,
+        "lineStart": 792,
+        "lineEnd": 799,
         "typeTree": {
           "start": {
             "type": "number",
@@ -1020,8 +1020,8 @@
         "signature": "$df.col(<column_name>).arr.std()",
         "signatureDetailed": "$df.col(<column_name>).arr.std()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 813,
-        "lineEnd": 815
+        "lineStart": 815,
+        "lineEnd": 817
       },
       "sum": {
         "desc": "Returns sum of elements inside each list.",
@@ -1037,8 +1037,8 @@
         "signature": "$df.col(<column_name>).arr.sum()",
         "signatureDetailed": "$df.col(<column_name>).arr.sum()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 831,
-        "lineEnd": 833
+        "lineStart": 833,
+        "lineEnd": 835
       },
       "toStruct": {
         "desc": "Converts list column elements to struct columns.",
@@ -1060,8 +1060,8 @@
         "signature": "$df.col(<column_name>).arr.toStruct(\n  {\n    upperBound,\n    fields\n  }: ToStructOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).arr.toStruct(\n  options: {\n    fields?: string[] | ((idx: number) => string),\n    upperBound?: number\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 850,
-        "lineEnd": 896,
+        "lineStart": 852,
+        "lineEnd": 898,
         "typeTree": {
           "options": {
             "type": "ToStructOptions",
@@ -1101,10 +1101,10 @@
         "propertyAccess": "unique",
         "callExpression": ".arr.unique()",
         "signature": "$df.col(<column_name>).arr.unique(options: UniqueArrayStatsOptions = {})",
-        "signatureDetailed": "$df.col(<column_name>).arr.unique(\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).arr.unique(\n  options: {\n    keySelector?: (val: unknown) => string,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 913,
-        "lineEnd": 915,
+        "lineStart": 915,
+        "lineEnd": 917,
         "typeTree": {
           "options": {
             "type": "UniqueArrayStatsOptions",
@@ -1113,7 +1113,7 @@
             "desc": "Custom uniqueness matching configuration.",
             "properties": {
               "keySelector": {
-                "type": "(val: any) => any",
+                "type": "(val: unknown) => string",
                 "optional": true,
                 "desc": "Custom function to extract a unique comparison key from each element."
               },
@@ -1141,8 +1141,8 @@
         "signature": "$df.col(<column_name>).arr.variance()",
         "signatureDetailed": "$df.col(<column_name>).arr.variance()",
         "filePath": "columnExpressions/mixins/arrayExpr.ts",
-        "lineStart": 931,
-        "lineEnd": 933
+        "lineStart": 933,
+        "lineEnd": 935
       }
     },
     "standardExpr": {
@@ -3140,14 +3140,14 @@
         "category": "ColumnExpression",
         "propertyAccess": "isClose",
         "callExpression": ".isClose()",
-        "signature": "$df.col(<column_name>).isClose(\n  other: any,\n  {\n    absTol = 1e-8,\n    relTol = 1e-8,\n    nansEqual = false\n  }: IsCloseOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).isClose(\n  other: any,\n  options: {\n    absTol?: number = 1e-8,\n    nansEqual?: boolean = false,\n    relTol?: number = 1e-8\n  } = {}\n)",
+        "signature": "$df.col(<column_name>).isClose(\n  other: unknown,\n  {\n    absTol = 1e-8,\n    relTol = 1e-8,\n    nansEqual = false\n  }: IsCloseOptions = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).isClose(\n  other: unknown,\n  options: {\n    absTol?: number = 1e-8,\n    nansEqual?: boolean = false,\n    relTol?: number = 1e-8\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
         "lineStart": 1574,
         "lineEnd": 1591,
         "typeTree": {
           "other": {
-            "type": "any",
+            "type": "unknown",
             "optional": false,
             "desc": "The value or expression to compare against."
           },
@@ -3449,7 +3449,7 @@
         "propertyAccess": "lag",
         "callExpression": ".lag()",
         "signature": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).lag(\n  offset: number = 1,\n  options: {\n    fillValue?: unknown = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
         "lineStart": 1835,
         "lineEnd": 1846,
@@ -3467,7 +3467,7 @@
             "desc": "Shift options configuring fallback fillValue (default null).",
             "properties": {
               "fillValue": {
-                "type": "any",
+                "type": "unknown",
                 "optional": true,
                 "desc": "Fallback fill value for empty slots introduced by shift/lag/lead.",
                 "default": "null"
@@ -3543,7 +3543,7 @@
         "propertyAccess": "lead",
         "callExpression": ".lead()",
         "signature": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: ShiftOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).lead(\n  offset: number = 1,\n  options: {\n    fillValue?: unknown = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
         "lineStart": 1903,
         "lineEnd": 1905,
@@ -3561,7 +3561,7 @@
             "desc": "Shift options configuring fallback fillValue (default null).",
             "properties": {
               "fillValue": {
-                "type": "any",
+                "type": "unknown",
                 "optional": true,
                 "desc": "Fallback fill value for empty slots introduced by shift/lag/lead.",
                 "default": "null"
@@ -4033,7 +4033,7 @@
         "propertyAccess": "nUnique",
         "callExpression": ".nUnique()",
         "signature": "$df.col(<column_name>).nUnique(options: UniqueArrayStatsOptions = {})",
-        "signatureDetailed": "$df.col(<column_name>).nUnique(\n  options: {\n    keySelector?: (val: any) => any,\n    strict?: boolean = false\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).nUnique(\n  options: {\n    keySelector?: (val: unknown) => string,\n    strict?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
         "lineStart": 2295,
         "lineEnd": 2297,
@@ -4045,7 +4045,7 @@
             "desc": "Uniqueness options.",
             "properties": {
               "keySelector": {
-                "type": "(val: any) => any",
+                "type": "(val: unknown) => string",
                 "optional": true,
                 "desc": "Custom function to extract a unique comparison key from each element."
               },
@@ -4336,8 +4336,8 @@
         "category": "ColumnExpression",
         "propertyAccess": "rolling",
         "callExpression": ".rolling()",
-        "signature": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: number | RollingOptions,\n  exprOrFn: IExpr | ((vals: any[]) => any)\n)",
-        "signatureDetailed": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: {\n    windowSize: number\n  },\n  exprOrFn: IExpr | ((vals: any[]) => any)\n)",
+        "signature": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: number | RollingOptions,\n  exprOrFn: IExpr | ((vals: unknown[]) => any)\n)",
+        "signatureDetailed": "$df.col(<column_name>).rolling(\n  optionsOrWindowSize: {\n    windowSize: number\n  },\n  exprOrFn: IExpr | ((vals: unknown[]) => any)\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
         "lineStart": 2518,
         "lineEnd": 2539,
@@ -4355,7 +4355,7 @@
             }
           },
           "exprOrFn": {
-            "type": "IExpr | ((vals: any[]) => any)",
+            "type": "IExpr | ((vals: unknown[]) => any)",
             "optional": false,
             "desc": "ColumnExpression to evaluate over each window slice, or a custom reducer function."
           }
@@ -4694,7 +4694,7 @@
         "propertyAccess": "shift",
         "callExpression": ".shift()",
         "signature": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: ShiftOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: {\n    fillValue?: any = null\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).shift(\n  n: number = 1,\n  options: {\n    fillValue?: unknown = null\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/standardExpr.ts",
         "lineStart": 2785,
         "lineEnd": 2787,
@@ -4712,7 +4712,7 @@
             "desc": "Configuration options for shifting column or array elements (`shift`, `lag`, `lead`).",
             "properties": {
               "fillValue": {
-                "type": "any",
+                "type": "unknown",
                 "optional": true,
                 "desc": "Fallback fill value for empty slots introduced by shift/lag/lead.",
                 "default": "null"
@@ -5061,8 +5061,8 @@
         "signature": "$df.col(<column_name>).str.concat(other: StringArg)",
         "signatureDetailed": "$df.col(<column_name>).str.concat(other: string | IExpr)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 94,
-        "lineEnd": 96,
+        "lineStart": 96,
+        "lineEnd": 98,
         "typeTree": {
           "other": {
             "type": "StringArg",
@@ -5092,8 +5092,8 @@
         "signature": "$df.col(<column_name>).str.contains(pattern: RegexPatternArg)",
         "signatureDetailed": "$df.col(<column_name>).str.contains(pattern: string | RegExp)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 113,
-        "lineEnd": 115,
+        "lineStart": 115,
+        "lineEnd": 117,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -5123,8 +5123,8 @@
         "signature": "$df.col(<column_name>).str.containsAny(patterns: RegexPatternSeriesArg)",
         "signatureDetailed": "$df.col(<column_name>).str.containsAny(patterns: (string | RegExp)[])",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 132,
-        "lineEnd": 139,
+        "lineStart": 134,
+        "lineEnd": 141,
         "typeTree": {
           "patterns": {
             "type": "RegexPatternSeriesArg",
@@ -5154,8 +5154,8 @@
         "signature": "$df.col(<column_name>).str.countMatches(\n  pattern: RegexPatternArg,\n  options: CountMatchesOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).str.countMatches(\n  pattern: string | RegExp,\n  options: {\n    literal?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 157,
-        "lineEnd": 168,
+        "lineStart": 159,
+        "lineEnd": 170,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -5202,8 +5202,8 @@
         "signature": "$df.col(<column_name>).str.decode(options: StringDecodeOptions)",
         "signatureDetailed": "$df.col(<column_name>).str.decode(\n  options: {\n    encoding: \"hex\" | \"base64\",\n    strict?: boolean = true\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 188,
-        "lineEnd": 190,
+        "lineStart": 190,
+        "lineEnd": 192,
         "typeTree": {
           "options": {
             "type": "StringDecodeOptions",
@@ -5240,8 +5240,8 @@
         "signature": "$df.col(<column_name>).str.decodeUriComponent()",
         "signatureDetailed": "$df.col(<column_name>).str.decodeUriComponent()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 206,
-        "lineEnd": 210
+        "lineStart": 208,
+        "lineEnd": 212
       },
       "encode": {
         "desc": "Encodes string column values into hex or base64.",
@@ -5266,8 +5266,8 @@
         "signature": "$df.col(<column_name>).str.encode(options: StringEncodeOptions)",
         "signatureDetailed": "$df.col(<column_name>).str.encode(\n  options: {\n    encoding: \"hex\" | \"base64\"\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 230,
-        "lineEnd": 232,
+        "lineStart": 232,
+        "lineEnd": 234,
         "typeTree": {
           "options": {
             "type": "StringEncodeOptions",
@@ -5298,8 +5298,8 @@
         "signature": "$df.col(<column_name>).str.encodeUriComponent()",
         "signatureDetailed": "$df.col(<column_name>).str.encodeUriComponent()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 248,
-        "lineEnd": 252
+        "lineStart": 250,
+        "lineEnd": 254
       },
       "endsWith": {
         "desc": "Checks if string ends with a suffix.",
@@ -5321,8 +5321,8 @@
         "signature": "$df.col(<column_name>).str.endsWith(suffix: string)",
         "signatureDetailed": "$df.col(<column_name>).str.endsWith(suffix: string)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 269,
-        "lineEnd": 271,
+        "lineStart": 271,
+        "lineEnd": 273,
         "typeTree": {
           "suffix": {
             "type": "string",
@@ -5345,8 +5345,8 @@
         "signature": "$df.col(<column_name>).str.escapeRegex(options: EscapeRegexOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).str.escapeRegex(\n  options: {\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\"\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 288,
-        "lineEnd": 290,
+        "lineStart": 290,
+        "lineEnd": 292,
         "typeTree": {
           "options": {
             "type": "EscapeRegexOptions",
@@ -5379,8 +5379,8 @@
         "signature": "$df.col(<column_name>).str.explode()",
         "signatureDetailed": "$df.col(<column_name>).str.explode()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 307,
-        "lineEnd": 309
+        "lineStart": 309,
+        "lineEnd": 311
       },
       "extract": {
         "desc": "Extracts a captured group from the first regex match.",
@@ -5406,8 +5406,8 @@
         "signature": "$df.col(<column_name>).str.extract(\n  pattern: RegexPatternArg,\n  options?: ExtractRegexEngineOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.extract(\n  pattern: string | RegExp,\n  options?: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 1\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 327,
-        "lineEnd": 329,
+        "lineStart": 329,
+        "lineEnd": 331,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -5467,8 +5467,8 @@
         "signature": "$df.col(<column_name>).str.extractAll(\n  pattern: RegexPatternArg,\n  options?: ExtractRegexEngineOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.extractAll(\n  pattern: string | RegExp,\n  options?: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 1\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 348,
-        "lineEnd": 350,
+        "lineStart": 350,
+        "lineEnd": 352,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -5524,8 +5524,8 @@
         "signature": "$df.col(<column_name>).str.extractGroups(\n  pattern: RegexPatternArg,\n  options: ExtractRegexEngineOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).str.extractGroups(\n  pattern: string | RegExp,\n  options: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 1\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 367,
-        "lineEnd": 369,
+        "lineStart": 369,
+        "lineEnd": 371,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -5586,8 +5586,8 @@
         "signature": "$df.col(<column_name>).str.extractMany(\n  patterns: RegexPatternSeriesArg,\n  options: ExtractManyOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).str.extractMany(\n  patterns: (string | RegExp)[],\n  options: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 0,\n    leftmost?: boolean = false,\n    overlapping?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 388,
-        "lineEnd": 390,
+        "lineStart": 390,
+        "lineEnd": 392,
         "typeTree": {
           "patterns": {
             "type": "RegexPatternSeriesArg",
@@ -5660,8 +5660,8 @@
         "signature": "$df.col(<column_name>).str.find(\n  value: RegexPatternArg,\n  options: FindOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).str.find(\n  value: string | RegExp,\n  options: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 0,\n    literal?: boolean = false,\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\"\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 410,
-        "lineEnd": 412,
+        "lineStart": 412,
+        "lineEnd": 414,
         "typeTree": {
           "value": {
             "type": "RegexPatternArg",
@@ -5735,8 +5735,8 @@
         "signature": "$df.col(<column_name>).str.findMany(\n  patterns: RegexPatternSeriesArg,\n  options: FindManyOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).str.findMany(\n  patterns: (string | RegExp)[],\n  options: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 0,\n    leftmost?: boolean = false,\n    literal?: boolean = false,\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\",\n    overlapping?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 431,
-        "lineEnd": 433,
+        "lineStart": 433,
+        "lineEnd": 435,
         "typeTree": {
           "patterns": {
             "type": "RegexPatternSeriesArg",
@@ -5818,8 +5818,8 @@
         "signature": "$df.col(<column_name>).str.head(n: number = 1)",
         "signatureDetailed": "$df.col(<column_name>).str.head(n: number = 1)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 451,
-        "lineEnd": 453,
+        "lineStart": 453,
+        "lineEnd": 455,
         "typeTree": {
           "n": {
             "type": "number",
@@ -5851,10 +5851,10 @@
         "propertyAccess": "join",
         "callExpression": ".str.join()",
         "signature": "$df.col(<column_name>).str.join(\n  delimiter: string = \"\",\n  options: JoinArrayOptions = {}\n)",
-        "signatureDetailed": "$df.col(<column_name>).str.join(\n  delimiter: string = \"\",\n  options: {\n    ignoreNulls?: boolean = false,\n    limit?: number,\n    nullValue?: string = \"\",\n    prefix?: string = \"\",\n    suffix?: string = \"\",\n    truncationMarker?: string = \"...\",\n    valueFormatter?: (val: any, index: number) => string\n  } = {}\n)",
+        "signatureDetailed": "$df.col(<column_name>).str.join(\n  delimiter: string = \"\",\n  options: {\n    ignoreNulls?: boolean = false,\n    limit?: number,\n    nullValue?: string = \"\",\n    prefix?: string = \"\",\n    suffix?: string = \"\",\n    truncationMarker?: string = \"...\",\n    valueFormatter?: (val: unknown, index: number) => string\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 472,
-        "lineEnd": 476,
+        "lineStart": 474,
+        "lineEnd": 478,
         "typeTree": {
           "delimiter": {
             "type": "string",
@@ -5904,7 +5904,7 @@
                 "default": "\"...\""
               },
               "valueFormatter": {
-                "type": "(val: any, index: number) => string",
+                "type": "(val: unknown, index: number) => string",
                 "optional": true,
                 "desc": "Callback function used to format each non-null element to a string."
               }
@@ -5932,8 +5932,8 @@
         "signature": "$df.col(<column_name>).str.jsonDecode(options: SafeJsonParseOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).str.jsonDecode(\n  options: {\n    allowPrimitives?: boolean = false,\n    fallback?: unknown,\n    format?: \"json\" | \"ndjson\" = \"json\",\n    guard?: ((value: unknown) => value is unknown) | ((value: unknown) => boolean),\n    ndjson?: {\n      maxLines?: number,\n      skipInvalidLines?: boolean = false,\n      skipLines?: number = 0\n    },\n    onError?: (err: unknown) => void,\n    reviver?: Parameters<typeof JSON.parse>[1],\n    trimBeforeParse?: boolean = false\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 494,
-        "lineEnd": 496,
+        "lineStart": 496,
+        "lineEnd": 498,
         "typeTree": {
           "options": {
             "type": "SafeJsonParseOptions",
@@ -6028,8 +6028,8 @@
         "signature": "$df.col(<column_name>).str.jsonPathMatch(jsonPath: string)",
         "signatureDetailed": "$df.col(<column_name>).str.jsonPathMatch(jsonPath: string)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 513,
-        "lineEnd": 515,
+        "lineStart": 515,
+        "lineEnd": 517,
         "typeTree": {
           "jsonPath": {
             "type": "string",
@@ -6052,8 +6052,8 @@
         "signature": "$df.col(<column_name>).str.len()",
         "signatureDetailed": "$df.col(<column_name>).str.len()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 532,
-        "lineEnd": 534
+        "lineStart": 534,
+        "lineEnd": 536
       },
       "lenBytes": {
         "desc": "Returns string length in UTF-8 encoded bytes.",
@@ -6069,8 +6069,8 @@
         "signature": "$df.col(<column_name>).str.lenBytes()",
         "signatureDetailed": "$df.col(<column_name>).str.lenBytes()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 551,
-        "lineEnd": 553
+        "lineStart": 553,
+        "lineEnd": 555
       },
       "lenChars": {
         "desc": "Returns string length in character count.",
@@ -6086,8 +6086,8 @@
         "signature": "$df.col(<column_name>).str.lenChars()",
         "signatureDetailed": "$df.col(<column_name>).str.lenChars()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 570,
-        "lineEnd": 572
+        "lineStart": 572,
+        "lineEnd": 574
       },
       "lower": {
         "desc": "Converts strings to lowercase.",
@@ -6103,8 +6103,8 @@
         "signature": "$df.col(<column_name>).str.lower()",
         "signatureDetailed": "$df.col(<column_name>).str.lower()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 589,
-        "lineEnd": 591
+        "lineStart": 591,
+        "lineEnd": 593
       },
       "lpad": {
         "desc": "Pads start of strings to specified width.",
@@ -6130,8 +6130,8 @@
         "signature": "$df.col(<column_name>).str.lpad(\n  width: number,\n  fill: string = \" \"\n)",
         "signatureDetailed": "$df.col(<column_name>).str.lpad(\n  width: number,\n  fill: string = \" \"\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 610,
-        "lineEnd": 612,
+        "lineStart": 612,
+        "lineEnd": 614,
         "typeTree": {
           "width": {
             "type": "number",
@@ -6166,8 +6166,8 @@
         "signature": "$df.col(<column_name>).str.normalize(form: UnicodeNormalizeForm = \"NFC\")",
         "signatureDetailed": "$df.col(<column_name>).str.normalize(form: \"NFC\" | \"NFD\" | \"NFKC\" | \"NFKD\" = \"NFC\")",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 631,
-        "lineEnd": 633,
+        "lineStart": 633,
+        "lineEnd": 635,
         "typeTree": {
           "form": {
             "type": "UnicodeNormalizeForm",
@@ -6202,8 +6202,8 @@
         "signature": "$df.col(<column_name>).str.padEnd(\n  width: number,\n  fill: string = \" \"\n)",
         "signatureDetailed": "$df.col(<column_name>).str.padEnd(\n  width: number,\n  fill: string = \" \"\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 652,
-        "lineEnd": 654,
+        "lineStart": 654,
+        "lineEnd": 656,
         "typeTree": {
           "width": {
             "type": "number",
@@ -6242,8 +6242,8 @@
         "signature": "$df.col(<column_name>).str.padStart(\n  width: number,\n  fill: string = \" \"\n)",
         "signatureDetailed": "$df.col(<column_name>).str.padStart(\n  width: number,\n  fill: string = \" \"\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 673,
-        "lineEnd": 675,
+        "lineStart": 675,
+        "lineEnd": 677,
         "typeTree": {
           "width": {
             "type": "number",
@@ -6286,8 +6286,8 @@
         "signature": "$df.col(<column_name>).str.replace(\n  pattern: RegexPatternArg,\n  replacement: StringReplacementArg,\n  options?: ReplaceOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.replace(\n  pattern: string | RegExp,\n  replacement: string | StringReplacerFn,\n  options?: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    literal?: boolean = false,\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\",\n    n?: number = 1\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 694,
-        "lineEnd": 700,
+        "lineStart": 696,
+        "lineEnd": 702,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -6369,8 +6369,8 @@
         "signature": "$df.col(<column_name>).str.replaceAll(\n  pattern: RegexPatternArg,\n  replacement: StringReplacementArg,\n  options: ReplaceAllOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).str.replaceAll(\n  pattern: string | RegExp,\n  replacement: string | StringReplacerFn,\n  options: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    literal?: boolean = false,\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\"\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 720,
-        "lineEnd": 726,
+        "lineStart": 722,
+        "lineEnd": 728,
         "typeTree": {
           "pattern": {
             "type": "RegexPatternArg",
@@ -6447,8 +6447,8 @@
         "signature": "$df.col(<column_name>).str.replaceMany(\n  patterns: RegexPatternSeriesArg | Record<string, string>,\n  replacements?: StringReplacementSeriesArg,\n  options?: ReplaceManyOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.replaceMany(\n  patterns: RegexPatternSeriesArg | Record<string, string>,\n  replacements?: (string | StringReplacerFn)[],\n  options?: {\n    asciiCaseInsensitive?: boolean = false,\n    global?: boolean = false,\n    groupIndex?: number | string = 0,\n    leftmost?: boolean = false,\n    literal?: boolean = false,\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\",\n    overlapping?: boolean = false\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 747,
-        "lineEnd": 753,
+        "lineStart": 749,
+        "lineEnd": 755,
         "typeTree": {
           "patterns": {
             "type": "RegexPatternSeriesArg | Record<string, string>",
@@ -6528,8 +6528,8 @@
         "signature": "$df.col(<column_name>).str.reverse()",
         "signatureDetailed": "$df.col(<column_name>).str.reverse()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 770,
-        "lineEnd": 772
+        "lineStart": 772,
+        "lineEnd": 774
       },
       "rpad": {
         "desc": "Pads end of strings to specified width.",
@@ -6555,8 +6555,8 @@
         "signature": "$df.col(<column_name>).str.rpad(\n  width: number,\n  fill: string = \" \"\n)",
         "signatureDetailed": "$df.col(<column_name>).str.rpad(\n  width: number,\n  fill: string = \" \"\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 791,
-        "lineEnd": 793,
+        "lineStart": 793,
+        "lineEnd": 795,
         "typeTree": {
           "width": {
             "type": "number",
@@ -6595,8 +6595,8 @@
         "signature": "$df.col(<column_name>).str.slice(\n  offset: number,\n  length?: number\n)",
         "signatureDetailed": "$df.col(<column_name>).str.slice(\n  offset: number,\n  length?: number\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 812,
-        "lineEnd": 818,
+        "lineStart": 814,
+        "lineEnd": 820,
         "typeTree": {
           "offset": {
             "type": "number",
@@ -6634,8 +6634,8 @@
         "signature": "$df.col(<column_name>).str.split(\n  delimiter: string,\n  options?: SplitOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.split(\n  delimiter: string,\n  options?: {\n    asciiCaseInsensitive?: boolean = false,\n    exact?: boolean = false,\n    global?: boolean = false,\n    inclusive?: boolean = false,\n    limit?: number,\n    literal?: boolean = true,\n    mode?: \"tc39\" | \"nonAlphanumericAscii\" = \"tc39\",\n    strict?: boolean = false\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 836,
-        "lineEnd": 838,
+        "lineStart": 838,
+        "lineEnd": 840,
         "typeTree": {
           "delimiter": {
             "type": "string",
@@ -6719,8 +6719,8 @@
         "signature": "$df.col(<column_name>).str.startsWith(prefix: string)",
         "signatureDetailed": "$df.col(<column_name>).str.startsWith(prefix: string)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 856,
-        "lineEnd": 858,
+        "lineStart": 858,
+        "lineEnd": 860,
         "typeTree": {
           "prefix": {
             "type": "string",
@@ -6753,8 +6753,8 @@
         "signature": "$df.col(<column_name>).str.stripChars(\n  characters?: RegexPatternArg,\n  options?: StripCharsOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.stripChars(\n  characters?: string | RegExp,\n  options?: {\n    maxMatchesEnd?: number | null,\n    maxMatchesStart?: number | null,\n    maxScanEnd?: number | null,\n    maxScanStart?: number | null,\n    mode?: \"both\" | \"start\" | \"end\" = \"both\",\n    returnStringOnNull?: boolean = false,\n    stringOptions?: {\n      caseInsensitive?: boolean = false,\n      literal?: boolean = false\n    },\n    trimFirst?: boolean = false\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 876,
-        "lineEnd": 878,
+        "lineStart": 878,
+        "lineEnd": 880,
         "typeTree": {
           "characters": {
             "type": "RegexPatternArg",
@@ -6853,8 +6853,8 @@
         "signature": "$df.col(<column_name>).str.stripCharsEnd(\n  characters?: RegexPatternArg,\n  options?: StripCharsOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.stripCharsEnd(\n  characters?: string | RegExp,\n  options?: {\n    maxMatchesEnd?: number | null,\n    maxMatchesStart?: number | null,\n    maxScanEnd?: number | null,\n    maxScanStart?: number | null,\n    mode?: \"both\" | \"start\" | \"end\" = \"both\",\n    returnStringOnNull?: boolean = false,\n    stringOptions?: {\n      caseInsensitive?: boolean = false,\n      literal?: boolean = false\n    },\n    trimFirst?: boolean = false\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 896,
-        "lineEnd": 898,
+        "lineStart": 898,
+        "lineEnd": 900,
         "typeTree": {
           "characters": {
             "type": "RegexPatternArg",
@@ -6953,8 +6953,8 @@
         "signature": "$df.col(<column_name>).str.stripCharsStart(\n  characters?: RegexPatternArg,\n  options?: StripCharsOptions\n)",
         "signatureDetailed": "$df.col(<column_name>).str.stripCharsStart(\n  characters?: string | RegExp,\n  options?: {\n    maxMatchesEnd?: number | null,\n    maxMatchesStart?: number | null,\n    maxScanEnd?: number | null,\n    maxScanStart?: number | null,\n    mode?: \"both\" | \"start\" | \"end\" = \"both\",\n    returnStringOnNull?: boolean = false,\n    stringOptions?: {\n      caseInsensitive?: boolean = false,\n      literal?: boolean = false\n    },\n    trimFirst?: boolean = false\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 916,
-        "lineEnd": 918,
+        "lineStart": 918,
+        "lineEnd": 920,
         "typeTree": {
           "characters": {
             "type": "RegexPatternArg",
@@ -7049,8 +7049,8 @@
         "signature": "$df.col(<column_name>).str.stripPrefix(prefix: string)",
         "signatureDetailed": "$df.col(<column_name>).str.stripPrefix(prefix: string)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 936,
-        "lineEnd": 946,
+        "lineStart": 938,
+        "lineEnd": 948,
         "typeTree": {
           "prefix": {
             "type": "string",
@@ -7079,8 +7079,8 @@
         "signature": "$df.col(<column_name>).str.stripSuffix(suffix: string)",
         "signatureDetailed": "$df.col(<column_name>).str.stripSuffix(suffix: string)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 963,
-        "lineEnd": 973,
+        "lineStart": 965,
+        "lineEnd": 975,
         "typeTree": {
           "suffix": {
             "type": "string",
@@ -7112,8 +7112,8 @@
         "signature": "$df.col(<column_name>).str.strptime(options: StrptimeOptions)",
         "signatureDetailed": "$df.col(<column_name>).str.strptime(\n  options: {\n    defaultTimeZone?: string = \"UTC\",\n    format: string,\n    strict?: boolean = true\n  }\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 991,
-        "lineEnd": 993,
+        "lineStart": 993,
+        "lineEnd": 995,
         "typeTree": {
           "options": {
             "type": "StrptimeOptions",
@@ -7161,8 +7161,8 @@
         "signature": "$df.col(<column_name>).str.tail(n: number = 1)",
         "signatureDetailed": "$df.col(<column_name>).str.tail(n: number = 1)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1011,
-        "lineEnd": 1013,
+        "lineStart": 1013,
+        "lineEnd": 1015,
         "typeTree": {
           "n": {
             "type": "number",
@@ -7186,8 +7186,8 @@
         "signature": "$df.col(<column_name>).str.toCamelCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toCamelCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1030,
-        "lineEnd": 1032
+        "lineStart": 1032,
+        "lineEnd": 1034
       },
       "toDate": {
         "desc": "Parses string into Date object.",
@@ -7203,8 +7203,8 @@
         "signature": "$df.col(<column_name>).str.toDate()",
         "signatureDetailed": "$df.col(<column_name>).str.toDate()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1047,
-        "lineEnd": 1049
+        "lineStart": 1049,
+        "lineEnd": 1051
       },
       "toDatetime": {
         "desc": "Parses string into Datetime value.",
@@ -7220,8 +7220,8 @@
         "signature": "$df.col(<column_name>).str.toDatetime()",
         "signatureDetailed": "$df.col(<column_name>).str.toDatetime()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1064,
-        "lineEnd": 1066
+        "lineStart": 1066,
+        "lineEnd": 1068
       },
       "toDecimal": {
         "desc": "Converts string into numeric decimal representation.",
@@ -7247,8 +7247,8 @@
         "signature": "$df.col(<column_name>).str.toDecimal(\n  precision?: number,\n  scale?: number\n)",
         "signatureDetailed": "$df.col(<column_name>).str.toDecimal(\n  precision?: number,\n  scale?: number\n)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1085,
-        "lineEnd": 1087,
+        "lineStart": 1087,
+        "lineEnd": 1089,
         "typeTree": {
           "precision": {
             "type": "number",
@@ -7276,8 +7276,8 @@
         "signature": "$df.col(<column_name>).str.toInteger()",
         "signatureDetailed": "$df.col(<column_name>).str.toInteger()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1104,
-        "lineEnd": 1106
+        "lineStart": 1106,
+        "lineEnd": 1108
       },
       "toKebabCase": {
         "desc": "Converts string casing to kebab-case.",
@@ -7293,8 +7293,8 @@
         "signature": "$df.col(<column_name>).str.toKebabCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toKebabCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1123,
-        "lineEnd": 1125
+        "lineStart": 1125,
+        "lineEnd": 1127
       },
       "toLowerCase": {
         "desc": "Converts all string elements in the column to lowercase.",
@@ -7310,8 +7310,8 @@
         "signature": "$df.col(<column_name>).str.toLowerCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toLowerCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1142,
-        "lineEnd": 1144
+        "lineStart": 1144,
+        "lineEnd": 1146
       },
       "toPascalCase": {
         "desc": "Converts string casing to PascalCase.",
@@ -7327,8 +7327,8 @@
         "signature": "$df.col(<column_name>).str.toPascalCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toPascalCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1161,
-        "lineEnd": 1163
+        "lineStart": 1163,
+        "lineEnd": 1165
       },
       "toSnakeCase": {
         "desc": "Converts string casing to snake_case.",
@@ -7344,8 +7344,8 @@
         "signature": "$df.col(<column_name>).str.toSnakeCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toSnakeCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1180,
-        "lineEnd": 1182
+        "lineStart": 1182,
+        "lineEnd": 1184
       },
       "toTime": {
         "desc": "Parses string into time component representation.",
@@ -7361,8 +7361,8 @@
         "signature": "$df.col(<column_name>).str.toTime()",
         "signatureDetailed": "$df.col(<column_name>).str.toTime()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1199,
-        "lineEnd": 1201
+        "lineStart": 1201,
+        "lineEnd": 1203
       },
       "toTitleCase": {
         "desc": "Converts string casing to Title Case.",
@@ -7378,8 +7378,8 @@
         "signature": "$df.col(<column_name>).str.toTitleCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toTitleCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1218,
-        "lineEnd": 1220
+        "lineStart": 1220,
+        "lineEnd": 1222
       },
       "toUpperCase": {
         "desc": "Converts all string elements in the column to uppercase.",
@@ -7395,8 +7395,8 @@
         "signature": "$df.col(<column_name>).str.toUpperCase()",
         "signatureDetailed": "$df.col(<column_name>).str.toUpperCase()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1237,
-        "lineEnd": 1239
+        "lineStart": 1239,
+        "lineEnd": 1241
       },
       "trim": {
         "desc": "Trims leading and trailing whitespace characters from each string element.",
@@ -7412,8 +7412,8 @@
         "signature": "$df.col(<column_name>).str.trim()",
         "signatureDetailed": "$df.col(<column_name>).str.trim()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1255,
-        "lineEnd": 1257
+        "lineStart": 1257,
+        "lineEnd": 1259
       },
       "trimEnd": {
         "desc": "Trims trailing whitespace characters from each string element.",
@@ -7429,8 +7429,8 @@
         "signature": "$df.col(<column_name>).str.trimEnd()",
         "signatureDetailed": "$df.col(<column_name>).str.trimEnd()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1273,
-        "lineEnd": 1275
+        "lineStart": 1275,
+        "lineEnd": 1277
       },
       "trimStart": {
         "desc": "Trims leading whitespace characters from each string element.",
@@ -7446,8 +7446,8 @@
         "signature": "$df.col(<column_name>).str.trimStart()",
         "signatureDetailed": "$df.col(<column_name>).str.trimStart()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1291,
-        "lineEnd": 1293
+        "lineStart": 1293,
+        "lineEnd": 1295
       },
       "upper": {
         "desc": "Converts string to uppercase.",
@@ -7463,8 +7463,8 @@
         "signature": "$df.col(<column_name>).str.upper()",
         "signatureDetailed": "$df.col(<column_name>).str.upper()",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1310,
-        "lineEnd": 1312
+        "lineStart": 1312,
+        "lineEnd": 1314
       },
       "zfill": {
         "desc": "Pads start of string with zeros to target width.",
@@ -7486,8 +7486,8 @@
         "signature": "$df.col(<column_name>).str.zfill(width: number)",
         "signatureDetailed": "$df.col(<column_name>).str.zfill(width: number)",
         "filePath": "columnExpressions/mixins/stringExpr.ts",
-        "lineStart": 1330,
-        "lineEnd": 1332,
+        "lineStart": 1332,
+        "lineEnd": 1334,
         "typeTree": {
           "width": {
             "type": "number",
@@ -7518,8 +7518,8 @@
         "signature": "$df.col(<column_name>).struct.field(name: string)",
         "signatureDetailed": "$df.col(<column_name>).struct.field(name: string)",
         "filePath": "columnExpressions/mixins/structExpr.ts",
-        "lineStart": 35,
-        "lineEnd": 40,
+        "lineStart": 37,
+        "lineEnd": 42,
         "typeTree": {
           "name": {
             "type": "string",
@@ -7548,8 +7548,8 @@
         "signature": "$df.col(<column_name>).struct.renameFields(mapping: RenameMappingArg)",
         "signatureDetailed": "$df.col(<column_name>).struct.renameFields(mapping: RenameMappingArg)",
         "filePath": "columnExpressions/mixins/structExpr.ts",
-        "lineStart": 56,
-        "lineEnd": 69,
+        "lineStart": 58,
+        "lineEnd": 71,
         "typeTree": {
           "mapping": {
             "type": "RenameMappingArg",
@@ -7578,8 +7578,8 @@
         "signature": "$df.col(<column_name>).struct.withFields(fields: StructFieldsArg)",
         "signatureDetailed": "$df.col(<column_name>).struct.withFields(fields: IntoExprSeriesArg | ExprDict)",
         "filePath": "columnExpressions/mixins/structExpr.ts",
-        "lineStart": 86,
-        "lineEnd": 131,
+        "lineStart": 88,
+        "lineEnd": 133,
         "typeTree": {
           "fields": {
             "type": "StructFieldsArg",
@@ -7603,8 +7603,8 @@
         "signature": "$df.col(<column_name>).struct.unnest()",
         "signatureDetailed": "$df.col(<column_name>).struct.unnest()",
         "filePath": "columnExpressions/mixins/structExpr.ts",
-        "lineStart": 146,
-        "lineEnd": 151
+        "lineStart": 148,
+        "lineEnd": 153
       }
     },
     "temporalExpr": {
@@ -7628,8 +7628,8 @@
         "signature": "$df.col(<column_name>).dt.castTimeUnit(unit: DatetimeTimeUnit)",
         "signatureDetailed": "$df.col(<column_name>).dt.castTimeUnit(unit: \"ms\" | \"us\" | \"ns\")",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 69,
-        "lineEnd": 71,
+        "lineStart": 70,
+        "lineEnd": 72,
         "typeTree": {
           "unit": {
             "type": "DatetimeTimeUnit",
@@ -7659,8 +7659,8 @@
         "signature": "$df.col(<column_name>).dt.century(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.century(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 87,
-        "lineEnd": 89,
+        "lineStart": 88,
+        "lineEnd": 90,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7692,8 +7692,8 @@
         "signature": "$df.col(<column_name>).dt.convertTimeZone(timeZone: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.convertTimeZone(timeZone: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 111,
-        "lineEnd": 120,
+        "lineStart": 112,
+        "lineEnd": 121,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7716,8 +7716,8 @@
         "signature": "$df.col(<column_name>).dt.date()",
         "signatureDetailed": "$df.col(<column_name>).dt.date()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 135,
-        "lineEnd": 137
+        "lineStart": 136,
+        "lineEnd": 138
       },
       "day": {
         "desc": "Extracts the calendar day component (1-31) from a Datetime column.",
@@ -7739,8 +7739,8 @@
         "signature": "$df.col(<column_name>).dt.day(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.day(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 153,
-        "lineEnd": 155,
+        "lineStart": 154,
+        "lineEnd": 156,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7769,8 +7769,8 @@
         "signature": "$df.col(<column_name>).dt.daysInMonth(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.daysInMonth(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 171,
-        "lineEnd": 173,
+        "lineStart": 172,
+        "lineEnd": 174,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7799,8 +7799,8 @@
         "signature": "$df.col(<column_name>).dt.epoch(unit: TimeUnit = \"ms\")",
         "signatureDetailed": "$df.col(<column_name>).dt.epoch(unit: \"s\" | \"ms\" | \"us\" | \"ns\" = \"ms\")",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 189,
-        "lineEnd": 191,
+        "lineStart": 190,
+        "lineEnd": 192,
         "typeTree": {
           "unit": {
             "type": "TimeUnit",
@@ -7831,8 +7831,8 @@
         "signature": "$df.col(<column_name>).dt.hour(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.hour(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 207,
-        "lineEnd": 209,
+        "lineStart": 208,
+        "lineEnd": 210,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7861,8 +7861,8 @@
         "signature": "$df.col(<column_name>).dt.isBusinessDay(options: IsBusinessDayOptions = {})",
         "signatureDetailed": "$df.col(<column_name>).dt.isBusinessDay(\n  options: {\n    excludeWeekdays?: number[] = [6, 7],\n    holidays?: (Date | string | number)[] | Set<number>\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 226,
-        "lineEnd": 228,
+        "lineStart": 227,
+        "lineEnd": 229,
         "typeTree": {
           "options": {
             "type": "IsBusinessDayOptions",
@@ -7905,8 +7905,8 @@
         "signature": "$df.col(<column_name>).dt.isLeapYear(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.isLeapYear(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 244,
-        "lineEnd": 247,
+        "lineStart": 245,
+        "lineEnd": 248,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7935,8 +7935,8 @@
         "signature": "$df.col(<column_name>).dt.isoYear(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.isoYear(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 264,
-        "lineEnd": 266,
+        "lineStart": 265,
+        "lineEnd": 267,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7965,8 +7965,8 @@
         "signature": "$df.col(<column_name>).dt.microsecond(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.microsecond(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 282,
-        "lineEnd": 284,
+        "lineStart": 283,
+        "lineEnd": 285,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -7995,8 +7995,8 @@
         "signature": "$df.col(<column_name>).dt.millennium(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.millennium(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 300,
-        "lineEnd": 302,
+        "lineStart": 301,
+        "lineEnd": 303,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8025,8 +8025,8 @@
         "signature": "$df.col(<column_name>).dt.millisecond(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.millisecond(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 318,
-        "lineEnd": 320,
+        "lineStart": 319,
+        "lineEnd": 321,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8055,8 +8055,8 @@
         "signature": "$df.col(<column_name>).dt.minute(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.minute(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 336,
-        "lineEnd": 338,
+        "lineStart": 337,
+        "lineEnd": 339,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8085,8 +8085,8 @@
         "signature": "$df.col(<column_name>).dt.month(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.month(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 354,
-        "lineEnd": 356,
+        "lineStart": 355,
+        "lineEnd": 357,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8109,8 +8109,8 @@
         "signature": "$df.col(<column_name>).dt.monthEnd()",
         "signatureDetailed": "$df.col(<column_name>).dt.monthEnd()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 371,
-        "lineEnd": 373
+        "lineStart": 372,
+        "lineEnd": 374
       },
       "monthStart": {
         "desc": "Returns a Datetime column shifted to the first calendar day of the month at 00:00:00.000 UTC.",
@@ -8126,8 +8126,8 @@
         "signature": "$df.col(<column_name>).dt.monthStart()",
         "signatureDetailed": "$df.col(<column_name>).dt.monthStart()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 388,
-        "lineEnd": 390
+        "lineStart": 389,
+        "lineEnd": 391
       },
       "nanosecond": {
         "desc": "Extracts the nanosecond component (0-999,000,000) scaled from Datetime millisecond precision.",
@@ -8149,8 +8149,8 @@
         "signature": "$df.col(<column_name>).dt.nanosecond(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.nanosecond(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 406,
-        "lineEnd": 408,
+        "lineStart": 407,
+        "lineEnd": 409,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8183,8 +8183,8 @@
         "signature": "$df.col(<column_name>).dt.offsetDay(\n  n: NumericArg,\n  options: DayOffsetOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).dt.offsetDay(\n  n: number | bigint | IExpr | null,\n  options: {\n    excludeWeekdays?: number[] = [6, 7],\n    holidays?: (Date | string | number)[] | Set<number>,\n    roll?: \"raise\" | \"forward\" | \"backward\" = \"raise\"\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 426,
-        "lineEnd": 433,
+        "lineStart": 427,
+        "lineEnd": 434,
         "typeTree": {
           "n": {
             "type": "NumericArg",
@@ -8240,8 +8240,8 @@
         "signature": "$df.col(<column_name>).dt.ordinalDay(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.ordinalDay(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 449,
-        "lineEnd": 451,
+        "lineStart": 450,
+        "lineEnd": 452,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8270,8 +8270,8 @@
         "signature": "$df.col(<column_name>).dt.quarter(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.quarter(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 467,
-        "lineEnd": 469,
+        "lineStart": 468,
+        "lineEnd": 470,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8300,8 +8300,8 @@
         "signature": "$df.col(<column_name>).dt.replace(options: ReplaceDateOptions)",
         "signatureDetailed": "$df.col(<column_name>).dt.replace(\n  options: {\n    day?: number,\n    hour?: number,\n    minute?: number,\n    month?: number,\n    ms?: number,\n    second?: number,\n    timeZone?: string | null,\n    year?: number\n  }\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 488,
-        "lineEnd": 490,
+        "lineStart": 489,
+        "lineEnd": 491,
         "typeTree": {
           "options": {
             "type": "ReplaceDateOptions",
@@ -8366,8 +8366,8 @@
         "signature": "$df.col(<column_name>).dt.second()",
         "signatureDetailed": "$df.col(<column_name>).dt.second()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 505,
-        "lineEnd": 507
+        "lineStart": 506,
+        "lineEnd": 508
       },
       "strftime": {
         "desc": "Formats Datetime values into custom formatted strings using strftime directive pattern tokens. Automatically applies the column's assigned timezone unless explicitly overridden in options.",
@@ -8392,8 +8392,8 @@
         "signature": "$df.col(<column_name>).dt.strftime(options: StrftimeOptions)",
         "signatureDetailed": "$df.col(<column_name>).dt.strftime(\n  options: {\n    format: string,\n    locale?: string = \"en-US\",\n    timeZone?: string = \"UTC\"\n  }\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 526,
-        "lineEnd": 532,
+        "lineStart": 527,
+        "lineEnd": 533,
         "typeTree": {
           "options": {
             "type": "StrftimeOptions",
@@ -8435,8 +8435,8 @@
         "signature": "$df.col(<column_name>).dt.time()",
         "signatureDetailed": "$df.col(<column_name>).dt.time()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 547,
-        "lineEnd": 549
+        "lineStart": 548,
+        "lineEnd": 550
       },
       "timestamp": {
         "desc": "Returns numeric timestamp relative to Epoch. Alias for epoch.",
@@ -8458,8 +8458,8 @@
         "signature": "$df.col(<column_name>).dt.timestamp(unit: TimeUnit = \"ms\")",
         "signatureDetailed": "$df.col(<column_name>).dt.timestamp(unit: \"s\" | \"ms\" | \"us\" | \"ns\" = \"ms\")",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 565,
-        "lineEnd": 567,
+        "lineStart": 566,
+        "lineEnd": 568,
         "typeTree": {
           "unit": {
             "type": "TimeUnit",
@@ -8484,8 +8484,8 @@
         "signature": "$df.col(<column_name>).dt.totalDays()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalDays()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 584,
-        "lineEnd": 586
+        "lineStart": 585,
+        "lineEnd": 587
       },
       "totalHours": {
         "desc": "Converts a Duration value (in milliseconds) to total hours count.",
@@ -8501,8 +8501,8 @@
         "signature": "$df.col(<column_name>).dt.totalHours()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalHours()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 602,
-        "lineEnd": 604
+        "lineStart": 603,
+        "lineEnd": 605
       },
       "totalMicroseconds": {
         "desc": "Converts Duration to microsecond count.",
@@ -8518,8 +8518,8 @@
         "signature": "$df.col(<column_name>).dt.totalMicroseconds()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalMicroseconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 620,
-        "lineEnd": 622
+        "lineStart": 621,
+        "lineEnd": 623
       },
       "totalMilliseconds": {
         "desc": "Converts Duration to millisecond count.",
@@ -8535,8 +8535,8 @@
         "signature": "$df.col(<column_name>).dt.totalMilliseconds()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalMilliseconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 638,
-        "lineEnd": 640
+        "lineStart": 639,
+        "lineEnd": 641
       },
       "totalMinutes": {
         "desc": "Converts Duration to floating point minutes.",
@@ -8552,8 +8552,8 @@
         "signature": "$df.col(<column_name>).dt.totalMinutes()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalMinutes()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 656,
-        "lineEnd": 658
+        "lineStart": 657,
+        "lineEnd": 659
       },
       "totalNanoseconds": {
         "desc": "Converts Duration to nanosecond count.",
@@ -8569,8 +8569,8 @@
         "signature": "$df.col(<column_name>).dt.totalNanoseconds()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalNanoseconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 674,
-        "lineEnd": 676
+        "lineStart": 675,
+        "lineEnd": 677
       },
       "totalSeconds": {
         "desc": "Converts Duration to floating point seconds.",
@@ -8586,8 +8586,8 @@
         "signature": "$df.col(<column_name>).dt.totalSeconds()",
         "signatureDetailed": "$df.col(<column_name>).dt.totalSeconds()",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 692,
-        "lineEnd": 694
+        "lineStart": 693,
+        "lineEnd": 695
       },
       "utcOffset": {
         "desc": "Returns the UTC offset of a timezone for a given Datetime value. Supports returning the total offset, the standard (base) offset, or just the daylight saving time component, in multiple output formats.",
@@ -8613,8 +8613,8 @@
         "signature": "$df.col(<column_name>).dt.utcOffset(\n  timeZone?: string,\n  options: UtcOffsetOptions = {}\n)",
         "signatureDetailed": "$df.col(<column_name>).dt.utcOffset(\n  timeZone?: string,\n  options: {\n    format?: \"milliseconds\" | \"minutes\" | \"hours\" | \"iso\" | \"basic\" = \"milliseconds\",\n    type?: \"base\" | \"total\" | \"daylightSavingTime\" = \"total\"\n  } = {}\n)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 715,
-        "lineEnd": 717,
+        "lineStart": 716,
+        "lineEnd": 718,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8665,8 +8665,8 @@
         "signature": "$df.col(<column_name>).dt.week(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.week(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 733,
-        "lineEnd": 735,
+        "lineStart": 734,
+        "lineEnd": 736,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8695,8 +8695,8 @@
         "signature": "$df.col(<column_name>).dt.weekday(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.weekday(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 751,
-        "lineEnd": 753,
+        "lineStart": 752,
+        "lineEnd": 754,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -8725,8 +8725,8 @@
         "signature": "$df.col(<column_name>).dt.year(timeZone?: string)",
         "signatureDetailed": "$df.col(<column_name>).dt.year(timeZone?: string)",
         "filePath": "columnExpressions/mixins/temporalExpr.ts",
-        "lineStart": 769,
-        "lineEnd": 771,
+        "lineStart": 770,
+        "lineEnd": 772,
         "typeTree": {
           "timeZone": {
             "type": "string",
@@ -9994,7 +9994,7 @@
       "propertyAccess": "pivot",
       "callExpression": ".pivot()",
       "signature": "df.pivot<U extends RowRecord = RowRecord>(config: PivotOptions<T>): DataFrame<U>",
-      "signatureDetailed": "df.pivot<U extends RowRecord = RowRecord>(\n  config: {\n    agg?: (values: unknown[]) => any | string,\n    columns: keyof T,\n    index: keyof T | keyof T[],\n    values: keyof T\n  }\n): DataFrame<U>",
+      "signatureDetailed": "df.pivot<U extends RowRecord = RowRecord>(\n  config: {\n    agg?: (values: unknown[]) => unknown | string,\n    columns: keyof T,\n    index: keyof T | keyof T[],\n    values: keyof T\n  }\n): DataFrame<U>",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 1416,
       "lineEnd": 1470,
@@ -10008,7 +10008,7 @@
               "type": "AggFn<unknown> | string",
               "optional": true,
               "desc": "Aggregation function to apply when multiple values exist for a cell.",
-              "resolvedType": "(values: unknown[]) => any | string"
+              "resolvedType": "(values: unknown[]) => unknown | string"
             },
             "columns": {
               "type": "keyof T",
@@ -10646,7 +10646,7 @@
       "propertyAccess": "writeCsv",
       "callExpression": ".writeCsv()",
       "signature": "df.writeCsv(\n  file?: WriteFileTargetArg,\n  options: WriteCSVOptions = {}\n): string",
-      "signatureDetailed": "df.writeCsv(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    dateFormat?: string,\n    datetimeFormat?: string,\n    includeBom?: boolean = false,\n    includeHeader?: boolean = true,\n    lineTerminator?: string = \"\\n\",\n    nullValue?: string = \"\",\n    numericFormatOptions?: {\n      accountingNegatives?: boolean = false,\n      fallback?: string = \"NaN\",\n      formatNonFinite?: boolean = false,\n      locale?: string = \"en-US\"\n    },\n    quoteChar?: string = '\"',\n    quoteStyle?: \"necessary\" | \"always\" | \"never\" | \"non_numeric\" = \"necessary\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => any,\n      onCircular?: (this: any, k: string, v: any) => any,\n      onCustom?: (this: any, k: string, v: any) => any,\n      onDate?: (v: Date) => any,\n      onError?: (v: Error) => any,\n      onMap?: (v: Map<any, any>) => any,\n      onRegExp?: (v: RegExp) => any,\n      onSet?: (v: Set<any>) => any,\n      onTypedArray?: (v: any) => any,\n      onURLSearchParams?: (v: URLSearchParams) => any,\n      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    },\n    separator?: string = \",\",\n    timeFormat?: string\n  } = {}\n): string",
+      "signatureDetailed": "df.writeCsv(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    dateFormat?: string,\n    datetimeFormat?: string,\n    includeBom?: boolean = false,\n    includeHeader?: boolean = true,\n    lineTerminator?: string = \"\\n\",\n    nullValue?: string = \"\",\n    numericFormatOptions?: {\n      accountingNegatives?: boolean = false,\n      fallback?: string = \"NaN\",\n      formatNonFinite?: boolean = false,\n      locale?: string = \"en-US\"\n    },\n    quoteChar?: string = '\"',\n    quoteStyle?: \"necessary\" | \"always\" | \"never\" | \"non_numeric\" = \"necessary\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => unknown,\n      onCircular?: (this: unknown, k: string, v: unknown) => unknown,\n      onCustom?: (this: unknown, k: string, v: unknown) => unknown,\n      onDate?: (v: Date) => unknown,\n      onError?: (v: Error) => unknown,\n      onMap?: (v: Map<unknown, unknown>) => unknown,\n      onRegExp?: (v: RegExp) => unknown,\n      onSet?: (v: Set<unknown>) => unknown,\n      onTypedArray?: (v: unknown) => unknown,\n      onURLSearchParams?: (v: URLSearchParams) => unknown,\n      replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    },\n    separator?: string = \",\",\n    timeFormat?: string\n  } = {}\n): string",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 2206,
       "lineEnd": 2241,
@@ -10770,57 +10770,57 @@
                   "default": "false"
                 },
                 "onBigInt": {
-                  "type": "(v: bigint) => any",
+                  "type": "(v: bigint) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `BigInt` values."
                 },
                 "onCircular": {
-                  "type": "(this: any, k: string, v: any) => any",
+                  "type": "(this: unknown, k: string, v: unknown) => unknown",
                   "optional": true,
                   "desc": "Custom callback invoked when a circular reference is encountered."
                 },
                 "onCustom": {
-                  "type": "(this: any, k: string, v: any) => any",
+                  "type": "(this: unknown, k: string, v: unknown) => unknown",
                   "optional": true,
                   "desc": "Catch-all serialization override for custom types, executed after native type checks."
                 },
                 "onDate": {
-                  "type": "(v: Date) => any",
+                  "type": "(v: Date) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Date` objects (takes precedence over `formatDate`)."
                 },
                 "onError": {
-                  "type": "(v: Error) => any",
+                  "type": "(v: Error) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Error` objects."
                 },
                 "onMap": {
-                  "type": "(v: Map<any, any>) => any",
+                  "type": "(v: Map<unknown, unknown>) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Map` objects."
                 },
                 "onRegExp": {
-                  "type": "(v: RegExp) => any",
+                  "type": "(v: RegExp) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `RegExp` objects."
                 },
                 "onSet": {
-                  "type": "(v: Set<any>) => any",
+                  "type": "(v: Set<unknown>) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Set` objects."
                 },
                 "onTypedArray": {
-                  "type": "(v: any) => any",
+                  "type": "(v: unknown) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `TypedArray` values."
                 },
                 "onURLSearchParams": {
-                  "type": "(v: URLSearchParams) => any",
+                  "type": "(v: URLSearchParams) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `URLSearchParams` objects."
                 },
                 "replacer": {
-                  "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+                  "type": "((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null",
                   "optional": true,
                   "desc": "Custom `JSON.stringify` replacer function or property whitelist array applied first."
                 },
@@ -10903,7 +10903,7 @@
       "propertyAccess": "writeJson",
       "callExpression": ".writeJson()",
       "signature": "df.writeJson(\n  file?: WriteFileTargetArg,\n  {\n    format = \"json\",\n    replacerOptions\n  }: WriteJSONOptions = {}\n): string",
-      "signatureDetailed": "df.writeJson(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    format?: \"json\" | \"ndjson\" = \"json\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => any,\n      onCircular?: (this: any, k: string, v: any) => any,\n      onCustom?: (this: any, k: string, v: any) => any,\n      onDate?: (v: Date) => any,\n      onError?: (v: Error) => any,\n      onMap?: (v: Map<any, any>) => any,\n      onRegExp?: (v: RegExp) => any,\n      onSet?: (v: Set<any>) => any,\n      onTypedArray?: (v: any) => any,\n      onURLSearchParams?: (v: URLSearchParams) => any,\n      replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    }\n  } = {}\n): string",
+      "signatureDetailed": "df.writeJson(\n  file?: {\n    write: (str: string) => void\n  },\n  options: {\n    format?: \"json\" | \"ndjson\" = \"json\",\n    replacerOptions?: {\n      bigintStrategy?: \"string\" | \"number\" = \"string\",\n      formatDate?: (v: Date) => string,\n      handleCircular?: boolean = false,\n      onBigInt?: (v: bigint) => unknown,\n      onCircular?: (this: unknown, k: string, v: unknown) => unknown,\n      onCustom?: (this: unknown, k: string, v: unknown) => unknown,\n      onDate?: (v: Date) => unknown,\n      onError?: (v: Error) => unknown,\n      onMap?: (v: Map<unknown, unknown>) => unknown,\n      onRegExp?: (v: RegExp) => unknown,\n      onSet?: (v: Set<unknown>) => unknown,\n      onTypedArray?: (v: unknown) => unknown,\n      onURLSearchParams?: (v: URLSearchParams) => unknown,\n      replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null,\n      voidBigIntReplacement?: boolean = false,\n      voidDateReplacement?: boolean = false,\n      voidMapReplacement?: boolean = false,\n      voidRegExpReplacement?: boolean = false,\n      voidSetReplacement?: boolean = false,\n      voidTypedArrayReplacement?: boolean = false\n    }\n  } = {}\n): string",
       "filePath": "dataframe/dataframe.ts",
       "lineStart": 2255,
       "lineEnd": 2282,
@@ -10957,57 +10957,57 @@
                   "default": "false"
                 },
                 "onBigInt": {
-                  "type": "(v: bigint) => any",
+                  "type": "(v: bigint) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `BigInt` values."
                 },
                 "onCircular": {
-                  "type": "(this: any, k: string, v: any) => any",
+                  "type": "(this: unknown, k: string, v: unknown) => unknown",
                   "optional": true,
                   "desc": "Custom callback invoked when a circular reference is encountered."
                 },
                 "onCustom": {
-                  "type": "(this: any, k: string, v: any) => any",
+                  "type": "(this: unknown, k: string, v: unknown) => unknown",
                   "optional": true,
                   "desc": "Catch-all serialization override for custom types, executed after native type checks."
                 },
                 "onDate": {
-                  "type": "(v: Date) => any",
+                  "type": "(v: Date) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Date` objects (takes precedence over `formatDate`)."
                 },
                 "onError": {
-                  "type": "(v: Error) => any",
+                  "type": "(v: Error) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Error` objects."
                 },
                 "onMap": {
-                  "type": "(v: Map<any, any>) => any",
+                  "type": "(v: Map<unknown, unknown>) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Map` objects."
                 },
                 "onRegExp": {
-                  "type": "(v: RegExp) => any",
+                  "type": "(v: RegExp) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `RegExp` objects."
                 },
                 "onSet": {
-                  "type": "(v: Set<any>) => any",
+                  "type": "(v: Set<unknown>) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `Set` objects."
                 },
                 "onTypedArray": {
-                  "type": "(v: any) => any",
+                  "type": "(v: unknown) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `TypedArray` values."
                 },
                 "onURLSearchParams": {
-                  "type": "(v: URLSearchParams) => any",
+                  "type": "(v: URLSearchParams) => unknown",
                   "optional": true,
                   "desc": "Custom serialization override for `URLSearchParams` objects."
                 },
                 "replacer": {
-                  "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+                  "type": "((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null",
                   "optional": true,
                   "desc": "Custom `JSON.stringify` replacer function or property whitelist array applied first."
                 },
@@ -12059,19 +12059,19 @@
   "types": {
     "ColumnExpr": {
       "filePath": "columnExpressions/columnExpr.ts",
-      "lineStart": 71,
-      "lineEnd": 76,
+      "lineStart": 72,
+      "lineEnd": 77,
       "signature": "export interface ColumnExpr<T> extends\n    StandardExpr,\n    StringExpr,\n    TemporalExpr,\n    ArrayExpr,\n    StructExpr { }"
     },
     "StructExprNamespace": {
       "filePath": "columnExpressions/mixins/structExpr.ts",
-      "lineStart": 157,
-      "lineEnd": 160,
+      "lineStart": 159,
+      "lineEnd": 162,
       "desc": "Dynamic index signature allowing direct property access on `struct` expressions (delegating to `.struct.field(key)`).",
-      "signature": "export interface StructExprNamespace {\n    /** Dynamic struct field accessor returning a `ColumnExpr` for the given property key. */\n    [key: string]: any;\n}",
+      "signature": "export interface StructExprNamespace {\n    /** Dynamic struct field accessor returning a `ColumnExpr` for the given property key. */\n    [key: string]: unknown;\n}",
       "properties": {
         "[key: string]": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "Dynamic struct field accessor returning a `ColumnExpr` for the given property key."
         }
@@ -12100,24 +12100,87 @@
         }
       }
     },
+    "BinaryMeta": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 42,
+      "lineEnd": 47,
+      "desc": "Metadata attached to binary expression operations for type inference.",
+      "signature": "export interface BinaryMeta {\n    /** Left operand of the binary expression. */\n    _left: unknown;\n    /** Right operand of the binary expression. */\n    _right: unknown;\n}",
+      "properties": {
+        "_left": {
+          "type": "unknown",
+          "optional": false,
+          "desc": "Left operand of the binary expression."
+        },
+        "_right": {
+          "type": "unknown",
+          "optional": false,
+          "desc": "Right operand of the binary expression."
+        }
+      }
+    },
     "BooleanArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 43,
-      "lineEnd": 43,
+      "lineStart": 53,
+      "lineEnd": 53,
       "desc": "Operand for boolean logical operations (and, or, xor). Accepts a boolean literal, boolean array, another column expression, or null.",
       "signature": "export type BooleanArg = ColumnKeyArg<boolean> | IExpr | null | undefined;"
     },
+    "ColumnExprInternal": {
+      "filePath": "columnExpressions/types.ts",
+      "lineStart": 58,
+      "lineEnd": 73,
+      "desc": "Internal structural shape for inspecting column expression metadata.",
+      "signature": "export interface ColumnExprInternal {\n    /** Binary operation metadata attached to `_ops` functions. */\n    _binaryMeta?: BinaryMeta;\n    /** Target column name for single-column expressions. */\n    _colName?: string;\n    /** Target column names for multi-column selectors. */\n    _colNames?: string[];\n    /** Evaluation method on expression-like objects. */\n    _evaluate?: unknown;\n    /** Operation pipeline array. */\n    _ops?: unknown[];\n    /** Regex/glob patterns for multi-column selectors. */\n    _patterns?: unknown[];\n    /** Explicit target DataType override. */\n    _targetType?: unknown;\n}",
+      "properties": {
+        "_binaryMeta": {
+          "type": "BinaryMeta",
+          "optional": true,
+          "desc": "Binary operation metadata attached to `_ops` functions."
+        },
+        "_colName": {
+          "type": "string",
+          "optional": true,
+          "desc": "Target column name for single-column expressions."
+        },
+        "_colNames": {
+          "type": "string[]",
+          "optional": true,
+          "desc": "Target column names for multi-column selectors."
+        },
+        "_evaluate": {
+          "type": "unknown",
+          "optional": true,
+          "desc": "Evaluation method on expression-like objects."
+        },
+        "_ops": {
+          "type": "unknown[]",
+          "optional": true,
+          "desc": "Operation pipeline array."
+        },
+        "_patterns": {
+          "type": "unknown[]",
+          "optional": true,
+          "desc": "Regex/glob patterns for multi-column selectors."
+        },
+        "_targetType": {
+          "type": "unknown",
+          "optional": true,
+          "desc": "Explicit target DataType override."
+        }
+      }
+    },
     "ComparisonArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 49,
-      "lineEnd": 49,
+      "lineStart": 79,
+      "lineEnd": 79,
       "desc": "Operand for equality and comparison expressions (eq, ne, eqMissing, neMissing). Accepts another column expression, valid primitive scalar, or an array of scalar values.",
       "signature": "export type ComparisonArg = ScalarArg | ArrayArg;"
     },
     "CountMatchesOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 54,
-      "lineEnd": 60,
+      "lineStart": 84,
+      "lineEnd": 90,
       "desc": "Configuration options for counting matching pattern occurrences in a string.",
       "signature": "export interface CountMatchesOptions {\n    /**\n     * If true, treats the pattern as a literal string rather than a regular expression.\n     * @default false\n     */\n    literal?: boolean;\n}",
       "properties": {
@@ -12131,8 +12194,8 @@
     },
     "CountOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 65,
-      "lineEnd": 72,
+      "lineStart": 95,
+      "lineEnd": 102,
       "desc": "Configuration options for counting elements (`$df.col().count()`).",
       "signature": "export interface CountOptions {\n    /**\n     * Whether to include `null`, `undefined`, or `NaN` values in the count.\n     * When `false`, counts only non-null, valid elements.\n     * @default false\n     */\n    includeNulls?: boolean;\n}",
       "properties": {
@@ -12146,8 +12209,8 @@
     },
     "EwmKurtOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 77,
-      "lineEnd": 77,
+      "lineStart": 107,
+      "lineEnd": 107,
       "desc": "Configuration options for exponentially weighted moving kurtosis (`$df.col().ewmKurt()`).",
       "signature": "export type EwmKurtOptions = EwmOptions;",
       "properties": {
@@ -12212,8 +12275,8 @@
     },
     "EwmMeanOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 82,
-      "lineEnd": 82,
+      "lineStart": 112,
+      "lineEnd": 112,
       "desc": "Configuration options for exponentially weighted moving mean (`$df.col().ewmMean()`).",
       "signature": "export type EwmMeanOptions = Omit<EwmOptions, \"bias\" | \"fisher\">;",
       "properties": {
@@ -12266,8 +12329,8 @@
     },
     "EwmOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 87,
-      "lineEnd": 133,
+      "lineStart": 117,
+      "lineEnd": 163,
       "desc": "Configuration options for Exponentially Weighted Moving (EWM) window operations.",
       "signature": "export interface EwmOptions extends CentralMomentsOptions, KurtosisOptions {\n    /**\n     * When `true`, divides by the decaying adjustment factor in beginning periods to account for imbalance in relative weightings.\n     * @default true\n     */\n    adjust?: boolean;\n    /**\n     * Smoothing factor `alpha` directly in `(0, 1]`. Mutually exclusive with `span`, `halfLife`, and `com`.\n     */\n    alpha?: number;\n    /**\n     * When `false`, applies sample bias correction; when `true`, computes population moments without bias correction.\n     * @default false\n     */\n    bias?: boolean;\n    /**\n     * Optional timestamp/index column name or expression used to scale `halfLife` decay by elapsed time deltas.\n     */\n    by?: ColumnOrExprArg;\n    /**\n     * Decay in terms of center of mass (`alpha = 1 / (1 + com)`), where `com >= 0`.\n     */\n    com?: number;\n    /**\n     * When `true` (default), computes excess kurtosis (Fisher's definition, subtracting 3.0); when `false`, computes Pearson's kurtosis.\n     * @default true\n     */\n    fisher?: boolean;\n    /**\n     * Decay in terms of half-life (`alpha = 1 - exp(-ln(2) / halfLife)`), as a positive number or duration string.\n     */\n    halfLife?: DurationValueArg;\n    /**\n     * When `true`, ignores missing/null values when calculating weights; when `false`, weights decay across null positions.\n     * @default false\n     */\n    ignoreNulls?: boolean;\n    /**\n     * Minimum number of non-null observations in window required to produce a value (otherwise `null`).\n     * @default 1\n     */\n    minSamples?: number;\n    /**\n     * Decay in terms of span (`alpha = 2 / (span + 1)`), where `span >= 1`.\n     */\n    span?: number;\n}",
       "properties": {
@@ -12332,8 +12395,8 @@
     },
     "EwmSkewOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 138,
-      "lineEnd": 138,
+      "lineStart": 168,
+      "lineEnd": 168,
       "desc": "Configuration options for exponentially weighted moving skewness (`$df.col().ewmSkew()`).",
       "signature": "export type EwmSkewOptions = Omit<EwmOptions, \"fisher\">;",
       "properties": {
@@ -12392,8 +12455,8 @@
     },
     "EwmStdOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 143,
-      "lineEnd": 143,
+      "lineStart": 173,
+      "lineEnd": 173,
       "desc": "Configuration options for exponentially weighted moving standard deviation (`$df.col().ewmStd()`).",
       "signature": "export type EwmStdOptions = Omit<EwmOptions, \"bias\" | \"fisher\">;",
       "properties": {
@@ -12446,8 +12509,8 @@
     },
     "EwmSumOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 148,
-      "lineEnd": 148,
+      "lineStart": 178,
+      "lineEnd": 178,
       "desc": "Configuration options for exponentially weighted moving sum (`$df.col().ewmSum()`).",
       "signature": "export type EwmSumOptions = Omit<EwmOptions, \"adjust\" | \"bias\" | \"fisher\">;",
       "properties": {
@@ -12494,8 +12557,8 @@
     },
     "EwmVarOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 153,
-      "lineEnd": 153,
+      "lineStart": 183,
+      "lineEnd": 183,
       "desc": "Configuration options for exponentially weighted moving variance (`$df.col().ewmVar()`).",
       "signature": "export type EwmVarOptions = Omit<EwmOptions, \"bias\" | \"fisher\">;",
       "properties": {
@@ -12548,8 +12611,8 @@
     },
     "IsCloseOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 158,
-      "lineEnd": 174,
+      "lineStart": 188,
+      "lineEnd": 204,
       "desc": "Configuration options for approximate floating-point equality comparison (`$df.col().isClose()`).",
       "signature": "export interface IsCloseOptions {\n    /**\n     * Non-negative absolute tolerance threshold.\n     * @default 1e-8\n     */\n    absTol?: number;\n    /**\n     * When `true`, two `NaN` values are treated as close (`true`).\n     * @default false\n     */\n    nansEqual?: boolean;\n    /**\n     * Non-negative relative tolerance threshold scaled by operand magnitude.\n     * @default 1e-8\n     */\n    relTol?: number;\n}",
       "properties": {
@@ -12575,8 +12638,8 @@
     },
     "IsNDistinctOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 179,
-      "lineEnd": 186,
+      "lineStart": 209,
+      "lineEnd": 216,
       "desc": "Configuration options for checking whether column values match the N-th distinct value (`$df.col().isNDistinct()`).",
       "signature": "export interface IsNDistinctOptions {\n    /**\n     * If true (default), returns null when index is out of bounds.\n     * If false, throws an error if index is out of bounds.\n     * @default true\n     */\n    nullOnOob?: boolean;\n}",
       "properties": {
@@ -12590,29 +12653,29 @@
     },
     "NumericArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 192,
-      "lineEnd": 192,
+      "lineStart": 222,
+      "lineEnd": 222,
       "desc": "Operand for arithmetic expressions. Accepts a literal number, bigint, another column expression, or null.",
       "signature": "export type NumericArg = number | bigint | IExpr | null;"
     },
     "NumericSeriesArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 198,
-      "lineEnd": 198,
+      "lineStart": 228,
+      "lineEnd": 228,
       "desc": "Operand for bivariate or series-level operations (corr, cov, dot, etc.). Accepts a numeric column expression, numeric literal, numeric array, or numeric typed array.",
       "signature": "export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;"
     },
     "ProxyPropertyResolver": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 203,
-      "lineEnd": 203,
+      "lineStart": 233,
+      "lineEnd": 233,
       "desc": "Callback function for resolving dynamic property access on a delegating Proxy (`createDelegatingProxy`).",
       "signature": "export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => any;"
     },
     "RandomOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 208,
-      "lineEnd": 224,
+      "lineStart": 238,
+      "lineEnd": 254,
       "desc": "Configuration options for pseudo-random number generation (`$df.col().rand()`).",
       "signature": "export interface RandomOptions {\n    /**\n     * When `true`, generates random integers in `[min, max]`. When `false`, generates floating-point numbers in `[min, max)`.\n     * @default false\n     */\n    integer?: boolean;\n    /**\n     * Maximum bound (exclusive for floats, inclusive for integers) for generated random values.\n     * @default 1\n     */\n    max?: number;\n    /**\n     * Minimum bound (inclusive) for generated random values.\n     * @default 0\n     */\n    min?: number;\n}",
       "properties": {
@@ -12638,8 +12701,8 @@
     },
     "RankOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 229,
-      "lineEnd": 236,
+      "lineStart": 259,
+      "lineEnd": 266,
       "desc": "Configuration options for window rank calculation (`$df.col().rank()`).",
       "signature": "export interface RankOptions {\n    /**\n     * When true, ranks are consecutive integers without gaps between tied values (1, 2, 2, 3).\n     * When false (default), ranks have gaps for tied values (1, 2, 2, 4).\n     * @default false\n     */\n    dense?: boolean;\n}",
       "properties": {
@@ -12653,8 +12716,8 @@
     },
     "ReplaceAllOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 242,
-      "lineEnd": 242,
+      "lineStart": 272,
+      "lineEnd": 272,
       "desc": "Configuration options for replacing all matching occurrences in a string. Omits the count limit `n` option present in `ReplaceOptions`.",
       "signature": "export type ReplaceAllOptions = Omit<ReplaceOptions, \"n\">;",
       "properties": {
@@ -12687,8 +12750,8 @@
     },
     "RollingOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 247,
-      "lineEnd": 252,
+      "lineStart": 277,
+      "lineEnd": 282,
       "desc": "Configuration options for rolling window aggregations (`rollingMean`, `rollingSum`, `rollingMin`, `rollingMax`, `rollingStd`, `rollingVar`, etc.).",
       "signature": "export interface RollingOptions {\n    /**\n     * Number of consecutive elements in the moving window.\n     */\n    windowSize: number;\n}",
       "properties": {
@@ -12701,13 +12764,13 @@
     },
     "ShiftOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 257,
-      "lineEnd": 263,
+      "lineStart": 287,
+      "lineEnd": 293,
       "desc": "Configuration options for shifting column or array elements (`shift`, `lag`, `lead`).",
-      "signature": "export interface ShiftOptions {\n    /**\n     * Fallback fill value for empty slots introduced by shift/lag/lead.\n     * @default null\n     */\n    fillValue?: any;\n}",
+      "signature": "export interface ShiftOptions {\n    /**\n     * Fallback fill value for empty slots introduced by shift/lag/lead.\n     * @default null\n     */\n    fillValue?: unknown;\n}",
       "properties": {
         "fillValue": {
-          "type": "any",
+          "type": "unknown",
           "optional": true,
           "desc": "Fallback fill value for empty slots introduced by shift/lag/lead.",
           "default": "null"
@@ -12716,15 +12779,15 @@
     },
     "StringArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 269,
-      "lineEnd": 269,
+      "lineStart": 299,
+      "lineEnd": 299,
       "desc": "Operand for string concatenation or text operations. Accepts a string literal or another column expression.",
       "signature": "export type StringArg = ColumnOrExprArg<string>;"
     },
     "StringDecodeOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 274,
-      "lineEnd": 280,
+      "lineStart": 304,
+      "lineEnd": 310,
       "desc": "Configuration options for decoding encoded string values (`$df.col().str.decode()`).",
       "signature": "export interface StringDecodeOptions extends StringEncodeOptions {\n    /**\n     * Whether invalid encoded sequences should throw an error (`true`) or return `null` (`false`).\n     * @default true\n     */\n    strict?: boolean;\n}",
       "properties": {
@@ -12744,8 +12807,8 @@
     },
     "StringEncodeOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 285,
-      "lineEnd": 290,
+      "lineStart": 315,
+      "lineEnd": 320,
       "desc": "Configuration options for encoding string values (`$df.col().str.encode()`).",
       "signature": "export interface StringEncodeOptions {\n    /**\n     * Target string encoding format (`\"hex\"` or `\"base64\"`).\n     */\n    encoding: StringEncoding;\n}",
       "properties": {
@@ -12759,36 +12822,36 @@
     },
     "StringReplacementArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 296,
-      "lineEnd": 296,
+      "lineStart": 326,
+      "lineEnd": 326,
       "desc": "Operand for string replacement operations (replace, replaceAll). Accepts a static replacement string or a dynamic replacer callback function.",
       "signature": "export type StringReplacementArg = string | StringReplacerFn;"
     },
     "StringReplacementSeriesArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 302,
-      "lineEnd": 302,
+      "lineStart": 332,
+      "lineEnd": 332,
       "desc": "Operand for multiple string replacements (replaceMany). Accepts an array of replacement strings or dynamic replacer callback functions.",
       "signature": "export type StringReplacementSeriesArg = StringReplacementArg[];"
     },
     "StringReplacerArg": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 308,
-      "lineEnd": 308,
+      "lineStart": 338,
+      "lineEnd": 338,
       "desc": "Arguments passed to an ECMAScript string replacer callback after the matched substring. Reuses RowRecord for named groups object, with scalar types for capture strings and offsets.",
       "signature": "export type StringReplacerArg = ValidScalarTypes | RowRecord;"
     },
     "StringReplacerFn": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 313,
-      "lineEnd": 313,
+      "lineStart": 343,
+      "lineEnd": 343,
       "desc": "Dynamic callback for string replacements following ECMAScript String.prototype.replace standards.",
       "signature": "export type StringReplacerFn = (match: string, ...args: StringReplacerArg[]) => string;"
     },
     "ToStructOptions": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 318,
-      "lineEnd": 329,
+      "lineStart": 348,
+      "lineEnd": 359,
       "desc": "Configuration options for converting array/list elements into struct objects (`$df.col().arr.toStruct()`).",
       "signature": "export interface ToStructOptions {\n    /**\n     * Explicit array of struct field names or a callback `(idx: number) => string` generating field names by element index.\n     * When omitted, field names are generated automatically as `\"field_0\"`, `\"field_1\"`, etc.\n     */\n    fields?: string[] | ((idx: number) => string);\n    /**\n     * Maximum number of array elements to extract into struct fields when `fields` is not an array.\n     * When omitted, uses the maximum array length in the column.\n     */\n    upperBound?: number;\n}",
       "properties": {
@@ -12806,8 +12869,8 @@
     },
     "UnicodeNormalizeForm": {
       "filePath": "columnExpressions/types.ts",
-      "lineStart": 338,
-      "lineEnd": 338,
+      "lineStart": 368,
+      "lineEnd": 368,
       "desc": "Unicode normalization form. - `\"NFC\"`: Canonical Decomposition, followed by Canonical Composition (default) - `\"NFD\"`: Canonical Decomposition - `\"NFKC\"`: Compatibility Decomposition, followed by Canonical Composition - `\"NFKD\"`: Compatibility Decomposition",
       "signature": "export type UnicodeNormalizeForm = \"NFC\" | \"NFD\" | \"NFKC\" | \"NFKD\";"
     },
@@ -13342,7 +13405,7 @@
           "type": "AggFn<unknown> | string",
           "optional": true,
           "desc": "Aggregation function to apply when multiple values exist for a cell.",
-          "resolvedType": "(values: unknown[]) => any | string"
+          "resolvedType": "(values: unknown[]) => unknown | string"
         },
         "columns": {
           "type": "keyof T",
@@ -13582,57 +13645,57 @@
               "default": "false"
             },
             "onBigInt": {
-              "type": "(v: bigint) => any",
+              "type": "(v: bigint) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `BigInt` values."
             },
             "onCircular": {
-              "type": "(this: any, k: string, v: any) => any",
+              "type": "(this: unknown, k: string, v: unknown) => unknown",
               "optional": true,
               "desc": "Custom callback invoked when a circular reference is encountered."
             },
             "onCustom": {
-              "type": "(this: any, k: string, v: any) => any",
+              "type": "(this: unknown, k: string, v: unknown) => unknown",
               "optional": true,
               "desc": "Catch-all serialization override for custom types, executed after native type checks."
             },
             "onDate": {
-              "type": "(v: Date) => any",
+              "type": "(v: Date) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Date` objects (takes precedence over `formatDate`)."
             },
             "onError": {
-              "type": "(v: Error) => any",
+              "type": "(v: Error) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Error` objects."
             },
             "onMap": {
-              "type": "(v: Map<any, any>) => any",
+              "type": "(v: Map<unknown, unknown>) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Map` objects."
             },
             "onRegExp": {
-              "type": "(v: RegExp) => any",
+              "type": "(v: RegExp) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `RegExp` objects."
             },
             "onSet": {
-              "type": "(v: Set<any>) => any",
+              "type": "(v: Set<unknown>) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Set` objects."
             },
             "onTypedArray": {
-              "type": "(v: any) => any",
+              "type": "(v: unknown) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `TypedArray` values."
             },
             "onURLSearchParams": {
-              "type": "(v: URLSearchParams) => any",
+              "type": "(v: URLSearchParams) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `URLSearchParams` objects."
             },
             "replacer": {
-              "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+              "type": "((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null",
               "optional": true,
               "desc": "Custom `JSON.stringify` replacer function or property whitelist array applied first."
             },
@@ -13930,7 +13993,7 @@
       "lineStart": 10,
       "lineEnd": 10,
       "desc": "Aggregation function mapping an array of column values to a single scalar or summary value.",
-      "signature": "export type AggFn<V, R = any> = (values: V[]) => R;"
+      "signature": "export type AggFn<V, R = unknown> = (values: V[]) => R;"
     },
     "AnyTypedArray": {
       "filePath": "types.ts",
@@ -14048,7 +14111,7 @@
       "lineStart": 92,
       "lineEnd": 92,
       "desc": "Array-like and iterable container holding a column's sequence of values.",
-      "signature": "export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;"
+      "signature": "export type ColumnData<T = unknown> = ArrayLike<T> & Iterable<T>;"
     },
     "ColumnDict": {
       "filePath": "types.ts",
@@ -14083,7 +14146,7 @@
       "lineStart": 117,
       "lineEnd": 119,
       "desc": "Selector for matching one or more DataFrame columns by name, regex pattern, or `DataType` class/instance.",
-      "signature": "export type ColumnSelector<T = any> =\n    | ColumnKeyArg<keyof T | RegexPatternArg>\n    | ColumnKeyArg<DataType | Function>;"
+      "signature": "export type ColumnSelector<T = unknown> =\n    | ColumnKeyArg<keyof T | RegexPatternArg>\n    | ColumnKeyArg<DataType | Function>;"
     },
     "ConcatHow": {
       "filePath": "types.ts",
@@ -14097,7 +14160,7 @@
       "lineStart": 129,
       "lineEnd": 129,
       "desc": "Single item accepted by `df.concat()` and `$df.concat()`: a `DataFrame` instance, array of row records, or column dictionary.",
-      "signature": "export type ConcatItem = DataFrame<any> | DataFrameDataArg;"
+      "signature": "export type ConcatItem = DataFrame<RowRecord> | DataFrameDataArg;"
     },
     "ConcatItemsArg": {
       "filePath": "types.ts",
@@ -14565,10 +14628,10 @@
       "lineEnd": 491,
       "desc": "Core internal and public interface implemented by all column expressions (`ExprBase`, `ColumnExpr`).",
       "internal": true,
-      "signature": "export interface IExpr {\n    /** Aggregation reducer function registered on the expression, or `null`. */\n    _aggFn?: AggFn<any> | null;\n    /** Parent base expression for struct field extraction or unnesting. */\n    _baseExpr?: IExpr;\n    /** Left and right operand metadata for binary expressions. */\n    _binaryMeta?: { _left: any; _right: any };\n    /** Branch operands collected by `$df.when().then().otherwise()` chains. */\n    _branchOperands?: any[];\n    /** Target `RegisteredDataType` registered via `.cast()`. */\n    _castType?: RegisteredDataType;\n    /** Source column name or expression selector marker. */\n    _colName?: string;\n    /** Logs intermediate column state during expression evaluation and returns `this`. */\n    _debug(label?: string): this;\n    /** Evaluates the full expression pipeline against `columns`. */\n    _evaluate(columns: ColumnDict, height: number): ColumnData;\n    /** Evaluates post-aggregation or post-partition operations starting after `opsIndex`. */\n    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;\n    /** Evaluates pre-aggregation or pre-partition operations up to `opsIndex`. */\n    _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;\n    /** Evaluates a row-wise window operation over a partition slice. */\n    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;\n    /** Struct field name targeted by `.struct.field()`. */\n    _fieldName?: string;\n    /** Pipeline index marking the boundary of an `.agg()` reduction. */\n    _groupingOpsIndex?: number;\n    /** Returns `true` if the expression performs a full-column reduction without window partitioning. */\n    _isGlobalAgg?(): boolean;\n    /** Flag indicating whether the expression represents a constant literal value. */\n    _isLiteral?: boolean;\n    /** Flag indicating whether the expression expands struct fields via `.struct.unnest()`. */\n    _isUnnest?: boolean;\n    /** Flag indicating whether the expression requires window-function evaluation. */\n    _isWindow?: boolean;\n    /** Raw literal value when `_isLiteral` is `true`. */\n    _literalValue?: any;\n    /** Ordered pipeline of vectorized transformation functions. */\n    _ops: OpFn[];\n    /** Explicit output alias name assigned via `.alias()`. */\n    _outputName?: string;\n    /** Partitioning column keys or expressions supplied to `.over()`. */\n    _partitionBy?: ColumnOrExprArg[] | null;\n    /** Pipeline index marking the boundary of an `.over()` window partition. */\n    _partitionOpsIndex?: number;\n    /** Resolves an operand into an evaluated column array or scalar value. */\n    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;\n    /** Window operation metadata descriptor when `_isWindow` is `true`. */\n    _windowOp?: { type: string;[key: string]: any } | null;\n}",
+      "signature": "export interface IExpr {\n    /** Aggregation reducer function registered on the expression, or `null`. */\n    _aggFn?: AggFn<unknown> | null;\n    /** Parent base expression for struct field extraction or unnesting. */\n    _baseExpr?: IExpr;\n    /** Left and right operand metadata for binary expressions. */\n    _binaryMeta?: { _left: unknown; _right: unknown };\n    /** Branch operands collected by `$df.when().then().otherwise()` chains. */\n    _branchOperands?: unknown[];\n    /** Target `RegisteredDataType` registered via `.cast()`. */\n    _castType?: RegisteredDataType;\n    /** Source column name or expression selector marker. */\n    _colName?: string;\n    /** Logs intermediate column state during expression evaluation and returns `this`. */\n    _debug(label?: string): this;\n    /** Evaluates the full expression pipeline against `columns`. */\n    _evaluate(columns: ColumnDict, height: number): ColumnData;\n    /** Evaluates post-aggregation or post-partition operations starting after `opsIndex`. */\n    _evaluatePost(opsIndex: number | undefined, aggregatedArray: unknown[], columns: ColumnDict): ColumnData;\n    /** Evaluates pre-aggregation or pre-partition operations up to `opsIndex`. */\n    _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;\n    /** Evaluates a row-wise window operation over a partition slice. */\n    _evaluateWindow?(groupPreValues: unknown[], partitionIndices: number[], currentIndex: number): unknown;\n    /** Struct field name targeted by `.struct.field()`. */\n    _fieldName?: string;\n    /** Pipeline index marking the boundary of an `.agg()` reduction. */\n    _groupingOpsIndex?: number;\n    /** Returns `true` if the expression performs a full-column reduction without window partitioning. */\n    _isGlobalAgg?(): boolean;\n    /** Flag indicating whether the expression represents a constant literal value. */\n    _isLiteral?: boolean;\n    /** Flag indicating whether the expression expands struct fields via `.struct.unnest()`. */\n    _isUnnest?: boolean;\n    /** Flag indicating whether the expression requires window-function evaluation. */\n    _isWindow?: boolean;\n    /** Raw literal value when `_isLiteral` is `true`. */\n    _literalValue?: unknown;\n    /** Ordered pipeline of vectorized transformation functions. */\n    _ops: OpFn[];\n    /** Explicit output alias name assigned via `.alias()`. */\n    _outputName?: string;\n    /** Partitioning column keys or expressions supplied to `.over()`. */\n    _partitionBy?: ColumnOrExprArg[] | null;\n    /** Pipeline index marking the boundary of an `.over()` window partition. */\n    _partitionOpsIndex?: number;\n    /** Resolves an operand into an evaluated column array or scalar value. */\n    _resolve(val: unknown, columns: ColumnDict, height: number): ColumnData | unknown;\n    /** Window operation metadata descriptor when `_isWindow` is `true`. */\n    _windowOp?: { type: string;[key: string]: unknown } | null;\n}",
       "properties": {
         "_aggFn": {
-          "type": "AggFn<any> | null",
+          "type": "AggFn<unknown> | null",
           "optional": true,
           "desc": "Aggregation reducer function registered on the expression, or `null`."
         },
@@ -14578,12 +14641,12 @@
           "desc": "Parent base expression for struct field extraction or unnesting."
         },
         "_binaryMeta": {
-          "type": "{ _left: any; _right: any }",
+          "type": "{ _left: unknown; _right: unknown }",
           "optional": true,
           "desc": "Left and right operand metadata for binary expressions."
         },
         "_branchOperands": {
-          "type": "any[]",
+          "type": "unknown[]",
           "optional": true,
           "desc": "Branch operands collected by `$df.when().then().otherwise()` chains."
         },
@@ -14623,7 +14686,7 @@
           "desc": "Flag indicating whether the expression requires window-function evaluation."
         },
         "_literalValue": {
-          "type": "any",
+          "type": "unknown",
           "optional": true,
           "desc": "Raw literal value when `_isLiteral` is `true`."
         },
@@ -14648,7 +14711,7 @@
           "desc": "Pipeline index marking the boundary of an `.over()` window partition."
         },
         "_windowOp": {
-          "type": "{ type: string;[key: string]: any } | null",
+          "type": "{ type: string;[key: string]: unknown } | null",
           "optional": true,
           "desc": "Window operation metadata descriptor when `_isWindow` is `true`."
         }
@@ -15056,10 +15119,10 @@
       "lineStart": 774,
       "lineEnd": 789,
       "desc": "Configuration options for sorting arrays and columns (`arr.sort`, `sortArray`).",
-      "signature": "export interface SortArrayOptions<T = any> {\n    /**\n     * Optional comparator function or dictionary mapping column names to custom comparator functions.\n     */\n    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;\n    /**\n     * Sort order boolean or array of booleans per key.\n     * @default false\n     */\n    descending?: ColumnKeyArg<boolean>;\n    /**\n     * When `true`, places nulls at the end of sorted output.\n     * @default true\n     */\n    nullsLast?: boolean;\n}",
+      "signature": "export interface SortArrayOptions<T = unknown> {\n    /**\n     * Optional comparator function or dictionary mapping column names to custom comparator functions.\n     */\n    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof T, (a: unknown, b: unknown) => number>> | null;\n    /**\n     * Sort order boolean or array of booleans per key.\n     * @default false\n     */\n    descending?: ColumnKeyArg<boolean>;\n    /**\n     * When `true`, places nulls at the end of sorted output.\n     * @default true\n     */\n    nullsLast?: boolean;\n}",
       "properties": {
         "customComp": {
-          "type": "((a: any, b: any) => number) | Partial<Record<keyof any, (a: any, b: any) => number>> | null",
+          "type": "((a: unknown, b: unknown) => number) | Partial<Record<keyof unknown, (a: unknown, b: unknown) => number>> | null",
           "optional": true,
           "desc": "Optional comparator function or dictionary mapping column names to custom comparator functions."
         },
@@ -15271,7 +15334,7 @@
       "lineStart": 13,
       "lineEnd": 29,
       "desc": "Target item type descriptor or predicate for `isArrayOfType()` and `toArrayOfType()`.",
-      "signature": "export type ArrayItemType =\n    | \"string\"\n    | \"number\"\n    | \"int\"\n    | \"boolean\"\n    | \"bigint\"\n    | \"object\"\n    | \"plainObject\"\n    | \"date\"\n    | \"regexp\"\n    | \"array\"\n    | \"any\"\n    | \"null\"\n    | \"undefined\"\n    | \"nullish\"\n    | (new (...args: any[]) => any)\n    | ((v: unknown) => any);"
+      "signature": "export type ArrayItemType =\n    | \"string\"\n    | \"number\"\n    | \"int\"\n    | \"boolean\"\n    | \"bigint\"\n    | \"object\"\n    | \"plainObject\"\n    | \"date\"\n    | \"regexp\"\n    | \"array\"\n    | \"any\"\n    | \"null\"\n    | \"undefined\"\n    | \"nullish\"\n    | (new (...args: unknown[]) => unknown)\n    | ((v: unknown) => unknown);"
     },
     "BigIntRange": {
       "filePath": "utils/types.ts",
@@ -15304,10 +15367,10 @@
       "lineStart": 51,
       "lineEnd": 61,
       "desc": "Configuration options for `binarySearch()`.",
-      "signature": "export interface BinarySearchOptions<T = any> {\n    /**\n     * Optional accessor function `(index, item) => number` for indirect searching.\n     */\n    getValue?: (index: number, item: T) => number;\n    /**\n     * Search side: `\"left\"` (first index `>= target`) or `\"right\"` (first index `> target`).\n     * @default \"left\"\n     */\n    side?: BinarySearchSide;\n}",
+      "signature": "export interface BinarySearchOptions<T = unknown> {\n    /**\n     * Optional accessor function `(index, item) => number` for indirect searching.\n     */\n    getValue?: (index: number, item: T) => number;\n    /**\n     * Search side: `\"left\"` (first index `>= target`) or `\"right\"` (first index `> target`).\n     * @default \"left\"\n     */\n    side?: BinarySearchSide;\n}",
       "properties": {
         "getValue": {
-          "type": "(index: number, item: any) => number",
+          "type": "(index: number, item: unknown) => number",
           "optional": true,
           "desc": "Optional accessor function `(index, item) => number` for indirect searching."
         },
@@ -15391,7 +15454,7 @@
       "lineStart": 107,
       "lineEnd": 118,
       "desc": "Callback context passed to cumulative step functions in `fillSequence()` and `$df.seqRange()`.",
-      "signature": "export interface CumulativeStepContext {\n    /** The absolute index of the current element in the parent array. */\n    absoluteIndex: number;\n    /** The relative iteration counter of the stepping process (starts at 1). */\n    index: number;\n    /** The original value at the current index in the target array. */\n    originalValue: any;\n    /** The accumulated value returned by the step function from the previous stepped index. */\n    prev: any;\n    /** The entire target array being populated/modified. */\n    targetArray: any;\n}",
+      "signature": "export interface CumulativeStepContext {\n    /** The absolute index of the current element in the parent array. */\n    absoluteIndex: number;\n    /** The relative iteration counter of the stepping process (starts at 1). */\n    index: number;\n    /** The original value at the current index in the target array. */\n    originalValue: unknown;\n    /** The accumulated value returned by the step function from the previous stepped index. */\n    prev: unknown;\n    /** The entire target array being populated/modified. */\n    targetArray: unknown;\n}",
       "properties": {
         "absoluteIndex": {
           "type": "number",
@@ -15404,17 +15467,17 @@
           "desc": "The relative iteration counter of the stepping process (starts at 1)."
         },
         "originalValue": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "The original value at the current index in the target array."
         },
         "prev": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "The accumulated value returned by the step function from the previous stepped index."
         },
         "targetArray": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "The entire target array being populated/modified."
         }
@@ -15522,15 +15585,15 @@
       "lineStart": 177,
       "lineEnd": 200,
       "desc": "Base configuration options for `fillSequence()`.",
-      "signature": "export interface FillSeqBaseOptions {\n    /**\n     * Type coercion helper applied to each generated value before writing.\n     */\n    coerce?: (v: any) => any;\n    /**\n     * Conditional predicate determining if a value should be written at a given index.\n     */\n    condition?: (v: any, index: number, array: any[]) => boolean;\n    /**\n     * Exclusive boundary index at which iteration and writing stops.\n     */\n    endIndex?: number;\n    /**\n     * If `true`, iterates and populates in reverse from `startIndex` down to `endIndex`.\n     * @default false\n     */\n    reverse?: boolean;\n    /**\n     * Index at which array iteration and writing begins.\n     * @default 0\n     */\n    startIndex?: number;\n}",
+      "signature": "export interface FillSeqBaseOptions {\n    /**\n     * Type coercion helper applied to each generated value before writing.\n     */\n    coerce?: (v: unknown) => unknown;\n    /**\n     * Conditional predicate determining if a value should be written at a given index.\n     */\n    condition?: (v: unknown, index: number, array: unknown[]) => boolean;\n    /**\n     * Exclusive boundary index at which iteration and writing stops.\n     */\n    endIndex?: number;\n    /**\n     * If `true`, iterates and populates in reverse from `startIndex` down to `endIndex`.\n     * @default false\n     */\n    reverse?: boolean;\n    /**\n     * Index at which array iteration and writing begins.\n     * @default 0\n     */\n    startIndex?: number;\n}",
       "properties": {
         "coerce": {
-          "type": "(v: any) => any",
+          "type": "(v: unknown) => unknown",
           "optional": true,
           "desc": "Type coercion helper applied to each generated value before writing."
         },
         "condition": {
-          "type": "(v: any, index: number, array: any[]) => boolean",
+          "type": "(v: unknown, index: number, array: unknown[]) => boolean",
           "optional": true,
           "desc": "Conditional predicate determining if a value should be written at a given index."
         },
@@ -15558,15 +15621,15 @@
       "lineStart": 205,
       "lineEnd": 238,
       "desc": "Configuration options for `fillSequence()`.",
-      "signature": "export interface FillSeqOptions extends FillSeqBaseOptions {\n    /**\n     * Type coercion helper applied to each generated value before writing.\n     */\n    coerce?: (v: any) => any;\n    /**\n     * Conditional predicate determining if a value should be written at a given index.\n     */\n    condition?: (v: any, index: number, array: any[]) => boolean;\n    /**\n     * Exclusive boundary index at which iteration and writing stops.\n     */\n    endIndex?: number;\n    /**\n     * Sequence generation mode: `\"constant\"`, `\"cumulative\"`, or `\"independent\"`.\n     * @default \"cumulative\"\n     */\n    mode?: \"constant\" | \"cumulative\" | \"independent\";\n    /**\n     * If `true`, iterates and populates in reverse from `startIndex` down to `endIndex`.\n     * @default false\n     */\n    reverse?: boolean;\n    /**\n     * Index at which array iteration and writing begins.\n     * @default 0\n     */\n    startIndex?: number;\n    /**\n     * Step increment value or callback function.\n     * @default 1\n     */\n    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);\n}",
+      "signature": "export interface FillSeqOptions extends FillSeqBaseOptions {\n    /**\n     * Type coercion helper applied to each generated value before writing.\n     */\n    coerce?: (v: unknown) => unknown;\n    /**\n     * Conditional predicate determining if a value should be written at a given index.\n     */\n    condition?: (v: unknown, index: number, array: unknown[]) => boolean;\n    /**\n     * Exclusive boundary index at which iteration and writing stops.\n     */\n    endIndex?: number;\n    /**\n     * Sequence generation mode: `\"constant\"`, `\"cumulative\"`, or `\"independent\"`.\n     * @default \"cumulative\"\n     */\n    mode?: \"constant\" | \"cumulative\" | \"independent\";\n    /**\n     * If `true`, iterates and populates in reverse from `startIndex` down to `endIndex`.\n     * @default false\n     */\n    reverse?: boolean;\n    /**\n     * Index at which array iteration and writing begins.\n     * @default 0\n     */\n    startIndex?: number;\n    /**\n     * Step increment value or callback function.\n     * @default 1\n     */\n    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => unknown);\n}",
       "properties": {
         "coerce": {
-          "type": "(v: any) => any",
+          "type": "(v: unknown) => unknown",
           "optional": true,
           "desc": "Type coercion helper applied to each generated value before writing."
         },
         "condition": {
-          "type": "(v: any, index: number, array: any[]) => boolean",
+          "type": "(v: unknown, index: number, array: unknown[]) => boolean",
           "optional": true,
           "desc": "Conditional predicate determining if a value should be written at a given index."
         },
@@ -15594,7 +15657,7 @@
           "default": "0"
         },
         "step": {
-          "type": "number | ((context: CumulativeStepContext & IndependentStepContext) => any)",
+          "type": "number | ((context: CumulativeStepContext & IndependentStepContext) => unknown)",
           "optional": true,
           "desc": "Step increment value or callback function.",
           "default": "1"
@@ -15739,57 +15802,57 @@
               "default": "false"
             },
             "onBigInt": {
-              "type": "(v: bigint) => any",
+              "type": "(v: bigint) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `BigInt` values."
             },
             "onCircular": {
-              "type": "(this: any, k: string, v: any) => any",
+              "type": "(this: unknown, k: string, v: unknown) => unknown",
               "optional": true,
               "desc": "Custom callback invoked when a circular reference is encountered."
             },
             "onCustom": {
-              "type": "(this: any, k: string, v: any) => any",
+              "type": "(this: unknown, k: string, v: unknown) => unknown",
               "optional": true,
               "desc": "Catch-all serialization override for custom types, executed after native type checks."
             },
             "onDate": {
-              "type": "(v: Date) => any",
+              "type": "(v: Date) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Date` objects (takes precedence over `formatDate`)."
             },
             "onError": {
-              "type": "(v: Error) => any",
+              "type": "(v: Error) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Error` objects."
             },
             "onMap": {
-              "type": "(v: Map<any, any>) => any",
+              "type": "(v: Map<unknown, unknown>) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Map` objects."
             },
             "onRegExp": {
-              "type": "(v: RegExp) => any",
+              "type": "(v: RegExp) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `RegExp` objects."
             },
             "onSet": {
-              "type": "(v: Set<any>) => any",
+              "type": "(v: Set<unknown>) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Set` objects."
             },
             "onTypedArray": {
-              "type": "(v: any) => any",
+              "type": "(v: unknown) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `TypedArray` values."
             },
             "onURLSearchParams": {
-              "type": "(v: URLSearchParams) => any",
+              "type": "(v: URLSearchParams) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `URLSearchParams` objects."
             },
             "replacer": {
-              "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+              "type": "((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null",
               "optional": true,
               "desc": "Custom `JSON.stringify` replacer function or property whitelist array applied first."
             },
@@ -15843,7 +15906,7 @@
       "lineStart": 320,
       "lineEnd": 331,
       "desc": "Callback context passed to independent step functions in `fillSequence()` and `$df.seqRange()`.",
-      "signature": "export interface IndependentStepContext {\n    /** The absolute index of the current element in the parent array. */\n    absoluteIndex: number;\n    /** The relative iteration counter of the generation process (starts at 0). */\n    index: number;\n    /** The static starting value passed to the sequence generator. */\n    initialValue: any;\n    /** The original value at the current index in the target array. */\n    originalValue: any;\n    /** The entire target array being populated/modified. */\n    targetArray: any;\n}",
+      "signature": "export interface IndependentStepContext {\n    /** The absolute index of the current element in the parent array. */\n    absoluteIndex: number;\n    /** The relative iteration counter of the generation process (starts at 0). */\n    index: number;\n    /** The static starting value passed to the sequence generator. */\n    initialValue: unknown;\n    /** The original value at the current index in the target array. */\n    originalValue: unknown;\n    /** The entire target array being populated/modified. */\n    targetArray: unknown;\n}",
       "properties": {
         "absoluteIndex": {
           "type": "number",
@@ -15856,17 +15919,17 @@
           "desc": "The relative iteration counter of the generation process (starts at 0)."
         },
         "initialValue": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "The static starting value passed to the sequence generator."
         },
         "originalValue": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "The original value at the current index in the target array."
         },
         "targetArray": {
-          "type": "any",
+          "type": "unknown",
           "optional": false,
           "desc": "The entire target array being populated/modified."
         }
@@ -15942,7 +16005,7 @@
       "lineStart": 372,
       "lineEnd": 392,
       "desc": "Configuration options for `isArrayOfType()` and `toArrayOfType()`.",
-      "signature": "export interface IsArrayOfTypeOptionsParams {\n    /**\n     * Whether an empty array is considered valid.\n     * @default true\n     */\n    allowEmpty?: boolean;\n    /**\n     * Whether `null` and `undefined` elements are permitted without failing validation.\n     * @default false\n     */\n    allowNulls?: boolean;\n    /**\n     * Optional custom coercion function applied to each element in `toArrayOfType()`.\n     */\n    coerce?: (v: unknown) => any;\n    /**\n     * Quantifier mode: `\"every\"` requires all elements to match; `\"some\"` requires at least one element to match.\n     * @default \"every\"\n     */\n    mode?: ArrayCheckMode;\n}",
+      "signature": "export interface IsArrayOfTypeOptionsParams {\n    /**\n     * Whether an empty array is considered valid.\n     * @default true\n     */\n    allowEmpty?: boolean;\n    /**\n     * Whether `null` and `undefined` elements are permitted without failing validation.\n     * @default false\n     */\n    allowNulls?: boolean;\n    /**\n     * Optional custom coercion function applied to each element in `toArrayOfType()`.\n     */\n    coerce?: (v: unknown) => unknown;\n    /**\n     * Quantifier mode: `\"every\"` requires all elements to match; `\"some\"` requires at least one element to match.\n     * @default \"every\"\n     */\n    mode?: ArrayCheckMode;\n}",
       "properties": {
         "allowEmpty": {
           "type": "boolean",
@@ -15957,7 +16020,7 @@
           "default": "false"
         },
         "coerce": {
-          "type": "(v: unknown) => any",
+          "type": "(v: unknown) => unknown",
           "optional": true,
           "desc": "Optional custom coercion function applied to each element in `toArrayOfType()`."
         },
@@ -16018,7 +16081,7 @@
       "lineStart": 419,
       "lineEnd": 453,
       "desc": "Configuration options for `joinArray()`.",
-      "signature": "export interface JoinArrayOptions {\n    /**\n     * If `true`, `null` and `undefined` elements are skipped during joining.\n     * @default false\n     */\n    ignoreNulls?: boolean;\n    /**\n     * Maximum number of array elements to join before truncating with `truncationMarker`.\n     */\n    limit?: number;\n    /**\n     * Custom string representation for `null` and `undefined` elements when `ignoreNulls` is `false`.\n     * @default \"\"\n     */\n    nullValue?: string;\n    /**\n     * Prefix string prepended to the joined result.\n     * @default \"\"\n     */\n    prefix?: string;\n    /**\n     * Suffix string appended to the joined result.\n     * @default \"\"\n     */\n    suffix?: string;\n    /**\n     * Placeholder string appended when `limit` truncation occurs.\n     * @default \"...\"\n     */\n    truncationMarker?: string;\n    /**\n     * Callback function used to format each non-null element to a string.\n     */\n    valueFormatter?: (val: any, index: number) => string;\n}",
+      "signature": "export interface JoinArrayOptions {\n    /**\n     * If `true`, `null` and `undefined` elements are skipped during joining.\n     * @default false\n     */\n    ignoreNulls?: boolean;\n    /**\n     * Maximum number of array elements to join before truncating with `truncationMarker`.\n     */\n    limit?: number;\n    /**\n     * Custom string representation for `null` and `undefined` elements when `ignoreNulls` is `false`.\n     * @default \"\"\n     */\n    nullValue?: string;\n    /**\n     * Prefix string prepended to the joined result.\n     * @default \"\"\n     */\n    prefix?: string;\n    /**\n     * Suffix string appended to the joined result.\n     * @default \"\"\n     */\n    suffix?: string;\n    /**\n     * Placeholder string appended when `limit` truncation occurs.\n     * @default \"...\"\n     */\n    truncationMarker?: string;\n    /**\n     * Callback function used to format each non-null element to a string.\n     */\n    valueFormatter?: (val: unknown, index: number) => string;\n}",
       "properties": {
         "ignoreNulls": {
           "type": "boolean",
@@ -16056,7 +16119,7 @@
           "default": "\"...\""
         },
         "valueFormatter": {
-          "type": "(val: any, index: number) => string",
+          "type": "(val: unknown, index: number) => string",
           "optional": true,
           "desc": "Callback function used to format each non-null element to a string."
         }
@@ -16192,10 +16255,17 @@
         }
       }
     },
-    "NumericFormatOptions": {
+    "NodeBufferConstructor": {
       "filePath": "utils/types.ts",
       "lineStart": 541,
-      "lineEnd": 562,
+      "lineEnd": 546,
+      "desc": "Minimal Node.js `Buffer` constructor interface for encoding/decoding strings without requiring `@types/node`.",
+      "signature": "export interface NodeBufferConstructor {\n    /**\n     * Allocates a new `Buffer` containing the given string encoded with `enc`.\n     */\n    from(s: string, enc: string): Uint8Array & { toString(enc: string): string };\n}"
+    },
+    "NumericFormatOptions": {
+      "filePath": "utils/types.ts",
+      "lineStart": 551,
+      "lineEnd": 572,
       "desc": "Configuration options for `formatNumber()`.",
       "signature": "export interface NumericFormatOptions extends Intl.NumberFormatOptions {\n    /**\n     * If `true`, formats negative numbers in accounting parentheses (e.g. `(1.23)`).\n     * @default false\n     */\n    accountingNegatives?: boolean;\n    /**\n     * Fallback string returned when the value cannot be parsed into a formattable number.\n     * @default \"NaN\"\n     */\n    fallback?: string;\n    /**\n     * If `true`, returns `fallback` for `Infinity` and `-Infinity` values.\n     * @default false\n     */\n    formatNonFinite?: boolean;\n    /**\n     * BCP 47 language tag (e.g. `\"en-US\"`, `\"de-DE\"`).\n     * @default \"en-US\"\n     */\n    locale?: string;\n}",
       "properties": {
@@ -16227,8 +16297,8 @@
     },
     "NumericValidationOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 567,
-      "lineEnd": 578,
+      "lineStart": 577,
+      "lineEnd": 588,
       "desc": "Configuration options for `isValidNumber()`.",
       "signature": "export interface NumericValidationOptions {\n    /**\n     * Whether `NaN` is considered a valid number.\n     * @default false\n     */\n    allowNaN?: boolean;\n    /**\n     * Whether `Infinity` and `-Infinity` are considered valid numbers.\n     * @default false\n     */\n    allowNonFiniteNumbers?: boolean;\n}",
       "properties": {
@@ -16248,8 +16318,8 @@
     },
     "ParseDurationStringOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 583,
-      "lineEnd": 589,
+      "lineStart": 593,
+      "lineEnd": 599,
       "desc": "Configuration options for `parseDurationString()`.",
       "signature": "export interface ParseDurationStringOptions {\n    /**\n     * Target unit to convert the parsed duration into.\n     * @default \"ms\"\n     */\n    to?: DurationUnit;\n}",
       "properties": {
@@ -16264,8 +16334,8 @@
     },
     "ParseNumberOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 594,
-      "lineEnd": 615,
+      "lineStart": 604,
+      "lineEnd": 625,
       "desc": "Configuration options for `toValidNumber()`.",
       "signature": "export interface ParseNumberOptions extends NumericValidationOptions {\n    /**\n     * Whether `NaN` is considered a valid number.\n     * @default false\n     */\n    allowNaN?: boolean;\n    /**\n     * Whether `Infinity` and `-Infinity` are considered valid numbers.\n     * @default false\n     */\n    allowNonFiniteNumbers?: boolean;\n    /**\n     * When `true`, allows scientific notation (e.g. `\"1.5e3\"`) when parsing numeric strings.\n     * @default true\n     */\n    floatScientific?: boolean;\n    /**\n     * When `true`, rejects strings containing currency symbols, percent signs, or non-standard formatting.\n     * @default false\n     */\n    strictNumericString?: boolean;\n}",
       "properties": {
@@ -16297,8 +16367,8 @@
     },
     "SafeJsonParseOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 620,
-      "lineEnd": 656,
+      "lineStart": 630,
+      "lineEnd": 666,
       "desc": "Configuration options for `safeJsonParse()`.",
       "signature": "export interface SafeJsonParseOptions<T = unknown, F = T> extends JSONParseOptions {\n    /**\n     * Whether to allow JSON primitive roots (numbers, booleans, strings, `null`) instead of requiring objects or arrays.\n     * @default false\n     */\n    allowPrimitives?: boolean;\n    /**\n     * Fallback value returned when parsing or guard validation fails.\n     */\n    fallback?: F;\n    /**\n     * Format of the JSON content: `\"json\"` (standard JSON) or `\"ndjson\"` (Newline Delimited JSON).\n     * @default \"json\"\n     */\n    format?: JSONFormat;\n    /**\n     * Guard predicate to validate the parsed value. If it returns `false`, `onError` is called and `fallback` is returned.\n     */\n    guard?: ((value: unknown) => value is T) | ((value: unknown) => boolean);\n    /**\n     * Options specific to NDJSON parsing when `format` is `\"ndjson\"`.\n     */\n    ndjson?: NDJSONParseOptions;\n    /**\n     * Callback invoked when parsing fails or the `guard` check returns `false`.\n     */\n    onError?: (err: unknown) => void;\n    /**\n     * Reviver function passed to `JSON.parse` for custom value transformation.\n     */\n    reviver?: Parameters<typeof JSON.parse>[1];\n    /**\n     * Whether to trim leading and trailing whitespace before validating/parsing.\n     * @default false\n     */\n    trimBeforeParse?: boolean;\n}",
       "properties": {
@@ -16369,10 +16439,10 @@
     },
     "SafeJsonReplacerOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 661,
-      "lineEnd": 726,
+      "lineStart": 671,
+      "lineEnd": 736,
       "desc": "Configuration options for `createSafeJsonReplacer()`.",
-      "signature": "export interface SafeJsonReplacerOptions {\n    /**\n     * Strategy for serializing `BigInt` values: `\"string\"` or `\"number\"`.\n     * @default \"string\"\n     */\n    bigintStrategy?: \"string\" | \"number\";\n    /** Custom formatter function for `Date` objects (ignored if `onDate` is specified). */\n    formatDate?: (v: Date) => string;\n    /**\n     * If `true`, replaces circular references instead of throwing.\n     * @default false\n     */\n    handleCircular?: boolean;\n    /** Custom serialization override for `BigInt` values. */\n    onBigInt?: (v: bigint) => any;\n    /** Custom callback invoked when a circular reference is encountered. */\n    onCircular?: (this: any, k: string, v: any) => any;\n    /** Catch-all serialization override for custom types, executed after native type checks. */\n    onCustom?: (this: any, k: string, v: any) => any;\n    /** Custom serialization override for `Date` objects (takes precedence over `formatDate`). */\n    onDate?: (v: Date) => any;\n    /** Custom serialization override for `Error` objects. */\n    onError?: (v: Error) => any;\n    /** Custom serialization override for `Map` objects. */\n    onMap?: (v: Map<any, any>) => any;\n    /** Custom serialization override for `RegExp` objects. */\n    onRegExp?: (v: RegExp) => any;\n    /** Custom serialization override for `Set` objects. */\n    onSet?: (v: Set<any>) => any;\n    /** Custom serialization override for `TypedArray` values. */\n    onTypedArray?: (v: any) => any;\n    /** Custom serialization override for `URLSearchParams` objects. */\n    onURLSearchParams?: (v: URLSearchParams) => any;\n    /** Custom `JSON.stringify` replacer function or property whitelist array applied first. */\n    replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null;\n    /**\n     * If `true`, disables default safe serialization for `BigInt` values.\n     * @default false\n     */\n    voidBigIntReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `Date` objects.\n     * @default false\n     */\n    voidDateReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `Map` objects.\n     * @default false\n     */\n    voidMapReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `RegExp` objects.\n     * @default false\n     */\n    voidRegExpReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `Set` objects.\n     * @default false\n     */\n    voidSetReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `TypedArray` values.\n     * @default false\n     */\n    voidTypedArrayReplacement?: boolean;\n}",
+      "signature": "export interface SafeJsonReplacerOptions {\n    /**\n     * Strategy for serializing `BigInt` values: `\"string\"` or `\"number\"`.\n     * @default \"string\"\n     */\n    bigintStrategy?: \"string\" | \"number\";\n    /** Custom formatter function for `Date` objects (ignored if `onDate` is specified). */\n    formatDate?: (v: Date) => string;\n    /**\n     * If `true`, replaces circular references instead of throwing.\n     * @default false\n     */\n    handleCircular?: boolean;\n    /** Custom serialization override for `BigInt` values. */\n    onBigInt?: (v: bigint) => unknown;\n    /** Custom callback invoked when a circular reference is encountered. */\n    onCircular?: (this: unknown, k: string, v: unknown) => unknown;\n    /** Catch-all serialization override for custom types, executed after native type checks. */\n    onCustom?: (this: unknown, k: string, v: unknown) => unknown;\n    /** Custom serialization override for `Date` objects (takes precedence over `formatDate`). */\n    onDate?: (v: Date) => unknown;\n    /** Custom serialization override for `Error` objects. */\n    onError?: (v: Error) => unknown;\n    /** Custom serialization override for `Map` objects. */\n    onMap?: (v: Map<unknown, unknown>) => unknown;\n    /** Custom serialization override for `RegExp` objects. */\n    onRegExp?: (v: RegExp) => unknown;\n    /** Custom serialization override for `Set` objects. */\n    onSet?: (v: Set<unknown>) => unknown;\n    /** Custom serialization override for `TypedArray` values. */\n    onTypedArray?: (v: unknown) => unknown;\n    /** Custom serialization override for `URLSearchParams` objects. */\n    onURLSearchParams?: (v: URLSearchParams) => unknown;\n    /** Custom `JSON.stringify` replacer function or property whitelist array applied first. */\n    replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null;\n    /**\n     * If `true`, disables default safe serialization for `BigInt` values.\n     * @default false\n     */\n    voidBigIntReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `Date` objects.\n     * @default false\n     */\n    voidDateReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `Map` objects.\n     * @default false\n     */\n    voidMapReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `RegExp` objects.\n     * @default false\n     */\n    voidRegExpReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `Set` objects.\n     * @default false\n     */\n    voidSetReplacement?: boolean;\n    /**\n     * If `true`, disables default safe serialization for `TypedArray` values.\n     * @default false\n     */\n    voidTypedArrayReplacement?: boolean;\n}",
       "properties": {
         "bigintStrategy": {
           "type": "\"string\" | \"number\"",
@@ -16392,57 +16462,57 @@
           "default": "false"
         },
         "onBigInt": {
-          "type": "(v: bigint) => any",
+          "type": "(v: bigint) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `BigInt` values."
         },
         "onCircular": {
-          "type": "(this: any, k: string, v: any) => any",
+          "type": "(this: unknown, k: string, v: unknown) => unknown",
           "optional": true,
           "desc": "Custom callback invoked when a circular reference is encountered."
         },
         "onCustom": {
-          "type": "(this: any, k: string, v: any) => any",
+          "type": "(this: unknown, k: string, v: unknown) => unknown",
           "optional": true,
           "desc": "Catch-all serialization override for custom types, executed after native type checks."
         },
         "onDate": {
-          "type": "(v: Date) => any",
+          "type": "(v: Date) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `Date` objects (takes precedence over `formatDate`)."
         },
         "onError": {
-          "type": "(v: Error) => any",
+          "type": "(v: Error) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `Error` objects."
         },
         "onMap": {
-          "type": "(v: Map<any, any>) => any",
+          "type": "(v: Map<unknown, unknown>) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `Map` objects."
         },
         "onRegExp": {
-          "type": "(v: RegExp) => any",
+          "type": "(v: RegExp) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `RegExp` objects."
         },
         "onSet": {
-          "type": "(v: Set<any>) => any",
+          "type": "(v: Set<unknown>) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `Set` objects."
         },
         "onTypedArray": {
-          "type": "(v: any) => any",
+          "type": "(v: unknown) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `TypedArray` values."
         },
         "onURLSearchParams": {
-          "type": "(v: URLSearchParams) => any",
+          "type": "(v: URLSearchParams) => unknown",
           "optional": true,
           "desc": "Custom serialization override for `URLSearchParams` objects."
         },
         "replacer": {
-          "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+          "type": "((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null",
           "optional": true,
           "desc": "Custom `JSON.stringify` replacer function or property whitelist array applied first."
         },
@@ -16486,8 +16556,8 @@
     },
     "StepSliceArrayOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 731,
-      "lineEnd": 755,
+      "lineStart": 741,
+      "lineEnd": 765,
       "desc": "Configuration options for `stepSliceArray()`.",
       "signature": "export interface StepSliceArrayOptions {\n    /**\n     * Maximum number of items to gather in the sliced result array.\n     */\n    maxItemsGathered?: number;\n    /**\n     * If `true`, returns `null` when the starting offset is out of bounds; if `false`, throws an error.\n     * @default true\n     */\n    nullOnOob?: boolean;\n    /**\n     * Ending index (exclusive). Supports negative indices relative to array length.\n     */\n    offsetEnd?: number;\n    /**\n     * Starting index (inclusive). Supports negative indices relative to array length.\n     * @default 0\n     */\n    offsetStart?: number;\n    /**\n     * Step size to slice the array by (non-zero). Positive slices forward; negative slices backward.\n     * @default 1\n     */\n    step?: number;\n}",
       "properties": {
@@ -16523,8 +16593,8 @@
     },
     "StripCharsOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 760,
-      "lineEnd": 807,
+      "lineStart": 770,
+      "lineEnd": 817,
       "desc": "Configuration options for `stripChars()`.",
       "signature": "export interface StripCharsOptions {\n    /**\n     * Maximum number of non-contiguous matching blocks allowed to be stripped from the end (`-1` or `null` strips all).\n     */\n    maxMatchesEnd?: number | null;\n    /**\n     * Maximum number of non-contiguous matching blocks allowed to be stripped from the start (`-1` or `null` strips all).\n     */\n    maxMatchesStart?: number | null;\n    /**\n     * Maximum number of non-matching characters allowed to be skipped from the end before a match block is found (`-1` or `null` scans full length).\n     */\n    maxScanEnd?: number | null;\n    /**\n     * Maximum number of non-matching characters allowed to be skipped from the start before a match block is found (`-1` or `null` scans full length).\n     */\n    maxScanStart?: number | null;\n    /**\n     * Boundary strip mode: `\"both\"`, `\"start\"`, or `\"end\"`.\n     * @default \"both\"\n     */\n    mode?: StripMode;\n    /**\n     * If `true`, returns `\"\"` instead of `null` when the stripped result is empty or input is `null`.\n     * @default false\n     */\n    returnStringOnNull?: boolean;\n    /**\n     * Options that apply only when `characters` is a string (and not a `RegExp`).\n     */\n    stringOptions?: {\n        /**\n         * If `true`, treats `characters` as a literal substring rather than a set of characters.\n         * @default false\n         */\n        literal?: boolean;\n        /**\n         * If `true`, performs case-insensitive character and substring matching.\n         * @default false\n         */\n        caseInsensitive?: boolean;\n    };\n    /**\n     * If `true`, trims standard whitespace first before performing character stripping.\n     * @default false\n     */\n    trimFirst?: boolean;\n}",
       "properties": {
@@ -16590,15 +16660,15 @@
     },
     "StripMode": {
       "filePath": "utils/types.ts",
-      "lineStart": 812,
-      "lineEnd": 812,
+      "lineStart": 822,
+      "lineEnd": 822,
       "desc": "Boundary side for `stripChars()`.",
       "signature": "export type StripMode = \"both\" | \"start\" | \"end\";"
     },
     "ToDurationOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 817,
-      "lineEnd": 827,
+      "lineStart": 827,
+      "lineEnd": 837,
       "desc": "Configuration options for `toDuration()`.",
       "signature": "export interface ToDurationOptions extends ParseDurationStringOptions {\n    /**\n     * Fallback numeric value returned when the input cannot be parsed as a valid duration.\n     */\n    fallback?: number;\n    /**\n     * Target unit to convert the parsed duration into.\n     * @default \"ms\"\n     */\n    to?: DurationUnit;\n}",
       "properties": {
@@ -16618,8 +16688,8 @@
     },
     "ToValidArrayOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 832,
-      "lineEnd": 843,
+      "lineStart": 842,
+      "lineEnd": 853,
       "desc": "Configuration options for `toValidArray()`.",
       "signature": "export interface ToValidArrayOptions {\n    /**\n     * If `true`, returns a shallow copy of an existing array. If `false`, returns the input array directly without cloning.\n     * @default true\n     */\n    clone?: boolean;\n    /**\n     * If `true`, wraps `null` or `undefined` into a single-element array. If `false`, returns an empty array `[]`.\n     * @default false\n     */\n    wrapNull?: boolean;\n}",
       "properties": {
@@ -16639,8 +16709,8 @@
     },
     "toValidBigIntOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 848,
-      "lineEnd": 859,
+      "lineStart": 858,
+      "lineEnd": 869,
       "desc": "Configuration options for `toValidBigInt()`.",
       "signature": "export interface toValidBigIntOptions extends IsValidBigIntOptions {\n    /**\n     * 64-bit integer range bounds to validate against.\n     * @default \"Int64\"\n     */\n    range?: BigIntRange;\n    /**\n     * When `true`, truncates fractional numbers/strings toward zero before converting to `bigint`.\n     * @default false\n     */\n    truncate?: boolean;\n}",
       "properties": {
@@ -16672,27 +16742,27 @@
     },
     "TypedArrayConstructor": {
       "filePath": "utils/types.ts",
-      "lineStart": 864,
-      "lineEnd": 864,
+      "lineStart": 874,
+      "lineEnd": 874,
       "desc": "Constructor signature for a JavaScript TypedArray.",
       "signature": "export type TypedArrayConstructor<T extends AnyTypedArray = AnyTypedArray> = new (length: number) => T;"
     },
     "UnicodeSurrogateType": {
       "filePath": "utils/types.ts",
-      "lineStart": 869,
-      "lineEnd": 869,
+      "lineStart": 879,
+      "lineEnd": 879,
       "desc": "Surrogate half selector for `_isUnicodeSurrogate()`.",
       "signature": "export type UnicodeSurrogateType = \"all\" | \"high\" | \"low\";"
     },
     "UniqueArrayStatsOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 874,
-      "lineEnd": 884,
+      "lineStart": 884,
+      "lineEnd": 894,
       "desc": "Configuration options for `getUniqueArrayStats()`.",
-      "signature": "export interface UniqueArrayStatsOptions {\n    /**\n     * Custom function to extract a unique comparison key from each element.\n     */\n    keySelector?: (val: any) => any;\n    /**\n     * If `true`, uses canonical serialization to group nested structures (Arrays, Sets, Maps, Dates) by value instead of reference.\n     * @default false\n     */\n    strict?: boolean;\n}",
+      "signature": "export interface UniqueArrayStatsOptions {\n    /**\n     * Custom function to extract a unique comparison key from each element.\n     */\n    keySelector?: (val: unknown) => string;\n    /**\n     * If `true`, uses canonical serialization to group nested structures (Arrays, Sets, Maps, Dates) by value instead of reference.\n     * @default false\n     */\n    strict?: boolean;\n}",
       "properties": {
         "keySelector": {
-          "type": "(val: any) => any",
+          "type": "(val: unknown) => string",
           "optional": true,
           "desc": "Custom function to extract a unique comparison key from each element."
         },
@@ -16706,8 +16776,8 @@
     },
     "WriteCSVOptions": {
       "filePath": "utils/types.ts",
-      "lineStart": 889,
-      "lineEnd": 945,
+      "lineStart": 899,
+      "lineEnd": 955,
       "desc": "Configuration options for `writeCSV()` and `df.writeCsv()`.",
       "signature": "export interface WriteCSVOptions extends FormatCSVValueOptions {\n    /**\n     * Custom `strftime` format string for `Date` values (e.g. `\"%Y-%m-%d\"`).\n     */\n    dateFormat?: string;\n    /**\n     * Custom `strftime` format string for `Datetime` values (e.g. `\"%Y-%m-%d %H:%M:%S\"`).\n     */\n    datetimeFormat?: string;\n    /**\n     * Whether to include a UTF-8 Byte Order Mark (BOM) at the start of the output.\n     * @default false\n     */\n    includeBom?: boolean;\n    /**\n     * Whether to write the header row.\n     * @default true\n     */\n    includeHeader?: boolean;\n    /**\n     * String used to terminate each row.\n     * @default \"\\n\"\n     */\n    lineTerminator?: string;\n    /**\n     * String representation to use for `null` or missing values.\n     * @default \"\"\n     */\n    nullValue?: string;\n    /**\n     * Options for numeric formatting (floats, ints, bigints).\n     */\n    numericFormatOptions?: NumericFormatOptions;\n    /**\n     * Single-character quote symbol used for quoting fields.\n     * @default '\"'\n     */\n    quoteChar?: string;\n    /**\n     * Quoting strategy for CSV fields: `\"necessary\"`, `\"always\"`, `\"never\"`, or `\"non_numeric\"`.\n     * @default \"necessary\"\n     */\n    quoteStyle?: \"necessary\" | \"always\" | \"never\" | \"non_numeric\";\n    /**\n     * Options for the safe JSON replacer used when formatting objects and arrays.\n     */\n    replacerOptions?: SafeJsonReplacerOptions;\n    /**\n     * Single-character delimiter that separates fields.\n     * @default \",\"\n     */\n    separator?: string;\n    /**\n     * Custom `strftime` format string for `Time` values (e.g. `\"%H:%M:%S\"`).\n     */\n    timeFormat?: string;\n}",
       "properties": {
@@ -16811,57 +16881,57 @@
               "default": "false"
             },
             "onBigInt": {
-              "type": "(v: bigint) => any",
+              "type": "(v: bigint) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `BigInt` values."
             },
             "onCircular": {
-              "type": "(this: any, k: string, v: any) => any",
+              "type": "(this: unknown, k: string, v: unknown) => unknown",
               "optional": true,
               "desc": "Custom callback invoked when a circular reference is encountered."
             },
             "onCustom": {
-              "type": "(this: any, k: string, v: any) => any",
+              "type": "(this: unknown, k: string, v: unknown) => unknown",
               "optional": true,
               "desc": "Catch-all serialization override for custom types, executed after native type checks."
             },
             "onDate": {
-              "type": "(v: Date) => any",
+              "type": "(v: Date) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Date` objects (takes precedence over `formatDate`)."
             },
             "onError": {
-              "type": "(v: Error) => any",
+              "type": "(v: Error) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Error` objects."
             },
             "onMap": {
-              "type": "(v: Map<any, any>) => any",
+              "type": "(v: Map<unknown, unknown>) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Map` objects."
             },
             "onRegExp": {
-              "type": "(v: RegExp) => any",
+              "type": "(v: RegExp) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `RegExp` objects."
             },
             "onSet": {
-              "type": "(v: Set<any>) => any",
+              "type": "(v: Set<unknown>) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `Set` objects."
             },
             "onTypedArray": {
-              "type": "(v: any) => any",
+              "type": "(v: unknown) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `TypedArray` values."
             },
             "onURLSearchParams": {
-              "type": "(v: URLSearchParams) => any",
+              "type": "(v: URLSearchParams) => unknown",
               "optional": true,
               "desc": "Custom serialization override for `URLSearchParams` objects."
             },
             "replacer": {
-              "type": "((this: any, k: string, v: any) => any) | (string | number)[] | null",
+              "type": "((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null",
               "optional": true,
               "desc": "Custom `JSON.stringify` replacer function or property whitelist array applied first."
             },

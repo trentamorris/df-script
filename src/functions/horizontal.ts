@@ -69,7 +69,7 @@ export function horizontal(
         for (let i = 0; i < height; i++) {
             const row = new Array(exprCount);
             for (let j = 0; j < exprCount; j++) {
-                row[j] = isCol[j] ? evaluatedArrays[j][i] : evaluatedArrays[j];
+                row[j] = isCol[j] ? (evaluatedArrays[j] as unknown[])[i] : evaluatedArrays[j];
             }
             result[i] = row;
         }

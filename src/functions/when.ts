@@ -59,15 +59,15 @@ export class WhenThen extends ColumnExpr<unknown> {
             for (let i = 0; i < height; i++) {
                 let matched = false;
                 for (let j = 0; j < numConditions; j++) {
-                    const predVal = isPredCol[j] ? evaluatedPreds[j][i] : evaluatedPreds[j];
+                    const predVal = isPredCol[j] ? (evaluatedPreds[j] as unknown[])[i] : evaluatedPreds[j];
                     if (predVal === true) {
-                        result[i] = isValCol[j] ? evaluatedVals[j][i] : evaluatedVals[j];
+                        result[i] = isValCol[j] ? (evaluatedVals[j] as unknown[])[i] : evaluatedVals[j];
                         matched = true;
                         break;
                     }
                 }
                 if (!matched) {
-                    result[i] = isOtherwiseCol ? evaluatedOtherwise[i] : evaluatedOtherwise;
+                    result[i] = isOtherwiseCol ? (evaluatedOtherwise as unknown[])[i] : evaluatedOtherwise;
                 }
             }
             return result;

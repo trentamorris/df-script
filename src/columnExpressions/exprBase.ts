@@ -1,4 +1,5 @@
 /** @internalfile */
+import type { BinaryMeta, ColumnExprInternal } from "./types"
 import type { IExpr, OpFn, AggFn, ColumnData, ColumnDict } from "../types"
 import type { RegisteredDataType } from "../datatypes"
 import { ALL_COLUMNS_MARKER } from "./constants"
@@ -10,13 +11,15 @@ const _derive = <T extends IExpr>(
     instance: T,
     nextOp?: OpFn
 ): T => {
-    const Constructor = instance.constructor as any;
-    const colNameVal = (instance as any)._colNames || (instance as any)._colName || "";
+    const Constructor = instance.constructor as new (colName: unknown) => T;
+    const instObj = instance as unknown as ColumnExprInternal;
+    const colNameVal = instObj._colNames || instObj._colName || "";
     const newInst = new Constructor(colNameVal);
     Object.assign(newInst, instance);
     newInst._ops = nextOp ? [...instance._ops, nextOp] : [...instance._ops];
-    if (nextOp && (nextOp as any)._binaryMeta) {
-        newInst._binaryMeta = (nextOp as any)._binaryMeta;
+    const nextOpMeta = nextOp ? (nextOp as unknown as { _binaryMeta?: BinaryMeta })._binaryMeta : undefined;
+    if (nextOpMeta) {
+        newInst._binaryMeta = nextOpMeta;
     }
     return newInst;
 };
@@ -24,15 +27,15 @@ const _derive = <T extends IExpr>(
 export function isExpr(v: unknown): v is IExpr { return v instanceof ExprBase; };
 
 export function isColExpr(v: unknown): v is IExpr {
-    return v instanceof ExprBase || (isObj(v) && typeof (v as any)._evaluate === "function");
+    return v instanceof ExprBase || (isObj(v) && typeof (v as ColumnExprInternal)._evaluate === "function");
 }
 
-export function toColExpr<T extends IExpr = IExpr>(col: any, contextExpr?: any): T {
+export function toColExpr<T extends IExpr = IExpr>(col: unknown, contextExpr?: unknown): T {
     assertNotNull(col, "Column reference can't be null or undefined.");
     if (isColExpr(col)) {
         return col as T;
     }
-    const Constructor = typeof contextExpr === "function" ? contextExpr : (contextExpr && contextExpr.constructor) || ExprBase;
+    const Constructor = (typeof contextExpr === "function" ? contextExpr : (contextExpr && (contextExpr as { constructor?: unknown }).constructor) || ExprBase) as new (col: unknown) => T;
     return new Constructor(col);
 }
 
@@ -45,14 +48,14 @@ export class ExprBase implements IExpr {
     _ops: OpFn[] = [];
     _outputName: string = "";
     _isLiteral?: boolean;
-    _literalValue?: any;
-    _aggFn?: AggFn<any> | null = null;
+    _literalValue?: unknown;
+    _aggFn?: AggFn<unknown> | null = null;
     _castType?: RegisteredDataType;
-    _binaryMeta?: { _left: any; _right: any };
+    _binaryMeta?: { _left: unknown; _right: unknown };
     _groupingOpsIndex?: number;
     _partitionOpsIndex?: number;
     _partitionBy: (string | IExpr)[] | null = null;
-    _evaluateWindow?: (groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any;
+    _evaluateWindow?: (groupPreValues: unknown[], partitionIndices: number[], currentIndex: number) => any;
     _baseExpr?: IExpr;
     _fieldName?: string;
     _isUnnest?: boolean;
@@ -68,19 +71,19 @@ export class ExprBase implements IExpr {
         return _derive(this, op) as this;
     }
 
-    _deriveBinary(other: any, fn: (v: any, r: any) => any) {
-        return _derive(this, kleeneBinary(this, other, fn));
+    _deriveBinary<L = number, R = number, Out = unknown>(other: unknown, fn: (v: L, r: R) => Out) {
+        return _derive(this, kleeneBinary(this, other, fn as (v: unknown, r: unknown) => unknown));
     }
 
-    _deriveUnary(fn: (v: any) => any) {
-        return _derive(this, kleeneUnary(fn));
+    _deriveUnary<V = number, Out = unknown>(fn: (v: V) => Out) {
+        return _derive(this, kleeneUnary(fn as (v: unknown) => unknown));
     }
 
     _evaluate(columns: ColumnDict, height: number): ColumnData {
         return this._evaluatePre(undefined, columns, height);
     }
 
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData {
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: unknown[], columns: ColumnDict): ColumnData {
         let value: ColumnData = aggregatedArray;
         const ops = this._ops;
         const start = opsIndex !== undefined ? opsIndex : 0;
@@ -102,7 +105,7 @@ export class ExprBase implements IExpr {
     }
 
     _getInitialValue(columns: ColumnDict, height: number): ColumnData {
-        const name = (this as any)._colName;
+        const name = (this as unknown as ColumnExprInternal)._colName;
         if (name && (name in columns)) {
             return columns[name];
         }
@@ -120,14 +123,14 @@ export class ExprBase implements IExpr {
         return this._aggFn != null && (!this._partitionBy || this._partitionBy.length === 0);
     }
 
-    _resolve(val: any, columns: ColumnDict, height: number) {
+    _resolve(val: unknown, columns: ColumnDict, height: number) {
         if (val instanceof ExprBase) {
             return val._isLiteral ? val._literalValue : evaluateExpression(val, columns, height);
         }
         return val;
     }
 
-    _toColExpr(col: any): any {
+    _toColExpr(col: unknown): unknown {
         return toColExpr(col, this);
     }
 }

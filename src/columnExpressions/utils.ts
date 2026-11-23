@@ -2,7 +2,7 @@
  * @internalfile
  */
 import type { IExpr, ColumnData, ColumnDict } from "../types";
-import type { ProxyPropertyResolver } from "./types";
+import type { BinaryMeta, ProxyPropertyResolver } from "./types";
 import { isExpr } from "./exprBase";
 import { isArrayOrTypedArray, sortArray, toCanonicalString } from "../utils";
 import { isValidDateObj } from "../utils/object";
@@ -18,7 +18,7 @@ export function createDelegatingProxy<T extends object>(
 ): T {
     return new Proxy(target, {
         get(t, prop, receiver) {
-            if (prop === "constructor") return (t as any).constructor;
+            if (prop === "constructor") return (t as { constructor: unknown }).constructor;
             if (typeof prop === "string") {
                 const delegated = resolve(prop, t);
                 if (delegated !== undefined) return delegated;
@@ -32,7 +32,7 @@ export function createDelegatingProxy<T extends object>(
  * Normalizes a single unary value (coercing Date instances to getTime if valid)
  * and executes the operation callback.
  */
-export function evalUnaryOp(v: any, fn: (a: any) => any): any {
+export function evalUnaryOp(v: unknown, fn: (a: unknown) => any): unknown {
     if (v == null) return null;
     const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
     return fn(normV);
@@ -42,14 +42,14 @@ export function evalUnaryOp(v: any, fn: (a: any) => any): any {
  * Normalizes binary values (coercing Date instances to getTime if valid)
  * and executes the operation callback.
  */
-export function evalBinaryOp(v: any, r: any, fn: (a: any, b: any) => any): any {
+export function evalBinaryOp(v: unknown, r: unknown, fn: (a: unknown, b: unknown) => any): unknown {
     if (v == null || r == null) return null;
     const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
     const normR = typeof r === "object" && isValidDateObj(r) ? r.getTime() : r;
     return fn(normV, normR);
 }
 
-export function kleeneUnary(fn: (v: any) => any) {
+export function kleeneUnary(fn: (v: unknown) => any) {
     return (vArray: ColumnData) => {
         const height = vArray.length;
         const result = new Array(height);
@@ -60,7 +60,7 @@ export function kleeneUnary(fn: (v: any) => any) {
     };
 }
 
-export function kleeneBinary(expr: IExpr, other: any, fn: (v: any, r: any) => any) {
+export function kleeneBinary(expr: IExpr, other: unknown, fn: (v: unknown, r: unknown) => any) {
     const op = (vArray: ColumnData, columns: ColumnDict) => {
         const height = vArray.length;
         const rResolved = expr._resolve(other, columns, height);
@@ -76,7 +76,7 @@ export function kleeneBinary(expr: IExpr, other: any, fn: (v: any, r: any) => an
         }
         return result;
     };
-    (op as any)._binaryMeta = { _left: expr, _right: other };
+    (op as unknown as { _binaryMeta: BinaryMeta })._binaryMeta = { _left: expr, _right: other };
     return op;
 }
 
@@ -93,7 +93,7 @@ export function evaluateArg(
     arg: unknown,
     columns: ColumnDict | null | undefined,
     height: number
-): any {
+): unknown {
     if (isExpr(arg)) {
         return evaluateExpression(arg, columns || {}, height);
     }
@@ -128,7 +128,7 @@ export function evaluateArgsMatrix(
     args: unknown[],
     columns: ColumnDict | null | undefined,
     height: number
-): { evaluatedArrays: any[]; isCol: boolean[] } {
+): { evaluatedArrays: unknown[]; isCol: boolean[] } {
     const len = args.length;
     const evaluatedArrays = new Array(len);
     const isCol = new Array(len);
@@ -143,17 +143,17 @@ export function evaluateArgsMatrix(
     return { evaluatedArrays, isCol };
 }
 
-export function buildCanonicalSet(vals: any): Set<string> {
+export function buildCanonicalSet(vals: unknown): Set<string> {
     const set = new Set<string>();
     const arr = isArrayOrTypedArray(vals) ? vals : [vals];
     for (let j = 0; j < arr.length; j++) set.add(toCanonicalString(arr[j]));
     return set;
 }
 
-export function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any): any[] {
+export function computeIsIn(vArray: ArrayLike<unknown>, columns: unknown, values: unknown): unknown[] {
     const height = vArray.length;
     const exprValues = isExpr(values);
-    const resolved = exprValues ? evaluateExpression(values, columns, height) : null;
+    const resolved = exprValues ? evaluateExpression(values, columns as ColumnDict, height) : null;
     const staticSet = exprValues ? null : buildCanonicalSet(values);
     const result = new Array(height);
 
@@ -169,7 +169,7 @@ export function computeIsIn(vArray: ArrayLike<any>, columns: any, values: any): 
     return result;
 }
 
-export function compareMissing(vArray: ArrayLike<any>, rResolved: any): boolean[] {
+export function compareMissing(vArray: ArrayLike<unknown>, rResolved: unknown): boolean[] {
     const height = vArray.length;
     const isRArray = isArrayOrTypedArray(rResolved);
     const result = new Array(height);
@@ -188,14 +188,14 @@ export function compareMissing(vArray: ArrayLike<any>, rResolved: any): boolean[
 }
 
 export function computeRank(
-    arr: any[],
-    value: any,
+    arr: unknown[],
+    value: unknown,
     options: { ignoreNulls?: boolean; dense?: boolean } = {}
 ): number | null {
     if (value == null) return null;
 
     const cacheKey = options.dense ? "_denseRankCache" : "_rankCache";
-    let valueToRank = (arr as any)[cacheKey];
+    let valueToRank = (arr as unknown as Record<string, Map<unknown, number> | undefined>)[cacheKey];
 
     if (!valueToRank) {
         let targetArr = arr;
@@ -219,7 +219,7 @@ export function computeRank(
                 valueToRank.set(v, i + 1);
             }
         }
-        (arr as any)[cacheKey] = valueToRank;
+        (arr as unknown as Record<string, Map<unknown, number>>)[cacheKey] = valueToRank;
     }
 
     return valueToRank.get(value) ?? null;

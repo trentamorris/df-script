@@ -1,6 +1,7 @@
 /**
  * @internalfile
  */
+import type { ColumnExprInternal } from "./types";
 import type { IExpr, DataFrameSchema, DatetimeTimeUnit, ColumnData } from "../types";
 import type { RegisteredDataType } from "../datatypes";
 import {
@@ -78,7 +79,7 @@ function _resolveOperandType(
     }
 
     if (isTypedArray(unboxed)) {
-        const tag = typedArrayTagGetter ? typedArrayTagGetter.call(unboxed) : (unboxed as any).constructor.name;
+        const tag = typedArrayTagGetter ? typedArrayTagGetter.call(unboxed) : (unboxed as { constructor: { name: string } }).constructor.name;
         const inner = _TYPED_ARRAY_MAP[tag];
         return inner ? DataTypeRegistry.Array(inner) : DataTypeRegistry.Binary;
     }
@@ -96,7 +97,7 @@ const _INT_PRECEDENCE = ["64", "32", "16", "8"] as const;
 function _deduceBinaryType(
     leftType: RegisteredDataType | undefined,
     rightType: RegisteredDataType | undefined,
-    colSample?: ColumnData | any[]
+    colSample?: ColumnData | unknown[]
 ): RegisteredDataType | undefined {
     if (!leftType || !rightType) return undefined;
 
@@ -170,13 +171,13 @@ function _deduceBinaryType(
 export function resolveExprOutputType(
     expr: IExpr,
     schema: DataFrameSchema,
-    colSample?: ColumnData | any[]
+    colSample?: ColumnData | unknown[]
 ): RegisteredDataType | undefined {
     if (!expr) return undefined;
 
     // 1. Direct explicit overrides
     if (expr._castType) return expr._castType;
-    if ((expr as any)._targetType instanceof DataType) return (expr as any)._targetType;
+    if ((expr as ColumnExprInternal)._targetType instanceof DataType) return (expr as unknown as { _targetType: RegisteredDataType })._targetType;
 
     const colName = expr._colName;
     const baseType = colName ? schema[colName] : undefined;
@@ -221,7 +222,7 @@ export function resolveExprOutputType(
     const sampleVal = colSample?.[0];
 
     if (baseType) {
-        if (baseType instanceof ArrayType && (expr._isUnnest || (colSample as any)?.rowMap)) return baseType.innerType;
+        if (baseType instanceof ArrayType && (expr._isUnnest || (colSample as { rowMap?: unknown })?.rowMap)) return baseType.innerType;
         if (!(baseType instanceof ArrayType) && Array.isArray(sampleVal)) return DataTypeRegistry.Array(baseType);
         if (expr._aggFn) {
             if (baseType.isTemporal && (isValidDateObj(sampleVal) || typeof sampleVal === "string")) return baseType;

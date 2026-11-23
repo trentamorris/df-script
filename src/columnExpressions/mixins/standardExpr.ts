@@ -55,7 +55,7 @@ import {
  */
 export class StandardExpr extends ExprBase {
 
-    _deriveAgg(fn: AggFn<any>) {
+    _deriveAgg(fn: AggFn<unknown>) {
         const newInst = this._derive();
         newInst._aggFn = fn;
         newInst._groupingOpsIndex = this._ops.length;
@@ -63,8 +63,8 @@ export class StandardExpr extends ExprBase {
         return newInst;
     }
 
-    _deriveAggBinary(other: any, fn: AggFn<[any, any]>) {
-        const result = (this._deriveBinary(other, (x, y) => [x, y]) as any)._deriveAgg(fn);
+    _deriveAggBinary(other: unknown, fn: AggFn<[unknown, unknown]>) {
+        const result = (this._deriveBinary(other, (x, y) => [x, y]) as unknown as { _deriveAgg(fn: AggFn<[unknown, unknown]>): StandardExpr })._deriveAgg(fn);
         result._binaryMeta = undefined;
         return result;
     }
@@ -73,7 +73,7 @@ export class StandardExpr extends ExprBase {
         return this._partitionBy !== null || this._evaluateWindow !== undefined || this._aggFn !== null;
     }
 
-    _window(evaluateWindow: (groupPreValues: any[], partitionIndices: number[], currentIndex: number) => any) {
+    _window(evaluateWindow: (groupPreValues: unknown[], partitionIndices: number[], currentIndex: number) => any) {
         const newInst = this._derive();
         newInst._partitionOpsIndex = this._ops.length;
         newInst._groupingOpsIndex = this._ops.length;
@@ -81,11 +81,11 @@ export class StandardExpr extends ExprBase {
         return newInst;
     }
 
-    _cum(
+    _cum<Acc = number, Val = number>(
         reverse: boolean,
-        initialVal: any,
-        stepFn: (acc: any, val: any) => any,
-        postFn?: (acc: any, hasValid: boolean) => any
+        initialVal: Acc,
+        stepFn: (acc: Acc, val: Val) => Acc,
+        postFn?: (acc: Acc, hasValid: boolean) => unknown
     ) {
         return this._window((vals, _, currIdx) => {
             let acc = initialVal;
@@ -95,7 +95,7 @@ export class StandardExpr extends ExprBase {
             for (let i = start; i <= end; i++) {
                 const val = vals[i];
                 if (val != null) {
-                    acc = stepFn(acc, val);
+                    acc = stepFn(acc, val as Val);
                     hasValid = true;
                 }
             }
@@ -131,13 +131,13 @@ export class StandardExpr extends ExprBase {
         }
 
         const decay = 1 - alpha;
-        const toNum = (val: any): number => (val == null ? 0 : toValidNumber(val) ?? toValidDate(val)?.getTime() ?? 0);
+        const toNum = (val: unknown): number => (val == null ? 0 : toValidNumber(val) ?? toValidDate(val)?.getTime() ?? 0);
 
         return this._derive((vArray, columns) => {
             const height = vArray.length;
             const res = new Array(height);
             const rawBy = by !== undefined ? evaluateArg(by, columns, height) : undefined;
-            const byVals = rawBy && hlMs != null ? Array.from(rawBy, toNum) : null;
+            const byVals = rawBy && hlMs != null ? Array.from(rawBy as ArrayLike<unknown>, toNum) : null;
 
             for (let i = 0; i < height; i++) {
                 const len = i + 1;
@@ -851,7 +851,7 @@ export class StandardExpr extends ExprBase {
      * // +-----+---------+
      */
     cumCount(reverse: boolean = false) {
-        return this._cum(reverse, 0, (acc) => acc + 1);
+        return this._cum(reverse, 0, (acc: number) => acc + 1);
     }
 
     /**
@@ -871,7 +871,7 @@ export class StandardExpr extends ExprBase {
      * // +-----+-------+
      */
     cumMax(reverse: boolean = false) {
-        return this._cum(reverse, null, (acc, val) => (acc === null || val > acc ? val : acc));
+        return this._cum(reverse, null, (acc: number | null, val: number) => (acc === null || val > acc ? val : acc));
     }
 
     /**
@@ -891,7 +891,7 @@ export class StandardExpr extends ExprBase {
      * // +-----+-------+
      */
     cumMin(reverse: boolean = false) {
-        return this._cum(reverse, null, (acc, val) => (acc === null || val < acc ? val : acc));
+        return this._cum(reverse, null, (acc: number | null, val: number) => (acc === null || val < acc ? val : acc));
     }
 
     /**
@@ -912,7 +912,7 @@ export class StandardExpr extends ExprBase {
      * // +---+--------+
      */
     cumProd(reverse: boolean = false) {
-        return this._cum(reverse, 1, (acc, val) => acc * val, (acc, hasValid) => (hasValid ? acc : null));
+        return this._cum(reverse, 1, (acc: number, val: number) => acc * val, (acc, hasValid) => (hasValid ? acc : null));
     }
 
     /**
@@ -932,7 +932,7 @@ export class StandardExpr extends ExprBase {
      * // +-----+-------+
      */
     cumSum(reverse: boolean = false) {
-        return this._cum(reverse, 0, (acc, val) => acc + val);
+        return this._cum(reverse, 0, (acc: number, val: number) => acc + val);
     }
 
     /**
@@ -1289,7 +1289,7 @@ export class StandardExpr extends ExprBase {
             } else if (strategy === "one") {
                 value = 1;
             } else if (strategy === "min" || strategy === "max" || strategy === "mean") {
-                value = (getArrayStats(vArray) as any)[strategy];
+                value = (getArrayStats(vArray) as unknown as Record<string, number | null>)[strategy];
             } else if (strategy && strategy !== "forward" && strategy !== "backward") {
                 throw new InvalidArgumentError(`Unsupported fill strategy: "${strategy}"`);
             }
@@ -1301,21 +1301,21 @@ export class StandardExpr extends ExprBase {
             const isTarget = (() => {
                 if (this._isColExpr(target)) {
                     const mask = this._resolve(target, columns, height);
-                    return isArrayOrTypedArray(mask) ? (_: any, i: number) => Boolean(mask[i]) : () => Boolean(mask);
+                    return isArrayOrTypedArray(mask) ? (_: unknown, i: number) => Boolean(mask[i]) : () => Boolean(mask);
                 }
-                if (target === "null") return (v: any) => v == null;
-                if (target === "nan") return (v: any) => typeof v === "number" && Number.isNaN(v);
-                if (target === "all") return (v: any) => v == null || (typeof v === "number" && Number.isNaN(v));
-                return (v: any) => Object.is(v, target);
+                if (target === "null") return (v: unknown) => v == null;
+                if (target === "nan") return (v: unknown) => typeof v === "number" && Number.isNaN(v);
+                if (target === "all") return (v: unknown) => v == null || (typeof v === "number" && Number.isNaN(v));
+                return (v: unknown) => Object.is(v, target);
             })();
 
-            let lastVal: any = null;
+            let lastVal: unknown = null;
             let consec = 0;
 
             fillSequence(result, null, {
                 mode: "independent",
                 reverse: strategy === "backward",
-                condition: (v: any, i: number) => isTarget(v, i),
+                condition: (v: unknown, i: number) => isTarget(v, i),
                 step: ({ originalValue, absoluteIndex }) => {
                     if (!isDirectional) {
                         return isArr ? resolved[absoluteIndex] : resolved;
@@ -1572,7 +1572,7 @@ export class StandardExpr extends ExprBase {
      * // +---+-------+
      */
     isClose(
-        other: any,
+        other: unknown,
         {
             absTol = 1e-8,
             relTol = 1e-8,
@@ -2495,7 +2495,7 @@ export class StandardExpr extends ExprBase {
      * // +---+----------+
      */
     reverse(): this {
-        return this._derive((vArray) => (vArray as any[]).slice().reverse()) as this;
+        return this._derive((vArray) => (vArray as unknown[]).slice().reverse()) as this;
     }
 
     /**
@@ -2517,20 +2517,20 @@ export class StandardExpr extends ExprBase {
      */
     rolling(
         optionsOrWindowSize: number | RollingOptions,
-        exprOrFn: IExpr | ((vals: any[]) => any)
+        exprOrFn: IExpr | ((vals: unknown[]) => any)
     ) {
         const win = Math.floor(typeof optionsOrWindowSize === "number" ? optionsOrWindowSize : optionsOrWindowSize?.windowSize);
         if (!(win >= 1)) {
             throw new InvalidArgumentError("rolling: windowSize must be a positive number >= 1");
         }
-        if (typeof exprOrFn !== "function" && typeof (exprOrFn as any)?._evaluate !== "function") {
+        if (typeof exprOrFn !== "function" && typeof (exprOrFn as IExpr)?._evaluate !== "function") {
             throw new InvalidArgumentError("rolling: second argument must be a reducer function or ColumnExpression");
         }
 
-        const col = (exprOrFn as any)._colName || (this as any)._colName || "val";
-        const reducer: (vals: any[]) => any = typeof exprOrFn === "function"
+        const col = (exprOrFn as IExpr)._colName || (this as unknown as IExpr)._colName || "val";
+        const reducer: (vals: unknown[]) => unknown = typeof exprOrFn === "function"
             ? exprOrFn
-            : (exprOrFn as any)._aggFn ?? ((vals) => {
+            : (exprOrFn as IExpr)._aggFn ?? ((vals) => {
                 const res = evaluateExpression(exprOrFn, { [col]: vals }, vals.length);
                 return Array.isArray(res) ? res[res.length - 1] : res;
             });

@@ -1,6 +1,7 @@
 import type { TimeUnit, DatetimeTimeUnit, StrftimeOptions, IsBusinessDayOptions, DayOffsetOptions, UtcOffsetOptions, ReplaceDateOptions } from "../../types";
 import { DatetimeType, Int32, BooleanDataType } from "../../datatypes/dataTypes";
 import { InvalidArgumentError } from "../../exceptions";
+import type { ColumnExpr } from "../columnExpr";
 import { ExprBase } from "../exprBase";
 import type { NumericArg } from "../types";
 import {
@@ -25,9 +26,9 @@ import {
  * @syntax $df.col(<column_name>).dt.{symbol}(...)
  */
 export class DateTimeExprNamespace {
-    _expr: any;
+    _expr: ColumnExpr<unknown>;
 
-    constructor(expr: any) {
+    constructor(expr: ColumnExpr<unknown>) {
         this._expr = expr;
     }
 
@@ -44,7 +45,7 @@ export class DateTimeExprNamespace {
     }
 
     _deriveDate(fn: (d: Date) => any) {
-        return this._expr._deriveUnary((v: any) => {
+        return this._expr._deriveUnary((v: unknown) => {
             const d = toValidDate(v);
             return d ? fn(d) : null;
         });
@@ -424,10 +425,10 @@ export class DateTimeExprNamespace {
      * // +------------+--------------------------+
      */
     offsetDay(n: NumericArg, options: DayOffsetOptions = {}) {
-        return this._expr._deriveBinary(n, (v: any, nVal: any) => {
+        return this._expr._deriveBinary(n, (v: unknown, nVal: unknown) => {
             const d = toValidDate(v);
             if (!d || nVal == null) return null;
-            const daysToAdd = offsetDay(d, nVal, options);
+            const daysToAdd = offsetDay(d, nVal as number, options);
             return new Date(d.getTime() + daysToAdd * MS_PER_DAY);
         });
     }
@@ -790,6 +791,6 @@ export class TemporalExpr extends ExprBase {
      * // +------+
      */
     get dt() {
-        return new DateTimeExprNamespace(this);
+        return new DateTimeExprNamespace(this as unknown as ColumnExpr<unknown>);
     }
 }

@@ -1,3 +1,5 @@
+import type { ColumnData, ColumnDict } from "../../types";
+import type { ColumnExpr } from "../columnExpr";
 import { ExprBase, isExpr } from "../exprBase";
 import { evaluateExpression } from "../utils";
 import {
@@ -36,22 +38,22 @@ import type { ArrayArg, NumericArg, NumericSeriesArg, ToStructOptions, ShiftOpti
  * @syntax $df.col(<column_name>).arr.{symbol}(...)
  */
 export class ArrayExprNamespace {
-    _expr: any;
+    _expr: ColumnExpr<unknown>;
 
-    constructor(expr: any) {
+    constructor(expr: ColumnExpr<unknown>) {
         this._expr = expr;
     }
 
-    _deriveArray(fn: (arr: any[] | AnyTypedArray) => any) {
-        return this._expr._deriveUnary((v: any) => isArrayOrTypedArray(v) ? fn(v as any) : null);
+    _deriveArray(fn: (arr: unknown[] | AnyTypedArray) => any) {
+        return this._expr._deriveUnary((v: unknown) => isArrayOrTypedArray(v) ? fn(v as unknown[] | AnyTypedArray) : null);
     }
 
-    _deriveArrayBinary(other: any, fn: (arr: any[] | AnyTypedArray, val: any) => any) {
+    _deriveArrayBinary(other: unknown, fn: (arr: unknown[] | AnyTypedArray, val: unknown) => any) {
         if (!isExpr(other)) {
             return this._deriveArray((arr) => fn(arr, other));
         }
-        const result = this._expr._deriveBinary(other, (arr: any, val: any) => {
-            return isArrayOrTypedArray(arr) ? fn(arr as any, val) : null;
+        const result = this._expr._deriveBinary(other, (arr: unknown, val: unknown) => {
+            return isArrayOrTypedArray(arr) ? fn(arr as unknown[] | AnyTypedArray, val) : null;
         });
         result._binaryMeta = undefined;
         return result;
@@ -59,10 +61,10 @@ export class ArrayExprNamespace {
 
     _evalSubExpr(
         expr: IExpr,
-        fn: (val: any[] | AnyTypedArray, evaluated: any) => any,
-        evaluator?: (expr: IExpr, subColumns: any, subHeight: number) => any
+        fn: (val: unknown[] | AnyTypedArray, evaluated: unknown) => any,
+        evaluator?: (expr: IExpr, subColumns: unknown, subHeight: number) => any
     ) {
-        return this._expr._derive((vArray: any[], columns: any) => {
+        return this._expr._derive((vArray: ColumnData, columns: ColumnDict) => {
             const height = vArray.length;
             const result = new Array(height);
             const subColumns = Object.create(columns);
@@ -274,11 +276,11 @@ export class ArrayExprNamespace {
         return this._evalSubExpr(expr, (_val, res) => res, (subExpr, subColumns, subHeight) => {
             if (subExpr._isGlobalAgg?.()) {
                 const preOpsIdx = subExpr._groupingOpsIndex !== undefined ? subExpr._groupingOpsIndex : subExpr._ops.length;
-                const preVal = subExpr._evaluatePre(preOpsIdx, subColumns, subHeight);
+                const preVal = subExpr._evaluatePre(preOpsIdx, subColumns as ColumnDict, subHeight);
                 const aggVal = subExpr._aggFn!(Array.from(preVal));
-                return subExpr._evaluatePost(preOpsIdx, [aggVal], subColumns);
+                return subExpr._evaluatePost(preOpsIdx, [aggVal], subColumns as ColumnDict);
             }
-            return evaluateExpression(subExpr, subColumns, subHeight);
+            return evaluateExpression(subExpr, subColumns as ColumnDict, subHeight);
         });
     }
 
@@ -301,7 +303,7 @@ export class ArrayExprNamespace {
      * // +---+
      */
     explode({ emptyAsNull = true, keepNulls = true }: ExplodeOptions = {}) {
-        return this._expr._derive((vArray: any[]) => {
+        return this._expr._derive((vArray: ColumnData) => {
             const height = vArray.length;
             let newHeight = 0;
             for (let i = 0; i < height; i++) {
@@ -353,7 +355,7 @@ export class ArrayExprNamespace {
                     res[idx++] = null;
                 }
             }
-            (res as any).rowMap = rowMap;
+            (res as unknown as { rowMap: Int32Array }).rowMap = rowMap;
             return res;
         });
     }
@@ -848,7 +850,7 @@ export class ArrayExprNamespace {
      * // +-----------+----------------+
      */
     toStruct({ upperBound, fields }: ToStructOptions = {}) {
-        return this._expr._derive((vArray: any[]) => {
+        return this._expr._derive((vArray: ColumnData) => {
             const height = vArray.length;
             const result = new Array(height);
 
@@ -885,7 +887,7 @@ export class ArrayExprNamespace {
                     result[i] = null;
                     continue;
                 }
-                const obj: any = {};
+                const obj: Record<string, unknown> = {};
                 for (let j = 0; j < width; j++) {
                     obj[names[j]] = getArrayElement(val, j, true);
                 }
@@ -953,6 +955,6 @@ export class ArrayExpr extends ExprBase {
      * // +-----+
      */
     get arr() {
-        return new ArrayExprNamespace(this);
+        return new ArrayExprNamespace(this as unknown as ColumnExpr<unknown>);
     }
 }

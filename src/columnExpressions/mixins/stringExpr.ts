@@ -11,6 +11,8 @@ import type {
     RegexPatternSeriesArg,
     ReplaceManyOptions,
 } from "../../types";
+import type { ColumnData } from "../../types";
+import type { ColumnExpr } from "../columnExpr";
 import { ExprBase } from "../exprBase";
 import type { StringArg, StringReplacementArg, StringReplacementSeriesArg, ReplaceAllOptions, CountMatchesOptions, UnicodeNormalizeForm, StringDecodeOptions, StringEncodeOptions } from "../types";
 import { TEXT_ENCODER } from "../../constants";
@@ -51,19 +53,19 @@ import {
  * @syntax $df.col(<column_name>).str.{symbol}(...)
  */
 export class StringExprNamespace {
-    _expr: any;
+    _expr: ColumnExpr<unknown>;
 
-    constructor(expr: any) {
+    constructor(expr: ColumnExpr<unknown>) {
         this._expr = expr;
     }
 
     _deriveString(fn: (v: string) => any) {
-        return this._expr._deriveUnary((v: any) => fn(String(v)));
+        return this._expr._deriveUnary((v: unknown) => fn(String(v)));
     }
 
-    _derivePattern(pattern: any, fn: (v: string) => any) {
+    _derivePattern(pattern: unknown, fn: (v: string) => any) {
         if (pattern == null) {
-            return this._expr._derive((vArray: any[]) => new Array(vArray.length).fill(null));
+            return this._expr._derive((vArray: ColumnData) => new Array(vArray.length).fill(null));
         }
         return this._deriveString(fn);
     }
@@ -92,7 +94,7 @@ export class StringExprNamespace {
      * // +----------+-----------+
      */
     concat(other: StringArg) {
-        return this._expr._deriveBinary(other, (v: any, o: any) => String(v) + String(o));
+        return this._expr._deriveBinary(other, (v: unknown, o: unknown) => String(v) + String(o));
     }
 
     /**
@@ -470,7 +472,7 @@ export class StringExprNamespace {
      * // +------------+--------+
      */
     join(delimiter: string = "", options: JoinArrayOptions = {}) {
-        return this._expr._deriveUnary((v: any) =>
+        return this._expr._deriveUnary((v: unknown) =>
             isArrayOrTypedArray(v) ? joinArray(v, delimiter, options) : null
         );
     }
@@ -1353,6 +1355,6 @@ export class StringExpr extends ExprBase {
      * // +-----+
      */
     get str() {
-        return new StringExprNamespace(this);
+        return new StringExprNamespace(this as unknown as ColumnExpr<unknown>);
     }
 }
