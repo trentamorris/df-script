@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.arctan2 tests...");
 
 // 1. All 4 Quadrants, Zero & Null Handling
-const df1 = $df.data({
+const df1 = $df.dataFrame({
     y: [1, 1, -1, -1, 0, 1, null, 2],
     x: [1, -1, 1, -1, 1, 0, 3, null]
 });
@@ -20,14 +20,14 @@ if (res1[6].a !== null) throw new Error("arctan2(null, x) should be null");
 if (res1[7].a !== null) throw new Error("arctan2(y, null) should be null");
 
 // 2. Scalar Argument
-const dfScalar = $df.data({ y: [3, -3, null] });
+const dfScalar = $df.dataFrame({ y: [3, -3, null] });
 const resScalar = dfScalar.select([$df.col("y").arctan2(4).alias("a")]).toDicts() as any[];
 if (Math.abs(resScalar[0].a - Math.atan2(3, 4)) > 1e-6) throw new Error("Scalar arctan2 positive failed");
 if (Math.abs(resScalar[1].a - Math.atan2(-3, 4)) > 1e-6) throw new Error("Scalar arctan2 negative failed");
 if (resScalar[2].a !== null) throw new Error("Scalar arctan2 null failed");
 
 // 3. Empty DataFrame
-const dfEmpty = $df.data({ y: [], x: [] });
+const dfEmpty = $df.dataFrame({ y: [], x: [] });
 const resEmpty = dfEmpty.select([$df.col("y").arctan2($df.col("x")).alias("a")]).toDicts() as any[];
 if (resEmpty.length !== 0) throw new Error("arctan2 on empty dataframe should return empty result");
 

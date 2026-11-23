@@ -11,7 +11,7 @@ try {
     // ------------------------------------------------------------------------
     // 1. Identity & Non-DataFrame Guards
     // ------------------------------------------------------------------------
-    const df1 = $df.data([
+    const df1 = $df.dataFrame([
         { a: 1, b: "x" },
         { a: 2, b: "y" }
     ]);
@@ -45,12 +45,12 @@ try {
     // ------------------------------------------------------------------------
     // 3. Shape Mismatches (Height & Width)
     // ------------------------------------------------------------------------
-    const dfShorter = $df.data([{ a: 1, b: "x" }]);
+    const dfShorter = $df.dataFrame([{ a: 1, b: "x" }]);
     if (df1.equals(dfShorter) || dfShorter.equals(df1)) {
         throw new Error("3.1 Height mismatch must return false");
     }
 
-    const dfWider = $df.data([
+    const dfWider = $df.dataFrame([
         { a: 1, b: "x", c: 100 },
         { a: 2, b: "y", c: 200 }
     ]);
@@ -72,7 +72,7 @@ try {
     // ------------------------------------------------------------------------
     // 4. Column Names & Strict Column Ordering
     // ------------------------------------------------------------------------
-    const dfDifferentCol = $df.data([
+    const dfDifferentCol = $df.dataFrame([
         { a: 1, c: "x" },
         { a: 2, c: "y" }
     ]);
@@ -81,7 +81,7 @@ try {
     }
 
     // Exact same columns and data, but reversed column order
-    const dfReordered = $df.data({
+    const dfReordered = $df.dataFrame({
         b: ["x", "y"],
         a: [1, 2]
     });
@@ -90,7 +90,7 @@ try {
     }
 
     // Case sensitivity in column names
-    const dfColCase = $df.data({
+    const dfColCase = $df.dataFrame({
         A: [1, 2],
         b: ["x", "y"]
     });
@@ -101,7 +101,7 @@ try {
     // ------------------------------------------------------------------------
     // 5. Value Mismatch & Position Sensitivity
     // ------------------------------------------------------------------------
-    const dfDifferentVal = $df.data([
+    const dfDifferentVal = $df.dataFrame([
         { a: 1, b: "x" },
         { a: 999, b: "y" }
     ]);
@@ -110,7 +110,7 @@ try {
     }
 
     // Swapped row order (same set of rows, different order)
-    const dfSwappedRows = $df.data([
+    const dfSwappedRows = $df.dataFrame([
         { a: 2, b: "y" },
         { a: 1, b: "x" }
     ]);
@@ -139,11 +139,11 @@ try {
     // ------------------------------------------------------------------------
     // 7. Null, Undefined & NaN Semantics (nullsEqual: true vs false)
     // ------------------------------------------------------------------------
-    const dfNulls1 = $df.data({
+    const dfNulls1 = $df.dataFrame({
         n: [null, NaN, 1],
         s: ["hello", null, "world"]
     });
-    const dfNulls2 = $df.data({
+    const dfNulls2 = $df.dataFrame({
         n: [null, NaN, 1],
         s: ["hello", null, "world"]
     });
@@ -160,8 +160,8 @@ try {
     }
 
     // Clean frame without any null/NaN with nullsEqual=false must still be equal
-    const dfClean1 = $df.data({ a: [1, 2], b: ["x", "y"] });
-    const dfClean2 = $df.data({ a: [1, 2], b: ["x", "y"] });
+    const dfClean1 = $df.dataFrame({ a: [1, 2], b: ["x", "y"] });
+    const dfClean2 = $df.dataFrame({ a: [1, 2], b: ["x", "y"] });
     if (!dfClean1.equals(dfClean2, { nullsEqual: false })) {
         throw new Error("7.4 Clean frame with nullsEqual=false must return true");
     }
@@ -180,20 +180,20 @@ try {
     }
 
     // Null vs 0, false, empty string
-    const dfZero = $df.data({ a: [0] });
-    const dfNull0 = $df.data({ a: [null] });
+    const dfZero = $df.dataFrame({ a: [0] });
+    const dfNull0 = $df.dataFrame({ a: [null] });
     if (dfZero.equals(dfNull0)) {
         throw new Error("7.7 0 vs null must return false");
     }
 
-    const dfFalse = $df.data({ a: [false] });
-    const dfNullBool = $df.data({ a: [null] });
+    const dfFalse = $df.dataFrame({ a: [false] });
+    const dfNullBool = $df.dataFrame({ a: [null] });
     if (dfFalse.equals(dfNullBool)) {
         throw new Error("7.8 false vs null must return false");
     }
 
-    const dfEmptyStr = $df.data({ a: [""] });
-    const dfNullStr = $df.data({ a: [null] });
+    const dfEmptyStr = $df.dataFrame({ a: [""] });
+    const dfNullStr = $df.dataFrame({ a: [null] });
     if (dfEmptyStr.equals(dfNullStr)) {
         throw new Error("7.9 '' vs null must return false");
     }
@@ -211,9 +211,9 @@ try {
         throw new Error("8.2 -0 vs -0 must return true");
     }
 
-    const dfInf1 = $df.data({ v: [Infinity, -Infinity] });
-    const dfInf2 = $df.data({ v: [Infinity, -Infinity] });
-    const dfInfDiff = $df.data({ v: [-Infinity, Infinity] });
+    const dfInf1 = $df.dataFrame({ v: [Infinity, -Infinity] });
+    const dfInf2 = $df.dataFrame({ v: [Infinity, -Infinity] });
+    const dfInfDiff = $df.dataFrame({ v: [-Infinity, Infinity] });
     if (!dfInf1.equals(dfInf2)) {
         throw new Error("8.3 Infinity & -Infinity must match identical signs");
     }
@@ -224,9 +224,9 @@ try {
     // ------------------------------------------------------------------------
     // 9. BigInt Columns & Boundary Values
     // ------------------------------------------------------------------------
-    const dfBigInt1 = $df.data({ b: [9007199254740993n, -9007199254740993n, 0n] });
-    const dfBigInt2 = $df.data({ b: [9007199254740993n, -9007199254740993n, 0n] });
-    const dfBigIntDiff = $df.data({ b: [9007199254740993n, -9007199254740994n, 0n] });
+    const dfBigInt1 = $df.dataFrame({ b: [9007199254740993n, -9007199254740993n, 0n] });
+    const dfBigInt2 = $df.dataFrame({ b: [9007199254740993n, -9007199254740993n, 0n] });
+    const dfBigIntDiff = $df.dataFrame({ b: [9007199254740993n, -9007199254740994n, 0n] });
 
     if (!dfBigInt1.equals(dfBigInt2)) {
         throw new Error("9.1 BigInt columns with equal values must return true");
@@ -236,8 +236,8 @@ try {
     }
 
     // BigInt vs Number with same numeric value (e.g., 0n vs 0)
-    const dfNumZero = $df.data({ b: [0] });
-    const dfBigZero = $df.data({ b: [0n] });
+    const dfNumZero = $df.dataFrame({ b: [0] });
+    const dfBigZero = $df.dataFrame({ b: [0n] });
     if (dfNumZero.equals(dfBigZero)) {
         throw new Error("9.3 0 (number) vs 0n (bigint) must return false");
     }
@@ -301,16 +301,16 @@ try {
     // ------------------------------------------------------------------------
     // 11. Empty DataFrames
     // ------------------------------------------------------------------------
-    const empty1 = $df.data([]);
-    const empty2 = $df.data([]);
+    const empty1 = $df.dataFrame([]);
+    const empty2 = $df.dataFrame([]);
     if (!empty1.equals(empty2)) {
         throw new Error("11.1 Two completely empty DataFrames must be equal");
     }
 
-    const emptyWithCols1 = $df.data({ a: [], b: [] });
-    const emptyWithCols2 = $df.data({ a: [], b: [] });
-    const emptyWithColsDiff = $df.data({ a: [], c: [] });
-    const emptyWithColsReordered = $df.data({ b: [], a: [] });
+    const emptyWithCols1 = $df.dataFrame({ a: [], b: [] });
+    const emptyWithCols2 = $df.dataFrame({ a: [], b: [] });
+    const emptyWithColsDiff = $df.dataFrame({ a: [], c: [] });
+    const emptyWithColsReordered = $df.dataFrame({ b: [], a: [] });
 
     if (!emptyWithCols1.equals(emptyWithCols2)) {
         throw new Error("11.2 Empty DataFrames with same columns must be equal");
@@ -323,8 +323,8 @@ try {
     }
 
     // 0-height empty vs 1-height empty
-    const singleRow = $df.data([{ a: 1 }]);
-    const emptyA = $df.data({ a: [] });
+    const singleRow = $df.dataFrame([{ a: 1 }]);
+    const emptyA = $df.dataFrame({ a: [] });
     if (singleRow.equals(emptyA) || emptyA.equals(singleRow)) {
         throw new Error("11.5 Empty vs non-empty must return false");
     }
@@ -333,9 +333,9 @@ try {
     // 12. Object Reference Equality (No Deep-Clone Equivalence)
     // ------------------------------------------------------------------------
     const sharedObj = { id: 42 };
-    const dfRef1 = $df.data({ o: [sharedObj] });
-    const dfRef2 = $df.data({ o: [sharedObj] });
-    const dfDistinctObj = $df.data({ o: [{ id: 42 }] });
+    const dfRef1 = $df.dataFrame({ o: [sharedObj] });
+    const dfRef2 = $df.dataFrame({ o: [sharedObj] });
+    const dfDistinctObj = $df.dataFrame({ o: [{ id: 42 }] });
 
     if (!dfRef1.equals(dfRef2)) {
         throw new Error("12.1 Same object reference must return true");
@@ -345,9 +345,9 @@ try {
     }
 
     const sharedDate = new Date("2026-01-01T00:00:00Z");
-    const dfDateRef1 = $df.data({ d: [sharedDate] });
-    const dfDateRef2 = $df.data({ d: [sharedDate] });
-    const dfDateDistinct = $df.data({ d: [new Date("2026-01-01T00:00:00Z")] });
+    const dfDateRef1 = $df.dataFrame({ d: [sharedDate] });
+    const dfDateRef2 = $df.dataFrame({ d: [sharedDate] });
+    const dfDateDistinct = $df.dataFrame({ d: [new Date("2026-01-01T00:00:00Z")] });
 
     if (!dfDateRef1.equals(dfDateRef2)) {
         throw new Error("12.3 Same Date reference must return true");
@@ -359,9 +359,9 @@ try {
     // ------------------------------------------------------------------------
     // 13. Single Element DataFrames
     // ------------------------------------------------------------------------
-    const single1 = $df.data({ x: [42] });
-    const single2 = $df.data({ x: [42] });
-    const single3 = $df.data({ x: [43] });
+    const single1 = $df.dataFrame({ x: [42] });
+    const single2 = $df.dataFrame({ x: [42] });
+    const single3 = $df.dataFrame({ x: [43] });
     if (!single1.equals(single2)) {
         throw new Error("13.1 Single element equal frames must return true");
     }

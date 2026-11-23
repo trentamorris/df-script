@@ -21,7 +21,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 1. Basic Standard Dot Product: 1*4 + 2*5 + 3*6 = 4 + 10 + 18 = 32
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 2, 3],
         b: [4, 5, 6]
     });
@@ -31,7 +31,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 2. Orthogonal Vectors (Perpendicular in Euclidean space -> dot product == 0)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 0, -2],
         b: [0, 5, 0] // 1*0 + 0*5 + (-2)*0 = 0
     });
@@ -41,7 +41,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 3. Negative Components & Cancellation
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [2, -3, 4],
         b: [-4, 5, 1] // 2*(-4) + (-3)*5 + 4*1 = -8 - 15 + 4 = -19
     });
@@ -51,7 +51,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 4. Self Dot Product (Square of Euclidean L2 Norm: ||v||^2)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [3, 4] // 3^2 + 4^2 = 9 + 16 = 25
     });
     const res = df.select($df.col("a").dot($df.col("a")).alias("norm_sq")).toDicts() as any[];
@@ -60,7 +60,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 5. Passing Raw Array Literal as `other`
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 2, 3]
     });
     const res = df.select($df.col("a").dot([10, 20, 30]).alias("d")).toDicts() as any[];
@@ -70,7 +70,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 6. Scalar Value Broadcasting: dot(scalar) evaluates sum(a_i * scalar)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 2, 3]
     });
     // 1*5 + 2*5 + 3*5 = 30
@@ -80,7 +80,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 7. Pairwise Missing Value Filtering (null and NaN dropped)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, null, 3, NaN, 5],
         b: [10, 20, 30, 40, 50] // Valid pairs: (1, 10), (3, 30), (5, 50) -> 10 + 90 + 250 = 350
     });
@@ -90,7 +90,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 8. All Pairs Missing or Invalid -> returns null
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [null, NaN],
         b: [10, 20]
     });
@@ -100,7 +100,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 9. Empty DataFrame -> returns null
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [],
         b: []
     });
@@ -110,7 +110,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 10. Single Row (Minimal Dimension 1)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [7],
         b: [8]
     });
@@ -120,7 +120,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 11. Infinity Handling (+Infinity and -Infinity treated as invalid and dropped)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, Infinity, 3, -Infinity],
         b: [10, 20, 30, 40] // Valid pairs: (1, 10), (3, 30) -> 10 + 90 = 100
     });
@@ -130,7 +130,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 12. Floating Point Precision & Sub-normal Floats
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [0.1, 0.3],
         b: [0.2, 0.4] // 0.1*0.2 + 0.3*0.4 = 0.02 + 0.12 = 0.14
     });
@@ -140,7 +140,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 13. Grouped Aggregation (`groupBy("dept").agg(...)`)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["eng", "eng", "sales", "sales"],
         x: [1, 2, 3, 4],
         y: [10, 20, 30, 40] // eng: 1*10 + 2*20 = 50; sales: 3*30 + 4*40 = 90 + 160 = 250
@@ -159,7 +159,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 14. Window Function Execution (`.over("dept")`)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["eng", "eng", "sales", "sales"],
         x: [1, 2, 3, 4],
         y: [10, 20, 30, 40]
@@ -178,7 +178,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 15. Multi-Column Expression Projection on Left Operand (`$df.col(['a', 'b']).dot($df.col('target'))`)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         target: [2, 3],
         a: [1, 4], // 1*2 + 4*3 = 2 + 12 = 14
         b: [5, 6]  // 5*2 + 6*3 = 10 + 18 = 28
@@ -194,7 +194,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 16. Asymmetric Null Masks across Vectors
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, null, 3, 4],
         b: [null, 2, 3, null] // Only row 2 (index 2: (3, 3)) is valid -> 3*3 = 9
     });

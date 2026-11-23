@@ -6,7 +6,7 @@ console.log("Running StandardExpr.rank edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Standard default ranking (with gaps for ties: 1, 2, 2, 4)
 // -------------------------------------------------------------
-const dfTies = $df.data([
+const dfTies = $df.dataFrame([
     { val: 10 },
     { val: 20 },
     { val: 20 },
@@ -32,7 +32,7 @@ if (resDense[0].r_dense !== 1 || resDense[1].r_dense !== 2 || resDense[2].r_dens
 // -------------------------------------------------------------
 // Case 3: Partitioned / window ranking (over partitionBy)
 // -------------------------------------------------------------
-const dfPartitioned = $df.data([
+const dfPartitioned = $df.dataFrame([
     { grp: "A", val: 50 },
     { grp: "A", val: 10 },
     { grp: "B", val: 100 },
@@ -48,7 +48,7 @@ if (resPartitioned[0].r !== 2 || resPartitioned[1].r !== 1 || resPartitioned[2].
 // -------------------------------------------------------------
 // Case 4: Null values handling in ranking
 // -------------------------------------------------------------
-const dfNulls = $df.data([
+const dfNulls = $df.dataFrame([
     { val: 10 },
     { val: null },
     { val: 20 }
@@ -63,7 +63,7 @@ if (resNulls[0].r !== 1 || resNulls[1].r !== null || resNulls[2].r !== 2) {
 // -------------------------------------------------------------
 // Case 5: All identical values
 // -------------------------------------------------------------
-const dfSame = $df.data([
+const dfSame = $df.dataFrame([
     { val: 42 },
     { val: 42 },
     { val: 42 }
@@ -82,7 +82,7 @@ if (resSame[0].r_dense !== 1 || resSame[1].r_dense !== 1 || resSame[2].r_dense !
 // -------------------------------------------------------------
 // Case 6: Negative and floating point numbers
 // -------------------------------------------------------------
-const dfFloats = $df.data([
+const dfFloats = $df.dataFrame([
     { val: -10.5 },
     { val: -20.0 },
     { val: 0.0 },
@@ -99,7 +99,7 @@ if (resFloats[0].r !== 2 || resFloats[1].r !== 1 || resFloats[2].r !== 3 || resF
 // -------------------------------------------------------------
 // Case 7: Lexicographical String column ranking
 // -------------------------------------------------------------
-const dfStrings = $df.data([
+const dfStrings = $df.dataFrame([
     { s: "zebra" },
     { s: "apple" },
     { s: "mango" },
@@ -120,14 +120,14 @@ if (resStrings[1].r_dense !== 1 || resStrings[3].r_dense !== 1 || resStrings[2].
 // -------------------------------------------------------------
 // Case 8: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ val: 100 }]);
+const dfSingle = $df.dataFrame([{ val: 100 }]);
 const resSingle = dfSingle.withColumns([$df.col("val").rank().alias("r")]).toDicts() as any[];
 if (resSingle[0].r !== 1) throw new Error("Case 8 failed: single row rank");
 
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame with schema preserved
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ val: 1 }]).filter($df.col("val").eq(999));
+const dfEmpty = $df.dataFrame([{ val: 1 }]).filter($df.col("val").eq(999));
 const resEmpty = dfEmpty.withColumns([$df.col("val").rank().alias("r")]).toDicts();
 if (resEmpty.length !== 0) throw new Error("Case 9 failed: empty DataFrame rank");
 

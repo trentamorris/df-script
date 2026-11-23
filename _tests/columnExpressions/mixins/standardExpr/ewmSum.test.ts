@@ -6,7 +6,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 1: Basic EWM Sum with alpha=0.5
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     // w: [0.25, 0.5, 1.0] -> 10*0.25 + 20*0.5 + 30*1.0 = 2.5 + 10 + 30 = 42.5
     const res = df.select($df.col("a").ewmSum({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 25 || res[2].r !== 42.5) {
@@ -16,7 +16,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 2: Span=1 (zero memory, sum equals current element)
 {
-    const df = $df.data({ a: [5, 15, 25, 35] });
+    const df = $df.dataFrame({ a: [5, 15, 25, 35] });
     const res = df.select($df.col("a").ewmSum({ span: 1 }).alias("r")).toDicts() as any[];
     if (res[0].r !== 5 || res[1].r !== 15 || res[2].r !== 25 || res[3].r !== 35) {
         throw new Error(`Test 2 Failed: ${JSON.stringify(res)}`);
@@ -25,7 +25,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 3: Negative floats and zero values
 {
-    const df = $df.data({ a: [-10.5, 0, 10.5] });
+    const df = $df.dataFrame({ a: [-10.5, 0, 10.5] });
     const res = df.select($df.col("a").ewmSum({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res[0].r !== -10.5 || res[1].r !== -5.25 || res[2].r !== 7.875) {
         throw new Error(`Test 3 Failed: ${JSON.stringify(res)}`);
@@ -34,14 +34,14 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 4: Huge gaps counting as decayed steps (ignoreNulls: false)
 {
-    const df = $df.data({ a: [100, null, null, null, 10] });
+    const df = $df.dataFrame({ a: [100, null, null, null, 10] });
     const res = df.select($df.col("a").ewmSum({ alpha: 0.5, ignoreNulls: false }).alias("r")).toDicts() as any[];
     if (res[4].r !== 16.25) throw new Error(`Test 4 Failed: expected 16.25, got ${res[4].r}`);
 }
 
 // Test 5: ignoreNulls: true does not decay across null steps
 {
-    const df = $df.data({ a: [100, null, 10] });
+    const df = $df.dataFrame({ a: [100, null, 10] });
     // null ignored: 100 * 0.5 + 10 = 60
     const res = df.select($df.col("a").ewmSum({ alpha: 0.5, ignoreNulls: true }).alias("r")).toDicts() as any[];
     if (res[2].r !== 60) throw new Error(`Test 5 Failed: expected 60, got ${res[2].r}`);
@@ -49,7 +49,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 6: SumBy across large exponential time deltas
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         time: [0, 1000, 1000000],
         val: [100, 100, 10]
     });
@@ -59,7 +59,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 7: SumBy with duration string halfLife
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         time: [0, 50, 100],
         val: [10, 20, 30]
     });
@@ -71,7 +71,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 8: SumBy with Date objects
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         time: [new Date("2026-01-01T00:00:00Z"), new Date("2026-01-01T01:00:00Z")],
         val: [50, 50]
     });
@@ -83,7 +83,7 @@ console.log("Running StandardExpr.ewmSum tests...");
 {
     let caught = false;
     try {
-        const df = $df.data({ a: [1, 2] });
+        const df = $df.dataFrame({ a: [1, 2] });
         df.select($df.col("a").ewmSum(null as any));
     } catch (e: any) {
         if (e instanceof InvalidArgumentError) caught = true;
@@ -93,14 +93,14 @@ console.log("Running StandardExpr.ewmSum tests...");
 
 // Test 10: Empty dataframe
 {
-    const df = $df.data({ a: [] });
+    const df = $df.dataFrame({ a: [] });
     const res = df.select($df.col("a").ewmSum({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res.length !== 0) throw new Error("Test 10 Failed: empty dataframe");
 }
 
 // Test 11: Polars parity test for ewm_sum_by with Date and 1h halfLife
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         t: [
             new Date("2024-01-01T00:00:00Z"),
             new Date("2024-01-01T01:00:00Z"),

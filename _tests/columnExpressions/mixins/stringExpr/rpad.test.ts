@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.rpad tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { digits: "42" },
     { digits: null }
 ]);

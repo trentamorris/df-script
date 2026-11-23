@@ -1,3 +1,4 @@
+import type { RowRecord } from "../types";
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import type { ColumnSelector } from "../types";
 
@@ -46,7 +47,7 @@ import type { ColumnSelector } from "../types";
  * // | y |
  * // +---+
  */
-export function col<T = any>(name: ColumnSelector<T>): ColumnExpr<T> {
+export function col<T = RowRecord>(name: ColumnSelector<T>): ColumnExpr<T> {
     return new ColumnExpr<T>(name);
 }
 

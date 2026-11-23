@@ -7,7 +7,7 @@ import type { JSONParseOptions, NDJSONParseOptions } from "./utils";
 /**
  * Aggregation function mapping an array of column values to a single scalar or summary value.
  */
-export type AggFn<V, R = any> = (values: V[]) => R;
+export type AggFn<V, R = unknown> = (values: V[]) => R;
 
 /**
  * Union of all standard JavaScript TypedArray instances.
@@ -89,7 +89,7 @@ export type ClosedBoundary = "both" | "left" | "right" | "none";
 /**
  * Array-like and iterable container holding a column's sequence of values.
  */
-export type ColumnData<T = any> = ArrayLike<T> & Iterable<T>;
+export type ColumnData<T = unknown> = ArrayLike<T> & Iterable<T>;
 
 /**
  * Dictionary mapping column names to their underlying `ColumnData` arrays.
@@ -114,7 +114,7 @@ export type ColumnOrExprArg<K = string> = K | IExpr;
 /**
  * Selector for matching one or more DataFrame columns by name, regex pattern, or `DataType` class/instance.
  */
-export type ColumnSelector<T = any> =
+export type ColumnSelector<T = unknown> =
     | ColumnKeyArg<keyof T | RegexPatternArg>
     | ColumnKeyArg<DataType | Function>;
 
@@ -126,7 +126,7 @@ export type ConcatHow = "vertical" | "horizontal" | "diagonal";
 /**
  * Single item accepted by `df.concat()` and `$df.concat()`: a `DataFrame` instance, array of row records, or column dictionary.
  */
-export type ConcatItem = DataFrame<any> | DataFrameDataArg;
+export type ConcatItem = DataFrame<RowRecord> | DataFrameDataArg;
 
 /**
  * Operand for concatenation operations (`df.concat`, `$df.concat`).
@@ -150,7 +150,7 @@ export interface ConcatOptions {
 }
 
 /**
- * Input data accepted by the `DataFrame` constructor and `$df.data()`.
+ * Input data accepted by the `DataFrame` constructor and `$df.dataFrame()`.
  * Accepts an array of row record objects or a column dictionary mapping column names to arrays.
  */
 export type DataFrameDataArg<T extends RowRecord = RowRecord> = T[] | ColumnDict;
@@ -441,13 +441,13 @@ export interface HorizontalConcatOptions {
  */
 export interface IExpr {
     /** Aggregation reducer function registered on the expression, or `null`. */
-    _aggFn?: AggFn<any> | null;
+    _aggFn?: AggFn<unknown> | null;
     /** Parent base expression for struct field extraction or unnesting. */
     _baseExpr?: IExpr;
     /** Left and right operand metadata for binary expressions. */
-    _binaryMeta?: { _left: any; _right: any };
+    _binaryMeta?: { _left: unknown; _right: unknown };
     /** Branch operands collected by `$df.when().then().otherwise()` chains. */
-    _branchOperands?: any[];
+    _branchOperands?: unknown[];
     /** Target `RegisteredDataType` registered via `.cast()`. */
     _castType?: RegisteredDataType;
     /** Source column name or expression selector marker. */
@@ -457,11 +457,11 @@ export interface IExpr {
     /** Evaluates the full expression pipeline against `columns`. */
     _evaluate(columns: ColumnDict, height: number): ColumnData;
     /** Evaluates post-aggregation or post-partition operations starting after `opsIndex`. */
-    _evaluatePost(opsIndex: number | undefined, aggregatedArray: any[], columns: ColumnDict): ColumnData;
+    _evaluatePost(opsIndex: number | undefined, aggregatedArray: unknown[], columns: ColumnDict): ColumnData;
     /** Evaluates pre-aggregation or pre-partition operations up to `opsIndex`. */
     _evaluatePre(opsIndex: number | undefined, columns: ColumnDict, height: number): ColumnData;
     /** Evaluates a row-wise window operation over a partition slice. */
-    _evaluateWindow?(groupPreValues: any[], partitionIndices: number[], currentIndex: number): any;
+    _evaluateWindow?(groupPreValues: unknown[], partitionIndices: number[], currentIndex: number): unknown;
     /** Struct field name targeted by `.struct.field()`. */
     _fieldName?: string;
     /** Pipeline index marking the boundary of an `.agg()` reduction. */
@@ -475,7 +475,7 @@ export interface IExpr {
     /** Flag indicating whether the expression requires window-function evaluation. */
     _isWindow?: boolean;
     /** Raw literal value when `_isLiteral` is `true`. */
-    _literalValue?: any;
+    _literalValue?: unknown;
     /** Ordered pipeline of vectorized transformation functions. */
     _ops: OpFn[];
     /** Explicit output alias name assigned via `.alias()`. */
@@ -485,9 +485,9 @@ export interface IExpr {
     /** Pipeline index marking the boundary of an `.over()` window partition. */
     _partitionOpsIndex?: number;
     /** Resolves an operand into an evaluated column array or scalar value. */
-    _resolve(val: any, columns: ColumnDict, height: number): ColumnData | any;
+    _resolve(val: unknown, columns: ColumnDict, height: number): ColumnData | unknown;
     /** Window operation metadata descriptor when `_isWindow` is `true`. */
-    _windowOp?: { type: string;[key: string]: any } | null;
+    _windowOp?: { type: string;[key: string]: unknown } | null;
 }
 
 /**
@@ -771,11 +771,11 @@ export interface SkewOptions {
 /**
  * Configuration options for sorting arrays and columns (`arr.sort`, `sortArray`).
  */
-export interface SortArrayOptions<T = any> {
+export interface SortArrayOptions<T = unknown> {
     /**
      * Optional comparator function or dictionary mapping column names to custom comparator functions.
      */
-    customComp?: ((a: any, b: any) => number) | Partial<Record<keyof T, (a: any, b: any) => number>> | null;
+    customComp?: ((a: unknown, b: unknown) => number) | Partial<Record<keyof T, (a: unknown, b: unknown) => number>> | null;
     /**
      * Sort order boolean or array of booleans per key.
      * @default false

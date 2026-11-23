@@ -2,10 +2,10 @@ import { ColumnExpr, resolveColumnSelectors, ALL_COLUMNS_MARKER, LITERAL_MARKER,
 import { GroupedData } from "./grouped"
 import { NEWLINE, MS_PER_DAY, DAY_OF_WEEK_MAP } from "../constants"
 import { createSafeJsonReplacer } from "../utils/json"
-import type { IExpr, ColumnData, ColumnDict, ColumnKeyArg, ColumnOrExprArg, ConcatOptions, ConcatItemsArg, DataFrameDataArg, RenameMappingArg, RowRecord, DataFrameSchema, ExplodeOptions, IntoExpr, IntoExprArg, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
+import type { IExpr, ColumnData, ColumnDict, ColumnKeyArg, ColumnOrExprArg, ConcatOptions, DataFrameDataArg, RenameMappingArg, RowRecord, DataFrameSchema, ExplodeOptions, IntoExpr, IntoExprArg, FillNullOptions, FillOptions, FillTarget, SortArrayOptions, CastOptions } from "../types"
 import type { CastTargetArg, DataFrameColumns, DataFrameShape, DynamicIndexColumnArg, EqualsOptions, FilterPredicateArg, GroupByDynamicOptions, InsertColumnArg, IterRowResult, IterRowsOptions, JoinAsofOptions, JoinMaintainOrder, JoinOptions, JoinWhereArg, JoinWhereOptions, LimitOptions, PartitionByKey, PartitionByOptions, PartitionByResult, PivotOptions, Rename, RowPredicateFn, SelectArg, SortOptions, TransposeOptions, UnpivotOptions, UnstackOptions, WritableStreamTarget, WriteFileTargetArg, WriteJSONOptions } from "./types"
 import { DataTypeRegistry, DataType, type RegisteredDataType } from "../datatypes"
-import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isArrayOfType, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate, type WriteCSVOptions } from "../utils"
+import { isArrayOrTypedArray, toValidArray, toArrayOfType, isObj, isRegExp, clamp, stringifyCSV, compareScalarValues, filterByMask, toDuration, toValidDate, toValidNumber, isValidNumber, binarySearch, addCalendarDuration, parseDurationInterval, createUTCDate, type WriteCSVOptions } from "../utils"
 import { assertColumnExists, assertHeight, DataFrameError, ShapeError, InvalidArgumentError, IOStreamError } from "../exceptions"
 import { concat } from "../functions/concat"
 import {
@@ -57,7 +57,7 @@ export class DataFrame<T extends RowRecord = RowRecord> {
      * @category DataFrame
      * @syntax df.{symbol}(...)
      * @example
-     * const df = $df.data([{ a: 1, b: "x" }, { a: 2, b: "y" }]);
+     * const df = $df.dataFrame([{ a: 1, b: "x" }, { a: 2, b: "y" }]);
      * // shape: (2, 2)
      * // +-----+-----+
      * // | a   | b   |
@@ -235,7 +235,7 @@ export class DataFrame<T extends RowRecord = RowRecord> {
     /**
      * Concatenates items vertically, horizontally, or diagonally.
      * 
-     * @param {ConcatItemsArg} items Single DataFrame or array of DataFrames/rows to concatenate.
+     * @param {DataFrame | DataFrame[]} items Single DataFrame or array of DataFrames to concatenate.
      * @param {ConcatOptions} [options] Configuration options for concatenation layout and strictness.
      * @returns {DataFrame}
      * 
@@ -256,7 +256,7 @@ export class DataFrame<T extends RowRecord = RowRecord> {
      * @example
      * // 2. Horizontal Concatenation:
      * <!-- doc:base_concat_pair -->
-     * const dfB = $df.data({ b: [10, 20] });
+     * const dfB = $df.dataFrame({ b: [10, 20] });
      * df1.concat(dfB, { how: "horizontal" });
      * // shape: (2, 2)
      * // +---+----+
@@ -281,13 +281,11 @@ export class DataFrame<T extends RowRecord = RowRecord> {
      * // +------+------+
      */
     concat<U extends RowRecord = T>(
-        items: ConcatItemsArg,
+        items: DataFrame | DataFrame[],
         options: ConcatOptions = {}
     ): DataFrame<U> {
-        const arrayItems = isArrayOfType(items, DataFrame, { mode: "every", allowEmpty: false })
-            ? (items as DataFrame[])
-            : [items];
-        return concat([this, ...arrayItems], options);
+        const arrayItems = Array.isArray(items) ? items : [items];
+        return concat([this as DataFrame, ...(arrayItems as DataFrame[])], options);
     }
 
     /**

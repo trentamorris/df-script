@@ -6,7 +6,7 @@ console.log("Running StandardExpr.or edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Column vs Column boolean logic
 // -------------------------------------------------------------
-const dfCol = $df.data([
+const dfCol = $df.dataFrame([
     { a: true, b: false },
     { a: false, b: false },
     { a: true, b: true },
@@ -50,7 +50,7 @@ if (resArr[0].c !== true || resArr[1].c !== true || resArr[2].c !== true || resA
 // Case 4: Kleene 3-valued logic with null
 // (true or null is true, false or null is null, null or null is null)
 // -------------------------------------------------------------
-const dfKleene = $df.data([
+const dfKleene = $df.dataFrame([
     { a: true, b: null },
     { a: false, b: null },
     { a: null, b: null }
@@ -69,7 +69,7 @@ if (resKleene[0].c_lit !== true || resKleene[1].c_lit !== null || resKleene[2].c
 // -------------------------------------------------------------
 // Case 5: Strict boolean comparison (only true yields true, non-booleans are false/null)
 // -------------------------------------------------------------
-const dfNonBool = $df.data([
+const dfNonBool = $df.dataFrame([
     { a: 0, b: 0 },
     { a: "true", b: false }
 ]);
@@ -83,7 +83,7 @@ if (resNonBool[0].c !== false || resNonBool[1].c !== false) {
 // -------------------------------------------------------------
 // Case 6: Multi-column projection ($df.col(["a", "b"]).or(false))
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: true, b: false },
     { a: false, b: true }
 ]);
@@ -108,21 +108,21 @@ if (resChain[0].c_not !== false || resChain[1].c_not !== true || resChain[2].c_n
 // -------------------------------------------------------------
 // Case 8: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ a: false, b: true }]);
+const dfSingle = $df.dataFrame([{ a: false, b: true }]);
 const resSingle = dfSingle.select([$df.col("a").or($df.col("b")).alias("c")]).toDicts() as any[];
 if (resSingle[0].c !== true) throw new Error("Case 8 failed: single row or");
 
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame with schema preserved
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ a: true, b: false }]).filter($df.col("a").eq(false));
+const dfEmpty = $df.dataFrame([{ a: true, b: false }]).filter($df.col("a").eq(false));
 const resEmpty = dfEmpty.select([$df.col("a").or($df.col("b")).alias("c")]).toDicts();
 if (resEmpty.length !== 0) throw new Error("Case 9 failed: empty DataFrame or");
 
 // -------------------------------------------------------------
 // Case 10: Triple chained OR: a.or(b).or(c)
 // -------------------------------------------------------------
-const dfTriple = $df.data([
+const dfTriple = $df.dataFrame([
     { a: false, b: false, c: false },
     { a: false, b: false, c: true },
     { a: false, b: true, c: false },

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.stripChars tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { name: "  --Alice  " },
     { name: null }
 ]);

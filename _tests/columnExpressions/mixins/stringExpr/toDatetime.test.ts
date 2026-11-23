@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toDatetime tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { iso_datetime: "2026-05-25T14:30:15.123Z" },
     { iso_datetime: null }
 ]);

@@ -13,7 +13,7 @@ import type { SeqRangeOptions } from "./types";
  *
  * @param value The initial value to start the sequence or the constant value to repeat.
  * @param [options] Configuration options.
- * @returns {ColumnExpr<any>} A column expression generating the sequence.
+ * @returns {ColumnExpr<T>} A column expression generating the sequence.
  * @namespace $df
  * @category Function
  * @syntax $df.{symbol}(...)
@@ -43,10 +43,10 @@ import type { SeqRangeOptions } from "./types";
  * // | 8         |
  * // +-----------+
  */
-export function seqRange(
-    value: any,
+export function seqRange<T = unknown>(
+    value: T,
     options: SeqRangeOptions = { strict: true }
-): ColumnExpr<any> {
+): ColumnExpr<T> {
     const opts = options;
     const expr = new ColumnExpr(LITERAL_MARKER);
     expr._literalValue = value;
@@ -83,7 +83,7 @@ export function seqRange(
 
         const mode = opts.mode || "cumulative";
         const step = opts.step !== undefined ? opts.step : 1;
-        const coerceVal = opts.dtype ? (val: any) => opts.dtype!.coerce(val) : (val: any) => val;
+        const coerceVal = opts.dtype ? (val: unknown) => opts.dtype!.coerce(val) : (val: unknown) => val;
         const coercedFill = coerceVal(!strict && opts.padValue !== undefined ? opts.padValue : null);
 
         const result = (strict && opts.dtype?.allocate)

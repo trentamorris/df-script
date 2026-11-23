@@ -1,3 +1,4 @@
+import { $df } from "df-script";
 import type { DataFrame, RowRecord } from "df-script";
 import type { Expect, Equal } from "../testTypeHelper";
 
@@ -39,6 +40,32 @@ export type _Test5_ToDicts = Expect<Equal<typeof rowsHoriz, Array<UserRow & Extr
 const genericConcat = dfGeneric.concat(df1);
 export type _Test6_RowRecordPreserved = Expect<Equal<typeof genericConcat, DataFrame<RowRecord>>>;
 
-// 7. Negative type tests
+// 7. Non-strict horizontal concat option is accepted
+const horizNonStrict = df1.concat<UserRow & ExtraCols>(dfExtra, {
+    how: "horizontal",
+    horizontal: { strict: false }
+});
+export type _Test7_HorizNonStrict = Expect<Equal<typeof horizNonStrict, DataFrame<UserRow & ExtraCols>>>;
+
+// 8. Top-level $df.concat preserves explicit generic U and defaults to RowRecord
+const topVert = $df.concat<UserRow>([df1, df2]);
+export type _Test8_TopLevelExplicit = Expect<Equal<typeof topVert, DataFrame<UserRow>>>;
+
+const topDefault = $df.concat([df1, dfExtra], { how: "diagonal" });
+export type _Test9_TopLevelDefaultRowRecord = Expect<Equal<typeof topDefault, DataFrame<RowRecord>>>;
+
+const topSingle = $df.concat<UserRow>(df1);
+export type _Test10_TopLevelSingle = Expect<Equal<typeof topSingle, DataFrame<UserRow>>>;
+
+// 9. Negative type tests
 // @ts-expect-error - invalid concat item
 df1.concat("not_a_dataframe");
+
+// @ts-expect-error - invalid how option
+df1.concat(df2, { how: "invalid" });
+
+// @ts-expect-error - invalid horizontal.strict type
+df1.concat(dfExtra, { how: "horizontal", horizontal: { strict: "yes" } });
+
+// @ts-expect-error - array containing non-DataFrame
+df1.concat([df2, 123]);

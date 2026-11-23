@@ -69,7 +69,7 @@ export function isObj(v: unknown): v is Record<PropertyKey, unknown> {
 }
 
 export function isSafeObjPropertyKey(key: unknown): key is string {
-    return typeof key === "string" && !DANGEROUS_OBJ_PROPERTIES.includes(key as any);
+    return typeof key === "string" && !(DANGEROUS_OBJ_PROPERTIES as readonly string[]).includes(key);
 }
 
 export function isPlainObj(v: unknown): v is Record<PropertyKey, unknown> {
@@ -106,14 +106,14 @@ export function isPlainObj(v: unknown): v is Record<PropertyKey, unknown> {
 const _dummyProxyTarget = function () { };
 const _dummyProxy = new Proxy(_dummyProxyTarget, { construct() { return this; } });
 const _dummyArrayBuffer = typeof ArrayBuffer === "function" ? new ArrayBuffer(0) : undefined;
-const _dummyConstructProbes: readonly any[][] = [
+const _dummyConstructProbes: readonly unknown[][] = [
     [],
     [_dummyProxyTarget],
     [_dummyArrayBuffer],
     [{}]
 ];
 
-export function isClass(v: unknown): v is new (...args: any[]) => any {
+export function isClass(v: unknown): v is new (...args: unknown[]) => unknown {
     if (typeof v !== "function") return false;
 
     try {
@@ -150,7 +150,7 @@ function _checkNativeSlot(
     v: unknown,
     tag: string,
     getterOrMethod: Function | undefined,
-    expectedReturn?: any
+    expectedReturn?: unknown
 ): boolean {
     if (!isObj(v)) return false;
 
@@ -178,7 +178,7 @@ export function isValidDateObj(v: unknown): v is Date {
     }
     try {
         if (Object.prototype.hasOwnProperty.call(v, Symbol.toStringTag)) return false;
-        return Object.prototype.toString.call(v) === _TAG_DATE && !Number.isNaN((v as any).getTime());
+        return Object.prototype.toString.call(v) === _TAG_DATE && !Number.isNaN((v as unknown as Date).getTime());
     } catch {
         return false;
     }
@@ -215,7 +215,7 @@ export function isError(v: unknown): v is Error {
     try {
         if (v instanceof Error) return true;
 
-        let p: any = v;
+        let p: unknown = v;
         while (p !== null) {
             if (!Object.prototype.hasOwnProperty.call(p, Symbol.toStringTag)) {
                 if (Object.prototype.toString.call(p) === _TAG_ERROR) return true;
@@ -258,8 +258,8 @@ export function isDetachedBuffer(v: unknown): boolean {
         if (isSharedArrayBuffer(buf)) return false;
         if (!isArrayBuffer(buf)) return false;
 
-        if ("detached" in buf && (buf as any).detached !== undefined) {
-            return (buf as any).detached === true;
+        if ("detached" in buf && (buf as { detached?: boolean }).detached !== undefined) {
+            return (buf as { detached?: boolean }).detached === true;
         }
 
         _arrayBufferSlice?.call(buf, 0, 0);

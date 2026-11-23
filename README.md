@@ -111,7 +111,7 @@ const { $df, DataFrame, ColumnExpr, DataType } = require("df-script");
 import { $df } from "df-script";
 
 // Create a DataFrame with structured data and automatic schema inference
-const df = $df.data([
+const df = $df.dataFrame([
   { id: 1, name: "Alice", joinDate: "2026-01-15", sales: 1200.50, tags: ["sales", "east"] },
   { id: 2, name: "Bob", joinDate: "2026-02-20", sales: 850.00, tags: ["support", "west"] },
   { id: 3, name: "Charlie", joinDate: "2026-03-05", sales: 2300.00, tags: ["sales", "north"] },
@@ -154,7 +154,7 @@ Output:
 
 ### 2. GroupBy & Multi-Metric Aggregations
 ```typescript
-const transactions = $df.data([
+const transactions = $df.dataFrame([
   { region: "East", category: "Hardware", revenue: 450, quantity: 3, timestamp: "2026-02-01" },
   { region: "East", category: "Hardware", revenue: 550, quantity: 5, timestamp: "2026-02-10" },
   { region: "West", category: "Software", revenue: 1200, quantity: 1, timestamp: "2026-01-20" },
@@ -194,7 +194,7 @@ Output:
 
 ### 3. Relational Joins & Conditional Columns
 ```typescript
-const orders = $df.data([
+const orders = $df.dataFrame([
   { orderId: 101, customerId: 1, amount: 250 },
   { orderId: 102, customerId: 2, amount: 1400 },
 ]);
@@ -208,7 +208,7 @@ orders:
 +---------+------------+--------+
 */
 
-const customers = $df.data([
+const customers = $df.dataFrame([
   { id: 1, firstName: "Alice", lastName: "Smith" },
   { id: 2, firstName: "Bob", lastName: "Jones" },
 ]);
@@ -246,7 +246,7 @@ Output:
 
 ### 4. Rolling Moving Windows & Cumulative Calculations
 ```typescript
-const sensorData = $df.data([
+const sensorData = $df.dataFrame([
   { timestamp: "2026-03-01T00:00:00Z", temperature: 20.1, powerUsage: 12 },
   { timestamp: "2026-03-01T01:00:00Z", temperature: 20.9, powerUsage: 14 },
   { timestamp: "2026-03-01T02:00:00Z", temperature: 21.5, powerUsage: 13 },
@@ -347,7 +347,7 @@ The `$df` entry point provides top-level functions to create DataFrames, constru
 | **`$df.coalesce`** | Returns the first non-null value among expressions. |
 | **`$df.col`** | Creates a column reference expression. |
 | **`$df.concat`** | Concatenates multiple DataFrames. |
-| **`$df.data`** | Creates a new DataFrame from rows, columns, or matrices. |
+| **`$df.dataFrame`** | Creates a new DataFrame from rows, columns, or matrices. |
 | **`$df.duration`** | Creates a duration expression. |
 | **`$df.element`** | References the current array element in `.arr.eval()`. |
 | **`$df.exclude`** | Selects all columns except the specified ones. |

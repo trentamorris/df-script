@@ -68,7 +68,7 @@ for (const { Cls, name } of otherErrorClasses) {
 
 // 2. Integration checks with DataFrame and ColumnExpr operations
 try {
-    const df = $df.data([{ a: 1 }]);
+    const df = $df.dataFrame([{ a: 1 }]);
     df.toArray("non_existent" as any);
     throw new Error("Expected ColumnNotFoundError but no error was thrown");
 } catch (err: any) {
@@ -78,7 +78,7 @@ try {
 }
 
 try {
-    const df = $df.data([{ a: [1, 2, 3] }]);
+    const df = $df.dataFrame([{ a: [1, 2, 3] }]);
     df.select($df.col("a").arr.get(5, false)).toDicts();
     throw new Error("Expected ComputeError but no error was thrown");
 } catch (err: any) {
@@ -88,7 +88,7 @@ try {
 }
 
 try {
-    const df = $df.data([{ a: 1 }]);
+    const df = $df.dataFrame([{ a: 1 }]);
     df.select($df.col("a").quantile(1.5)).toDicts();
     throw new Error("Expected ComputeError but no error was thrown");
 } catch (err: any) {

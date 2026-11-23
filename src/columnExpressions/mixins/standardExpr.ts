@@ -1717,7 +1717,7 @@ export class StandardExpr extends ExprBase {
         return this._derive((vArray, columns) => {
             const { values } = getUniqueArrayStats(vArray, { strict: true });
             const targetVal = getArrayElement(values, index, nullOnOob);
-            return this.eq(targetVal)._evaluate(columns, vArray.length);
+            return this.eq(targetVal as ComparisonArg)._evaluate(columns, vArray.length);
         });
     }
 

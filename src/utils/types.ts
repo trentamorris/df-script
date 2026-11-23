@@ -25,8 +25,8 @@ export type ArrayItemType =
     | "null"
     | "undefined"
     | "nullish"
-    | (new (...args: any[]) => any)
-    | ((v: unknown) => any);
+    | (new (...args: unknown[]) => unknown)
+    | ((v: unknown) => unknown);
 
 /**
  * BigInt bounds specification: either a predefined `BigIntRangeType` name or an explicit `{ min, max }` object.
@@ -48,7 +48,7 @@ export type BigIntRangeType = keyof typeof BIGINT_RANGES;
 /**
  * Configuration options for `binarySearch()`.
  */
-export interface BinarySearchOptions<T = any> {
+export interface BinarySearchOptions<T = unknown> {
     /**
      * Optional accessor function `(index, item) => number` for indirect searching.
      */
@@ -110,11 +110,11 @@ export interface CumulativeStepContext {
     /** The relative iteration counter of the stepping process (starts at 1). */
     index: number;
     /** The original value at the current index in the target array. */
-    originalValue: any;
+    originalValue: unknown;
     /** The accumulated value returned by the step function from the previous stepped index. */
-    prev: any;
+    prev: unknown;
     /** The entire target array being populated/modified. */
-    targetArray: any;
+    targetArray: unknown;
 }
 
 /**
@@ -178,11 +178,11 @@ export interface FillSeqBaseOptions {
     /**
      * Type coercion helper applied to each generated value before writing.
      */
-    coerce?: (v: any) => any;
+    coerce?: (v: unknown) => unknown;
     /**
      * Conditional predicate determining if a value should be written at a given index.
      */
-    condition?: (v: any, index: number, array: any[]) => boolean;
+    condition?: (v: unknown, index: number, array: unknown[]) => boolean;
     /**
      * Exclusive boundary index at which iteration and writing stops.
      */
@@ -206,11 +206,11 @@ export interface FillSeqOptions extends FillSeqBaseOptions {
     /**
      * Type coercion helper applied to each generated value before writing.
      */
-    coerce?: (v: any) => any;
+    coerce?: (v: unknown) => unknown;
     /**
      * Conditional predicate determining if a value should be written at a given index.
      */
-    condition?: (v: any, index: number, array: any[]) => boolean;
+    condition?: (v: unknown, index: number, array: unknown[]) => boolean;
     /**
      * Exclusive boundary index at which iteration and writing stops.
      */
@@ -234,7 +234,7 @@ export interface FillSeqOptions extends FillSeqBaseOptions {
      * Step increment value or callback function.
      * @default 1
      */
-    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);
+    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => unknown);
 }
 
 /**
@@ -323,11 +323,11 @@ export interface IndependentStepContext {
     /** The relative iteration counter of the generation process (starts at 0). */
     index: number;
     /** The static starting value passed to the sequence generator. */
-    initialValue: any;
+    initialValue: unknown;
     /** The original value at the current index in the target array. */
-    originalValue: any;
+    originalValue: unknown;
     /** The entire target array being populated/modified. */
-    targetArray: any;
+    targetArray: unknown;
 }
 
 /**
@@ -383,7 +383,7 @@ export interface IsArrayOfTypeOptionsParams {
     /**
      * Optional custom coercion function applied to each element in `toArrayOfType()`.
      */
-    coerce?: (v: unknown) => any;
+    coerce?: (v: unknown) => unknown;
     /**
      * Quantifier mode: `"every"` requires all elements to match; `"some"` requires at least one element to match.
      * @default "every"
@@ -449,7 +449,7 @@ export interface JoinArrayOptions {
     /**
      * Callback function used to format each non-null element to a string.
      */
-    valueFormatter?: (val: any, index: number) => string;
+    valueFormatter?: (val: unknown, index: number) => string;
 }
 
 /**
@@ -533,6 +533,16 @@ export interface NDJSONParseOptions {
      * @default 0
      */
     skipLines?: number;
+}
+
+/**
+ * Minimal Node.js `Buffer` constructor interface for encoding/decoding strings without requiring `@types/node`.
+ */
+export interface NodeBufferConstructor {
+    /**
+     * Allocates a new `Buffer` containing the given string encoded with `enc`.
+     */
+    from(s: string, enc: string): Uint8Array & { toString(enc: string): string };
 }
 
 /**
@@ -672,27 +682,27 @@ export interface SafeJsonReplacerOptions {
      */
     handleCircular?: boolean;
     /** Custom serialization override for `BigInt` values. */
-    onBigInt?: (v: bigint) => any;
+    onBigInt?: (v: bigint) => unknown;
     /** Custom callback invoked when a circular reference is encountered. */
-    onCircular?: (this: any, k: string, v: any) => any;
+    onCircular?: (this: unknown, k: string, v: unknown) => unknown;
     /** Catch-all serialization override for custom types, executed after native type checks. */
-    onCustom?: (this: any, k: string, v: any) => any;
+    onCustom?: (this: unknown, k: string, v: unknown) => unknown;
     /** Custom serialization override for `Date` objects (takes precedence over `formatDate`). */
-    onDate?: (v: Date) => any;
+    onDate?: (v: Date) => unknown;
     /** Custom serialization override for `Error` objects. */
-    onError?: (v: Error) => any;
+    onError?: (v: Error) => unknown;
     /** Custom serialization override for `Map` objects. */
-    onMap?: (v: Map<any, any>) => any;
+    onMap?: (v: Map<unknown, unknown>) => unknown;
     /** Custom serialization override for `RegExp` objects. */
-    onRegExp?: (v: RegExp) => any;
+    onRegExp?: (v: RegExp) => unknown;
     /** Custom serialization override for `Set` objects. */
-    onSet?: (v: Set<any>) => any;
+    onSet?: (v: Set<unknown>) => unknown;
     /** Custom serialization override for `TypedArray` values. */
-    onTypedArray?: (v: any) => any;
+    onTypedArray?: (v: unknown) => unknown;
     /** Custom serialization override for `URLSearchParams` objects. */
-    onURLSearchParams?: (v: URLSearchParams) => any;
+    onURLSearchParams?: (v: URLSearchParams) => unknown;
     /** Custom `JSON.stringify` replacer function or property whitelist array applied first. */
-    replacer?: ((this: any, k: string, v: any) => any) | (string | number)[] | null;
+    replacer?: ((this: unknown, k: string, v: unknown) => unknown) | (string | number)[] | null;
     /**
      * If `true`, disables default safe serialization for `BigInt` values.
      * @default false
@@ -875,7 +885,7 @@ export interface UniqueArrayStatsOptions {
     /**
      * Custom function to extract a unique comparison key from each element.
      */
-    keySelector?: (val: any) => any;
+    keySelector?: (val: unknown) => string;
     /**
      * If `true`, uses canonical serialization to group nested structures (Arrays, Sets, Maps, Dates) by value instead of reference.
      * @default false

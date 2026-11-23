@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.totalMinutes tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { dur: 60000 },
     { dur: -3600000 },
     { dur: null }

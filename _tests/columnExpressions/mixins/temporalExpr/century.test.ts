@@ -8,7 +8,7 @@ const d1000 = new Date(0); d1000.setUTCFullYear(1000, 0, 1);
 const d100 = new Date(0); d100.setUTCFullYear(100, 0, 1);
 const d1 = new Date(0); d1.setUTCFullYear(1, 0, 1);
 
-const df = $df.data({
+const df = $df.dataFrame({
     date: [
         new Date("2026-05-25T00:00:00.000Z"),
         new Date("2001-01-01T00:00:00.000Z"),

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.countMatches tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { text: "banana" },
     { text: "apple.banana.cherry" },
     { text: "hello 123 world 456" },

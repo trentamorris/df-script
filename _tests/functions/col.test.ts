@@ -6,7 +6,7 @@ console.log("STARTING $df.col() TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         numA: [1, 2],
         numB: [10, 20],
         label: ["x", "y"]

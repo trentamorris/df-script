@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.cov tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { a: 1, b: 2 },
     { a: 2, b: 4 },
     { a: 3, b: 6 }

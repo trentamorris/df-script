@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.reverse tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { tags: ["apple", "banana", "cherry"] },
     { tags: [] },
     { tags: null }

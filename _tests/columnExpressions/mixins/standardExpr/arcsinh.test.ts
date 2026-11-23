@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.arcsinh tests...");
 
 // 1. Valid Domain (-Infinity, +Infinity) Real Values & Null
-const df1 = $df.data({
+const df1 = $df.dataFrame({
     val: [0, 1, -1, 5.5, -5.5, 100, -100, null]
 });
 const res1 = df1.select([$df.col("val").arcsinh().alias("a")]).toDicts() as any[];
@@ -19,7 +19,7 @@ if (Math.abs(res1[6].a - Math.asinh(-100)) > 1e-6) throw new Error("arcsinh(-100
 if (res1[7].a !== null) throw new Error("arcsinh(null) should be null");
 
 // 2. Infinities and NaN
-const dfInf = $df.data({
+const dfInf = $df.dataFrame({
     val: [Infinity, -Infinity, NaN]
 });
 const resInf = dfInf.select([$df.col("val").arcsinh().alias("a")]).toDicts() as any[];
@@ -28,7 +28,7 @@ if (resInf[1].a !== -Infinity) throw new Error("arcsinh(-Infinity) should be -In
 if (!Number.isNaN(resInf[2].a)) throw new Error("arcsinh(NaN) should be NaN");
 
 // 3. Empty DataFrame
-const dfEmpty = $df.data({ val: [] });
+const dfEmpty = $df.dataFrame({ val: [] });
 const resEmpty = dfEmpty.select([$df.col("val").arcsinh().alias("a")]).toDicts() as any[];
 if (resEmpty.length !== 0) throw new Error("arcsinh on empty dataframe should return empty result");
 

@@ -12,7 +12,7 @@ try {
         flag: $df.Boolean
     };
 
-    const df = $df.data({
+    const df = $df.dataFrame({
         num: [1, 2],
         str: ["a", "b"],
         flag: [true, false]

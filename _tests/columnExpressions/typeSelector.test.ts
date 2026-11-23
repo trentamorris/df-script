@@ -13,7 +13,7 @@ const schema = {
     is_active: $df.Boolean
 };
 
-const df = $df.data([
+const df = $df.dataFrame([
     { id: 1, name: "Alice", score: 95, weight: 62.5, is_active: true },
     { id: 2, name: "Bob", score: 80, weight: 75.2, is_active: false }
 ], schema);

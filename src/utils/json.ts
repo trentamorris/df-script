@@ -73,7 +73,7 @@ export function safeJsonParse<T = unknown, F = unknown>(
 
         if (format === "ndjson") {
             const { skipInvalidLines = false, maxLines, skipLines = 0 } = ndjson;
-            const parsedData: any[] = [];
+            const parsedData: unknown[] = [];
             const rawLines = s.split(NEWLINE_REGEX);
             const limit = maxLines ?? Infinity;
             let skipped = 0;
@@ -110,10 +110,10 @@ export function safeJsonParse<T = unknown, F = unknown>(
             throw new InvalidArgumentError("Parsed value failed guard validation");
         }
 
-        return result as any;
+        return result as T | F;
     } catch (err) {
         try { onError?.(err); } catch { /* ignore user handler errors */ }
-        return fallbackVal as any;
+        return fallbackVal as T | F;
     }
 }
 
@@ -125,7 +125,7 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
 
     let seen = options.handleCircular ? new WeakSet<object>() : null;
 
-    return function replacer(this: any, k: string, v: any): any {
+    return function replacer(this: unknown, k: string, v: unknown): unknown {
         let val = v;
 
         if (typeof options.replacer === "function") {
@@ -136,7 +136,7 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
 
         if (val === undefined) return undefined;
 
-        const raw = (val === v && this != null) ? this[k] : val;
+        const raw = (val === v && this != null) ? (this as Record<string, unknown>)[k] : val;
 
         if (options.onCustom) {
             const customVal = options.onCustom.call(this, k, raw);
@@ -165,7 +165,7 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
             return unboxed.toString();
         }
 
-        if (isTypedArray(unboxed)) return options.voidTypedArrayReplacement ? val : (options.onTypedArray?.(unboxed) ?? Array.from(unboxed as any));
+        if (isTypedArray(unboxed)) return options.voidTypedArrayReplacement ? val : (options.onTypedArray?.(unboxed) ?? Array.from(unboxed as ArrayLike<unknown>));
         if (isSet(unboxed)) return options.voidSetReplacement ? val : (options.onSet?.(unboxed) ?? Array.from(unboxed));
         if (isMap(unboxed)) return options.voidMapReplacement ? val : (options.onMap?.(unboxed) ?? Array.from(unboxed.entries()));
         if (isRegExp(unboxed)) return options.voidRegExpReplacement ? val : (options.onRegExp?.(unboxed) ?? unboxed.toString());
@@ -230,7 +230,7 @@ function _tokenizeJsonPath(path: string): JsonToken[] | null {
     return lastIndex === cleanPath.length ? tokens : null;
 }
 
-function _collectJsonRecursive(val: any, tok: JsonToken, results: any[], visited = new Set<object>()): void {
+function _collectJsonRecursive(val: unknown, tok: JsonToken, results: unknown[], visited = new Set<object>()): void {
     if (val == null || !isSafeObjPropertyKey(tok.key) || typeof val !== "object" || visited.has(val)) return;
 
     visited.add(val);
@@ -251,7 +251,7 @@ function _collectJsonRecursive(val: any, tok: JsonToken, results: any[], visited
     }
 }
 
-function _resolveJsonPathStep(item: any, tok: JsonToken, next: any[]): void {
+function _resolveJsonPathStep(item: unknown, tok: JsonToken, next: unknown[]): void {
     if (item == null) return;
 
     switch (tok.type) {
@@ -299,7 +299,7 @@ function _resolveJsonPathStep(item: any, tok: JsonToken, next: any[]): void {
 export function jsonPathMatch(jsonInput: unknown, path: string): string | null {
     if (jsonInput == null || isBlankString(path)) return null;
 
-    let root: any = jsonInput;
+    let root: unknown = jsonInput;
     if (typeof jsonInput === "string") {
         const trimmed = jsonInput.trim();
         if (trimmed === "") return null;
@@ -313,9 +313,9 @@ export function jsonPathMatch(jsonInput: unknown, path: string): string | null {
     const tokens = _tokenizeJsonPath(path);
     if (tokens === null) return null;
 
-    let curr: any[] = [root];
+    let curr: unknown[] = [root];
     for (let t = 0; t < tokens.length && curr.length > 0; t++) {
-        const next: any[] = [];
+        const next: unknown[] = [];
         for (let c = 0; c < curr.length; c++) {
             _resolveJsonPathStep(curr[c], tokens[t], next);
         }

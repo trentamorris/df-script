@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.jsonPathMatch tests...");
 
 
-const df = $df.data({
+const df = $df.dataFrame({
     json_str: [
         '{"user": {"name": "Alice", "age": 30, "tags": ["admin", "dev"]}, "active": true}',
         '{"user": {"name": "Bob", "age": 25, "tags": ["user", "guest", "tester"]}, "active": false}',

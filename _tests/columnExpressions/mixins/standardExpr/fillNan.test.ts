@@ -6,7 +6,7 @@ console.log("Running StandardExpr.fillNan tests...");
 // -------------------------------------------------------------
 // Case 1: Basic scalar replacement with { value: ... }
 // -------------------------------------------------------------
-const dfBasic = $df.data([
+const dfBasic = $df.dataFrame([
     { a: 10, b: 100 },
     { a: NaN, b: 200 },
     { a: 30, b: 300 }
@@ -31,7 +31,7 @@ if (resBasic[1].f_bwd !== 30) throw new Error("Case 1 failed: fillNan strategy b
 // -------------------------------------------------------------
 // Case 2: Only NaN is replaced; null, 0, -0, valid numbers are preserved
 // -------------------------------------------------------------
-const dfMixed = $df.data([
+const dfMixed = $df.dataFrame([
     { val: NaN },
     { val: null },
     { val: 0 },
@@ -52,7 +52,7 @@ if (resMixed[4].filled !== 42) throw new Error("Case 2 failed: valid number alte
 // -------------------------------------------------------------
 // Case 3: Statistical strategies ("min", "max", "mean")
 // -------------------------------------------------------------
-const dfStats = $df.data([
+const dfStats = $df.dataFrame([
     { x: 10 },
     { x: NaN },
     { x: 20 },
@@ -73,7 +73,7 @@ if (resStats[1].s_mean !== 20 || resStats[3].s_mean !== 20) throw new Error("Cas
 // -------------------------------------------------------------
 // Case 4: Directional strategies ("forward", "backward") with limit
 // -------------------------------------------------------------
-const dfLimit = $df.data([
+const dfLimit = $df.dataFrame([
     { v: 100 },
     { v: NaN },
     { v: NaN },
@@ -97,7 +97,7 @@ if (resLimit[3].bwd_lim1 !== 500) throw new Error("Case 4 failed: bwd limit inde
 // -------------------------------------------------------------
 // Case 5: Empty DataFrame with schema preserved via filter
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ a: 1 }]).filter($df.col("a").eq(999));
+const dfEmpty = $df.dataFrame([{ a: 1 }]).filter($df.col("a").eq(999));
 const resEmpty = dfEmpty.select([
     $df.col("a").fillNan({ value: 0 }).alias("a")
 ]).toDicts();
@@ -106,7 +106,7 @@ if (resEmpty.length !== 0) throw new Error("Case 5 failed: empty DataFrame");
 // -------------------------------------------------------------
 // Case 6: All NaNs column
 // -------------------------------------------------------------
-const dfAllNan = $df.data([
+const dfAllNan = $df.dataFrame([
     { a: NaN },
     { a: NaN },
     { a: NaN }
@@ -129,7 +129,7 @@ if (!Number.isNaN(resAllNan[0].bwd) || !Number.isNaN(resAllNan[1].bwd) || !Numbe
 // -------------------------------------------------------------
 // Case 7: Multi-column projection via col(["a", "b"])
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: NaN, b: 1, c: 99 },
     { a: 2, b: NaN, c: 99 }
 ]);
@@ -144,7 +144,7 @@ if (resMulti[1].a !== 2 || resMulti[1].b !== 0) throw new Error("Case 7 failed: 
 // -------------------------------------------------------------
 // Case 8: Expression chaining after fillNan
 // -------------------------------------------------------------
-const dfChain = $df.data([
+const dfChain = $df.dataFrame([
     { a: 5 },
     { a: NaN },
     { a: 10 }
@@ -161,7 +161,7 @@ if (resChain[0].chained !== 50 || resChain[1].chained !== 20 || resChain[2].chai
 // -------------------------------------------------------------
 // Case 9: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ v: NaN }]);
+const dfSingle = $df.dataFrame([{ v: NaN }]);
 const resSingle = dfSingle.select([
     $df.col("v").fillNan({ value: 42 }).alias("v")
 ]).toDicts() as any[];
@@ -170,7 +170,7 @@ if (resSingle[0].v !== 42) throw new Error("Case 9 failed: single row");
 // -------------------------------------------------------------
 // Case 10: fillNan with null replacement value
 // -------------------------------------------------------------
-const dfNullFill = $df.data([{ v: NaN }, { v: 10 }]);
+const dfNullFill = $df.dataFrame([{ v: NaN }, { v: 10 }]);
 const resNullFill = dfNullFill.select([
     $df.col("v").fillNan({ value: null }).alias("v")
 ]).toDicts() as any[];

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.join tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { tags: ["apple", "banana", "cherry"] },
     { numbers: [1, null, 2] },
     { tags: null }

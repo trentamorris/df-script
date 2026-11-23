@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.replace tests...");
 
 
-const df = $df.data({
+const df = $df.dataFrame({
     ts: [
         "2024-02-29T23:45:15.123Z",
         null

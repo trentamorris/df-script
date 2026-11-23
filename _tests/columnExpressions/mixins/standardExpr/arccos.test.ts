@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.arccos tests...");
 
 // 1. Standard Domain [-1, 1] Boundaries, Center & Null Values
-const df1 = $df.data({
+const df1 = $df.dataFrame({
     val: [1, 0, -1, 0.5, -0.5, null]
 });
 const res1 = df1.select([$df.col("val").arccos().alias("a")]).toDicts() as any[];
@@ -17,7 +17,7 @@ if (Math.abs(res1[4].a - (2 * Math.PI / 3)) > 1e-6) throw new Error("arccos(-0.5
 if (res1[5].a !== null) throw new Error("arccos(null) should be null");
 
 // 2. Out-of-bounds Domain Inputs (< -1 or > 1) -> Should cleanly return null
-const dfOob = $df.data({
+const dfOob = $df.dataFrame({
     val: [1.0001, -1.0001, 100, -100, Infinity, -Infinity]
 });
 const resOob = dfOob.select([$df.col("val").arccos().alias("a")]).toDicts() as any[];
@@ -26,17 +26,17 @@ for (let i = 0; i < resOob.length; i++) {
 }
 
 // 3. NaN Input retains NaN
-const dfNan = $df.data({ val: [NaN] });
+const dfNan = $df.dataFrame({ val: [NaN] });
 const resNan = dfNan.select([$df.col("val").arccos().alias("a")]).toDicts() as any[];
 if (!Number.isNaN(resNan[0].a)) throw new Error("arccos(NaN) should be NaN");
 
 // 4. Empty DataFrame
-const dfEmpty = $df.data({ val: [] });
+const dfEmpty = $df.dataFrame({ val: [] });
 const resEmpty = dfEmpty.select([$df.col("val").arccos().alias("a")]).toDicts() as any[];
 if (resEmpty.length !== 0) throw new Error("arccos on empty dataframe should return empty result");
 
 // 5. GroupBy aggregation context / expression evaluation
-const dfGrouped = $df.data({
+const dfGrouped = $df.dataFrame({
     group: ["g1", "g1", "g2", "g2"],
     val: [1, 0, -1, null]
 });

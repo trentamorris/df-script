@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running ArrayExpr.mode tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { tags: ["apple", "banana", "apple", "cherry"] },
     { tags: [] },
     { tags: null }

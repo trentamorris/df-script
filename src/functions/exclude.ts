@@ -7,7 +7,7 @@ import type { ColumnKeyArg } from "../types";
  * Creates an expression targeting all columns except the specified ones.
  *
  * @param {ColumnKeyArg} columns The name or names of columns to exclude.
- * @returns {ColumnExpr<any>} A column expression targeting all columns except the specified ones.
+ * @returns {ColumnExpr<unknown>} A column expression targeting all columns except the specified ones.
  * @namespace $df
  * @category Function
  * @syntax $df.{symbol}(...)
@@ -36,7 +36,7 @@ import type { ColumnKeyArg } from "../types";
  * // | 30 |
  * // +----+
  */
-export function exclude(columns: ColumnKeyArg): ColumnExpr<any> {
+export function exclude(columns: ColumnKeyArg): ColumnExpr<unknown> {
     const expr = new ColumnExpr(ALL_COLUMNS_MARKER);
     expr._excludedCols = toValidArray(columns, { clone: false });
     return expr;

@@ -3,11 +3,11 @@ import { $df } from "df-script";
 
 console.log("Running StandardExpr.nanMin tests...");
 
-const df1 = $df.data([{ val: 10 }, { val: NaN }, { val: 20 }]);
+const df1 = $df.dataFrame([{ val: 10 }, { val: NaN }, { val: 20 }]);
 const res1 = df1.select([$df.col("val").nanMin().alias("m")]).toDicts() as any[];
 if (!Number.isNaN(res1[0].m)) throw new Error("nanMin with NaN failed");
 
-const df2 = $df.data([{ val: 10 }, { val: 30 }, { val: 20 }]);
+const df2 = $df.dataFrame([{ val: 10 }, { val: 30 }, { val: 20 }]);
 const res2 = df2.select([$df.col("val").nanMin().alias("m")]).toDicts() as any[];
 if (res2[0].m !== 10) throw new Error("nanMin without NaN failed");
 

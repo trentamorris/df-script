@@ -54,7 +54,7 @@ export interface DurationOptions {
 /**
  * Return expression type of `$df.horizontal()`, combining `ColumnExpr` and `ArrayExprNamespace` methods.
  */
-export type HorizontalExpr = ColumnExpr<any[]> & ArrayExprNamespace;
+export type HorizontalExpr = ColumnExpr<unknown[]> & ArrayExprNamespace;
 
 /**
  * Configuration options for `$df.lit()`.
@@ -104,7 +104,7 @@ export interface SeqRangeOptions {
      * Value used for padding in non-strict mode.
      * @default null
      */
-    padValue?: any;
+    padValue?: unknown;
     /**
      * Starting row index in the DataFrame to insert the sequence (non-strict mode).
      * @default 0
@@ -114,7 +114,7 @@ export interface SeqRangeOptions {
      * Step increment/multiplier value or step callback function.
      * @default 1
      */
-    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => any);
+    step?: number | ((context: CumulativeStepContext & IndependentStepContext) => unknown);
     /**
      * When `true`, throws a `ShapeError` if the generated sequence height does not match the target height. When `false`, allows padding, truncation, and slice bounds.
      * @default true
@@ -137,4 +137,4 @@ export type StructArg = StructFieldsArg | IntoExpr;
  * Condition or branch operand for `$df.when().then().otherwise()`.
  * Accepts a column expression, scalar literal, array, or record object.
  */
-export type WhenArg = ComparisonArg | RowRecord | any[];
+export type WhenArg = ComparisonArg | RowRecord | unknown[];

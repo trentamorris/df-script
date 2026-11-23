@@ -6,7 +6,7 @@ console.log("Running StandardExpr.minBy tests...");
 // -------------------------------------------------------------
 // Case 1: Basic minBy with column expression ($df.col("score"))
 // -------------------------------------------------------------
-const dfBasic = $df.data([
+const dfBasic = $df.dataFrame([
     { name: "Alice", score: 80 },
     { name: "Bob", score: 95 },
     { name: "Charlie", score: 70 }
@@ -31,7 +31,7 @@ if (resArray[0].lowest_arr !== "Charlie") {
 // -------------------------------------------------------------
 // Case 3: GroupBy aggregation with minBy
 // -------------------------------------------------------------
-const dfGrouped = $df.data([
+const dfGrouped = $df.dataFrame([
     { dept: "Engineering", emp: "Alice", salary: 120 },
     { dept: "Engineering", emp: "Bob", salary: 150 },
     { dept: "Sales", emp: "Charlie", salary: 110 },
@@ -47,7 +47,7 @@ if (resGrouped.length !== 2 || resGrouped[0].lowest_paid !== "Alice" || resGroup
 // -------------------------------------------------------------
 // Case 4: Tie-breaking behavior (first minimum occurrence wins)
 // -------------------------------------------------------------
-const dfTies = $df.data([
+const dfTies = $df.dataFrame([
     { item: "first_min", score: 10 },
     { item: "second_min", score: 10 },
     { item: "high", score: 50 }
@@ -62,7 +62,7 @@ if (resTies[0].winner !== "first_min") {
 // -------------------------------------------------------------
 // Case 5: Null handling in `by` column (skips nulls in finding min)
 // -------------------------------------------------------------
-const dfNullsInBy = $df.data([
+const dfNullsInBy = $df.dataFrame([
     { name: "Alice", score: null },
     { name: "Bob", score: 20 },
     { name: "Charlie", score: 15 },
@@ -79,7 +79,7 @@ if (resNullsInBy[0].lowest !== "Charlie") {
 // Case 6: Null handling in target column
 // (evalBinaryOp treats null target as null pair, so minBy selects lowest non-null pair)
 // -------------------------------------------------------------
-const dfNullTarget = $df.data([
+const dfNullTarget = $df.dataFrame([
     { name: "Alice", score: 100 },
     { name: null, score: 5 },
     { name: "Charlie", score: 25 }
@@ -94,7 +94,7 @@ if (resNullTarget[0].lowest !== "Charlie") {
 // -------------------------------------------------------------
 // Case 7: All `by` values are null (returns null)
 // -------------------------------------------------------------
-const dfAllNullBy = $df.data([
+const dfAllNullBy = $df.dataFrame([
     { name: "Alice", score: null },
     { name: "Bob", score: null }
 ]);
@@ -108,7 +108,7 @@ if (resAllNull[0].lowest !== null) {
 // -------------------------------------------------------------
 // Case 8: Lexicographical string ordering in `by` column
 // -------------------------------------------------------------
-const dfStrBy = $df.data([
+const dfStrBy = $df.dataFrame([
     { id: 1, code: "bravo" },
     { id: 2, code: "zulu" },
     { id: 3, code: "alpha" }
@@ -126,7 +126,7 @@ if (resStrBy[0].min_str_id !== 3) {
 const d1 = new Date("2024-01-01");
 const d2 = new Date("2025-06-15");
 const d3 = new Date("2023-12-31");
-const dfDateBy = $df.data([
+const dfDateBy = $df.dataFrame([
     { event: "launch", date: d1 },
     { event: "v2", date: d2 },
     { event: "concept", date: d3 }
@@ -141,7 +141,7 @@ if (resDateBy[0].earliest !== "concept") {
 // -------------------------------------------------------------
 // Case 10: Single-row DataFrame & negative numeric values
 // -------------------------------------------------------------
-const dfNeg = $df.data([
+const dfNeg = $df.dataFrame([
     { tag: "neg_twenty", temp: -20 },
     { tag: "neg_five", temp: -5 },
     { tag: "neg_fifty", temp: -50 }
@@ -153,7 +153,7 @@ if (resNeg[0].coldest !== "neg_fifty") {
     throw new Error("Case 10 failed: negative values in by column");
 }
 
-const dfSingle = $df.data([{ label: "only", score: 42 }]);
+const dfSingle = $df.dataFrame([{ label: "only", score: 42 }]);
 const resSingle = dfSingle.select([
     $df.col("label").minBy($df.col("score")).alias("lowest")
 ]).toDicts() as any[];

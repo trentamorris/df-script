@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StructExpr.field tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { s: { a: 1, b: "foo" } },
     { s: { a: 2, b: "bar" } },
     { s: null },
@@ -39,7 +39,7 @@ if (rNonExistent[0].missing !== null) throw new Error("Expected null for missing
 if (rNonExistent[2].missing !== null) throw new Error("Expected null for missing field on null object");
 
 // 4. Primitive / non-object column values evaluate to null
-const dfPrimitives = $df.data([
+const dfPrimitives = $df.dataFrame([
     { s: 123 },
     { s: "string_val" },
     { s: true },
@@ -54,7 +54,7 @@ if (rPrim[2].a_val !== null) throw new Error("Expected null for boolean primitiv
 if (rPrim[3].a_val !== null) throw new Error("Expected null for empty struct");
 
 // 5. Nested structs extraction
-const dfNested = $df.data([
+const dfNested = $df.dataFrame([
     { s: { nested: { x: 42 } } },
     { s: { nested: null } },
     { s: null }
@@ -67,7 +67,7 @@ if (rNested[1].x_val !== null) throw new Error("Expected null for nested null st
 if (rNested[2].x_val !== null) throw new Error("Expected null for outer null struct");
 
 // 6. Falsy-but-valid values (0, false, "") inside struct are preserved
-const dfFalsy = $df.data([
+const dfFalsy = $df.dataFrame([
     { s: { x: 0, y: false, z: "" } },
     { s: { x: -1, y: true, z: "ok" } }
 ], { s: $df.Object });
@@ -81,7 +81,7 @@ if (rFalsy[0].y !== false) throw new Error("Expected false for falsy bool");
 if (rFalsy[0].z !== "") throw new Error("Expected '' for falsy string");
 
 // 7. Struct field holding an array value
-const dfArrField = $df.data([
+const dfArrField = $df.dataFrame([
     { s: { tags: [1, 2, 3] } },
     { s: { tags: [] } },
     { s: null }
@@ -106,14 +106,14 @@ if (rWithCols[0].a_val !== 1) throw new Error("Expected a_val=1 in withColumns")
 if (rWithCols[2].a_val !== null) throw new Error("Expected null for null struct row in withColumns");
 
 // 9. Non-object with array type should return null
-const dfArr = $df.data([{ s: [1, 2, 3] }], { s: $df.Object });
+const dfArr = $df.dataFrame([{ s: [1, 2, 3] }], { s: $df.Object });
 const rArr = dfArr.select([$df.col("s").struct.field("0").alias("v")]).toDicts() as any[];
 // Arrays are objects in JS — field "0" should still resolve
 if (rArr[0].v === undefined) throw new Error("Expected array index field to resolve");
 
 // 10. Triple-chained mutations: renameFields → withFields → field()
 // Rename "a"→"x", add "y" derived from original "a", then extract "y".
-const dfChain = $df.data([
+const dfChain = $df.dataFrame([
     { s: { a: 5, b: "hi" } },
     { s: { a: 10, b: "there" } },
     { s: null }
@@ -130,7 +130,7 @@ if (rChain[1].y !== 30) throw new Error(`Chain: Expected y=30, got ${rChain[1].y
 if (rChain[2].y !== null) throw new Error(`Chain: Expected y=null for null struct`);
 
 // 11. sort() by struct field extracted via field() — integration with DataFrame sort
-const dfSort = $df.data([
+const dfSort = $df.dataFrame([
     { s: { score: 30 } },
     { s: { score: 10 } },
     { s: null },
@@ -145,7 +145,7 @@ if (rSort[2].score !== 30) throw new Error(`Sort: Expected third score=30`);
 if (rSort[3].score !== null) throw new Error(`Sort: Expected last score=null`);
 
 // 12. Prototype-safe field access: key "constructor" must return own property, not prototype
-const dfProto = $df.data([
+const dfProto = $df.dataFrame([
     { s: { normal: 42 } },
     { s: { constructor: "hacked" } }
 ], { s: $df.Object });
@@ -155,7 +155,7 @@ const rProto = dfProto.select([
 if (rProto[1].ctor !== "hacked") throw new Error(`Proto: Expected own 'constructor' property returned`);
 
 // 13. field() returning undefined/null propagates into further arithmetic
-const dfNullProp = $df.data([
+const dfNullProp = $df.dataFrame([
     { s: { a: 5 } },
     { s: { b: 99 } },
     { s: null }
@@ -168,7 +168,7 @@ if (rNullProp[1].result !== null) throw new Error(`NullProp: Expected null for m
 if (rNullProp[2].result !== null) throw new Error(`NullProp: Expected null for null struct * 10`);
 
 // 14. Edge case: field extraction from primitive non-objects returns null
-const dfNonObj = $df.data([
+const dfNonObj = $df.dataFrame([
     { s: "hello" },
     { s: 123 },
     { s: true },
@@ -184,7 +184,7 @@ for (let i = 0; i < 4; i++) {
 }
 
 // 15. Edge case: struct field with falsy boolean and 0 values
-const dfFalsyValues = $df.data([
+const dfFalsyValues = $df.dataFrame([
     { s: { flag: false, count: 0, str: "", empty: null } }
 ], { s: $df.Object });
 const rFalsyValues = dfFalsyValues.select([

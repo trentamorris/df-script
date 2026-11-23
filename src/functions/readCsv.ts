@@ -1,6 +1,6 @@
 import { DataFrame } from "../dataframe/dataframe";
 
-import type { ColumnDict, ReadCSVOptions, RowRecord } from "../types";
+import type { ColumnDict, DataFrameDataArg, ReadCSVOptions, RowRecord } from "../types";
 import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
 
 /**
@@ -36,7 +36,7 @@ import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
  * // | 30 | 40 |
  * // +----+----+
  */
-export function readCsv<T extends RowRecord = any>(
+export function readCsv<T extends RowRecord = RowRecord>(
     content: string,
     options: ReadCSVOptions = {}
 ): DataFrame<T> {
@@ -48,7 +48,7 @@ export function readCsv<T extends RowRecord = any>(
 
     const rows = parseCSV(content, options);
     const totalRows = rows.length;
-    if (totalRows === 0) return new DataFrame<T>({} as any);
+    if (totalRows === 0) return new DataFrame<T>({} as DataFrameDataArg<T>);
 
     const startRow = hasHeader ? 1 : 0;
     const numRows = totalRows - startRow;
@@ -68,5 +68,5 @@ export function readCsv<T extends RowRecord = any>(
             : rawValues;
     }
 
-    return new DataFrame<T>(coercedColumns as any, schema);
+    return new DataFrame<T>(coercedColumns as DataFrameDataArg<T>, schema);
 }

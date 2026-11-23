@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.encodeUriComponent tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { text: "hello world!" },
     { text: null }
 ]);

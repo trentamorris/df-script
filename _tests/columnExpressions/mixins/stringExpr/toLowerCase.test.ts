@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toLowerCase tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { phrase: "HELLO" },
     { phrase: null }
 ]);

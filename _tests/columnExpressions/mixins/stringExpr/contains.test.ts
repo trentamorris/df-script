@@ -3,7 +3,7 @@ import { $df, Utf8 } from "df-script";
 
 console.log("Running StringExpr.contains tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { phrase: "DFScript is awesome!" },
     { phrase: "Hello world!" },
     { phrase: null }
@@ -34,7 +34,7 @@ if (res[2].c_str !== null) throw new Error("contains null failed");
 if (res[2].c_null_pat !== null) throw new Error("contains null pattern should return null for null cell");
 
 // 10/10 EXTREME EDGE CASES SUITE FOR CONTAINS
-const dfEdge = $df.data([
+const dfEdge = $df.dataFrame([
     // Row 0: Regex meta-characters in text: "[test] (item) $100 * ^"
     { text: "Price is [2026] (USD) $100 * ^special^." },
     // Row 1: Multiline text with newlines

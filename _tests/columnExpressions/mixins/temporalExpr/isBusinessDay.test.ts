@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.isBusinessDay tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2024-02-29" }, // Thursday -> true
     { date: "2027-01-02" }, // Saturday -> false
     { date: null }

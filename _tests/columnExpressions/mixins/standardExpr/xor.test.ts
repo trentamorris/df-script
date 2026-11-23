@@ -6,7 +6,7 @@ console.log("Running StandardExpr.xor edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Column vs Column boolean logic
 // -------------------------------------------------------------
-const dfCol = $df.data([
+const dfCol = $df.dataFrame([
     { a: true, b: false },
     { a: true, b: true },
     { a: false, b: false },
@@ -47,7 +47,7 @@ if (resArray[0].x !== true || resArray[1].x !== false || resArray[2].x !== true 
 // -------------------------------------------------------------
 // Case 4: Null propagation (Kleene / SQL 3-valued logic: null yields null)
 // -------------------------------------------------------------
-const dfNull = $df.data([
+const dfNull = $df.dataFrame([
     { a: null, b: true },
     { a: false, b: null },
     { a: null, b: null }
@@ -66,7 +66,7 @@ if (resNull[0].x_lit !== null || resNull[1].x_lit !== null || resNull[2].x_lit !
 // -------------------------------------------------------------
 // Case 5: Truthy / Falsy primitives (numbers 1 and 0 coerced via !!)
 // -------------------------------------------------------------
-const dfNumeric = $df.data([
+const dfNumeric = $df.dataFrame([
     { a: 1, b: 0 },
     { a: 1, b: 1 },
     { a: 0, b: 0 }
@@ -81,7 +81,7 @@ if (resNumeric[0].x !== true || resNumeric[1].x !== false || resNumeric[2].x !==
 // -------------------------------------------------------------
 // Case 6: Multi-column projection with xor
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: true, b: false },
     { a: false, b: true }
 ]);
@@ -105,21 +105,21 @@ if (resChain[0].x_not !== false || resChain[1].x_not !== true || resChain[2].x_n
 // -------------------------------------------------------------
 // Case 8: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ a: true, b: false }]);
+const dfSingle = $df.dataFrame([{ a: true, b: false }]);
 const resSingle = dfSingle.select([$df.col("a").xor($df.col("b")).alias("x")]).toDicts() as any[];
 if (resSingle[0].x !== true) throw new Error("Case 8 failed: single row xor");
 
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame (schema preserved)
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ a: true, b: false }]).filter($df.col("a").eq(false));
+const dfEmpty = $df.dataFrame([{ a: true, b: false }]).filter($df.col("a").eq(false));
 const resEmpty = dfEmpty.select([$df.col("a").xor($df.col("b")).alias("x")]).toDicts();
 if (resEmpty.length !== 0) throw new Error("Case 9 failed: empty DataFrame xor");
 
 // -------------------------------------------------------------
 // Case 10: Chaining multiple xors: a.xor(b).xor(c)
 // -------------------------------------------------------------
-const dfTriple = $df.data([
+const dfTriple = $df.dataFrame([
     { a: true, b: true, c: true },   // (T ^ T) ^ T = F ^ T = T
     { a: true, b: true, c: false },  // (T ^ T) ^ F = F ^ F = F
     { a: true, b: false, c: false }, // (T ^ F) ^ F = T ^ F = T

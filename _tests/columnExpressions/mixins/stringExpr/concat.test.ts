@@ -3,7 +3,7 @@ import { $df, Utf8, Int32 } from "df-script";
 
 console.log("Running StringExpr.concat tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { a: "hello", b: " world" },
     { a: "foo", b: "bar" },
     { a: null, b: "baz" }
@@ -19,7 +19,7 @@ if (res[1].c1 !== "foobar") throw new Error("concat 1 failed");
 if (res[2].c1 !== null) throw new Error("concat null failed");
 
 // 10/10 EXTREME EDGE CASES SUITE FOR CONCAT
-const dfEdge = $df.data([
+const dfEdge = $df.dataFrame([
     // Row 0: Normal strings
     { s: "order-", num_col: 101, empty_s: "" },
     // Row 1: Empty string base

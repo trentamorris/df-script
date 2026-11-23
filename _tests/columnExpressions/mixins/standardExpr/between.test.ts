@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.between tests...");
 
 // 1. Basic between with default options ({ closed: "both" })
-const df = $df.data([
+const df = $df.dataFrame([
     { val: 15, lower: 10, upper: 20 },
     { val: 10, lower: 10, upper: 20 },
     { val: 20, lower: 10, upper: 20 },
@@ -56,7 +56,7 @@ if (resDynamic[1].both !== true || resDynamic[1].none !== false) {
 }
 
 // 3. Null handling edge cases
-const dfNulls = $df.data({
+const dfNulls = $df.dataFrame({
     val: [null, 15, 10, null],
     lower: [10, null, 10, null],
     upper: [20, 20, null, null]
@@ -73,7 +73,7 @@ for (let i = 0; i < resNulls.length; i++) {
 }
 
 // 4. Equal boundaries: lower === upper
-const dfEqual = $df.data({ val: [10, 9, 11] });
+const dfEqual = $df.dataFrame({ val: [10, 9, 11] });
 const resEqualBoth = dfEqual.select([$df.col("val").between(10, 10, { closed: "both" }).alias("c")]).toArray("c");
 if (resEqualBoth[0] !== true || resEqualBoth[1] !== false || resEqualBoth[2] !== false) {
     throw new Error("between with equal boundaries ({ closed: 'both' }) failed");
@@ -93,14 +93,14 @@ for (let i = 0; i < resInverted.length; i++) {
 }
 
 // 6. Empty DataFrame edge case
-const dfEmpty = $df.data({ val: [] as number[] });
+const dfEmpty = $df.dataFrame({ val: [] as number[] });
 const resEmpty = dfEmpty.select([$df.col("val").between(0, 10).alias("c")]).toArray("c");
 if (resEmpty.length !== 0) {
     throw new Error("between on empty DataFrame failed");
 }
 
 // 7. Infinity, -Infinity & extreme floating-point boundaries
-const dfFloat = $df.data({
+const dfFloat = $df.dataFrame({
     val: [-Infinity, -1e10, 0, 1e10, Infinity, NaN]
 });
 const resInf = dfFloat.select([
@@ -120,7 +120,7 @@ if (resInf[2].pos_inf !== true || resInf[1].pos_inf !== false || resInf[4].pos_i
 }
 
 // 8. BigInt values and boundaries
-const dfBigInt = $df.data({
+const dfBigInt = $df.dataFrame({
     val: [10n, 20n, 30n, 5n, 35n]
 });
 const resBigInt = dfBigInt.select([
@@ -141,7 +141,7 @@ if (resBigInt[1].both !== true || resBigInt[3].both !== false || resBigInt[4].bo
 }
 
 // 9. Lexicographical string comparisons in between
-const dfStr = $df.data({
+const dfStr = $df.dataFrame({
     val: ["apple", "banana", "cherry", "date", "apricot"]
 });
 const resStr = dfStr.select([
@@ -165,7 +165,7 @@ const d3 = new Date("2026-12-31T00:00:00Z");
 const dMid = new Date("2026-03-15T00:00:00Z");
 const dEarly = new Date("2025-12-31T00:00:00Z");
 
-const dfDate = $df.data({
+const dfDate = $df.dataFrame({
     val: [dEarly, d1, dMid, d2, d3]
 });
 
@@ -187,7 +187,7 @@ if (resDate[3].both !== true || resDate[3].left !== false || resDate[3].right !=
 if (resDate[4].both !== false) throw new Error("Date between subsequent date failed");
 
 // 11. Complex chained expression: filter with between
-const dfFilter = $df.data({
+const dfFilter = $df.dataFrame({
     id: [1, 2, 3, 4, 5],
     score: [45, 75, 88, 92, 100]
 });

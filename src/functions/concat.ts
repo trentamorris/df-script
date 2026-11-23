@@ -1,58 +1,28 @@
 import { DataFrame } from "../dataframe/dataframe"
 import { DataTypeRegistry, type RegisteredDataType } from "../datatypes"
-import { isTypedArray, isPlainObj, isArrayOfType, isArrayOrTypedArray, toValidArray } from "../utils"
-import type { ColumnDict, ConcatOptions, ConcatItemsArg, RowRecord, DataFrameSchema } from "../types"
+import { isTypedArray } from "../utils"
+import type { ColumnDict, ConcatOptions, RowRecord, DataFrameSchema } from "../types"
 import { DataFrameError, SchemaError, ShapeError } from "../exceptions"
 
-function _copyElements(src: ArrayLike<any>, dest: ArrayLike<any> | any[], offset: number, count: number): void {
+function _copyElements(src: ArrayLike<unknown>, dest: ArrayLike<unknown> | unknown[], offset: number, count: number): void {
     if (isTypedArray(src) && isTypedArray(dest)) {
         (dest as Uint8Array).set(src as ArrayLike<number>, offset);
         return;
     }
-    const destArr = dest as any[];
+    const destArr = dest as unknown[];
     for (let i = 0; i < count; i++) {
         destArr[offset + i] = src[i];
     }
 }
 
-function _normalizeToDataFrames(item: any, context: string, index: number): DataFrame<any>[] {
-    if (item == null) {
-        throw new DataFrameError(`Invalid input to ${context} at index ${index}: item cannot be null or undefined.`);
-    }
-    if (item instanceof DataFrame) {
-        return [item];
-    }
-    if (isPlainObj(item)) {
-        return [new DataFrame(item as ColumnDict)];
-    }
-    if (isArrayOrTypedArray(item)) {
-        if (isArrayOfType(item, DataFrame, { mode: "every" })) {
-            return item as DataFrame<any>[];
-        }
-        if (isArrayOfType(item, "plainObject", { mode: "every" })) {
-            return [new DataFrame(item as any[])];
-        }
-        const anyDF = isArrayOfType(item, DataFrame, { mode: "some" });
-        for (let j = 0; j < item.length; j++) {
-            if (anyDF ? !(item[j] instanceof DataFrame) : !isPlainObj(item[j])) {
-                throw new DataFrameError(anyDF
-                    ? `Invalid input to ${context} at index ${index}, sub-index ${j}: nested array must contain only DataFrame instances.`
-                    : `Invalid input to ${context} at index ${index}, row ${j}: rows must be plain objects.`
-                );
-            }
-        }
-    }
-    throw new DataFrameError(`Invalid input to ${context} at index ${index}: expected DataFrame, row array, or column dictionary.`);
-}
-
 function _blitStackedColumns<U extends RowRecord>(
-    items: DataFrame<any>[],
+    items: DataFrame<RowRecord>[],
     columns: string[],
     outSchema: DataFrameSchema,
     totalHeight: number,
     allowTyped: boolean = false
 ): DataFrame<U> {
-    const newColumns: Record<string, ArrayLike<any>> = {};
+    const newColumns: Record<string, ArrayLike<unknown>> = {};
 
     for (let c = 0; c < columns.length; c++) {
         const key = columns[c];
@@ -114,7 +84,7 @@ function _blitStackedColumns<U extends RowRecord>(
  * @example
  * // 2. Horizontal Concatenation:
  * <!-- doc:base_concat_pair -->
- * const dfB = $df.data({ b: [10, 20] });
+ * const dfB = $df.dataFrame({ b: [10, 20] });
  * $df.concat([df1, dfB], { how: "horizontal" });
  * // shape: (2, 2)
  * // +---+----+
@@ -138,17 +108,18 @@ function _blitStackedColumns<U extends RowRecord>(
  * // | null | 20   |
  * // +------+------+
  */
-export function concat<U extends RowRecord = any>(
-    rawItems: ConcatItemsArg,
+export function concat<U extends RowRecord = RowRecord>(
+    rawItems: DataFrame | DataFrame[],
     { how = 'vertical', horizontal }: ConcatOptions = {}
 ): DataFrame<U> {
     if (rawItems == null) {
         throw new DataFrameError("Invalid input to concat: rawItems cannot be null or undefined.");
     }
-    const itemsArray = toValidArray(rawItems, { clone: false });
-    const items: DataFrame<any>[] = [];
-    for (let i = 0; i < itemsArray.length; i++) {
-        items.push(..._normalizeToDataFrames(itemsArray[i], "concat", i));
+    const items = Array.isArray(rawItems) ? rawItems : [rawItems];
+    for (let i = 0, len = items.length; i < len; i++) {
+        if (!(items[i] instanceof DataFrame)) {
+            throw new DataFrameError(`Invalid input to concat at index ${i}: expected DataFrame.`);
+        }
     }
 
     if (items.length === 0) return DataFrame._createDirect<U>({}, {}, 0);
@@ -156,7 +127,7 @@ export function concat<U extends RowRecord = any>(
 
     switch (how) {
         case 'vertical': {
-            let firstDF: DataFrame<any> | null = null;
+            let firstDF: DataFrame<RowRecord> | null = null;
             let totalHeight = 0;
             for (let i = 0; i < items.length; i++) {
                 totalHeight += items[i].height;
@@ -198,7 +169,7 @@ export function concat<U extends RowRecord = any>(
             }
 
             const allColNames = new Set<string>();
-            const newColumns: Record<string, ArrayLike<any>> = {};
+            const newColumns: Record<string, ArrayLike<unknown>> = {};
             const outSchema: DataFrameSchema = {};
 
             for (let i = 0; i < items.length; i++) {
@@ -219,7 +190,7 @@ export function concat<U extends RowRecord = any>(
 
                     const col = df._columns[key];
                     if (h === maxHeight) {
-                        newColumns[key] = isTypedArray(col) ? Array.from(col as any) : col;
+                        newColumns[key] = isTypedArray(col) ? Array.from(col as Iterable<unknown> | ArrayLike<unknown>) : col;
                     } else {
                         const padded = new Array(maxHeight).fill(null);
                         _copyElements(col, padded, 0, h);

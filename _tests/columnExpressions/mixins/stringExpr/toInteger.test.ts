@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toInteger tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { int_str: "123" },
     { int_str: null }
 ]);

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.lower tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { phrase: "HELLO World" },
     { phrase: null }
 ]);

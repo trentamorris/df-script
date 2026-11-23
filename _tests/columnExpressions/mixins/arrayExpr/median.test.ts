@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.median tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [10, 20, 30, 40, 50] },
     { numbers: [10, 20, 30, 40] },
     { numbers: null }

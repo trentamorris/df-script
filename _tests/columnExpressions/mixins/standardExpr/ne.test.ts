@@ -6,7 +6,7 @@ console.log("Running StandardExpr.ne edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Column vs Column inequality
 // -------------------------------------------------------------
-const dfCol = $df.data([
+const dfCol = $df.dataFrame([
     { a: 10, b: 10 },
     { a: 10, b: 20 },
     { a: null, b: null }
@@ -43,7 +43,7 @@ if (resArr[0].n !== false || resArr[1].n !== true || resArr[2].n !== null) {
 // -------------------------------------------------------------
 const d1 = new Date("2026-01-01T00:00:00.000Z");
 const d2 = new Date("2026-06-01T00:00:00.000Z");
-const dfDate = $df.data([{ d: d1 }, { d: d2 }]);
+const dfDate = $df.dataFrame([{ d: d1 }, { d: d2 }]);
 const resDate = dfDate.select([
     $df.col("d").ne(d1).alias("n")
 ]).toDicts() as any[];
@@ -54,7 +54,7 @@ if (resDate[0].n !== false || resDate[1].n !== true) {
 // -------------------------------------------------------------
 // Case 5: String and BigInt comparisons
 // -------------------------------------------------------------
-const dfMisc = $df.data([
+const dfMisc = $df.dataFrame([
     { s: "hello", b: 10n },
     { s: "world", b: 20n }
 ]);
@@ -68,7 +68,7 @@ if (resMisc[0].b_ne !== false || resMisc[1].b_ne !== true) throw new Error("Case
 // -------------------------------------------------------------
 // Case 6: Null and undefined propagation (SQL standard: comparison with null yields null)
 // -------------------------------------------------------------
-const dfNulls = $df.data([{ a: 10 }, { a: null }]);
+const dfNulls = $df.dataFrame([{ a: 10 }, { a: null }]);
 const resNulls = dfNulls.select([
     $df.col("a").ne(null).alias("n_null"),
     $df.col("a").ne(undefined).alias("n_undef")
@@ -79,7 +79,7 @@ if (resNulls[0].n_undef !== null || resNulls[1].n_undef !== null) throw new Erro
 // -------------------------------------------------------------
 // Case 7: IEEE 754 NaN handling (NaN !== NaN is true, null propagation)
 // -------------------------------------------------------------
-const dfNaN = $df.data([
+const dfNaN = $df.dataFrame([
     { a: NaN, b: NaN },
     { a: NaN, b: 10 },
     { a: 10, b: NaN },
@@ -94,7 +94,7 @@ if (resNaN[3].n !== null) throw new Error("Case 7 failed: NaN ne null should be 
 // -------------------------------------------------------------
 // Case 8: Multi-column projection ($df.col(["a", "b"]).ne(10))
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: 10, b: 20 },
     { a: 30, b: 10 }
 ]);
@@ -107,7 +107,7 @@ if (resMulti[1].a !== true || resMulti[1].b !== false) throw new Error("Case 8 f
 // -------------------------------------------------------------
 // Case 9: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ a: 42 }]);
+const dfSingle = $df.dataFrame([{ a: 42 }]);
 const resSingle = dfSingle.select([$df.col("a").ne(42).alias("n")]).toDicts() as any[];
 if (resSingle[0].n !== false) throw new Error("Case 9 failed: single row ne");
 

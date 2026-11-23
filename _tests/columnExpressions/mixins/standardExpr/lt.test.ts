@@ -4,12 +4,12 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.lt tests...");
 
 
-const df = $df.data([{ a: 10, b: 10 }, { a: 5, b: 10 }, { a: 15, b: 10 }]);
+const df = $df.dataFrame([{ a: 10, b: 10 }, { a: 5, b: 10 }, { a: 15, b: 10 }]);
 const res = df.select([$df.col("a").lt($df.col("b")).alias("l")]).toDicts() as any[];
 if (res[0].l !== false || res[1].l !== true || res[2].l !== false) throw new Error("lt failed");
 
 // NaN edge cases: Any inequality comparison with NaN evaluates to false in IEEE 754
-const dfNaN = $df.data([
+const dfNaN = $df.dataFrame([
     { a: NaN, b: 10 },
     { a: 10, b: NaN },
     { a: NaN, b: NaN },

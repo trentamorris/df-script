@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.cast edge-case tests...");
 
 // 1. Cast integer to Utf8 string
-const df = $df.data({ a: [1, 2, 3] });
+const df = $df.dataFrame({ a: [1, 2, 3] });
 const res1 = df.select([
     $df.col("a").cast($df.Utf8).alias("str_a")
 ]).toDicts() as any[];
@@ -14,7 +14,7 @@ if (res1[0].str_a !== "1" || res1[1].str_a !== "2" || res1[2].str_a !== "3") {
 }
 
 // 2. Cast string to Float64
-const dfStr = $df.data({ s: ["10.5", "20.25", "30.75"] });
+const dfStr = $df.dataFrame({ s: ["10.5", "20.25", "30.75"] });
 const resFloat = dfStr.select([
     $df.col("s").cast($df.Float64).alias("num")
 ]).toDicts() as any[];
@@ -24,7 +24,7 @@ if (resFloat[0].num !== 10.5 || resFloat[1].num !== 20.25 || resFloat[2].num !==
 }
 
 // 3. Cast to Boolean
-const dfBool = $df.data({ num: [1, 0, 42, 0], str: ["true", "false", "yes", ""] });
+const dfBool = $df.dataFrame({ num: [1, 0, 42, 0], str: ["true", "false", "yes", ""] });
 const resBool = dfBool.select([
     $df.col("num").cast($df.Boolean).alias("b_num"),
     $df.col("str").cast($df.Boolean).alias("b_str")
@@ -35,7 +35,7 @@ if (resBool[0].b_num !== true || resBool[1].b_num !== false || resBool[2].b_num 
 }
 
 // 4. Null & Undefined propagation in cast
-const dfNulls = $df.data({ v: [10, null, undefined, 40] });
+const dfNulls = $df.dataFrame({ v: [10, null, undefined, 40] });
 const resNulls = dfNulls.select([
     $df.col("v").cast($df.Utf8).alias("casted")
 ]).toDicts() as any[];
@@ -45,7 +45,7 @@ if (resNulls[0].casted !== "10" || resNulls[1].casted !== null || resNulls[2].ca
 }
 
 // 5. Non-strict mode: invalid conversions coerce to null without throwing
-const dfInvalid = $df.data({ s: ["valid", "abc", "123"] });
+const dfInvalid = $df.dataFrame({ s: ["valid", "abc", "123"] });
 const resNonStrict = dfInvalid.select([
     $df.col("s").cast($df.Int32, { strict: false }).alias("int_val")
 ]).toDicts() as any[];
@@ -64,7 +64,7 @@ if (resStrictDefault[0].strict_int !== null || resStrictDefault[1].strict_int !=
 }
 
 // 7. Empty DataFrame casting
-const emptyDf = $df.data({ a: [] as number[] });
+const emptyDf = $df.dataFrame({ a: [] as number[] });
 const resEmpty = emptyDf.select([
     $df.col("a").cast($df.Utf8).alias("empty_str")
 ]).toDicts() as any[];
@@ -74,7 +74,7 @@ if (resEmpty.length !== 0) {
 }
 
 // 8. Chained cast: Int -> Utf8 -> Int
-const dfRoundTrip = $df.data({ n: [42, 999] });
+const dfRoundTrip = $df.dataFrame({ n: [42, 999] });
 const resRoundTrip = dfRoundTrip.select([
     $df.col("n").cast($df.Utf8).cast($df.Int32).alias("roundtrip")
 ]).toDicts() as any[];
@@ -85,7 +85,7 @@ if (resRoundTrip[0].roundtrip !== 42 || resRoundTrip[1].roundtrip !== 999) {
 
 // 9. Cast on Date/Datetime values
 const now = new Date("2026-01-01T00:00:00.000Z");
-const dfDate = $df.data({ d: [now] });
+const dfDate = $df.dataFrame({ d: [now] });
 const resDate = dfDate.select([
     $df.col("d").cast($df.Int64).alias("ts")
 ]).toDicts() as any[];

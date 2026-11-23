@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.normalize tests...");
 
 
-const df = $df.data({
+const df = $df.dataFrame({
     raw: ["e\u0301", "\u00E9", "ﬁ", null]
 });
 

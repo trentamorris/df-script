@@ -133,6 +133,54 @@ try {
     }
     console.log("✓ Single column with trailing newline passed!");
 
+    // 11. CRLF (\r\n) line endings
+    const dfCrlf = $df.readCsv("a,b\r\n1,x\r\n2,y\r\n");
+    if (dfCrlf.height !== 2 || dfCrlf.toDicts()[1].b !== "y") {
+        throw new Error("11: CRLF line endings failed");
+    }
+
+    // 12. Unicode and emoji values
+    const dfUnicode = $df.readCsv("city,emoji\n東京,🚀\nMünchen,✨");
+    if (dfUnicode.height !== 2 || dfUnicode.toDicts()[0].city !== "東京" || dfUnicode.toDicts()[1].emoji !== "✨") {
+        throw new Error("12: Unicode/emoji values failed");
+    }
+
+    // 13. Tab-separated (TSV)
+    const dfTsv2 = $df.readCsv("a\tb\n1\tx\n2\ty", { separator: "\t" });
+    if (dfTsv2.height !== 2 || dfTsv2.toDicts()[0].b !== "x") {
+        throw new Error("13: TSV failed");
+    }
+
+    // 14. Quoted fields containing commas
+    const dfQuotedComma = $df.readCsv('name,note\n"Doe, Jane","a, b, c"');
+    if (dfQuotedComma.toDicts()[0].name !== "Doe, Jane" || dfQuotedComma.toDicts()[0].note !== "a, b, c") {
+        throw new Error("14: Quoted commas failed");
+    }
+
+    // 15. Boolean column inference
+    const dfBool = $df.readCsv("flag\ntrue\nfalse\ntrue");
+    if (dfBool.toDicts()[0].flag !== true || dfBool.toDicts()[1].flag !== false) {
+        throw new Error("15: Boolean inference failed");
+    }
+
+    // 16. Mixed int and float column inference
+    const dfFloat = $df.readCsv("n\n1\n2.5\n3");
+    if (dfFloat.toDicts()[0].n !== 1 || dfFloat.toDicts()[1].n !== 2.5) {
+        throw new Error("16: Mixed int/float inference failed");
+    }
+
+    // 17. Empty cells in numeric column
+    const dfEmptyCells = $df.readCsv("a,b\n1,\n,2");
+    if (dfEmptyCells.height !== 2) {
+        throw new Error("17: Empty cells height mismatch");
+    }
+
+    // 18. Whitespace-only input
+    const dfWs = $df.readCsv("   \n  ");
+    if (dfWs.width === 0 && dfWs.height !== 0) {
+        throw new Error("18: Whitespace-only CSV failed");
+    }
+
     console.log("\n🎉 ALL DATAFRAME CSV READ TESTS PASSED SUCCESSFULLY!");
 } catch (e: any) {
     console.error(`\n❌ DATAFRAME CSV READ TEST FAILED: ${e.message}`);

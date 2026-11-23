@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running DataFrame.fill tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { a: 1, b: null },
     { a: null, b: 20 },
     { a: NaN, b: NaN },
@@ -28,7 +28,7 @@ if (filledAll[0].b !== -1 || filledAll[1].a !== -1 || filledAll[2].a !== -1 || f
 }
 
 // 4. Fill using expression options across DataFrame
-const dfExpr = $df.data([
+const dfExpr = $df.dataFrame([
     { a: null, b: 10 },
     { a: null, b: 20 },
     { a: 5, b: 30 }
@@ -39,7 +39,7 @@ if (filledWithCol[1].a !== 200) throw new Error("df.fill with expression row 1 f
 if (filledWithCol[2].a !== 5) throw new Error("df.fill preserved value row 2 failed");
 
 // 5. Fill using forward strategy across all DataFrame columns
-const dfFwdAll = $df.data([
+const dfFwdAll = $df.dataFrame([
     { a: 1, b: null },
     { a: null, b: "hello" },
     { a: null, b: null },
@@ -56,7 +56,7 @@ if (filledFwdLimit[1].a !== 1) throw new Error("df.fill limit 1 row 1 failed");
 if (filledFwdLimit[2].a !== null) throw new Error("df.fill limit 1 row 2 must be null");
 
 // 7. Empty DataFrame fill
-const emptyDf = $df.data([] as { a: number }[]);
+const emptyDf = $df.dataFrame([] as { a: number }[]);
 const resEmpty = emptyDf.fill("null", { value: 0 }).toDicts();
 if (resEmpty.length !== 0) throw new Error("Empty DataFrame fill failed");
 

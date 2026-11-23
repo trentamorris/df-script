@@ -13,7 +13,7 @@ import type { RowRecord, DataFrameSchema, DataFrameDataArg } from "../types";
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Construct DataFrame from a column dictionary:
- * const df = $df.data({ a: [1, 2], b: ["x", "y"] });
+ * const df = $df.dataFrame({ a: [1, 2], b: ["x", "y"] });
  * // shape: (2, 2)
  * // +---+---+
  * // | a | b |
@@ -24,7 +24,7 @@ import type { RowRecord, DataFrameSchema, DataFrameDataArg } from "../types";
  *
  * @example
  * // 2. Construct DataFrame from an array of row objects:
- * const df = $df.data([
+ * const df = $df.dataFrame([
  * { a: 1, b: "x" },
  * { a: 2, b: "y" }
  * ])
@@ -36,7 +36,7 @@ import type { RowRecord, DataFrameSchema, DataFrameDataArg } from "../types";
  * // | 2 | y |
  * // +---+---+
  */
-export function data<T extends RowRecord = any>(
+export function dataFrame<T extends RowRecord = RowRecord>(
     data: DataFrameDataArg<T>,
     schema?: DataFrameSchema
 ): DataFrame<T> {

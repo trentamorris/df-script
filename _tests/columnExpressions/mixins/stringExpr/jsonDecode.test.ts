@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.jsonDecode tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { json: '{"a": 1, "b": "foo"}' },
     { json: null }
 ]);

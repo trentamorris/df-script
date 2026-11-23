@@ -6,7 +6,7 @@ console.log("Running StandardExpr.notIn edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Standard array of candidates
 // -------------------------------------------------------------
-const dfBasic = $df.data([
+const dfBasic = $df.dataFrame([
     { val: 10 },
     { val: 25 },
     { val: null }
@@ -35,7 +35,7 @@ if (resScalar[0].n2 !== true || resScalar[1].n2 !== true || resScalar[2].n2 !== 
 // -------------------------------------------------------------
 // Case 3: Column expression as target candidate list
 // -------------------------------------------------------------
-const dfExprCol = $df.data([
+const dfExprCol = $df.dataFrame([
     { item: "apple", target: "apple" },
     { item: "banana", target: "apple" }
 ]);
@@ -49,7 +49,7 @@ if (resExprCol[0].n !== false || resExprCol[1].n !== true) {
 // -------------------------------------------------------------
 // Case 4: NaN membership in candidate list
 // -------------------------------------------------------------
-const dfNaN = $df.data([
+const dfNaN = $df.dataFrame([
     { val: NaN },
     { val: 10 },
     { val: null }
@@ -68,7 +68,7 @@ if (resNaN[0].n !== false || resNaN[1].n !== true || resNaN[2].n !== null) {
 const d1 = new Date("2026-01-01T00:00:00.000Z");
 const d2 = new Date("2026-06-01T00:00:00.000Z");
 const d3 = new Date("2026-12-31T00:00:00.000Z");
-const dfDates = $df.data([{ d: d1 }, { d: d2 }]);
+const dfDates = $df.dataFrame([{ d: d1 }, { d: d2 }]);
 const resDates = dfDates.select([
     $df.col("d").notIn([d2, d3]).alias("n")
 ]).toDicts() as any[];
@@ -79,7 +79,7 @@ if (resDates[0].n !== true || resDates[1].n !== false) {
 // -------------------------------------------------------------
 // Case 6: BigInt candidate values
 // -------------------------------------------------------------
-const dfBig = $df.data([{ n: 10n }, { n: 20n }, { n: 30n }]);
+const dfBig = $df.dataFrame([{ n: 10n }, { n: 20n }, { n: 30n }]);
 const resBig = dfBig.select([
     $df.col("n").notIn([10n, 50n]).alias("n")
 ]).toDicts() as any[];
@@ -100,7 +100,7 @@ if (resEmptyCandidates[0].n !== true || resEmptyCandidates[1].n !== true || resE
 // -------------------------------------------------------------
 // Case 8: Multi-column projection ($df.col(["a", "b"]).notIn([1, 2]))
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: 1, b: 3 },
     { a: 2, b: 2 }
 ]);
@@ -113,7 +113,7 @@ if (resMulti[1].a !== false || resMulti[1].b !== false) throw new Error("Case 8 
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame with schema preserved
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ val: 1 }]).filter($df.col("val").eq(999));
+const dfEmpty = $df.dataFrame([{ val: 1 }]).filter($df.col("val").eq(999));
 const resEmpty = dfEmpty.select([
     $df.col("val").notIn([1, 2]).alias("n")
 ]).toDicts();

@@ -6,7 +6,7 @@ console.log("STARTING DATAFRAME COLUMNS GETTER TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 2],
         b: ["x", "y"],
         c: [true, false]
@@ -22,7 +22,7 @@ try {
     }
 
     // 2. Empty DataFrame columns
-    const emptyDf = $df.data({ x: [], y: [] });
+    const emptyDf = $df.dataFrame({ x: [], y: [] });
     if (emptyDf.columns.length !== 2 || emptyDf.columns[0] !== "x" || emptyDf.columns[1] !== "y") {
         throw new Error("Empty DataFrame columns mismatch");
     }

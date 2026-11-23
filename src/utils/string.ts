@@ -18,7 +18,7 @@ import {
 } from "../constants";
 import { InvalidArgumentError } from "../exceptions";
 import type { StringEncoding, EscapeRegexOptions, ExtractManyOptions, ExtractRegexEngineOptions, RegexEngineOptions, FindOptions, FindManyOptions, SplitOptions, ReplaceOptions, ReplaceManyOptions } from "../types";
-import type { StripMode, StripCharsOptions, ChangeCaseOptions, IsUnicodeSurrogateOptions, CandidateMatch } from "./types";
+import type { StripMode, StripCharsOptions, ChangeCaseOptions, IsUnicodeSurrogateOptions, CandidateMatch, NodeBufferConstructor } from "./types";
 
 
 export function isBlankString(v: unknown): v is string {
@@ -160,14 +160,14 @@ function _canonicalizeList(items: unknown[], nextOpt: { depth: number; maxDepth:
     return parts;
 }
 
-function _canonicalizePrimitive(val: any, type: string): string | null {
-    if (type === "string") return `s:${val.length}:${val}`;
+function _canonicalizePrimitive(val: unknown, type: string): string | null {
+    if (type === "string") return `s:${(val as string).length}:${val}`;
     if (type === "number" || type === "boolean" || type === "bigint") return `${type}:${val}`;
     return null;
 }
 
 export function toCanonicalString(
-    val: any,
+    val: unknown,
     { depth = 0, maxDepth = 50 }: { depth?: number; maxDepth?: number } = {}
 ): string {
     const rawPrimitive = _canonicalizePrimitive(val, typeof val);
@@ -184,7 +184,7 @@ export function toCanonicalString(
     if (unboxedPrimitive !== null) return unboxedPrimitive;
 
     if (type === "symbol" || type === "function") {
-        const s = val.toString();
+        const s = (val as symbol | Function).toString();
         return `${type === "symbol" ? "y" : "f"}:${s.length}:${s}`;
     }
 
@@ -200,9 +200,10 @@ export function toCanonicalString(
     if (isSet(val)) return `set:[${_canonicalizeList(Array.from(val), nextOpt).sort().join(KEY_PAIR_SEPARATOR)}]`;
     if (isMap(val)) return _canonicalizeKeyed(Array.from(val.keys()), (k) => val.get(k), nextOpt, "map:");
 
-    if (typeof val.toJSON === "function") {
+    const objWithToJson = val as { toJSON?: () => unknown };
+    if (typeof objWithToJson.toJSON === "function") {
         try {
-            const jsonVal = val.toJSON();
+            const jsonVal = objWithToJson.toJSON();
             if (jsonVal !== val) return `j:${toCanonicalString(jsonVal, nextOpt)}`;
         } catch {
             // Fall through
@@ -245,7 +246,7 @@ const _WORDS_REGEX = new RegExp(
  * Fully robust, Unicode-aware string tokenization engine.
  * Guarded against prototype pollution, type errors, and NFD text formatting.
  */
-export function toWords(str: any): string[] {
+export function toWords(str: unknown): string[] {
     if (str === null || str === undefined) return [];
     const primitiveStr = String(str);
     if (!primitiveStr) return [];
@@ -272,7 +273,7 @@ function _getCodePointStep(str: string, index: number = 0): number {
     return cp != null && cp > 0xffff ? 2 : 1;
 }
 
-export function changeCase(str: any, options: ChangeCaseOptions): string {
+export function changeCase(str: unknown, options: ChangeCaseOptions): string {
     const words = toWords(str);
     const len = words.length;
     if (len === 0) return "";
@@ -298,11 +299,11 @@ export function changeCase(str: any, options: ChangeCaseOptions): string {
 }
 
 
-const _BUFFER_REF = typeof globalThis !== "undefined" ? (globalThis as any).Buffer : undefined;
+const _BUFFER_REF = typeof globalThis !== "undefined" ? (globalThis as unknown as { Buffer?: NodeBufferConstructor }).Buffer : undefined;
 const _HAS_BUFFER = typeof _BUFFER_REF !== "undefined";
 
-const _HAS_NATIVE_HEX = typeof Uint8Array !== "undefined" && typeof (Uint8Array as any).fromHex === "function";
-const _HAS_NATIVE_BASE64 = typeof Uint8Array !== "undefined" && typeof (Uint8Array as any).fromBase64 === "function";
+const _HAS_NATIVE_HEX = typeof Uint8Array !== "undefined" && typeof (Uint8Array as unknown as { fromHex?: (s: string) => Uint8Array }).fromHex === "function";
+const _HAS_NATIVE_BASE64 = typeof Uint8Array !== "undefined" && typeof (Uint8Array as unknown as { fromBase64?: (s: string, opts?: { strict?: boolean }) => Uint8Array }).fromBase64 === "function";
 const _MAX_BYTE_CHUNK_SIZE = 8192;
 const _STRICT_B64_REGEX = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 const _HEX_REGEX = /^[0-9a-fA-F]*$/;
@@ -331,8 +332,8 @@ export function encodeString(str: string | null | undefined, encoding: StringEnc
     if (encoding === "base64") {
         if (_HAS_BUFFER) return _BUFFER_REF.from(s, "utf-8").toString("base64");
         const bytes = TEXT_ENCODER.encode(s);
-        if (_HAS_NATIVE_BASE64 && typeof (Uint8Array as any).prototype.toBase64 === "function") {
-            return (bytes as any).toBase64();
+        if (_HAS_NATIVE_BASE64 && typeof (Uint8Array.prototype as unknown as { toBase64?: () => string }).toBase64 === "function") {
+            return (bytes as unknown as { toBase64(): string }).toBase64();
         }
         let bin = "";
         for (let i = 0; i < bytes.length; i += _MAX_BYTE_CHUNK_SIZE) {
@@ -363,7 +364,7 @@ export function decodeString(
                 throw new Error("Invalid hex format");
             }
             if (_HAS_BUFFER) return decoder.decode(_BUFFER_REF.from(s, "hex"));
-            if (_HAS_NATIVE_HEX) return decoder.decode((Uint8Array as any).fromHex(s));
+            if (_HAS_NATIVE_HEX) return decoder.decode((Uint8Array as unknown as { fromHex(s: string): Uint8Array }).fromHex(s));
             const bytes = new Uint8Array(s.length / 2);
             for (let i = 0; i < bytes.length; i++) {
                 const byte = parseInt(s.substring(i * 2, i * 2 + 2), 16);
@@ -378,7 +379,7 @@ export function decodeString(
                 throw new Error("Invalid base64 format");
             }
             if (_HAS_NATIVE_BASE64) {
-                return decoder.decode((Uint8Array as any).fromBase64(s, { strict }));
+                return decoder.decode((Uint8Array as unknown as { fromBase64(s: string, opts?: { strict?: boolean }): Uint8Array }).fromBase64(s, { strict }));
             }
             if (_HAS_BUFFER) {
                 return decoder.decode(_BUFFER_REF.from(s, "base64"));
@@ -862,7 +863,7 @@ function _expandReplacementString(
 export function replaceString(
     str: string | null | undefined,
     pattern: string | RegExp,
-    replacement: string | ((match: string, ...args: any[]) => string),
+    replacement: string | ((match: string, ...args: never[]) => string),
     options?: ReplaceOptions
 ): string | null {
     if (str == null || pattern == null || replacement == null) return null;
@@ -892,8 +893,8 @@ export function replaceString(
     let count = 0;
     const isLimited = effectiveN > 0 && effectiveN !== Infinity;
 
-    return input.replace(cleanObj.reg, (...args: any[]) => {
-        if (isLimited && count++ >= effectiveN) return args[0];
+    return input.replace(cleanObj.reg, (...args: unknown[]): string => {
+        if (isLimited && count++ >= effectiveN) return args[0] as string;
         if (isFn) return String((replacement as Function)(...args));
 
         const len = args.length;
@@ -902,14 +903,14 @@ export function replaceString(
         const offset = (hasGroups ? args[len - 3] : args[len - 2]) as number;
         const captures = args.slice(1, hasGroups ? len - 3 : len - 2);
 
-        return _expandReplacementString(repStr, args[0], offset, input, captures, groups);
+        return _expandReplacementString(repStr, args[0] as string, offset, input, captures as (string | undefined)[], groups as Record<string, string> | undefined);
     });
 }
 
 export function replaceManyString(
     str: string | null | undefined,
     patterns: (string | RegExp)[] | Record<string, string>,
-    replaceWith?: (string | ((match: string, ...args: any[]) => string))[] | string | ((match: string, ...args: any[]) => string),
+    replaceWith?: (string | ((match: string, ...args: never[]) => string))[] | string | ((match: string, ...args: never[]) => string),
     options?: ReplaceManyOptions
 ): string | null {
     if (str == null || patterns == null) return null;
@@ -930,7 +931,7 @@ export function replaceManyString(
     }
 
     const isList = isObj || Array.isArray(replaceWith);
-    const repList = isObj ? Object.values(patterns) : (replaceWith as any[]);
+    const repList = isObj ? Object.values(patterns) : (replaceWith as unknown[]);
 
     const candidates: CandidateMatch<string>[] = [];
 

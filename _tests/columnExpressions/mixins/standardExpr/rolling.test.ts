@@ -9,7 +9,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 1: Rolling Sum with Expression
 {
-    const df = $df.data({ a: [1, 2, 3, 4, 5] });
+    const df = $df.dataFrame({ a: [1, 2, 3, 4, 5] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 1 || res[1].r !== 3 || res[2].r !== 6 || res[3].r !== 9 || res[4].r !== 12) {
         throw new Error(`Test 1 Failed: ${JSON.stringify(res)}`);
@@ -18,7 +18,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 2: Rolling Mean with Expression
 {
-    const df = $df.data({ a: [10, 20, 30, 40] });
+    const df = $df.dataFrame({ a: [10, 20, 30, 40] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").mean()).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 15 || res[2].r !== 25 || res[3].r !== 35) {
         throw new Error(`Test 2 Failed: ${JSON.stringify(res)}`);
@@ -27,7 +27,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 3: Rolling Min with Expression
 {
-    const df = $df.data({ a: [5, 2, 8, 1, 9] });
+    const df = $df.dataFrame({ a: [5, 2, 8, 1, 9] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").min()).alias("r")).toDicts() as any[];
     if (res[0].r !== 5 || res[1].r !== 2 || res[2].r !== 2 || res[3].r !== 1 || res[4].r !== 1) {
         throw new Error(`Test 3 Failed: ${JSON.stringify(res)}`);
@@ -36,7 +36,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 4: Rolling Max with Expression
 {
-    const df = $df.data({ a: [5, 2, 8, 1, 9] });
+    const df = $df.dataFrame({ a: [5, 2, 8, 1, 9] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").max()).alias("r")).toDicts() as any[];
     if (res[0].r !== 5 || res[1].r !== 5 || res[2].r !== 8 || res[3].r !== 8 || res[4].r !== 9) {
         throw new Error(`Test 4 Failed: ${JSON.stringify(res)}`);
@@ -45,28 +45,28 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 5: Rolling Variance with Expression
 {
-    const df = $df.data({ a: [2, 4, 4, 4, 5, 5, 7, 9] });
+    const df = $df.dataFrame({ a: [2, 4, 4, 4, 5, 5, 7, 9] });
     const res = df.select($df.col("a").rolling(4, $df.col("a").variance()).alias("r")).toDicts() as any[];
     if (typeof res[3].r !== "number" || res[3].r === 0) throw new Error(`Test 5 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 6: Rolling Standard Deviation with Expression
 {
-    const df = $df.data({ a: [10, 10, 10, 10] });
+    const df = $df.dataFrame({ a: [10, 10, 10, 10] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").std()).alias("r")).toDicts() as any[];
     if (res[2].r !== 0 || res[3].r !== 0) throw new Error(`Test 6 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 7: Rolling Quantile (Median 50th percentile)
 {
-    const df = $df.data({ a: [1, 10, 2, 8, 3] });
+    const df = $df.dataFrame({ a: [1, 10, 2, 8, 3] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").quantile(0.5)).alias("r")).toDicts() as any[];
     if (res[2].r !== 2 || res[3].r !== 8 || res[4].r !== 3) throw new Error(`Test 7 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 8: Rolling Product / Compound Growth
 {
-    const df = $df.data({ a: [2, 3, 4, 5] });
+    const df = $df.dataFrame({ a: [2, 3, 4, 5] });
     const res = df.select($df.col("a").rolling(2, (vals) => vals.reduce((acc, v) => acc * v, 1)).alias("r")).toDicts() as any[];
     if (res[0].r !== 2 || res[1].r !== 6 || res[2].r !== 12 || res[3].r !== 20) {
         throw new Error(`Test 8 Failed: ${JSON.stringify(res)}`);
@@ -75,7 +75,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 9: Rolling Skewness Custom Reducer
 {
-    const df = $df.data({ a: [1, 2, 2, 3, 10, 2, 3] });
+    const df = $df.dataFrame({ a: [1, 2, 2, 3, 10, 2, 3] });
     const res = df.select($df.col("a").rolling(5, (vals) => {
         const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
         const m3 = vals.reduce((a, b) => a + Math.pow(b - mean, 3), 0) / vals.length;
@@ -87,7 +87,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 10: Rolling Kurtosis
 {
-    const df = $df.data({ a: [1, 2, 3, 4, 5, 6, 7] });
+    const df = $df.dataFrame({ a: [1, 2, 3, 4, 5, 6, 7] });
     const res = df.select($df.col("a").rolling(4, $df.col("a").kurtosis()).alias("r")).toDicts() as any[];
     if (res.length !== 7) throw new Error(`Test 10 Failed: ${JSON.stringify(res)}`);
 }
@@ -98,14 +98,14 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 11: Window containing all nulls (returns null)
 {
-    const df = $df.data({ a: [null, null, null] });
+    const df = $df.dataFrame({ a: [null, null, null] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== null || res[1].r !== null || res[2].r !== null) throw new Error(`Test 11 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 12: Intermittent nulls in rolling mean
 {
-    const df = $df.data({ a: [10, null, 30, null, 50] });
+    const df = $df.dataFrame({ a: [10, null, 30, null, 50] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").mean()).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 10 || res[2].r !== 30 || res[3].r !== 30 || res[4].r !== 50) {
         throw new Error(`Test 12 Failed: ${JSON.stringify(res)}`);
@@ -114,7 +114,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 13: Rolling count of non-null elements
 {
-    const df = $df.data({ a: [1, null, 3, null, 5] });
+    const df = $df.dataFrame({ a: [1, null, 3, null, 5] });
     const res = df.select($df.col("a").rolling(3, (vals) => vals.filter(v => v !== null).length).alias("r")).toDicts() as any[];
     if (res[0].r !== 1 || res[1].r !== 1 || res[2].r !== 2 || res[3].r !== 1 || res[4].r !== 2) {
         throw new Error(`Test 13 Failed: ${JSON.stringify(res)}`);
@@ -123,35 +123,35 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 14: Rolling with NaNs
 {
-    const df = $df.data({ a: [10, NaN, 20, 30] });
+    const df = $df.dataFrame({ a: [10, NaN, 20, 30] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[2].r !== 20 || res[3].r !== 50) throw new Error(`Test 14 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 15: Single non-null surrounded by nulls
 {
-    const df = $df.data({ a: [null, null, 42, null, null] });
+    const df = $df.dataFrame({ a: [null, null, 42, null, null] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").max()).alias("r")).toDicts() as any[];
     if (res[2].r !== 42 || res[3].r !== 42 || res[4].r !== 42) throw new Error(`Test 15 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 16: Rolling null count ratio on string data
 {
-    const df = $df.data({ a: ["x", null, null, "y"] });
+    const df = $df.dataFrame({ a: ["x", null, null, "y"] });
     const res = df.select($df.col("a").rolling(2, (v) => v.filter(x => x == null).length / v.length).alias("r")).toDicts() as any[];
     if (res[1].r !== 0.5 || res[2].r !== 1 || res[3].r !== 0.5) throw new Error(`Test 16 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 17: Rolling first non-null (Coalesce rolling)
 {
-    const df = $df.data({ a: [null, 10, null, 20] });
+    const df = $df.dataFrame({ a: [null, 10, null, 20] });
     const res = df.select($df.col("a").rolling(2, (v) => v.find(x => x != null) ?? null).alias("r")).toDicts() as any[];
     if (res[0].r !== null || res[1].r !== 10 || res[2].r !== 10 || res[3].r !== 20) throw new Error(`Test 17 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 18: Rolling last non-null
 {
-    const df = $df.data({ a: [10, null, 20, null] });
+    const df = $df.dataFrame({ a: [10, null, 20, null] });
     const res = df.select($df.col("a").rolling(2, (v) => {
         const valid = v.filter(x => x != null);
         return valid.length > 0 ? valid[valid.length - 1] : null;
@@ -161,14 +161,14 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 19: All NaN column
 {
-    const df = $df.data({ a: [NaN, NaN, NaN] });
+    const df = $df.dataFrame({ a: [NaN, NaN, NaN] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").count()).alias("r")).toDicts() as any[];
     if (res.length !== 3) throw new Error(`Test 19 Failed`);
 }
 
 // Test 20: Alternating nulls with window larger than data
 {
-    const df = $df.data({ a: [1, null, 3] });
+    const df = $df.dataFrame({ a: [1, null, 3] });
     const res = df.select($df.col("a").rolling(10, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[2].r !== 4) throw new Error(`Test 20 Failed: ${JSON.stringify(res)}`);
 }
@@ -179,35 +179,35 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 21: windowSize = 1 (Identity rolling)
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").rolling(1, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 20 || res[2].r !== 30) throw new Error(`Test 21 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 22: windowSize equal to DataFrame length
 {
-    const df = $df.data({ a: [1, 2, 3, 4] });
+    const df = $df.dataFrame({ a: [1, 2, 3, 4] });
     const res = df.select($df.col("a").rolling(4, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[3].r !== 10) throw new Error(`Test 22 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 23: windowSize much larger than DataFrame length (100 on 3 rows)
 {
-    const df = $df.data({ a: [5, 15, 25] });
+    const df = $df.dataFrame({ a: [5, 15, 25] });
     const res = df.select($df.col("a").rolling(100, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 5 || res[1].r !== 20 || res[2].r !== 45) throw new Error(`Test 23 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 24: Single row DataFrame
 {
-    const df = $df.data({ a: [99] });
+    const df = $df.dataFrame({ a: [99] });
     const res = df.select($df.col("a").rolling(5, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 99) throw new Error(`Test 24 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 25: Empty DataFrame
 {
-    const df = $df.data({ a: [] });
+    const df = $df.dataFrame({ a: [] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res.length !== 0) throw new Error(`Test 25 Failed: expected empty`);
 }
@@ -215,7 +215,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 // Test 26: Large sequence windowSize 10
 {
     const arr = Array.from({ length: 50 }, (_, i) => i + 1);
-    const df = $df.data({ a: arr });
+    const df = $df.dataFrame({ a: arr });
     const res = df.select($df.col("a").rolling(10, $df.col("a").sum()).alias("r")).toDicts() as any[];
     // Sum of 1..10 = 55, sum of 41..50 = 455
     if (res[9].r !== 55 || res[49].r !== 455) throw new Error(`Test 26 Failed: res[9]=${res[9].r}, res[49]=${res[49].r}`);
@@ -223,28 +223,28 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 27: Rolling with Options Object { windowSize: 3 }
 {
-    const df = $df.data({ a: [2, 4, 6, 8] });
+    const df = $df.dataFrame({ a: [2, 4, 6, 8] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").mean()).alias("r")).toDicts() as any[];
     if (res[2].r !== 4 || res[3].r !== 6) throw new Error(`Test 27 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 28: Rolling window range (Max - Min)
 {
-    const df = $df.data({ a: [10, 50, 20, 80] });
+    const df = $df.dataFrame({ a: [10, 50, 20, 80] });
     const res = df.select($df.col("a").rolling(3, (v) => Math.max(...v) - Math.min(...v)).alias("r")).toDicts() as any[];
     if (res[1].r !== 40 || res[2].r !== 40 || res[3].r !== 60) throw new Error(`Test 28 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 29: Window size equal to 2 with repeated values
 {
-    const df = $df.data({ a: [7, 7, 7, 7] });
+    const df = $df.dataFrame({ a: [7, 7, 7, 7] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[1].r !== 14 || res[2].r !== 14 || res[3].r !== 14) throw new Error(`Test 29 Failed`);
 }
 
 // Test 30: Negative values in rolling sum
 {
-    const df = $df.data({ a: [-10, 20, -30, 40] });
+    const df = $df.dataFrame({ a: [-10, 20, -30, 40] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== -10 || res[1].r !== 10 || res[2].r !== -10 || res[3].r !== 10) throw new Error(`Test 30 Failed: ${JSON.stringify(res)}`);
 }
@@ -255,7 +255,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 31: Rolling string concatenation
 {
-    const df = $df.data({ s: ["a", "b", "c", "d"] });
+    const df = $df.dataFrame({ s: ["a", "b", "c", "d"] });
     const res = df.select($df.col("s").rolling(2, (v) => v.join("-")).alias("r")).toDicts() as any[];
     if (res[0].r !== "a" || res[1].r !== "a-b" || res[2].r !== "b-c" || res[3].r !== "c-d") {
         throw new Error(`Test 31 Failed: ${JSON.stringify(res)}`);
@@ -264,7 +264,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 32: Rolling boolean AND logic
 {
-    const df = $df.data({ b: [true, true, false, true] });
+    const df = $df.dataFrame({ b: [true, true, false, true] });
     const res = df.select($df.col("b").rolling(2, (v) => v.every(Boolean)).alias("r")).toDicts() as any[];
     if (res[0].r !== true || res[1].r !== true || res[2].r !== false || res[3].r !== false) {
         throw new Error(`Test 32 Failed: ${JSON.stringify(res)}`);
@@ -273,7 +273,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 33: Rolling boolean OR logic
 {
-    const df = $df.data({ b: [false, false, true, false] });
+    const df = $df.dataFrame({ b: [false, false, true, false] });
     const res = df.select($df.col("b").rolling(2, (v) => v.some(Boolean)).alias("r")).toDicts() as any[];
     if (res[0].r !== false || res[1].r !== false || res[2].r !== true || res[3].r !== true) {
         throw new Error(`Test 33 Failed: ${JSON.stringify(res)}`);
@@ -282,7 +282,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 34: Rolling array union / flatten
 {
-    const df = $df.data({ tags: [["ts"], ["js"], ["python"]] });
+    const df = $df.dataFrame({ tags: [["ts"], ["js"], ["python"]] });
     const res = df.select($df.col("tags").rolling(2, (v) => v.flat()).alias("r")).toDicts() as any[];
     if (res[1].r.length !== 2 || res[1].r[0] !== "ts" || res[1].r[1] !== "js") {
         throw new Error(`Test 34 Failed: ${JSON.stringify(res)}`);
@@ -291,7 +291,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 35: Rolling distinct count (unique values in window)
 {
-    const df = $df.data({ cat: ["A", "A", "B", "A", "C"] });
+    const df = $df.dataFrame({ cat: ["A", "A", "B", "A", "C"] });
     const res = df.select($df.col("cat").rolling(3, (v) => new Set(v).size).alias("r")).toDicts() as any[];
     if (res[0].r !== 1 || res[1].r !== 1 || res[2].r !== 2 || res[3].r !== 2 || res[4].r !== 3) {
         throw new Error(`Test 35 Failed: ${JSON.stringify(res)}`);
@@ -300,7 +300,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 36: Rolling majority vote (Mode)
 {
-    const df = $df.data({ v: [1, 2, 2, 3, 3, 3] });
+    const df = $df.dataFrame({ v: [1, 2, 2, 3, 3, 3] });
     const res = df.select($df.col("v").rolling(4, (v) => {
         const counts: Record<any, number> = {};
         v.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
@@ -311,7 +311,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 37: Rolling object property aggregation
 {
-    const df = $df.data({ item: [{ score: 10 }, { score: 20 }, { score: 30 }] });
+    const df = $df.dataFrame({ item: [{ score: 10 }, { score: 20 }, { score: 30 }] });
     const res = df.select($df.col("item").rolling(2, (v) => v.reduce((acc, x) => acc + x.score, 0)).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 30 || res[2].r !== 50) throw new Error(`Test 37 Failed: ${JSON.stringify(res)}`);
 }
@@ -321,21 +321,21 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
     const d1 = new Date("2026-01-01T00:00:00Z");
     const d2 = new Date("2026-01-02T00:00:00Z");
     const d3 = new Date("2026-01-05T00:00:00Z");
-    const df = $df.data({ dt: [d1, d2, d3] });
+    const df = $df.dataFrame({ dt: [d1, d2, d3] });
     const res = df.select($df.col("dt").rolling(2, (v) => (v[v.length - 1].getTime() - v[0].getTime()) / (1000 * 3600 * 24)).alias("days")).toDicts() as any[];
     if (res[0].days !== 0 || res[1].days !== 1 || res[2].days !== 3) throw new Error(`Test 38 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 39: Rolling BigInt Sum
 {
-    const df = $df.data({ n: [10n, 20n, 30n, 40n] });
+    const df = $df.dataFrame({ n: [10n, 20n, 30n, 40n] });
     const res = df.select($df.col("n").rolling(2, (v) => v.reduce((a, b) => a + b, 0n)).alias("r")).toDicts() as any[];
     if (res[0].r !== 10n || res[1].r !== 30n || res[2].r !== 50n || res[3].r !== 70n) throw new Error(`Test 39 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 40: Rolling JSON payload serialize
 {
-    const df = $df.data({ a: [1, 2, 3] });
+    const df = $df.dataFrame({ a: [1, 2, 3] });
     const res = df.select($df.col("a").rolling(2, (v) => JSON.stringify(v)).alias("r")).toDicts() as any[];
     if (res[0].r !== "[1]" || res[1].r !== "[1,2]" || res[2].r !== "[2,3]") throw new Error(`Test 40 Failed: ${JSON.stringify(res)}`);
 }
@@ -346,7 +346,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 41: Rolling within withColumns pipeline
 {
-    const df = $df.data({ a: [10, 20, 30, 40] });
+    const df = $df.dataFrame({ a: [10, 20, 30, 40] });
     const res = df.withColumns([
         $df.col("a").rolling(2, $df.col("a").sum()).alias("r_sum"),
         $df.col("a").rolling(2, $df.col("a").mean()).alias("r_mean")
@@ -356,7 +356,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 42: Chaining Rolling with Arithmetic Operations
 {
-    const df = $df.data({ a: [10, 20, 30, 40] });
+    const df = $df.dataFrame({ a: [10, 20, 30, 40] });
     const res = df.select(
         $df.col("a").rolling(2, $df.col("a").sum()).mul(2).alias("doubled_sum")
     ).toDicts() as any[];
@@ -367,7 +367,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 43: Comparing Current Value against Rolling Average (Bollinger Band logic)
 {
-    const df = $df.data({ price: [10, 20, 15, 30] });
+    const df = $df.dataFrame({ price: [10, 20, 15, 30] });
     const res = df.withColumns(
         $df.col("price").rolling(2, $df.col("price").mean()).alias("ma2")
     ).withColumns(
@@ -380,7 +380,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 44: Rolling Exponential Smoothing Approximation
 {
-    const df = $df.data({ a: [10, 20, 30, 40] });
+    const df = $df.dataFrame({ a: [10, 20, 30, 40] });
     const res = df.select($df.col("a").rolling(3, (v) => {
         let ema = v[0];
         const alpha = 0.5;
@@ -392,7 +392,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 45: Rolling Linear Regression Slope (Trend Detector)
 {
-    const df = $df.data({ y: [1, 2, 3, 4, 5] });
+    const df = $df.dataFrame({ y: [1, 2, 3, 4, 5] });
     const res = df.select($df.col("y").rolling(3, (vals) => {
         const n = vals.length;
         if (n < 2) return 0;
@@ -410,7 +410,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 46: Rolling Peak / Local Maximum detector
 {
-    const df = $df.data({ a: [1, 5, 2, 8, 3] });
+    const df = $df.dataFrame({ a: [1, 5, 2, 8, 3] });
     const res = df.select($df.col("a").rolling(3, (v) => {
         if (v.length < 3) return false;
         return v[1] > v[0] && v[1] > v[2];
@@ -422,7 +422,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 47: Rolling Consecutive Growth Count
 {
-    const df = $df.data({ a: [1, 2, 3, 1, 2] });
+    const df = $df.dataFrame({ a: [1, 2, 3, 1, 2] });
     const res = df.select($df.col("a").rolling(3, (v) => {
         let count = 0;
         for (let i = 1; i < v.length; i++) {
@@ -437,7 +437,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 48: Rolling Volatility (Max drawdown in window)
 {
-    const df = $df.data({ price: [100, 120, 90, 80, 110] });
+    const df = $df.dataFrame({ price: [100, 120, 90, 80, 110] });
     const res = df.select($df.col("price").rolling(3, (v) => {
         let maxPeak = v[0];
         let maxDd = 0;
@@ -455,7 +455,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 49: Multiple rolling expressions on different columns simultaneously
 {
-    const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [1, 2, 3], b: [10, 20, 30] });
     const res = df.select([
         $df.col("a").rolling(2, $df.col("a").sum()).alias("r_a"),
         $df.col("b").rolling(2, $df.col("b").sum()).alias("r_b")
@@ -465,7 +465,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 50: Rolling Z-Score Standardization inside Sliding Window
 {
-    const df = $df.data({ val: [10, 20, 30, 40, 50] });
+    const df = $df.dataFrame({ val: [10, 20, 30, 40, 50] });
     const res = df.select($df.col("val").rolling(3, (vals) => {
         if (vals.length < 2) return 0;
         const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
@@ -518,7 +518,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 53: Floating point window size is floored (e.g., 2.9 floors to 2)
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").rolling(2.9, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 30 || res[2].r !== 50) {
         throw new Error(`Test 53 Failed: ${JSON.stringify(res)}`);
@@ -527,7 +527,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 54: Rolling with cross-column reference inside sub-expression
 {
-    const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [1, 2, 3], b: [10, 20, 30] });
     const res = df.select($df.col("a").rolling(2, (vals) => vals[vals.length - 1] * 2).alias("r")).toDicts() as any[];
     if (res[0].r !== 2 || res[1].r !== 4 || res[2].r !== 6) {
         throw new Error(`Test 54 Failed: ${JSON.stringify(res)}`);
@@ -536,7 +536,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 55: Rolling chained with arithmetic operations afterwards (.rolling().add(5))
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").rolling(2, $df.col("a").sum()).add(5).alias("r")).toDicts() as any[];
     if (res[0].r !== 15 || res[1].r !== 35 || res[2].r !== 55) {
         throw new Error(`Test 55 Failed: ${JSON.stringify(res)}`);
@@ -545,7 +545,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 56: Rolling with over/groupBy partition boundary separation
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["A", "A", "A", "B", "B"],
         salary: [100, 200, 300, 400, 500]
     });
@@ -591,7 +591,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 59: Rolling with non-numeric data (String concatenation across sliding window)
 {
-    const df = $df.data({ s: ["a", "b", "c", "d"] });
+    const df = $df.dataFrame({ s: ["a", "b", "c", "d"] });
     const res = df.select($df.col("s").rolling(2, (vals) => vals.join("-")).alias("r")).toDicts() as any[];
     if (res[0].r !== "a" || res[1].r !== "a-b" || res[2].r !== "b-c" || res[3].r !== "c-d") {
         throw new Error(`Test 59 Failed: ${JSON.stringify(res)}`);
@@ -600,7 +600,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 60: Rolling with windowed sub-expression (window inside rolling)
 {
-    const df = $df.data({ a: [10, 20, 30, 40] });
+    const df = $df.dataFrame({ a: [10, 20, 30, 40] });
     // cumSum inside each rolling window
     const res = df.select($df.col("a").rolling(3, $df.col("a").cumSum()).alias("r")).toDicts() as any[];
     // At index 0: [10] -> cumSum is [10] -> 10
@@ -614,7 +614,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 61: Rolling window evaluation with boolean values (Rolling all / any)
 {
-    const df = $df.data({ b: [true, true, false, true] });
+    const df = $df.dataFrame({ b: [true, true, false, true] });
     const res = df.select([
         $df.col("b").rolling(2, $df.col("b").all()).alias("all_true"),
         $df.col("b").rolling(2, $df.col("b").any()).alias("any_true")
@@ -629,7 +629,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 62: Rolling window of size larger than group partition height
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         grp: ["X", "X", "Y", "Y"],
         v: [1, 2, 10, 20]
     });
@@ -644,21 +644,21 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 63: Rolling over empty dataframe (0 rows)
 {
-    const df = $df.data({ a: [] as number[] });
+    const df = $df.dataFrame({ a: [] as number[] });
     const res = df.select($df.col("a").rolling(3, $df.col("a").sum()).alias("r")).toDicts();
     if (res.length !== 0) throw new Error(`Test 63 Failed: expected empty, got ${res.length}`);
 }
 
 // Test 64: Rolling over single row dataframe (1 row, windowSize 5 > length)
 {
-    const df = $df.data({ a: [42] });
+    const df = $df.dataFrame({ a: [42] });
     const res = df.select($df.col("a").rolling(5, $df.col("a").sum()).alias("r")).toDicts() as any[];
     if (res.length !== 1 || res[0].r !== 42) throw new Error(`Test 64 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 65: Rolling with windowSize 1 (identity reduction)
 {
-    const df = $df.data({ a: [10, -20, 30, -40] });
+    const df = $df.dataFrame({ a: [10, -20, 30, -40] });
     const res = df.select($df.col("a").rolling(1, (v) => v[0]).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== -20 || res[2].r !== 30 || res[3].r !== -40) {
         throw new Error(`Test 65 Failed: ${JSON.stringify(res)}`);
@@ -667,7 +667,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 66: Rolling over all null/undefined values
 {
-    const df = $df.data({ a: [null, undefined, null, null] });
+    const df = $df.dataFrame({ a: [null, undefined, null, null] });
     const res = df.select($df.col("a").rolling(2, (v) => v.filter(x => x == null).length).alias("null_cnt")).toDicts() as any[];
     if (res[0].null_cnt !== 1 || res[1].null_cnt !== 2 || res[2].null_cnt !== 2 || res[3].null_cnt !== 2) {
         throw new Error(`Test 66 Failed: ${JSON.stringify(res)}`);
@@ -676,7 +676,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 67: Rolling with mixed special float values (Infinity, -Infinity, NaN)
 {
-    const df = $df.data({ a: [Infinity, 10, -Infinity, NaN] });
+    const df = $df.dataFrame({ a: [Infinity, 10, -Infinity, NaN] });
     const res = df.select($df.col("a").rolling(2, (v) => v.some(x => x === Infinity)).alias("has_inf")).toDicts() as any[];
     if (res[0].has_inf !== true || res[1].has_inf !== true || res[2].has_inf !== false || res[3].has_inf !== false) {
         throw new Error(`Test 67 Failed: ${JSON.stringify(res)}`);
@@ -685,7 +685,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 68: Rolling with BigInt values and custom accumulator
 {
-    const df = $df.data({ n: [100n, 200n, 300n, 400n] });
+    const df = $df.dataFrame({ n: [100n, 200n, 300n, 400n] });
     const res = df.select($df.col("n").rolling(2, (v: unknown[]) => (v as bigint[]).reduce((a, b) => a + b, 0n)).alias("r")).toDicts() as any[];
     if (res[0].r !== 100n || res[1].r !== 300n || res[2].r !== 500n || res[3].r !== 700n) {
         throw new Error(`Test 68 Failed: ${JSON.stringify(res)}`);
@@ -694,7 +694,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 69: Rolling with Date objects calculating time span within window
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         d: [new Date("2026-01-01T00:00:00Z"), new Date("2026-01-02T00:00:00Z"), new Date("2026-01-05T00:00:00Z")]
     });
     const res = df.select($df.col("d").rolling(2, (v: unknown[]) => {
@@ -708,7 +708,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 70: Rolling with nested complex objects (struct / JSON record windows)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         items: [{ score: 10 }, { score: 20 }, { score: 30 }]
     });
     const res = df.select($df.col("items").rolling(2, (v: unknown[]) => {
@@ -721,7 +721,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 71: Extreme edge-case - window size equals exact DataFrame height
 {
-    const df = $df.data({ val: [1, 2, 3, 4, 5] });
+    const df = $df.dataFrame({ val: [1, 2, 3, 4, 5] });
     const res = df.select($df.col("val").rolling(5, $df.col("val").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 1 || res[1].r !== 3 || res[2].r !== 6 || res[3].r !== 10 || res[4].r !== 15) {
         throw new Error(`Test 71 Failed: ${JSON.stringify(res)}`);
@@ -730,7 +730,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 72: Extreme edge-case - window size significantly exceeds DataFrame height (100 > 3)
 {
-    const df = $df.data({ val: [5, 10, 15] });
+    const df = $df.dataFrame({ val: [5, 10, 15] });
     const res = df.select($df.col("val").rolling(100, $df.col("val").sum()).alias("r")).toDicts() as any[];
     if (res[0].r !== 5 || res[1].r !== 15 || res[2].r !== 30) {
         throw new Error(`Test 72 Failed: ${JSON.stringify(res)}`);
@@ -739,7 +739,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 73: Extreme edge-case - sequential rolling via withColumns
 {
-    const df = $df.data({ val: [1, 2, 3, 4, 5] });
+    const df = $df.dataFrame({ val: [1, 2, 3, 4, 5] });
     const step1 = df.withColumns($df.col("val").rolling(2, $df.col("val").sum()).alias("r1"));
     const res = step1.select($df.col("r1").rolling(2, (v) => Math.max(...(v as number[]))).alias("r")).toDicts() as any[];
     if (res[0].r !== 1 || res[1].r !== 3 || res[2].r !== 5 || res[3].r !== 7 || res[4].r !== 9) {
@@ -749,7 +749,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 74: Extreme edge-case - multiple partitions with uneven partition lengths under .over()
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["A", "B", "B", "B", "C"],
         salary: [100, 200, 300, 400, 500]
     });
@@ -764,7 +764,7 @@ console.log("Running StandardExpr.rolling 50 exhaustive 10/10 difficulty tests..
 
 // Test 75: Extreme edge-case - reducer returning non-primitive array / list (implosion per window)
 {
-    const df = $df.data({ v: [1, 2, 3] });
+    const df = $df.dataFrame({ v: [1, 2, 3] });
     const res = df.select(
         $df.col("v").rolling(2, (vals) => vals.slice()).alias("slices")
     ).toDicts() as any[];

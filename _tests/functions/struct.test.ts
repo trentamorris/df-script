@@ -6,7 +6,7 @@ console.log("STARTING COLUMN EXPRESSION $df.struct() TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         user_id: [1, 2],
         user_name: ["Alice", "Bob"],
         score: [95, 80]

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.stripPrefix tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { text: "pre-middle-suf" },
     { text: "no-pre" },
     { text: null }

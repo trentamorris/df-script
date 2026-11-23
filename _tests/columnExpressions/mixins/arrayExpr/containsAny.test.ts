@@ -3,7 +3,7 @@ import { $df, ObjectDataType } from "df-script";
 
 console.log("Running ArrayExpr.containsAny tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { tags: ["apple", "banana"] },
     { typed_array: new Int32Array([10, 20, 30]) },
     { tags: null }
@@ -21,7 +21,7 @@ if (res[1].typed_any !== true) throw new Error("Expected typed_any true");
 if (res[2].has_any !== null) throw new Error("Expected null");
 
 // Edge cases: Dynamic column expression target, empty arrays, null values, TypedArrays
-const dfEdge = $df.data([
+const dfEdge = $df.dataFrame([
     { list: ["a", "b", "c"], targets: ["x", "c"] },
     { list: ["a", "b"], targets: ["x", "y"] },
     { list: [], targets: [] },

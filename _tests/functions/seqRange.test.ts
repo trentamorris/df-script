@@ -4,7 +4,7 @@ console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION SEQ_RANGE TESTS...");
 console.log("=========================================");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { id: 1 },
     { id: 2 },
     { id: 3 },
@@ -110,7 +110,7 @@ try {
 
     // 10. Complex 10/10 Edge Cases
     // 10.1 Negative Indexing Slice with Floating Steps and Float64 Typed Allocation
-    const df6 = $df.data([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }]);
+    const df6 = $df.dataFrame([{ a: 1 }, { a: 2 }, { a: 3 }, { a: 4 }, { a: 5 }, { a: 6 }]);
     const r10 = df6.select([
         $df.seqRange(0.25, {
             strict: false,

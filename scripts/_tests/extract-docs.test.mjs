@@ -345,7 +345,7 @@ test("extractRawDocs: top-level domain keys, columnExpressions hierarchy, and fl
   assert.strictEqual(seqRange.filePath, "functions/seqRange.ts");
   assert.strictEqual(
     seqRange.signature,
-    "$df.seqRange(\n  value: any,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<any>"
+    "$df.seqRange<T = unknown>(\n  value: T,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<T>"
   );
 
   const seqRangeOpts = allDocs.types.SeqRangeOptions;
@@ -359,43 +359,43 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
   const expectedFunctions = {
     all: {
       filePath: "functions/all.ts",
-      signature: "$df.all(): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.all<T extends RowRecord = RowRecord>(): ColumnExpr<T>",
+      returns: "ColumnExpr<T>"
     },
     coalesce: {
       filePath: "functions/coalesce.ts",
-      signature: "$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.coalesce<T extends RowRecord = RowRecord>(...exprs: CoalesceArg[]): ColumnExpr<T>",
+      returns: "ColumnExpr<T>"
     },
     col: {
       filePath: "functions/col.ts",
-      signature: "$df.col<T = any>(name: ColumnSelector<T>): ColumnExpr<T>",
+      signature: "$df.col<T = RowRecord>(name: ColumnSelector<T>): ColumnExpr<T>",
       returns: "ColumnExpr<T>"
     },
     concat: {
       filePath: "functions/concat.ts",
-      signature: "$df.concat<U extends RowRecord = any>(\n  rawItems: ConcatItemsArg,\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>",
+      signature: "$df.concat<U extends RowRecord = RowRecord>(\n  rawItems: DataFrame | DataFrame[],\n  {\n    how = 'vertical',\n    horizontal\n  }: ConcatOptions = {}\n): DataFrame<U>",
       returns: "DataFrame"
     },
-    data: {
-      filePath: "functions/data.ts",
-      signature: "$df.data<T extends RowRecord = any>(\n  data: DataFrameDataArg<T>,\n  schema?: DataFrameSchema\n): DataFrame<T>",
+    dataFrame: {
+      filePath: "functions/dataFrame.ts",
+      signature: "$df.dataFrame<T extends RowRecord = RowRecord>(\n  data: DataFrameDataArg<T>,\n  schema?: DataFrameSchema\n): DataFrame<T>",
       returns: "DataFrame<T>"
     },
     duration: {
       filePath: "functions/duration.ts",
-      signature: "$df.duration(options: DurationArg = {}): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.duration(options: DurationArg = {}): ColumnExpr<number>",
+      returns: "ColumnExpr<number>"
     },
     element: {
       filePath: "functions/element.ts",
-      signature: "$df.element<T = any>(): ColumnExpr<T>",
+      signature: "$df.element<T = unknown>(): ColumnExpr<T>",
       returns: "ColumnExpr<T>"
     },
     exclude: {
       filePath: "functions/exclude.ts",
-      signature: "$df.exclude(columns: ColumnKeyArg): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.exclude(columns: ColumnKeyArg): ColumnExpr<unknown>",
+      returns: "ColumnExpr<unknown>"
     },
     horizontal: {
       filePath: "functions/horizontal.ts",
@@ -404,33 +404,33 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     },
     implode: {
       filePath: "functions/implode.ts",
-      signature: "$df.implode(column: IntoExprArg): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.implode<T = unknown>(column: IntoExprArg): ColumnExpr<T[]>",
+      returns: "ColumnExpr<T[]>"
     },
     lit: {
       filePath: "functions/lit.ts",
-      signature: "$df.lit(\n  value: any,\n  options: LitOptions = {}\n): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.lit<T = unknown>(\n  value: T,\n  options: LitOptions = {}\n): ColumnExpr<T>",
+      returns: "ColumnExpr<T>"
     },
     readCsv: {
       filePath: "functions/readCsv.ts",
-      signature: "$df.readCsv<T extends RowRecord = any>(\n  content: string,\n  options: ReadCSVOptions = {}\n): DataFrame<T>",
+      signature: "$df.readCsv<T extends RowRecord = RowRecord>(\n  content: string,\n  options: ReadCSVOptions = {}\n): DataFrame<T>",
       returns: "DataFrame"
     },
     readJson: {
       filePath: "functions/readJson.ts",
-      signature: '$df.readJson<T extends RowRecord = any>(\n  content: string,\n  {\n    format = "json",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<T>',
+      signature: '$df.readJson<T extends RowRecord = RowRecord>(\n  content: string,\n  {\n    format = "json",\n    trimBeforeParse = true,\n    schema,\n    ...parseOpts\n  }: ReadJSONOptions = {}\n): DataFrame<T>',
       returns: "A new DataFrame instance populated with the parsed records."
     },
     seqRange: {
       filePath: "functions/seqRange.ts",
-      signature: "$df.seqRange(\n  value: any,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.seqRange<T = unknown>(\n  value: T,\n  options: SeqRangeOptions = { strict: true }\n): ColumnExpr<T>",
+      returns: "ColumnExpr<T>"
     },
     struct: {
       filePath: "functions/struct.ts",
-      signature: "$df.struct(\n  fields: StructArg,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<any>",
-      returns: "ColumnExpr<any>"
+      signature: "$df.struct(\n  fields: StructArg,\n  ...moreFields: IntoExpr[]\n): ColumnExpr<Record<string, unknown>>",
+      returns: "ColumnExpr<Record<string, unknown>>"
     },
     when: {
       filePath: "functions/when.ts",
@@ -830,7 +830,6 @@ test("extractRawDocs: verifies real project typeTree for ewmVar, concat, readJso
 
   // concat: nested HorizontalConcatOptions inside ConcatOptions + 2-step alias ConcatItemsArg
   const concatTree = allDocs.dataframe.concat.typeTree;
-  assert.strictEqual(concatTree.items.resolvedType, "ConcatItem | ConcatItem[]");
   assert.strictEqual(concatTree.options.properties.horizontal.properties.strict.default, "true");
 
   // duration: union DurationArg = DurationOptions | string has both resolvedType and properties
@@ -1148,7 +1147,7 @@ test("buildDetailedSignature: 0-param, getters, and simple 1-param methods stay 
   );
   // Single variadic param with resolvedType
   assert.strictEqual(
-    buildDetailedSignature("$df.coalesce(...exprs: CoalesceArg[]): ColumnExpr<any>", {
+    buildDetailedSignature("$df.coalesce<T extends RowRecord = RowRecord>(...exprs: CoalesceArg[]): ColumnExpr<T>", {
       exprs: {
         type: "CoalesceArg[]",
         optional: false,
@@ -1157,7 +1156,7 @@ test("buildDetailedSignature: 0-param, getters, and simple 1-param methods stay 
         desc: "Expressions."
       }
     }),
-    "$df.coalesce(...exprs: (IntoExprArg | ValidScalarTypes)[]): ColumnExpr<any>"
+    "$df.coalesce<T extends RowRecord = RowRecord>(...exprs: (IntoExprArg | ValidScalarTypes)[]): ColumnExpr<T>"
   );
 });
 
@@ -1220,7 +1219,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
     dfConcat.signatureDetailed,
     [
       "df.concat<U extends RowRecord = T>(",
-      "  items: ConcatItem | ConcatItem[],",
+      "  items: DataFrame | DataFrame[],",
       "  options: {",
       "    horizontal?: {",
       "      strict?: boolean = true",
@@ -1236,8 +1235,8 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
   assert.strictEqual(
     fnConcat.signatureDetailed,
     [
-      "$df.concat<U extends RowRecord = any>(",
-      "  rawItems: ConcatItem | ConcatItem[],",
+      "$df.concat<U extends RowRecord = RowRecord>(",
+      "  rawItems: DataFrame | DataFrame[],",
       "  options: {",
       "    horizontal?: {",
       "      strict?: boolean = true",

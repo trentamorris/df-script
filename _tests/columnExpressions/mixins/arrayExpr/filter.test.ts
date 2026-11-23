@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.filter tests...");
 
 // 1. Basic numeric filter
-const df1 = $df.data([
+const df1 = $df.dataFrame([
     { numbers: [3, 1, 4, 1, 5, 9, null, 2] },
     { numbers: null }
 ]);
@@ -18,7 +18,7 @@ if (res1[0].gt_3.length !== 3 || res1[0].gt_3[0] !== 4 || res1[0].gt_3[1] !== 5 
 if (res1[1].no_nulls !== null) throw new Error("1. null array failed");
 
 // 2. Empty array rows
-const dfEmpty = $df.data({ a: [[], [1, 2], []] });
+const dfEmpty = $df.dataFrame({ a: [[], [1, 2], []] });
 const resEmpty = dfEmpty.select([$df.col("a").arr.filter($df.element().gt(0)).alias("f")]).toDicts() as any[];
 if (resEmpty[0].f.length !== 0 || resEmpty[1].f.length !== 2 || resEmpty[2].f.length !== 0) {
     throw new Error("2. Empty array rows failed");
@@ -37,7 +37,7 @@ if (resAll[0].f.length !== 0 || resAll[1].f.length !== 2 || resAll[2].f.length !
 }
 
 // 5. String element filtering with .str namespace
-const dfStr = $df.data({
+const dfStr = $df.dataFrame({
     tags: [["apple", "banana", "avocado"], ["cherry", "apricot"], []]
 });
 const resStr = dfStr.select([
@@ -48,7 +48,7 @@ if (JSON.stringify(resStr[1].a_tags) !== JSON.stringify(["apricot"])) throw new 
 if (JSON.stringify(resStr[2].a_tags) !== JSON.stringify([])) throw new Error("5. String startsWith failed for empty row");
 
 // 6. Filtering NaNs inside array
-const dfNans = $df.data({
+const dfNans = $df.dataFrame({
     vals: [[1, NaN, 2, NaN, 3], [NaN, NaN], [4, 5]]
 });
 const resNans = dfNans.select([
@@ -59,7 +59,7 @@ if (JSON.stringify(resNans[1].clean) !== JSON.stringify([])) throw new Error("6.
 if (JSON.stringify(resNans[2].clean) !== JSON.stringify([4, 5])) throw new Error("6. NaN filter failed for row 2");
 
 // 7. Boolean elements in array (falsy preservation: false !== null)
-const dfBools = $df.data({
+const dfBools = $df.dataFrame({
     flags: [[true, false, true, false], [false, false], [null, true]]
 });
 const resBools = dfBools.select([
@@ -70,7 +70,7 @@ if (JSON.stringify(resBools[1].falses) !== JSON.stringify([false, false])) throw
 if (JSON.stringify(resBools[2].falses) !== JSON.stringify([])) throw new Error("7. Falsy boolean filter failed row 2");
 
 // 8. Zero and signed zero preservation
-const dfZeros = $df.data({
+const dfZeros = $df.dataFrame({
     nums: [[0, -0, 1, 2, 0], [-1, 0, 1]]
 });
 const resZeros = dfZeros.select([
@@ -80,7 +80,7 @@ if (resZeros[0].zeros.length !== 3) throw new Error("8. Zero elements filter fai
 if (resZeros[1].zeros.length !== 1) throw new Error("8. Zero elements filter failed row 1");
 
 // 9. TypedArray inside cells (Float64Array, Int32Array)
-const dfTyped = $df.data({
+const dfTyped = $df.dataFrame({
     floats: [new Float64Array([10.5, 20.5, 30.5]), new Int32Array([1, 2, 3, 4])]
 });
 const resTyped = dfTyped.select([
@@ -90,7 +90,7 @@ if (JSON.stringify(resTyped[0].gt15) !== JSON.stringify([20.5, 30.5])) throw new
 if (JSON.stringify(resTyped[1].gt15) !== JSON.stringify([])) throw new Error("9. Int32Array filter failed");
 
 // 10. Chained array operations: .arr.filter(...).arr.len()
-const dfChain = $df.data({
+const dfChain = $df.dataFrame({
     items: [[1, 2, 3, 4, 5], [10, 20], [100]]
 });
 const resChain = dfChain.select([
@@ -101,7 +101,7 @@ if (resChain[0].cnt !== 3 || resChain[1].cnt !== 2 || resChain[2].cnt !== 1) {
 }
 
 // 11. Array filter + explode
-const dfExplode = $df.data({
+const dfExplode = $df.dataFrame({
     id: [1, 2],
     vals: [[10, 20, 30], [5, 15]]
 });
@@ -114,7 +114,7 @@ if (resExplode[0].gt12 !== 20 || resExplode[1].gt12 !== 30 || resExplode[2].gt12
 }
 
 // 12. Non-array row cell values (null, undefined, arrays)
-const dfMixed = $df.data({
+const dfMixed = $df.dataFrame({
     v: [[1, 2, 3], null, undefined, [4, 5]]
 });
 const resMixed = dfMixed.select([
@@ -126,7 +126,7 @@ if (resMixed[2].f !== null) throw new Error("12. Undefined row failed");
 if (JSON.stringify(resMixed[3].f) !== JSON.stringify([4, 5])) throw new Error("12. Mixed row 3 failed");
 
 // 13. Logical AND condition on elements
-const dfAnd = $df.data({
+const dfAnd = $df.dataFrame({
     v: [[1, 5, 10, 15, 20], [2, 4, 6, 8]]
 });
 const resAnd = dfAnd.select([
@@ -149,7 +149,7 @@ const resBetween = dfAnd.select([
 if (JSON.stringify(resBetween[0].between) !== JSON.stringify([5, 10, 15])) throw new Error("15. Between filter failed");
 
 // 16. Negative values filtering
-const dfNeg = $df.data({
+const dfNeg = $df.dataFrame({
     v: [[-10, -5, 0, 5, 10], [-1, -2, -3]]
 });
 const resNeg = dfNeg.select([
@@ -159,7 +159,7 @@ if (JSON.stringify(resNeg[0].negs) !== JSON.stringify([-10, -5])) throw new Erro
 if (JSON.stringify(resNeg[1].negs) !== JSON.stringify([-1, -2, -3])) throw new Error("16. Neg filter row 1 failed");
 
 // 17. Single element arrays
-const dfSingle = $df.data({ v: [[1], [2], [3]] });
+const dfSingle = $df.dataFrame({ v: [[1], [2], [3]] });
 const resSingle = dfSingle.select([
     $df.col("v").arr.filter($df.element().eq(2)).alias("two")
 ]).toDicts() as any[];
@@ -169,7 +169,7 @@ if (JSON.stringify(resSingle[2].two) !== JSON.stringify([])) throw new Error("17
 
 // 18. Large array in cell (1000 items)
 const largeArr = Array.from({ length: 1000 }, (_, i) => i);
-const dfLarge = $df.data({ v: [largeArr] });
+const dfLarge = $df.dataFrame({ v: [largeArr] });
 const resLarge = dfLarge.select([
     $df.col("v").arr.filter($df.element().ge(990)).alias("top10")
 ]).toDicts() as any[];
@@ -178,7 +178,7 @@ if (resLarge[0].top10.length !== 10 || resLarge[0].top10[0] !== 990 || resLarge[
 }
 
 // 19. Empty strings in string arrays
-const dfEmptyStrs = $df.data({
+const dfEmptyStrs = $df.dataFrame({
     s: [["", "hello", "", "world"], ["", ""]]
 });
 const resEmptyStrs = dfEmptyStrs.select([
@@ -189,7 +189,7 @@ if (JSON.stringify(resEmptyStrs[1].non_empty) !== JSON.stringify([])) throw new 
 
 // 20. Immutability check: original data untouched
 const originalArr = [1, 2, 3, 4];
-const dfImmut = $df.data({ a: [originalArr] });
+const dfImmut = $df.dataFrame({ a: [originalArr] });
 dfImmut.select([$df.col("a").arr.filter($df.element().gt(2)).alias("gt2")]);
 if (originalArr.length !== 4 || originalArr[0] !== 1) {
     throw new Error("20. Immutability violation: source array was modified");

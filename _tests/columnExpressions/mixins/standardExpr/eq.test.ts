@@ -5,7 +5,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 1. Basic Primitives Comparison (Numbers, Strings, Booleans, BigInts)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         nums_a: [10, 20, 30],
         nums_b: [10, 99, 30],
         str_a: ["apple", "banana", "cherry"],
@@ -39,7 +39,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 2. Kleene Three-Valued Logic with Null & Undefined (unknown === anything -> null)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [10, null, 30, null],
         b: [10, null, null, 40]
     });
@@ -52,7 +52,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 3. Scalar Literal Broadcasting (`.eq(scalar)`)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, 2, 3, 2, null]
     });
     const res = df.select($df.col("x").eq(2).alias("r")).toDicts() as any[];
@@ -69,7 +69,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 4. IEEE 754 NaN Comparisons (`NaN === NaN` is false, `NaN === null` is null)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [NaN, NaN, 10, NaN],
         b: [NaN, 10, NaN, null]
     });
@@ -86,7 +86,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
     const d1Copy = new Date("2026-01-01T00:00:00Z");
     const d2 = new Date("2026-06-01T00:00:00Z");
 
-    const df = $df.data({
+    const df = $df.dataFrame({
         d_a: [d1, d1],
         d_b: [d1Copy, d2]
     });
@@ -97,7 +97,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 6. Zero Sign Semantics (`+0 === -0` is true in JS strict equality)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [+0, 0],
         b: [-0, 0]
     });
@@ -109,7 +109,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 7. Array Literal as `val`
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: ["a", "b", "c"]
     });
     const res = df.select($df.col("x").eq(["a", "z", "c"]).alias("r")).toDicts() as any[];
@@ -120,14 +120,14 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 8. Empty DataFrame
 {
-    const emptyDf = $df.data({ a: [], b: [] });
+    const emptyDf = $df.dataFrame({ a: [], b: [] });
     const res = emptyDf.select($df.col("a").eq($df.col("b")).alias("r")).toDicts() as any[];
     if (res.length !== 0) throw new Error("Case 8: Empty DataFrame should yield empty results");
 }
 
 // 9. Multi-Column Selector on Left Operand
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         target: [10, 20, 30],
         col1: [10, 99, 30],
         col2: [99, 20, 99]
@@ -146,7 +146,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 10. Filter Behavior (Null Dropping in Predicate Filters)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         id: [1, 2, 3, 4],
         status: ["active", "pending", null, "active"]
     });
@@ -159,7 +159,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 11. TypedArray Support (Uint8Array and Float64Array)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         u8: new Uint8Array([10, 20, 30])
     });
     const res = df.select($df.col("u8").eq(new Uint8Array([10, 99, 30])).alias("r")).toDicts() as any[];
@@ -170,7 +170,7 @@ console.log("Running StandardExpr.eq edge-case tests...");
 
 // 12. Cross-Type Scalar Comparisons (Strict JS === Semantics across Different Data Types)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         str_col: ["10", "true"]
     });
     // In strict equality, string "10" !== number 10, string "true" !== boolean true

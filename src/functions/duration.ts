@@ -11,7 +11,7 @@ import type { DurationArg, DurationComponentArg } from "./types";
  * Constructs a Duration expression column from numeric values, string intervals, column references, or expressions.
  *
  * @param {DurationArg} [options] Duration component options or string interval (e.g. "1d 12h").
- * @returns {ColumnExpr<any>} A column expression with the calculated duration values.
+ * @returns {ColumnExpr<number>} A column expression with the calculated duration values.
  * @namespace $df
  * @category Function
  * @syntax $df.duration(options)
@@ -37,7 +37,7 @@ import type { DurationArg, DurationComponentArg } from "./types";
  * // | 2026-05-20T22:00:00.123Z |
  * // +--------------------------+
  */
-export function duration(options: DurationArg = {}): ColumnExpr<any> {
+export function duration(options: DurationArg = {}): ColumnExpr<number> {
     if (typeof options === "string") {
         const ms = parseDurationString(options, { to: "ms" });
         const expr = lit(ms).alias("duration");
@@ -46,7 +46,7 @@ export function duration(options: DurationArg = {}): ColumnExpr<any> {
     }
 
     let constantMs = 0;
-    let exprTotal: ColumnExpr<any> | null = null;
+    let exprTotal: ColumnExpr<number> | null = null;
     let hasComponent = false;
     const opts = options as Record<string, DurationComponentArg | undefined>;
 
@@ -63,7 +63,7 @@ export function duration(options: DurationArg = {}): ColumnExpr<any> {
             continue;
         }
 
-        const part = toColExpr<ColumnExpr<any>>(val as IntoExpr, ColumnExpr).mul(mult);
+        const part = toColExpr<ColumnExpr<number>>(val as IntoExpr, ColumnExpr).mul(mult);
         exprTotal = exprTotal ? exprTotal.add(part) : part;
     }
 
@@ -78,5 +78,5 @@ export function duration(options: DurationArg = {}): ColumnExpr<any> {
             : exprTotal;
 
     out._castType = new DurationType("ms");
-    return out.alias("duration") as ColumnExpr<any>;
+    return out.alias("duration");
 }

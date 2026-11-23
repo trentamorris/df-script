@@ -1,10 +1,11 @@
+import type { RowRecord } from "../types";
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
 
 /**
  * Creates an expression targeting all columns in the DataFrame.
  *
- * @returns {ColumnExpr<any>} A column expression targeting all columns.
+ * @returns {ColumnExpr<T>} A column expression targeting all columns.
  * @namespace $df
  * @category Function
  * @syntax $df.{symbol}(...)
@@ -33,6 +34,6 @@ import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
  * // | 30 | 300 |
  * // +----+-----+
  */
-export function all(): ColumnExpr<any> {
+export function all<T extends RowRecord = RowRecord>(): ColumnExpr<T> {
     return new ColumnExpr(ALL_COLUMNS_MARKER);
 }

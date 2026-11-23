@@ -4,7 +4,7 @@ import { $df, ObjectDataType } from "df-script";
 console.log("Running ArrayExpr.contains tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { tags: ["apple", "banana", "cherry"] },
     { tags: [] },
     { tags: null }
@@ -21,7 +21,7 @@ if (res[1].has_banana !== false) throw new Error("Expected false for empty array
 if (res[2].has_banana !== null) throw new Error("Expected null for null array");
 
 // Dynamic Column Expression as Target
-const dfDyn = $df.data([
+const dfDyn = $df.dataFrame([
     { list: [1, 2, 3], target: 2 },
     { list: [1, 2, 3], target: 99 },
     { list: null, target: 2 },
@@ -37,7 +37,7 @@ if (resDyn[2].found !== null) throw new Error("Expected null for null list with 
 if (resDyn[3].found !== null) throw new Error("Expected null for dynamic target null (Kleene logic)");
 
 // Additional Edge Cases: undefined (Kleene logic), non-array types (primitives/objects), and Float64Array with NaN
-const dfEdge = $df.data([
+const dfEdge = $df.dataFrame([
     { arr: [undefined, null, 0], f64: new Float64Array([NaN, 1.5]), bools: [true, false] },
     { arr: [1, 2], f64: new Float64Array([0]), bools: [] },
     { arr: null, f64: { length: 2, 0: 1 }, bools: null }

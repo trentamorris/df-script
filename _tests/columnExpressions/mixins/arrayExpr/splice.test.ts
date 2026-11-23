@@ -3,7 +3,7 @@ import { $df, Object as ObjectType } from "df-script";
 
 console.log("Running ArrayExpr.splice tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [1, 2, 3, 4, 5] },
     { numbers: null }
 ]);
@@ -18,7 +18,7 @@ if (res[0].spliced[0] !== 1 || res[0].spliced[1] !== 99 || res[0].spliced[2] !==
 if (res[1].spliced !== null) throw new Error("null array splice failed");
 
 // 10/10 EXTREME EDGE CASES SUITE
-const dfEdge = $df.data([
+const dfEdge = $df.dataFrame([
     // Row 0: Standard array
     { arr: [10, 20, 30, 40, 50] },
     // Row 1: Empty array

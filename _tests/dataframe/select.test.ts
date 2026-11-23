@@ -376,7 +376,7 @@ const legacyUserStructType = $df.Struct({
     })
 });
 
-const complexNestedDf = $df.data([
+const complexNestedDf = $df.dataFrame([
     {
         arrInt: [1, 2, 3],
         arrFloat: [1.1, 2.2],
@@ -498,7 +498,7 @@ const deepSchemaB = $df.Struct({
     }))
 });
 
-const dfDeepTree = $df.data([
+const dfDeepTree = $df.dataFrame([
     {
         colA: { level1: [{ level2: [{ val: 1.23 }] }] },
         colB: { level1: [{ level2: [{ val: 456 }] }] }
@@ -520,7 +520,7 @@ if (dfDeepSelectedB.columns.length !== 1 || dfDeepSelectedB.columns[0] !== "colB
 
 // Edge Case S2: Empty Struct vs Populated Struct
 const emptyStructType = $df.Struct({});
-const dfWithEmptyStruct = $df.data([
+const dfWithEmptyStruct = $df.dataFrame([
     { emptyCol: {}, filledCol: { a: 1 } }
 ], {
     emptyCol: emptyStructType,
@@ -533,7 +533,7 @@ if (dfEmptyMatch.columns.length !== 1 || dfEmptyMatch.columns[0] !== "emptyCol")
 }
 
 // Edge Case S3: Nested Array Selection Combined with Exclusion ($df.exclude)
-const dfMultiArray = $df.data([
+const dfMultiArray = $df.dataFrame([
     { a1: [1], a2: [2.5], a3: ["str"], s1: { x: 1 } }
 ], {
     a1: $df.Array($df.Int32),
@@ -598,7 +598,7 @@ if (!threwWildcardDup) {
 // 10/10 REGEX PATTERN COLUMN SELECTOR TESTS
 // ============================================================================
 
-const dfPattern = $df.data([
+const dfPattern = $df.dataFrame([
     {
         user_id: 1,
         user_name: "Alice",

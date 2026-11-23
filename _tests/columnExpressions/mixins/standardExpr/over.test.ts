@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.over tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { dept: "A", salary: 100 },
     { dept: "A", salary: 200 },
     { dept: "B", salary: 300 }

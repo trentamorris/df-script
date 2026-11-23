@@ -8,7 +8,7 @@ import type { LitOptions } from "./types";
  *
  * @param value The literal value (number, string, boolean, etc.).
  * @param [options] Configuration options.
- * @returns {ColumnExpr<any>} A column expression with the literal value.
+ * @returns {ColumnExpr<T>} A column expression with the literal value.
  * @namespace $df
  * @category Function
  * @syntax $df.{symbol}(...)
@@ -36,9 +36,9 @@ import type { LitOptions } from "./types";
  * // | 2 | y | active |
  * // +---+---+--------+
  */
-export function lit(value: any, options: LitOptions = {}): ColumnExpr<any> {
+export function lit<T = unknown>(value: T, options: LitOptions = {}): ColumnExpr<T> {
     const expr = seqRange(value, { ...options, mode: "constant" });
     expr._isLiteral = true;
     expr._literalValue = value;
-    return expr;
+    return expr as ColumnExpr<T>;
 }

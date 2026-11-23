@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.escapeRegex tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { raw: "hello.world*foo+bar?baz^1$2|3(4)[5]{6}/7-8\\9" },
     { raw: "plain text" },
     { raw: null }

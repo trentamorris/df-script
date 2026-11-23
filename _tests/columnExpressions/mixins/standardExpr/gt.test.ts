@@ -6,7 +6,7 @@ console.log("Running StandardExpr.gt edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Column vs Column comparison
 // -------------------------------------------------------------
-const dfCol = $df.data([
+const dfCol = $df.dataFrame([
     { a: 10, b: 10 },
     { a: 15, b: 10 },
     { a: 5, b: 10 }
@@ -38,7 +38,7 @@ if (resArr[0].g !== false || resArr[1].g !== false || resArr[2].g !== true) {
 const d1 = new Date("2026-01-01T00:00:00.000Z");
 const d2 = new Date("2026-06-01T00:00:00.000Z");
 const d3 = new Date("2026-12-31T00:00:00.000Z");
-const dfDate = $df.data([{ d: d1 }, { d: d2 }, { d: d3 }]);
+const dfDate = $df.dataFrame([{ d: d1 }, { d: d2 }, { d: d3 }]);
 const resDate = dfDate.select([$df.col("d").gt(d2).alias("g")]).toDicts() as any[];
 if (resDate[0].g !== false || resDate[1].g !== false || resDate[2].g !== true) {
     throw new Error("Case 4 failed: date comparison");
@@ -47,7 +47,7 @@ if (resDate[0].g !== false || resDate[1].g !== false || resDate[2].g !== true) {
 // -------------------------------------------------------------
 // Case 5: Lexicographical String comparison
 // -------------------------------------------------------------
-const dfStr = $df.data([{ s: "apple" }, { s: "banana" }, { s: "cherry" }]);
+const dfStr = $df.dataFrame([{ s: "apple" }, { s: "banana" }, { s: "cherry" }]);
 const resStr = dfStr.select([$df.col("s").gt("banana").alias("g")]).toDicts() as any[];
 if (resStr[0].g !== false || resStr[1].g !== false || resStr[2].g !== true) {
     throw new Error("Case 5 failed: string comparison");
@@ -56,7 +56,7 @@ if (resStr[0].g !== false || resStr[1].g !== false || resStr[2].g !== true) {
 // -------------------------------------------------------------
 // Case 6: BigInt comparison
 // -------------------------------------------------------------
-const dfBig = $df.data([{ n: 10n }, { n: 20n }, { n: 5n }]);
+const dfBig = $df.dataFrame([{ n: 10n }, { n: 20n }, { n: 5n }]);
 const resBig = dfBig.select([$df.col("n").gt(10n).alias("g")]).toDicts() as any[];
 if (resBig[0].g !== false || resBig[1].g !== true || resBig[2].g !== false) {
     throw new Error("Case 6 failed: bigint comparison");
@@ -65,7 +65,7 @@ if (resBig[0].g !== false || resBig[1].g !== true || resBig[2].g !== false) {
 // -------------------------------------------------------------
 // Case 7: Null handling in column and argument
 // -------------------------------------------------------------
-const dfNull = $df.data([{ a: 10 }, { a: null }, { a: 20 }]);
+const dfNull = $df.dataFrame([{ a: 10 }, { a: null }, { a: 20 }]);
 const resNull1 = dfNull.select([$df.col("a").gt(null).alias("g")]).toDicts() as any[];
 const resNull2 = dfNull.select([$df.col("a").gt(15).alias("g")]).toDicts() as any[];
 if (resNull1[0].g !== null || resNull1[1].g !== null || resNull1[2].g !== null) {
@@ -78,7 +78,7 @@ if (resNull2[0].g !== false || resNull2[1].g !== null || resNull2[2].g !== true)
 // -------------------------------------------------------------
 // Case 8: NaN edge cases (IEEE 754: any comparison with NaN is false, except null propagation)
 // -------------------------------------------------------------
-const dfNaN = $df.data([
+const dfNaN = $df.dataFrame([
     { a: NaN, b: 10 },
     { a: 10, b: NaN },
     { a: NaN, b: NaN },
@@ -93,7 +93,7 @@ if (resNaN[3].g !== null) throw new Error("Case 8 failed: NaN gt null should be 
 // -------------------------------------------------------------
 // Case 9: Multi-column projection via col(["a", "b"]).gt(10)
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: 5, b: 15 },
     { a: 10, b: 10 }
 ]);

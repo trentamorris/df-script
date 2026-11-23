@@ -6,7 +6,7 @@ console.log("Running StandardExpr.isNDistinct edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: First distinct value (index = 0) and last distinct (index = -1)
 // -------------------------------------------------------------
-const dfBasic = $df.data([
+const dfBasic = $df.dataFrame([
     { a: 10 },
     { a: 20 },
     { a: 20 },
@@ -71,7 +71,7 @@ if (resNeg[0].third_last !== true || resNeg[1].third_last !== false) {
 // -------------------------------------------------------------
 // Case 5: Null handling in column (null values in distinct set)
 // -------------------------------------------------------------
-const dfNulls = $df.data([
+const dfNulls = $df.dataFrame([
     { a: 10 },
     { a: null },
     { a: 20 }
@@ -87,7 +87,7 @@ if (resNulls[0].first !== true || resNulls[1].first !== null || resNulls[2].firs
 // -------------------------------------------------------------
 // Case 6: Distinct strings (order of first appearance: zebra, apple, mango)
 // -------------------------------------------------------------
-const dfStrings = $df.data([
+const dfStrings = $df.dataFrame([
     { s: "zebra" },
     { s: "apple" },
     { s: "apple" },
@@ -112,7 +112,7 @@ if (resStrings[3].last_str !== true || resStrings[0].last_str !== false) {
 // -------------------------------------------------------------
 // Case 7: All identical values
 // -------------------------------------------------------------
-const dfSame = $df.data([{ val: 5 }, { val: 5 }, { val: 5 }]);
+const dfSame = $df.dataFrame([{ val: 5 }, { val: 5 }, { val: 5 }]);
 const resSame = dfSame.select([
     $df.col("val").isNDistinct(0).alias("first"),
     $df.col("val").isNDistinct(1).alias("second")
@@ -127,7 +127,7 @@ if (resSame[0].second !== null || resSame[1].second !== null || resSame[2].secon
 // -------------------------------------------------------------
 // Case 8: Multi-column projection
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: 10, b: 100 },
     { a: 20, b: 200 }
 ]);
@@ -142,7 +142,7 @@ if (resMulti[0].a_dist !== true || resMulti[0].b_dist !== true || resMulti[1].a_
 // -------------------------------------------------------------
 // Case 9: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ val: 42 }]);
+const dfSingle = $df.dataFrame([{ val: 42 }]);
 const resSingle = dfSingle.select([$df.col("val").isNDistinct(0).alias("res")]).toDicts() as any[];
 if (resSingle[0].res !== true) throw new Error("Case 9 failed: single row isNDistinct");
 

@@ -2,7 +2,7 @@ export * from "./all";
 export * from "./coalesce";
 export * from "./col";
 export * from "./concat";
-export * from "./data";
+export * from "./dataFrame";
 export * from "./duration";
 export * from "./element";
 export * from "./exclude";

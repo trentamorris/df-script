@@ -31,7 +31,7 @@ function _formatCsvValue(options: FormatCSVValueOptions = {}) {
 
     const onBigInt = replacerOptions?.onBigInt;
 
-    return (val: any): { str: string; isNumeric: boolean } => {
+    return (val: unknown): { str: string; isNumeric: boolean } => {
         if (val == null || typeof val === "symbol" || typeof val === "function" || (val instanceof Date && !isValidDateObj(val))) {
             return { str: nullValue, isNumeric: false };
         }
@@ -83,7 +83,7 @@ export function stringifyCSV(
 
     const formatValue = _formatCsvValue(formatOptions);
 
-    const escapeAndQuote = (val: any, isHeader = false): string => {
+    const escapeAndQuote = (val: unknown, isHeader = false): string => {
         const formatted = isHeader ? { str: String(val), isNumeric: false } : formatValue(val);
         const strVal = formatted.str;
         if (quoteStyle === "never") return strVal;
@@ -108,7 +108,7 @@ export function stringifyCSV(
         else lines.push(fullLine);
     };
 
-    const writeRow = (getVal: (i: number) => any, isHeader: boolean) => {
+    const writeRow = (getVal: (i: number) => unknown, isHeader: boolean) => {
         const row = new Array(numKeys);
         for (let i = 0; i < numKeys; i++) {
             row[i] = escapeAndQuote(getVal(i), isHeader);
@@ -210,7 +210,7 @@ export function parseCSV(content: string, options: ReadCSVOptions = {}): string[
 export function inferAndCoerceCSVColumn(
     values: string[],
     options: ReadCSVOptions = {}
-): { type: DataType; values: any[] } {
+): { type: DataType; values: unknown[] } {
     const nullValues = new Set(options.nullValues ?? ["", "NA", "null", "NaN"]);
     const len = values.length;
     const trimmedValues = new Array<string>(len);

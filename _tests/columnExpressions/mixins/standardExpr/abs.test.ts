@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.abs tests...");
 
 
-const df = $df.data([{ val: -5.5 }, { val: 4.88 }, { val: null }]);
+const df = $df.dataFrame([{ val: -5.5 }, { val: 4.88 }, { val: null }]);
 const res = df.select([$df.col("val").abs().alias("a")]).toDicts() as any[];
 if (res[0].a !== 5.5 || res[1].a !== 4.88 || res[2].a !== null) throw new Error("abs failed");
 

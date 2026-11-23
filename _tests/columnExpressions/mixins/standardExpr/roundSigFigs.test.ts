@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.roundSigFigs tests...");
 
 
-const df = $df.data([{ val: -5.5 }, { val: 4.88 }, { val: null }]);
+const df = $df.dataFrame([{ val: -5.5 }, { val: 4.88 }, { val: null }]);
 const res = df.select([
     $df.col("val").roundSigFigs(2).alias("r2"),
     $df.col("val").roundSigFigs(1).alias("r1")

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toDecimal tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { decimal_str: "123.4567" },
     { decimal_str: null }
 ]);

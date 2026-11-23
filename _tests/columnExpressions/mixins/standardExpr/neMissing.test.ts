@@ -6,7 +6,7 @@ console.log("Running StandardExpr.neMissing edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Column vs Column difference treating null as equal
 // -------------------------------------------------------------
-const dfCol = $df.data([
+const dfCol = $df.dataFrame([
     { a: 10, b: 10 },
     { a: 10, b: 20 },
     { a: null, b: null },
@@ -67,7 +67,7 @@ if (resArr[0].n !== false || resArr[1].n !== true || resArr[2].n !== false || re
 // -------------------------------------------------------------
 const d1 = new Date("2026-01-01T00:00:00.000Z");
 const d2 = new Date("2026-06-01T00:00:00.000Z");
-const dfDate = $df.data([{ d: d1 }, { d: d2 }, { d: null }]);
+const dfDate = $df.dataFrame([{ d: d1 }, { d: d2 }, { d: null }]);
 const resDate = dfDate.select([
     $df.col("d").neMissing(d1).alias("n1"),
     $df.col("d").neMissing(null).alias("n2")
@@ -78,7 +78,7 @@ if (resDate[0].n2 !== true || resDate[1].n2 !== true || resDate[2].n2 !== false)
 // -------------------------------------------------------------
 // Case 7: String and BigInt comparisons
 // -------------------------------------------------------------
-const dfMisc = $df.data([
+const dfMisc = $df.dataFrame([
     { s: "hello", b: 10n },
     { s: null, b: null }
 ]);
@@ -96,7 +96,7 @@ if (resMisc[0].b_null !== true || resMisc[1].b_null !== false) throw new Error("
 // -------------------------------------------------------------
 // Case 8: NaN comparison in neMissing (NaN !== NaN is true, NaN !== null is true)
 // -------------------------------------------------------------
-const dfNaN = $df.data([
+const dfNaN = $df.dataFrame([
     { a: NaN, b: NaN },
     { a: NaN, b: 10 },
     { a: NaN, b: null }
@@ -111,7 +111,7 @@ if (resNaN[2].n !== true) throw new Error("Case 8 failed: NaN neMissing null sho
 // -------------------------------------------------------------
 // Case 9: Multi-column projection ($df.col(["a", "b"]).neMissing(null))
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: 1, b: null },
     { a: null, b: 2 }
 ]);

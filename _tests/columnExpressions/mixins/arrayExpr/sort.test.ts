@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.sort tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [3, null, 1, 4, 1, 5] },
     { numbers: null }
 ]);

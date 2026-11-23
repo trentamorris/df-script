@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running TemporalExpr.utcOffset tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2011-12-29T00:00:00Z" }, // Samoa before shift
     { date: "2012-01-01T00:00:00Z" }, // Samoa after shift
     { date: "2026-07-01T00:00:00Z" }, // NY Summer (DST)

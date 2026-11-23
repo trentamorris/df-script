@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StringExpr.stripSuffix tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { text: "pre-middle-suf" },
     { text: "no-suf" },
     { text: "no-match" },

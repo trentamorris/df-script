@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.last tests...");
 
 
-const df = $df.data([{ val: 10 }, { val: 20 }, { val: 30 }]);
+const df = $df.dataFrame([{ val: 10 }, { val: 20 }, { val: 30 }]);
 const res = df.select([$df.col("val").last().alias("l")]).toDicts() as any[];
 if (res[0].l !== 30) throw new Error("last failed");
 

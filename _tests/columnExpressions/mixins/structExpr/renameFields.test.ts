@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StructExpr.renameFields tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { s: { a: 1, b: "foo" } },
     { s: { a: 2, b: "bar" } },
     { s: null },
@@ -36,7 +36,7 @@ if ("never_added" in rNonExistentKey[0].renamed || rNonExistentKey[0].renamed.a 
 }
 
 // 4. Primitive / non-object values evaluate to null
-const dfPrimitives = $df.data([
+const dfPrimitives = $df.dataFrame([
     { s: 123 },
     { s: "string_val" },
     { s: true }
@@ -62,7 +62,7 @@ const rIdentity = df.select([
 if (rIdentity[0].renamed.a !== 1) throw new Error("Expected identity rename to preserve value");
 
 // 7. Struct with nested object value — rename operates on top-level keys only
-const dfNested = $df.data([
+const dfNested = $df.dataFrame([
     { s: { outer: { inner: 42 }, x: 1 } }
 ], { s: $df.Object });
 const rNestedRename = dfNested.select([
@@ -74,7 +74,7 @@ if (rNestedRename[0].s.renamed_outer.inner !== 42) throw new Error("Expected inn
 
 // 8. renameFields then unnest — renamed field names must appear as columns
 // Previously buggy: schema path returned stale pre-rename names after unnest.
-const dfRenameUnnest = $df.data([
+const dfRenameUnnest = $df.dataFrame([
     { s: { a: 100, b: 200 } },
     { s: null }
 ], { s: $df.Struct({ a: $df.Int32, b: $df.Int32 }) });
@@ -87,7 +87,7 @@ if (rRenameUnnest[0].renamed_a !== 100) throw new Error(`Expected renamed_a=100,
 if (rRenameUnnest[1].renamed_a !== null) throw new Error("Expected null for null struct after rename+unnest");
 
 // 9. Edge case: struct with undefined/null property values preserved correctly
-const dfNullProps = $df.data([
+const dfNullProps = $df.dataFrame([
     { s: { x: null, y: undefined, z: 0, w: false } }
 ], { s: $df.Object });
 const rNullProps = dfNullProps.select([
@@ -99,14 +99,14 @@ if (rNullProps[0].s_new.z_new !== 0) throw new Error("Expected 0 preserved acros
 if (rNullProps[0].s_new.w_new !== false) throw new Error("Expected false preserved across rename");
 
 // 10. Edge case: empty object `{}` struct rename
-const dfEmptyStruct = $df.data([{ s: {} }], { s: $df.Object });
+const dfEmptyStruct = $df.dataFrame([{ s: {} }], { s: $df.Object });
 const rEmptyStruct = dfEmptyStruct.select([
     $df.col("s").struct.renameFields({ a: "b" }).alias("s")
 ]).toDicts() as any[];
 if (Object.keys(rEmptyStruct[0].s).length !== 0) throw new Error("Expected empty struct after rename on empty object");
 
 // 11. Edge case: multiple fields renamed simultaneously
-const dfMulti = $df.data([{ s: { a: 1, b: 2, c: 3, d: 4 } }]);
+const dfMulti = $df.dataFrame([{ s: { a: 1, b: 2, c: 3, d: 4 } }]);
 const rMulti = dfMulti.select([
     $df.col("s").struct.renameFields({ a: "alpha", b: "beta", c: "gamma" }).alias("s")
 ]).toDicts() as any[];

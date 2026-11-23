@@ -5,7 +5,7 @@ console.log("Running TemporalExpr.millennium tests...");
 
 
 const d1000 = new Date(0); d1000.setUTCFullYear(1000, 0, 1);
-const df = $df.data({
+const df = $df.dataFrame({
     date: [
         new Date("2026-05-25T00:00:00.000Z"),
         new Date("2000-12-31T23:59:59.000Z"),

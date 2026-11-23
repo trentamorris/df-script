@@ -24,7 +24,7 @@ export class WhenThenChain {
 
 export { WhenThenChain as When };
 
-export class WhenThen extends ColumnExpr<any> {
+export class WhenThen extends ColumnExpr<unknown> {
     _predicates: WhenArg[];
     _values: WhenArg[];
     _otherwise: WhenArg;

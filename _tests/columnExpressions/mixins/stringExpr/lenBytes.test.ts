@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.lenBytes tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { phrase: "hello" },
     { phrase: "café" },
     { phrase: null }

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.weekday tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2024-02-29" }, // Thursday -> 4
     { date: "2027-01-02" }, // Saturday -> 6
     { date: null }

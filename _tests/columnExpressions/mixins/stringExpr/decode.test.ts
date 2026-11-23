@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.decode tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { hex: "68656c6c6f20776f726c64", b64: "aGVsbG8gd29ybGQ=" },
     { hex: "4446536372697074", b64: "WUVTIQ==" },
     { hex: null, b64: null }

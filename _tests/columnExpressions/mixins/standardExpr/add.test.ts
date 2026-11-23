@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.add tests...");
 
 
-const df = $df.data([{ a: 10, b: 3 }, { a: -20, b: 5 }, { a: null, b: 5 }]);
+const df = $df.dataFrame([{ a: 10, b: 3 }, { a: -20, b: 5 }, { a: null, b: 5 }]);
 const res = df.select([
     $df.col("a").add($df.col("b")).alias("c1"),
     $df.col("a").add(5).alias("c2"),

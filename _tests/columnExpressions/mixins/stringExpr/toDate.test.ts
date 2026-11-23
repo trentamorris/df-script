@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toDate tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { iso_date: "2026-05-25" },
     { iso_date: null }
 ]);

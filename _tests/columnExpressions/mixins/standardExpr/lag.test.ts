@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StandardExpr.lag tests...");
 
-const df = $df.data([{ val: 10 }, { val: 20 }, { val: 30 }]);
+const df = $df.dataFrame([{ val: 10 }, { val: 20 }, { val: 30 }]);
 
 // 1. Basic lag(1)
 const res = df.select([$df.col("val").lag(1).alias("l")]).toDicts() as any[];
@@ -34,7 +34,7 @@ if (resBeyondNeg[0].l !== "N/A" || resBeyondNeg[1].l !== "N/A" || resBeyondNeg[2
 }
 
 // 7. Partitioning with .over("group")
-const dfGrouped = $df.data([
+const dfGrouped = $df.dataFrame([
     { group: "A", val: 1 },
     { group: "A", val: 2 },
     { group: "B", val: 3 },
@@ -46,7 +46,7 @@ if (resOver[0].l !== -1 || resOver[1].l !== 1 || resOver[2].l !== -1 || resOver[
 }
 
 // 8. Empty DataFrame
-const emptyDf = $df.data([] as { val: number }[]);
+const emptyDf = $df.dataFrame([] as { val: number }[]);
 const resEmpty = emptyDf.select([$df.col("val").lag(1).alias("l")]).toDicts() as any[];
 if (resEmpty.length !== 0) throw new Error("lag empty DataFrame failed");
 

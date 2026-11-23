@@ -5,8 +5,22 @@ console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION $df.duration() TESTS...");
 console.log("=========================================");
 
+function assert(cond: boolean, msg: string): void {
+    if (!cond) throw new Error(msg);
+}
+
+function assertThrows(fn: () => void, msg: string): void {
+    let threw = false;
+    try {
+        fn();
+    } catch {
+        threw = true;
+    }
+    if (!threw) throw new Error(msg);
+}
+
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         days_col: [1, 2, 3]
     });
 
@@ -60,6 +74,47 @@ try {
     if (resFolded[0].mixed_dyn !== 86400000 + 21600000) {
         throw new Error("Mixed dynamic + literal duration failed: " + resFolded[0].mixed_dyn);
     }
+    // --- Additional Extreme Edge Cases ---
+    (() => {
+    const df = $df.dataFrame({ n: [1, 2, null] });
+
+    // 1. Empty options object throws InvalidArgumentError
+    assertThrows(() => $df.duration({}), "1: Empty duration options should throw");
+
+    // 2. Default (no args) throws InvalidArgumentError
+    assertThrows(() => $df.duration(), "2: Default duration() with no args should throw");
+
+    // 3. String shorthand parsing ("1d 12h")
+    const r3 = df.select($df.duration("1d 12h")).toDicts() as any[];
+    assert(r3[0].duration === 36 * 3600 * 1000, "3: String shorthand 1d 12h failed");
+
+    // 4. Negative duration components
+    const r4 = df.select($df.duration({ hours: -2, minutes: 30 })).toDicts() as any[];
+    assert(r4[0].duration === (-2 * 60 + 30) * 60 * 1000, "4: Negative duration components failed");
+
+    // 5. Fractional duration components
+    const r5 = df.select($df.duration({ seconds: 1.5 })).toDicts() as any[];
+    assert(r5[0].duration === 1500, "5: Fractional seconds failed");
+
+    // 6. Zero duration component
+    const r6 = df.select($df.duration({ milliseconds: 0 })).toDicts() as any[];
+    assert(r6[0].duration === 0, "6: Zero duration component failed");
+
+    // 7. Dynamic expression component ($df.col("n"))
+    const r7 = df.select($df.duration({ seconds: $df.col("n") })).toDicts() as any[];
+    assert(r7[0].duration === 1000 && r7[1].duration === 2000 && r7[2].duration === null, "7: Dynamic expr component failed");
+
+    // 8. Mixed constant + dynamic expression components
+    const r8 = df.select($df.duration({ seconds: $df.col("n"), milliseconds: 500 })).toDicts() as any[];
+    assert(r8[0].duration === 1500 && r8[1].duration === 2500 && r8[2].duration === null, "8: Mixed constant + dynamic failed");
+
+    // 9. Multiple dynamic expression components
+    const r9 = df.select($df.duration({ minutes: $df.col("n"), seconds: $df.col("n") })).toDicts() as any[];
+    assert(r9[0].duration === 61000 && r9[1].duration === 122000, "9: Multiple dynamic components failed");
+
+    // 10. Invalid string shorthand throws
+    assertThrows(() => $df.duration("not_a_duration"), "10: Invalid duration string should throw");
+    })();
 
     console.log("✓ $df.duration() tests passed successfully!");
 } catch (err) {

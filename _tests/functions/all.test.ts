@@ -5,7 +5,7 @@ console.log("STARTING COLUMN EXPRESSION $df.all() TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 2, 3],
         b: [4, 5, 6],
         c: ["x", "y", "z"]

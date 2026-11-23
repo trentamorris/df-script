@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.any tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { bools: [false, false, true] },
     { bools: [false, false] },
     { bools: [] },

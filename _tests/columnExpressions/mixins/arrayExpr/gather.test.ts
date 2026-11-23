@@ -3,7 +3,7 @@ import { $df, Object as ObjectType, Int32 } from "df-script";
 
 console.log("Running ArrayExpr.gather tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [10, 20, 30, 40, 50] },
     { numbers: null }
 ]);
@@ -18,7 +18,7 @@ if (res[0].g2[0] !== 20 || res[0].g2[1] !== 40) throw new Error("gather g2 faile
 if (res[1].g1 !== null) throw new Error("gather null failed");
 
 // Dynamic Column Expression as indices, single scalar index, BigInt, and null targets
-const dfDyn = $df.data([
+const dfDyn = $df.dataFrame([
     { arr: [100, 200, 300, 400], target_idxs: [1, 3], single_idx: 2 },
     { arr: [100, 200, 300, 400], target_idxs: [0], single_idx: -1 },
     { arr: null, target_idxs: [0, 1], single_idx: 0 },

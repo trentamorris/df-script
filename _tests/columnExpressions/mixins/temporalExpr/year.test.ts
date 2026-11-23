@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.year tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2024-02-29" },
     { date: "2026-01-01T02:00:00.000Z" }, // 2026 UTC, 2025 in NY
     { date: null }

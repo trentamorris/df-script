@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.ordinalDay tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2024-02-29" }, // Leap year 31 + 29 = 60
     { date: "2023-03-15" }, // Non-leap 31 + 28 + 15 = 74
     { date: null }

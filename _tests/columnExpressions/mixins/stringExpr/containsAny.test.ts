@@ -3,7 +3,7 @@ import { $df, Utf8 } from "df-script";
 
 console.log("Running StringExpr.containsAny tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { phrase: "DFScript is awesome!" },
     { phrase: "Hello world!" },
     { phrase: null }
@@ -30,7 +30,7 @@ if (res[2].c_any !== null) throw new Error("containsAny null failed");
 if (res[2].c_null_pat !== null) throw new Error("containsAny null pattern should return null for null cell");
 
 // 10/10 EXTREME EDGE CASES SUITE FOR CONTAINSANY
-const dfEdge = $df.data([
+const dfEdge = $df.dataFrame([
     // Row 0: Mixed text with symbols and special characters
     { code: "ERR_404_NOT_FOUND (status: [FAIL])" },
     // Row 1: Multiline code block

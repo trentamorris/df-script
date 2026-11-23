@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StructExpr.withFields tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { s: { a: 1, b: "foo" } },
     { s: { a: 2, b: "bar" } },
     { s: null },
@@ -56,7 +56,7 @@ if (rEmpty[0].updated.a !== 1 || rEmpty[0].updated.b !== "foo") {
 }
 
 // 5. Primitive / non-object column values evaluate to null
-const dfPrimitives = $df.data([
+const dfPrimitives = $df.dataFrame([
     { s: 123 },
     { s: "string_val" }
 ], { s: $df.Object });
@@ -83,7 +83,7 @@ if (rNullField[0].s.a !== null) throw new Error("Expected a=null after lit(null)
 if (rNullField[0].s.b !== "foo") throw new Error("Expected b preserved after null field");
 
 // 8. withFields with a row-dependent expression (col referencing another column)
-const dfMultiCol = $df.data([
+const dfMultiCol = $df.dataFrame([
     { s: { x: 1 }, factor: 10 },
     { s: { x: 2 }, factor: 20 },
     { s: null, factor: 30 }
@@ -98,7 +98,7 @@ if (rMultiCol[1].s.scaled !== 40) throw new Error("Expected scaled=40");
 if (rMultiCol[2].s !== null) throw new Error("Expected null for null struct");
 
 // 9. withFields with falsy field values (0, false, "")
-const dfFalsy = $df.data([{ s: { a: 1 } }]);
+const dfFalsy = $df.dataFrame([{ s: { a: 1 } }]);
 const rFalsy = dfFalsy.select([
     $df.col("s").struct.withFields({
         zero: $df.lit(0),
@@ -119,7 +119,7 @@ if (typeof rNestedField[0].s.meta !== "object" || rNestedField[0].s.meta.v !== 1
 }
 
 // 11. withFields self-reference: new value reads the pre-mutation field
-const dfSelfRef = $df.data([
+const dfSelfRef = $df.dataFrame([
     { s: { a: 4, b: 1 } },
     { s: { a: 7, b: 2 } }
 ]);
@@ -133,7 +133,7 @@ if (rSelfRef[1].s.a !== 14) throw new Error(`SelfRef: Expected a=14, got ${rSelf
 if (rSelfRef[0].s.b !== 1)  throw new Error(`SelfRef: Expected b=1 preserved`);
 
 // 12. withFields adding an array-valued field
-const dfArrVal = $df.data([{ s: { x: 1 } }, { s: null }]);
+const dfArrVal = $df.dataFrame([{ s: { x: 1 } }, { s: null }]);
 const rArrVal = dfArrVal.select([
     $df.col("s").struct.withFields({ tags: $df.lit([10, 20, 30]) }).alias("s")
 ]).toDicts() as any[];
@@ -143,7 +143,7 @@ if (!Array.isArray(rArrVal[0].s.tags) || rArrVal[0].s.tags[1] !== 20) {
 if (rArrVal[1].s !== null) throw new Error(`ArrVal: Expected null row preserved`);
 
 // 13. Double-chained withFields — both chains read original column snapshot
-const dfDoubleChain = $df.data([{ s: { a: 1 } }, { s: null }]);
+const dfDoubleChain = $df.dataFrame([{ s: { a: 1 } }, { s: null }]);
 const rDoubleChain = dfDoubleChain.select([
     $df.col("s").struct
         .withFields({ b: $df.col("s").struct.a.add(10) })
@@ -156,7 +156,7 @@ if (rDoubleChain[0].s.c !== 101) throw new Error(`DoubleChain: Expected c=101, g
 if (rDoubleChain[1].s !== null)  throw new Error(`DoubleChain: Expected null row preserved`);
 
 // 14. Edge case: withFields updating with falsy values (false, 0, "", null)
-const dfFalsyUpdates = $df.data([{ s: { active: true, count: 5, str: "initial" } }]);
+const dfFalsyUpdates = $df.dataFrame([{ s: { active: true, count: 5, str: "initial" } }]);
 const rFalsyUpdates = dfFalsyUpdates.select([
     $df.col("s").struct.withFields({
         active: $df.lit(false),
@@ -171,7 +171,7 @@ if (rFalsyUpdates[0].s.str !== "") throw new Error("Expected str to be empty str
 if (rFalsyUpdates[0].s.cleared !== null) throw new Error("Expected cleared to be null");
 
 // 15. Edge case: withFields adding a nested struct
-const dfNestedAdd = $df.data([{ s: { id: 10 } }]);
+const dfNestedAdd = $df.dataFrame([{ s: { id: 10 } }]);
 const rNestedAdd = dfNestedAdd.select([
     $df.col("s").struct.withFields({
         meta: $df.struct({ score: $df.lit(99), valid: $df.lit(true) })

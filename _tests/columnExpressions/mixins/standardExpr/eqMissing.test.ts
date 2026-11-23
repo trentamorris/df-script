@@ -5,7 +5,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 1. Basic Primitives Comparison (Numbers, Strings, Booleans)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         nums_a: [10, 20, 30],
         nums_b: [10, 99, 30],
         str_a: ["apple", "banana", "cherry"],
@@ -33,7 +33,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 2. Missing Value Equivalence: null === null -> true, undefined === null -> true
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [10, null, 30, null],
         b: [10, null, null, 40]
     });
@@ -46,7 +46,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 3. Scalar Literal Null: .eqMissing(null) acts as isNull()
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [100, null, 200, undefined, 300]
     });
     const res = df.select($df.col("x").eqMissing(null).alias("is_missing")).toDicts() as any[];
@@ -63,7 +63,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 4. Scalar Non-Null Literal: .eqMissing(val) on a column with nulls produces false, never null
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, 2, null, 2]
     });
     const res = df.select($df.col("x").eqMissing(2).alias("r")).toDicts() as any[];
@@ -74,7 +74,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 5. IEEE 754 NaN Comparisons (NaN is not equal to NaN in eqMissing; NaN is not null)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [NaN, NaN, 10, NaN],
         b: [NaN, 10, NaN, null]
     });
@@ -91,7 +91,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
     const d1Copy = new Date("2026-01-01T00:00:00Z");
     const d2 = new Date("2026-06-01T00:00:00Z");
 
-    const df = $df.data({
+    const df = $df.dataFrame({
         d_a: [d1, d1, null],
         d_b: [d1Copy, d2, null]
     });
@@ -103,7 +103,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 7. Array Literal as `val` with Nulls
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: ["a", null, "c"]
     });
     const res = df.select($df.col("x").eqMissing(["a", null, "z"]).alias("r")).toDicts() as any[];
@@ -114,14 +114,14 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 8. Empty DataFrame
 {
-    const emptyDf = $df.data({ a: [], b: [] });
+    const emptyDf = $df.dataFrame({ a: [], b: [] });
     const res = emptyDf.select($df.col("a").eqMissing($df.col("b")).alias("r")).toDicts() as any[];
     if (res.length !== 0) throw new Error("Case 8: Empty DataFrame should yield empty results");
 }
 
 // 9. Multi-Column Selector on Left Operand
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         target: [10, null, 30],
         col1: [10, null, 99],
         col2: [99, null, 30]
@@ -140,7 +140,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 10. Filter Behavior: Filtering on Missing Values (`df.filter(col("x").eqMissing(null))`)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         id: [1, 2, 3, 4],
         val: ["A", null, "B", null]
     });
@@ -153,7 +153,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 11. TypedArray Support
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         u8: new Uint8Array([10, 20, 30])
     });
     const res = df.select($df.col("u8").eqMissing(new Uint8Array([10, 99, 30])).alias("r")).toDicts() as any[];
@@ -164,7 +164,7 @@ console.log("Running StandardExpr.eqMissing edge-case tests...");
 
 // 12. Type-Mismatched Equality (Null vs Cross-Type Literals)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         str_val: ["null", "", "0", null],
         target: [null, null, null, null]
     });

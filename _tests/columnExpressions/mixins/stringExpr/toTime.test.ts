@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toTime tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { time_str: "14:30:15.123" },
     { time_str: null }
 ]);

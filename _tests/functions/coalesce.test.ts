@@ -6,7 +6,7 @@ console.log("STARTING COLUMN EXPRESSION $df.coalesce() TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, null, null, null],
         b: [null, 20, null, null],
         c: [null, null, 300, null]

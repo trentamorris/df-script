@@ -36,7 +36,6 @@ import {
 export { BaseDataType as DataType };
 export { Boolean, Date, Object, Array };
 export * from "./dataTypes";
-export * from "./dataTypes";
 
 export const DataTypeRegistry = {
     Int8,

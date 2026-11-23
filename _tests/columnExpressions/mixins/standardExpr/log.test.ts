@@ -5,7 +5,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Base tests: standard positive values, negative values, null, and undefined
 {
-    const df = $df.data([
+    const df = $df.dataFrame([
         { val: 10 },
         { val: -5 },
         { val: null },
@@ -27,7 +27,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: zero and negative zero
 {
-    const dfZero = $df.data([{ val: 0 }, { val: -0 }]);
+    const dfZero = $df.dataFrame([{ val: 0 }, { val: -0 }]);
     const resZero = dfZero.select([
         $df.col("val").log().alias("ln"),
         $df.col("val").log(10).alias("l10")
@@ -39,7 +39,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: input value 1 (log_b(1) should always be 0 for any valid base)
 {
-    const dfOne = $df.data([{ val: 1 }]);
+    const dfOne = $df.dataFrame([{ val: 1 }]);
     const resOne = dfOne.select([
         $df.col("val").log().alias("ln_1"),
         $df.col("val").log(10).alias("l10_1"),
@@ -57,7 +57,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: fractional inputs (0 < v < 1)
 {
-    const dfFrac = $df.data([{ val: 0.5 }, { val: 0.1 }, { val: 0.001 }]);
+    const dfFrac = $df.dataFrame([{ val: 0.5 }, { val: 0.1 }, { val: 0.001 }]);
     const resFrac = dfFrac.select([
         $df.col("val").log().alias("ln"),
         $df.col("val").log(10).alias("l10"),
@@ -72,7 +72,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: fractional base (e.g., base 0.5)
 {
-    const dfBaseFrac = $df.data([{ val: 2 }, { val: 4 }, { val: 8 }, { val: 0.5 }]);
+    const dfBaseFrac = $df.dataFrame([{ val: 2 }, { val: 4 }, { val: 8 }, { val: 0.5 }]);
     const resBaseFrac = dfBaseFrac.select([
         $df.col("val").log(0.5).alias("l_half")
     ]).toDicts() as any[];
@@ -85,14 +85,14 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: base equal to value (log_b(b) === 1)
 {
-    const dfSame = $df.data([{ val: 7 }]);
+    const dfSame = $df.dataFrame([{ val: 7 }]);
     const resSame = dfSame.select([$df.col("val").log(7).alias("same")]).toDicts() as any[];
     if (Math.abs(resSame[0].same - 1) > 1e-6) throw new Error("log_b(b) should be 1");
 }
 
 // Edge case: Infinity and -Infinity
 {
-    const dfInf = $df.data([{ val: Infinity }, { val: -Infinity }]);
+    const dfInf = $df.dataFrame([{ val: Infinity }, { val: -Infinity }]);
     const resInf = dfInf.select([
         $df.col("val").log().alias("ln")
     ]).toDicts() as any[];
@@ -103,7 +103,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: NaN handling
 {
-    const dfNan = $df.data([{ val: NaN }]);
+    const dfNan = $df.dataFrame([{ val: NaN }]);
     const resNan = dfNan.select([
         $df.col("val").log().alias("ln")
     ]).toDicts() as any[];
@@ -114,7 +114,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: Large numbers / Powers of 10 and 2
 {
-    const dfPowers = $df.data([
+    const dfPowers = $df.dataFrame([
         { val: 1000 },
         { val: 1000000 },
         { val: 1024 }
@@ -131,7 +131,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: Base = Math.E default parameter behavior
 {
-    const dfE = $df.data([{ val: Math.E }, { val: Math.E * Math.E }]);
+    const dfE = $df.dataFrame([{ val: Math.E }, { val: Math.E * Math.E }]);
     const resE = dfE.select([
         $df.col("val").log().alias("ln_default"),
         $df.col("val").log(Math.E).alias("ln_explicit")
@@ -144,7 +144,7 @@ console.log("Running StandardExpr.log exhaustive edge case tests...");
 
 // Edge case: Chaining with arithmetic operations (.log().round(2))
 {
-    const dfChain = $df.data([{ val: 20 }]);
+    const dfChain = $df.dataFrame([{ val: 20 }]);
     const resChain = dfChain.select([
         $df.col("val").log(10).round(2).alias("rounded_log")
     ]).toDicts() as any[];

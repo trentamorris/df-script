@@ -66,19 +66,19 @@ if (dfGen1.height !== 1 || dfGen1.toDicts()[0].name !== "Alice") {
     throw new Error("Generalized concat with single DataFrame failed");
 }
 
-const dfGen2 = df1.concat({ age: [25] }, { how: "horizontal" });
+const dfGen2 = df1.concat($df.dataFrame({ age: [25] }), { how: "horizontal" });
 if (dfGen2.height !== 1 || (dfGen2.toDicts() as any[])[0].age !== 25) {
-    throw new Error("Generalized instance concat with columns object failed");
+    throw new Error("Generalized instance concat with DataFrame failed");
 }
 
-const dfGen3 = df1.concat([{ id: 2, name: "Bob" }], { how: "vertical" });
+const dfGen3 = df1.concat($df.dataFrame([{ id: 2, name: "Bob" }]), { how: "vertical" });
 if (dfGen3.height !== 2 || dfGen3.toDicts()[1].name !== "Bob") {
-    throw new Error("Generalized instance concat with raw row objects failed");
+    throw new Error("Generalized instance concat with DataFrame failed");
 }
 
-const dfGen4 = $df.concat([df1, { id: [2], name: ["Bob"] }], { how: "diagonal" });
+const dfGen4 = $df.concat([df1, $df.dataFrame({ id: [2], name: ["Bob"] })], { how: "diagonal" });
 if (dfGen4.height !== 2 || dfGen4.toDicts()[1].name !== "Bob") {
-    throw new Error("Generalized top-level concat with mixed items failed");
+    throw new Error("Generalized top-level concat with DataFrames failed");
 }
 
 // 7. Defensive verification
@@ -94,25 +94,17 @@ threw = false;
 try {
     $df.concat([df1, null as any]);
 } catch (e: any) {
-    if (e.message.includes("cannot be null or undefined")) threw = true;
+    if (e.message.includes("expected DataFrame")) threw = true;
 }
 if (!threw) throw new Error("Expected concat([df, null]) to throw");
 
 threw = false;
 try {
-    $df.concat([[df1, {} as any]]);
+    $df.concat([{ a: [1] } as any]);
 } catch (e: any) {
-    if (e.message.includes("must contain only DataFrame instances")) threw = true;
+    if (e.message.includes("expected DataFrame")) threw = true;
 }
-if (!threw) throw new Error("Expected nested array with non-DataFrame to throw");
-
-threw = false;
-try {
-    $df.concat([[1, 2, 3] as any]);
-} catch (e: any) {
-    if (e.message.includes("rows must be plain objects")) threw = true;
-}
-if (!threw) throw new Error("Expected row array with non-objects to throw");
+if (!threw) throw new Error("Expected non-DataFrame item to throw");
 
 threw = false;
 try {
@@ -346,8 +338,8 @@ if (f32Rows[0].f32 !== 1.5 || f32Rows[3].f32 !== 4.5 || f32Rows[3].i16 !== 400) 
 // 9.13 Polymorphic Input Mix (DataFrame + ColumnDict + Array of RowRecords) in Single Concat
 const mixedInputConcat = $df.concat([
     new DataFrame({ a: [1], b: ["first"] }),
-    { a: [2], b: ["second"] },
-    [{ a: 3, b: "third" }],
+    $df.dataFrame({ a: [2], b: ["second"] }),
+    $df.dataFrame([{ a: 3, b: "third" }]),
     new DataFrame([{ a: 4, b: "fourth" }])
 ], { how: "vertical" });
 if (mixedInputConcat.height !== 4) throw new Error("Polymorphic input vertical concat height mismatch");

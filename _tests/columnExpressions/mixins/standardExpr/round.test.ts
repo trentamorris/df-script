@@ -6,7 +6,7 @@ console.log("Running StandardExpr.round edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Default scale (0 decimal places)
 // -------------------------------------------------------------
-const dfBasic = $df.data([
+const dfBasic = $df.dataFrame([
     { val: 4.2 },
     { val: 4.88 },
     { val: -5.5 },
@@ -32,7 +32,7 @@ if (resPos[0].r1 !== 4.2 || resPos[1].r1 !== 4.9 || resPos[2].r1 !== -5.5) {
 // -------------------------------------------------------------
 // Case 3: Negative decimal places (rounding to tens, hundreds: e.g. -1, -2)
 // -------------------------------------------------------------
-const dfLargeNums = $df.data([
+const dfLargeNums = $df.dataFrame([
     { val: 1234.56 },
     { val: 1289.10 },
     { val: 55 }
@@ -52,7 +52,7 @@ if (resNeg[0].r_hundreds !== 1200 || resNeg[1].r_hundreds !== 1300 || resNeg[2].
 // -------------------------------------------------------------
 // Case 4: Null and NaN preservation
 // -------------------------------------------------------------
-const dfMissing = $df.data([
+const dfMissing = $df.dataFrame([
     { val: null },
     { val: NaN }
 ]);
@@ -65,7 +65,7 @@ if (!Number.isNaN(resMissing[1].r)) throw new Error("Case 4 failed: round on NaN
 // -------------------------------------------------------------
 // Case 5: Signed zero and zero preservation
 // -------------------------------------------------------------
-const dfZeros = $df.data([
+const dfZeros = $df.dataFrame([
     { val: 0 },
     { val: -0 },
     { val: 0.00001 }
@@ -80,7 +80,7 @@ if (resZeros[0].r !== 0 || resZeros[1].r !== 0 || resZeros[2].r !== 0) {
 // -------------------------------------------------------------
 // Case 6: Precision edge cases with floating point representation (e.g. 1.005)
 // -------------------------------------------------------------
-const dfFloat = $df.data([
+const dfFloat = $df.dataFrame([
     { val: 1.005 },
     { val: 2.175 }
 ]);
@@ -94,7 +94,7 @@ if (Math.abs(resFloat[0].r - 1.01) > 1e-6 || Math.abs(resFloat[1].r - 2.18) > 1e
 // -------------------------------------------------------------
 // Case 7: Multi-column projection ($df.col(["a", "b"]).round(1))
 // -------------------------------------------------------------
-const dfMulti = $df.data([
+const dfMulti = $df.dataFrame([
     { a: 1.25, b: 9.84 },
     { a: 3.44, b: 5.67 }
 ]);
@@ -108,7 +108,7 @@ if (resMulti[0].a !== 1.3 || resMulti[0].b !== 9.8 || resMulti[1].a !== 3.4 || r
 // -------------------------------------------------------------
 // Case 8: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ val: 3.14159 }]);
+const dfSingle = $df.dataFrame([{ val: 3.14159 }]);
 const resSingle = dfSingle.select([
     $df.col("val").round(4).alias("pi")
 ]).toDicts() as any[];
@@ -119,7 +119,7 @@ if (resSingle[0].pi !== 3.1416) {
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame with schema preserved
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ val: 1.1 }]).filter($df.col("val").eq(999));
+const dfEmpty = $df.dataFrame([{ val: 1.1 }]).filter($df.col("val").eq(999));
 const resEmpty = dfEmpty.select([
     $df.col("val").round(2).alias("r")
 ]).toDicts();

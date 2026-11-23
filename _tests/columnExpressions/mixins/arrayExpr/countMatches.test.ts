@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.countMatches tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { tags: ["apple", "banana", "apple", "cherry"] },
     { tags: [] },
     { tags: null }
@@ -22,7 +22,7 @@ if (res[2].apple_count !== null) throw new Error("Expected null for null array")
 
 
 // Edge Case 1: Dynamic column expression as target operand
-const dfExpr = $df.data([
+const dfExpr = $df.dataFrame([
     { list: [10, 20, 10, 30], target: 10 },
     { list: [10, 20, 10, 30], target: 20 },
     { list: [10, 20, 10, 30], target: 99 }
@@ -35,7 +35,7 @@ if (resExpr[1].matches !== 1) throw new Error("Edge Case 1 failed: Expected 1 ma
 if (resExpr[2].matches !== 0) throw new Error("Edge Case 1 failed: Expected 0 matches for target 99");
 
 // Edge Case 2: TypedArray nested cells
-const dfTyped = $df.data([
+const dfTyped = $df.dataFrame([
     { arr: new Int32Array([5, 5, 2, 5, 1]) },
     { arr: new Float64Array([1.5, 2.5, 1.5, 3.5]) }
 ]);
@@ -47,7 +47,7 @@ if (resTyped[0].int_matches !== 3) throw new Error("Edge Case 2 failed: Expected
 if (resTyped[1].float_matches !== 2) throw new Error("Edge Case 2 failed: Expected 2 matches for Float64Array");
 
 // Edge Case 3: NaN element matching via SameValueZero Map semantics
-const dfNaN = $df.data([
+const dfNaN = $df.dataFrame([
     { nums: [NaN, 1, NaN, 2, NaN] },
     { nums: [1, 2, 3] }
 ]);
@@ -58,7 +58,7 @@ if (resNaN[0].nan_count !== 3) throw new Error("Edge Case 3 failed: Expected 3 N
 if (resNaN[1].nan_count !== 0) throw new Error("Edge Case 3 failed: Expected 0 NaN matches");
 
 // Edge Case 4: Arrays containing internal null elements
-const dfWithNulls = $df.data([
+const dfWithNulls = $df.dataFrame([
     { items: [null, "apple", null, "apple", "banana"] },
     { items: [null, null] }
 ]);
@@ -73,7 +73,7 @@ if (resWithNulls[0].orange_count !== 0) throw new Error("Edge Case 4 failed: Exp
 if (resWithNulls[1].apple_count !== 0) throw new Error("Edge Case 4 failed: Expected 0 matches for array of only nulls");
 
 // Edge Case 5: Null target, null row, and empty array boundaries
-const dfNulls = $df.data([
+const dfNulls = $df.dataFrame([
     { items: [1, 2, 3], target: null },
     { items: null, target: 2 },
     { items: [], target: 5 }

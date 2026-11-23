@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.isoYear tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2024-02-29" },
     { date: "2023-03-15" },
     { date: "2027-01-02" }, // Gregorian 2027 is ISO year 2026

@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.strptime tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date_str: "2026-05-25 14:30:15" },
     { date_str: null }
 ]);

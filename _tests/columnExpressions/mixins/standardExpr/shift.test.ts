@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StandardExpr.shift tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { a: 10 },
     { a: 20 },
     { a: 30 }
@@ -22,7 +22,7 @@ if (resUp[0].s !== 20 || resUp[1].s !== 30 || resUp[2].s !== null) {
 }
 
 // 3. Shift with window partition (.over)
-const dfGrouped = $df.data([
+const dfGrouped = $df.dataFrame([
     { group: "A", val: 1 },
     { group: "A", val: 2 },
     { group: "B", val: 3 },
@@ -91,14 +91,14 @@ if (resNan[0].s !== 10 || resNan[1].s !== 20 || resNan[2].s !== 30) {
 }
 
 // 11. Empty DataFrame edge case
-const emptyDf = $df.data([] as { a: number }[]);
+const emptyDf = $df.dataFrame([] as { a: number }[]);
 const resEmpty = emptyDf.select([$df.col("a").shift(1).alias("s")]).toDicts() as any[];
 if (resEmpty.length !== 0) {
     throw new Error("StandardExpr.shift empty df failed");
 }
 
 // 12. Single row DataFrame
-const singleRowDf = $df.data([{ a: 42 }]);
+const singleRowDf = $df.dataFrame([{ a: 42 }]);
 const resSingleShift1 = singleRowDf.select([$df.col("a").shift(1).alias("s")]).toDicts() as any[];
 if (resSingleShift1[0].s !== null) {
     throw new Error("StandardExpr.shift single row shift(1) failed");

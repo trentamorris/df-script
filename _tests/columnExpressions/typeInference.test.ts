@@ -7,7 +7,7 @@ console.log("STARTING POST-OPERATION TYPE INFERENCE TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         start_dt: ["2026-01-01T00:00:00.000Z", "2026-05-01T12:00:00.000Z"],
         end_dt: ["2026-01-02T00:00:00.000Z", "2026-05-02T12:00:00.000Z"],
         start_d: ["2026-01-01", "2026-05-01"],
@@ -108,7 +108,7 @@ try {
     }
 
     // 8. Complex Window Expressions (.over())
-    const windowDf = $df.data({
+    const windowDf = $df.dataFrame({
         dept: ["eng", "eng", "hr", "hr"],
         start_dt: [
             new Date("2026-01-01T00:00:00.000Z"),
@@ -298,7 +298,7 @@ try {
     }
 
     // 16. Numeric Promotions: Int + Float => Float64, Int64 + Int => Int64
-    const numericDf = $df.data({
+    const numericDf = $df.dataFrame({
         int_val: [10, 20],
         float_val: [1.5, 2.5],
         big_val: [100n, 200n]
@@ -328,7 +328,7 @@ try {
     }
 
     // 17. Struct Subfield Access
-    const structDf = $df.data({
+    const structDf = $df.dataFrame({
         user: [
             { name: "Alice", age: 30 },
             { name: "Bob", age: 25 }
@@ -353,7 +353,7 @@ try {
     }
 
     // 18. Array Implode & Extraction
-    const arrayDf = $df.data({
+    const arrayDf = $df.dataFrame({
         grp: ["A", "A", "B", "B"],
         val: [10, 20, 30, 40]
     }, {
@@ -373,7 +373,7 @@ try {
     }
 
     // 19. Time Arithmetic & Differences: Time - Time => Duration, Time +/- Duration => Time
-    const timeDf = $df.data({
+    const timeDf = $df.dataFrame({
         start_t: ["08:30:00.000", "12:00:00.000"],
         end_t: ["09:00:00.000", "13:30:00.000"],
         shift_dur: [1800000, 3600000]
@@ -393,7 +393,7 @@ try {
     }
 
     // 20. Decimal & Float32 Arithmetic
-    const decDf = $df.data({
+    const decDf = $df.dataFrame({
         dec_val: [10.5, 20.25],
         f32_val: [1.2, 2.4]
     }, {
@@ -411,7 +411,7 @@ try {
     }
 
     // 21. Binary and Utf8 Concatenation
-    const strDf = $df.data({
+    const strDf = $df.dataFrame({
         first_name: ["John", "Jane"],
         last_name: ["Doe", "Smith"],
         bin_data: [new Uint8Array([1, 2]), new Uint8Array([3, 4])]
@@ -434,7 +434,7 @@ try {
     }
 
     // 22. Unsigned Integers & String Length Count
-    const uintDf = $df.data({
+    const uintDf = $df.dataFrame({
         u8: [255, 128],
         u16: [65535, 32768],
         u32: [1000000, 2000000],
@@ -456,7 +456,7 @@ try {
     }
 
     // 23. Nested Arrays & Unnesting / Extraction
-    const nestedArrDf = $df.data({
+    const nestedArrDf = $df.dataFrame({
         matrix: [
             [[1, 2], [3, 4]],
             [[5, 6], [7, 8]]
@@ -478,7 +478,7 @@ try {
     }
 
     // 24. Nulls & Missing Value Propagation
-    const nullDf = $df.data({
+    const nullDf = $df.dataFrame({
         val: [null, 42],
         fallback: [100, 200]
     }, {
@@ -495,7 +495,7 @@ try {
     }
 
     // 25. Complete Integer Promotion Rank Hierarchy (Int8 -> Int16 -> Int32 and Int64)
-    const intRankDf = $df.data({
+    const intRankDf = $df.dataFrame({
         i8: [10, 20],
         i16: [1000, 2000],
         i32: [100000, 200000],
@@ -528,7 +528,7 @@ try {
     }
 
     // 26. Complete Unsigned Integer Hierarchy (UInt8 -> UInt16 -> UInt32 and UInt64)
-    const uintRankDf = $df.data({
+    const uintRankDf = $df.dataFrame({
         u8: [10, 20],
         u16: [1000, 2000],
         u32: [100000, 200000],
@@ -557,7 +557,7 @@ try {
     }
 
     // 27. Float32 vs Float32 and Float32 vs Float64
-    const floatDf = $df.data({
+    const floatDf = $df.dataFrame({
         f32_a: [1.5, 2.5],
         f32_b: [3.5, 4.5],
         f64: [10.25, 20.75]
@@ -580,7 +580,7 @@ try {
     }
 
     // 28. ObjectType and Generic Objects
-    const objDf = $df.data({
+    const objDf = $df.dataFrame({
         raw_obj: [{ foo: "bar" }, { foo: "baz" }]
     }, {
         raw_obj: $df.Object
@@ -595,7 +595,7 @@ try {
     }
 
     // 29. Exhaustive NumericArg Combinations (BigInt, String Literal, Column Name, Number)
-    const numericArgDf = $df.data({
+    const numericArgDf = $df.dataFrame({
         i64_col: [1000000000n, 2000000000n],
         i32_col: [10, 20],
         str_col: ["Hello", "World"],
@@ -649,7 +649,7 @@ try {
     if (numericArgRows[0].col_expr_mul !== 50) throw new Error("col_expr_mul value mismatch");
 
     // 30. Time - Time => Duration ("ms") Schema Type Deduction
-    const edgeTimeDf = $df.data({
+    const edgeTimeDf = $df.dataFrame({
         start_t: ["08:30:00.000", "09:00:00.000"],
         end_t: ["10:30:00.000", "17:00:00.000"]
     }, {
@@ -678,7 +678,7 @@ try {
     }
 
     // 32. Mixed Signed and Unsigned Integers (Int8 + UInt16 => Int16, Int16 + UInt32 => Int32)
-    const mixedSignDf = $df.data({
+    const mixedSignDf = $df.dataFrame({
         i8_val: [10, -20],
         u16_val: [500, 1000],
         u32_val: [100000, 200000]
@@ -701,7 +701,7 @@ try {
     }
 
     // 33. Decimal mixed with Float and Integers
-    const edgeDecimalDf = $df.data({
+    const edgeDecimalDf = $df.dataFrame({
         dec_col: ["123.45", "678.90"],
         i32_col: [10, 20],
         f64_col: [1.5, 2.5]
@@ -724,7 +724,7 @@ try {
     }
 
     // 34. Binary DataType operations & Column Pass-Through
-    const edgeBinDf = $df.data({
+    const edgeBinDf = $df.dataFrame({
         raw_bin: [new Uint8Array([1, 2, 3]), new Uint8Array([4, 5, 6])]
     }, {
         raw_bin: $df.Binary
@@ -756,7 +756,7 @@ try {
     }
 
     // 36. Boxed Primitive Wrapper Objects (Object(100), Object("foo"), Object(true), Object(500n))
-    const boxedDf = $df.data({
+    const boxedDf = $df.dataFrame({
         num: [10, 20],
         i64_col: [1000000000n, 2000000000n],
         str: ["a", "b"]
@@ -787,7 +787,7 @@ try {
     }
 
     // 37. TypedArray Variations in When/Then and Schema Inferences
-    const typedArrDf = $df.data({
+    const typedArrDf = $df.dataFrame({
         cat: ["A", "B"]
     }, {
         cat: $df.Utf8
@@ -826,7 +826,7 @@ try {
     }
 
     // 38. Nested Array of Strings vs Nested Array of Booleans vs Empty Arrays
-    const arrLitDf = $df.data({
+    const arrLitDf = $df.dataFrame({
         flag: [true, false]
     }, {
         flag: $df.Boolean
@@ -853,7 +853,7 @@ try {
     }
 
     // 39. Multi-Layer Chained Unsigned and Signed Bitwise Operations
-    const bitwiseDf = $df.data({
+    const bitwiseDf = $df.dataFrame({
         u32_val: [1000000, 2000000],
         i8_val: [10, 20]
     }, {
@@ -871,7 +871,7 @@ try {
     }
 
     // 40. Decimal Mixed with Duration & Mixed Math Operations
-    const decDurDf = $df.data({
+    const decDurDf = $df.dataFrame({
         dur_col: [3600000, 7200000],
         dec_col: ["2.50", "4.00"]
     }, {
@@ -888,7 +888,7 @@ try {
     }
 
     // 41. Struct Access on Window Expressions & Chained Projections
-    const complexStructDf = $df.data({
+    const complexStructDf = $df.dataFrame({
         user_info: [
             { id: 1, profile: { age: 25, score: 99.5 } },
             { id: 2, profile: { age: 30, score: 88.0 } }
@@ -917,7 +917,7 @@ try {
     }
 
     // 42. Date vs Date Subtraction vs Datetime Subtraction vs Duration Addition
-    const mixedTemporalDf = $df.data({
+    const mixedTemporalDf = $df.dataFrame({
         d1: ["2026-01-01", "2026-02-01"],
         d2: ["2026-01-10", "2026-02-15"],
         dt1: ["2026-01-01T00:00:00Z", "2026-02-01T00:00:00Z"]
@@ -940,7 +940,7 @@ try {
     }
 
     // 43. Untyped Raw Array Branch Deduction: .then([128, 64]) vs .then([1.28, 6.4]) vs .then([100n, 200n])
-    const rawArrDf = $df.data({
+    const rawArrDf = $df.dataFrame({
         category: ["X", "Y"]
     });
 
@@ -975,7 +975,7 @@ try {
     }
 
     // 44. Deep 3D Nested Array Recursion ([[[1, 2]], [[3, 4]]])
-    const deepNestDf = $df.data({
+    const deepNestDf = $df.dataFrame({
         cond: [true, false]
     });
 
@@ -995,7 +995,7 @@ try {
     }
 
     // 45. Mixed Numeric Elements in Array (First Element Inspection vs Fallback)
-    const mixedArrDf = $df.data({
+    const mixedArrDf = $df.dataFrame({
         id: [1, 2]
     });
 
@@ -1042,7 +1042,7 @@ try {
     }
 
     // 49. Nested Struct Field Navigation: struct.field("a").struct.field("b")
-    const deepStructDf = $df.data({
+    const deepStructDf = $df.dataFrame({
         meta: [
             { location: { city: "Austin", zip: 78701 } },
             { location: { city: "Dallas", zip: 75001 } }
@@ -1077,7 +1077,7 @@ try {
     }
 
     // 51. Decimal and Duration scaling edge cases
-    const decimalScaleDf = $df.data({
+    const decimalScaleDf = $df.dataFrame({
         dec: ["100.50", "200.75"],
         multiplier: [2, 3]
     }, {
@@ -1114,7 +1114,7 @@ try {
     }
 
     // 53. Literal expressions inside when/then/otherwise and binary expressions
-    const litTestDf = $df.data({ a: [1, 2], b: [10, 20] });
+    const litTestDf = $df.dataFrame({ a: [1, 2], b: [10, 20] });
     const litBranchDf = litTestDf.withColumns(
         $df.when($df.col("a").eq(1))
             .then($df.lit(100))
@@ -1149,7 +1149,7 @@ try {
     }
 
     // 55. Date +/- Duration and Time +/- Duration arithmetic
-    const dateDurDf = $df.data({
+    const dateDurDf = $df.dataFrame({
         d: ["2026-01-01", "2026-06-01"],
         t: ["12:00:00.000", "15:30:00.000"],
         dur: [86400000, 3600000]
@@ -1178,7 +1178,7 @@ try {
     }
 
     // 56. Array explode() type deduction resolving innerType
-    const arrExplodeDf = $df.data({
+    const arrExplodeDf = $df.dataFrame({
         items: [[10, 20], [30, 40]]
     }, {
         items: $df.Array($df.Int32)
@@ -1191,7 +1191,7 @@ try {
     }
 
     // 57. Schema prototype safety checks
-    const protoSafeDf = $df.data({
+    const protoSafeDf = $df.dataFrame({
         a: ["toString", "valueOf", "constructor"]
     });
     const protoSafeRes = protoSafeDf.withColumns(
@@ -1202,7 +1202,7 @@ try {
     }
 
     // 58. Static string concatenation with empty DataFrame
-    const emptyStringDf = $df.data({
+    const emptyStringDf = $df.dataFrame({
         s1: [] as string[],
         s2: [] as string[]
     }, {
@@ -1217,7 +1217,7 @@ try {
     }
 
     // 59. Unsigned 32-bit Integer arithmetic (UInt32 + UInt32 => UInt32)
-    const u32Df = $df.data({
+    const u32Df = $df.dataFrame({
         u1: [100, 200],
         u2: [300, 400]
     }, {
@@ -1232,7 +1232,7 @@ try {
     }
 
     // 60. Array literal with leading null elements resolving innerType
-    const leadingNullArrayDf = $df.data({
+    const leadingNullArrayDf = $df.dataFrame({
         x: [1, 2]
     }).withColumns(
         $df.lit([null, null, 100]).alias("arr_lit")
@@ -1243,7 +1243,7 @@ try {
     }
 
     // 61. TypedArray literals in expressions
-    const typedArrLiteralDf = $df.data({
+    const typedArrLiteralDf = $df.dataFrame({
         id: [1, 2]
     }).withColumns(
         $df.lit(new Float32Array([1.5, 2.5])).alias("f32_arr_lit"),
@@ -1261,7 +1261,7 @@ try {
     }
 
     // 62. Multi-branch coalesce & when/then starting with literal null
-    const branchNullDf = $df.data({
+    const branchNullDf = $df.dataFrame({
         val: [null, 42]
     }, {
         val: $df.Int32
@@ -1277,7 +1277,7 @@ try {
     }
 
     // 63. Struct field access type inference
-    const structTypeDf = $df.data({
+    const structTypeDf = $df.dataFrame({
         user: [
             { name: "Alice", age: 30 },
             { name: "Bob", age: 25 }
@@ -1299,7 +1299,7 @@ try {
     }
 
     // 64. Duration cross-timeUnit arithmetic preservation
-    const durUnitDf = $df.data({
+    const durUnitDf = $df.dataFrame({
         dur_us: [10, 20],
         dur_ms: [1000, 2000]
     }, {
@@ -1314,7 +1314,7 @@ try {
     }
 
     // 65. Primitive boxed Object unwrapping in resolveOperandType
-    const boxedObjDf = $df.data({
+    const boxedObjDf = $df.dataFrame({
         n: [1, 2]
     }).withColumns(
         $df.lit(new Number(42) as any).alias("boxed_num"),
@@ -1332,7 +1332,7 @@ try {
     }
 
     // 66. Temporal Subtractions: Date - Date and Time - Time => DurationType
-    const tempSubDf = $df.data({
+    const tempSubDf = $df.dataFrame({
         d1: ["2026-01-01"],
         d2: ["2026-01-10"],
         t1: ["10:00:00.000"],
@@ -1354,7 +1354,7 @@ try {
     }
 
     // 67. Duration +/- Temporal commutativity: Duration + Date => Date, Duration + Time => Time
-    const durCommDf = $df.data({
+    const durCommDf = $df.dataFrame({
         d: ["2026-01-01"],
         t: ["10:00:00.000"],
         dur: [1000]
@@ -1374,7 +1374,7 @@ try {
     }
 
     // 68. Duration * Numeric commutativity: Duration * Float64 => Duration, Float64 * Duration => Duration
-    const durNumDf = $df.data({
+    const durNumDf = $df.dataFrame({
         dur: [1000],
         factor_f: [2.5],
         factor_i: [3]
@@ -1402,7 +1402,7 @@ try {
     }
 
     // 69. 16-bit Integer Arithmetic Promotions
-    const int16Df = $df.data({
+    const int16Df = $df.dataFrame({
         u16: [100],
         u16_b: [200],
         i16: [300],
@@ -1428,7 +1428,7 @@ try {
     }
 
     // 70. 8-bit Integer Arithmetic Promotions
-    const int8Df = $df.data({
+    const int8Df = $df.dataFrame({
         u8: [10],
         u8_b: [20],
         i8: [30]
@@ -1452,7 +1452,7 @@ try {
     }
 
     // 71. 64-bit Integer arithmetic (UInt64, Int64)
-    const int64Df = $df.data({
+    const int64Df = $df.dataFrame({
         u64: [100n],
         i64: [200n]
     }, {
@@ -1466,7 +1466,7 @@ try {
     }
 
     // 72. Float32 + Decimal => Float64 promotion
-    const f32DecDf = $df.data({
+    const f32DecDf = $df.dataFrame({
         f32: [1.5],
         dec: [10.5]
     }, {
@@ -1480,7 +1480,7 @@ try {
     }
 
     // 73. resolveOperandType fallback for non-existent column name string
-    const fallbackDf73 = $df.data({ a: [1] }).withColumns(
+    const fallbackDf73 = $df.dataFrame({ a: [1] }).withColumns(
         $df.lit("unmatched_column_string").alias("lit_str")
     );
     if (fallbackDf73.schema["lit_str"].name !== "Utf8") {
@@ -1488,7 +1488,7 @@ try {
     }
 
     // 74. resolveOperandType with BigUint64Array / Uint16Array typed arrays
-    const typedArrDf74 = $df.data({ dummy: [1] }).withColumns(
+    const typedArrDf74 = $df.dataFrame({ dummy: [1] }).withColumns(
         $df.lit(new BigUint64Array([10n, 20n])).alias("u64_arr"),
         $df.lit(new Uint16Array([1, 2])).alias("u16_arr")
     );
@@ -1500,7 +1500,7 @@ try {
     }
 
     // 75. resolveOperandType with nested arrays and nulls
-    const nestedArrDf75 = $df.data({ dummy: [1] }).withColumns(
+    const nestedArrDf75 = $df.dataFrame({ dummy: [1] }).withColumns(
         $df.lit([[null, 100], [200]]).alias("nested_arr"),
         $df.lit([null, null]).alias("all_null_arr")
     );
@@ -1512,7 +1512,7 @@ try {
     }
 
     // 76. resolveOperandType unboxing Boxed Symbol / Object
-    const objDf76 = $df.data({ dummy: [1] }).withColumns(
+    const objDf76 = $df.dataFrame({ dummy: [1] }).withColumns(
         $df.lit({ key: "val" }).alias("custom_obj")
     );
     if (objDf76.schema["custom_obj"].name !== "Object") {
@@ -1520,7 +1520,7 @@ try {
     }
 
     // 77. Statistical aggregation (mean / std) on integer column promoting to Float64
-    const intMeanDf77 = $df.data({ int_vals: [10, 20, 30] }, { int_vals: $df.Int32 }).select([
+    const intMeanDf77 = $df.dataFrame({ int_vals: [10, 20, 30] }, { int_vals: $df.Int32 }).select([
         $df.col("int_vals").mean().alias("mean_val"),
         $df.col("int_vals").std().alias("std_val")
     ]);
@@ -1532,7 +1532,7 @@ try {
     }
 
     // 78. Statistical aggregation on Float32 column yielding Float32 or Float64
-    const f32MeanDf78 = $df.data({ f32_vals: [1.5, 2.5] }, { f32_vals: $df.Float32 }).select([
+    const f32MeanDf78 = $df.dataFrame({ f32_vals: [1.5, 2.5] }, { f32_vals: $df.Float32 }).select([
         $df.col("f32_vals").mean().alias("f32_mean")
     ]);
     if (f32MeanDf78.schema["f32_mean"].name !== "Float64") {
@@ -1540,7 +1540,7 @@ try {
     }
 
     // 79. Duration aggregation preserving DurationType
-    const durAggDf79 = $df.data({ dur_col: [5000, 10000] }, { dur_col: new DurationType("ms") }).select([
+    const durAggDf79 = $df.dataFrame({ dur_col: [5000, 10000] }, { dur_col: new DurationType("ms") }).select([
         $df.col("dur_col").min().alias("min_dur"),
         $df.col("dur_col").max().alias("max_dur")
     ]);
@@ -1552,7 +1552,7 @@ try {
     }
 
     // 80. Unnesting / exploding Array of Structs
-    const structArrDf80 = $df.data({
+    const structArrDf80 = $df.dataFrame({
         arr_structs: [[{ id: 1, val: "A" }]]
     }, {
         arr_structs: $df.Array($df.Struct({ id: $df.Int32, val: $df.Utf8 }))
@@ -1562,7 +1562,7 @@ try {
     }
 
     // 81. when().then().otherwise() with mixed numeric branches (Int32 + Float64 -> Float64)
-    const mixedBranchDf81 = $df.data({ flag: [true, false] }, { flag: $df.Boolean }).withColumns(
+    const mixedBranchDf81 = $df.dataFrame({ flag: [true, false] }, { flag: $df.Boolean }).withColumns(
         $df.when($df.col("flag")).then(10).otherwise(2.5).alias("promoted_branch"),
         $df.when($df.col("flag")).then(5).otherwise(100n).alias("promoted_bigint_branch")
     );
@@ -1574,7 +1574,7 @@ try {
     }
 
     // 82. Binary arithmetic with identical integer types preserving exact type
-    const sameIntDf82 = $df.data({
+    const sameIntDf82 = $df.dataFrame({
         u8_a: [10], u8_b: [20],
         u16_a: [100], u16_b: [200],
         u32_a: [1000], u32_b: [2000],
@@ -1604,7 +1604,7 @@ try {
     }
 
     // 83. Multi-branch when-then chain with sequential type widening
-    const multiBranchWideningDf83 = $df.data({ step: [1, 2, 3] }, { step: $df.Int32 }).withColumns(
+    const multiBranchWideningDf83 = $df.dataFrame({ step: [1, 2, 3] }, { step: $df.Int32 }).withColumns(
         $df.when($df.col("step").eq(1)).then(1)
             .when($df.col("step").eq(2)).then(2.5)
             .otherwise(10)
@@ -1615,7 +1615,7 @@ try {
     }
 
     // 84. Array literal with distinct types inspected from first non-null element
-    const arrLitDf84 = $df.data({ id: [1] }).withColumns(
+    const arrLitDf84 = $df.dataFrame({ id: [1] }).withColumns(
         $df.lit([20.5, 10, 30]).alias("f64_leading_arr"),
         $df.lit([200n, 10]).alias("i64_leading_arr")
     );
@@ -1627,7 +1627,7 @@ try {
     }
 
     // 85. Non-numeric column aggregation (count/len) resolving to Int32
-    const nonNumericAggDf85 = $df.data({
+    const nonNumericAggDf85 = $df.dataFrame({
         words: ["apple", "banana", "cherry"],
         bools: [true, false, true],
         structs: [{ a: 1 }, { a: 2 }, { a: 3 }]
@@ -1651,7 +1651,7 @@ try {
     }
 
     // 86. Array column count aggregation resolving to Int32
-    const arrCountDf86 = $df.data({
+    const arrCountDf86 = $df.dataFrame({
         items: [[1, 2], [3, 4, 5]]
     }, {
         items: $df.Array($df.Int32)
@@ -1663,7 +1663,7 @@ try {
     }
 
     // 87. Edge case: Mixed Integer Width & Signedness Resolution (UInt8 + Int8, UInt16 + Int16, UInt32 + Int32)
-    const intEdgeDf87 = $df.data({
+    const intEdgeDf87 = $df.dataFrame({
         u8: [10],
         i8: [20],
         u16: [1000],
@@ -1705,7 +1705,7 @@ try {
     }
 
     // 88. Edge case: resolveOperandType with nested empty/null array elements fallback to Utf8
-    const emptyArrDf88 = $df.data({
+    const emptyArrDf88 = $df.dataFrame({
         empty_lit: [1]
     }).select([
         $df.lit([]).alias("empty_arr"),
@@ -1719,7 +1719,7 @@ try {
     }
 
     // 89. Complex resolveExprOutputType: Nested Struct field access through expressions
-    const nestedStructDf89 = $df.data({
+    const nestedStructDf89 = $df.dataFrame({
         user: [
             { profile: { stats: { score: 99.5, level: 5 } } }
         ]
@@ -1744,7 +1744,7 @@ try {
     }
 
     // 90. Complex resolveExprOutputType: Multi-branch when/then promotion (Int8 + Int32 + Float32 + Float64)
-    const multiBranchDf90 = $df.data({
+    const multiBranchDf90 = $df.dataFrame({
         cond1: [true, false, false],
         cond2: [false, true, false],
         v_i8: [1, 2, 3],
@@ -1767,7 +1767,7 @@ try {
     }
 
     // 91. Complex resolveExprOutputType: Array unnesting vs array wrapping on non-array column
-    const arrayTransformDf91 = $df.data({
+    const arrayTransformDf91 = $df.dataFrame({
         tags: [["tag1", "tag2"], ["tag3"]],
         score: [10, 20]
     }, {
@@ -1787,7 +1787,7 @@ try {
     }
 
     // 92. Complex resolveExprOutputType: Binary operation involving Duration + Datetime and Duration * Duration
-    const durExprDf92 = $df.data({
+    const durExprDf92 = $df.dataFrame({
         base_time: ["2026-03-01T12:00:00.000Z"],
         dur_a: [3600000],
         dur_b: [1800000]

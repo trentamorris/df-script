@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running ArrayExpr.gatherEvery tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] },
     { numbers: null }
 ]);

@@ -6,7 +6,7 @@ console.log("Running StandardExpr.spearmanCorr edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Perfect positive monotonic correlation (+1.0)
 // -------------------------------------------------------------
-const dfPerfPos = $df.data([
+const dfPerfPos = $df.dataFrame([
     { a: 1, b: 2 },
     { a: 2, b: 20 },
     { a: 3, b: 200 }
@@ -21,7 +21,7 @@ if (Math.abs(resPerfPos[0].c - 1) > 1e-6) {
 // -------------------------------------------------------------
 // Case 2: Perfect negative monotonic correlation (-1.0)
 // -------------------------------------------------------------
-const dfPerfNeg = $df.data([
+const dfPerfNeg = $df.dataFrame([
     { a: 1, b: 100 },
     { a: 2, b: 50 },
     { a: 3, b: 10 }
@@ -46,7 +46,7 @@ if (Math.abs(resArray[0].c - (-1)) > 1e-6) {
 // -------------------------------------------------------------
 // Case 4: Tied ranks (fractional rank assignment)
 // -------------------------------------------------------------
-const dfTies = $df.data([
+const dfTies = $df.dataFrame([
     { a: 1, b: 10 },
     { a: 2, b: 20 },
     { a: 2, b: 20 },
@@ -62,7 +62,7 @@ if (Math.abs(resTies[0].c - 1) > 1e-6) {
 // -------------------------------------------------------------
 // Case 5: Zero variance (constant column yields null)
 // -------------------------------------------------------------
-const dfConst = $df.data([
+const dfConst = $df.dataFrame([
     { a: 5, b: 10 },
     { a: 5, b: 20 },
     { a: 5, b: 30 }
@@ -77,7 +77,7 @@ if (resConst[0].c !== null) {
 // -------------------------------------------------------------
 // Case 6: Null values dropped via pairwise deletion
 // -------------------------------------------------------------
-const dfNulls = $df.data([
+const dfNulls = $df.dataFrame([
     { a: 1, b: 10 },
     { a: null, b: 50 }, // dropped
     { a: 2, b: null }, // dropped
@@ -95,7 +95,7 @@ if (Math.abs(resNulls[0].c - 1) > 1e-6) {
 // -------------------------------------------------------------
 // Case 7: Fewer than 2 valid pairs yields null
 // -------------------------------------------------------------
-const dfInsufficient = $df.data([
+const dfInsufficient = $df.dataFrame([
     { a: 1, b: 10 },
     { a: null, b: 20 }
 ]);
@@ -109,7 +109,7 @@ if (resInsufficient[0].c !== null) {
 // -------------------------------------------------------------
 // Case 8: GroupBy aggregation with spearmanCorr
 // -------------------------------------------------------------
-const dfGroup = $df.data([
+const dfGroup = $df.dataFrame([
     { grp: "pos", a: 1, b: 10 },
     { grp: "pos", a: 2, b: 20 },
     { grp: "pos", a: 3, b: 30 },
@@ -128,7 +128,7 @@ if (Math.abs(resGroup[0].corr - (-1)) > 1e-6 || Math.abs(resGroup[1].corr - 1) >
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame with schema preserved
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ a: 1, b: 1 }]).filter($df.col("a").eq(999));
+const dfEmpty = $df.dataFrame([{ a: 1, b: 1 }]).filter($df.col("a").eq(999));
 const resEmpty = dfEmpty.select([
     $df.col("a").spearmanCorr($df.col("b")).alias("c")
 ]).toDicts() as any[];

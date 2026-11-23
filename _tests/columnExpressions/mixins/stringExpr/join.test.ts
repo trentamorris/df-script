@@ -5,7 +5,7 @@ import { DataTypeRegistry } from "df-script";
 console.log("Running StringExpr.join tests...");
 
 
-const df = $df.data({
+const df = $df.dataFrame({
     tags: [["a", "b", "c"], ["x", "y"], [], ["foo", null, "bar"], null]
 });
 
@@ -21,7 +21,7 @@ if (res[2].dash !== "") throw new Error("join empty failed");
 if (res[3].ign_null !== "foo-bar") throw new Error("join ignore nulls failed");
 if (res[4].dash !== null) throw new Error("join null failed");
 
-const dfTyped = $df.data({
+const dfTyped = $df.dataFrame({
     tags: [new Int32Array([1, 2, 3]), new Uint8Array([]), null]
 }, {
     tags: DataTypeRegistry.Array(DataTypeRegistry.Int32)
@@ -36,7 +36,7 @@ if (resTyped[1].joined !== "") throw new Error("join empty TypedArray failed");
 if (resTyped[2].joined !== null) throw new Error("join null TypedArray failed");
 
 // Test direct non-array value passed to join: isArrayOrTypedArray will return false and result in null
-const nonArrayDf = $df.data({ scalar: ["scalar_string"] });
+const nonArrayDf = $df.dataFrame({ scalar: ["scalar_string"] });
 const resDirect = nonArrayDf.select([$df.col("scalar" as any).str.join("-").alias("res")]).toDicts() as any[];
 if (resDirect[0].res !== null) throw new Error("join non-array scalar should evaluate to null");
 

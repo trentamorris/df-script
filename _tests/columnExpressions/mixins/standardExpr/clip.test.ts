@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.clip tests...");
 
 
-const df = $df.data([{ val: -5.5 }, { val: 4.88 }, { val: 10 }, { val: null }]);
+const df = $df.dataFrame([{ val: -5.5 }, { val: 4.88 }, { val: 10 }, { val: null }]);
 const res = df.select([
     $df.col("val").clip(-5, 5).alias("both"),
     $df.col("val").clip(-2, null).alias("lower"),

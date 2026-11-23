@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StructExpr.unnest tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { s: { a: 1, b: "foo" } },
     { s: { a: 2, b: "bar" } },
     { s: null },
@@ -17,7 +17,7 @@ const schema = {
         b: $df.Utf8
     })
 };
-const dfWithSchema = $df.data([
+const dfWithSchema = $df.dataFrame([
     { s: { a: 1, b: "foo" } },
     { s: { a: 2, b: "bar" } },
     { s: null },
@@ -52,7 +52,7 @@ if (r8[0].a !== 1 || r8[0].b !== "foo" || !("s" in r8[0])) {
 }
 
 // 4. unnest() when all struct values are null
-const dfAllNull = $df.data([
+const dfAllNull = $df.dataFrame([
     { s: null },
     { s: null }
 ], { s: $df.Struct({ a: $df.Int32, b: $df.Utf8 }) });
@@ -63,7 +63,7 @@ if (rAllNull[0].a !== null || rAllNull[0].b !== null) throw new Error("Expected 
 if ("s" in rAllNull[0]) throw new Error("Expected 's' removed after unnest in select");
 
 // 5. unnest() on struct with a single field
-const dfSingle = $df.data([
+const dfSingle = $df.dataFrame([
     { s: { only: 42 } },
     { s: null }
 ], { s: $df.Struct({ only: $df.Int32 }) });
@@ -74,7 +74,7 @@ if (rSingle[0].only !== 42) throw new Error("Expected only=42");
 if (rSingle[1].only !== null) throw new Error("Expected only=null for null struct");
 
 // 6. unnest() on struct with nested object field (child object is preserved as-is)
-const dfNestedObj = $df.data([
+const dfNestedObj = $df.dataFrame([
     { s: { meta: { x: 1 }, val: 10 } }
 ], { s: $df.Object });
 const rNestedObj = dfNestedObj.select([
@@ -94,7 +94,7 @@ if (rMixed[0].a !== 1 || rMixed[0].extra !== 1) throw new Error("Expected unnest
 
 // 8. unnest column-name collision: struct field "a" vs existing sibling column "a"
 // In select(), only the struct fields survive — the sibling "a" is not included.
-const dfCollision = $df.data([
+const dfCollision = $df.dataFrame([
     { a: 99, s: { a: 1, b: "foo" } },
     { a: 88, s: { a: 2, b: "bar" } }
 ]);
@@ -104,7 +104,7 @@ if (rCollision[0].b !== "foo") throw new Error(`Collision: Expected b=foo`);
 if ("s" in rCollision[0]) throw new Error(`Collision: Expected s column removed`);
 
 // 9. Full round-trip: unnest → mutate top-level columns → re-pack via withFields
-const dfRoundTrip = $df.data([
+const dfRoundTrip = $df.dataFrame([
     { s: { x: 3, y: 4 } },
     { s: { x: 10, y: 0 } }
 ], { s: $df.Struct({ x: $df.Int32, y: $df.Int32 }) });

@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StringExpr.findMany tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { text: "apple banana cherry" },
     { text: null }
 ]);

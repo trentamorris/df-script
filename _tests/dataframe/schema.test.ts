@@ -12,7 +12,7 @@ console.table(data);
 
 try {
     // 1. Test automatic schema inference
-    const df = $df.data(data);
+    const df = $df.dataFrame(data);
     const schema = df.schema;
     
     console.log("\nInferred Schema:");
@@ -35,7 +35,7 @@ try {
         missing_col: $df.Utf8 // will be null-padded
     };
 
-    const dfCoerced = $df.data(data, explicitSchema);
+    const dfCoerced = $df.dataFrame(data, explicitSchema);
     const coercedData = dfCoerced.toDicts() as any[];
     
     console.log("\nCoerced Data (with Null Padding):");
@@ -69,7 +69,7 @@ try {
         })
     };
 
-    const dfComplex = $df.data(complexData, complexSchema);
+    const dfComplex = $df.dataFrame(complexData, complexSchema);
     const complexResult = dfComplex.toDicts() as any[];
 
     console.log("\nComplex Array & Struct Coerced Result:");
@@ -83,7 +83,7 @@ try {
     if (complexResult[1].info.label !== "B") throw new Error("Struct field label string preserve failed");
 
     // 4. Test inferred schema TypedArray coercion
-    const inferredDf = $df.data({
+    const inferredDf = $df.dataFrame({
         age: [30, 25, 40],
         price: [10.5, 20.3, 30.1]
     });
@@ -103,13 +103,13 @@ try {
             new Int32Array([3, 4])
         ]
     };
-    const listTypedArrayDf = $df.data(listTypedArrayData);
+    const listTypedArrayDf = $df.dataFrame(listTypedArrayData);
     const listTypedArraySchema = listTypedArrayDf.schema;
     if (listTypedArraySchema.nested_lists.name !== "Array") throw new Error(`Expected nested_lists schema to be Array, got ${listTypedArraySchema.nested_lists.name}`);
     if ((listTypedArraySchema.nested_lists as any).innerType.name !== "Int32") throw new Error(`Expected nested array inner type to be Int32, got ${(listTypedArraySchema.nested_lists as any).innerType.name}`);
 
     // 6. Test NaN column type inference (numbers + NaN must infer as Float64)
-    const nanNumDf = $df.data({
+    const nanNumDf = $df.dataFrame({
         vals: [10, NaN, 20],
         only_nan: [NaN, NaN, NaN],
         nan_and_null: [NaN, null, 1.5]

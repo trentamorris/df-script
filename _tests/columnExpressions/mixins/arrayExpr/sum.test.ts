@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running ArrayExpr.sum tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [1, 2, 3, 4] },
     { numbers: [] },
     { numbers: null }

@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StandardExpr.fillNull tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { val: 10, other: 100 },
     { val: null, other: 200 },
     { val: 30, other: 300 }
@@ -32,7 +32,7 @@ if (res[1].f_fwd !== 10) throw new Error("fillNull forward failed");
 if (res[1].f_bwd !== 30) throw new Error("fillNull backward failed");
 
 // Test forward limit
-const dfLimit = $df.data([{ val: 5 }, { val: null }, { val: null }, { val: null }]);
+const dfLimit = $df.dataFrame([{ val: 5 }, { val: null }, { val: null }, { val: null }]);
 const resLimit = dfLimit.select([
     $df.col("val").fillNull({ strategy: "forward", limit: 1 }).alias("f_fwd_l1")
 ]).toDicts() as any[];

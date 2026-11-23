@@ -7,7 +7,7 @@
 export const DOC_EXAMPLES: Record<string, string> = {
     // 1. Basic 2-column DataFrame (2 rows) - { a: [1, 2], b: ["x", "y"] }
     base_2x2: [
-        "const df = $df.data({ a: [1, 2], b: [\"x\", \"y\"] });",
+        "const df = $df.dataFrame({ a: [1, 2], b: [\"x\", \"y\"] });",
         "// shape: (2, 2)",
         "// +---+---+",
         "// | a | b |",
@@ -19,7 +19,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 2. Single-column 3-row numeric DataFrame - { a: [1, 2, 3] }
     base_numbers_3x1: [
-        "const df = $df.data({ a: [1, 2, 3], val: [10, 20, 30], score: [75, 85, 95] });",
+        "const df = $df.dataFrame({ a: [1, 2, 3], val: [10, 20, 30], score: [75, 85, 95] });",
         "// shape: (3, 1)",
         "// +---+",
         "// | a |",
@@ -32,7 +32,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 2b. Single-column 3-row signed numeric DataFrame - { a: [-1, 0, 2] }
     base_signed_numbers_3x1: [
-        "const df = $df.data({ a: [-1, 0, 2] });",
+        "const df = $df.dataFrame({ a: [-1, 0, 2] });",
         "// shape: (3, 1)",
         "// +----+",
         "// | a  |",
@@ -45,7 +45,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 3. Basic 3-row numeric DataFrame - { a: [1, 2, 3], b: [10, 20, 30] }
     base_numbers_3x2: [
-        "const df = $df.data({ a: [1, 2, 3], b: [10, 20, 30] });",
+        "const df = $df.dataFrame({ a: [1, 2, 3], b: [10, 20, 30] });",
         "// shape: (3, 2)",
         "// +---+----+",
         "// | a | b  |",
@@ -58,7 +58,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 4. Categorical / Grouping 3-row DataFrame - { group: ["A", "A", "B"], val: [10, 20, 30] }
     base_grouped_3x2: [
-        "const df = $df.data({ group: [\"A\", \"A\", \"B\"], val: [10, 20, 30] });",
+        "const df = $df.dataFrame({ group: [\"A\", \"A\", \"B\"], val: [10, 20, 30] });",
         "// shape: (3, 2)",
         "// +-------+-----+",
         "// | group | val |",
@@ -71,7 +71,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 5. Nullable 3-row 2-column DataFrame - { a: [1, null, 3], b: [null, 2, null] }
     base_nulls_3x2: [
-        "const df = $df.data({ a: [1, null, 3], b: [null, 2, null] });",
+        "const df = $df.dataFrame({ a: [1, null, 3], b: [null, 2, null] });",
         "// shape: (3, 2)",
         "// +------+------+",
         "// | a    | b    |",
@@ -84,7 +84,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 6. 4-row 2-column Boolean DataFrame - { a: [true, true, false, false], b: [true, false, true, false] }
     base_bool_4x2: [
-        "const df = $df.data({ a: [true, true, false, false], b: [true, false, true, false] });",
+        "const df = $df.dataFrame({ a: [true, true, false, false], b: [true, false, true, false] });",
         "// shape: (4, 2)",
         "// +-------+-------+",
         "// | a     | b     |",
@@ -98,7 +98,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 7. String 3-row list - { s: ["apple", "banana", "cherry"] }
     base_strings_3x1: [
-        "const df = $df.data({ s: [\"apple\", \"banana\", \"cherry\"], email: [\"user@example.com\", \"admin@test.org\", \"info@site.io\"], json: [JSON.stringify({ a: 1 }), JSON.stringify({ a: 2 }), JSON.stringify({ a: 3 })], d: [\"2026-05-20\", \"2026-05-21\", \"2026-05-22\"] });",
+        "const df = $df.dataFrame({ s: [\"apple\", \"banana\", \"cherry\"], email: [\"user@example.com\", \"admin@test.org\", \"info@site.io\"], json: [JSON.stringify({ a: 1 }), JSON.stringify({ a: 2 }), JSON.stringify({ a: 3 })], d: [\"2026-05-20\", \"2026-05-21\", \"2026-05-22\"] });",
         "// shape: (3, 1)",
         "// +----------+",
         "// | s        |",
@@ -111,7 +111,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 8. Array 2-row nested numeric DataFrame - { a: [[1, 2, 3], [4, 5]] }
     base_array_nested_2rows: [
-        "const df = $df.data({ a: [[1, 2, 3], [4, 5]] });",
+        "const df = $df.dataFrame({ a: [[1, 2, 3], [4, 5]] });",
         "// shape: (2, 1)",
         "// +-----------+",
         "// | a         |",
@@ -123,7 +123,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 8b. Array 2-row nested boolean DataFrame - { a: [[true, true], [true, false]] }
     base_array_nested_bool_2rows: [
-        "const df = $df.data({ a: [[true, true], [true, false]] });",
+        "const df = $df.dataFrame({ a: [[true, true], [true, false]] });",
         "// shape: (2, 1)",
         "// +---------------+",
         "// | a             |",
@@ -135,7 +135,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 9. Struct single user row - { user: [{ name: "Alice", age: 30 }] }
     base_struct_single: [
-        "const df = $df.data({ user: [{ name: \"Alice\", age: 30 }] });",
+        "const df = $df.dataFrame({ user: [{ name: \"Alice\", age: 30 }] });",
         "// shape: (1, 1)",
         "// +--------------------------------+",
         "// | user                           |",
@@ -146,7 +146,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 10. Temporal single Datetime row - { date: ["2026-05-20T10:00:00.123Z"] }
     base_temporal_single: [
-        "const df = $df.data({ date: [\"2026-05-20T10:00:00.123Z\"], ts: [\"2026-05-20T10:00:00.123Z\"], d: [\"2026-05-20\"], add: [\"P1D\"] });",
+        "const df = $df.dataFrame({ date: [\"2026-05-20T10:00:00.123Z\"], ts: [\"2026-05-20T10:00:00.123Z\"], d: [\"2026-05-20\"], add: [\"P1D\"] });",
         "// shape: (1, 1)",
         "// +--------------------------+",
         "// | date                     |",
@@ -157,8 +157,8 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 11. Two single-column DataFrames for Concat / HConcat / VConcat
     base_concat_pair: [
-        "const df1 = $df.data({ a: [1, 2] });",
-        "const df2 = $df.data({ a: [3, 4] });",
+        "const df1 = $df.dataFrame({ a: [1, 2] });",
+        "const df2 = $df.dataFrame({ a: [3, 4] });",
         "// shape: (2, 1)",
         "// +---+",
         "// | a |",
@@ -177,8 +177,8 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 12. Two DataFrames for Join operations
     base_join_pair: [
-        "const df1 = $df.data({ id: [1, 2], val: [\"a\", \"b\"] });",
-        "const df2 = $df.data({ id: [1, 2], num: [100, 200] });",
+        "const df1 = $df.dataFrame({ id: [1, 2], val: [\"a\", \"b\"] });",
+        "const df2 = $df.dataFrame({ id: [1, 2], num: [100, 200] });",
         "// shape: (2, 2)",
         "// +----+-----+",
         "// | id | val |",
@@ -197,12 +197,12 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 13. Pair of DataFrames for Asof Join (trades & quotes)
     base_asof_pair: [
-        "const trades = $df.data([",
+        "const trades = $df.dataFrame([",
         "  { time: 1000, ticker: \"AAPL\", price: 150.0 },",
         "  { time: 1005, ticker: \"AAPL\", price: 150.5 },",
         "  { time: 1015, ticker: \"AAPL\", price: 151.0 }",
         "])",
-        "const quotes = $df.data([",
+        "const quotes = $df.dataFrame([",
         "  { time: 998, ticker: \"AAPL\", bid: 149.9 },",
         "  { time: 1004, ticker: \"AAPL\", bid: 150.4 },",
         "  { time: 1010, ticker: \"AAPL\", bid: 150.8 }",
@@ -227,7 +227,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 14. Wide DataFrame for Pivot / Unpivot / Transpose
     base_pivot_table: [
-        "const df = $df.data({ year: [2020, 2020, 2021, 2021], month: [\"Jan\", \"Feb\", \"Jan\", \"Feb\"], revenue: [100, 150, 120, 180] });",
+        "const df = $df.dataFrame({ year: [2020, 2020, 2021, 2021], month: [\"Jan\", \"Feb\", \"Jan\", \"Feb\"], revenue: [100, 150, 120, 180] });",
         "// shape: (4, 3)",
         "// +------+-------+---------+",
         "// | year | month | revenue |",
@@ -241,7 +241,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 15. Time-Series DataFrame for Dynamic Grouping
     base_dataframe_dynamic: [
-        "const df = $df.data([",
+        "const df = $df.dataFrame([",
         "  { time: new Date(\"2024-01-01T00:00:00Z\"), val: 10 },",
         "  { time: new Date(\"2024-01-01T12:00:00Z\"), val: 20 },",
         "  { time: new Date(\"2024-01-02T00:00:00Z\"), val: 30 }",
@@ -260,7 +260,7 @@ export const DOC_EXAMPLES: Record<string, string> = {
 
     // 17. Partitioning DataFrame - { category: ["A", "B", "A", "B"], val: [10, 20, 30, 40] }
     base_dataframe_partition: [
-        "const df = $df.data({ category: [\"A\", \"B\", \"A\", \"B\"], val: [10, 20, 30, 40] });",
+        "const df = $df.dataFrame({ category: [\"A\", \"B\", \"A\", \"B\"], val: [10, 20, 30, 40] });",
         "// shape: (4, 2)",
         "// +----------+-----+",
         "// | category | val |",
@@ -272,12 +272,12 @@ export const DOC_EXAMPLES: Record<string, string> = {
         "// +----------+-----+"
     ].join('\n'),
     base_join_where_pair: [
-        "const east = $df.data([",
+        "const east = $df.dataFrame([",
         "  { id: 100, dur: 120, rev: 12, cores: 2 },",
         "  { id: 101, dur: 140, rev: 14, cores: 8 },",
         "  { id: 102, dur: 160, rev: 16, cores: 4 }",
         "])",
-        "const west = $df.data([",
+        "const west = $df.dataFrame([",
         "  { t_id: 404, time: 90, cost: 9, cores: 4 },",
         "  { t_id: 498, time: 130, cost: 13, cores: 2 },",
         "  { t_id: 676, time: 150, cost: 15, cores: 1 },",

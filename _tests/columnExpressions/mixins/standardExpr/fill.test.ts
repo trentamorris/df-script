@@ -3,7 +3,7 @@ import { $df } from "df-script";
 
 console.log("Running StandardExpr.fill tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { val: 10, other: 100 },
     { val: null, other: 200 },
     { val: NaN, other: 300 },
@@ -47,7 +47,7 @@ if (resAll[2].f_all_val !== 77) throw new Error("fill all [2] failed");
 if (resAll[3].f_all_val !== 40) throw new Error("fill all [3] failed");
 
 // 4. Fill using $df.seqRange
-const dfSeq = $df.data([
+const dfSeq = $df.dataFrame([
     { val: 10 },
     { val: null },
     { val: null },
@@ -64,7 +64,7 @@ if (resSeq[2].f_seq !== 120) throw new Error(`fill seq [2] failed: expected 120,
 if (resSeq[3].f_seq !== 40) throw new Error("fill seq [3] failed");
 
 // 5. Strategies: forward and backward with target "nan"
-const dfFwd = $df.data([
+const dfFwd = $df.dataFrame([
     { val: 1 },
     { val: NaN },
     { val: NaN },
@@ -84,13 +84,13 @@ if (resFwd[1].bwd !== 4 || resFwd[2].bwd !== 4) throw new Error("fill nan backwa
 // =========================================================================
 
 // EDGE CASE 1: Empty DataFrame (Height 0)
-const emptyDf = $df.data({ a: [] as number[] });
+const emptyDf = $df.dataFrame({ a: [] as number[] });
 const resEmpty = emptyDf.select([$df.col("a").fill("null", { value: 0 })]).toDicts();
 if (resEmpty.length !== 0) throw new Error("Empty DataFrame fill failed");
 
 // EDGE CASE 2: All Target Rows (All NULLs / All NaNs)
 // Forward and backward should remain null/NaN when there is NO valid value to propagate
-const allNullDf = $df.data([{ a: null }, { a: null }, { a: null }]);
+const allNullDf = $df.dataFrame([{ a: null }, { a: null }, { a: null }]);
 const resAllNullFwd = allNullDf.select([
     $df.col("a").fill("null", { strategy: "forward" }).alias("fwd"),
     $df.col("a").fill("null", { strategy: "backward" }).alias("bwd"),
@@ -102,7 +102,7 @@ if (resAllNullFwd[0].mean !== null) throw new Error("All null mean should be nul
 
 // EDGE CASE 3: Leading / Trailing Targets with Forward/Backward
 // Forward cannot fill leading nulls; Backward cannot fill trailing nulls
-const edgeBookendDf = $df.data([
+const edgeBookendDf = $df.dataFrame([
     { v: null },
     { v: 10 },
     { v: null },
@@ -123,7 +123,7 @@ if (resBookend[4].bwd !== null) throw new Error("Backward fill should NOT fill t
 
 // EDGE CASE 4: Consecutive Limit Boundary Exactness
 // Verify limit=0 (fills nothing), limit=1, limit=2, limit > gap
-const limitEdgeDf = $df.data([
+const limitEdgeDf = $df.dataFrame([
     { v: 100 },
     { v: null },
     { v: null },
@@ -144,7 +144,7 @@ if (resLimitEdge[1].l10 !== 100 || resLimitEdge[2].l10 !== 100 || resLimitEdge[3
 
 // EDGE CASE 5: Chained Dynamic Expressions with Binary Math & When/Then
 // Fill nulls using an expression derived from multiple columns ($df.col("x") * 2 + $df.col("y"))
-const exprDf = $df.data([
+const exprDf = $df.dataFrame([
     { a: 1, x: 10, y: 5 },
     { a: null, x: 20, y: 7 },
     { a: 3, x: 30, y: 9 }
@@ -157,7 +157,7 @@ if (resExpr[1].filled_computed !== 47) throw new Error(`Expr fill row 1 failed: 
 if (resExpr[2].filled_computed !== 3) throw new Error("Expr fill row 2 failed");
 
 // EDGE CASE 6: Filling with Conditional $df.when().then().otherwise() Expression
-const whenDf = $df.data([
+const whenDf = $df.dataFrame([
     { a: null, tier: "gold" },
     { a: null, tier: "silver" },
     { a: 50, tier: "bronze" }
@@ -174,7 +174,7 @@ if (resWhen[2].tiered_fill !== 50) throw new Error("When/then fill row 2 preserv
 
 // EDGE CASE 7: Falsey Primitive Values (0, false, empty string "", -0)
 // Must NEVER be treated as null or NaN!
-const falseyDf = $df.data([
+const falseyDf = $df.dataFrame([
     { v: 0, s: "", b: false },
     { v: null, s: null, b: null },
     { v: -0, s: "valid", b: true }
@@ -192,7 +192,7 @@ if (resFalsey[1].f_str !== "FALLBACK") throw new Error("Null string replacement 
 if (resFalsey[1].f_bool !== true) throw new Error("Null bool replacement failed");
 
 // EDGE CASE 8: Target "all" with Mixed Null, NaN, and Valid Numbers
-const mixedDf = $df.data([
+const mixedDf = $df.dataFrame([
     { x: null },
     { x: NaN },
     { x: 42 },
@@ -211,7 +211,7 @@ if (resMixed[4].filled_all !== -99) throw new Error("fill 'all' failed on traili
 // EDGE CASE 9: Cumulative Forward Propagation across intermingled Null and NaN
 // When target is "nan", nulls are non-target values and will be propagated!
 // When target is "null", NaNs are non-target values and will be propagated!
-const intermingledDf = $df.data([
+const intermingledDf = $df.dataFrame([
     { a: 10 },
     { a: null },
     { a: NaN },
@@ -227,7 +227,7 @@ if (!Number.isNaN(resIntermingled[3].fill_null_fwd)) throw new Error("Intermingl
 
 // EDGE CASE 10: Statistical Strategies ("min", "max", "mean") with NaN presence
 // Floating NaN should not poison getArrayStats when non-NaN numbers exist
-const statsDf = $df.data([
+const statsDf = $df.dataFrame([
     { val: 10 },
     { val: 30 },
     { val: null }
@@ -243,7 +243,7 @@ if (resStats[2].max !== 30) throw new Error(`Statistical max failed: expected 30
 
 // EDGE CASE 12: Expression as Target with Directional Forward-Fill ($df.col("a").ne($df.col("b")))
 // When a !== b, forward fill 'a' with the last row where a === b!
-const diffDf = $df.data([
+const diffDf = $df.dataFrame([
     { a: 10, b: 10 }, // match
     { a: 99, b: 20 }, // mismatch! fill with 10
     { a: 88, b: 30 }, // mismatch! fill with 10
@@ -260,7 +260,7 @@ if (resDiffExpr[3].synced !== 40) throw new Error("Expression target row 3 match
 if (resDiffExpr[4].synced !== 40) throw new Error("Expression target row 4 forward fill failed");
 
 // EDGE CASE 13: Arbitrary Sentinel Value (-999, "MISSING") with Backward Fill and Limit
-const sentinelDf = $df.data([
+const sentinelDf = $df.dataFrame([
     { sensor: -999 },
     { sensor: -999 },
     { sensor: 25.4 },
@@ -276,7 +276,7 @@ if (resSentinel[2].cleaned !== 25.4) throw new Error("Sentinel valid row 2 modif
 if (resSentinel[3].cleaned !== 30.1) throw new Error("Sentinel backward limit 1 row 3 failed");
 
 // EDGE CASE 14: DFScript Expression Target (e.g. negative numbers) with constant replacement
-const customFnDf = $df.data([
+const customFnDf = $df.dataFrame([
     { v: 10 },
     { v: -1 }, // target: negative
     { v: 30 },
@@ -291,7 +291,7 @@ if (resCustomFn[2].clamped_zero !== 30) throw new Error("Expression predicate ro
 if (resCustomFn[3].clamped_zero !== 0) throw new Error("Expression predicate row 3 replacement failed");
 
 // EDGE CASE 15: Expression Target replacing with another Expression
-const crossColDf = $df.data([
+const crossColDf = $df.dataFrame([
     { status: "ERR", reading: 0, baseline: 50 },
     { status: "OK", reading: 75, baseline: 50 },
     { status: "ERR", reading: 0, baseline: 60 }
@@ -304,7 +304,7 @@ if (resCrossCol[1].fixed !== 75) throw new Error("Cross column expression target
 if (resCrossCol[2].fixed !== 120) throw new Error("Cross column expression target row 2 failed");
 
 // EDGE CASE 16: Multi-Column Compound Boolean Expression Target ($df.col("a").gt(5).and($df.col("b").eq("INVALID"))) with Forward Fill
-const compoundDf = $df.data([
+const compoundDf = $df.dataFrame([
     { val: 100, a: 1, b: "VALID" },
     { val: 200, a: 6, b: "INVALID" }, // target! forward fill with 100
     { val: 300, a: 7, b: "INVALID" }, // target! forward fill with 100
@@ -324,7 +324,7 @@ if (resCompound[3].filled_val !== 400) throw new Error("Compound target row 3 no
 if (resCompound[4].filled_val !== 400) throw new Error("Compound target row 4 forward fill failed");
 
 // EDGE CASE 17: TypedArray Data Input (Int32Array / Float64Array) Preservation with Directional Limit Fill
-const typedDf = $df.data({
+const typedDf = $df.dataFrame({
     arr: new Float64Array([NaN, 1.5, NaN, NaN, NaN, 5.5, NaN])
 });
 const resTyped = typedDf.select([
@@ -346,7 +346,7 @@ if (!Number.isNaN(resTyped[3].bwd_lim)) throw new Error("TypedArray bwd row 3 sh
 
 // EDGE CASE 18: Alternating Target Pattern with Backward Fill and Consecutive Limit Boundary
 // Pattern: [T, T, V, T, T, V] with backward limit 1
-const altDf = $df.data([
+const altDf = $df.dataFrame([
     { x: null }, // index 0 (dist 2 from row 2 -> stays null)
     { x: null }, // index 1 (dist 1 from row 2 -> becomes 10)
     { x: 10 },   // index 2 (anchor)
@@ -365,7 +365,7 @@ if (resAlt[4].alt_bwd !== 20) throw new Error("Alt pattern row 4 should be 20");
 if (resAlt[5].alt_bwd !== 20) throw new Error("Alt pattern row 5 should be 20");
 
 // EDGE CASE 19: All Target Column (Every single row matches target) with Directional Forward and Backward
-const allTargetDf = $df.data([
+const allTargetDf = $df.dataFrame([
     { a: null },
     { a: null },
     { a: null }
@@ -382,7 +382,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 // EDGE CASE 20: Complex Chaining of fill() with Arithmetic, Aliasing and Subsequent Filter
-const chainDf = $df.data([
+const chainDf = $df.dataFrame([
     { id: 1, val: null, mult: 10 },
     { id: 2, val: 5, mult: 2 },
     { id: 3, val: null, mult: 4 },
@@ -406,7 +406,7 @@ if (resChain[3].computed_total !== 20) throw new Error(`Chained fill row 3 faile
 
 // EDGE CASE 21: Backward Fill with NaN as propagation value when target is "null"
 // Backward fill propagating NaN to earlier null positions
-const bwdNanDf = $df.data([
+const bwdNanDf = $df.dataFrame([
     { a: null },
     { a: null },
     { a: NaN },
@@ -424,7 +424,7 @@ if (resBwdNan[3].bwd_null !== 10) throw new Error("Row 3 should remain 10");
 // EDGE CASE 22: Date and Object Preservations across fill
 const d1 = new Date("2026-01-01T00:00:00Z");
 const d2 = new Date("2026-01-02T00:00:00Z");
-const dateDf = $df.data([
+const dateDf = $df.dataFrame([
     { dt: d1 },
     { dt: null },
     { dt: d2 }
@@ -435,7 +435,7 @@ const resDate = dateDf.select([
 if (resDate[1].dt_fwd !== d1) throw new Error("Date object reference / value failed during forward fill");
 
 // EDGE CASE 23: Backward strategy with limit: 0
-const bwdLimitZeroDf = $df.data([
+const bwdLimitZeroDf = $df.dataFrame([
     { a: null },
     { a: null },
     { a: 50 }
@@ -448,7 +448,7 @@ if (resBwdLimitZero[0].bwd_l0 !== null || resBwdLimitZero[1].bwd_l0 !== null) {
 }
 
 // EDGE CASE 24: Single-Row DataFrame (Height 1) edge cases
-const singleRowNullDf = $df.data([{ v: null }]);
+const singleRowNullDf = $df.dataFrame([{ v: null }]);
 const resSingleNull = singleRowNullDf.select([
     $df.col("v").fill("null", { value: 42 }).alias("val_filled"),
     $df.col("v").fill("null", { strategy: "forward" }).alias("fwd"),
@@ -458,7 +458,7 @@ if (resSingleNull[0].val_filled !== 42) throw new Error("Single row null scalar 
 if (resSingleNull[0].fwd !== null) throw new Error("Single row null forward fill should remain null");
 if (resSingleNull[0].bwd !== null) throw new Error("Single row null backward fill should remain null");
 
-const singleRowValidDf = $df.data([{ v: 100 }]);
+const singleRowValidDf = $df.dataFrame([{ v: 100 }]);
 const resSingleValid = singleRowValidDf.select([
     $df.col("v").fill("null", { value: 42 }).alias("val_filled"),
     $df.col("v").fill("null", { strategy: "forward" }).alias("fwd")
@@ -467,7 +467,7 @@ if (resSingleValid[0].val_filled !== 100) throw new Error("Single row valid valu
 if (resSingleValid[0].fwd !== 100) throw new Error("Single row valid forward fill modified unexpectedly");
 
 // EDGE CASE 25: Column with explicit undefined values filled via target "null" and target "all"
-const undefDf = $df.data([
+const undefDf = $df.dataFrame([
     { u: undefined },
     { u: 20 },
     { u: undefined }
@@ -482,7 +482,7 @@ if (resUndef[2].u_fwd !== 20) throw new Error("Forward fill of undefined row 2 s
 
 // EDGE CASE 26: Strict FillOptions with { value: ... } object argument pattern
 {
-    const dfOpts = $df.data({
+    const dfOpts = $df.dataFrame({
         a: [10, null, 30],
         b: [null, 20, null]
     });
@@ -500,7 +500,7 @@ if (resUndef[2].u_fwd !== 20) throw new Error("Forward fill of undefined row 2 s
 // EDGE CASE 27: Filling with BigInt and Date scalar values
 {
     const dFallback = new Date("2026-01-01T00:00:00Z");
-    const dfBigDate = $df.data({
+    const dfBigDate = $df.dataFrame({
         big: [100n, null, 300n],
         dt: [new Date("2025-01-01T00:00:00Z"), null, new Date("2027-01-01T00:00:00Z")]
     });
@@ -515,7 +515,7 @@ if (resUndef[2].u_fwd !== 20) throw new Error("Forward fill of undefined row 2 s
 
 // EDGE CASE 28: Multi-Column Expression Projection with FillOptions
 {
-    const dfMulti = $df.data({
+    const dfMulti = $df.dataFrame({
         x: [1, null, 3],
         y: [null, 20, null],
         z: [100, 200, null]
@@ -531,7 +531,7 @@ if (resUndef[2].u_fwd !== 20) throw new Error("Forward fill of undefined row 2 s
 
 // EDGE CASE 29: Limit larger than total consecutive gap size (Graceful boundary saturation)
 {
-    const dfGap = $df.data({
+    const dfGap = $df.dataFrame({
         v: [10, null, null, 40]
     });
     const resGap = dfGap.select(
@@ -544,7 +544,7 @@ if (resUndef[2].u_fwd !== 20) throw new Error("Forward fill of undefined row 2 s
 
 // EDGE CASE 30: All statistical strategies on mixed numeric series (min, max, mean, zero, one)
 {
-    const dfStats = $df.data({
+    const dfStats = $df.dataFrame({
         v: [10, null, 30, null] // non-nulls: 10, 30 -> min=10, max=30, mean=20
     });
     const resStats = dfStats.select([

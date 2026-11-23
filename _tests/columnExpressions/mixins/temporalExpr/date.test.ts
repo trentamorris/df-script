@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.date tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { datetime_str: "2026-05-25T10:37:16.123Z" },
     { datetime_str: null }
 ], { datetime_str: $df.Datetime });

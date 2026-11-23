@@ -7,14 +7,14 @@ console.log("Running StandardExpr.filter tests...");
 const colData = [10, 20, 30, 40, 50];
 const cols = { a: colData };
 const expr = $df.col("a").filter($df.col("a").gt(25));
-const dfStandalone = $df.data({ a: colData });
+const dfStandalone = $df.dataFrame({ a: colData });
 const resStandalone = dfStandalone.select([expr.alias("res")]).toDicts() as any[];
 if (resStandalone.length !== 5 || resStandalone[0].res !== null || resStandalone[1].res !== null || resStandalone[2].res !== 30 || resStandalone[3].res !== 40 || resStandalone[4].res !== 50) {
     throw new Error(`1. StandardExpr.filter standalone evaluation failed: ${JSON.stringify(resStandalone)}`);
 }
 
 // 2. Filter in select with aggregation (.sum(), .mean(), .min(), .max(), .count())
-const df1 = $df.data({ a: [10, 20, 30, 40, 50] });
+const df1 = $df.dataFrame({ a: [10, 20, 30, 40, 50] });
 const resAgg = df1.select([
     $df.col("a").filter($df.col("a").gt(25)).sum().alias("sum_gt_25"),
     $df.col("a").filter($df.col("a").lt(35)).mean().alias("mean_lt_35"),
@@ -28,7 +28,7 @@ if (resAgg[0].sum_gt_25 !== 120 || resAgg[0].mean_lt_35 !== 20 || resAgg[0].min_
 }
 
 // 3. Filter with nulls / isNotNull in aggregation
-const df2 = $df.data({ a: [10, null, 30, null, 50] });
+const df2 = $df.dataFrame({ a: [10, null, 30, null, 50] });
 const resNullAgg = df2.select([
     $df.col("a").filter($df.col("a").isNotNull()).sum().alias("sum_clean"),
     $df.col("a").filter($df.col("a").isNotNull()).count().alias("count_clean")
@@ -39,7 +39,7 @@ if (resNullAgg[0].sum_clean !== 90 || resNullAgg[0].count_clean !== 3) {
 }
 
 // 4. Filter with NaNs / isNotNan in aggregation
-const dfNans = $df.data({ a: [10, NaN, 30, NaN, 50] });
+const dfNans = $df.dataFrame({ a: [10, NaN, 30, NaN, 50] });
 const resNanAgg = dfNans.select([
     $df.col("a").filter($df.col("a").isNotNan()).sum().alias("sum_no_nan"),
     $df.col("a").filter($df.col("a").isNotNan()).mean().alias("mean_no_nan")
@@ -50,7 +50,7 @@ if (resNanAgg[0].sum_no_nan !== 90 || resNanAgg[0].mean_no_nan !== 30) {
 }
 
 // 5. Conditional aggregation in groupBy across multiple categories
-const dfGroup = $df.data({
+const dfGroup = $df.dataFrame({
     dept: ["Sales", "Sales", "Sales", "Eng", "Eng", "Eng"],
     type: ["FT", "Contractor", "FT", "FT", "Contractor", "Contractor"],
     salary: [100, 50, 120, 200, 80, 90]
@@ -71,7 +71,7 @@ if (engRow.avg_ft !== 200 || engRow.avg_contractor !== 85) {
 }
 
 // 6. withColumns element-wise masking
-const dfWithCol = $df.data({ val: [10, 20, 30, 40] });
+const dfWithCol = $df.dataFrame({ val: [10, 20, 30, 40] });
 const resWithCol = dfWithCol.withColumns(
     $df.col("val").filter($df.col("val").ge(25)).alias("masked")
 ).toDicts() as any[];
@@ -104,7 +104,7 @@ const resLitFalse = dfWithCol.select([
 if (resLitFalse[0].cnt !== 0) throw new Error("10. Lit false filter failed");
 
 // 11. String column filtering with .str namespace
-const dfStrings = $df.data({
+const dfStrings = $df.dataFrame({
     name: ["Alice", "Bob", "Alex", "Charlie", "Anna"],
     score: [85, 90, 75, 95, 80]
 });
@@ -115,28 +115,28 @@ const resStrFilter = dfStrings.select([
 if (resStrFilter[0].avg_a_names !== 80) throw new Error("11. String filter failed");
 
 // 12. Negative numbers filtering
-const dfNeg = $df.data({ v: [-10, -5, 0, 5, 10] });
+const dfNeg = $df.dataFrame({ v: [-10, -5, 0, 5, 10] });
 const resNeg = dfNeg.select([
     $df.col("v").filter($df.col("v").lt(0)).sum().alias("neg_sum")
 ]).toDicts() as any[];
 if (resNeg[0].neg_sum !== -15) throw new Error("12. Negative filter failed");
 
 // 13. Zero and signed zero preservation
-const dfZeros = $df.data({ v: [0, -0, +0, 10] });
+const dfZeros = $df.dataFrame({ v: [0, -0, +0, 10] });
 const resZeros = dfZeros.select([
     $df.col("v").filter($df.col("v").eq(0)).count().alias("zero_count")
 ]).toDicts() as any[];
 if (resZeros[0].zero_count !== 3) throw new Error("13. Zero count filter failed");
 
 // 14. Boolean column filtering (false !== null)
-const dfBools = $df.data({ b: [true, false, true, false, null] });
+const dfBools = $df.dataFrame({ b: [true, false, true, false, null] });
 const resBools = dfBools.select([
     $df.col("b").filter($df.col("b").eq(false)).count().alias("false_count")
 ]).toDicts() as any[];
 if (resBools[0].false_count !== 2) throw new Error("14. False boolean count failed");
 
 // 15. Empty string column filtering with implode
-const dfEmptyStr = $df.data({ s: ["", "abc", "", "def", null] });
+const dfEmptyStr = $df.dataFrame({ s: ["", "abc", "", "def", null] });
 const resEmptyStr = dfEmptyStr.select([
     $df.col("s").filter($df.col("s").eq("")).implode().alias("empty_str_list")
 ]).toDicts() as any[];
@@ -145,7 +145,7 @@ if (JSON.stringify(resEmptyStr[0].empty_str_list) !== JSON.stringify(["", null, 
 }
 
 // 16. Multiple condition combining with .and()
-const dfMulti = $df.data({ a: [1, 2, 3, 4, 5], b: [10, 20, 30, 40, 50] });
+const dfMulti = $df.dataFrame({ a: [1, 2, 3, 4, 5], b: [10, 20, 30, 40, 50] });
 const resAnd = dfMulti.select([
     $df.col("b").filter($df.col("a").gt(1).and($df.col("a").lt(5))).sum().alias("b_sum")
 ]).toDicts() as any[];
@@ -167,7 +167,7 @@ const resNot = dfMulti.select([
 if (resNot[0].b_sum !== 120) throw new Error("18. .not() filter failed");
 
 // 19. Chained mathematical transformations after filter
-const dfMath = $df.data({ a: [-8, 8, 27, 64] });
+const dfMath = $df.dataFrame({ a: [-8, 8, 27, 64] });
 const resMath = dfMath.select([
     $df.col("a").filter($df.col("a").gt(0)).cbrt().sum().alias("cbrt_sum")
 ]).toDicts() as any[];
@@ -176,14 +176,14 @@ if (Math.abs(resMath[0].cbrt_sum - 9) > 1e-6) throw new Error("19. Chained math 
 
 // 20. Large scale 10,000 row aggregation
 const largeArr = Array.from({ length: 10000 }, (_, i) => i);
-const dfLarge = $df.data({ id: largeArr });
+const dfLarge = $df.dataFrame({ id: largeArr });
 const resLarge = dfLarge.select([
     $df.col("id").filter($df.col("id").ge(9000)).count().alias("count_top_1000")
 ]).toDicts() as any[];
 if (resLarge[0].count_top_1000 !== 1000) throw new Error("20. Large scale filter count failed");
 
 // 21. Imploding filtered values in groupBy
-const dfEvents = $df.data({
+const dfEvents = $df.dataFrame({
     userId: [1, 1, 1, 2, 2],
     event: ["click", "error", "buy", "click", "error"],
     isError: [false, true, false, false, true]
@@ -199,7 +199,7 @@ if (JSON.stringify(user1.errors) !== JSON.stringify([null, "error", null]) || JS
 }
 
 // 22. Cumulative aggregation on filtered values (nulls skipped in cumSum)
-const dfCum = $df.data({ val: [10, 20, 30, 40] });
+const dfCum = $df.dataFrame({ val: [10, 20, 30, 40] });
 const resCum = dfCum.withColumns(
     $df.col("val").filter($df.col("val").ne(20)).cumSum().alias("cum_sum_no_20")
 ).toDicts() as any[];
@@ -209,7 +209,7 @@ if (resCum[0].cum_sum_no_20 !== 10 || resCum[1].cum_sum_no_20 !== 10 || resCum[2
 
 
 // 23. Edge Case: Date predicate comparison filtering
-const dfDates = $df.data({
+const dfDates = $df.dataFrame({
     d: [new Date("2026-01-01"), new Date("2026-06-01"), new Date("2026-12-31")],
     v: [10, 20, 30]
 });
@@ -221,7 +221,7 @@ if (resDates[0].res !== null || resDates[1].res !== 20 || resDates[2].res !== 30
 }
 
 // 24. Edge Case: BigInt predicate comparison filtering
-const dfBigInts = $df.data({
+const dfBigInts = $df.dataFrame({
     b: [10n, 20n, 30n],
     v: ["a", "b", "c"]
 });
@@ -233,7 +233,7 @@ if (resBigInts[0].res !== null || resBigInts[1].res !== "b" || resBigInts[2].res
 }
 
 // 25. Edge Case: Predicate column containing NaN and null
-const dfPredicateNulls = $df.data({
+const dfPredicateNulls = $df.dataFrame({
     a: [NaN, 10, null, 20],
     v: [1, 2, 3, 4]
 });
@@ -245,7 +245,7 @@ if (resPredNulls[0].res !== null || resPredNulls[1].res !== 2 || resPredNulls[2]
 }
 
 // 26. Edge Case: Multi-column left projection with filter
-const dfMultiFilter = $df.data({
+const dfMultiFilter = $df.dataFrame({
     a: [10, 20, 30],
     b: [100, 200, 300]
 });
@@ -259,7 +259,7 @@ if (resMultiFilter[0].a !== null || resMultiFilter[0].b !== null ||
 }
 
 // 27. Edge Case: Chained filter expressions (.filter().filter())
-const dfChain = $df.data({ a: [10, 20, 30] });
+const dfChain = $df.dataFrame({ a: [10, 20, 30] });
 const resChain = dfChain.select([
     $df.col("a").filter($df.col("a").gt(10)).filter($df.col("a").lt(30)).alias("res")
 ]).toDicts() as any[];
@@ -268,7 +268,7 @@ if (resChain[0].res !== null || resChain[1].res !== 20 || resChain[2].res !== nu
 }
 
 // 28. Edge Case: Single-row DataFrame
-const dfSingle = $df.data({ a: [10] });
+const dfSingle = $df.dataFrame({ a: [10] });
 const resSingleMatch = dfSingle.select([$df.col("a").filter($df.col("a").eq(10)).alias("res")]).toDicts() as any[];
 const resSingleMismatch = dfSingle.select([$df.col("a").filter($df.col("a").eq(99)).alias("res")]).toDicts() as any[];
 if (resSingleMatch[0].res !== 10 || resSingleMismatch[0].res !== null) {
@@ -276,7 +276,7 @@ if (resSingleMatch[0].res !== 10 || resSingleMismatch[0].res !== null) {
 }
 
 // 29. Edge Case: Empty DataFrame (schema preserved)
-const dfEmpty = $df.data([{ a: 1 }]).filter($df.col("a").eq(999));
+const dfEmpty = $df.dataFrame([{ a: 1 }]).filter($df.col("a").eq(999));
 const resEmpty = dfEmpty.select([$df.col("a").filter($df.col("a").eq(1)).alias("res")]).toDicts();
 if (resEmpty.length !== 0) {
     throw new Error("29. Empty DataFrame filter failed");

@@ -478,7 +478,7 @@ export function clamp<T extends number | bigint>(
     if (!options) return val;
     const { min = null, max = null, safe = true } = options;
 
-    if (min !== null && max !== null && (min as any) > (max as any)) return min as T;
+    if (min !== null && max !== null && (min as number) > (max as number)) return min as T;
 
     let v = val;
     if (safe && typeof v === "number") {

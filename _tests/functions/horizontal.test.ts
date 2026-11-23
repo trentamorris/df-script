@@ -5,8 +5,12 @@ console.log("=========================================");
 console.log("STARTING COLUMN EXPRESSION $df.horizontal() TESTS...");
 console.log("=========================================");
 
+function assert(cond: boolean, msg: string): void {
+    if (!cond) throw new Error(msg);
+}
+
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         a: [1, 10, 100],
         b: [2, 20, 200],
         c: [3, 30, 300]
@@ -31,7 +35,7 @@ try {
     if (resMean[2].mean !== 200) throw new Error("Row 2 mean failed: " + resMean[2].mean);
 
     // 3. Horizontal evaluation with boolean checks (gt and all / any)
-    const boolDf = $df.data({
+    const boolDf = $df.dataFrame({
         x: [5, -2, 10],
         y: [8, -3, -1],
         z: [1, -5, 4]
@@ -95,7 +99,7 @@ try {
     }
 
     // 8. Empty dataframe / 0 rows
-    const emptyDf = $df.data({
+    const emptyDf = $df.dataFrame({
         a: [] as number[],
         b: [] as number[]
     });
@@ -107,7 +111,7 @@ try {
     }
 
     // 9. Null and undefined handling
-    const nullDf = $df.data({
+    const nullDf = $df.dataFrame({
         a: [1, null, undefined, 4],
         b: [null, 2, undefined, 5]
     });
@@ -146,7 +150,7 @@ try {
     }
 
     // 13. Mixed string/numeric data (array coerces to common Utf8 array type)
-    const mixedTypeDf = $df.data({
+    const mixedTypeDf = $df.dataFrame({
         name: ["Alice", "Bob"],
         code: ["A1", "B2"],
         city: ["NYC", "LA"]
@@ -157,6 +161,55 @@ try {
     if (resMixed[0].str_arr[0] !== "Alice" || resMixed[0].str_arr[1] !== "A1" || resMixed[0].str_arr[2] !== "NYC") {
         throw new Error("Mixed string array failed");
     }
+    // --- Additional Extreme Edge Cases ---
+    (() => {
+    const df = $df.dataFrame({ a: [1, 2, null], b: [10, null, 30], c: [100, 200, 300] });
+
+    // 1. Horizontal sum across columns with nulls
+    const r1 = df.select($df.horizontal("a", "b").sum().alias("s")).toDicts() as any[];
+    assert(r1[0].s === 11 && r1[1].s === 2 && r1[2].s === 30, "1: Horizontal sum with nulls failed");
+
+    // 2. Horizontal min and max
+    const r2 = df.select(
+        $df.horizontal("a", "b", "c").min().alias("mn"),
+        $df.horizontal("a", "b", "c").max().alias("mx")
+    ).toDicts() as any[];
+    assert(r2[0].mn === 1 && r2[0].mx === 100 && r2[1].mn === 2 && r2[1].mx === 200, "2: Horizontal min/max failed");
+
+    // 3. Horizontal mean
+    const r3 = df.select($df.horizontal("a", "b").mean().alias("m")).toDicts() as any[];
+    assert(r3[0].m === 5.5 && r3[1].m === 2 && r3[2].m === 30, "3: Horizontal mean failed");
+
+    // 4. Array argument syntax $df.horizontal(["a", "b"])
+    const r4 = df.select($df.horizontal(["a", "b"]).sum().alias("s")).toDicts() as any[];
+    assert(r4[0].s === 11, "4: Array arg syntax failed");
+
+    // 5. Selector syntax $df.horizontal($df.all())
+    const r5 = df.select($df.horizontal($df.all()).sum().alias("s")).toDicts() as any[];
+    assert(r5[0].s === 111 && r5[1].s === 202 && r5[2].s === 330, "5: Selector $df.all() failed");
+
+    // 6. Horizontal eval with $df.element()
+    const r6 = df.select($df.horizontal("a", "c").eval($df.element<number>().mul(2)).alias("e")).toDicts() as any[];
+    assert(JSON.stringify(r6[0].e) === "[2,200]", "6: Horizontal eval failed");
+
+    // 7. Horizontal with literal expression
+    const r7 = df.select($df.horizontal("a", $df.lit(5)).sum().alias("s")).toDicts() as any[];
+    assert(r7[0].s === 6 && r7[2].s === 5, "7: Horizontal with lit() failed");
+
+    // 8. Horizontal on all-null row
+    const dfAllNull = $df.dataFrame({ a: [null], b: [null] });
+    const r8 = dfAllNull.select($df.horizontal("a", "b").min().alias("mn")).toDicts() as any[];
+    assert(r8[0].mn === null, "8: All-null row horizontal min should be null");
+
+    // 9. Horizontal on 0-row DataFrame
+    const dfEmpty = $df.dataFrame({ a: [], b: [] });
+    const r9 = dfEmpty.select($df.horizontal("a", "b").sum().alias("s"));
+    assert(r9.height === 0 && r9.width === 1, "9: 0-row DataFrame horizontal failed");
+
+    // 10. Single column horizontal
+    const r10 = df.select($df.horizontal("c").sum().alias("s")).toDicts() as any[];
+    assert(r10[0].s === 100 && r10[2].s === 300, "10: Single column horizontal failed");
+    })();
 
     console.log("✓ $df.horizontal() tests passed successfully!");
 } catch (err) {

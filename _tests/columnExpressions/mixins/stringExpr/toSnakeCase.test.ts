@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toSnakeCase tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { raw: "HelloWorld" },
     { raw: null }
 ]);

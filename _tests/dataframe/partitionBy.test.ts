@@ -6,7 +6,7 @@ console.log("STARTING DATAFRAME partitionBy() TESTS...");
 console.log("=========================================");
 
 try {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["Engineering", "Sales", "Engineering", "HR", "Sales"],
         name: ["Alice", "Bob", "Charlie", "David", "Eve"],
         salary: [100, 80, 110, 70, 85]
@@ -48,7 +48,7 @@ try {
     if (exprParts.length !== 3) throw new Error(`Expected 3 partitions via expression, got ${exprParts.length}`);
 
     // 4. Multi-column partitionBy
-    const multiDf = $df.data({
+    const multiDf = $df.dataFrame({
         cat: ["A", "A", "B", "B"],
         sub: [1, 2, 1, 1],
         val: [10, 20, 30, 40]
@@ -57,7 +57,7 @@ try {
     if (multiParts.length !== 3) throw new Error(`Expected 3 partitions for multi-column, got ${multiParts.length}`);
 
     // 5. Empty dataframe partitioning
-    const emptyDf = $df.data({
+    const emptyDf = $df.dataFrame({
         k: [] as string[],
         v: [] as number[]
     });

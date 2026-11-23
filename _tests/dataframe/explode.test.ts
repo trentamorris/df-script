@@ -8,7 +8,7 @@ console.log("=========================================");
 
 try {
     // 1. DataFrame.explode with Array of ColumnExprs
-    const df1 = $df.data({
+    const df1 = $df.dataFrame({
         id: [1, 2],
         list1: [[10, 20], [30]],
         list2: [["a", "b"], ["c"]]
@@ -27,13 +27,13 @@ try {
     console.log("✓ Pass: 2. DataFrame.explode with Selectors");
 
     // 3. Explode empty DataFrame (0 rows)
-    const emptyDf = $df.data({ id: [] as number[], list: [] as number[][] });
+    const emptyDf = $df.dataFrame({ id: [] as number[], list: [] as number[][] });
     const explodedEmpty = emptyDf.explode("list").toDicts();
     if (explodedEmpty.length !== 0) throw new Error(`Expected empty exploded length 0, got ${explodedEmpty.length}`);
     console.log("✓ Pass: 3. Explode on 0-row DataFrame");
 
     // 4. Explode TypedArrays
-    const typedDf = $df.data({
+    const typedDf = $df.dataFrame({
         category: ["A", "B"],
         values: [new Int32Array([100, 200]), new Int32Array([300])]
     });
@@ -43,7 +43,7 @@ try {
     console.log("✓ Pass: 4. Explode TypedArray columns");
 
     // 5. Options combinations: emptyAsNull & keepNulls
-    const mixedDf = $df.data({
+    const mixedDf = $df.dataFrame({
         id: [1, 2, 3, 4],
         arr: [[1, 2], [], null, [3]]
     });
@@ -64,7 +64,7 @@ try {
     console.log("✓ Pass: 5. Explode options (emptyAsNull & keepNulls)");
 
     // 6. Exploding mixed array sizes and nulls
-    const mixedListsDf = $df.data({
+    const mixedListsDf = $df.dataFrame({
         id: [1, 2, 3],
         val: [[10, 20], [99], null]
     });
@@ -74,7 +74,7 @@ try {
     console.log("✓ Pass: 6. Exploding mixed array sizes and nulls");
 
     // 7. Parallel explode mismatch assertion
-    const mismatchDf = $df.data({
+    const mismatchDf = $df.dataFrame({
         a: [[1, 2], [3]],
         b: [[10], [20, 30]]
     });
@@ -111,21 +111,21 @@ try {
     console.log("✓ Pass: 9. ColumnExpression.arr.explode() with alias");
 
     // 10. Single-row DataFrame explosion
-    const singleRowDf = $df.data({ id: [1], items: [[10, 20, 30, 40]] });
+    const singleRowDf = $df.dataFrame({ id: [1], items: [[10, 20, 30, 40]] });
     const singleExploded = singleRowDf.explode("items").toDicts();
     if (singleExploded.length !== 4) throw new Error(`Single row expected 4 rows, got ${singleExploded.length}`);
     if (singleExploded[3].items !== 40) throw new Error("Single row explode last element failed");
     console.log("✓ Pass: 10. Single-row DataFrame explosion");
 
     // 11. Arrays with internal nulls/undefined values
-    const internalNullsDf = $df.data({ id: [1, 2], val: [[10, null, 30], [null, 40]] });
+    const internalNullsDf = $df.dataFrame({ id: [1, 2], val: [[10, null, 30], [null, 40]] });
     const explodedInternalNulls = internalNullsDf.explode("val").toDicts();
     if (explodedInternalNulls.length !== 5) throw new Error(`Internal nulls expected 5 rows, got ${explodedInternalNulls.length}`);
     if (explodedInternalNulls[1].val !== null || explodedInternalNulls[3].val !== null) throw new Error("Internal null elements failed");
     console.log("✓ Pass: 11. Arrays with internal null elements");
 
     // 12. Arrays of objects / structs
-    const structArrayDf = $df.data({
+    const structArrayDf = $df.dataFrame({
         id: [1, 2],
         items: [[{ x: 10, y: "a" }, { x: 20, y: "b" }], [{ x: 30, y: "c" }]]
     });
@@ -137,7 +137,7 @@ try {
     // 13. Arrays of Date objects & booleans
     const d1 = new Date("2026-01-01");
     const d2 = new Date("2026-02-02");
-    const datesBoolsDf = $df.data({
+    const datesBoolsDf = $df.dataFrame({
         id: [1, 2],
         dates: [[d1, d2], [d1]],
         bools: [[true, false], [true]]
@@ -148,7 +148,7 @@ try {
     console.log("✓ Pass: 13. Arrays of Date objects and booleans");
 
     // 14. Nested multi-dimensional arrays
-    const nestedArrayDf = $df.data({
+    const nestedArrayDf = $df.dataFrame({
         id: [1, 2],
         matrix: [[[1, 2], [3]], [[4, 5]]]
     });
@@ -182,14 +182,14 @@ try {
     console.log("✓ Pass: 17. Exploding in withColumns()");
 
     // 18. String column str.explode()
-    const strDf = $df.data({ word: ["cat", "dog"] });
+    const strDf = $df.dataFrame({ word: ["cat", "dog"] });
     const explodedStr = strDf.withColumns($df.col("word").str.explode().alias("chars")).toDicts();
     if (explodedStr.length !== 2) throw new Error(`str.explode expected 2 rows, got ${explodedStr.length}`);
     if (JSON.stringify(explodedStr[0].chars) !== JSON.stringify(["c", "a", "t"])) throw new Error("str.explode chars failed");
     console.log("✓ Pass: 18. String column str.explode()");
 
     // 19. All empty arrays [ [], [], [] ] with options
-    const allEmptyDf = $df.data({ id: [1, 2, 3], list: [[], [], []] });
+    const allEmptyDf = $df.dataFrame({ id: [1, 2, 3], list: [[], [], []] });
     const allEmptyDefault = allEmptyDf.explode("list").toDicts();
     if (allEmptyDefault.length !== 3) throw new Error(`All empty default expected 3 rows of null, got ${allEmptyDefault.length}`);
     if (allEmptyDefault[0].list !== null) throw new Error("All empty default row 0 failed");
@@ -199,7 +199,7 @@ try {
     console.log("✓ Pass: 19. All empty arrays [ [], [], [] ] with options");
 
     // 20. All null rows [ null, null, null ] with options
-    const allNullDf = $df.data({ id: [1, 2, 3], list: [null, null, null] });
+    const allNullDf = $df.dataFrame({ id: [1, 2, 3], list: [null, null, null] });
     const allNullDefault = allNullDf.explode("list").toDicts();
     if (allNullDefault.length !== 3) throw new Error(`All null default expected 3 rows of null, got ${allNullDefault.length}`);
 
@@ -215,7 +215,7 @@ try {
 
     // 22. Large array explosion (10,000 elements)
     const largeArr = Array.from({ length: 10000 }, (_, i) => i);
-    const largeDf = $df.data({ id: [1], items: [largeArr] });
+    const largeDf = $df.dataFrame({ id: [1], items: [largeArr] });
     const explodedLarge = largeDf.explode("items").toDicts();
     if (explodedLarge.length !== 10000) throw new Error(`Large array expected 10,000 rows, got ${explodedLarge.length}`);
     if (explodedLarge[9999].items !== 9999) throw new Error("Large array last item failed");

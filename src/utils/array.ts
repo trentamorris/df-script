@@ -27,7 +27,7 @@ export function isTypedArray(v: unknown): v is AnyTypedArray {
     return tag !== "[object DataView]" && tag.endsWith("Array]");
 }
 
-export function isArrayOrTypedArray(v: unknown): v is any[] | AnyTypedArray {
+export function isArrayOrTypedArray(v: unknown): v is unknown[] | AnyTypedArray {
     return Array.isArray(v) || isTypedArray(v);
 }
 
@@ -38,11 +38,11 @@ export function toValidArray<T>(
     const { clone = true, wrapNull = false } = options;
     if (val == null) return wrapNull ? ([val] as T[]) : [];
     if (Array.isArray(val)) return clone ? [...val] : (val as T[]);
-    if (isTypedArray(val)) return Array.from(val as any);
+    if (isTypedArray(val)) return Array.from(val as ArrayLike<T>);
     return [val as T];
 }
 
-export function getArrayElement(arr: any[] | AnyTypedArray, index: number, nullOnOob: boolean): any {
+export function getArrayElement(arr: unknown[] | AnyTypedArray, index: number, nullOnOob: boolean): unknown {
     const len = arr.length;
     const isOob = index < -len || index >= len;
     if (isOob && !nullOnOob) {
@@ -155,7 +155,7 @@ export function isArrayOfType(
 /**
  * Coerces array items to a target type contract in a single optimized pass.
  */
-export function toArrayOfType<T = any>(
+export function toArrayOfType<T = unknown>(
     val: unknown,
     type: ArrayItemType = "any",
     options: IsArrayOfTypeOptionsParams = {}
@@ -175,10 +175,10 @@ export function toArrayOfType<T = any>(
 
     if (len === 0) {
         if (!allowEmpty) throw new ComputeError("Expected non-empty array");
-        return (isTypedArrayTarget ? new (type as TypedArrayConstructor)(0) : []) as any;
+        return (isTypedArrayTarget ? new (type as TypedArrayConstructor)(0) : []) as T[];
     }
 
-    const res: any = isTypedArrayTarget ? new (type as TypedArrayConstructor)(len) : new Array(len);
+    const res = (isTypedArrayTarget ? new (type as TypedArrayConstructor)(len) : new Array(len)) as unknown[];
     let matchCount = 0;
 
     for (let i = 0; i < len; i++) {
@@ -203,12 +203,12 @@ export function toArrayOfType<T = any>(
         if (matchCount < len) res.length = matchCount;
     }
 
-    return res;
+    return res as T[];
 }
 
 export function compareScalarValues(
-    a: any,
-    b: any,
+    a: unknown,
+    b: unknown,
     { descending = false, nullsLast = true, customComp }: SortArrayOptions = {}
 ): number {
     const isDesc = Boolean(Array.isArray(descending) ? descending[0] : descending);
@@ -233,7 +233,7 @@ export function compareScalarValues(
     }
 
     if (typeA !== typeB) return typeA < typeB ? -1 : 1;
-    if (typeA === "string") return a.localeCompare(b) * dir;
+    if (typeA === "string") return (a as string).localeCompare(b as string) * dir;
 
     const isDateA = isValidDateObj(a);
     const isDateB = isValidDateObj(b);
@@ -246,12 +246,12 @@ export function compareScalarValues(
 export function sortArray(
     arr: unknown,
     { descending = false, nullsLast = true, customComp }: SortArrayOptions = {}
-): any[] {
+): unknown[] {
     if (!isArrayOrTypedArray(arr)) return [];
 
-    const list = arr as any;
+    const list = arr as unknown[];
     const len = list.length;
-    if (len <= 1) return isTypedArray(arr) ? Array.from(list) : (len === 0 ? [] : [list[0]]);
+    if (len <= 1) return isTypedArray(arr) ? Array.from(list as ArrayLike<unknown>) : (len === 0 ? [] : [list[0]]);
 
     const isDesc = Boolean(Array.isArray(descending) ? descending[0] : descending);
 
@@ -275,10 +275,10 @@ export function getArrayStats(arr: unknown): {
     sum: number | null;
     product: number | null;
     count: number;
-    min: any;
-    max: any;
-    nanMin: any;
-    nanMax: any;
+    min: unknown;
+    max: unknown;
+    nanMin: unknown;
+    nanMax: unknown;
     minIdx: number | null;
     maxIdx: number | null;
     mean: number | null;
@@ -293,13 +293,13 @@ export function getArrayStats(arr: unknown): {
     if (!isArrayOrTypedArray(arr)) {
         return DEFAULT_STATS;
     }
-    const len = (arr as any).length;
+    const len = (arr as ArrayLike<unknown>).length;
     if (len === 0) {
         return DEFAULT_STATS;
     }
 
-    let minVal: any = null;
-    let maxVal: any = null;
+    let minVal: unknown = null;
+    let maxVal: unknown = null;
     let minIdx: number | null = null;
     let maxIdx: number | null = null;
     let count = 0;
@@ -312,7 +312,7 @@ export function getArrayStats(arr: unknown): {
     let M2 = 0;
 
     for (let i = 0; i < len; i++) {
-        const val = (arr as any)[i];
+        const val = (arr as ArrayLike<unknown>)[i];
         if (val == null) {
             nullCount++;
             continue;
@@ -378,18 +378,18 @@ export function getArrayStats(arr: unknown): {
 
 
 export function getUniqueArrayStats(
-    arr: ArrayLike<any>,
+    arr: ArrayLike<unknown>,
     {
         strict = false,
         keySelector
     }: UniqueArrayStatsOptions = {}
-): { values: any[]; count: number; frequencies: Map<any, number> } {
+): { values: unknown[]; count: number; frequencies: Map<unknown, number> } {
     const list = Array.from(arr);
-    const frequencies = new Map<any, number>();
+    const frequencies = new Map<unknown, number>();
 
     if (strict) {
         const selector = keySelector ?? toCanonicalString;
-        const seen = new Map<string, { val: any; count: number }>();
+        const seen = new Map<string, { val: unknown; count: number }>();
         const len = list.length;
         for (let i = 0; i < len; i++) {
             const val = list[i];
@@ -402,7 +402,7 @@ export function getUniqueArrayStats(
             }
         }
 
-        const values: any[] = [];
+        const values: unknown[] = [];
         for (const entry of seen.values()) {
             values.push(entry.val);
         }
@@ -490,7 +490,7 @@ export function stepSliceArray<T>(
             }
         }
     }
-    return res;
+    return res as T[];
 }
 
 /**
@@ -498,7 +498,7 @@ export function stepSliceArray<T>(
  * Excludes nullish checks and formats nested arrays cleanly.
  */
 export function joinArray(
-    arr: ArrayLike<any>,
+    arr: ArrayLike<unknown>,
     separator: string = ",",
     {
         ignoreNulls = false,
@@ -532,27 +532,27 @@ export function joinArray(
 }
 
 export function fillSequence(
-    targetArray: any,
-    initialValue: any,
+    targetArray: unknown[] | AnyTypedArray,
+    initialValue: unknown,
     options: FillSeqOptions = {}
 ): void {
     const len = targetArray.length;
     const {
         mode = "cumulative",
         step = 1,
-        coerce = (v: any) => v,
+        coerce = (v: unknown) => v,
         condition,
         reverse = false,
         startIndex = reverse ? len - 1 : 0,
         endIndex = reverse ? -1 : len
-    } = options as any;
+    } = options;
 
     const increment = reverse ? -1 : 1;
     const start = startIndex;
     const end = endIndex;
 
-    const writeVal = (idx: number, val: any) => {
-        if (!condition || condition(targetArray[idx], idx, targetArray)) {
+    const writeVal = (idx: number, val: unknown) => {
+        if (!condition || condition(targetArray[idx], idx, targetArray as unknown[])) {
             targetArray[idx] = coerce(val);
         }
     };
@@ -574,13 +574,13 @@ export function fillSequence(
                         originalValue: targetArray[i],
                         absoluteIndex: i,
                         targetArray
-                    })
+                    } as Parameters<typeof step>[0])
                 );
                 relativeIdx++;
             }
         } else {
             for (let i = start; reverse ? i > end : i < end; i += increment) {
-                writeVal(i, initialValue + i * step);
+                writeVal(i, (initialValue as number) + i * step);
             }
         }
     } else {
@@ -600,9 +600,9 @@ export function fillSequence(
                         originalValue: targetArray[i],
                         absoluteIndex: i,
                         targetArray
-                    });
+                    } as Parameters<typeof step>[0]);
                 } else {
-                    current = current + step;
+                    current = (current as number) + step;
                 }
                 writeVal(i, current);
             }
@@ -611,7 +611,7 @@ export function fillSequence(
     }
 }
 
-function _getSortedValidNumbers(values: ArrayLike<any>): Float64Array | null {
+function _getSortedValidNumbers(values: ArrayLike<unknown>): Float64Array | null {
     const len = values.length;
     let validCount = 0;
     const nums = new Float64Array(len);
@@ -632,7 +632,7 @@ function _getSortedValidNumbers(values: ArrayLike<any>): Float64Array | null {
  * Computes the quantile of a numeric array using linear interpolation, filtering out non-numeric and NaN values.
  * q must be in [0, 1]. Returns null if no valid numbers remain or q is out of bounds.
  */
-export function computeQuantile(values: ArrayLike<any>, q: number): number | null {
+export function computeQuantile(values: ArrayLike<unknown>, q: number): number | null {
     if (q < 0 || q > 1) return null;
     const validNums = _getSortedValidNumbers(values);
     if (!validNums) return null;
@@ -648,13 +648,13 @@ export function computeQuantile(values: ArrayLike<any>, q: number): number | nul
  * Computes the mode(s) of an array, filtering out null/undefined values.
  * Returns an array of the most frequent values, sorted, or null if empty/no mode.
  */
-export function computeMode(values: ArrayLike<any>): any[] | null {
+export function computeMode(values: ArrayLike<unknown>): unknown[] | null {
     if (!isArrayOrTypedArray(values) || values.length === 0) return null;
 
-    const counts = new Map<any, number>();
+    const counts = new Map<unknown, number>();
     const len = values.length;
     let max = 0;
-    let modes: any[] = [];
+    let modes: unknown[] = [];
 
     for (let i = 0; i < len; i++) {
         const val = values[i];
@@ -674,7 +674,7 @@ export function computeMode(values: ArrayLike<any>): any[] | null {
     return sortArray(modes);
 }
 
-export function shiftArray(arr: any[] | AnyTypedArray, n: number, fillValue: any = null): any[] {
+export function shiftArray(arr: unknown[] | AnyTypedArray, n: number, fillValue: unknown = null): unknown[] {
     const len = arr.length;
     if (len === 0) return [];
 
@@ -701,7 +701,7 @@ export function shiftArray(arr: any[] | AnyTypedArray, n: number, fillValue: any
  * Unzips and validates a ColumnData pair array into contiguous Float64Array buffers.
  * @internal
  */
-function _unzipValidNumericPairs(pairs: ColumnData<[any, any]>): { xArr: Float64Array; yArr: Float64Array; count: number } {
+function _unzipValidNumericPairs(pairs: ColumnData<[unknown, unknown]>): { xArr: Float64Array; yArr: Float64Array; count: number } {
     const len = pairs.length;
     const xArr = new Float64Array(len);
     const yArr = new Float64Array(len);
@@ -775,7 +775,7 @@ function _computeWelfordMatrix(
  * covariance, variances, and correlation simultaneously with high numerical stability.
  */
 export function computeStatisticalMatrix(
-    pairs: ColumnData<[any, any]>
+    pairs: ColumnData<[unknown, unknown]>
 ): { covariance: number | null; correlation: number | null } | null {
     const { xArr, yArr, count } = _unzipValidNumericPairs(pairs);
     if (count < 2) return { covariance: null, correlation: null };
@@ -828,7 +828,7 @@ export function computeCorrelationOfFlatArrays(
  * Computes Spearman Rank Correlation Coefficient
  * Optimized to achieve near-zero secondary allocations.
  */
-export function computeSpearmanCorrelation(pairs: ColumnData<[any, any]>): number | null {
+export function computeSpearmanCorrelation(pairs: ColumnData<[unknown, unknown]>): number | null {
     const { xArr, yArr, count } = _unzipValidNumericPairs(pairs);
     if (count < 2) return null;
 
@@ -841,7 +841,7 @@ export function computeSpearmanCorrelation(pairs: ColumnData<[any, any]>): numbe
 /**
  * Computes the dot product of two arrays of pairs.
  */
-export function computeDotProduct(pairs: ColumnData<[any, any]>): number | null {
+export function computeDotProduct(pairs: ColumnData<[unknown, unknown]>): number | null {
     const len = pairs.length;
     let sum = 0;
     let count = 0;
@@ -865,7 +865,7 @@ export function computeDotProduct(pairs: ColumnData<[any, any]>): number | null 
  * Computes the weighted average of two arrays of pairs.
  * Defensive against absolute sum-zero weight errors.
  */
-export function computeWeightedAverage(pairs: ColumnData<[any, any]>): number | null {
+export function computeWeightedAverage(pairs: ColumnData<[unknown, unknown]>): number | null {
     const len = pairs.length;
     let sumProducts = 0;
     let sumWeights = 0;
@@ -923,7 +923,7 @@ export function computeCartesianProduct(lenA: number, lenB: number): { leftIndic
  * @param options.getValue Optional accessor function `(index, item) => number` for indirect searching.
  * @returns Index insertion point.
  */
-export function binarySearch<T = any>(
+export function binarySearch<T = unknown>(
     arr: ArrayLike<T>,
     target: number,
     options: BinarySearchOptions<T> = {}
@@ -951,7 +951,7 @@ export function binarySearch<T = any>(
  * Supports both unweighted and weighted evaluation.
  */
 export function getCentralMoments(
-    arr: ArrayLike<any>,
+    arr: ArrayLike<unknown>,
     weights?: ArrayLike<number> | null,
     options: CentralMomentsOptions = {}
 ): CentralMomentsResult | null {
@@ -1024,7 +1024,7 @@ export function getCentralMoments(
  * @param arr ArrayLike dataset
  * @param options Skewness calculation options ({ bias?: boolean }, default bias=true)
  */
-export function computeSkewness(arr: ArrayLike<any>, options: SkewOptions = {}): number | null {
+export function computeSkewness(arr: ArrayLike<unknown>, options: SkewOptions = {}): number | null {
     const stats = getCentralMoments(arr);
     if (!stats || stats.m2Sum <= 0) return null;
 
@@ -1049,7 +1049,7 @@ export function computeSkewness(arr: ArrayLike<any>, options: SkewOptions = {}):
  * @param arr ArrayLike dataset
  * @param options Kurtosis calculation options ({ fisher?: boolean, bias?: boolean }, default fisher=true, bias=true)
  */
-export function computeKurtosis(arr: ArrayLike<any>, options: KurtosisOptions = {}): number | null {
+export function computeKurtosis(arr: ArrayLike<unknown>, options: KurtosisOptions = {}): number | null {
     const stats = getCentralMoments(arr);
     if (!stats || stats.m2Sum <= 0) return null;
 
@@ -1080,7 +1080,7 @@ export function computeKurtosis(arr: ArrayLike<any>, options: KurtosisOptions = 
  * @param options Entropy options ({ base?: number, normalize?: boolean }, default base=Math.E, normalize=true)
  */
 export function computeEntropy(
-    arr: ArrayLike<any>,
+    arr: ArrayLike<unknown>,
     options: EntropyOptions = {}
 ): number | null {
     if (!arr || arr.length === 0) return null;
@@ -1151,7 +1151,7 @@ export function computeEntropy(
 
 /** Reduces elements in an array using a bitwise binary operation across valid BigInts/numbers. */
 export function reduceBitwise(
-    arr: ArrayLike<any>,
+    arr: ArrayLike<unknown>,
     op: (acc: bigint, val: bigint) => bigint
 ): number | bigint | null {
     if (!arr || arr.length === 0) return null;
@@ -1172,9 +1172,9 @@ export function reduceBitwise(
 
 /** Finds the value in target column corresponding to the minimum or maximum value in `by` column. */
 export function computeBy(
-    pairs: Array<[any, any]> | null | undefined,
+    pairs: Array<[unknown, unknown]> | null | undefined,
     statKey: "minIdx" | "maxIdx"
-): any {
+): unknown {
     if (!pairs || pairs.length === 0) return null;
     const len = pairs.length;
     const targets = new Array(len);
@@ -1195,9 +1195,9 @@ export function computeBy(
  * @param options Configuration options ({ nullify?: boolean }). If nullify is true, non-matching items become null while preserving length.
  * @returns Filtered array containing matching elements (or nullified elements).
  */
-export function filterByMask<T = any>(
+export function filterByMask<T = unknown>(
     arr: ArrayLike<T> | null | undefined,
-    mask: any,
+    mask: unknown,
     options: FilterByMaskOptions = {}
 ): (T | null)[] {
     if (!arr || arr.length === 0) return [];

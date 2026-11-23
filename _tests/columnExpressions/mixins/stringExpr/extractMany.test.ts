@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.extractMany tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { text: "user_123_item_456" },
     { text: null }
 ]);

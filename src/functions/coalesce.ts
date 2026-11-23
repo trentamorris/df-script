@@ -1,3 +1,4 @@
+import type { RowRecord } from "../types";
 import { ColumnExpr } from "../columnExpressions/columnExpr";
 import type { ScalarArg } from "../types";
 import type { CoalesceArg } from "./types";
@@ -8,7 +9,7 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * Returns the first non-null value among the specified expressions.
  *
  * @param {...CoalesceArg} exprs The list of expressions or columns to coalesce.
- * @returns {ColumnExpr<any>} A column expression resolving to the first non-null value.
+ * @returns {ColumnExpr<T>} A column expression resolving to the first non-null value.
  * @namespace $df
  * @category Function
  * @syntax $df.{symbol}(...)
@@ -38,7 +39,7 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * // | 3  |
  * // +----+
  */
-export function coalesce(...exprs: CoalesceArg[]): ColumnExpr<any> {
+export function coalesce<T extends RowRecord = RowRecord>(...exprs: CoalesceArg[]): ColumnExpr<T> {
     const rawArgs = (exprs.length === 1 && Array.isArray(exprs[0]))
         ? (exprs[0] as ScalarArg[])
         : (exprs as ScalarArg[]);

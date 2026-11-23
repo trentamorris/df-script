@@ -6,7 +6,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 1: Alpha parameterization with adjust=true (default)
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res[0].r !== 10) throw new Error(`Test 1 Failed: ${JSON.stringify(res)}`);
     if (Math.abs(res[1].r - 16.666667) > 1e-4) throw new Error(`Test 1 Failed: ${JSON.stringify(res)}`);
@@ -15,7 +15,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 2: Span parameterization (span=1 -> alpha=1)
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").ewmMean({ span: 1 }).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || res[1].r !== 20 || res[2].r !== 30) {
         throw new Error(`Test 2 Failed: ${JSON.stringify(res)}`);
@@ -24,14 +24,14 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 3: COM parameterization (com=1 -> alpha=0.5)
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").ewmMean({ com: 1 }).alias("r")).toDicts() as any[];
     if (Math.abs(res[1].r - 16.666667) > 1e-4) throw new Error(`Test 3 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 4: HalfLife parameterization
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").ewmMean({ halfLife: 1 }).alias("r")).toDicts() as any[];
     if (res[0].r !== 10 || typeof res[1].r !== "number") {
         throw new Error(`Test 4 Failed: ${JSON.stringify(res)}`);
@@ -40,7 +40,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 5: minSamples constraint
 {
-    const df = $df.data({ a: [10, 20, 30] });
+    const df = $df.dataFrame({ a: [10, 20, 30] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.5, minSamples: 2 }).alias("r")).toDicts() as any[];
     if (res[0].r !== null || Math.abs(res[1].r - 16.666667) > 1e-4) {
         throw new Error(`Test 5 Failed: ${JSON.stringify(res)}`);
@@ -51,7 +51,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 {
     let caught = false;
     try {
-        const df = $df.data({ a: [1, 2] });
+        const df = $df.dataFrame({ a: [1, 2] });
         df.select($df.col("a").ewmMean({ alpha: 1.5 }));
     } catch (e: any) {
         if (e instanceof InvalidArgumentError) caught = true;
@@ -63,7 +63,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 {
     let caught = false;
     try {
-        const df = $df.data({ a: [1, 2] });
+        const df = $df.dataFrame({ a: [1, 2] });
         df.select($df.col("a").ewmMean(null as any));
     } catch (e: any) {
         if (e instanceof InvalidArgumentError) caught = true;
@@ -73,7 +73,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 8: Alternating pattern
 {
-    const df = $df.data({ a: [0, 100, 0, 100] });
+    const df = $df.dataFrame({ a: [0, 100, 0, 100] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res[0].r !== 0 || Math.abs(res[1].r - 66.666667) > 1e-4 || Math.abs(res[2].r - 28.571429) > 1e-4) {
         throw new Error(`Test 8 Failed: ${JSON.stringify(res)}`);
@@ -82,7 +82,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 9: Leading, middle, and trailing null clusters
 {
-    const df = $df.data({ a: [null, null, 50, null, 100, null] });
+    const df = $df.dataFrame({ a: [null, null, 50, null, 100, null] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.5, minSamples: 2 }).alias("r")).toDicts() as any[];
     if (res[0].r !== null || res[1].r !== null || res[2].r !== null || res[3].r !== null) {
         throw new Error(`Test 9 Failed: expected nulls prior to 2 valid observations`);
@@ -94,14 +94,14 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 10: Extreme small alpha (long memory) and huge values
 {
-    const df = $df.data({ a: [1e9, 1e9, 1e9] });
+    const df = $df.dataFrame({ a: [1e9, 1e9, 1e9] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.0001 }).alias("r")).toDicts() as any[];
     if (Math.abs(res[2].r - 1e9) > 1) throw new Error(`Test 10 Failed: ${JSON.stringify(res)}`);
 }
 
 // Test 11: MeanBy with irregular timestamp clustering (same ms timestamps)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         t: [1000, 1000, 1000, 5000],
         v: [10, 20, 30, 40]
     });
@@ -112,7 +112,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 12: MeanBy with ISO date strings
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         time: ["2024-02-28T00:00:00Z", "2024-02-29T00:00:00Z", "2024-03-01T00:00:00Z"],
         val: [100, 200, 300]
     });
@@ -124,7 +124,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 13: MeanBy with negative values
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         time: [10, 20, 30, 40],
         val: [-50, -100, 50, 100]
     });
@@ -136,7 +136,7 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 14: All null column
 {
-    const df = $df.data({ a: [null, null, null] });
+    const df = $df.dataFrame({ a: [null, null, null] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res[0].r !== null || res[1].r !== null || res[2].r !== null) {
         throw new Error(`Test 14 Failed: all nulls must produce null`);
@@ -145,14 +145,14 @@ console.log("Running StandardExpr.ewmMean tests...");
 
 // Test 15: Empty DataFrame
 {
-    const df = $df.data({ a: [] });
+    const df = $df.dataFrame({ a: [] });
     const res = df.select($df.col("a").ewmMean({ alpha: 0.5 }).alias("r")).toDicts() as any[];
     if (res.length !== 0) throw new Error("Test 15 Failed: empty dataframe");
 }
 
 // Test 16: EWM Mean with Date and 1h halfLife
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         t: [
             new Date("2024-01-01T00:00:00Z"),
             new Date("2024-01-01T01:00:00Z"),

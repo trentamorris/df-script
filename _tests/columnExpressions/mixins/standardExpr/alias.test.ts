@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.alias edge-case tests...");
 
 // 1. Basic alias renaming
-const df = $df.data({ a: [1, 2, 3] });
+const df = $df.dataFrame({ a: [1, 2, 3] });
 const res1 = df.select([
     $df.col("a").alias("renamed_a")
 ]).toDicts() as any[];
@@ -45,7 +45,7 @@ if (!(specialKey in res4[0]) || res4[0][specialKey] !== 1) {
 }
 
 // 5. Aliasing empty DataFrame (preserves schema/column name)
-const emptyDf = $df.data({ a: [] as number[] });
+const emptyDf = $df.dataFrame({ a: [] as number[] });
 const resEmpty = emptyDf.select([
     $df.col("a").alias("b")
 ]).toDicts() as any[];
@@ -53,7 +53,7 @@ const resEmpty = emptyDf.select([
 if (resEmpty.length !== 0) throw new Error("5. empty DataFrame alias should return empty rows");
 
 // 6. Aliasing aggregation result in select and groupBy
-const dfGroup = $df.data({ g: ["x", "x", "y"], val: [10, 20, 30] });
+const dfGroup = $df.dataFrame({ g: ["x", "x", "y"], val: [10, 20, 30] });
 const resAgg = dfGroup.groupBy("g").agg([
     $df.col("val").sum().alias("total_val"),
     $df.col("val").mean().alias("avg_val")

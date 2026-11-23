@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.daysInMonth tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2024-02-15" }, // Leap year Feb -> 29
     { date: "2023-02-15" }, // Non-leap Feb -> 28
     { date: "2023-03-15" }, // March -> 31

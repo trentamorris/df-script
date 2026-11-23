@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StringExpr.toPascalCase tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { raw: "hello_world" },
     { raw: null }
 ]);

@@ -13,7 +13,7 @@ const data = [
 ];
 
 try {
-    const df = $df.data(data);
+    const df = $df.dataFrame(data);
 
     // 1. Basic When/Then/Otherwise using withColumns and ColumnExpressions
     const res1 = df.withColumns(
@@ -110,7 +110,7 @@ try {
     if (res5[1].basic_expr !== "200") throw new Error(`res5[1].basic_expr failed, got ${res5[1].basic_expr}`);
 
     // 6. String column name predicates and string column outputs
-    const dfStringCol = $df.data({
+    const dfStringCol = $df.dataFrame({
         is_promo: [true, false, true, false],
         code_a: ["P1", "P2", "P3", "P4"],
         code_b: ["STD1", "STD2", "STD3", "STD4"]
@@ -124,7 +124,7 @@ try {
     if (res6[1].active_code !== "STD2" || res6[1].tier !== "STANDARD") throw new Error("res6[1] failed");
 
     // 7. Non-boolean predicate values (truthiness vs strict boolean true check)
-    const dfTruthy = $df.data({
+    const dfTruthy = $df.dataFrame({
         num_flag: [1, 0, null, 2],
         str_flag: ["true", "", "yes", null]
     });
@@ -155,7 +155,7 @@ try {
     if (res8[3].nested_grade !== "OTHER") throw new Error(`res8[3].nested_grade failed, got ${res8[3].nested_grade}`);
 
     // 9. Empty DataFrame edge case
-    const emptyDf = $df.data({ val: [] as number[], cat: [] as string[] });
+    const emptyDf = $df.dataFrame({ val: [] as number[], cat: [] as string[] });
     const res9 = emptyDf.withColumns(
         $df.when($df.col("val").gt(0)).then("POS").otherwise("NON_POS").alias("status")
     );
@@ -164,7 +164,7 @@ try {
     }
 
     // 10. Multi-branch chaining with 5 branches (first match precedence)
-    const res10 = $df.data({ val: [10, 20, 30, 40, 50, 60] }).withColumns(
+    const res10 = $df.dataFrame({ val: [10, 20, 30, 40, 50, 60] }).withColumns(
         $df.when($df.col("val").eq(10)).then("T10")
             .when($df.col("val").eq(20)).then("T20")
             .when($df.col("val").eq(30)).then("T30")
@@ -182,7 +182,7 @@ try {
     if (res10[5].bracket !== "T_OTHER") throw new Error("res10[5] failed");
 
     // 11. TypedArray and Array outputs in then/otherwise
-    const res11 = $df.data({ flag: [true, false] }).withColumns(
+    const res11 = $df.dataFrame({ flag: [true, false] }).withColumns(
         $df.when($df.col("flag")).then(new Uint8Array([1, 2])).otherwise(new Uint8Array([3, 4])).alias("bin_data"),
         $df.when($df.col("flag")).then($df.lit([10, 20])).otherwise($df.lit([30, 40])).alias("list_data")
     ).toDicts() as any[];

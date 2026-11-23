@@ -3,7 +3,7 @@ import { $df, Object as ObjectType, Int32 } from "df-script";
 
 console.log("Running ArrayExpr.get tests...");
 
-const df = $df.data([
+const df = $df.dataFrame([
     { numbers: [10, 20, 30, 40] },
     { numbers: null }
 ]);
@@ -20,7 +20,7 @@ if (res[0].idx_oob !== null) throw new Error("Expected null for oob");
 if (res[1].idx_1 !== null) throw new Error("Expected null for null array");
 
 // Dynamic Column Expression index, BigInt, and null index
-const dfDyn = $df.data([
+const dfDyn = $df.dataFrame([
     { arr: [100, 200, 300], idx: 0 },
     { arr: [100, 200, 300], idx: 2 },
     { arr: [100, 200, 300], idx: -1 },

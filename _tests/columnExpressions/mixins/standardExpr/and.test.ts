@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.and tests...");
 
 // 1. Canonical Kleene 3-valued logic truth table (9 combinations)
-const kleeneDf = $df.data({
+const kleeneDf = $df.dataFrame({
     a: [true,  true,  true,  false, false, false, null,  null,  null],
     b: [true,  false, null,  true,  false, null,  true,  false, null]
 });
@@ -29,7 +29,7 @@ for (let i = 0; i < expectedKleene.length; i++) {
 }
 
 // 2. Scalar boolean literal: .and(true)
-const dfTrue = $df.data({ a: [true, false, null] });
+const dfTrue = $df.dataFrame({ a: [true, false, null] });
 const resTrue = dfTrue.select([$df.col("a").and(true).alias("c")]).toArray("c");
 if (resTrue[0] !== true || resTrue[1] !== false || resTrue[2] !== null) {
     throw new Error("Scalar .and(true) failed");
@@ -54,7 +54,7 @@ if (resUndefined[0] !== null || resUndefined[1] !== false || resUndefined[2] !==
 }
 
 // 6. Another ColumnExpression: .and($df.col("b"))
-const dfCols = $df.data({ a: [true, false, true], b: [true, true, false] });
+const dfCols = $df.dataFrame({ a: [true, false, true], b: [true, true, false] });
 const resColExpr = dfCols.select([$df.col("a").and($df.col("b")).alias("c")]).toArray("c");
 if (resColExpr[0] !== true || resColExpr[1] !== false || resColExpr[2] !== false) {
     throw new Error(".and($df.col('b')) column expression failed");
@@ -67,21 +67,21 @@ if (resSelf[0] !== true || resSelf[1] !== false || resSelf[2] !== true) {
 }
 
 // 8. Chained .and().and()
-const dfChained = $df.data({ a: [true, true, true], b: [true, true, false], c: [true, false, true] });
+const dfChained = $df.dataFrame({ a: [true, true, true], b: [true, true, false], c: [true, false, true] });
 const resChained = dfChained.select([$df.col("a").and($df.col("b")).and($df.col("c")).alias("out")]).toArray("out");
 if (resChained[0] !== true || resChained[1] !== false || resChained[2] !== false) {
     throw new Error("Chained .and().and() failed");
 }
 
 // 9. Empty DataFrame edge case
-const emptyDf = $df.data({ a: [] as boolean[], b: [] as boolean[] });
+const emptyDf = $df.dataFrame({ a: [] as boolean[], b: [] as boolean[] });
 const resEmpty = emptyDf.select([$df.col("a").and($df.col("b")).alias("c")]).toArray("c");
 if (resEmpty.length !== 0) {
     throw new Error("Empty DataFrame .and() failed: expected length 0");
 }
 
 // 10. Single row edge case
-const singleDf = $df.data({ a: [false], b: [null] });
+const singleDf = $df.dataFrame({ a: [false], b: [null] });
 const resSingle = singleDf.select([$df.col("a").and($df.col("b")).alias("c")]).toArray("c");
 if (resSingle[0] !== false) {
     throw new Error("Single row false AND null failed: expected false");

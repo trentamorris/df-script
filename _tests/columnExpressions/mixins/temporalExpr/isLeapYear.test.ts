@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running TemporalExpr.isLeapYear tests...");
 
 
-const df = $df.data([
+const df = $df.dataFrame([
     { date: "2000-01-01T00:00:00Z" }, // 400-yr leap -> true
     { date: "1900-01-01T00:00:00Z" }, // 100-yr non-leap -> false
     { date: "2024-02-29T12:00:00Z" }, // 4-yr leap -> true

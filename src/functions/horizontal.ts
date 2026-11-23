@@ -48,7 +48,7 @@ export function horizontal(
         ? (exprs[0] as IntoExpr[])
         : (exprs as IntoExpr[]);
 
-    const expr = new ColumnExpr<any[]>(HORIZONTAL_MARKER);
+    const expr = new ColumnExpr<unknown[]>(HORIZONTAL_MARKER);
 
     expr._ops.push((_, columns) => {
         const height = _.length;
@@ -78,13 +78,14 @@ export function horizontal(
     });
 
     return createDelegatingProxy(expr, (prop, target) => {
-        const arrNamespace = target.arr as any;
+        const arrNamespace = target.arr as unknown as Record<string, ((...args: unknown[]) => unknown) | undefined>;
         if (prop === "eval") {
-            return (subExpr: any) => subExpr?._isGlobalAgg?.() ? arrNamespace.agg(subExpr) : arrNamespace.eval(subExpr);
+            return (subExpr: ColumnExpr<unknown> & { _isGlobalAgg?: () => boolean }) =>
+                subExpr?._isGlobalAgg?.() ? arrNamespace.agg?.(subExpr) : arrNamespace.eval?.(subExpr);
         }
         if (arrNamespace && typeof arrNamespace[prop] === "function") {
-            return (...args: any[]) => arrNamespace[prop](...args);
+            return (...args: unknown[]) => arrNamespace[prop]!(...args);
         }
         return undefined;
-    }) as any;
+    }) as unknown as HorizontalExpr;
 }

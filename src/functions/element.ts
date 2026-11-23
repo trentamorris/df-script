@@ -34,6 +34,6 @@ import { ELEMENT_MARKER } from "../columnExpressions/constants";
  * // | [40, 50]     |
  * // +--------------+
  */
-export function element<T = any>(): ColumnExpr<T> {
+export function element<T = unknown>(): ColumnExpr<T> {
     return new ColumnExpr(ELEMENT_MARKER);
 }

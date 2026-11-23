@@ -10,7 +10,7 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  *
  * @param {StructArg} fields An array of expressions, a record of field names to expressions, or a single expression.
  * @param {...IntoExpr[]} moreFields Additional fields when a single expression is passed as the first parameter.
- * @returns {ColumnExpr<any>} A column expression packaging the specified fields.
+ * @returns {ColumnExpr<Record<string, unknown>>} A column expression packaging the specified fields.
  * @namespace $df
  * @category Function
  * @syntax $df.{symbol}(...)
@@ -41,7 +41,7 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
 export function struct(
     fields: StructArg,
     ...moreFields: IntoExpr[]
-): ColumnExpr<any> {
+): ColumnExpr<Record<string, unknown>> {
     let resolvedFields: StructFieldsArg;
 
     if (Array.isArray(fields)) {
@@ -52,10 +52,10 @@ export function struct(
         resolvedFields = [fields as IntoExpr, ...moreFields];
     }
 
-    const expr = lit({}).struct.withFields(resolvedFields) as ColumnExpr<any>;
+    const expr = lit({}).struct.withFields(resolvedFields) as ColumnExpr<Record<string, unknown>>;
     delete expr._isLiteral;
     delete expr._literalValue;
-    (expr as any)._colName = STRUCT_MARKER;
+    (expr as unknown as { _colName: string })._colName = STRUCT_MARKER;
     
-    return expr.alias("struct") as ColumnExpr<any>;
+    return expr.alias("struct");
 }

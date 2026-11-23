@@ -6,7 +6,7 @@ console.log("Running StandardExpr.wAvg edge-case tests...");
 // -------------------------------------------------------------
 // Case 1: Basic column weights in select aggregation
 // -------------------------------------------------------------
-const dfBasic = $df.data([
+const dfBasic = $df.dataFrame([
     { val: 10, weight: 1 },
     { val: 20, weight: 2 },
     { val: 30, weight: 3 }
@@ -41,7 +41,7 @@ if (resScalar[0].w !== 20) {
 // -------------------------------------------------------------
 // Case 4: GroupBy aggregation with wAvg
 // -------------------------------------------------------------
-const dfGroup = $df.data([
+const dfGroup = $df.dataFrame([
     { grp: "A", val: 10, w: 1 },
     { grp: "A", val: 20, w: 3 }, // (10*1 + 20*3)/4 = 70/4 = 17.5
     { grp: "B", val: 30, w: 2 },
@@ -57,7 +57,7 @@ if (resGroup[0].weighted_mean !== 17.5 || resGroup[1].weighted_mean !== 40) {
 // -------------------------------------------------------------
 // Case 5: Single-row DataFrame
 // -------------------------------------------------------------
-const dfSingle = $df.data([{ val: 42, w: 5 }]);
+const dfSingle = $df.dataFrame([{ val: 42, w: 5 }]);
 const resSingle = dfSingle.select([
     $df.col("val").wAvg($df.col("w")).alias("w")
 ]).toDicts() as any[];
@@ -68,7 +68,7 @@ if (resSingle[0].w !== 42) {
 // -------------------------------------------------------------
 // Case 6: Zero weights handling (zero sum of weights should yield NaN or 0/null)
 // -------------------------------------------------------------
-const dfZeroWeight = $df.data([
+const dfZeroWeight = $df.dataFrame([
     { val: 10, w: 0 },
     { val: 20, w: 0 }
 ]);
@@ -82,7 +82,7 @@ if (!Number.isNaN(resZeroWeight[0].w) && resZeroWeight[0].w !== null) {
 // -------------------------------------------------------------
 // Case 7: Null values in value column or weight column
 // -------------------------------------------------------------
-const dfNulls = $df.data([
+const dfNulls = $df.dataFrame([
     { val: 10, w: 1 },
     { val: null, w: 5 }, // skipped pair
     { val: 20, w: null }, // skipped pair
@@ -99,7 +99,7 @@ if (Math.abs(resNulls[0].w - 23.333333) > 1e-4) {
 // -------------------------------------------------------------
 // Case 8: NaN values in value column or weight column
 // -------------------------------------------------------------
-const dfNans = $df.data([
+const dfNans = $df.dataFrame([
     { val: 10, w: 1 },
     { val: NaN, w: 2 },
     { val: 20, w: 3 }
@@ -117,7 +117,7 @@ if (!Number.isNaN(resNans[0].w)) {
 // -------------------------------------------------------------
 // Case 9: Empty DataFrame (schema preserved)
 // -------------------------------------------------------------
-const dfEmpty = $df.data([{ val: 1, w: 1 }]).filter($df.col("val").eq(999));
+const dfEmpty = $df.dataFrame([{ val: 1, w: 1 }]).filter($df.col("val").eq(999));
 const resEmpty = dfEmpty.select([
     $df.col("val").wAvg($df.col("w")).alias("w")
 ]).toDicts() as any[];

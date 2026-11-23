@@ -4,7 +4,7 @@ import { $df } from "df-script";
 console.log("Running StandardExpr.degrees tests...");
 
 
-const df = $df.data([{ val: Math.PI }, { val: null }]);
+const df = $df.dataFrame([{ val: Math.PI }, { val: null }]);
 const res = df.select([$df.col("val").degrees().alias("d")]).toDicts() as any[];
 if (Math.abs(res[0].d - 180) > 1e-6 || res[1].d !== null) throw new Error("degrees failed");
 

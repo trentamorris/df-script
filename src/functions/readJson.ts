@@ -22,7 +22,7 @@ import { DataFrameError } from "../exceptions";
  * | 2 | y |
  * +---+---+
  */
-export function readJson<T extends RowRecord = any>(
+export function readJson<T extends RowRecord = RowRecord>(
     content: string,
     {
         format = "json",
@@ -36,5 +36,5 @@ export function readJson<T extends RowRecord = any>(
         throw new DataFrameError(`Invalid JSON input: must be a valid, non-empty JSON ${format} string.`);
     }
     const parsedData = Array.isArray(parsed) ? parsed : (isObj(parsed) ? [parsed] : []);
-    return new DataFrame<T>(parsedData as any, schema);
+    return new DataFrame<T>(parsedData as T[], schema);
 }

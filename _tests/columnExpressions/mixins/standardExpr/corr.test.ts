@@ -21,7 +21,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 1. Basic Perfect Linear Correlation (+1.0 and -1.0)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, 2, 3, 4, 5],
         pos: [10, 20, 30, 40, 50],
         neg: [50, 40, 30, 20, 10]
@@ -37,7 +37,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 // 2. Uncorrelated / Symmetric Non-linear (zero correlation)
 {
     // Quadratic relationship y = x^2 centered at 0: Pearson r should be exactly 0
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [-2, -1, 0, 1, 2],
         y: [4, 1, 0, 1, 4]
     });
@@ -48,7 +48,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 // 3. Null and NaN Handling (Pairwise Deletion / Missing Values)
 {
     // Pairs with null or NaN in either x or y should be ignored, leaving 3 valid pairs: (1, 10), (3, 30), (5, 50)
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, null, 3, NaN, 5],
         y: [10, 20, 30, 40, 50]
     });
@@ -59,7 +59,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 // 4. Constant Column (Zero Variance -> Division by Zero -> null)
 {
     // Matching Polars and pandas: when variance is 0, correlation is undefined / NaN / null
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, 2, 3, 4],
         constant_y: [7, 7, 7, 7],
         constant_both_x: [3, 3, 3, 3],
@@ -76,9 +76,9 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 // 5. Insufficient Observations (< 2 valid pairs -> null)
 {
     // 0 pairs, 1 pair, or pairs dropped to < 2 due to nulls
-    const emptyDf = $df.data({ x: [], y: [] });
-    const singleDf = $df.data({ x: [42], y: [100] });
-    const droppedDf = $df.data({
+    const emptyDf = $df.dataFrame({ x: [], y: [] });
+    const singleDf = $df.dataFrame({ x: [42], y: [100] });
+    const droppedDf = $df.dataFrame({
         x: [1, null, null],
         y: [10, 20, null]
     });
@@ -94,7 +94,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 6. Exactly Two Pairs (Edge Case: Minimal Valid Degrees of Freedom)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [10, 20],
         y: [5, 15]
     });
@@ -104,7 +104,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 7. Self-Correlation (col(x).corr(col(x)) == 1.0)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [-15.2, 0.4, 33.1, -2.8, 100.5]
     });
     const res = df.select($df.col("x").corr($df.col("x")).alias("r")).toDicts() as any[];
@@ -113,7 +113,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 8. Passing Numeric Array Literal as `other`
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, 2, 3, 4]
     });
     // Correlate column expression with a raw array literal
@@ -124,7 +124,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 // 9. Large Magnitude & Offset Values (Numerical Stability of Welford's Algorithm)
 {
     // Catastrophic cancellation test: huge mean (1e9) with tiny variance (1, 2, 3)
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1e9 + 1, 1e9 + 2, 1e9 + 3, 1e9 + 4],
         y: [1e9 + 2, 1e9 + 4, 1e9 + 6, 1e9 + 8]
     });
@@ -134,7 +134,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 10. Grouped Aggregation & Window Function (`groupBy` and `.over()`)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["sales", "sales", "sales", "eng", "eng", "eng"],
         exp: [1, 2, 3, 1, 2, 3],
         score: [10, 20, 30, 30, 20, 10]
@@ -161,7 +161,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 11. Infinity Handling (+Infinity and -Infinity are treated as non-finite/dropped)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, Infinity, 3, -Infinity, 5],
         y: [10, 20, 30, 40, 50]
     });
@@ -171,7 +171,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 12. Floating-Point Precision Clamping strictly within [-1.0, 1.0]
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [0.1, 0.2, 0.3, 0.4, 0.5],
         y: [0.3, 0.6, 0.9, 1.2, 1.5]
     });
@@ -184,7 +184,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 13. Asymmetric Missing Masks (Interleaved / Non-overlapping Nulls)
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, null, 3, null],
         y: [null, 2, 3, null] // Only index 2 (3, 3) is valid -> total count 1 < 2 -> null
     });
@@ -194,7 +194,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 14. Non-Numeric Column Coercion
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         x: [1, 2, 3],
         non_numeric: ["a", "b", "c"]
     });
@@ -205,14 +205,14 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 // 15. Invariant Series / Constant Self-Correlation
 {
     // Constant column self-correlation: variance is 0, so correlation is undefined -> null (not false 1.0)
-    const df = $df.data({ x: [5, 5, 5, 5] });
+    const df = $df.dataFrame({ x: [5, 5, 5, 5] });
     const res = df.select($df.col("x").corr($df.col("x")).alias("r")).toDicts() as any[];
     assertClose(res[0].r, null, 1e-6, "Case 15: Self-correlation on constant column yields null");
 }
 
 // 16. Mixed Grouped Aggregations with Single-Item and All-Null Groups
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         dept: ["valid", "valid", "valid", "single", "all_null", "all_null"],
         x: [1, 2, 3, 10, null, null],
         y: [10, 20, 30, 20, 1, 2]
@@ -233,7 +233,7 @@ function assertClose(actual: number | null, expected: number | null, tol = 1e-6,
 
 // 17. Multi-Column Expression Projection on Left Operand ($df.col(['a', 'b', 'c']).corr($df.col('target')))
 {
-    const df = $df.data({
+    const df = $df.dataFrame({
         target: [1, 2, 3, 4],
         pos: [10, 20, 30, 40],
         neg: [40, 30, 20, 10],
