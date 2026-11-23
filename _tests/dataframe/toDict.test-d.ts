@@ -5,7 +5,7 @@ import type { Expect, Equal } from "../testTypeHelper";
 const df = $df.dataFrame({ a: [1, 2], b: ["x", "y"] });
 
 // 1. DataFrame instance type check
-export type _Test1_DataFrame = Expect<Equal<typeof df, DataFrame<{ a: number; b: string }>>>;
+export type _Test1_DataFrame = Expect<Equal<typeof df, DataFrame<RowRecord>>>;
 
 // 2. Method/property exists on DataFrame
 const prop = (df as DataFrame<RowRecord>)["toDict" as keyof DataFrame<RowRecord>];

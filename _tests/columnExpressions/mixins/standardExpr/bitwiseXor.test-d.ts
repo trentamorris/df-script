@@ -4,24 +4,19 @@ import type { Expect, Equal } from "../../../testTypeHelper";
 
 const df = $df.dataFrame({ a: [1, 2], b: [true, false] });
 const numCol = $df.col<number>("a");
-const boolCol = $df.col<boolean>("b");
 
-// 1. Accepts number literal
-const res1 = numCol.bitwiseXor(2);
-export type _Test1_Number = Expect<Equal<typeof res1, ColumnExpr<any>>>;
+// 1. Returns ColumnExpr
+const res = numCol.bitwiseXor();
+export type _Test1_Return = Expect<Equal<typeof res, ColumnExpr<any>>>;
 
-// 2. Accepts ColumnExpr
-const res2 = numCol.bitwiseXor($df.col<number>("b"));
-export type _Test2_Expr = Expect<Equal<typeof res1, typeof res2>>;
+// 2. Supports chaining with alias()
+const aliased = numCol.bitwiseXor().alias("out");
+export type _Test2_Alias = Expect<Equal<typeof aliased, ColumnExpr<any>>>;
 
-// 3. Supports chaining with alias()
-const aliased = numCol.bitwiseXor(2).alias("out");
-export type _Test3_Alias = Expect<Equal<typeof aliased, ColumnExpr<any>>>;
+// 3. Works inside df.select()
+const selected = df.select(numCol.bitwiseXor().alias("out"));
+export type _Test3_Select = Expect<Equal<typeof selected, DataFrame<RowRecord>>>;
 
-// 4. Negative: missing required argument
-// @ts-expect-error - bitwiseXor() requires an argument
-numCol.bitwiseXor();
-
-// 5. Negative: invalid boolean argument
-// @ts-expect-error - bitwiseXor() does not accept boolean
-numCol.bitwiseXor(true);
+// 4. Negative: unexpected string argument
+// @ts-expect-error - bitwiseXor() takes 0 arguments
+numCol.bitwiseXor("invalid");
