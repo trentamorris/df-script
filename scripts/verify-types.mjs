@@ -41,10 +41,27 @@ for (const f of relativeFiles) {
 }
 console.log("");
 
+const tempTsConfigPath = path.join(rootDir, "tsconfig.verify-types.json");
 try {
   process.stdout.write("▶ Compiling type assertions with tsc... ");
-  const cmd = `npx tsc --target ES2022 --module ESNext --moduleResolution bundler --customConditions @df-script/source --strict --noEmit --skipLibCheck --rootDir . ${relativeFiles.join(" ")}`;
-  execSync(cmd, { cwd: rootDir, stdio: "pipe" });
+  fs.writeFileSync(
+    tempTsConfigPath,
+    JSON.stringify({
+      compilerOptions: {
+        target: "ES2022",
+        module: "ESNext",
+        moduleResolution: "bundler",
+        customConditions: ["@df-script/source"],
+        strict: true,
+        noEmit: true,
+        skipLibCheck: true,
+        rootDir: "."
+      },
+      include: relativeFiles
+    }),
+    "utf8"
+  );
+  execSync("npx tsc -p tsconfig.verify-types.json", { cwd: rootDir, stdio: "pipe" });
   console.log("✓ PASSED\n");
   console.log("=========================================");
   console.log("🎉 ALL TYPE TESTS PASSED SUCCESSFULLY!");
@@ -54,4 +71,6 @@ try {
   if (err.stdout) console.error(err.stdout.toString());
   if (err.stderr) console.error(err.stderr.toString());
   process.exit(1);
+} finally {
+  if (fs.existsSync(tempTsConfigPath)) fs.unlinkSync(tempTsConfigPath);
 }
