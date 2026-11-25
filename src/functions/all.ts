@@ -7,7 +7,6 @@ import { ALL_COLUMNS_MARKER } from "../columnExpressions/constants";
  *
  * @returns {ColumnExpr<T>} A column expression targeting all columns.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Select all columns:

@@ -8,7 +8,6 @@ import { ELEMENT_MARKER } from "../columnExpressions/constants";
  * @template T The type of the element.
  * @returns {ColumnExpr<T>} A column expression referencing the array element.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Filter elements within array cells:

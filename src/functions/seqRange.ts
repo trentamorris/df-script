@@ -15,7 +15,6 @@ import type { SeqRangeOptions } from "./types";
  * @param [options] Configuration options.
  * @returns {ColumnExpr<T>} A column expression generating the sequence.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Ascending stepping sequence:
@@ -96,7 +95,7 @@ export function seqRange<T = unknown>(
             coerce: coerceVal,
             startIndex: strict ? 0 : safeStart,
             endIndex: strict ? targetHeight : Math.min(safeStart + specifiedHeight, safeEnd)
-        } as any);
+        } as Parameters<typeof fillSequence>[2]);
 
         return result;
     });

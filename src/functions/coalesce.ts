@@ -11,7 +11,6 @@ import { COALESCE_MARKER } from "../columnExpressions/constants";
  * @param {...CoalesceArg} exprs The list of expressions or columns to coalesce.
  * @returns {ColumnExpr<T>} A column expression resolving to the first non-null value.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Coalesce across multiple columns to pick the first non-null:

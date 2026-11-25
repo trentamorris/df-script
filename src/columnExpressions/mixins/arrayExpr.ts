@@ -34,7 +34,6 @@ import type { ArrayArg, NumericArg, NumericSeriesArg, ToStructOptions, ShiftOpti
 
 /**
  * @namespace $df.col.arr
- * @category ColumnExpression
  * @syntax $df.col(<column_name>).arr.{symbol}(...)
  */
 export class ArrayExprNamespace {
@@ -44,11 +43,11 @@ export class ArrayExprNamespace {
         this._expr = expr;
     }
 
-    _deriveArray(fn: (arr: unknown[] | AnyTypedArray) => any) {
+    _deriveArray(fn: (arr: unknown[] | AnyTypedArray) => unknown) {
         return this._expr._deriveUnary((v: unknown) => isArrayOrTypedArray(v) ? fn(v as unknown[] | AnyTypedArray) : null);
     }
 
-    _deriveArrayBinary(other: unknown, fn: (arr: unknown[] | AnyTypedArray, val: unknown) => any) {
+    _deriveArrayBinary(other: unknown, fn: (arr: unknown[] | AnyTypedArray, val: unknown) => unknown) {
         if (!isExpr(other)) {
             return this._deriveArray((arr) => fn(arr, other));
         }
@@ -61,8 +60,8 @@ export class ArrayExprNamespace {
 
     _evalSubExpr(
         expr: IExpr,
-        fn: (val: unknown[] | AnyTypedArray, evaluated: unknown) => any,
-        evaluator?: (expr: IExpr, subColumns: unknown, subHeight: number) => any
+        fn: (val: unknown[] | AnyTypedArray, evaluated: unknown) => unknown,
+        evaluator?: (expr: IExpr, subColumns: ColumnDict, subHeight: number) => unknown
     ) {
         return this._expr._derive((vArray: ColumnData, columns: ColumnDict) => {
             const height = vArray.length;
@@ -940,7 +939,6 @@ export class ArrayExpr extends ExprBase {
      * @ignore
      * Array namespace accessor for list-based column operations.
      * @namespace $df.col
-     * @category ColumnExpression
      * @syntax $df.col(<column_name>).arr
      * @returns ArrayExprNamespace
      * @example

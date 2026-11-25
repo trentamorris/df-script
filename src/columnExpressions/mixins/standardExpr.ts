@@ -50,7 +50,6 @@ import {
 
 /**
  * @namespace $df.col
- * @category ColumnExpression
  * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class StandardExpr extends ExprBase {
@@ -73,7 +72,7 @@ export class StandardExpr extends ExprBase {
         return this._partitionBy !== null || this._evaluateWindow !== undefined || this._aggFn !== null;
     }
 
-    _window(evaluateWindow: (groupPreValues: unknown[], partitionIndices: number[], currentIndex: number) => any) {
+    _window(evaluateWindow: (groupPreValues: unknown[], partitionIndices: number[], currentIndex: number) => unknown) {
         const newInst = this._derive();
         newInst._partitionOpsIndex = this._ops.length;
         newInst._groupingOpsIndex = this._ops.length;
@@ -103,7 +102,7 @@ export class StandardExpr extends ExprBase {
         });
     }
 
-    _ewmUnary(options: EwmOptions, extract: (stats: CentralMomentsResult) => any) {
+    _ewmUnary(options: EwmOptions, extract: (stats: CentralMomentsResult) => unknown) {
         if (!options || typeof options !== "object") {
             throw new InvalidArgumentError("ewm: options object must be provided");
         }
@@ -2517,7 +2516,7 @@ export class StandardExpr extends ExprBase {
      */
     rolling(
         optionsOrWindowSize: number | RollingOptions,
-        exprOrFn: IExpr | ((vals: unknown[]) => any)
+        exprOrFn: IExpr | ((vals: unknown[]) => unknown)
     ) {
         const win = Math.floor(typeof optionsOrWindowSize === "number" ? optionsOrWindowSize : optionsOrWindowSize?.windowSize);
         if (!(win >= 1)) {

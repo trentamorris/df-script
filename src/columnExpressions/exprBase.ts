@@ -7,10 +7,10 @@ import { ColumnNotFoundError, assertNotNull } from "../exceptions"
 import { evaluateExpression, kleeneUnary, kleeneBinary } from "./utils"
 import { isObj } from "../utils"
 
-const _derive = <T extends IExpr>(
+function _derive<T extends IExpr>(
     instance: T,
     nextOp?: OpFn
-): T => {
+): T {
     const Constructor = instance.constructor as new (colName: unknown) => T;
     const instObj = instance as unknown as ColumnExprInternal;
     const colNameVal = instObj._colNames || instObj._colName || "";
@@ -22,7 +22,7 @@ const _derive = <T extends IExpr>(
         newInst._binaryMeta = nextOpMeta;
     }
     return newInst;
-};
+}
 
 export function isExpr(v: unknown): v is IExpr { return v instanceof ExprBase; };
 
@@ -41,7 +41,6 @@ export function toColExpr<T extends IExpr = IExpr>(col: unknown, contextExpr?: u
 
 /**
  * @namespace $df.col
- * @category ColumnExpression
  * @syntax $df.col(<column_name>).{symbol}(...)
  */
 export class ExprBase implements IExpr {
@@ -55,7 +54,7 @@ export class ExprBase implements IExpr {
     _groupingOpsIndex?: number;
     _partitionOpsIndex?: number;
     _partitionBy: (string | IExpr)[] | null = null;
-    _evaluateWindow?: (groupPreValues: unknown[], partitionIndices: number[], currentIndex: number) => any;
+    _evaluateWindow?: (groupPreValues: unknown[], partitionIndices: number[], currentIndex: number) => unknown;
     _baseExpr?: IExpr;
     _fieldName?: string;
     _isUnnest?: boolean;

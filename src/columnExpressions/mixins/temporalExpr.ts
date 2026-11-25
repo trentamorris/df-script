@@ -22,7 +22,6 @@ import {
 
 /**
  * @namespace $df.col.dt
- * @category ColumnExpression
  * @syntax $df.col(<column_name>).dt.{symbol}(...)
  */
 export class DateTimeExprNamespace {
@@ -44,7 +43,7 @@ export class DateTimeExprNamespace {
         return (ct instanceof DatetimeType) ? ct.timeUnit : null;
     }
 
-    _deriveDate(fn: (d: Date) => any) {
+    _deriveDate(fn: (d: Date) => unknown) {
         return this._expr._deriveUnary((v: unknown) => {
             const d = toValidDate(v);
             return d ? fn(d) : null;
@@ -777,7 +776,6 @@ export class TemporalExpr extends ExprBase {
      * @ignore
      * Datetime namespace accessor for date, time, and duration operations.
      * @namespace $df.col
-     * @category ColumnExpression
      * @syntax $df.col(<column_name>).dt
      * @returns DateTimeExprNamespace
      * @example

@@ -1,9 +1,11 @@
 import assert from "assert";
+import fs from "fs";
+import path from "path";
+import ts from "typescript";
 import {
   splitByComma,
   formatSignature,
   parseJSDocComment,
-  extractSignatureAndEnd,
   extractTypesFromContent,
   extractTypeProperties,
   resolveTypeAliasString,
@@ -270,16 +272,7 @@ test("extractRawDocsFromContent: file-level JSDoc followed by class JSDoc in Exc
   );
 });
 
-test("extractSignatureAndEnd: handles braces inside strings and default parameters", () => {
-  const code = `foo(a: string = "{ not body }", b: { x: number } = { x: 1 }): boolean { const s = "}"; return true; }`;
-  const { signature, endIndex } = extractSignatureAndEnd(code, 3, "foo", false);
-  assert.strictEqual(
-    signature,
-    'foo(a: string = "{ not body }", b: { x: number } = { x: 1 }): boolean'
-  );
-  assert.strictEqual(code[endIndex], "}");
-  assert.strictEqual(endIndex, code.length - 1);
-});
+
 
 // ─── 5. Objective TypeScript Type Extraction ──────────────────────────────────
 
@@ -327,21 +320,17 @@ test("extractRawDocs: top-level domain keys, columnExpressions hierarchy, and fl
   const allDocs = extractRawDocs();
 
   assert.deepStrictEqual(Object.keys(allDocs), [
-    "columnExpressions",
-    "dataframe",
-    "datatypes",
-    "exceptions",
+    "classes",
+    "constants",
     "functions",
     "types"
   ]);
 
-  assert.deepStrictEqual(
-    Object.keys(allDocs.columnExpressions).sort(),
-    ["arrayExpr", "standardExpr", "stringExpr", "structExpr", "temporalExpr"]
-  );
+  assert.ok(allDocs.functions["ArrayExpr.agg"], "Missing functions['ArrayExpr.agg']");
+  assert.ok(allDocs.functions["DataFrame.select"], "Missing functions['DataFrame.select']");
 
-  const seqRange = allDocs.functions.seqRange;
-  assert.ok(seqRange, "Missing functions.seqRange");
+  const seqRange = allDocs.functions["$df.seqRange"];
+  assert.ok(seqRange, "Missing functions['$df.seqRange']");
   assert.strictEqual(seqRange.filePath, "functions/seqRange.ts");
   assert.strictEqual(
     seqRange.signature,
@@ -440,10 +429,9 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
   };
 
   for (const [fnName, expected] of Object.entries(expectedFunctions)) {
-    const fnDoc = allDocs.functions[fnName];
+    const fnDoc = allDocs.functions[`$df.${fnName}`];
     assert.ok(fnDoc, `Missing function symbol '${fnName}' in docs.functions`);
     assert.strictEqual(fnDoc.filePath, expected.filePath, `Expected filePath '${expected.filePath}' for ${fnName}`);
-    assert.strictEqual(fnDoc.category, "Function", `Expected category 'Function' for ${fnName}`);
     assert.strictEqual(fnDoc.namespace, "$df", `Expected namespace '$df' for ${fnName}`);
     assert.strictEqual(fnDoc.propertyAccess, fnName, `Unexpected propertyAccess for ${fnName}: ${fnDoc.propertyAccess}`);
     assert.strictEqual(fnDoc.callExpression, `${fnName}()`, `Unexpected callExpression for ${fnName}: ${fnDoc.callExpression}`);
@@ -451,6 +439,31 @@ test("Top-level functions (docs.functions): category, namespace, syntax, and sig
     assert.strictEqual(fnDoc.returns, expected.returns, `Returns mismatch for ${fnName}`);
     assert.ok(fnDoc.examples && fnDoc.examples.length > 0, `Missing examples for ${fnName}`);
   }
+});
+
+test("Flat functions map: visibility, owner, code, types, utils, and alphabetical keys", () => {
+  const allDocs = extractRawDocs();
+  const fnEntries = Object.entries(allDocs.functions);
+  assert.ok(fnEntries.length > 200, `Expected >200 flat functions, got ${fnEntries.length}`);
+
+  // 1. Every entry has visibility, filePath, signature, code, and sorted keys
+  for (const [key, doc] of fnEntries) {
+    assert.ok(doc.visibility === "public" || doc.visibility === "internal", `Invalid visibility for ${key}`);
+    assert.ok(typeof doc.filePath === "string" && doc.filePath.length > 0, `Missing filePath for ${key}`);
+    assert.ok(typeof doc.signature === "string" && doc.signature.length > 0, `Missing signature for ${key}`);
+    assert.ok(typeof doc.code === "string" && doc.code.length > 0, `Missing code for ${key}`);
+    const keys = Object.keys(doc);
+    assert.deepStrictEqual(keys, [...keys].sort(), `Keys not alphabetically sorted for ${key}`);
+  }
+
+  // 2. Internal utils and file-local _-prefixed helpers are present with visibility: "internal"
+  assert.strictEqual(allDocs.functions["isTypedArray"]?.visibility, "internal");
+  assert.strictEqual(allDocs.functions["_blitStackedColumns"]?.visibility, "internal");
+
+  // 3. Body-level types and functions are captured in dependencies
+  const coalesceDoc = allDocs.functions["$df.coalesce"];
+  assert.ok(coalesceDoc.dependencies?.types?.includes("ScalarArg"), "Expected ScalarArg in $df.coalesce.dependencies.types");
+  assert.ok(coalesceDoc.dependencies?.functions?.includes("evaluateArgsMatrix"), "Expected evaluateArgsMatrix in $df.coalesce.dependencies.functions");
 });
 
 // ─── 7. Full Codebase Invariant Audit on extractRawDocs() ─────────────────────
@@ -471,11 +484,7 @@ test("Full codebase invariant check: all symbols and types have valid signatures
 
   // 2. Validate all operations across all categories
   const opGroups = [
-    ...Object.entries(allDocs.columnExpressions).map(([k, v]) => [`columnExpressions.${k}`, v]),
-    ["dataframe", allDocs.dataframe],
-    ["datatypes", allDocs.datatypes],
-    ["exceptions", allDocs.exceptions],
-    ["functions", allDocs.functions]
+    ["functions (public)", Object.fromEntries(Object.entries(allDocs.functions).filter(([, v]) => v.visibility === "public"))]
   ];
 
   let totalOps = 0;
@@ -531,28 +540,28 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
   const allDocs = extractRawDocs();
 
   // 1. Column expressions with accessors (arr, str, struct, dt)
-  const arrayAgg = allDocs.columnExpressions.arrayExpr?.agg;
+  const arrayAgg = allDocs.functions["ArrayExpr.agg"];
   assert.ok(arrayAgg, "Expected arrayExpr.agg to exist");
   assert.strictEqual(arrayAgg.namespace, "$df.col");
   assert.strictEqual(arrayAgg.accessor, "arr");
   assert.strictEqual(arrayAgg.propertyAccess, "agg");
   assert.strictEqual(arrayAgg.callExpression, ".arr.agg()");
 
-  const stringConcat = allDocs.columnExpressions.stringExpr?.concat;
+  const stringConcat = allDocs.functions["StringExpr.concat"];
   assert.ok(stringConcat, "Expected stringExpr.concat to exist");
   assert.strictEqual(stringConcat.namespace, "$df.col");
   assert.strictEqual(stringConcat.accessor, "str");
   assert.strictEqual(stringConcat.propertyAccess, "concat");
   assert.strictEqual(stringConcat.callExpression, ".str.concat()");
 
-  const structField = allDocs.columnExpressions.structExpr?.field;
+  const structField = allDocs.functions["StructExpr.field"];
   assert.ok(structField, "Expected structExpr.field to exist");
   assert.strictEqual(structField.namespace, "$df.col");
   assert.strictEqual(structField.accessor, "struct");
   assert.strictEqual(structField.propertyAccess, "field");
   assert.strictEqual(structField.callExpression, ".struct.field()");
 
-  const dtYear = allDocs.columnExpressions.temporalExpr?.year;
+  const dtYear = allDocs.functions["TemporalExpr.year"];
   assert.ok(dtYear, "Expected temporalExpr.year to exist");
   assert.strictEqual(dtYear.namespace, "$df.col");
   assert.strictEqual(dtYear.accessor, "dt");
@@ -560,7 +569,7 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
   assert.strictEqual(dtYear.callExpression, ".dt.year()");
 
   // 2. Base / Standard column expressions ($df.col namespace, no accessor)
-  const standardAbs = allDocs.columnExpressions.standardExpr?.abs;
+  const standardAbs = allDocs.functions["StandardExpr.abs"];
   assert.ok(standardAbs, "Expected standardExpr.abs to exist");
   assert.strictEqual(standardAbs.namespace, "$df.col");
   assert.strictEqual(standardAbs.accessor, undefined);
@@ -568,14 +577,14 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
   assert.strictEqual(standardAbs.callExpression, ".abs()");
 
   // 3. DataFrame operations
-  const dfFilter = allDocs.dataframe?.filter;
+  const dfFilter = allDocs.functions["DataFrame.filter"];
   assert.ok(dfFilter, "Expected dataframe.filter to exist");
   assert.strictEqual(dfFilter.namespace, "df");
   assert.strictEqual(dfFilter.accessor, undefined);
   assert.strictEqual(dfFilter.propertyAccess, "filter");
   assert.strictEqual(dfFilter.callExpression, ".filter()");
 
-  const dfShapeGetter = allDocs.dataframe?.shape;
+  const dfShapeGetter = allDocs.functions["DataFrame.shape"];
   assert.ok(dfShapeGetter, "Expected dataframe.shape to exist");
   assert.strictEqual(dfShapeGetter.namespace, "df");
   assert.strictEqual(dfShapeGetter.accessor, undefined);
@@ -583,7 +592,7 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
   assert.strictEqual(dfShapeGetter.callExpression, ".shape");
 
   // 4. Standalone functions
-  const fnCol = allDocs.functions?.col;
+  const fnCol = allDocs.functions["$df.col"];
   assert.ok(fnCol, "Expected functions.col to exist");
   assert.strictEqual(fnCol.namespace, "$df");
   assert.strictEqual(fnCol.accessor, undefined);
@@ -591,7 +600,7 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
   assert.strictEqual(fnCol.callExpression, "col()");
 
   // 5. Exceptions (classes)
-  const errDf = allDocs.exceptions?.DataFrameError;
+  const errDf = allDocs.functions["Exceptions.DataFrameError"];
   assert.ok(errDf, "Expected exceptions.DataFrameError to exist");
   assert.strictEqual(errDf.namespace, "Exception");
   assert.strictEqual(errDf.accessor, undefined);
@@ -599,29 +608,20 @@ test("extractRawDocs: propertyAccess, accessor, and callExpression are populated
   assert.strictEqual(errDf.callExpression, "DataFrameError");
 
   // Invariant across all documented operations
-  const allGroups = [
-    ...Object.values(allDocs.columnExpressions),
-    allDocs.dataframe,
-    allDocs.datatypes,
-    allDocs.exceptions,
-    allDocs.functions
-  ];
-
-  for (const group of allGroups) {
-    for (const [sym, item] of Object.entries(group)) {
-      assert.strictEqual(item.propertyAccess, sym, `propertyAccess must match symbol key '${sym}'`);
-      assert.ok(item.callExpression, `callExpression must be defined for '${sym}'`);
-      assert.strictEqual(item.name, undefined, `name must be removed for '${sym}'`);
-      assert.strictEqual(item.methodName, undefined, `methodName must be removed for '${sym}'`);
-      assert.strictEqual(item.qualifiedName, undefined, `qualifiedName must be removed for '${sym}'`);
-      if (item.category === "ColumnExpression") {
-        assert.strictEqual(item.namespace, "$df.col");
-        if (item.accessor) {
-          assert.ok(
-            item.callExpression.startsWith(`.${item.accessor}.`),
-            `Expected callExpression for '${sym}' with accessor '${item.accessor}' to start with '.${item.accessor}.', got '${item.callExpression}'`
-          );
-        }
+  const publicFns = Object.fromEntries(Object.entries(allDocs.functions).filter(([, v]) => v.visibility === "public"));
+  for (const [sym, item] of Object.entries(publicFns)) {
+    const expectedName = sym.includes(".") ? sym.split(".").pop() : sym;
+    assert.strictEqual(item.propertyAccess, expectedName, `propertyAccess must match symbol name '${expectedName}' for '${sym}'`);
+    assert.ok(item.callExpression, `callExpression must be defined for '${sym}'`);
+    assert.strictEqual(item.name, undefined, `name must be removed for '${sym}'`);
+    assert.strictEqual(item.methodName, undefined, `methodName must be removed for '${sym}'`);
+    assert.strictEqual(item.qualifiedName, undefined, `qualifiedName must be removed for '${sym}'`);
+    if (item.namespace === "$df.col") {
+      if (item.accessor) {
+        assert.ok(
+          item.callExpression.startsWith(`.${item.accessor}.`),
+          `Expected callExpression for '${sym}' with accessor '${item.accessor}' to start with '.${item.accessor}.', got '${item.callExpression}'`
+        );
       }
     }
   }
@@ -812,7 +812,7 @@ test("extractRawDocs: verifies real project typeTree for ewmVar, concat, readJso
   const allDocs = extractRawDocs();
 
   // ewmVar: EwmVarOptions = Omit<EwmOptions, 'bias' | 'fisher'>
-  const ewmVarTree = allDocs.columnExpressions.standardExpr.ewmVar.typeTree;
+  const ewmVarTree = allDocs.functions["StandardExpr.ewmVar"].typeTree;
   assert.ok(ewmVarTree && ewmVarTree.options && ewmVarTree.options.properties);
   assert.deepStrictEqual(Object.keys(ewmVarTree.options.properties), [
     "adjust",
@@ -829,11 +829,11 @@ test("extractRawDocs: verifies real project typeTree for ewmVar, concat, readJso
   assert.strictEqual(ewmVarTree.options.properties.by.properties, undefined); // IExpr is opaque
 
   // concat: nested HorizontalConcatOptions inside ConcatOptions + 2-step alias ConcatItemsArg
-  const concatTree = allDocs.dataframe.concat.typeTree;
+  const concatTree = allDocs.functions["DataFrame.concat"].typeTree;
   assert.strictEqual(concatTree.options.properties.horizontal.properties.strict.default, "true");
 
   // duration: union DurationArg = DurationOptions | string has both resolvedType and properties
-  const durationTree = allDocs.functions.duration.typeTree;
+  const durationTree = allDocs.functions["$df.duration"].typeTree;
   assert.strictEqual(durationTree.options.resolvedType, "DurationOptions | string");
   assert.ok(durationTree.options.properties.days);
 });
@@ -1069,9 +1069,7 @@ test("Extreme edge cases: circular/self-referential types and declarative @inter
 test("Full codebase typeTree invariant audit: 0 missing descriptions, 0 leaked internal/_/index properties across all 210+ parameterized operations", () => {
   const allDocs = extractRawDocs();
   const opGroups = [
-    ...Object.entries(allDocs.columnExpressions).map(([k, v]) => [`columnExpressions.${k}`, v]),
-    ["dataframe", allDocs.dataframe],
-    ["functions", allDocs.functions]
+    ["functions (public)", Object.fromEntries(Object.entries(allDocs.functions).filter(([, v]) => v.visibility === "public"))]
   ];
 
   let treeCount = 0;
@@ -1164,7 +1162,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
   const allDocs = extractRawDocs();
 
   // 1. arrayExpr.join (separator + JoinArrayOptions)
-  const arrJoin = allDocs.columnExpressions.arrayExpr.join;
+  const arrJoin = allDocs.functions["ArrayExpr.join"];
   assert.strictEqual(
     arrJoin.signature,
     '$df.col(<column_name>).arr.join(\n  separator: string = ",",\n  options: JoinArrayOptions = {}\n)'
@@ -1188,7 +1186,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
   );
 
   // 2. standardExpr.ewmKurt (single options param without default `= {}` expands across multiple lines)
-  const ewmKurt = allDocs.columnExpressions.standardExpr.ewmKurt;
+  const ewmKurt = allDocs.functions["StandardExpr.ewmKurt"];
   assert.strictEqual(
     ewmKurt.signature,
     "$df.col(<column_name>).ewmKurt(options: EwmKurtOptions)"
@@ -1214,7 +1212,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
   );
 
   // 3. dataframe.concat (destructured options in raw TS normalized to `options: { ... } = {}` with 2-level nested `horizontal`)
-  const dfConcat = allDocs.dataframe.concat;
+  const dfConcat = allDocs.functions["DataFrame.concat"];
   assert.strictEqual(
     dfConcat.signatureDetailed,
     [
@@ -1231,7 +1229,7 @@ test("buildDetailedSignature: expands 1-level and multi-level nested option prop
   );
 
   // 4. functions.concat (preserves generics `<U extends RowRecord = any>` and return type `: DataFrame<U>`)
-  const fnConcat = allDocs.functions.concat;
+  const fnConcat = allDocs.functions["$df.concat"];
   assert.strictEqual(
     fnConcat.signatureDetailed,
     [
@@ -1315,11 +1313,7 @@ test("buildDetailedSignature: synthetic 3-level deep nesting, callbacks with '=>
 test("Full codebase signatureDetailed invariant audit: balanced delimiters and no leaked internal properties", () => {
   const allDocs = extractRawDocs();
   const opGroups = [
-    ...Object.entries(allDocs.columnExpressions).map(([k, v]) => [`columnExpressions.${k}`, v]),
-    ["dataframe", allDocs.dataframe],
-    ["datatypes", allDocs.datatypes],
-    ["exceptions", allDocs.exceptions],
-    ["functions", allDocs.functions]
+    ["functions (public)", Object.fromEntries(Object.entries(allDocs.functions).filter(([, v]) => v.visibility === "public"))]
   ];
 
   for (const [groupName, symbols] of opGroups) {
@@ -1340,6 +1334,56 @@ test("Full codebase signatureDetailed invariant audit: balanced delimiters and n
       }
     }
   }
+});
+
+test("Full src/ AST completeness: 0 missing top-level functions, types, exported constants, and classes", () => {
+  const allDocs = extractRawDocs();
+  const docFnNames = new Set(Object.keys(allDocs.functions).map(k => (k.includes(".") ? k.split(".").pop() : k)));
+  const docTypeNames = new Set(Object.keys(allDocs.types));
+  const docConstNames = new Set(Object.keys(allDocs.constants || {}));
+  const docClassNames = new Set(Object.keys(allDocs.classes || {}));
+
+  const walk = (dir) => {
+    let res = [];
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) res = res.concat(walk(p));
+      else if (e.name.endsWith(".ts")) res.push(p);
+    }
+    return res;
+  };
+
+  const missingFns = [];
+  const missingTypes = [];
+  const missingConsts = [];
+  const missingClasses = [];
+
+  for (const file of walk("src")) {
+    const rel = path.relative("src", file).replace(/\\/g, "/");
+    const sf = ts.createSourceFile(file, fs.readFileSync(file, "utf8"), ts.ScriptTarget.Latest, true);
+    for (const stmt of sf.statements) {
+      if (ts.isFunctionDeclaration(stmt) && stmt.name) {
+        if (!docFnNames.has(stmt.name.text)) missingFns.push(`${rel}:${stmt.name.text}`);
+      } else if ((ts.isInterfaceDeclaration(stmt) || ts.isTypeAliasDeclaration(stmt)) && stmt.name) {
+        if (!docTypeNames.has(stmt.name.text)) missingTypes.push(`${rel}:${stmt.name.text}`);
+      } else if (ts.isVariableStatement(stmt)) {
+        const isExported = !!stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+        for (const decl of stmt.declarationList.declarations) {
+          if (ts.isIdentifier(decl.name)) {
+            const key = isExported ? decl.name.text : `${rel}:${decl.name.text}`;
+            if (!docConstNames.has(key)) missingConsts.push(`${rel}:${decl.name.text}`);
+          }
+        }
+      } else if (ts.isClassDeclaration(stmt) && stmt.name) {
+        if (!docClassNames.has(stmt.name.text)) missingClasses.push(`${rel}:${stmt.name.text}`);
+      }
+    }
+  }
+
+  assert.deepStrictEqual(missingFns, [], `Missing top-level functions in docs: ${missingFns.join(", ")}`);
+  assert.deepStrictEqual(missingTypes, [], `Missing types/interfaces in docs: ${missingTypes.join(", ")}`);
+  assert.deepStrictEqual(missingConsts, [], `Missing exported constants in docs: ${missingConsts.join(", ")}`);
+  assert.deepStrictEqual(missingClasses, [], `Missing classes in docs: ${missingClasses.join(", ")}`);
 });
 
 console.log(`✅ All ${passed} test suites in scripts/_tests/extract-docs.test.mjs passed!`);

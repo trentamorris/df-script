@@ -32,7 +32,7 @@ export function createDelegatingProxy<T extends object>(
  * Normalizes a single unary value (coercing Date instances to getTime if valid)
  * and executes the operation callback.
  */
-export function evalUnaryOp(v: unknown, fn: (a: unknown) => any): unknown {
+export function evalUnaryOp(v: unknown, fn: (a: unknown) => unknown): unknown {
     if (v == null) return null;
     const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
     return fn(normV);
@@ -42,14 +42,14 @@ export function evalUnaryOp(v: unknown, fn: (a: unknown) => any): unknown {
  * Normalizes binary values (coercing Date instances to getTime if valid)
  * and executes the operation callback.
  */
-export function evalBinaryOp(v: unknown, r: unknown, fn: (a: unknown, b: unknown) => any): unknown {
+export function evalBinaryOp(v: unknown, r: unknown, fn: (a: unknown, b: unknown) => unknown): unknown {
     if (v == null || r == null) return null;
     const normV = typeof v === "object" && isValidDateObj(v) ? v.getTime() : v;
     const normR = typeof r === "object" && isValidDateObj(r) ? r.getTime() : r;
     return fn(normV, normR);
 }
 
-export function kleeneUnary(fn: (v: unknown) => any) {
+export function kleeneUnary(fn: (v: unknown) => unknown) {
     return (vArray: ColumnData) => {
         const height = vArray.length;
         const result = new Array(height);
@@ -60,7 +60,7 @@ export function kleeneUnary(fn: (v: unknown) => any) {
     };
 }
 
-export function kleeneBinary(expr: IExpr, other: unknown, fn: (v: unknown, r: unknown) => any) {
+export function kleeneBinary(expr: IExpr, other: unknown, fn: (v: unknown, r: unknown) => unknown) {
     const op = (vArray: ColumnData, columns: ColumnDict) => {
         const height = vArray.length;
         const rResolved = expr._resolve(other, columns, height);

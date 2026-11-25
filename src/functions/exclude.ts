@@ -9,7 +9,6 @@ import type { ColumnKeyArg } from "../types";
  * @param {ColumnKeyArg} columns The name or names of columns to exclude.
  * @returns {ColumnExpr<unknown>} A column expression targeting all columns except the specified ones.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Exclude a single column by name:

@@ -54,7 +54,6 @@ export class DataFrame<T extends RowRecord = RowRecord> {
      * @param schema Optional explicit DataFrame schema mapping.
      * @param height Optional explicit height (row count).
      * @namespace df
-     * @category DataFrame
      * @syntax df.{symbol}(...)
      * @example
      * const df = $df.dataFrame([{ a: 1, b: "x" }, { a: 2, b: "y" }]);
@@ -105,6 +104,10 @@ export class DataFrame<T extends RowRecord = RowRecord> {
             schema[key] = inferColumnType(this._columns[key]);
         }
         this._applySchema(schema);
+    }
+
+    private _isPlainCol(expr: IExpr): boolean {
+        return !!(expr._ops.length === 0 && !expr._aggFn && !expr._isLiteral && expr._colName && this._schema[expr._colName]);
     }
 
     static _normalizeArgs(args: SelectArg[]): IExpr[] {
@@ -594,8 +597,8 @@ export class DataFrame<T extends RowRecord = RowRecord> {
     }
 
     /**
-     * Groups rows by key columns to prepare for aggregations.
-     * @param {ColumnKeyArg<K>} keys Column name or array of key column names.
+     * Groups rows by key columns or column expressions to prepare for aggregations.
+     * @param {ColumnKeyArg<K> | IExpr | (K | IExpr)[]} keys Column name, expression, or array of key column names/expressions.
      * @returns {GroupedData}
      * @example
      * // 1. Group by single column with single aggregation:
@@ -623,17 +626,69 @@ export class DataFrame<T extends RowRecord = RowRecord> {
      * // | A     | 15  | 30    |
      * // | B     | 30  | 30    |
      * // +-------+-----+-------+
+     *
+     * @example
+     * // 3. Group by computed expression:
+     * <!-- doc:base_grouped_3x2 -->
+     * df.groupBy($df.col("val").gt(15).alias("high")).agg($df.col("val").sum().alias("total"))
+     * // shape: (2, 2)
+     * // +-------+-------+
+     * // | high  | total |
+     * // +-------+-------+
+     * // | false | 10    |
+     * // | true  | 50    |
+     * // +-------+-------+
      */
-    groupBy<K extends keyof T>(keys: ColumnKeyArg<K>): GroupedData<T, K> {
-        const keysStr = toArrayOfType<string>(keys, "string");
+    groupBy<K extends keyof T>(keys: ColumnKeyArg<K> | IExpr | (K | IExpr)[]): GroupedData<T, K> {
+        const rawList = Array.isArray(keys) ? keys : [keys];
+        const isExprLike = (k: unknown): k is IExpr => k != null && typeof (k as IExpr)._evaluate === "function";
 
-        for (let j = 0; j < keysStr.length; j++) {
-            assertColumnExists(keysStr[j], this._columns, "Grouping key");
+        if (!rawList.some(isExprLike)) {
+            const keysStr = toArrayOfType<string>(keys, "string");
+            const seen = keysStr.length > 1 ? new Set<string>() : null;
+            for (let j = 0; j < keysStr.length; j++) {
+                assertColumnExists(keysStr[j], this._columns, "Grouping key");
+                if (seen) {
+                    if (seen.has(keysStr[j])) {
+                        throw new InvalidArgumentError(`groupBy: duplicate grouping key "${keysStr[j]}"`);
+                    }
+                    seen.add(keysStr[j]);
+                }
+            }
+            const groups = buildGroupMap(this._columns, keysStr, this._height);
+            return new GroupedData<T, K>(groups, keysStr as K[], Object.keys(this._columns) as (keyof T)[], this._columns, this._height, this._schema);
         }
 
-        const groups = buildGroupMap(this._columns, keysStr, this._height);
-        const allKeys = Object.keys(this._columns) as (keyof T)[];
-        return new GroupedData<T, K>(groups, keysStr as K[], allKeys, this._columns, this._height, this._schema);
+        const expanded = resolveColumnSelectors(
+            DataFrame._normalizeArgs(rawList as SelectArg[]),
+            Object.keys(this._columns),
+            undefined,
+            this._schema,
+            this._columns
+        );
+        const keyNames: string[] = [];
+        const seenKeys = new Set<string>();
+        const toMaterialize: IExpr[] = [];
+
+        for (let i = 0; i < expanded.length; i++) {
+            const expr = expanded[i];
+            if (expr._aggFn != null || expr._partitionBy != null || expr._evaluateWindow != null) {
+                throw new InvalidArgumentError("groupBy: aggregation and window expressions cannot be used as grouping keys");
+            }
+            const outName = expr._outputName || expr._colName || (expr._isLiteral ? "literal" : "__group_key");
+            if (seenKeys.has(outName)) {
+                throw new InvalidArgumentError(`groupBy: duplicate grouping key "${outName}"`);
+            }
+            seenKeys.add(outName);
+            keyNames.push(outName);
+
+            if (!this._isPlainCol(expr) || expr._outputName) {
+                toMaterialize.push(expr._outputName ? expr : (expr as ColumnExpr<unknown>).alias(outName));
+            }
+        }
+
+        const workDf = toMaterialize.length > 0 ? this.withColumns(...toMaterialize) : this;
+        return workDf.groupBy(keyNames as K[]) as unknown as GroupedData<T, K>;
     }
 
     /**
@@ -1652,6 +1707,12 @@ export class DataFrame<T extends RowRecord = RowRecord> {
             const expr = expandedExprs[i];
             const targetKey = targetKeys[i];
             const col = evaluatedCols[i];
+
+            if (this._isPlainCol(expr) && !activeRowMap && !shouldCollapse) {
+                outSchema[targetKey] = this._schema[expr._colName!];
+                newColumns[targetKey] = Array.isArray(col) ? col.slice() : (col as { slice(): ColumnData }).slice();
+                continue;
+            }
             const type = resolveExprOutputType(expr, this._schema, col) || inferColumnType(col);
 
             outSchema[targetKey] = type;

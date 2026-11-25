@@ -361,7 +361,9 @@ export class ArrayType<TInner = unknown> extends NestedDataType<TInner[] | null>
     }
     allocate(size: number): (TInner[] | null)[] { return new Array(size).fill(null); }
 }
-export const ArrayDataType = <TInner>(inner: RegisteredDataType & DataType<TInner>) => new ArrayType<TInner>(inner);
+export function ArrayDataType<TInner>(inner: RegisteredDataType & DataType<TInner>) {
+    return new ArrayType<TInner>(inner);
+}
 
 /**
  * Keyed struct object datatype wrapping sub-field schemas.
@@ -395,7 +397,9 @@ export class StructType<TFields extends RowRecord = RowRecord> extends NestedDat
     }
     allocate(size: number): (TFields | null)[] { return new Array(size).fill(null); }
 }
-export const Struct = <TFields extends RowRecord>(fields: { [K in keyof TFields]: RegisteredDataType & DataType<TFields[K]> }) => new StructType<TFields>(fields);
+export function Struct<TFields extends RowRecord>(fields: { [K in keyof TFields]: RegisteredDataType & DataType<TFields[K]> }) {
+    return new StructType<TFields>(fields);
+}
 
 /**
  * Union of all concrete registered DataType instances supported in a DataFrame schema.

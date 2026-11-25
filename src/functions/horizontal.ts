@@ -13,7 +13,6 @@ import { HORIZONTAL_MARKER } from "../columnExpressions/constants";
  * @param {...IntoExprArg} exprs Column names, expressions, selectors (e.g. `$df.all()`), or arrays of them.
  * @returns {HorizontalExpr} A column expression representing the horizontal row arrays.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Horizontal sum across row values:

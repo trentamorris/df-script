@@ -7,7 +7,6 @@ import { parseCSV, inferAndCoerceCSVColumn } from "../utils";
  * Reads a CSV string and constructs a DataFrame.
  * Automatically infers column data types unless an explicit schema is provided.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @param content The CSV content string.
  * @param [options] Parse and configuration options.

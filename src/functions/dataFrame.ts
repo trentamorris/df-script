@@ -9,7 +9,6 @@ import type { RowRecord, DataFrameSchema, DataFrameDataArg } from "../types";
  * @param {DataFrameSchema} [schema] Optional explicit column schema mapping.
  * @returns {DataFrame<T>} A new DataFrame instance.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Construct DataFrame from a column dictionary:

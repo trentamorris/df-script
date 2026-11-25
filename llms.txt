@@ -7,6 +7,7 @@
 - **In-Browser Notebook**: [https://df-script.js.org/notebook](https://df-script.js.org/notebook)
 - **Repository**: [https://github.com/trentamorris/df-script](https://github.com/trentamorris/df-script)
 - **Full LLM Reference (Markdown)**: [llms-full.txt](https://df-script.js.org/llms-full.txt)
+- **Developer LLM Reference (Markdown)**: [llms-dev.txt](https://df-script.js.org/llms-dev.txt)
 - **Raw API Schema (JSON)**: [docs.json](https://df-script.js.org/docs.json)
 
 ---

@@ -13,7 +13,6 @@ export interface GroupedData<T extends RowRecord = RowRecord, K extends keyof T 
 /**
  * Represents a DataFrame grouped by key columns, supporting aggregation operations.
  * @namespace df
- * @category DataFrame
  * @syntax df.groupBy(...).{symbol}(...)
  */
 export class GroupedData<T extends RowRecord = RowRecord, K extends keyof T = keyof T> {

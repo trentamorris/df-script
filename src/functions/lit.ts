@@ -10,7 +10,6 @@ import type { LitOptions } from "./types";
  * @param [options] Configuration options.
  * @returns {ColumnExpr<T>} A column expression with the literal value.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Literal number repeated for every row:

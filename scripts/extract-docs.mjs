@@ -9,6 +9,7 @@
  *   node scripts/extract-docs.mjs --out ./docs.json
  */
 
+import ts from "typescript";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath, pathToFileURL } from "url";
@@ -25,7 +26,7 @@ try {
   if (match) {
     docExamples = new Function("return " + match[1])();
   }
-} catch (e) {}
+} catch (e) { }
 
 /**
  * Strips embedded example tables from source files, keeping only clean <!-- doc:KEY --> tags.
@@ -76,11 +77,7 @@ const TAG_TYPEFILE = "@typefile";
 const TAG_INTERNALFILE = "@internalfile";
 const TAG_NOTE = "@note";
 
-// ─── Regexes to capture JSDoc comments followed by identifiers ────────────────
-
-// Capture any JSDoc block (not followed by another JSDoc block) + modifiers + immediate declaration name
-const JSDOC_BLOCK_REGEX =
-  /\/\*\*((?:(?!\*\/)[\s\S])*?)\*\/[\s\r\n]*?(?![\s\r\n]*\/\*\*)((?:(?:export|public|private|static|abstract|readonly|override|async|function|class|get|set)\s+|\*\s*)*)([a-zA-Z0-9_$]+)/g;
+// ─── Regexes to capture JSDoc tags ────────────────────────────────────────────
 
 // Regexes for specific tags
 const PARAM_REGEX = new RegExp(
@@ -149,15 +146,15 @@ export function parseJSDocComment(comment) {
             .replace(new RegExp(`(?:${TAG_INTERNAL}|${TAG_IGNORE})\\b`, "g"), "")
             .replace(/\s+/g, " ")
             .trim();
-              const paramObj = { name: rawName };
-              if (type) paramObj.type = type;
-              if (defaultVal) paramObj.default = defaultVal;
-              if (hasInternalTag) paramObj.internal = true;
-              paramObj.desc = cleanDesc;
-              paramsList.push(paramObj);
-              inParam = true;
-            }
-          } else if (trimmed.startsWith(TAG_RETURNS)) {
+          const paramObj = { name: rawName };
+          if (type) paramObj.type = type;
+          if (defaultVal) paramObj.default = defaultVal;
+          if (hasInternalTag) paramObj.internal = true;
+          paramObj.desc = cleanDesc;
+          paramsList.push(paramObj);
+          inParam = true;
+        }
+      } else if (trimmed.startsWith(TAG_RETURNS)) {
         const m = trimmed.match(RETURNS_REGEX);
         if (m) {
           const rType = m[1] ? m[1].trim() : "";
@@ -198,15 +195,15 @@ export function parseJSDocComment(comment) {
     examples:
       examplesList.length > 0
         ? examplesList.map(ex => {
-            return ex
-              .replace(
-                /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*(?:df\.|df1\.|df2\.|trades\.|quotes\.|east\.|west\.|\$df\.|\$col|const |let |var |\/\/)|$))/g,
-                (_, key) => {
-                  return docExamples[key] ? docExamples[key].replace(/^ {5}\* /gm, "") : "";
-                }
-              )
-              .trim();
-          })
+          return ex
+            .replace(
+              /<!-- @?doc:([a-zA-Z0-9_]+) -->([\s\S]*?)(?=(\n\s*(?:df\.|df1\.|df2\.|trades\.|quotes\.|east\.|west\.|\$df\.|\$col|const |let |var |\/\/)|$))/g,
+              (_, key) => {
+                return docExamples[key] ? docExamples[key].replace(/^ {5}\* /gm, "") : "";
+              }
+            )
+            .trim();
+        })
         : undefined,
     params: paramsList.length > 0 ? paramsList : undefined,
     notes: notesList.length > 0 ? notesList : undefined,
@@ -397,9 +394,9 @@ function _splitParamNameAndType(paramStr) {
   return idx === -1
     ? { namePart: paramStr.trim(), typeAndDefault: "" }
     : {
-        namePart: paramStr.slice(0, idx).trim(),
-        typeAndDefault: paramStr.slice(idx + 1).trim()
-      };
+      namePart: paramStr.slice(0, idx).trim(),
+      typeAndDefault: paramStr.slice(idx + 1).trim()
+    };
 }
 
 function _splitTypeAndDefault(typeAndDefault) {
@@ -407,9 +404,9 @@ function _splitTypeAndDefault(typeAndDefault) {
   return idx === -1
     ? { typeStr: typeAndDefault.trim(), defaultStr: undefined }
     : {
-        typeStr: typeAndDefault.slice(0, idx).trim(),
-        defaultStr: typeAndDefault.slice(idx + 1).trim()
-      };
+      typeStr: typeAndDefault.slice(0, idx).trim(),
+      defaultStr: typeAndDefault.slice(idx + 1).trim()
+    };
 }
 
 function _extractSignatureParams(signatureStr) {
@@ -425,60 +422,7 @@ function _extractSignatureParams(signatureStr) {
   };
 }
 
-export function extractSignatureAndEnd(rawContent, startIndex, symbolName, isGetter) {
-  let i = startIndex;
-  while (i < rawContent.length && /\s/.test(rawContent[i])) i++;
 
-  let bodyStartIndex = -1;
-  let semicolonIndex = -1;
-
-  _scanBalanced(
-    rawContent,
-    (ch, idx, isTop) => {
-      if (!isTop) return false;
-      if (ch === "{") {
-        bodyStartIndex = idx;
-        return true;
-      }
-      if (ch === ";") {
-        const implRegex = new RegExp(`^\\s*(?:export\\s+)?(?:async\\s+)?function\\s+${symbolName}\\b`);
-        if (implRegex.test(rawContent.slice(idx + 1))) {
-          const nextBrace = rawContent.indexOf("{", idx + 1);
-          if (nextBrace !== -1) bodyStartIndex = nextBrace;
-        } else {
-          semicolonIndex = idx;
-        }
-        return true;
-      }
-      return false;
-    },
-    i
-  );
-
-  const prefix = isGetter ? "get " + symbolName : symbolName;
-  if (semicolonIndex !== -1) {
-    return {
-      signature: (prefix + rawContent.slice(i, semicolonIndex)).replace(/\s+/g, " ").trim(),
-      endIndex: semicolonIndex
-    };
-  }
-
-  const sigEnd = bodyStartIndex !== -1 ? bodyStartIndex : rawContent.length;
-  const endIndex =
-    bodyStartIndex !== -1
-      ? _findMatchingClose(rawContent, bodyStartIndex, "{", "}")
-      : rawContent.length;
-
-  let normalizedSig = (prefix + rawContent.slice(i, sigEnd)).replace(/\s+/g, " ").trim();
-  if (isGetter) {
-    normalizedSig = normalizedSig.replace(/^get\s+([a-zA-Z0-9_$]+)\s*\(\s*\)/, "$1");
-  }
-
-  return {
-    signature: normalizedSig,
-    endIndex: endIndex !== -1 ? endIndex : rawContent.length - 1
-  };
-}
 
 // splitByComma: Splits a string on commas at the top-level (respecting strings, nested parentheses, curly braces, brackets, and generics).
 export function splitByComma(str) {
@@ -1413,7 +1357,6 @@ export function getSourceFiles(dir) {
 
 export function extractRawDocsFromContent(rawContent, relativePath = "", typesMap = null) {
   let fileDocs = null;
-  let match;
 
   // Scan the raw file content for an `@namespace <value>` tag in any JSDoc block
   const namespaceMatch = rawContent.match(NAMESPACE_REGEX);
@@ -1421,32 +1364,61 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
 
   // Scan for `@category <value>`
   const categoryMatch = rawContent.match(CATEGORY_REGEX);
-  const fileCategory = categoryMatch ? categoryMatch[1].trim() : "ColumnExpression";
+  const inferCategory = (relPath) => {
+    if (relPath.startsWith("functions/")) return "Function";
+    if (relPath.startsWith("dataframe/")) return "DataFrame";
+    if (relPath.startsWith("datatypes/")) return "DataType";
+    if (relPath.startsWith("exceptions/")) return "Exception";
+    return "ColumnExpression";
+  };
+  const fileCategory = categoryMatch ? categoryMatch[1].trim() : inferCategory(relativePath);
 
   // Scan for `@syntax <template>`
   const syntaxMatch = rawContent.match(SYNTAX_REGEX);
   const fileSyntaxTemplate = syntaxMatch ? syntaxMatch[1].trim() : null;
 
-  JSDOC_BLOCK_REGEX.lastIndex = 0;
-  while ((match = JSDOC_BLOCK_REGEX.exec(rawContent)) !== null) {
-    const comment = match[1];
-    const modifiers = match[2] || "";
-    const symbolName = match[3];
+  const sf = ts.createSourceFile(relativePath || "file.ts", rawContent, ts.ScriptTarget.Latest, true);
 
-    // Skip internal functions marked with @internal or @ignore, or constructor / leading underscore / interface / type symbols
+  const getLeadingJSDoc = (node) => {
+    const ranges = ts.getLeadingCommentRanges(rawContent, node.getFullStart()) || [];
+    for (let i = ranges.length - 1; i >= 0; i--) {
+      const text = rawContent.slice(ranges[i].pos, ranges[i].end);
+      if (text.startsWith("/**")) return text.slice(3, -2);
+    }
+    return null;
+  };
+
+  const candidates = [];
+  for (const stmt of sf.statements) {
+    if (ts.isFunctionDeclaration(stmt) && stmt.name) {
+      candidates.push({ node: stmt, symbolName: stmt.name.text, isClass: false, isGetter: false });
+    } else if (ts.isClassDeclaration(stmt) && stmt.name) {
+      candidates.push({ node: stmt, symbolName: stmt.name.text, isClass: true, isGetter: false });
+      for (const member of stmt.members) {
+        if ((ts.isMethodDeclaration(member) || ts.isGetAccessorDeclaration(member)) && member.name && ts.isIdentifier(member.name)) {
+          candidates.push({
+            node: member,
+            symbolName: member.name.text,
+            isClass: false,
+            isGetter: ts.isGetAccessorDeclaration(member)
+          });
+        }
+      }
+    }
+  }
+
+  for (const { node, symbolName, isClass, isGetter } of candidates) {
+    const comment = getLeadingJSDoc(node);
+    if (!comment) continue;
+
+    // Skip internal functions marked with @internal or @ignore, or leading underscore
     if (
       comment.includes(TAG_INTERNAL) ||
       comment.includes(TAG_IGNORE) ||
-      symbolName.startsWith("_") ||
-      symbolName === "constructor" ||
-      symbolName === "interface" ||
-      symbolName === "type"
+      symbolName.startsWith("_")
     ) {
       continue;
     }
-
-    const isClass = /\bclass\b/.test(modifiers);
-    const isGetter = /\bget\b/.test(modifiers);
 
     let symbolCategory = fileCategory;
     const localCategoryMatch = comment.match(CATEGORY_REGEX);
@@ -1510,17 +1482,34 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
       }
     }
 
-    const { signature: rawSignature, endIndex } = extractSignatureAndEnd(
-      rawContent,
-      JSDOC_BLOCK_REGEX.lastIndex,
-      symbolName,
-      isGetter
-    );
+    const nodeStart = node.getStart(sf);
+    const nodeEnd = node.getEnd();
+    if (parsed.params && Array.isArray(node.parameters)) {
+      const astParamTypes = new Map();
+      for (const p of node.parameters) {
+        if (ts.isIdentifier(p.name) && p.type) {
+          astParamTypes.set(p.name.text, p.type.getText(sf).replace(/\s+/g, " ").trim());
+        }
+      }
+      for (const p of parsed.params) {
+        if (!p.type || p.type === "any") {
+          const cleanName = p.name.replace(/^\[|\]$/g, "").replace(/^\.\.\./, "").split("=")[0].trim();
+          const astType = astParamTypes.get(cleanName);
+          if (astType) p.type = astType;
+        }
+      }
+    }
+    let rawSignature = node.body
+      ? rawContent.slice(nodeStart, node.body.getStart(sf)).replace(/\s+/g, " ").trim()
+      : rawContent.slice(nodeStart, nodeEnd).replace(/\s+/g, " ").trim();
+    rawSignature = rawSignature.replace(/^(?:export\s+)?(?:async\s+)?function\s+/, "");
+    if (isGetter) {
+      rawSignature = rawSignature.replace(/^get\s+/, "").replace(/\(\s*\)\s*:/, ":");
+    }
 
     if (isClass && symbolCategory === "Exception") {
-      const classBody = rawContent.substring(JSDOC_BLOCK_REGEX.lastIndex, endIndex + 1);
-      const ctorMatch = classBody.match(/constructor\s*\(([\s\S]*?)\)/);
-      const ctorParams = ctorMatch ? ctorMatch[1].replace(/\s+/g, " ").trim() : "message: string";
+      const ctor = node.members.find(m => ts.isConstructorDeclaration(m));
+      const ctorParams = ctor ? ctor.parameters.map(p => p.getText(sf).replace(/\s+/g, " ").trim()).join(", ") : "message: string";
       parsed.signature = formatSignature(`new ${symbolName}(${ctorParams})`);
     } else {
       const formattedSignature = formatSignature(rawSignature);
@@ -1532,8 +1521,8 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
     if (relativePath) {
       parsed.filePath = relativePath;
     }
-    parsed.lineStart = rawContent.substring(0, match.index + match[0].length).split("\n").length;
-    parsed.lineEnd = rawContent.substring(0, endIndex + 1).split("\n").length;
+    parsed.lineStart = sf.getLineAndCharacterOfPosition(nodeStart).line + 1;
+    parsed.lineEnd = sf.getLineAndCharacterOfPosition(nodeEnd).line + 1;
     const typeTree = typesMap ? buildFunctionTypeTree(rawSignature, parsed.params || [], typesMap) : undefined;
     const signatureDetailed = buildDetailedSignature(parsed.signature, typeTree);
 
@@ -1567,18 +1556,191 @@ export function extractRawDocsFromContent(rawContent, relativePath = "", typesMa
   return fileDocs;
 }
 
+function extractAllProjectUtils(sourceFiles, typesMap) {
+  const utilsMap = {};
+  const rawBodies = {};
+  const allTypeNames = Object.keys(typesMap || {});
+
+  for (const filePath of sourceFiles) {
+    const relativePath = path.relative(srcDir, filePath).replace(/\\/g, "/");
+    if (relativePath.endsWith("types.ts") || relativePath.endsWith("index.ts")) {
+      continue;
+    }
+    const isUtilFile = relativePath.startsWith("utils/") || relativePath.endsWith("/utils.ts");
+    const rawContent = fs.readFileSync(filePath, "utf-8");
+    const sf = ts.createSourceFile(filePath, rawContent, ts.ScriptTarget.Latest, true);
+
+    for (const stmt of sf.statements) {
+      if (!ts.isFunctionDeclaration(stmt) || !stmt.name) continue;
+      const name = stmt.name.text;
+      const exported = Boolean(stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword));
+      const params = stmt.parameters.map(p => p.getText(sf)).join(", ");
+      const ret = stmt.type ? stmt.type.getText(sf) : "unknown";
+      const signature = `${name}(${params}): ${ret}`;
+      const lineStart = sf.getLineAndCharacterOfPosition(stmt.getStart(sf)).line + 1;
+      const lineEnd = sf.getLineAndCharacterOfPosition(stmt.getEnd()).line + 1;
+      const referencedTypes = allTypeNames.filter(t => new RegExp(`\\b${t}\\b`).test(signature)).sort();
+      const entry = {
+        code: stmt.getText(sf),
+        exported,
+        filePath: relativePath,
+        lineEnd,
+        lineStart,
+        returns: ret,
+        signature
+      };
+      if (referencedTypes.length > 0) {
+        entry.types = referencedTypes;
+      }
+      utilsMap[name] = entry;
+      rawBodies[name] = stmt.body ? stmt.body.getText(sf) : "";
+    }
+  }
+
+  const allUtilNames = Object.keys(utilsMap).sort();
+  const sortedUtilsMap = {};
+  for (const name of allUtilNames) {
+    const body = rawBodies[name];
+    if (body) {
+      const called = allUtilNames.filter(u => u !== name && new RegExp(`\\b${u}\\s*\\(`).test(body));
+      if (called.length > 0) {
+        utilsMap[name].utils = called;
+      }
+    }
+    sortedUtilsMap[name] = utilsMap[name];
+  }
+
+  return sortedUtilsMap;
+}
+
+function extractAllProjectConstantsAndClasses(sourceFiles) {
+  const constants = {};
+  const classes = {};
+
+  const getLeadingDoc = (node, sf, raw) => {
+    const ranges = ts.getLeadingCommentRanges(raw, node.getFullStart()) || [];
+    for (let i = ranges.length - 1; i >= 0; i--) {
+      const text = raw.slice(ranges[i].pos, ranges[i].end);
+      if (text.startsWith("/**")) {
+        return parseJSDocComment(text.slice(3, -2)).description || "";
+      }
+    }
+    return "";
+  };
+
+  for (const filePath of sourceFiles) {
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const rel = path.relative(srcDir, filePath).replace(/\\/g, "/");
+    const sf = ts.createSourceFile(filePath, raw, ts.ScriptTarget.Latest, true);
+
+    for (const stmt of sf.statements) {
+      if (ts.isVariableStatement(stmt)) {
+        const isExported = !!stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+        const desc = getLeadingDoc(stmt, sf, raw);
+        const start = sf.getLineAndCharacterOfPosition(stmt.getStart(sf)).line + 1;
+        const end = sf.getLineAndCharacterOfPosition(stmt.getEnd()).line + 1;
+        for (const decl of stmt.declarationList.declarations) {
+          if (!ts.isIdentifier(decl.name)) continue;
+          const name = decl.name.text;
+          const key = isExported ? name : `${rel}:${name}`;
+          constants[key] = {
+            name,
+            exported: isExported,
+            visibility: isExported && !name.startsWith("_") ? "public" : "internal",
+            type: decl.type ? decl.type.getText(sf) : undefined,
+            value: decl.initializer ? decl.initializer.getText(sf) : undefined,
+            filePath: rel,
+            lineStart: start,
+            lineEnd: end,
+            ...(desc ? { description: desc } : {})
+          };
+        }
+      } else if (ts.isClassDeclaration(stmt) && stmt.name) {
+        const name = stmt.name.text;
+        const isExported = !!stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword);
+        const desc = getLeadingDoc(stmt, sf, raw);
+        const start = sf.getLineAndCharacterOfPosition(stmt.getStart(sf)).line + 1;
+        const end = sf.getLineAndCharacterOfPosition(stmt.getEnd()).line + 1;
+
+        let ext;
+        let impls;
+        if (stmt.heritageClauses) {
+          for (const hc of stmt.heritageClauses) {
+            const names = hc.types.map(t => t.getText(sf));
+            if (hc.token === ts.SyntaxKind.ExtendsKeyword) ext = names[0];
+            else if (hc.token === ts.SyntaxKind.ImplementsKeyword) impls = names;
+          }
+        }
+
+        let ctor;
+        const properties = [];
+        const methods = [];
+        const getters = [];
+        const setters = [];
+
+        for (const member of stmt.members) {
+          if (ts.isConstructorDeclaration(member)) {
+            const params = member.parameters.map(p => p.getText(sf)).join(", ");
+            const cDesc = getLeadingDoc(member, sf, raw);
+            ctor = {
+              signature: `constructor(${params})`,
+              ...(cDesc ? { description: cDesc } : {})
+            };
+          } else if (ts.isPropertyDeclaration(member) && member.name) {
+            const pName = member.name.getText(sf);
+            properties.push({
+              name: pName,
+              type: member.type ? member.type.getText(sf) : undefined,
+              visibility: pName.startsWith("_") ? "internal" : "public"
+            });
+          } else if (ts.isMethodDeclaration(member) && member.name) {
+            methods.push(member.name.getText(sf));
+          } else if (ts.isGetAccessorDeclaration(member) && member.name) {
+            getters.push(member.name.getText(sf));
+          } else if (ts.isSetAccessorDeclaration(member) && member.name) {
+            setters.push(member.name.getText(sf));
+          }
+        }
+
+        classes[name] = {
+          name,
+          exported: isExported,
+          visibility: isExported && !name.startsWith("_") ? "public" : "internal",
+          ...(ext ? { extends: ext } : {}),
+          ...(impls?.length ? { implements: impls } : {}),
+          filePath: rel,
+          lineStart: start,
+          lineEnd: end,
+          ...(ctor ? { constructor: ctor } : {}),
+          ...(properties.length ? { properties } : {}),
+          ...(methods.length ? { methods } : {}),
+          ...(getters.length ? { getters } : {}),
+          ...(setters.length ? { setters } : {}),
+          ...(desc ? { description: desc } : {})
+        };
+      }
+    }
+  }
+
+  return { constants, classes };
+}
+
 export function extractRawDocs() {
   const typesMap = extractAllProjectTypes();
+  const sourceFiles = getSourceFiles(srcDir);
+  const utilsMap = extractAllProjectUtils(sourceFiles, typesMap);
+  const { constants, classes } = extractAllProjectConstantsAndClasses(sourceFiles);
   const docs = {
+    classes,
     columnExpressions: {},
+    constants,
     dataframe: {},
     datatypes: {},
     exceptions: {},
     functions: {},
-    types: typesMap
+    types: typesMap,
+    utils: utilsMap
   };
-
-  const sourceFiles = getSourceFiles(srcDir);
 
   for (const filePath of sourceFiles) {
     const rawContent = fs.readFileSync(filePath, "utf-8");
@@ -1606,7 +1768,190 @@ export function extractRawDocs() {
     }
   }
 
-  return docs;
+  const allTypeNames = Object.keys(typesMap);
+  const allUtilNames = Object.keys(utilsMap);
+
+  const sortEntry = (entry) => {
+    const sorted = {};
+    for (const k of Object.keys(entry).sort()) {
+      sorted[k] = entry[k];
+    }
+    return sorted;
+  };
+
+  for (const [fnName, fnDoc] of Object.entries(docs.functions)) {
+    const fullPath = path.join(srcDir, fnDoc.filePath);
+    if (fs.existsSync(fullPath)) {
+      const raw = fs.readFileSync(fullPath, "utf-8");
+      const sf = ts.createSourceFile(fullPath, raw, ts.ScriptTarget.Latest, true);
+      for (const stmt of sf.statements) {
+        if (ts.isFunctionDeclaration(stmt) && stmt.name?.text === fnName) {
+          fnDoc.code = stmt.getText(sf);
+          const body = stmt.body ? stmt.body.getText(sf) : "";
+          const refUtils = allUtilNames.filter(u => new RegExp(`\\b${u}\\s*\\(`).test(body)).sort();
+          if (refUtils.length > 0) fnDoc.utils = refUtils;
+          break;
+        }
+      }
+    }
+    const typeScanText = `${fnDoc.signature || ""}\n${fnDoc.code || ""}`;
+    const refTypes = allTypeNames.filter(t => new RegExp(`\\b${t}\\b`).test(typeScanText)).sort();
+    if (refTypes.length > 0) fnDoc.types = refTypes;
+    docs.functions[fnName] = sortEntry(fnDoc);
+  }
+
+  const enrichEntry = (doc) => {
+    if (!doc || typeof doc !== "object" || !doc.filePath) return;
+    const fullPath = path.join(srcDir, doc.filePath);
+    if (fs.existsSync(fullPath) && doc.lineStart && doc.lineEnd && !doc.code) {
+      const lines = fs.readFileSync(fullPath, "utf-8").split(/\r?\n/);
+      const snippet = lines.slice(doc.lineStart - 1, doc.lineEnd).join("\n");
+      doc.code = snippet;
+      const refUtils = allUtilNames.filter(u => new RegExp(`\\b${u}\\s*\\(`).test(snippet)).sort();
+      if (refUtils.length > 0 && !doc.utils) doc.utils = refUtils;
+    }
+    const typeScanText = `${doc.signature || ""}\n${doc.code || ""}`;
+    const refTypes = allTypeNames.filter(t => new RegExp(`\\b${t}\\b`).test(typeScanText)).sort();
+    if (refTypes.length > 0 && !doc.types) doc.types = refTypes;
+  };
+
+  for (const subMap of Object.values(docs.columnExpressions)) {
+    for (const doc of Object.values(subMap)) enrichEntry(doc);
+  }
+  for (const doc of Object.values(docs.dataframe)) enrichEntry(doc);
+  for (const doc of Object.values(docs.datatypes)) enrichEntry(doc);
+  for (const doc of Object.values(docs.exceptions)) enrichEntry(doc);
+
+  const sortDeep = (val) => {
+    if (Array.isArray(val)) return val.map(sortDeep);
+    if (val && typeof val === "object") {
+      const sorted = {};
+      for (const k of Object.keys(val).sort()) {
+        sorted[k] = sortDeep(val[k]);
+      }
+      return sorted;
+    }
+    return val;
+  };
+
+  const flatFunctions = {};
+  const addFlat = (key, doc, owner, visibility) => {
+    flatFunctions[key] = sortDeep({ ...doc, owner, visibility });
+  };
+
+  for (const [fnName, doc] of Object.entries(docs.functions)) {
+    addFlat(`$df.${fnName}`, doc, "$df", "public");
+  }
+  for (const [fnName, doc] of Object.entries(docs.dataframe)) {
+    addFlat(`DataFrame.${fnName}`, doc, "DataFrame", "public");
+  }
+  for (const [sub, subMap] of Object.entries(docs.columnExpressions)) {
+    const owner = sub.charAt(0).toUpperCase() + sub.slice(1);
+    for (const [fnName, doc] of Object.entries(subMap)) {
+      addFlat(`${owner}.${fnName}`, doc, owner, "public");
+    }
+  }
+  for (const [fnName, doc] of Object.entries(docs.datatypes)) {
+    addFlat(`DataTypes.${fnName}`, doc, "DataTypes", "public");
+  }
+  for (const [fnName, doc] of Object.entries(docs.exceptions)) {
+    addFlat(`Exceptions.${fnName}`, doc, "Exceptions", "public");
+  }
+  for (const [fnName, doc] of Object.entries(docs.utils)) {
+    if (!docs.functions[fnName]) {
+      addFlat(fnName, doc, "internal", "internal");
+    }
+  }
+
+  const exportedSymbols = new Set();
+  for (const filePath of sourceFiles) {
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const rel = path.relative(srcDir, filePath).replace(/\\/g, "/");
+    const sf = ts.createSourceFile(filePath, raw, ts.ScriptTarget.Latest, true);
+    for (const stmt of sf.statements) {
+      if (!stmt.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)) continue;
+      if ((ts.isFunctionDeclaration(stmt) || ts.isInterfaceDeclaration(stmt) || ts.isTypeAliasDeclaration(stmt)) && stmt.name) {
+        exportedSymbols.add(`${rel}:${stmt.name.text}`);
+      }
+    }
+  }
+
+  const allClassNames = Object.keys(classes);
+  const allConstNames = [...new Set(Object.values(constants).map(c => c.name))];
+  const allFnShortNames = [...new Set(Object.keys(flatFunctions).map(k => (k.includes(".") ? k.split(".").pop() : k)))];
+  const allCallableNames = [...new Set([...allUtilNames, ...allFnShortNames])];
+
+  const testsRoot = path.resolve(__dirname, "../_tests");
+  const loadFunctionTests = (filePath, shortName) => {
+    if (!filePath) return undefined;
+    const noExt = filePath.replace(/\.ts$/, "");
+    const dir = path.dirname(filePath);
+    const bases = [
+      path.join(testsRoot, noExt, shortName),
+      path.join(testsRoot, dir, shortName),
+      path.join(testsRoot, noExt)
+    ];
+    const result = {};
+    for (const [key, suffix] of [["bench", ".bench.ts"], ["test", ".test.ts"], ["test-d", ".test-d.ts"]]) {
+      for (const base of bases) {
+        const candidate = base + suffix;
+        if (fs.existsSync(candidate)) {
+          result[key] = fs.readFileSync(candidate, "utf-8");
+          break;
+        }
+      }
+    }
+    return Object.keys(result).length > 0 ? result : undefined;
+  };
+
+  for (const [fnKey, fnDoc] of Object.entries(flatFunctions)) {
+    if (!fnDoc || typeof fnDoc !== "object") continue;
+    const shortName = fnKey.includes(".") ? fnKey.split(".").pop() : fnKey;
+    const isExported = fnDoc.filePath ? exportedSymbols.has(`${fnDoc.filePath}:${shortName}`) : false;
+    fnDoc.exported = isExported;
+    if (!fnDoc.visibility) {
+      fnDoc.visibility = shortName.startsWith("_") || fnDoc.category === "internal" ? "internal" : "public";
+    }
+    const scanText = `${fnDoc.signature || ""}\n${fnDoc.code || ""}`;
+    const bodyText = fnDoc.code || "";
+    const depClasses = allClassNames.filter(c => new RegExp(`\\b${c}\\b`).test(scanText)).sort();
+    const depConstants = allConstNames.filter(c => new RegExp(`\\b${c}\\b`).test(scanText)).sort();
+    const depFunctions = allCallableNames.filter(f => f !== shortName && new RegExp(`\\b${f}\\s*\\(`).test(bodyText)).sort();
+    const depTypes = allTypeNames.filter(t => new RegExp(`\\b${t}\\b`).test(scanText)).sort();
+    const deps = {
+      ...(depClasses.length ? { classes: depClasses } : {}),
+      ...(depConstants.length ? { constants: depConstants } : {}),
+      ...(depFunctions.length ? { functions: depFunctions } : {}),
+      ...(depTypes.length ? { types: depTypes } : {})
+    };
+    if (Object.keys(deps).length > 0) {
+      fnDoc.dependencies = deps;
+    }
+    const fnTests = loadFunctionTests(fnDoc.filePath, shortName);
+    if (fnTests) {
+      fnDoc.tests = fnTests;
+    }
+    delete fnDoc.types;
+    delete fnDoc.utils;
+    delete fnDoc.category;
+    delete fnDoc.owner;
+  }
+
+  for (const [typeName, typeDoc] of Object.entries(docs.types)) {
+    if (!typeDoc || typeof typeDoc !== "object") continue;
+    const isExported = typeDoc.filePath ? exportedSymbols.has(`${typeDoc.filePath}:${typeName}`) : false;
+    typeDoc.exported = isExported;
+    if (!typeDoc.visibility) {
+      typeDoc.visibility = typeName.startsWith("_") ? "internal" : "public";
+    }
+  }
+
+  return sortDeep({
+    classes: docs.classes,
+    constants: docs.constants,
+    functions: flatFunctions,
+    types: docs.types
+  });
 }
 
 /**
@@ -1634,6 +1979,7 @@ export async function validateExtractedDocExamples(docs) {
   let total = 0;
   let passed = 0;
   const errors = [];
+  const shapeWarnings = [];
 
   function cleanCodeToRun(exampleStr) {
     const lines = exampleStr.split("\n");
@@ -1653,8 +1999,20 @@ export async function validateExtractedDocExamples(docs) {
         total++;
         const code = cleanCodeToRun(ex);
         try {
-          const fn = new Function("$df", "all", "col", "element", "lit", "when", code);
-          fn(dfNs, all, col, element, lit, when);
+          const logs = [];
+          const origLog = console.log;
+          console.log = (...args) => logs.push(args.map(String).join(" "));
+          try {
+            const fn = new Function("$df", "all", "col", "element", "lit", "when", code);
+            fn(dfNs, all, col, element, lit, when);
+          } finally {
+            console.log = origLog;
+          }
+          const expectedShape = ex.match(/shape:\s*\((\d+,\s*\d+)\)/)?.[1];
+          const actualShape = logs.join("\n").match(/shape:\s*\((\d+,\s*\d+)\)/)?.[1];
+          if (expectedShape && actualShape && expectedShape !== actualShape) {
+            shapeWarnings.push(`${currentPath}[${idx}]: expected shape (${expectedShape}), got (${actualShape})`);
+          }
           passed++;
         } catch (err) {
           errors.push({ path: `${currentPath}[${idx}]`, err: err.message, code });
@@ -1675,6 +2033,10 @@ export async function validateExtractedDocExamples(docs) {
     throw new Error(`Doc extraction aborted due to ${errors.length} invalid example(s).`);
   }
   console.log(`  ✓ Verified ${passed} of ${total} doc examples executed cleanly without error.`);
+  if (shapeWarnings.length > 0) {
+    console.warn(`  ⚠ ${shapeWarnings.length} doc example(s) have stale shape comments:`);
+    for (const w of shapeWarnings) console.warn(`    - ${w}`);
+  }
 }
 
 export function hydrateDtsInDir(dir) {

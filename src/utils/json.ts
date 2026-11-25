@@ -179,8 +179,9 @@ export function createSafeJsonReplacer(options: SafeJsonReplacerOptions = {}) {
 
 
 
-const _unescapeQuotes = (str: string): string =>
-    str.replace(/\\(.)/g, (_, c) => CONTROL_UNESCAPE_MAP[c] ?? c);
+function _unescapeQuotes(str: string): string {
+    return str.replace(/\\(.)/g, (_, c) => CONTROL_UNESCAPE_MAP[c] ?? c);
+}
 
 /**
  * Tokenizes a JSONPath query string (e.g. "$.user.items[0]") into an array 

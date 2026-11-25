@@ -161,10 +161,47 @@ function main() {
   const docs = JSON.parse(fs.readFileSync(docsJsonPath, "utf-8"));
   const readmeContent = fs.readFileSync(readmePath, "utf-8");
 
+function buildLlmsDevTxt({ pkg, docs }) {
+  const lines = [
+    `# ${pkg.name} v${pkg.version} — Developer & AI Reference`,
+    "",
+    "> Full internal reference including source `code`, `utils`, `types`, and call-graph pointers.",
+    ""
+  ];
+
+  const emitSection = (title, map) => {
+    if (!map || typeof map !== "object") return;
+    lines.push(`## ${title}`, "");
+    for (const [name, entry] of Object.entries(map)) {
+      if (!entry || typeof entry !== "object") continue;
+      const loc = entry.filePath ? ` (${entry.filePath}${entry.lineStart ? `#L${entry.lineStart}-L${entry.lineEnd}` : ""})` : "";
+      lines.push(`### ${name}${loc}`);
+      if (entry.signature) lines.push("```ts", entry.signature, "```");
+      if (entry.types?.length) lines.push(`- **Types**: ${entry.types.join(", ")}`);
+      if (entry.utils?.length) lines.push(`- **Utils**: ${entry.utils.join(", ")}`);
+      if (entry.code) lines.push("```ts", entry.code, "```");
+      lines.push("");
+    }
+  };
+
+  emitSection("Functions", docs.functions);
+  emitSection("DataFrame", docs.dataframe);
+  if (docs.columnExpressions) {
+    for (const [sub, map] of Object.entries(docs.columnExpressions)) {
+      emitSection(`ColumnExpressions: ${sub}`, map);
+    }
+  }
+  emitSection("DataTypes", docs.datatypes);
+  emitSection("Exceptions", docs.exceptions);
+  emitSection("Utils", docs.utils);
+  emitSection("Types", docs.types);
+
+  return lines.join("\n");
+}
+
   // 1. Build llms.txt directly from README.md (shields stripped)
   const llmsTxt = buildLlmsTxtFromReadme(readmeContent);
   const llmsFullTxt = buildLlmsFullTxt({ pkg, docs });
-
   // 2. Write to df-script root
   const llmsTxtDest = path.resolve(rootDir, "llms.txt");
   const llmsFullTxtDest = path.resolve(rootDir, "llms-full.txt");
@@ -172,6 +209,14 @@ function main() {
   fs.writeFileSync(llmsFullTxtDest, llmsFullTxt, "utf-8");
   console.log(`✓ Generated ${path.relative(rootDir, llmsTxtDest)} (from README.md)`);
   console.log(`✓ Generated ${path.relative(rootDir, llmsFullTxtDest)}`);
+
+  const websitePublicDir = path.resolve(rootDir, "../df-script-website/public");
+  if (fs.existsSync(websitePublicDir)) {
+    fs.copyFileSync(path.resolve(rootDir, "docs.json"), path.join(websitePublicDir, "docs.json"));
+    fs.writeFileSync(path.join(websitePublicDir, "llms.txt"), llmsTxt, "utf-8");
+    fs.writeFileSync(path.join(websitePublicDir, "llms-full.txt"), llmsFullTxt, "utf-8");
+    console.log("✓ Copied docs.json, llms.txt, and llms-full.txt to df-script-website/public/");
+  }
 
   console.log("Done.");
 }

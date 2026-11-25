@@ -122,10 +122,10 @@ export function stringifyCSV(
     return onRow ? (includeBom ? UTF8_BOM : "") : lines.join(lineTerminator);
 }
 
-const _parseBool = (v: string): boolean | null => {
+function _parseBool(v: string): boolean | null {
     const l = v.toLowerCase();
     return (l === "true" || l === "1") ? true : (l === "false" || l === "0") ? false : null;
-};
+}
 
 const CSV_CANDIDATES = [
     { type: BoolType, parse: _parseBool },

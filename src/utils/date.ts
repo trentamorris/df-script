@@ -224,8 +224,12 @@ function _getISO(y: number, m: number, d: number, field: "week" | "year" = "week
     return ordinal != null ? Math.floor((ordinal - 1) / 7) + 1 : null;
 }
 
-const _normalizeSubsecond = (s: string): number => parseInt(s.padEnd(3, "0").slice(0, 3), 10);
-const _pad2 = (n: number): string => String(n).padStart(2, "0");
+function _normalizeSubsecond(s: string): number {
+    return parseInt(s.padEnd(3, "0").slice(0, 3), 10);
+}
+function _pad2(n: number): string {
+    return String(n).padStart(2, "0");
+}
 
 const _D2_PATTERN = "\\d{2}";
 const _YEAR_PATTERN = "[+-]?\\d{4,}";

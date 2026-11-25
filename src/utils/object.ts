@@ -103,7 +103,7 @@ export function isPlainObj(v: unknown): v is Record<PropertyKey, unknown> {
     }
 }
 
-const _dummyProxyTarget = function () { };
+function _dummyProxyTarget() { }
 const _dummyProxy = new Proxy(_dummyProxyTarget, { construct() { return this; } });
 const _dummyArrayBuffer = typeof ArrayBuffer === "function" ? new ArrayBuffer(0) : undefined;
 const _dummyConstructProbes: readonly unknown[][] = [

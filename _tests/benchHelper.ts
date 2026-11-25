@@ -89,3 +89,13 @@ export function benchCompare(
         `  ➔ Abstraction Tax : ${ratio.toFixed(2)}x baseline ${ratio <= 2.5 ? "⚡ (Excellent)" : ratio <= 5.0 ? "✅ (Good)" : "⚠️ (Needs Optimization)"}`
     );
 }
+
+/**
+ * Times a single step and logs its elapsed duration in milliseconds.
+ */
+export function benchStep<T>(label: string, fn: () => T): T {
+    const start = performance.now();
+    const res = fn();
+    console.log(`  [${label}] ${(performance.now() - start).toFixed(2)} ms`);
+    return res;
+}

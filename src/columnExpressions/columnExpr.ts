@@ -27,7 +27,6 @@ export class ColumnExpr<T> extends ExprBase {
     /**
      * Creates a column expression representing a column or a raw expression value.
      * @namespace $df.col
-     * @category ColumnExpression
      * @syntax $df.col(<column_name>).{symbol}(...)
      */
     constructor(colName: ColumnSelector<T>) {

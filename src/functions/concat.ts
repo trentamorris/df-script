@@ -61,7 +61,6 @@ function _blitStackedColumns<U extends RowRecord>(
 /**
  * Concatenates items vertically, horizontally, or diagonally.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @param rawItems Single DataFrame or array of DataFrames/rows to concatenate.
  * @param [options] Configuration options for concatenation layout and strictness.

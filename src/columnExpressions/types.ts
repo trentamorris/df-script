@@ -230,7 +230,7 @@ export type NumericSeriesArg = NumericArg | number[] | AnyTypedArray;
 /**
  * Callback function for resolving dynamic property access on a delegating Proxy (`createDelegatingProxy`).
  */
-export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => any;
+export type ProxyPropertyResolver<T extends object> = (prop: string, target: T) => unknown;
 
 /**
  * Configuration options for pseudo-random number generation (`$df.col().rand()`).

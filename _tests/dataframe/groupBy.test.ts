@@ -349,5 +349,213 @@ if (dfIdenticalAgg.height !== 1) throw new Error("Identical keys failed to colla
 const idenRow = dfIdenticalAgg.toDicts()[0] as any;
 if (idenRow.cnt !== N || idenRow.total !== (N * (N - 1)) / 2) throw new Error("Identical group count or sum mismatch");
 
+// 11. Computed Expression Grouping Keys: Output Naming & Aliasing
+const dfExprBase = new DataFrame({
+    dept: ["eng", "eng", "sales", "sales"],
+    name: ["alice", "ALICE", "bob", "BOB"],
+    salary: [1000, 1500, 2000, 2500],
+    a: [1, 1, 2, 2],
+    b: [10, 10, 20, 20],
+    hireDate: [new Date("2022-01-10"), new Date("2022-05-20"), new Date("2023-03-15"), null],
+    primary: [null, "p2", null, "p4"],
+    fallback: ["f1", "f2", null, "f4"],
+    group_x: [1, 1, 2, 2],
+    group_y: ["a", "a", "b", "b"],
+});
+
+// 11a. Explicit .alias() naming
+const resAlias = dfExprBase.groupBy($df.col("salary").div(1000).floor().alias("salary_k")).agg($df.col("salary").sum().alias("s"));
+if (!resAlias.columns.includes("salary_k") || resAlias.height !== 2) throw new Error("11a: explicit alias failed");
+
+// 11b. Unaliased single-column expression inherits root column name
+const resUnaliased = dfExprBase.groupBy($df.col("name").str.toUpperCase()).agg($df.col("salary").sum().alias("s"));
+if (!resUnaliased.columns.includes("name") || resUnaliased.height !== 2) throw new Error("11b: unaliased single-col expr failed");
+
+// 11c. Duplicate unaliased binary expressions on same left operand throw duplicate-column error
+let threwDup = false;
+try {
+    dfExprBase.groupBy([$df.col("a").add(1), $df.col("a").mul(2)]);
+} catch {
+    threwDup = true;
+}
+if (!threwDup) throw new Error("11c: expected duplicate-column error for two unaliased exprs on 'a'");
+
+let threwDupStr = false;
+try {
+    dfExprBase.groupBy(["dept", "dept"]);
+} catch {
+    threwDupStr = true;
+}
+if (!threwDupStr) throw new Error("11c: expected duplicate-column error for ['dept', 'dept']");
+
+let threwDupStrExpr = false;
+try {
+    dfExprBase.groupBy(["dept", $df.col("dept")]);
+} catch {
+    threwDupStrExpr = true;
+}
+if (!threwDupStrExpr) throw new Error("11c: expected duplicate-column error for ['dept', col('dept')]");
+
+// 11d. Literal expression as grouping key
+const resLit = dfExprBase.groupBy($df.lit("constant")).agg($df.col("salary").sum().alias("s"));
+if (resLit.height !== 1 || resLit.item(0, "s") !== 7000) throw new Error("11d: literal groupBy failed");
+
+// 12. Mixed Keys & Collision Semantics
+// 12a. Mix of string and ColumnExpr preserves input order
+const resMixed = dfExprBase.groupBy(["dept", $df.col("hireDate").dt.year().alias("year")]).agg($df.col("salary").sum().alias("s"));
+if (resMixed.columns[0] !== "dept" || resMixed.columns[1] !== "year") throw new Error("12a: mixed key order mismatch");
+
+// 12b. Computed key aliasing existing column ("dept") overwrites with computed values
+const resOverwrite = dfExprBase.groupBy($df.col("salary").gt(1800).alias("dept")).agg($df.col("salary").mean().alias("m"));
+const overwriteVals = resOverwrite.toArray("dept");
+if (!overwriteVals.every(v => typeof v === "boolean")) throw new Error("12b: computed alias 'dept' did not overwrite original");
+
+// 12c. Synthesized key referenced inside .agg() vs original column
+const resSynthAgg = dfExprBase.groupBy($df.col("a").mul(2).alias("a2")).agg($df.col("a").sum().alias("orig_sum"), $df.col("a2").count().alias("synth_cnt"));
+if (resSynthAgg.height !== 2 || resSynthAgg.item(0, "orig_sum") !== 2) throw new Error("12c: synthesized key agg failed");
+
+// 13. Multi-Column Selector Expressions
+const resMultiArr = dfExprBase.groupBy($df.col(["a", "b"])).agg($df.col("salary").sum().alias("s"));
+if (resMultiArr.height !== 2 || resMultiArr.columns[0] !== "a" || resMultiArr.columns[1] !== "b") throw new Error("13a: array selector failed");
+
+const resMultiRx = dfExprBase.groupBy($df.col(/^group_/)).agg($df.col("salary").sum().alias("s"));
+if (resMultiRx.height !== 2 || !resMultiRx.columns.includes("group_x") || !resMultiRx.columns.includes("group_y")) throw new Error("13b: regex selector failed");
+
+const resMultiType = dfExprBase.groupBy($df.col($df.Utf8)).agg($df.col("salary").sum().alias("s"));
+if (resMultiType.height !== 4) throw new Error("13c: DataType selector failed");
+
+const resZeroMatch = dfExprBase.groupBy($df.col(/^nonexistent_/)).agg($df.col("salary").sum().alias("s"));
+if (resZeroMatch.height !== 1 || resZeroMatch.item(0, "s") !== 7000) throw new Error("13d: zero-match selector should collapse to 1 global group");
+
+// 14. Expression Types & Rejections
+// 14a. Temporal bucketing with null propagation
+const resDt = dfExprBase.groupBy($df.col("hireDate").dt.year().alias("yr")).agg($df.col("salary").sum().alias("s"));
+if (resDt.height !== 3) throw new Error("14a: temporal bucketing height mismatch");
+
+// 14b. Conditional when/then/otherwise
+const resWhen = dfExprBase.groupBy($df.when($df.col("salary").gt(1800)).then("high").otherwise("low").alias("tier")).agg($df.col("salary").count().alias("c"));
+if (resWhen.height !== 2) throw new Error("14b: when/then/otherwise groupBy failed");
+
+// 14c. Horizontal coalesce
+const resCoalesce = dfExprBase.groupBy($df.coalesce($df.col("primary"), $df.col("fallback")).alias("key")).agg($df.col("salary").sum().alias("s"));
+if (resCoalesce.height !== 4) throw new Error("14c: coalesce groupBy failed");
+
+// 14d. Reject agg / window expressions in groupBy
+let threwAgg = false;
+try { dfExprBase.groupBy($df.col("salary").sum()); } catch { threwAgg = true; }
+if (!threwAgg) throw new Error("14d: expected error for agg expression in groupBy");
+
+let threwWin = false;
+try { dfExprBase.groupBy($df.col("salary").rank().over("dept")); } catch { threwWin = true; }
+if (!threwWin) throw new Error("14d: expected error for window expression in groupBy");
+
+// 15. Empty DataFrame (schema-less and with schema + computed key)
+const emptyNoSchemaAgg = new DataFrame([]).groupBy([]).agg($df.lit(1).count().alias("cnt"));
+if (emptyNoSchemaAgg.height !== 0) throw new Error("15: empty schema-less DataFrame groupBy([]) failed");
+
+const emptyExprDf = new DataFrame({ a: [] as string[], b: [] as number[] }, { a: $df.Utf8, b: $df.Int32 });
+const resEmpty = emptyExprDf.groupBy($df.col("a").str.toLowerCase().alias("a_lower")).agg($df.col("b").sum().alias("b_sum"));
+if (resEmpty.height !== 0 || !resEmpty.columns.includes("a_lower")) throw new Error("15: empty DataFrame computed groupBy failed");
+
+// 16. Adversarial & Extreme Robustness Edge Cases
+// 16a. Prototype-polluting string keys
+const dfProtoStrings = new DataFrame([
+    { k: "__proto__", val: 1 },
+    { k: "__proto__", val: 2 },
+    { k: "constructor", val: 3 },
+    { k: "toString", val: 4 },
+    { k: "valueOf", val: 5 },
+    { k: "hasOwnProperty", val: 6 },
+]);
+const protoStrAgg = dfProtoStrings.groupBy("k").agg($df.col("val").sum().alias("s"));
+if (protoStrAgg.height !== 5) throw new Error(`16a: Prototype string keys collided, got ${protoStrAgg.height}`);
+if ((protoStrAgg.toDicts() as any[]).find(r => r.k === "__proto__")?.s !== 3) throw new Error("16a: __proto__ group sum mismatch");
+
+// 16b. Null-prototype objects (Object.create(null))
+const nullProto1 = Object.assign(Object.create(null), { a: 1, b: 2 });
+const nullProto2 = Object.assign(Object.create(null), { b: 2, a: 1 });
+const nullProto3 = Object.assign(Object.create(null), { a: 1, b: 3 });
+const dfNullProto = new DataFrame(
+    [
+        { obj: nullProto1, val: 10 },
+        { obj: nullProto2, val: 20 },
+        { obj: nullProto3, val: 30 },
+    ],
+    { obj: $df.Object, val: $df.Int32 }
+);
+if (dfNullProto.groupBy("obj").agg($df.col("val").sum().alias("s")).height !== 2) {
+    throw new Error("16b: Object.create(null) grouping failed");
+}
+
+// 16c. Signed zero (-0 vs +0), Infinity, -Infinity, and NaN
+const dfSpecialNums = new DataFrame({
+    n: [-0, +0, Infinity, -Infinity, NaN, NaN],
+    val: [1, 2, 10, 20, 100, 200],
+});
+const specialNumAgg = dfSpecialNums.groupBy("n").agg($df.col("val").sum().alias("s"));
+if (specialNumAgg.height !== 4) throw new Error(`16c: Expected 4 groups, got ${specialNumAgg.height}`);
+const snRows = specialNumAgg.toDicts() as any[];
+if (snRows.find(r => r.n === 0)?.s !== 3) throw new Error("16c: -0/+0 merge mismatch");
+if (snRows.find(r => Number.isNaN(r.n))?.s !== 300) throw new Error("16c: NaN sum mismatch");
+
+// 16d. BigInt inside nested objects
+const dfNestedBigInt = new DataFrame(
+    [
+        { meta: { id: 9007199254740993n, tag: "a" }, val: 5 },
+        { meta: { tag: "a", id: 9007199254740993n }, val: 15 },
+        { meta: { id: 9007199254740994n, tag: "a" }, val: 25 },
+    ],
+    { meta: $df.Object, val: $df.Int32 }
+);
+if (dfNestedBigInt.groupBy("meta").agg($df.col("val").sum().alias("s")).height !== 2) {
+    throw new Error("16d: Nested BigInt object canonicalization failed");
+}
+
+// 16e. Binary (Uint8Array) equality in Object column
+const dfBinaryKeys = new DataFrame(
+    [
+        { bin: new Uint8Array([1, 2, 3]), val: 10 },
+        { bin: new Uint8Array([1, 2, 3]), val: 20 },
+        { bin: new Uint8Array([1, 2, 4]), val: 30 },
+    ],
+    { bin: $df.Object, val: $df.Int32 }
+);
+if (dfBinaryKeys.groupBy("bin").agg($df.col("val").sum().alias("s")).height !== 2) {
+    throw new Error("16e: Identical Uint8Array keys failed to merge");
+}
+
+// 16f. $df.exclude(...) selector as grouping keys
+const dfExcludeGroup = new DataFrame({
+    region: ["North", "North", "South"],
+    tier: ["Gold", "Gold", "Silver"],
+    revenue: [100, 250, 400],
+});
+const excludeAgg = dfExcludeGroup.groupBy($df.exclude("revenue")).agg($df.col("revenue").sum().alias("total_rev"));
+if (excludeAgg.height !== 2 || (excludeAgg.toDicts()[0] as any).total_rev !== 350) {
+    throw new Error("16f: $df.all().exclude() groupBy failed");
+}
+
+// 16g. Parallel materialization: computed key shadowing "a" while sibling key reads original "a"
+const dfShadow = new DataFrame({ a: [1, 2, 3], val: [10, 20, 30] });
+const shadowAgg = dfShadow
+    .groupBy([$df.col("a").gt(1).alias("a"), $df.col("a").mul(10).alias("a10")])
+    .agg($df.col("val").sum().alias("s"));
+if (shadowAgg.height !== 3 || (shadowAgg.toDicts() as any[]).find(r => r.a10 === 30)?.s !== 30) {
+    throw new Error("16g: Parallel key materialization corrupted sibling input");
+}
+
+// 16h. First-seen group order preservation
+const dfOrder = new DataFrame([
+    { k: "Z", val: 1 },
+    { k: null, val: 2 },
+    { k: "A", val: 3 },
+    { k: "Z", val: 4 },
+    { k: null, val: 5 },
+]);
+const orderKeys = dfOrder.groupBy("k").agg($df.col("val").sum().alias("s")).toDicts().map((r: any) => r.k);
+if (orderKeys[0] !== "Z" || orderKeys[1] !== null || orderKeys[2] !== "A") {
+    throw new Error(`16h: First-seen group order not preserved: ${JSON.stringify(orderKeys)}`);
+}
+
 console.log("✓ groupBy tests passed!");
 

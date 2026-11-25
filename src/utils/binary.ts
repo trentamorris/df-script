@@ -25,7 +25,9 @@ export function isBinaryObj(
 }
 
 const UINT8_INT_OPTS: IntOptions = { range: "UInt8" };
-const _isUInt8 = (n: unknown): n is number => isValidInt(n, UINT8_INT_OPTS);
+function _isUInt8(n: unknown): n is number {
+    return isValidInt(n, UINT8_INT_OPTS);
+}
 
 export function isValidBinary(
     v: unknown,

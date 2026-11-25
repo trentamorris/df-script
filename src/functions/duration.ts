@@ -13,7 +13,6 @@ import type { DurationArg, DurationComponentArg } from "./types";
  * @param {DurationArg} [options] Duration component options or string interval (e.g. "1d 12h").
  * @returns {ColumnExpr<number>} A column expression with the calculated duration values.
  * @namespace $df
- * @category Function
  * @syntax $df.duration(options)
  * @example
  * // 1. Construct from a duration component options object:

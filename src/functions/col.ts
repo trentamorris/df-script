@@ -9,7 +9,6 @@ import type { ColumnSelector } from "../types";
  * @param {ColumnSelector<T>} name Column name, array of names, RegExp pattern, or DataType selector.
  * @returns {ColumnExpr<T>} A column expression targeting the selected column(s).
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Select single column by name:

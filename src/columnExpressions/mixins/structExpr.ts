@@ -8,7 +8,6 @@ import { createDelegatingProxy } from "../utils";
 
 /**
  * @namespace $df.col.struct
- * @category ColumnExpression
  * @syntax $df.col(<column_name>).struct.{symbol}(...)
  */
 
@@ -166,7 +165,6 @@ export class StructExpr extends ExprBase {
      * @ignore
      * Struct namespace accessor for operating on nested object/struct columns.
      * @namespace $df.col
-     * @category ColumnExpression
      * @syntax $df.col(<column_name>).struct
      * @returns StructExprNamespace
      * @example

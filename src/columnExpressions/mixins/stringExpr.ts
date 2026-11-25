@@ -49,7 +49,6 @@ import {
 
 /**
  * @namespace $df.col.str
- * @category ColumnExpression
  * @syntax $df.col(<column_name>).str.{symbol}(...)
  */
 export class StringExprNamespace {
@@ -59,11 +58,11 @@ export class StringExprNamespace {
         this._expr = expr;
     }
 
-    _deriveString(fn: (v: string) => any) {
+    _deriveString(fn: (v: string) => unknown) {
         return this._expr._deriveUnary((v: unknown) => fn(String(v)));
     }
 
-    _derivePattern(pattern: unknown, fn: (v: string) => any) {
+    _derivePattern(pattern: unknown, fn: (v: string) => unknown) {
         if (pattern == null) {
             return this._expr._derive((vArray: ColumnData) => new Array(vArray.length).fill(null));
         }
@@ -1339,7 +1338,6 @@ export class StringExpr extends ExprBase {
      * @ignore
      * String namespace accessor for text operations.
      * @namespace $df.col
-     * @category ColumnExpression
      * @syntax $df.col(<column_name>).str
      * @returns StringExprNamespace
      * @example

@@ -12,7 +12,6 @@ import { STRUCT_MARKER } from "../columnExpressions/constants";
  * @param {...IntoExpr[]} moreFields Additional fields when a single expression is passed as the first parameter.
  * @returns {ColumnExpr<Record<string, unknown>>} A column expression packaging the specified fields.
  * @namespace $df
- * @category Function
  * @syntax $df.{symbol}(...)
  * @example
  * // 1. Package fields using an object property mapping:

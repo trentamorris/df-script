@@ -1,6 +1,5 @@
 /**
  * @namespace Exception
- * @category Exception
  * @syntax throw new {symbol}("message")
  */
 
